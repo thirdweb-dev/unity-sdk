@@ -30,6 +30,7 @@ namespace Thirdweb
         [AOT.MonoPInvokeCallback(typeof(Action<string, string>))]
         private static void jsCallback(string taskId, string result)
         {
+            Debug.Log("jsCallback: " + taskId + " " + result);
             if (taskMap.ContainsKey(taskId))
             {
                 taskMap[taskId].TrySetResult(result);  
@@ -41,8 +42,13 @@ namespace Thirdweb
             ThirdwebInitialize(chainOrRPC);
         }
 
-        public static void Connect() {
-            ThirdwebConnect();
+        public static async Task<string> Connect() {
+            var task = new TaskCompletionSource<string>();
+            string taskId = System.Guid.NewGuid().ToString();
+            taskMap[taskId] = task;
+            ThirdwebConnect(taskId, jsCallback);
+            string result = await task.Task;
+            return result;
         }
 
         public static async Task<T> InvokeRoute<T>(string route, string[] body)
@@ -74,6 +80,6 @@ namespace Thirdweb
         [DllImport("__Internal")]
         private static extern string ThirdwebInitialize(string chainOrRPC);
         [DllImport("__Internal")]
-        private static extern string ThirdwebConnect();
+        private static extern string ThirdwebConnect(string taskId, Action<string, string> cb);
     }
 }

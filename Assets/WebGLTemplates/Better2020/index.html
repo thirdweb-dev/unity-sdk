@@ -101,7 +101,7 @@
             const w = window;
             w.bridge = {};
             w.bridge.initialize = (chain) => {
-              const sdk = new ThirdwebSDK("goerli");
+              const sdk = new ThirdwebSDK(chain);
               w.thirdweb = sdk;
             }
 
@@ -114,9 +114,14 @@
                 if(w.thirdweb) {
                   console.log("connecting SDK");
                   w.thirdweb.updateSignerOrProvider(signer);
+                  return await w.thirdweb.wallet.getAddress();
+                } else {
+                  console.error("window.thirdweb is not defined");
+                  return null;
                 }
               } else {
                 console.error("Please install a wallet browser extension")
+                return null;
               }
             }
 

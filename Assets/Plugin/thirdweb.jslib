@@ -19,7 +19,22 @@ mergeInto(LibraryManager.library, {
   ThirdwebInitialize: function (chain) {
     window.bridge.initialize(UTF8ToString(chain));
   },
-  ThirdwebConnect: function () {
-    window.bridge.connect();
+  ThirdwebConnect: function (taskId, cb) {
+    // convert taskId from pointer to str and allocate it to keep in memory
+    var id = UTF8ToString(taskId);
+    var idSize = lengthBytesUTF8(id) + 1;
+    var idPtr = _malloc(idSize);
+    stringToUTF8(id, idPtr, idSize);
+    // execute bridge call
+    window.bridge.connect().then((address) => {
+      if (address) {
+        var bufferSize = lengthBytesUTF8(address) + 1;
+        var buffer = _malloc(bufferSize);
+        stringToUTF8(address, buffer, bufferSize);
+        dynCall_vii(cb, idPtr, buffer);
+      } else {
+        dynCall_vii(cb, idPtr, null);
+      }
+    });
   },
 });

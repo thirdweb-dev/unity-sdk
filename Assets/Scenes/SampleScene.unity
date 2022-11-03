@@ -269,7 +269,7 @@ GameObject:
   - component: {fileID: 65284396}
   - component: {fileID: 65284395}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: LoginText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -524,6 +524,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 408667fcf1581402885e572525603dd0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  loginButton: {fileID: 65284395}
+  fetchButton: {fileID: 1828601337}
+  claimButton: {fileID: 1600812348}
 --- !u!4 &354401068
 Transform:
   m_ObjectHideFlags: 0
@@ -1065,7 +1068,7 @@ GameObject:
   - component: {fileID: 1600812349}
   - component: {fileID: 1600812348}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: ClaimText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1200,7 +1203,7 @@ GameObject:
   - component: {fileID: 1828601338}
   - component: {fileID: 1828601337}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: FetchText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
