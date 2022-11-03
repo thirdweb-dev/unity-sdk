@@ -25,6 +25,10 @@
       </div>
     </div>
     <div id="unity-fullscreen-button" style="display: none"></div>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
     <script type="module">
             const hideFullScreenButton = "{{{ HIDE_FULL_SCREEN_BUTTON }}}";
             const buildUrl = "Build";
@@ -78,6 +82,21 @@
             loadingCover.style.display = "";
 
             import { ThirdwebSDK } from "https://esm.sh/@thirdweb-dev/sdk@nightly?bundle"
+            // import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
+            // big number transform
+            const bigNumberReplacer = (_key, value) => {
+              // if we find a BigNumber then make it into a string (since that is safe)
+              if (ethers.BigNumber.isBigNumber(value) ||
+                (typeof value === "object" &&
+                  value !== null &&
+                  value.type === "BigNumber" &&
+                  "hex" in value)
+              ) {
+                return ethers.BigNumber.from(value).toString();
+              }
+              return value;
+            };
+
             let id = 0;
             const w = window;
             w.bridge = {};
@@ -85,6 +104,22 @@
               const sdk = new ThirdwebSDK("goerli");
               w.thirdweb = sdk;
             }
+
+            w.bridge.connect = async () => {
+              if(w.ethereum) {
+                await w.ethereum.enable
+                const provider = new ethers.providers.Web3Provider(w.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner()
+                if(w.thirdweb) {
+                  console.log("connecting SDK");
+                  w.thirdweb.updateSignerOrProvider(signer);
+                }
+              } else {
+                console.error("Please install a wallet browser extension")
+              }
+            }
+
             w.bridge.invoke = async (route, payload) => {
               console.log("invoke called", route, payload);
               const routeArgs = route.split(".")
@@ -92,7 +127,7 @@
               const contract = await w.thirdweb.getContract(addr)
               const fnArgs = JSON.parse(payload).arguments;
               const result = await contract[routeArgs[1]][routeArgs[2]](...fnArgs)
-              return JSON.stringify({ result: result });
+              return JSON.stringify({ result: result }, bigNumberReplacer);
             };
 
             const script = document.createElement("script");

@@ -9,6 +9,10 @@ namespace Thirdweb
             Bridge.Initialize(chainOrRPC);
         }
 
+        public void Connect() {
+            Bridge.Connect();
+        }
+
         public Contract GetContract(string address)
         {
             return new Contract(this.chainOrRPC, address);

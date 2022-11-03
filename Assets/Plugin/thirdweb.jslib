@@ -19,4 +19,7 @@ mergeInto(LibraryManager.library, {
   ThirdwebInitialize: function (chain) {
     window.bridge.initialize(UTF8ToString(chain));
   },
+  ThirdwebConnect: function () {
+    window.bridge.connect();
+  },
 });

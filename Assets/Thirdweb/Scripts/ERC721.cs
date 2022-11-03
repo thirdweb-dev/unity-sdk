@@ -21,6 +21,24 @@ namespace Thirdweb
         public string owner;
     }
 
+    [System.Serializable]
+    public struct Receipt
+    {
+        public string from;
+        public string to;
+        public int transactionIndex;
+        public string gasUsed;
+        public string blockHash;
+        public string transactionHash;
+    }
+
+    [System.Serializable]
+    public struct TransactionResult
+    {
+        public Receipt receipt;
+        public string id;
+    }
+
     public class ERC721
     {
         public string chain;
@@ -30,43 +48,22 @@ namespace Thirdweb
             this.chain = chain;
             this.address = address;
         }
-        public async Task<NFT> GetNFT(string id)
+        public async Task<NFT> GetNFT(string tokenId)
         {
-            return await Bridge.InvokeRoute<NFT>(getRoute("get"), new string[] { id });
+            return await Bridge.InvokeRoute<NFT>(getRoute("get"), new string[] { tokenId });
+        }
+        public async Task<TransactionResult> Transfer(string to, string tokenId)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), new string[] { to, tokenId });
+        }
+
+        public async Task<TransactionResult[]> Claim(int quantity)
+        {
+            return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claim"), new string[] { quantity.ToString() });
         }
 
         private string getRoute(string functionPath) {
             return this.address + ".erc721." + functionPath;
         }
-
-        // public Currency GetCurrency(string address)
-        // {
-        //     if (!currencyModules.ContainsKey(address))
-        //     {
-        //         currencyModules[address] = new Currency(this, this.bridge, address);
-        //     }
-
-        //     return currencyModules[address];
-        // }
-
-        // public NFT GetNFT(string address)
-        // {
-        //     if (!nftModules.ContainsKey(address))
-        //     {
-        //         nftModules[address] = new NFT(this, this.bridge, address);
-        //     }
-
-        //     return nftModules[address];
-        // }
-
-        // public Market GetMarket(string address)
-        // {
-        //     if (!marketModules.ContainsKey(address))
-        //     {
-        //         marketModules[address] = new Market(this, this.bridge, address);
-        //     }
-
-        //     return marketModules[address];
-        // }
     }
 }
