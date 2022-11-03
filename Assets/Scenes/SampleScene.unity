@@ -209,7 +209,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 354401067}
         m_TargetAssemblyTypeName: SDKTest, Assembly-CSharp
-        m_MethodName: OnLoginClick
+        m_MethodName: OnButtonClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

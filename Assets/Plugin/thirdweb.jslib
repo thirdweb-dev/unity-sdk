@@ -16,4 +16,7 @@ mergeInto(LibraryManager.library, {
         dynCall_vii(cb, idPtr, buffer);
       });
   },
+  ThirdwebInitialize: function (chain) {
+    window.bridge.initialize(UTF8ToString(chain));
+  },
 });

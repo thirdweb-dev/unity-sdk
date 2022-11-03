@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Thirdweb
 {
@@ -23,12 +21,22 @@ namespace Thirdweb
         public string owner;
     }
 
-    public class SDK
+    public class ERC721
     {
-        public static async Task<NFT> GetNFT(string id)
+        public string chain;
+        public string address;
+        public ERC721(string chain, string address)
         {
-            var result = await Bridge.InvokeRoute<NFT>("erc721.get", new string[] { id });
-            return result;
+            this.chain = chain;
+            this.address = address;
+        }
+        public async Task<NFT> GetNFT(string id)
+        {
+            return await Bridge.InvokeRoute<NFT>(getRoute("get"), new string[] { id });
+        }
+
+        private string getRoute(string functionPath) {
+            return this.address + ".erc721." + functionPath;
         }
 
         // public Currency GetCurrency(string address)

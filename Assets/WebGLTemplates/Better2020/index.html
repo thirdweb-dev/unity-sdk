@@ -81,14 +81,18 @@
             let id = 0;
             const w = window;
             w.bridge = {};
+            w.bridge.initialize = (chain) => {
+              const sdk = new ThirdwebSDK("goerli");
+              w.thirdweb = sdk;
+            }
             w.bridge.invoke = async (route, payload) => {
               console.log("invoke called", route, payload);
-              const sdk = new ThirdwebSDK("goerli");
-              const contract = await sdk.getContract("0x2e01763fA0e15e07294D74B63cE4b526B321E389")
-              const tokenId = JSON.parse(payload).arguments[0];
-              console.log("tokenId", tokenId);
-              const all = await contract.erc721.get(tokenId);
-              return JSON.stringify({ result: all });
+              const routeArgs = route.split(".")
+              const addr = routeArgs[0];
+              const contract = await w.thirdweb.getContract(addr)
+              const fnArgs = JSON.parse(payload).arguments;
+              const result = await contract[routeArgs[1]][routeArgs[2]](...fnArgs)
+              return JSON.stringify({ result: result });
             };
 
             const script = document.createElement("script");
