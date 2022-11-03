@@ -78,15 +78,17 @@
             loadingCover.style.display = "";
 
             import { ThirdwebSDK } from "https://esm.sh/@thirdweb-dev/sdk@nightly?bundle"
+            let id = 0;
             const w = window;
             w.bridge = {};
             w.bridge.invoke = async (route, payload) => {
               console.log("invoke called", route, payload);
               const sdk = new ThirdwebSDK("goerli");
               const contract = await sdk.getContract("0x2e01763fA0e15e07294D74B63cE4b526B321E389")
-              const all = await contract.erc721.getAll();
-              console.log("all", all);
-              return JSON.stringify(all);
+              const tokenId = JSON.parse(payload).arguments[0];
+              console.log("tokenId", tokenId);
+              const all = await contract.erc721.get(tokenId);
+              return JSON.stringify({ result: all });
             };
 
             const script = document.createElement("script");

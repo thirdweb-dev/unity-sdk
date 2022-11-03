@@ -18,10 +18,14 @@ public class SDKTest : MonoBehaviour
         
     }
 
+    int count;
+
     public async void OnLoginClick()
     {
         Debug.Log("Button clicked ");
-        string result = await SDK.Initialize();
-        Debug.Log("result" + result);
+        count++;
+        NFT result = await SDK.GetNFT(count.ToString());
+        Debug.Log("name: " + result.metadata.name);
+        Debug.Log("owner: " + result.owner);
     }
 }

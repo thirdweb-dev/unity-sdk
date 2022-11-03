@@ -12,7 +12,6 @@ namespace Thirdweb
         [System.Serializable]
         private struct Result<T>
         {
-            public string ack_id;
             public T result;
         }
 
@@ -26,20 +25,26 @@ namespace Thirdweb
             public string[] arguments;
         }
 
-        private static TaskCompletionSource<string> utcs;
+        private static Dictionary<string, TaskCompletionSource<string>> taskMap = new Dictionary<string, TaskCompletionSource<string>>();
 
-        [AOT.MonoPInvokeCallback(typeof(Action<string>))]
-        private static void testFuncCB(string result)
+        [AOT.MonoPInvokeCallback(typeof(Action<string, string>))]
+        private static void jsCallback(string taskId, string result)
         {
-            utcs.TrySetResult(result);  
+            if (taskMap.ContainsKey(taskId))
+            {
+                taskMap[taskId].TrySetResult(result);  
+                taskMap.Remove(taskId);
+            }
         }
 
         public static async Task<T> InvokeRoute<T>(string route, string[] body)
         {
             var msg = JsonUtility.ToJson(new RequestMessageBody(body));
-            var ack_id = ThirdwebInvoke(route, msg, testFuncCB);
-            var tr = new TaskCompletionSource<string>();
-            string result = await tr.Task;
+            string taskId = System.Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+            ThirdwebInvoke(taskId, route, msg, jsCallback);
+            string result = await task.Task;
             // Debug.LogFormat("Result from {0}: {1}", route, result);
             return JsonUtility.FromJson<Result<T>>(result).result;
         }
@@ -47,15 +52,16 @@ namespace Thirdweb
         public static async Task<string> InvokeRouteRaw(string route, string[] body)
         {
             var msg = JsonUtility.ToJson(new RequestMessageBody(body));
-            Debug.LogFormat("Calling JS");
-            utcs = new TaskCompletionSource<string>();
-            ThirdwebInvoke(route, msg, testFuncCB);
-            var result = await utcs.Task;
+            string taskId = System.Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+            ThirdwebInvoke(taskId, route, msg, jsCallback);
+            string result = await task.Task;
             // Debug.LogFormat("Result from {0}: {1}", route, result);
             return result;
         }
 
         [DllImport("__Internal")]
-        private static extern string ThirdwebInvoke(string route, string payload, Action<string> cb);
+        private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string> cb);
     }
 }
