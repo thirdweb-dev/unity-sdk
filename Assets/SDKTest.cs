@@ -40,6 +40,8 @@ public class SDKTest : MonoBehaviour
         fetchButton.text = result.metadata.name;
         // int supply = await contract.ERC721.TotalClaimedSupply();
         // fetchButton.text = supply.ToString();
+        // string uri = await contract.Read<string>("tokenURI", count);
+        // fetchButton.text = uri;
     }
 
     public async void OnWriteButtonClick()

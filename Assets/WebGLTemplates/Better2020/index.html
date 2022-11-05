@@ -81,6 +81,7 @@
       #endif
             loadingCover.style.display = "";
 
+            /// --- Thirdweb Brige ---
             import { ThirdwebSDK } from "https://esm.sh/@thirdweb-dev/sdk@nightly?bundle"
             // import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
             // big number transform
@@ -131,9 +132,19 @@
               const addr = routeArgs[0];
               const contract = await w.thirdweb.getContract(addr)
               const fnArgs = JSON.parse(payload).arguments;
-              const result = await contract[routeArgs[1]][routeArgs[2]](...fnArgs)
-              return JSON.stringify({ result: result }, bigNumberReplacer);
+              if(routeArgs.length === 2) {
+                // TODO assumes contract call
+                const result = await contract[routeArgs[1]](...fnArgs)
+                return JSON.stringify({ result: result }, bigNumberReplacer);
+              } else if(routeArgs.length === 3) {
+                const result = await contract[routeArgs[1]][routeArgs[2]](...fnArgs)
+                return JSON.stringify({ result: result }, bigNumberReplacer);
+              } else {
+                console.error("invalid route", route);
+                return null;
+              }
             };
+            /// --- End Thirdweb Brige ---
 
             const script = document.createElement("script");
             script.src = loaderUrl;

@@ -30,7 +30,6 @@ namespace Thirdweb
         [AOT.MonoPInvokeCallback(typeof(Action<string, string>))]
         private static void jsCallback(string taskId, string result)
         {
-            Debug.Log("jsCallback: " + taskId + " " + result);
             if (taskMap.ContainsKey(taskId))
             {
                 taskMap[taskId].TrySetResult(result);  

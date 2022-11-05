@@ -9,12 +9,14 @@ namespace Thirdweb
     public class ThirdwebSDK
     {
         private string chainOrRPC;
-        public ThirdwebSDK(string chainOrRPC) {
+        public ThirdwebSDK(string chainOrRPC) 
+        {
             this.chainOrRPC = chainOrRPC;
             Bridge.Initialize(chainOrRPC);
         }
 
-        public Task<string> Connect() {
+        public Task<string> Connect() 
+        {
             return Bridge.Connect();
         }
 

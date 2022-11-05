@@ -117,7 +117,7 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), new string[] { to, tokenId });
         }
 
-        public async Task<TransactionResult> Burn( string tokenId)
+        public async Task<TransactionResult> Burn(string tokenId)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("burn"), new string[] { tokenId });
         }
