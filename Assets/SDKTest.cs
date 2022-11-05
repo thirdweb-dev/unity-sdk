@@ -34,10 +34,12 @@ public class SDKTest : MonoBehaviour
         Debug.Log("Button clicked");
         count++;
         fetchButton.text = "Fetching Token: " + count;
-        NFT result = await contract.ERC721.GetNFT(count.ToString());
+        NFT result = await contract.ERC721.Get(count.ToString());
         Debug.Log("name: " + result.metadata.name);
         Debug.Log("owner: " + result.owner);
         fetchButton.text = result.metadata.name;
+        // int supply = await contract.ERC721.TotalClaimedSupply();
+        // fetchButton.text = supply.ToString();
     }
 
     public async void OnWriteButtonClick()
