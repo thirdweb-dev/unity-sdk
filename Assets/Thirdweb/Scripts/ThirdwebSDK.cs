@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 
 namespace Thirdweb
 {
-
     /// <summary>
     /// The entry point for the thirdweb SDK.
     /// </summary>

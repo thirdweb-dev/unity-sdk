@@ -1,9 +1,7 @@
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Thirdweb
 {
-
     /// <summary>
     /// Convenient wrapper to interact with any EVM contract
     /// </summary>
@@ -22,7 +20,7 @@ namespace Thirdweb
         {
             string [] argsEncoded = new string[args.Length + 1];
             argsEncoded[0] = functionName;
-            toJsonStringArray(args).CopyTo(argsEncoded, 1);
+            Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
             return await Bridge.InvokeRoute<T>(getRoute("call"), argsEncoded);
         }
 
@@ -30,7 +28,7 @@ namespace Thirdweb
         {
             string [] argsEncoded = new string[args.Length + 1];
             argsEncoded[0] = functionName;
-            toJsonStringArray(args).CopyTo(argsEncoded, 1);
+            Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), argsEncoded);
         }
 
@@ -38,21 +36,5 @@ namespace Thirdweb
             return this.address + "." + functionPath;
         }
 
-        private string[] toJsonStringArray(params object[] args) {
-            string[] stringArgs = new string[args.Length];
-            for (int i = 0; i < args.Length; i++)
-            {
-                // if value type, convert to string otherwise serialize to json
-                if (args[i].GetType().IsPrimitive || args[i] is string)
-                {
-                    stringArgs[i] = args[i].ToString();
-                }
-                else
-                {
-                    stringArgs[i] = JsonUtility.ToJson(args[i]);
-                }
-            }
-            return stringArgs;
-        }
     }
 }

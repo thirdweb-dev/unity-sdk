@@ -2,43 +2,6 @@ using System.Threading.Tasks;
 
 namespace Thirdweb
 {
-
-    [System.Serializable]
-    public struct NFTMetadata
-    {
-        public string id;
-        public string uri;
-        public string description;
-        public string image;
-        public string name;
-        // TODO: support properties;
-    }
-
-    [System.Serializable]
-    public struct NFT
-    {
-        public NFTMetadata metadata;
-        public string owner;
-    }
-
-    [System.Serializable]
-    public struct Receipt
-    {
-        public string from;
-        public string to;
-        public int transactionIndex;
-        public string gasUsed;
-        public string blockHash;
-        public string transactionHash;
-    }
-
-    [System.Serializable]
-    public struct TransactionResult
-    {
-        public Receipt receipt;
-        public string id;
-    }
-
     /// <summary>
     /// Interact with any <c>ERC721</c> compatible contract.
     /// </summary>
@@ -130,6 +93,16 @@ namespace Thirdweb
         public async Task<TransactionResult[]> ClaimTo(string address, int quantity)
         {
             return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claimTo"), new string[] { address, quantity.ToString() });
+        }
+
+        public async Task<TransactionResult> Mint(NFTMetadata nft)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(nft));
+        }
+
+        public async Task<TransactionResult> MintTo(string address, NFTMetadata nft)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, nft));
         }
 
         private string getRoute(string functionPath) {

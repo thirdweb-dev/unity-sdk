@@ -132,12 +132,19 @@
               const addr = routeArgs[0];
               const contract = await w.thirdweb.getContract(addr)
               const fnArgs = JSON.parse(payload).arguments;
+              const parsedARgs = fnArgs.map((arg) => {
+                try {
+                  return JSON.parse(arg);
+                } catch (e) {
+                  return arg;
+                }
+              });
               if(routeArgs.length === 2) {
                 // TODO assumes contract call
-                const result = await contract[routeArgs[1]](...fnArgs)
+                const result = await contract[routeArgs[1]](...parsedARgs)
                 return JSON.stringify({ result: result }, bigNumberReplacer);
               } else if(routeArgs.length === 3) {
-                const result = await contract[routeArgs[1]][routeArgs[2]](...fnArgs)
+                const result = await contract[routeArgs[1]][routeArgs[2]](...parsedARgs)
                 return JSON.stringify({ result: result }, bigNumberReplacer);
               } else {
                 console.error("invalid route", route);

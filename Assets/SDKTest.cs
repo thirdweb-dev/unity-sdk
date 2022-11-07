@@ -50,9 +50,18 @@ public class SDKTest : MonoBehaviour
         count++;
         //var result = await contract.ERC721.Transfer("0x2247d5d238d0f9d37184d8332aE0289d1aD9991b", count.ToString());
         claimButton.text = "claiming...";
-        var result = await contract.ERC721.Claim(1);
-        Debug.Log("result id: " + result[0].id);
-        Debug.Log("result receipt: " + result[0].receipt.transactionHash);
-        claimButton.text = "claimed tokenId: " + result[0].id;
+        // var result = await contract.ERC721.Claim(1);
+        // Debug.Log("result id: " + result[0].id);
+        // Debug.Log("result receipt: " + result[0].receipt.transactionHash);
+        // claimButton.text = "claimed tokenId: " + result[0].id;
+
+        var nftCollection = sdk.GetContract("0x8bFD00BD1D3A2778BDA12AFddE5E65Cca95082DF");
+        var meta = new NFTMetadata();
+        meta.name = "Unity NFT";
+        meta.description = "Minted From Unity";
+        // get a cat image url
+        
+        var result = await nftCollection.ERC721.Mint(meta);
+        claimButton.text = "minted tokenId: " + result.id;
     }
 }
