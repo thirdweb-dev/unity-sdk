@@ -85,7 +85,7 @@
             import { ThirdwebSDK } from "https://esm.sh/@thirdweb-dev/sdk@nightly?bundle"
             // import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
             // big number transform
-            const bigNumberReplacer = (_key, value) => {
+            const bigNumberReplacer = (key, value) => {
               // if we find a BigNumber then make it into a string (since that is safe)
               if (ethers.BigNumber.isBigNumber(value) ||
                 (typeof value === "object" &&
@@ -98,7 +98,15 @@
               return value;
             };
 
-            let id = 0;
+            const parserTransform = (key, value) => {
+              // if we find a BigNumber then make it into a string (since that is safe)
+              if (key.toLowerCase().includes("time")) {
+                console.log("converting time", value);
+                return new Date(value);
+              }
+              return value;
+            };
+
             const w = window;
             w.bridge = {};
             w.bridge.initialize = (chain) => {
@@ -121,7 +129,7 @@
                   return null;
                 }
               } else {
-                console.error("Please install a wallet browser extension")
+                console.error("Please install a wallet browser extension");
                 return null;
               }
             }
@@ -130,10 +138,10 @@
               const routeArgs = route.split(".")
               const addr = routeArgs[0];
               const contract = await w.thirdweb.getContract(addr)
-              const fnArgs = JSON.parse(payload).arguments;
+              const fnArgs = JSON.parse(payload, parserTransform).arguments;
               const parsedArgs = fnArgs.map((arg) => {
                 try {
-                  return JSON.parse(arg);
+                  return JSON.parse(arg, parserTransform);
                 } catch (e) {
                   return arg;
                 }

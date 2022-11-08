@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using UnityEngine;
 
@@ -33,7 +34,13 @@ namespace Thirdweb
             {
                 hex.AppendFormat("{0:x2}", b);
             }
-            return "0x" + hex.ToString().PadRight(64, '0');
+            return "0x" + hex.ToString().PadLeft(64, '0');
+        }
+
+        public static long UnixTimeNowMs()
+        {
+            var timeSpan = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0));
+            return (long) timeSpan.TotalMilliseconds;
         }
     }
 }

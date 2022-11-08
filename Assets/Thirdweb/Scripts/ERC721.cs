@@ -134,8 +134,8 @@ namespace Thirdweb
         public NFTMetadata? metadata;
         public string uid;
         // TODO implement these, needs JS bridging support
-        public DateTime? mintStartTime;
-        public DateTime? mintEndTime;
+        public long mintStartTime;
+        public long mintEndTime;
 
         public ERC721MintPayload() {
             this.to = Utils.AddressZero;
@@ -146,9 +146,10 @@ namespace Thirdweb
             this.royaltyBps = 0;
             this.quantity = 1;
             this.metadata = null;
-            this.mintEndTime = null;
-            this.mintEndTime = null;
             this.uid = Utils.ToBytes32HexString(Guid.NewGuid().ToByteArray());
+            // TODO temporary solution
+            this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
+            this.mintEndTime = this.mintStartTime + 1000L * 60L * 60L * 24L * 365L;
         }
     }
 
