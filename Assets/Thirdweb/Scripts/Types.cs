@@ -14,6 +14,13 @@ namespace Thirdweb {
     }
 
     [System.Serializable]
+    public struct NFTMetadataWithSupply
+    {
+        public NFTMetadata metadata;
+        public int supply;
+    }
+
+    [System.Serializable]
     public struct NFT
     {
         public NFTMetadata metadata;
