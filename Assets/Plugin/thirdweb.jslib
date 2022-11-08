@@ -1,4 +1,4 @@
-mergeInto(LibraryManager.library, {
+var plugin = {
   ThirdwebInvoke: function (taskId, route, payload, cb) {
     // convert taskId from pointer to str and allocate it to keep in memory
     var id = UTF8ToString(taskId);
@@ -13,7 +13,14 @@ mergeInto(LibraryManager.library, {
         var buffer = _malloc(bufferSize);
         stringToUTF8(returnStr, buffer, bufferSize);
         // callback into unity
-        dynCall_vii(cb, idPtr, buffer);
+        dynCall_viii(cb, idPtr, buffer, null);
+      })
+      .catch((err) => {
+        var msg = err.message;
+        var bufferSize = lengthBytesUTF8(msg) + 1;
+        var buffer = _malloc(bufferSize);
+        stringToUTF8(msg, buffer, bufferSize);
+        dynCall_viii(cb, idPtr, null, buffer);
       });
   },
   ThirdwebInitialize: function (chain) {
@@ -26,15 +33,26 @@ mergeInto(LibraryManager.library, {
     var idPtr = _malloc(idSize);
     stringToUTF8(id, idPtr, idSize);
     // execute bridge call
-    window.bridge.connect().then((address) => {
-      if (address) {
-        var bufferSize = lengthBytesUTF8(address) + 1;
+    window.bridge
+      .connect()
+      .then((address) => {
+        if (address) {
+          var bufferSize = lengthBytesUTF8(address) + 1;
+          var buffer = _malloc(bufferSize);
+          stringToUTF8(address, buffer, bufferSize);
+          dynCall_viii(cb, idPtr, buffer, null);
+        } else {
+          dynCall_viii(cb, idPtr, null, null);
+        }
+      })
+      .catch((err) => {
+        var msg = err.message;
+        var bufferSize = lengthBytesUTF8(msg) + 1;
         var buffer = _malloc(bufferSize);
-        stringToUTF8(address, buffer, bufferSize);
-        dynCall_vii(cb, idPtr, buffer);
-      } else {
-        dynCall_vii(cb, idPtr, null);
-      }
-    });
+        stringToUTF8(msg, buffer, bufferSize);
+        dynCall_viii(cb, idPtr, null, buffer);
+      });
   },
-});
+};
+
+mergeInto(LibraryManager.library, plugin);

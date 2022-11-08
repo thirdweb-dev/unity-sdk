@@ -27,12 +27,18 @@ namespace Thirdweb
 
         private static Dictionary<string, TaskCompletionSource<string>> taskMap = new Dictionary<string, TaskCompletionSource<string>>();
 
-        [AOT.MonoPInvokeCallback(typeof(Action<string, string>))]
-        private static void jsCallback(string taskId, string result)
+        [AOT.MonoPInvokeCallback(typeof(Action<string, string, string>))]
+        private static void jsCallback(string taskId, string result, string error)
         {
             if (taskMap.ContainsKey(taskId))
             {
-                taskMap[taskId].TrySetResult(result);  
+                if (error != null) 
+                {
+                    taskMap[taskId].SetException(new Exception(error));
+                } else 
+                {
+                    taskMap[taskId].SetResult(result);
+                }
                 taskMap.Remove(taskId);
             }
         }
@@ -62,23 +68,11 @@ namespace Thirdweb
             return JsonUtility.FromJson<Result<T>>(result).result;
         }
 
-        public static async Task<string> InvokeRouteRaw(string route, string[] body)
-        {
-            var msg = JsonUtility.ToJson(new RequestMessageBody(body));
-            string taskId = Guid.NewGuid().ToString();
-            var task = new TaskCompletionSource<string>();
-            taskMap[taskId] = task;
-            ThirdwebInvoke(taskId, route, msg, jsCallback);
-            string result = await task.Task;
-            // Debug.LogFormat("Result from {0}: {1}", route, result);
-            return result;
-        }
-
         [DllImport("__Internal")]
-        private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string> cb);
+        private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebInitialize(string chainOrRPC);
         [DllImport("__Internal")]
-        private static extern string ThirdwebConnect(string taskId, Action<string, string> cb);
+        private static extern string ThirdwebConnect(string taskId, Action<string, string, string> cb);
     }
 }

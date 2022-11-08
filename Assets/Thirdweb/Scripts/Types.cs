@@ -25,6 +25,9 @@ namespace Thirdweb {
     {
         public NFTMetadata metadata;
         public string owner;
+        public string type;
+        public int supply;
+        public int? quantityOwned;
     }
 
     [System.Serializable]

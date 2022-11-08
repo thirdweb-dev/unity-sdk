@@ -13,7 +13,6 @@ namespace Thirdweb
             string[] stringArgs = new string[args.Length];
             for (int i = 0; i < args.Length; i++)
             {
-                Debug.Log("Type" + args[i].GetType());
                 // if value type, convert to string otherwise serialize to json
                 if (args[i].GetType().IsPrimitive || args[i] is string)
                 {

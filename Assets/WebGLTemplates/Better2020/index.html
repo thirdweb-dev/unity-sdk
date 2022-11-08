@@ -101,7 +101,6 @@
             const parserTransform = (key, value) => {
               // if we find a BigNumber then make it into a string (since that is safe)
               if (key.toLowerCase().includes("time")) {
-                console.log("converting time", value);
                 return new Date(value);
               }
               return value;
