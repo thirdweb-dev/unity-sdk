@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 namespace Thirdweb
@@ -9,14 +10,16 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public ERC721Signature signature;
+
         public ERC721(string chain, string address)
         {
             this.chain = chain;
             this.address = address;
+            this.signature = new ERC721Signature(chain, address);
         }
 
         /// READ FUNCTIONS
-
 
         public async Task<NFT> Get(string tokenId)
         {
@@ -105,8 +108,85 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, nft));
         }
 
+        public async Task<TransactionResult> GenerateSignature(NFTMetadata nft)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("signature.generate"), Utils.ToJsonStringArray(nft));
+        }
+
+        /// PRIVATE
+
         private string getRoute(string functionPath) {
             return this.address + ".erc721." + functionPath;
+        }
+    }
+
+    [System.Serializable]
+    #nullable enable
+    public class ERC721MintPayload
+    {
+        public string to;
+        public string price;
+        public string currencyAddress;
+        public string primarySaleRecipient;
+        public string royaltyRecipient;
+        public int royaltyBps;
+        public int quantity;
+        public NFTMetadata? metadata;
+        public string uid;
+        // TODO implement these, needs JS bridging support
+        public DateTime? mintStartTime;
+        public DateTime? mintEndTime;
+
+        public ERC721MintPayload() {
+            this.to = Utils.AddressZero;
+            this.price = "0";
+            this.currencyAddress = Utils.AddressZero;
+            this.primarySaleRecipient = Utils.AddressZero;
+            this.royaltyRecipient = Utils.AddressZero;
+            this.royaltyBps = 0;
+            this.quantity = 1;
+            this.metadata = null;
+            this.mintEndTime = null;
+            this.mintEndTime = null;
+            this.uid = Utils.ToBytes32HexString(Guid.NewGuid().ToByteArray());
+        }
+    }
+
+    [System.Serializable]
+    public struct ERC721SignedPayload
+    {
+        public string signature;
+        public ERC721MintPayload payload;
+    }
+
+    public class ERC721Signature
+    {
+        public string chain;
+        public string address;
+
+        public ERC721Signature(string chain, string address)
+        {
+            this.chain = chain;
+            this.address = address;
+        }
+
+        public async Task<ERC721SignedPayload> Generate(ERC721MintPayload payloadToSign)
+        {
+            return await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+        }
+
+        public async Task<bool> Verify(ERC721SignedPayload signedPayload)
+        {
+            return await Bridge.InvokeRoute<bool>(getRoute("verify"), Utils.ToJsonStringArray(signedPayload));
+        }
+
+        public async Task<TransactionResult> Mint(ERC721SignedPayload signedPayload)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
+        }
+
+        private string getRoute(string functionPath) {
+            return this.address + ".erc721.signature." + functionPath;
         }
     }
 }

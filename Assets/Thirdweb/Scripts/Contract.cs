@@ -10,6 +10,7 @@ namespace Thirdweb
         public string chain;
         public string address;
         public ERC721 ERC721;
+
         public Contract(string chain, string address) {
             this.chain = chain;
             this.address = address;
@@ -35,6 +36,5 @@ namespace Thirdweb
         private string getRoute(string functionPath) {
             return this.address + "." + functionPath;
         }
-
     }
 }

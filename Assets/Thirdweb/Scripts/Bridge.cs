@@ -43,7 +43,7 @@ namespace Thirdweb
 
         public static async Task<string> Connect() {
             var task = new TaskCompletionSource<string>();
-            string taskId = System.Guid.NewGuid().ToString();
+            string taskId = Guid.NewGuid().ToString();
             taskMap[taskId] = task;
             ThirdwebConnect(taskId, jsCallback);
             string result = await task.Task;
@@ -53,7 +53,7 @@ namespace Thirdweb
         public static async Task<T> InvokeRoute<T>(string route, string[] body)
         {
             var msg = JsonUtility.ToJson(new RequestMessageBody(body));
-            string taskId = System.Guid.NewGuid().ToString();
+            string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
             ThirdwebInvoke(taskId, route, msg, jsCallback);
@@ -65,7 +65,7 @@ namespace Thirdweb
         public static async Task<string> InvokeRouteRaw(string route, string[] body)
         {
             var msg = JsonUtility.ToJson(new RequestMessageBody(body));
-            string taskId = System.Guid.NewGuid().ToString();
+            string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
             ThirdwebInvoke(taskId, route, msg, jsCallback);

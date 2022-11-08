@@ -58,10 +58,22 @@ public class SDKTest : MonoBehaviour
         var nftCollection = sdk.GetContract("0x8bFD00BD1D3A2778BDA12AFddE5E65Cca95082DF");
         var meta = new NFTMetadata();
         meta.name = "Unity NFT";
-        meta.description = "Minted From Unity";
-        // get a cat image url
+        meta.description = "Minted From Unity (signature)";
+        // get a cute kitten image url
+        meta.image = "https://placekitten.com/200/300";
         
-        var result = await nftCollection.ERC721.Mint(meta);
-        claimButton.text = "minted tokenId: " + result.id;
+        // var result = await nftCollection.ERC721.Mint(meta);
+        // claimButton.text = "minted tokenId: " + result.id;
+
+        var payload = new ERC721MintPayload();
+        payload.metadata = meta;
+        payload.to = "0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803";
+        // TODO allow passing dates as unix timestamps
+        var p = await nftCollection.ERC721.signature.Generate(payload);
+        Debug.Log("sig:" + p.signature);
+        var result = await nftCollection.ERC721.signature.Mint(p);
+        claimButton.text = "sigminted tokenId: " + result.id;
+
     }
+
 }

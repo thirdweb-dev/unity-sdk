@@ -127,26 +127,29 @@
             }
 
             w.bridge.invoke = async (route, payload) => {
-              console.log("invoke called", route, payload);
               const routeArgs = route.split(".")
               const addr = routeArgs[0];
               const contract = await w.thirdweb.getContract(addr)
               const fnArgs = JSON.parse(payload).arguments;
-              const parsedARgs = fnArgs.map((arg) => {
+              const parsedArgs = fnArgs.map((arg) => {
                 try {
                   return JSON.parse(arg);
                 } catch (e) {
                   return arg;
                 }
               });
+              console.log("invoke called", route, parsedArgs);
               if(routeArgs.length === 2) {
                 // TODO assumes contract call
-                const result = await contract[routeArgs[1]](...parsedARgs)
+                const result = await contract[routeArgs[1]](...parsedArgs)
                 return JSON.stringify({ result: result }, bigNumberReplacer);
               } else if(routeArgs.length === 3) {
-                const result = await contract[routeArgs[1]][routeArgs[2]](...parsedARgs)
+                const result = await contract[routeArgs[1]][routeArgs[2]](...parsedArgs)
                 return JSON.stringify({ result: result }, bigNumberReplacer);
-              } else {
+              } else if(routeArgs.length === 4) {
+                const result = await contract[routeArgs[1]][routeArgs[2]][routeArgs[3]](...parsedArgs)
+                return JSON.stringify({ result: result }, bigNumberReplacer);
+              }else {
                 console.error("invalid route", route);
                 return null;
               }

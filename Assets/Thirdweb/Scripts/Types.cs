@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Thirdweb {
     [System.Serializable]
     public struct NFTMetadata
@@ -7,7 +9,8 @@ namespace Thirdweb {
         public string description;
         public string image;
         public string name;
-        // TODO: support properties;
+        public string external_url;
+        public Dictionary<string, string> properties;
     }
 
     [System.Serializable]
