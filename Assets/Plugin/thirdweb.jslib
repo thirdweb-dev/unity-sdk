@@ -16,6 +16,7 @@ var plugin = {
         dynCall_viii(cb, idPtr, buffer, null);
       })
       .catch((err) => {
+        console.error("ThirdwebSDK invoke error", err);
         var msg = err.message;
         var bufferSize = lengthBytesUTF8(msg) + 1;
         var buffer = _malloc(bufferSize);

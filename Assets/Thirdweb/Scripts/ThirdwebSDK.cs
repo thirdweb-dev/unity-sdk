@@ -10,14 +10,15 @@ namespace Thirdweb
         [System.Serializable]
         public struct Options
         {
-            public GaslessOptions gasless;
+            public GaslessOptions? gasless;
         }
 
         [System.Serializable]
         public struct GaslessOptions
         {
-            public OZDefenderOptions openzeppelin;
-            public BiconomyOptions biconomy;
+            public OZDefenderOptions? openzeppelin;
+            public BiconomyOptions? biconomy;
+            public bool experimentalChainlessSupport;
         }
 
         [System.Serializable]

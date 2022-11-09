@@ -11,14 +11,7 @@ public class SDKTest : MonoBehaviour
 
     void Start()
     {
-        sdk = new ThirdwebSDK("goerli", new ThirdwebSDK.Options() {
-            gasless = new ThirdwebSDK.GaslessOptions() {
-                openzeppelin = new ThirdwebSDK.OZDefenderOptions() {
-                    relayerUrl = "https://api.defender.openzeppelin.com/autotasks/dad61716-3624-46c9-874f-0e73f15f04d5/runs/webhook/7d6a1834-dd33-4b7b-8af4-b6b4719a0b97/FdHMqyF3p6MGHw6K2nkLsv",
-                    relayerForwarderAddress = "0xEbc1977d1aC2fe1F6DAaF584E2957F7c436fcdEF"
-                }
-            }
-        });
+        sdk = new ThirdwebSDK("goerli");
     }
 
     void Update() {
@@ -72,30 +65,25 @@ public class SDKTest : MonoBehaviour
 
     public async void MintERC721()
     {
-        var nftCollection = sdk.GetContract("0x8bFD00BD1D3A2778BDA12AFddE5E65Cca95082DF"); // NFT Collection
+        var contract = sdk.GetContract("0x2e01763fA0e15e07294D74B63cE4b526B321E389"); // NFT Drop
         Debug.Log("Claim button clicked");
         //var result = await contract.ERC721.Transfer("0x2247d5d238d0f9d37184d8332aE0289d1aD9991b", count.ToString());
         resultText.text = "claiming...";
-        // var result = await contract.ERC721.Claim(1);
-        // Debug.Log("result id: " + result[0].id);
-        // Debug.Log("result receipt: " + result[0].receipt.transactionHash);
-        // claimButton.text = "claimed tokenId: " + result[0].id;
-
+        var result = await contract.ERC721.Claim(1);
+        Debug.Log("result id: " + result[0].id);
+        Debug.Log("result receipt: " + result[0].receipt.transactionHash);
+        resultText.text = "claimed tokenId: " + result[0].id;
         
-        var meta = new NFTMetadata();
-        meta.name = "Unity NFT";
-        meta.description = "Minted From Unity (signature)";
-        // get a cute kitten image url
-        meta.image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc";
-        
-        // var result = await nftCollection.ERC721.Mint(meta);
-        // claimButton.text = "minted tokenId: " + result.id;
-
         // sig mint
-        var payload = new ERC721MintPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", meta);
-        var p = await nftCollection.ERC721.signature.Generate(payload);
-        var result = await nftCollection.ERC721.signature.Mint(p);
-        resultText.text = "sigminted tokenId: " + result.id;
+        // var contract = sdk.GetContract("0x8bFD00BD1D3A2778BDA12AFddE5E65Cca95082DF"); // NFT Collection
+        // var meta = new NFTMetadata();
+        // meta.name = "Unity NFT";
+        // meta.description = "Minted From Unity (signature)";
+        // meta.image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc";
+        // var payload = new ERC721MintPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", meta);
+        // var p = await nftCollection.ERC721.signature.Generate(payload);
+        // var result = await nftCollection.ERC721.signature.Mint(p);
+        // resultText.text = "sigminted tokenId: " + result.id;
     }
 
     public async void MintERC1155()

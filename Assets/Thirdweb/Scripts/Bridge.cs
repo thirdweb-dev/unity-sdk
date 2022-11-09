@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using UnityEngine;
+using Newtonsoft.Json;
 
 namespace Thirdweb
 {
@@ -45,7 +45,7 @@ namespace Thirdweb
         }
 
         public static void Initialize(string chainOrRPC, ThirdwebSDK.Options options) {
-            ThirdwebInitialize(chainOrRPC, JsonUtility.ToJson(options));
+            ThirdwebInitialize(chainOrRPC, Utils.ToJson(options));
         }
 
         public static async Task<string> Connect() {
@@ -59,14 +59,14 @@ namespace Thirdweb
 
         public static async Task<T> InvokeRoute<T>(string route, string[] body)
         {
-            var msg = JsonUtility.ToJson(new RequestMessageBody(body));
+            var msg = Utils.ToJson(new RequestMessageBody(body));
             string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
             ThirdwebInvoke(taskId, route, msg, jsCallback);
             string result = await task.Task;
             // Debug.LogFormat("Result from {0}: {1}", route, result);
-            return JsonUtility.FromJson<Result<T>>(result).result;
+            return JsonConvert.DeserializeObject<Result<T>>(result).result;
         }
 
         [DllImport("__Internal")]

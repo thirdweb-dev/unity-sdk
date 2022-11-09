@@ -1,6 +1,6 @@
 using System;
 using System.Text;
-using UnityEngine;
+using Newtonsoft.Json;
 
 namespace Thirdweb
 {
@@ -20,10 +20,14 @@ namespace Thirdweb
                 }
                 else
                 {
-                    stringArgs[i] = JsonUtility.ToJson(args[i]);
+                    stringArgs[i] = Utils.ToJson(args[i]);
                 }
             }
             return stringArgs;
+        }
+
+        public static string ToJson(object obj) {
+            return JsonConvert.SerializeObject(obj, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
         }
 
         public static string ToBytes32HexString(byte[] bytes)
