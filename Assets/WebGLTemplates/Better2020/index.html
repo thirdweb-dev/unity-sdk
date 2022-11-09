@@ -98,14 +98,6 @@
               return value;
             };
 
-            const parserTransform = (key, value) => {
-              // if we find a BigNumber then make it into a string (since that is safe)
-              if (key.toLowerCase().includes("time")) {
-                return new Date(value);
-              }
-              return value;
-            };
-
             const w = window;
             w.bridge = {};
             w.bridge.initialize = (chain) => {
@@ -137,10 +129,10 @@
               const routeArgs = route.split(".")
               const addr = routeArgs[0];
               const contract = await w.thirdweb.getContract(addr)
-              const fnArgs = JSON.parse(payload, parserTransform).arguments;
+              const fnArgs = JSON.parse(payload).arguments;
               const parsedArgs = fnArgs.map((arg) => {
                 try {
-                  return JSON.parse(arg, parserTransform);
+                  return JSON.parse(arg);
                 } catch (e) {
                   return arg;
                 }

@@ -120,9 +120,42 @@ namespace Thirdweb
         }
     }
 
+    // TODO switch to another JSON serializer that supports polymorphism
     [System.Serializable]
     #nullable enable
     public class ERC1155MintPayload
+    {
+        public string to;
+        public string price;
+        public string currencyAddress;
+        public string primarySaleRecipient;
+        public string royaltyRecipient;
+        public int royaltyBps;
+        public int quantity;
+        public NFTMetadata metadata;
+        public string uid;
+        // TODO implement these, needs JS bridging support
+        // public long mintStartTime;
+        // public long mintEndTime;
+
+        public ERC1155MintPayload(string receiverAddress, NFTMetadata metadata) {
+            this.metadata = metadata;
+            this.to = receiverAddress;
+            this.price = "0";
+            this.currencyAddress = Utils.AddressZero;
+            this.primarySaleRecipient = Utils.AddressZero;
+            this.royaltyRecipient = Utils.AddressZero;
+            this.royaltyBps = 0;
+            this.quantity = 1;
+            this.uid = Utils.ToBytes32HexString(Guid.NewGuid().ToByteArray());
+            // TODO temporary solution
+            // this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
+            // this.mintEndTime = this.mintStartTime + 1000L * 60L * 60L * 24L * 365L;
+        }
+    }
+
+    [System.Serializable]
+    public class ERC1155MintAdditionalPayload
     {
         public string tokenId;
         public string to;
@@ -132,34 +165,49 @@ namespace Thirdweb
         public string royaltyRecipient;
         public int royaltyBps;
         public int quantity;
-        public NFTMetadata? metadata;
         public string uid;
         // TODO implement these, needs JS bridging support
-        public long mintStartTime;
-        public long mintEndTime;
+        // public long mintStartTime;
+        // public long mintEndTime;
 
-        public ERC1155MintPayload() {
-            this.tokenId = ""; // TODO max uint256 by default
-            this.to = Utils.AddressZero;
+        public ERC1155MintAdditionalPayload(string receiverAddress, string tokenId) {
+            this.tokenId = tokenId;
+            this.to = receiverAddress;
             this.price = "0";
             this.currencyAddress = Utils.AddressZero;
             this.primarySaleRecipient = Utils.AddressZero;
             this.royaltyRecipient = Utils.AddressZero;
             this.royaltyBps = 0;
             this.quantity = 1;
-            this.metadata = null;
             this.uid = Utils.ToBytes32HexString(Guid.NewGuid().ToByteArray());
             // TODO temporary solution
-            this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
-            this.mintEndTime = this.mintStartTime + 1000L * 60L * 60L * 24L * 365L;
+            // this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
+            // this.mintEndTime = this.mintStartTime + 1000L * 60L * 60L * 24L * 365L;
         }
+    }
+
+    [System.Serializable]
+    public struct ERC1155SignedPayloadOutput
+    {
+        public string to;
+        public string tokenId;
+        public string price;
+        public string currencyAddress;
+        public string primarySaleRecipient;
+        public string royaltyRecipient;
+        public int royaltyBps;
+        public int quantity;
+        public string uri;
+        public string uid;
+        public long mintStartTime;
+        public long mintEndTime;
     }
 
     [System.Serializable]
     public struct ERC1155SignedPayload
     {
         public string signature;
-        public ERC1155MintPayload payload;
+        public ERC1155SignedPayloadOutput payload;
     }
 
     public class ERC1155Signature
@@ -176,6 +224,11 @@ namespace Thirdweb
         public async Task<ERC1155SignedPayload> Generate(ERC1155MintPayload payloadToSign)
         {
             return await Bridge.InvokeRoute<ERC1155SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+        }
+
+        public async Task<ERC1155SignedPayload> GenerateFromTokenId(ERC1155MintAdditionalPayload payloadToSign)
+        {
+            return await Bridge.InvokeRoute<ERC1155SignedPayload>(getRoute("generateFromTokenId"), Utils.ToJsonStringArray(payloadToSign));
         }
 
         public async Task<bool> Verify(ERC1155SignedPayload signedPayload)

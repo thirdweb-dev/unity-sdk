@@ -126,33 +126,49 @@ namespace Thirdweb
         public string royaltyRecipient;
         public int royaltyBps;
         public int quantity;
-        public NFTMetadata? metadata;
+        public NFTMetadata metadata;
         public string uid;
         // TODO implement these, needs JS bridging support
-        public long mintStartTime;
-        public long mintEndTime;
+        // public long mintStartTime;
+        // public long mintEndTime;
 
-        public ERC721MintPayload() {
-            this.to = Utils.AddressZero;
+        public ERC721MintPayload(string receiverAddress, NFTMetadata metadata) {
+            this.metadata = metadata;
+            this.to = receiverAddress;
             this.price = "0";
             this.currencyAddress = Utils.AddressZero;
             this.primarySaleRecipient = Utils.AddressZero;
             this.royaltyRecipient = Utils.AddressZero;
             this.royaltyBps = 0;
             this.quantity = 1;
-            this.metadata = null;
             this.uid = Utils.ToBytes32HexString(Guid.NewGuid().ToByteArray());
             // TODO temporary solution
-            this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
-            this.mintEndTime = this.mintStartTime + 1000L * 60L * 60L * 24L * 365L;
+            // this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
+            // this.mintEndTime = this.mintStartTime + 1000L * 60L * 60L * 24L * 365L;
         }
+    }
+
+    [System.Serializable]
+    public struct ERC721SignedPayloadOutput
+    {
+        public string to;
+        public string price;
+        public string currencyAddress;
+        public string primarySaleRecipient;
+        public string royaltyRecipient;
+        public int royaltyBps;
+        public int quantity;
+        public string uri;
+        public string uid;
+        public long mintStartTime;
+        public long mintEndTime;
     }
 
     [System.Serializable]
     public struct ERC721SignedPayload
     {
         public string signature;
-        public ERC721MintPayload payload;
+        public ERC721SignedPayloadOutput payload;
     }
 
     public class ERC721Signature

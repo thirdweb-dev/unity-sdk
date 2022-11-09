@@ -34,10 +34,11 @@ namespace Thirdweb
             {
                 if (error != null) 
                 {
-                    taskMap[taskId].SetException(new Exception(error));
+                    // TODO wrap error in proper result type
+                    taskMap[taskId].TrySetException(new Exception(error));
                 } else 
                 {
-                    taskMap[taskId].SetResult(result);
+                    taskMap[taskId].TrySetResult(result);
                 }
                 taskMap.Remove(taskId);
             }

@@ -74,28 +74,41 @@ public class SDKTest : MonoBehaviour
         meta.name = "Unity NFT";
         meta.description = "Minted From Unity (signature)";
         // get a cute kitten image url
-        meta.image = "https://placekitten.com/200/300";
+        meta.image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc";
         
         // var result = await nftCollection.ERC721.Mint(meta);
         // claimButton.text = "minted tokenId: " + result.id;
 
-        var payload = new ERC721MintPayload();
-        payload.metadata = meta;
-        payload.to = "0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803";
-        // TODO allow passing dates as unix timestamps
+        // sig mint
+        var payload = new ERC721MintPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", meta);
         var p = await nftCollection.ERC721.signature.Generate(payload);
-        Debug.Log("sig:" + p.signature);
         var result = await nftCollection.ERC721.signature.Mint(p);
         resultText.text = "sigminted tokenId: " + result.id;
     }
 
     public async void MintERC1155()
     {
-        var contract = sdk.GetContract("0x86B7df0dc0A790789D8fDE4C604EF8187FF8AD2A"); // Edition Drop
         Debug.Log("Claim button clicked");
         resultText.text = "claiming...";
-        var result = await contract.ERC1155.Claim("0", 1);
-        Debug.Log("result receipt: " + result[0].receipt.transactionHash);
-        resultText.text = "claim successful";
+
+        // claim
+        // var contract = sdk.GetContract("0x86B7df0dc0A790789D8fDE4C604EF8187FF8AD2A"); // Edition Drop
+        // var result = await contract.ERC1155.Claim("0", 1);
+        // Debug.Log("result receipt: " + result[0].receipt.transactionHash);
+        // resultText.text = "claim successful";
+
+
+        // sig mint
+        var contract = sdk.GetContract("0xdb9AAb1cB8336CCd50aF8aFd7d75769CD19E5FEc"); // Edition
+        //  var meta = new NFTMetadata();
+        // meta.name = "Kitten Unity NFT";
+        // meta.description = "Cat Minted From Unity (with signature)";
+        // meta.image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc";
+        // var payload = new ERC1155MintPayload(meta);
+        var payload = new ERC1155MintAdditionalPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", "1");
+        payload.quantity = 3;
+        var p = await contract.ERC1155.signature.GenerateFromTokenId(payload);
+        var result = await contract.ERC1155.signature.Mint(p);
+        resultText.text = "sigminted tokenId: " + result.id;
     }
 }
