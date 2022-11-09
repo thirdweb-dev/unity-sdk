@@ -122,18 +122,18 @@ public class SDKTest : MonoBehaviour
         Debug.Log("Claim button clicked");
         resultText.text = "claiming...";
 
-        // claim
-        // var contract = sdk.GetContract("0x86B7df0dc0A790789D8fDE4C604EF8187FF8AD2A"); // Edition Drop
-        // var result = await contract.ERC1155.Claim("0", 1);
-        // Debug.Log("result receipt: " + result[0].receipt.transactionHash);
-        // resultText.text = "claim successful";
+        // Mint
+        var contract = sdk.GetContract("0xB4870B21f80223696b68798a755478C86ce349bE"); // Edition Drop
+        var result = await contract.ERC20.Mint("1.2");
+        Debug.Log("result receipt: " + result.receipt.transactionHash);
+        resultText.text = "mint successful";
 
 
         // sig mint
-        var contract = sdk.GetContract("0xB4870B21f80223696b68798a755478C86ce349bE"); // Token
-        var payload = new ERC20MintPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", "3.2");
-        var p = await contract.ERC20.signature.Generate(payload);
-        await contract.ERC20.signature.Mint(p);
-        resultText.text = "sigminted currency successfully";
+        // var contract = sdk.GetContract("0xB4870B21f80223696b68798a755478C86ce349bE"); // Token
+        // var payload = new ERC20MintPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", "3.2");
+        // var p = await contract.ERC20.signature.Generate(payload);
+        // await contract.ERC20.signature.Mint(p);
+        // resultText.text = "sigminted currency successfully";
     }
 }
