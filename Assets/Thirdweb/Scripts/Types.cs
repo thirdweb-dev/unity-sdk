@@ -27,7 +27,25 @@ namespace Thirdweb {
         public string owner;
         public string type;
         public int supply;
-        public int? quantityOwned;
+        public int quantityOwned; // only for ERC1155.GetOwned()
+    }
+
+    [System.Serializable]
+    public struct Currency
+    {
+        public string name;
+        public string symbol;
+        public string decimals;
+    }
+
+    [System.Serializable]
+    public struct CurrencyValue
+    {
+        public string name;
+        public string symbol;
+        public string decimals;
+        public string value;
+        public string displayValue;
     }
 
     [System.Serializable]

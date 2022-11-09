@@ -49,13 +49,18 @@ public class SDKTest : MonoBehaviour
         count++;
         resultText.text = "Fetching Token: " + count;
         NFT result = await contract.ERC1155.Get(count.ToString());
-        Debug.Log("name: " + result.metadata.name);
-        Debug.Log("owner: " + result.owner);
         resultText.text = result.metadata.name + " (x" + result.quantityOwned + ")";
-        // int supply = await contract.ERC721.TotalClaimedSupply();
-        // fetchButton.text = supply.ToString();
-        // string uri = await contract.Read<string>("tokenURI", count);
-        // fetchButton.text = uri;
+    }
+
+    public async void GetERC20()
+    {
+        var contract = sdk.GetContract("0xB4870B21f80223696b68798a755478C86ce349bE"); // Token
+        Debug.Log("Button clicked");
+        resultText.text = "Fetching Token info";
+        Currency result = await contract.ERC20.Get();
+        CurrencyValue currencyValue = await contract.ERC20.TotalSupply();
+        Debug.Log("name: " + result.name);
+        resultText.text = result.name + " (" + currencyValue.displayValue + ")";
     }
 
     public async void MintERC721()
@@ -110,5 +115,25 @@ public class SDKTest : MonoBehaviour
         var p = await contract.ERC1155.signature.GenerateFromTokenId(payload);
         var result = await contract.ERC1155.signature.Mint(p);
         resultText.text = "sigminted tokenId: " + result.id;
+    }
+
+     public async void MintERC20()
+    {
+        Debug.Log("Claim button clicked");
+        resultText.text = "claiming...";
+
+        // claim
+        // var contract = sdk.GetContract("0x86B7df0dc0A790789D8fDE4C604EF8187FF8AD2A"); // Edition Drop
+        // var result = await contract.ERC1155.Claim("0", 1);
+        // Debug.Log("result receipt: " + result[0].receipt.transactionHash);
+        // resultText.text = "claim successful";
+
+
+        // sig mint
+        var contract = sdk.GetContract("0xB4870B21f80223696b68798a755478C86ce349bE"); // Token
+        var payload = new ERC20MintPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", "3.2");
+        var p = await contract.ERC20.signature.Generate(payload);
+        await contract.ERC20.signature.Mint(p);
+        resultText.text = "sigminted currency successfully";
     }
 }

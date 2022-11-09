@@ -9,12 +9,14 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public ERC20 ERC20;
         public ERC721 ERC721;
         public ERC1155 ERC1155;
 
         public Contract(string chain, string address) {
             this.chain = chain;
             this.address = address;
+            this.ERC20 = new ERC20(chain, address);
             this.ERC721 = new ERC721(chain, address);
             this.ERC1155 = new ERC1155(chain, address);
         }
