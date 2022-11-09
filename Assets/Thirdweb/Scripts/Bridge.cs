@@ -44,8 +44,8 @@ namespace Thirdweb
             }
         }
 
-        public static void Initialize(string chainOrRPC) {
-            ThirdwebInitialize(chainOrRPC);
+        public static void Initialize(string chainOrRPC, ThirdwebSDK.Options options) {
+            ThirdwebInitialize(chainOrRPC, JsonUtility.ToJson(options));
         }
 
         public static async Task<string> Connect() {
@@ -72,7 +72,7 @@ namespace Thirdweb
         [DllImport("__Internal")]
         private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
         [DllImport("__Internal")]
-        private static extern string ThirdwebInitialize(string chainOrRPC);
+        private static extern string ThirdwebInitialize(string chainOrRPC, string options);
         [DllImport("__Internal")]
         private static extern string ThirdwebConnect(string taskId, Action<string, string, string> cb);
     }

@@ -23,8 +23,8 @@ var plugin = {
         dynCall_viii(cb, idPtr, null, buffer);
       });
   },
-  ThirdwebInitialize: function (chain) {
-    window.bridge.initialize(UTF8ToString(chain));
+  ThirdwebInitialize: function (chain, options) {
+    window.bridge.initialize(UTF8ToString(chain), UTF8ToString(options));
   },
   ThirdwebConnect: function (taskId, cb) {
     // convert taskId from pointer to str and allocate it to keep in memory

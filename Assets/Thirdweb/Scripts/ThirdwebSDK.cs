@@ -7,11 +7,39 @@ namespace Thirdweb
     /// </summary>
     public class ThirdwebSDK
     {
+        [System.Serializable]
+        public struct Options
+        {
+            public GaslessOptions gasless;
+        }
+
+        [System.Serializable]
+        public struct GaslessOptions
+        {
+            public OZDefenderOptions openzeppelin;
+            public BiconomyOptions biconomy;
+        }
+
+        [System.Serializable]
+        public struct OZDefenderOptions
+        {
+            public string relayerUrl;
+            public string relayerForwarderAddress;
+        }
+
+        [System.Serializable]
+        public struct BiconomyOptions
+        {
+            public string apiId;
+            public string apiKey;
+        }
+
         private string chainOrRPC;
-        public ThirdwebSDK(string chainOrRPC) 
+
+        public ThirdwebSDK(string chainOrRPC, Options options = new Options()) 
         {
             this.chainOrRPC = chainOrRPC;
-            Bridge.Initialize(chainOrRPC);
+            Bridge.Initialize(chainOrRPC, options);
         }
 
         public Task<string> Connect() 

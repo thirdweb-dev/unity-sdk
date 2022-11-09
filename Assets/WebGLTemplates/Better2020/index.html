@@ -100,8 +100,9 @@
 
             const w = window;
             w.bridge = {};
-            w.bridge.initialize = (chain) => {
-              const sdk = new ThirdwebSDK(chain);
+            w.bridge.initialize = (chain, options) => {
+              console.log("bridge.initialize", chain, options);
+              const sdk = new ThirdwebSDK(chain, JSON.parse(options));
               w.thirdweb = sdk;
             }
 
