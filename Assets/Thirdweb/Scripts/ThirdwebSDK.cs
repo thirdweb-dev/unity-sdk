@@ -35,11 +35,13 @@ namespace Thirdweb
 
         private string chainOrRPC;
         public Wallet wallet;
+        public Deployer deployer;
 
         public ThirdwebSDK(string chainOrRPC, Options options = new Options()) 
         {
             this.chainOrRPC = chainOrRPC;
             this.wallet = new Wallet();
+            this.deployer = new Deployer();
             Bridge.Initialize(chainOrRPC, options);
         }
 

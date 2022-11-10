@@ -171,4 +171,21 @@ namespace Thirdweb
         public string gasLimit;
         public string gasPrice;
     }
+
+    [System.Serializable]
+    public struct LoginPayload
+    {
+        public LoginPayloadData payload;
+        public string signature;
+    }
+
+    [System.Serializable]
+    public struct LoginPayloadData
+    {
+        public string domain;
+        public string address;
+        public string nonce;
+        public string expiration_time;
+        public string chain_id;
+    }
 }

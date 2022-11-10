@@ -37,8 +37,10 @@ public class SDKTest : MonoBehaviour
     public async void OnSignClick()
     {
         resultText.text = "Signing...";
-        string sig = await sdk.wallet.Sign("Hello from Unity");
-        resultText.text = "Sig: " + sig.Substring(0, 6) + "...";
+        // string sig = await sdk.wallet.Sign("Hello from Unity");
+        // resultText.text = "Sig: " + sig.Substring(0, 6) + "...";
+        var data = await sdk.wallet.Authenticate("thirdweb.com");
+        resultText.text = "Sig: " + data.payload.address.Substring(0, 6) + "...";
     }
 
     public async void GetERC721()
@@ -175,5 +177,18 @@ public class SDKTest : MonoBehaviour
         var marketplace = sdk.GetContract("0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A").marketplace; // Marketplace
         var result = await marketplace.BuyListing("0", 1);
         resultText.text = "NFT bought successfully";
+    }
+
+    public async void Deploy()
+    {
+        Debug.Log("Deploy button clicked");
+        resultText.text = "Deploying...";
+
+        // fetch listings
+        var address = await sdk.deployer.DeployNFTCollection(new NFTContractDeployMetadata {
+            name = "Unity Collection",
+            primary_sale_recipient = await sdk.wallet.GetAddress(),
+        });
+        resultText.text = "Deployed: " + address;
     }
 }

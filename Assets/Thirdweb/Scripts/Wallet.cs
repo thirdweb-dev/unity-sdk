@@ -7,10 +7,14 @@ namespace Thirdweb
     /// </summary>
     public class Wallet
     {
-
         public Task<string> Connect() 
         {
             return Bridge.Connect();
+        }
+
+        public async Task<LoginPayload> Authenticate(string domain) 
+        {
+            return await Bridge.InvokeRoute<LoginPayload>("sdk#auth.login", Utils.ToJsonStringArray(domain));
         }
 
         public async Task<CurrencyValue> GetBalance(string currencyAddress = Utils.NativeTokenAddress)
