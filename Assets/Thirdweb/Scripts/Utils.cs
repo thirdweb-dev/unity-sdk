@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -10,20 +11,24 @@ namespace Thirdweb
         public static string AddressZero = "0x0000000000000000000000000000000000000000";
 
         public static string[] ToJsonStringArray(params object[] args) {
-            string[] stringArgs = new string[args.Length];
+            List<string> stringArgs = new List<string>();
             for (int i = 0; i < args.Length; i++)
             {
+                if (args[i] == null) 
+                {
+                    continue;
+                }
                 // if value type, convert to string otherwise serialize to json
                 if (args[i].GetType().IsPrimitive || args[i] is string)
                 {
-                    stringArgs[i] = args[i].ToString();
+                    stringArgs.Add(args[i].ToString());
                 }
                 else
                 {
-                    stringArgs[i] = Utils.ToJson(args[i]);
+                    stringArgs.Add(Utils.ToJson(args[i]));
                 }
             }
-            return stringArgs;
+            return stringArgs.ToArray();
         }
 
         public static string ToJson(object obj) {

@@ -128,8 +128,13 @@
 
             w.bridge.invoke = async (route, payload) => {
               const routeArgs = route.split(".")
-              const addr = routeArgs[0];
-              const contract = await w.thirdweb.getContract(addr)
+              const firstArg = routeArgs[0].split("#");
+              const addr = firstArg[0];
+              let type = undefined;
+              if(firstArg.length > 1) {
+                type = firstArg[1];
+              }
+              const contract = await w.thirdweb.getContract(addr, type);
               const fnArgs = JSON.parse(payload).arguments;
               const parsedArgs = fnArgs.map((arg) => {
                 try {

@@ -140,4 +140,26 @@ public class SDKTest : MonoBehaviour
         // await contract.ERC20.signature.Mint(p);
         // resultText.text = "sigminted currency successfully";
     }
+
+    public async void GetListing()
+    {
+        Debug.Log("Get Listing button clicked");
+        resultText.text = "fetching listing...";
+
+        // fetch listings
+        var marketplace = sdk.GetContract("0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A").marketplace; // Marketplace
+        var result = await marketplace.GetAllListings();
+        resultText.text = "Listing count: " + result.Count + " | " + result[0].asset.name + "(" + result[0].buyoutCurrencyValuePerToken.displayValue + ")";
+    }
+
+    public async void BuyListing()
+    {
+        Debug.Log("Buy Listing button clicked");
+        resultText.text = "Buying...";
+
+        // fetch listings
+        var marketplace = sdk.GetContract("0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A").marketplace; // Marketplace
+        var result = await marketplace.BuyListing("0", 1);
+        resultText.text = "NFT bought successfully";
+    }
 }

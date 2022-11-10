@@ -45,7 +45,7 @@ namespace Thirdweb
 
         /// WRITE FUNCTIONS
 
-        public async Task<TransactionResult> BuyListing(string listingId, int? quantityDesired = null, string receiverAddress = null)
+        public async Task<TransactionResult> BuyListing(string listingId, int quantityDesired, string receiverAddress = null)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("buyoutListing"), Utils.ToJsonStringArray(listingId, quantityDesired, receiverAddress));
         }
@@ -58,7 +58,7 @@ namespace Thirdweb
         /// PRIVATE
 
         private string getRoute(string functionPath) {
-            return this.address + ".marketplace." + functionPath;
+            return this.address + "#marketplace." + functionPath;
         }
     }
 
@@ -100,7 +100,7 @@ namespace Thirdweb
         }
 
         private string getRoute(string functionPath) {
-            return this.address + ".marketplace.direct." + functionPath;
+            return this.address + "#marketplace.direct." + functionPath;
         }
     }
 
@@ -152,7 +152,7 @@ namespace Thirdweb
         }
 
         private string getRoute(string functionPath) {
-            return this.address + ".marketplace.auction." + functionPath;
+            return this.address + "#marketplace.auction." + functionPath;
         }
     }
 }
