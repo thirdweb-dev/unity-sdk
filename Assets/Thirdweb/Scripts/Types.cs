@@ -160,4 +160,15 @@ namespace Thirdweb
         public Receipt receipt;
         public string id;
     }
+
+    [System.Serializable]
+    public struct TransactionRequest
+    {
+        public string from;
+        public string to;
+        public string data;
+        public string value;
+        public string gasLimit;
+        public string gasPrice;
+    }
 }

@@ -8,6 +8,7 @@ public class SDKTest : MonoBehaviour
     private ThirdwebSDK sdk;
     private int count;
     public TMP_Text loginButton;
+    public TMP_Text balanceText;
     public TMP_Text resultText;
 
     void Start()
@@ -21,10 +22,23 @@ public class SDKTest : MonoBehaviour
     public async void OnLoginCLick()
     {
         Debug.Log("Login clicked");
-        
         loginButton.text = "Connecting...";
-        string address = await sdk.Connect();
+        string address = await sdk.wallet.Connect();
         loginButton.text = "Connected as: " + address.Substring(0, 6) + "...";
+    }
+
+    public async void OnBalanceClick()
+    {
+        balanceText.text = "Loading...";
+        CurrencyValue balance = await sdk.wallet.GetBalance();
+        balanceText.text = "Balance: " + balance.displayValue.Substring(0,3) + " " + balance.symbol;
+    }
+
+    public async void OnSignClick()
+    {
+        resultText.text = "Signing...";
+        string sig = await sdk.wallet.Sign("Hello from Unity");
+        resultText.text = "Sig: " + sig.Substring(0, 6) + "...";
     }
 
     public async void GetERC721()

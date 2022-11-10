@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace Thirdweb
 {
     /// <summary>
@@ -36,16 +34,13 @@ namespace Thirdweb
         }
 
         private string chainOrRPC;
+        public Wallet wallet;
 
         public ThirdwebSDK(string chainOrRPC, Options options = new Options()) 
         {
             this.chainOrRPC = chainOrRPC;
+            this.wallet = new Wallet();
             Bridge.Initialize(chainOrRPC, options);
-        }
-
-        public Task<string> Connect() 
-        {
-            return Bridge.Connect();
         }
 
         public Contract GetContract(string address)

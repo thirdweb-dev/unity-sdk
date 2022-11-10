@@ -8,7 +8,8 @@ namespace Thirdweb
     public class Utils
     {
 
-        public static string AddressZero = "0x0000000000000000000000000000000000000000";
+        public const string AddressZero = "0x0000000000000000000000000000000000000000";
+        public const string NativeTokenAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 
         public static string[] ToJsonStringArray(params object[] args) {
             List<string> stringArgs = new List<string>();
