@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Thirdweb
@@ -26,19 +27,19 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<NFT>(getRoute("get"), Utils.ToJsonStringArray(tokenId));
         }
 
-        public async Task<NFT[]> GetAll()
+        public async Task<List<NFT>> GetAll()
         {
-            return await Bridge.InvokeRoute<NFT[]>(getRoute("getAll"), new string[] { });
+            return await Bridge.InvokeRoute<List<NFT>>(getRoute("getAll"), new string[] { });
         }
 
-        public async Task<NFT[]> GetOwned()
+        public async Task<List<NFT>> GetOwned()
         {
-            return await Bridge.InvokeRoute<NFT[]>(getRoute("getOwned"), new string[] { });
+            return await Bridge.InvokeRoute<List<NFT>>(getRoute("getOwned"), new string[] { });
         }
 
-        public async Task<NFT[]> GetOwned(string address)
+        public async Task<List<NFT>> GetOwned(string address)
         {
-            return await Bridge.InvokeRoute<NFT[]>(getRoute("getOwned"), Utils.ToJsonStringArray(address));
+            return await Bridge.InvokeRoute<List<NFT>>(getRoute("getOwned"), Utils.ToJsonStringArray(address));
         }
 
         public async Task<string> Balance(string tokenId)

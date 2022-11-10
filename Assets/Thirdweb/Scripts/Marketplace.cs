@@ -1,0 +1,158 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace Thirdweb
+{
+    /// <summary>
+    /// Interact with a Marketplace contract.
+    /// </summary>
+    public class Marketplace
+    {
+        public string chain;
+        public string address;
+        public MarketplaceDirect direct;
+        public MarketplaceAuction auction;
+
+        public Marketplace(string chain, string address)
+        {
+            this.chain = chain;
+            this.address = address;
+            this.direct = new MarketplaceDirect(chain, address);
+            this.auction = new MarketplaceAuction(chain, address);
+        }
+
+        /// READ FUNCTIONS
+
+        public async Task<Listing> GetListing(string listingId)
+        {
+            return await Bridge.InvokeRoute<Listing>(getRoute("getListing"), Utils.ToJsonStringArray(listingId));
+        }
+
+        public async Task<List<Listing>> GetAllListings(MarketplaceFilter filter = null)
+        {
+            return await Bridge.InvokeRoute<List<Listing>>(getRoute("getAllListings"), Utils.ToJsonStringArray(filter));
+        }
+
+        public async Task<List<Listing>> GetActiveListings(MarketplaceFilter filter = null)
+        {
+            return await Bridge.InvokeRoute<List<Listing>>(getRoute("getActiveListings"), Utils.ToJsonStringArray(filter));
+        }
+
+        public async Task<List<Offer>> GetOffers(string listingId)
+        {
+            return await Bridge.InvokeRoute<List<Offer>>(getRoute("getOffers"), Utils.ToJsonStringArray(listingId));
+        }
+
+        /// WRITE FUNCTIONS
+
+        public async Task<TransactionResult> BuyListing(string listingId, int? quantityDesired = null, string receiverAddress = null)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("buyoutListing"), Utils.ToJsonStringArray(listingId, quantityDesired, receiverAddress));
+        }
+
+        public async Task<TransactionResult> MakeOffer(string listingId, string pricePerToken, int? quantity = null)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("makeOffer"), Utils.ToJsonStringArray(listingId, pricePerToken, quantity));
+        }
+
+        /// PRIVATE
+
+        private string getRoute(string functionPath) {
+            return this.address + ".marketplace." + functionPath;
+        }
+    }
+
+    // DIRECT
+
+    public class MarketplaceDirect {
+        public string chain;
+        public string address;
+
+        public MarketplaceDirect(string chain, string address)
+        {
+            this.chain = chain;
+            this.address = address;
+        }
+
+        public async Task<DirectListing> GetListing(string listingId)
+        {
+            return await Bridge.InvokeRoute<DirectListing>(getRoute("getListing"), Utils.ToJsonStringArray(listingId));
+        }
+
+        public async Task<Offer> GetActiveOffer(string listingId, string address)
+        {
+            return await Bridge.InvokeRoute<Offer>(getRoute("getActiveOffer"), Utils.ToJsonStringArray(listingId));
+        }
+
+        public async Task<TransactionResult> CreateListing(NewDirectListing listing)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("createListing"), Utils.ToJsonStringArray(listing));
+        }
+
+        public async Task<TransactionResult> AcceptOffer(NewDirectListing listing, string addressOfOfferor)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("acceptOffer"), Utils.ToJsonStringArray(listing, addressOfOfferor));
+        }
+
+        public async Task<TransactionResult> CancelListing(string listingId)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("cancelListing"), Utils.ToJsonStringArray(listingId));
+        }
+
+        private string getRoute(string functionPath) {
+            return this.address + ".marketplace.direct." + functionPath;
+        }
+    }
+
+    // AUCTION
+
+    public class MarketplaceAuction {
+        public string chain;
+        public string address;
+
+        public MarketplaceAuction(string chain, string address)
+        {
+            this.chain = chain;
+            this.address = address;
+        }
+
+        public async Task<AuctionListing> GetListing(string listingId)
+        {
+            return await Bridge.InvokeRoute<AuctionListing>(getRoute("getListing"), Utils.ToJsonStringArray(listingId));
+        }
+
+        public async Task<Offer> GetWinningBid(string listingId)
+        {
+            return await Bridge.InvokeRoute<Offer>(getRoute("getWinningBid"), Utils.ToJsonStringArray(listingId));
+        }
+
+        public async Task<CurrencyValue> GetMinimumNextBid(string listingId)
+        {
+            return await Bridge.InvokeRoute<CurrencyValue>(getRoute("getMinimumNextBid"), Utils.ToJsonStringArray(listingId));
+        }
+
+        public async Task<string> GetWinner(string listingId)
+        {
+            return await Bridge.InvokeRoute<string>(getRoute("getWinner"), Utils.ToJsonStringArray(listingId));
+        }
+
+        public async Task<TransactionResult> CreateListing(NewAuctionListing listing)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("createListing"), Utils.ToJsonStringArray(listing));
+        }
+
+        public async Task<TransactionResult> CancelListing(string listingId)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("cancelListing"), Utils.ToJsonStringArray(listingId));
+        }
+
+        public async Task<TransactionResult> ExecuteSale(string listingId)
+        {
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("executeSale"), Utils.ToJsonStringArray(listingId));
+        }
+
+        private string getRoute(string functionPath) {
+            return this.address + ".marketplace.auction." + functionPath;
+        }
+    }
+}

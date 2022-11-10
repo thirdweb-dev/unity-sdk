@@ -1,6 +1,7 @@
 using UnityEngine;
 using Thirdweb;
 using TMPro;
+using System.Collections.Generic;
 
 public class SDKTest : MonoBehaviour
 {
@@ -30,12 +31,20 @@ public class SDKTest : MonoBehaviour
     {
         var contract = sdk.GetContract("0x2e01763fA0e15e07294D74B63cE4b526B321E389"); // NFT Drop
         Debug.Log("Button clicked");
-        count++;
-        resultText.text = "Fetching Token: " + count;
-        NFT result = await contract.ERC721.Get(count.ToString());
-        Debug.Log("name: " + result.metadata.name);
-        Debug.Log("owner: " + result.owner);
-        resultText.text = result.metadata.name;
+        // fetch single NFT
+        // count++;
+        // resultText.text = "Fetching Token: " + count;
+        // NFT result = await contract.ERC721.Get(count.ToString());
+        // Debug.Log("name: " + result.metadata.name);
+        // Debug.Log("owner: " + result.owner);
+        // resultText.text = result.metadata.name;
+
+        // fetch all NFTs
+        resultText.text = "Fetching all NFTs";
+        List<NFT> result = await contract.ERC721.GetAll();
+        resultText.text = "Fetched " + result.Count + " NFTs";
+
+        // custom function call
         // int supply = await contract.ERC721.TotalClaimedSupply();
         // fetchButton.text = supply.ToString();
         // string uri = await contract.Read<string>("tokenURI", count);
