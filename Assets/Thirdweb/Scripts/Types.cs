@@ -155,10 +155,14 @@ namespace Thirdweb
     }
 
     [System.Serializable]
-    public struct TransactionResult
+    public class TransactionResult
     {
         public Receipt receipt;
         public string id;
+
+        public bool isSuccessful() {
+            return receipt.transactionHash != null;
+        }
     }
 
     [System.Serializable]

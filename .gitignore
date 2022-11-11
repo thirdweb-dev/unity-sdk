@@ -64,6 +64,7 @@ Assets/StreamingAssets/
 
 # Crashlytics generated file
 crashlytics-build.properties
-test_demo/
 .DS_Store
+
+build/
 
