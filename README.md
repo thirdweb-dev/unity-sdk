@@ -20,7 +20,7 @@
 
 ## Installation
 
-Head over to the [releases](/releases) page and download the latest `.unitypackage` file.
+Head over to the [releases](https://github.com/thirdweb-dev/unity-sdk/releases) page and download the latest `.unitypackage` file.
 
 Drag and drop the file into your project.
 
@@ -40,6 +40,10 @@ var sdk = new ThirdwebSDK("goerli");
 
 // connect a wallet via browser extension
 var walletAddress = await sdk.wallet.Connect();
+
+// interact with the wallet
+CurrencyValue balance = await sdk.wallet.GetBalance();
+var signature = await sdk.wallet.Sign("message to sign");
 
 // get an instance of a deployed contract (no ABI requried!)
 var contract = sdk.GetContract("0x...");
