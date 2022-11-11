@@ -67,4 +67,5 @@ crashlytics-build.properties
 .DS_Store
 
 build/
+releases/
 

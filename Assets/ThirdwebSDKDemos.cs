@@ -101,10 +101,11 @@ public class ThirdwebSDKDemos : MonoBehaviour
         
         // sig mint
         var contract = sdk.GetContract("0x8bFD00BD1D3A2778BDA12AFddE5E65Cca95082DF"); // NFT Collection
-        var meta = new NFTMetadata();
-        meta.name = "Unity NFT";
-        meta.description = "Minted From Unity (signature)";
-        meta.image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc";
+        var meta = new NFTMetadata() {
+            name = "Unity NFT",
+            description = "Minted From Unity (signature)",
+            image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc"
+        };
         string connectedAddress = await sdk.wallet.GetAddress();
         var payload = new ERC721MintPayload(connectedAddress, meta);
         var p = await contract.ERC721.signature.Generate(payload); // typically generated on the backend
