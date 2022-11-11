@@ -57,6 +57,10 @@ namespace Thirdweb
             return result;
         }
 
+        public static void SwitchNetwork(int chainId) {
+            ThirdwebSwitchNetwork(chainId);
+        }
+
         public static async Task<T> InvokeRoute<T>(string route, string[] body)
         {
             var msg = Utils.ToJson(new RequestMessageBody(body));
@@ -64,9 +68,17 @@ namespace Thirdweb
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
             ThirdwebInvoke(taskId, route, msg, jsCallback);
-            string result = await task.Task;
-            // Debug.LogFormat("Result from {0}: {1}", route, result);
-            return JsonConvert.DeserializeObject<Result<T>>(result).result;
+            try 
+            {
+                string result = await task.Task;
+                // Debug.LogFormat("Result from {0}: {1}", route, result);
+                return JsonConvert.DeserializeObject<Result<T>>(result).result;
+            } 
+            catch (Exception)
+            {
+                // Debug.LogFormat("Error from {0}: {1}", route, e);
+                return default(T);
+            }
         }
 
         [DllImport("__Internal")]
@@ -75,5 +87,7 @@ namespace Thirdweb
         private static extern string ThirdwebInitialize(string chainOrRPC, string options);
         [DllImport("__Internal")]
         private static extern string ThirdwebConnect(string taskId, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebSwitchNetwork(int chainId);
     }
 }

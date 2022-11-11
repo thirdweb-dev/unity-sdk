@@ -54,6 +54,9 @@ var plugin = {
         dynCall_viii(cb, idPtr, null, buffer);
       });
   },
+  ThirdwebSwitchNetwork: async function (chainId) {
+    await window.bridge.switchNetwork(chainId);
+  },
 };
 
 mergeInto(LibraryManager.library, plugin);

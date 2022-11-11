@@ -27,6 +27,26 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<string>(getRoute("getAddress"), new string[] { });
         }
 
+        public async Task<bool> IsConnected()
+        {
+            return await Bridge.InvokeRoute<bool>(getRoute("isConnected"), new string[] { });
+        }
+
+        public async Task<int> GetChainId()
+        {
+            return await Bridge.InvokeRoute<int>(getRoute("getChainId"), new string[] { });
+        }
+
+        public async Task<bool> IsOnCorrectChain()
+        {
+            return await Bridge.InvokeRoute<bool>(getRoute("isOnCorrectChain"), new string[] { });
+        }
+
+        public void SwitchNetwork(int chainId)
+        {
+            Bridge.SwitchNetwork(chainId);
+        }
+
         public async Task<TransactionResult> Transfer(string to, string amount, string currencyAddress = Utils.NativeTokenAddress)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, amount, currencyAddress));

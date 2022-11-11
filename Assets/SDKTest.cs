@@ -25,6 +25,11 @@ public class SDKTest : MonoBehaviour
         loginButton.text = "Connecting...";
         string address = await sdk.wallet.Connect();
         loginButton.text = "Connected as: " + address.Substring(0, 6) + "...";
+        int chain = await sdk.wallet.GetChainId();
+        Debug.Log("chain: " + chain);
+        if (chain != 5) {
+            sdk.wallet.SwitchNetwork(5);
+        }
     }
 
     public async void OnBalanceClick()
