@@ -11,14 +11,14 @@
 <p align="center"><strong>Best in class Web3 SDK for Unity games</strong></p>
 <br />
 
-## Supported platforms
+# Supported platforms
 
 - [x] WebGL
 - [ ] Desktop (coming soon)
 - [ ] Android (coming soon)
 - [ ] iOS (coming soon)
 
-## Installation
+# Installation
 
 Head over to the [releases](https://github.com/thirdweb-dev/unity-sdk/releases) page and download the latest `.unitypackage` file.
 
@@ -26,13 +26,17 @@ Drag and drop the file into your project.
 
 The package comes with a sample Scene showcasing the different capabilities of the SDK.
 
-## Build
+# Build
 
 - Open your `Build settings`, select `WebGL` as the target platform.
 - Open `Player settings` > `Resolution and Presentation` and under `WebGLTemplate` choose `Thirdweb`.
 - Save and click `Build and Run` to test out your game in a browser.
 
-## Usage
+Note that in order to communicate with the SDK, you need to `Build and run` your project so it runs in a browser context.
+
+#### _**Interacting with the SDK within the Unity Editor is NOT supported.**_
+
+# Usage
 
 ```csharp
 // instantiate a read only SDK on any EVM chain
