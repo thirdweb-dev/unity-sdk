@@ -41,7 +41,11 @@ public class ThirdwebSDKDemos : MonoBehaviour
     {
         resultText.text = "Signing...";
         var data = await sdk.wallet.Authenticate("example.com");
-        resultText.text = "Sig: " + data.payload.address.Substring(0, 6) + "...";
+        if (data.payload.address != null) {
+            resultText.text = "Sig: " + data.payload.address.Substring(0, 6) + "...";
+        } else {
+            resultText.text = "Failed to authenticate";
+        }
     }
 
     public async void GetERC721()
@@ -149,7 +153,6 @@ public class ThirdwebSDKDemos : MonoBehaviour
         // Mint
         var contract = sdk.GetContract("0xB4870B21f80223696b68798a755478C86ce349bE"); // Token
         var result = await contract.ERC20.Mint("1.2");
-        Debug.Log("result: " + result);
         if (result.isSuccessful()) {
             resultText.text = "mint successful";
         } else {

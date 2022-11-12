@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace Thirdweb
 {
@@ -45,10 +46,18 @@ namespace Thirdweb
         }
 
         public static void Initialize(string chainOrRPC, ThirdwebSDK.Options options) {
+            if (Application.isEditor) {
+                Debug.LogWarning("Initializing the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                return;
+            }
             ThirdwebInitialize(chainOrRPC, Utils.ToJson(options));
         }
 
         public static async Task<string> Connect() {
+            if (Application.isEditor) {
+                Debug.LogWarning("Connecting wallets is not supported in the editor. Please build and run the app instead.");
+                return "0x0000000000000000000000000000000000000000";
+            }
             var task = new TaskCompletionSource<string>();
             string taskId = Guid.NewGuid().ToString();
             taskMap[taskId] = task;
@@ -58,11 +67,19 @@ namespace Thirdweb
         }
 
         public static void SwitchNetwork(int chainId) {
+            if (Application.isEditor) {
+                Debug.LogWarning("Switching networks is not supported in the editor. Please build and run the app instead.");
+                return;
+            }
             ThirdwebSwitchNetwork(chainId);
         }
 
         public static async Task<T> InvokeRoute<T>(string route, string[] body)
         {
+            if (Application.isEditor) {
+                Debug.LogWarning("Interacting with the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                return default(T);
+            }
             var msg = Utils.ToJson(new RequestMessageBody(body));
             string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
