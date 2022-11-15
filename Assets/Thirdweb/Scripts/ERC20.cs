@@ -10,6 +10,9 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        /// <summary>
+        /// Handle signature minting functionality
+        /// </summary>
         public ERC20Signature signature;
 
         public ERC20(string chain, string address)
@@ -19,76 +22,115 @@ namespace Thirdweb
             this.signature = new ERC20Signature(chain, address);
         }
 
-        /// READ FUNCTIONS
+        // READ FUNCTIONS
 
+        /// <summary>
+        /// Get the currency information
+        /// </summary>
         public async Task<Currency> Get()
         {
             return await Bridge.InvokeRoute<Currency>(getRoute("get"), new string[] { });
         }
 
+        /// <summary>
+        /// Get the balance of the connected wallet
+        /// </summary>
         public async Task<CurrencyValue> Balance()
         {
             return await Bridge.InvokeRoute<CurrencyValue>(getRoute("balance"), new string[] { });
         }
 
+        /// <summary>
+        /// Get the balance of the specified wallet
+        /// </summary>
         public async Task<CurrencyValue> BalanceOf(string address)
         {
             return await Bridge.InvokeRoute<CurrencyValue>(getRoute("balanceOf"), Utils.ToJsonStringArray(address));
         }
 
+        /// <summary>
+        /// Get how much allowance the given address is allowed to spend on behalf of the connected wallet
+        /// </summary>
         public async Task<string> Allowance(string spender)
         {
             return await Bridge.InvokeRoute<string>(getRoute("allowance"), Utils.ToJsonStringArray(spender));
         }
 
+        /// <summary>
+        /// Get how much allowance the given address is allowed to spend on behalf of the specified wallet
+        /// </summary>
         public async Task<string> AllowanceOf(string owner, string spender)
         {
             return await Bridge.InvokeRoute<string>(getRoute("allowanceOf"), Utils.ToJsonStringArray(owner, spender));
         }
 
+        /// <summary>
+        /// Get the total supply in circulation
+        /// </summary>
         public async Task<CurrencyValue> TotalSupply()
         {
             return await Bridge.InvokeRoute<CurrencyValue>(getRoute("totalSupply"), new string[] { });
         }
 
-        /// WRITE FUNCTIONS
+        // WRITE FUNCTIONS
 
+        /// <summary>
+        /// Set how much allowance the given address is allowed to spend on behalf of the connected wallet
+        /// </summary>
         public async Task<TransactionResult> SetAllowance(string spender, bool amount)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("setAllowance"), Utils.ToJsonStringArray(spender, amount));
         }
 
+        /// <summary>
+        /// Transfer a given amount of currency to another wallet
+        /// </summary>
         public async Task<TransactionResult> Transfer(string to, string amount)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, amount));
         }
 
+        /// <summary>
+        /// Burn a given amount of currency
+        /// </summary>
         public async Task<TransactionResult> Burn(string amount)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("burn"), Utils.ToJsonStringArray(amount));
         }
 
+        /// <summary>
+        /// Claim a given amount of currency for compatible drop contracts
+        /// </summary>
         public async Task<TransactionResult[]> Claim(string amount)
         {
             return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claim"), Utils.ToJsonStringArray(amount));
         }
 
+        /// <summary>
+        /// Claim a given amount of currency to a given destination wallet for compatible drop contracts
+        /// </summary>
         public async Task<TransactionResult[]> ClaimTo(string address, int amount)
         {
             return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claimTo"), Utils.ToJsonStringArray(address, amount));
         }
 
+        /// <summary>
+        /// Mint a given amount of currency
+        /// </summary>
         public async Task<TransactionResult> Mint(string amount)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(amount));
         }
 
+        /// <summary>
+        /// Mint a given amount of currency to a given destination wallet
+        /// </summary>
         public async Task<TransactionResult> MintTo(string address, string amount)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, amount));
         }
 
-        /// PRIVATE
+        // PRIVATE
 
         private string getRoute(string functionPath) {
             return this.address + ".erc20." + functionPath;
@@ -153,16 +195,25 @@ namespace Thirdweb
             this.address = address;
         }
 
+        /// <summary>
+        /// Generate a signed mintable payload. Requires minting permission.
+        /// </summary>
         public async Task<ERC20SignedPayload> Generate(ERC20MintPayload payloadToSign)
         {
             return await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
         }
 
+        /// <summary>
+        /// Verify that a signed mintable payload is valid
+        /// </summary>
         public async Task<bool> Verify(ERC20SignedPayload signedPayload)
         {
             return await Bridge.InvokeRoute<bool>(getRoute("verify"), Utils.ToJsonStringArray(signedPayload));
         }
 
+        /// <summary>
+        /// Mint a signed mintable payload
+        /// </summary>
         public async Task<TransactionResult> Mint(ERC20SignedPayload signedPayload)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));

@@ -5,12 +5,18 @@ namespace Thirdweb
     /// </summary>
     public class ThirdwebSDK
     {
+        /// <summary>
+        /// Options for the thirdweb SDK.
+        /// </summary>
         [System.Serializable]
         public struct Options
         {
             public GaslessOptions? gasless;
         }
 
+        /// <summary>
+        /// Gasless configuration options.
+        /// </summary>
         [System.Serializable]
         public struct GaslessOptions
         {
@@ -19,6 +25,9 @@ namespace Thirdweb
             public bool experimentalChainlessSupport;
         }
 
+        /// <summary>
+        /// OpenZeppelin Defender Gasless configuration options.
+        /// </summary>
         [System.Serializable]
         public struct OZDefenderOptions
         {
@@ -26,6 +35,9 @@ namespace Thirdweb
             public string relayerForwarderAddress;
         }
 
+        /// <summary>
+        /// Biconomy Gasless configuration options.
+        /// </summary>
         [System.Serializable]
         public struct BiconomyOptions
         {
@@ -34,9 +46,21 @@ namespace Thirdweb
         }
 
         private string chainOrRPC;
+
+        /// <summary>
+        /// Connect and Interact with a user's wallet
+        /// </summary>
         public Wallet wallet;
+        /// <summary>
+        /// Deploy new contracts
+        /// </summary>
         public Deployer deployer;
 
+        /// <summary>
+        /// Create an instance of the thirdweb SDK. Requires a webGL browser context.
+        /// </summary>
+        /// <param name="chainOrRPC">The chain name or RPC url to connect to</param>
+        /// <param name="options">Configuration options</param>
         public ThirdwebSDK(string chainOrRPC, Options options = new Options()) 
         {
             this.chainOrRPC = chainOrRPC;
@@ -45,6 +69,11 @@ namespace Thirdweb
             Bridge.Initialize(chainOrRPC, options);
         }
 
+        /// <summary>
+        /// Get an instance of a deployed contract.
+        /// </summary>
+        /// <param name="address">The contract address</param>
+        /// <returns>A contract instance</returns>
         public Contract GetContract(string address)
         {
             return new Contract(this.chainOrRPC, address);

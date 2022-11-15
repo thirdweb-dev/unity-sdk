@@ -9,9 +9,21 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        /// <summary>
+        /// Call any ERC20 supported functions
+        /// </summary>
         public ERC20 ERC20;
+        /// <summary>
+        /// Call any ERC721 supported functions
+        /// </summary>
         public ERC721 ERC721;
+        /// <summary>
+        /// Call any ERC1155 supported functions
+        /// </summary>
         public ERC1155 ERC1155;
+        /// <summary>
+        /// Call any Marketplace supported functions
+        /// </summary>
         public Marketplace marketplace;
 
         public Contract(string chain, string address) {
@@ -23,6 +35,12 @@ namespace Thirdweb
             this.marketplace = new Marketplace(chain, address);
         }
 
+        /// <summary>
+        /// Read data from a contract
+        /// </summary>
+        /// <param name="functionName">The contract function name to call</param>
+        /// <param name="args">The function arguments. Structs and Lists will get serialized automatically</param>
+        /// <returns>The data deserialized to the given typed</returns>
         public async Task<T> Read<T>(string functionName, params object[] args)
         {
             string [] argsEncoded = new string[args.Length + 1];
@@ -31,6 +49,12 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<T>(getRoute("call"), argsEncoded);
         }
 
+        /// <summary>
+        /// Execute a write transaction on a contract
+        /// </summary>
+        /// <param name="functionName">The contract function name to call</param>
+        /// <param name="args">The function arguments. Structs and Lists will get serialized automatically</param>
+        /// <returns>The transaction receipt</returns>
         public async Task<TransactionResult> Write(string functionName, params object[] args)
         {
             string [] argsEncoded = new string[args.Length + 1];
