@@ -5,15 +5,24 @@ using System.Threading.Tasks;
 namespace Thirdweb
 {
     /// <summary>
-    /// Interact with any <c>ERC721</c> compatible contract.
+    /// Interact with any ERC721 compatible contract.
     /// </summary>
     public class ERC721
     {
         public string chain;
         public string address;
+        /// <summary>
+        /// Handle signature minting functionality
+        /// </summary>
         public ERC721Signature signature;
+        /// <summary>
+        /// Query claim conditions
+        /// </summary>
         public ERC721ClaimConditions claimConditions;
 
+        /// <summary>
+        /// Interact with any ERC721 compatible contract.
+        /// </summary>
         public ERC721(string chain, string address)
         {
             this.chain = chain;
@@ -22,96 +31,150 @@ namespace Thirdweb
             this.claimConditions = new ERC721ClaimConditions(chain, address);
         }
 
-        /// READ FUNCTIONS
+        // READ FUNCTIONS
 
+        /// <summary>
+        /// Get a NFT in this contract by its ID
+        /// </summary>
         public async Task<NFT> Get(string tokenId)
         {
             return await Bridge.InvokeRoute<NFT>(getRoute("get"), Utils.ToJsonStringArray(tokenId));
         }
 
+        /// <summary>
+        /// Get a all NFTs in this contract
+        /// </summary>
         public async Task<List<NFT>> GetAll()
         {
             return await Bridge.InvokeRoute<List<NFT>>(getRoute("getAll"), new string[] { });
         }
 
-        public async Task<List<NFT>> GetOwned()
-        {
-            return await Bridge.InvokeRoute<List<NFT>>(getRoute("getOwned"), new string[] { });
-        }
-
-        public async Task<List<NFT>> GetOwned(string address)
+        /// <summary>
+        /// Get a all NFTs owned by the connected wallet
+        /// </summary>
+        /// <param name="address">Optional wallet address to query NFTs of</param>
+        public async Task<List<NFT>> GetOwned(string address = null)
         {
             return await Bridge.InvokeRoute<List<NFT>>(getRoute("getOwned"), Utils.ToJsonStringArray(address));
         }
 
+        /// <summary>
+        /// Get the owner of a NFT in this contract
+        /// </summary>
         public async Task<string> OwnerOf(string tokenId)
         {
             return await Bridge.InvokeRoute<string>(getRoute("ownerOf"), Utils.ToJsonStringArray(tokenId));
         }
 
+        /// <summary>
+        /// Get the balance of NFTs in this contract for the connected wallet
+        /// </summary>
         public async Task<string> Balance()
         {
             return await Bridge.InvokeRoute<string>(getRoute("balance"), new string[] { });
         }
 
+        /// <summary>
+        /// Get the balance of NFTs in this contract for the given wallet address
+        /// </summary>
         public async Task<string> BalanceOf(string address)
         {
             return await Bridge.InvokeRoute<string>(getRoute("balanceOf"), Utils.ToJsonStringArray(address));
         }
 
-        public async Task<string> IsApprovedForAll(string address, string approvedContract)
+        /// <summary>
+        /// Check whether the given contract address has been approved to transfer NFTs on behalf of the given wallet address
+        /// </summary>
+        /// <param name="address">The wallet address</param>
+        /// <param name="contractAddress">The contract address to check approval for</param>
+        public async Task<bool> IsApprovedForAll(string address, string approvedContract)
         {
-            return await Bridge.InvokeRoute<string>(getRoute("isApproved"), Utils.ToJsonStringArray(address, approvedContract));
+            return await Bridge.InvokeRoute<bool>(getRoute("isApproved"), Utils.ToJsonStringArray(address, approvedContract));
         }
 
+        /// <summary>
+        /// Get the total suppply in circulation
+        /// </summary>
+        public async Task<int> TotalCount()
+        {
+            return await Bridge.InvokeRoute<int>(getRoute("totalCount"), new string[] { });
+        }
+
+        /// <summary>
+        /// Get the total claimed suppply for Drop contracts
+        /// </summary>
         public async Task<int> TotalClaimedSupply()
         {
             return await Bridge.InvokeRoute<int>(getRoute("totalClaimedSupply"), new string[] { });
         }
 
+        /// <summary>
+        /// Get the total unclaimed suppply for Drop contracts
+        /// </summary>
         public async Task<int> TotalUnclaimedSupply()
         {
             return await Bridge.InvokeRoute<int>(getRoute("totalUnclaimedSupply"), new string[] { });
         }
 
-        /// WRITE FUNCTIONS
+        // WRITE FUNCTIONS
 
+        /// <summary>
+        /// Set approval to the given contract to transfer NFTs on behalf of the connected wallet
+        /// </summary>
         public async Task<TransactionResult> SetApprovalForAll(string contractToApprove, bool approved)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("isApproved"), Utils.ToJsonStringArray(contractToApprove, approved));
         }
 
+        /// <summary>
+        /// Transfer a given NFT to the given address
+        /// </summary>
         public async Task<TransactionResult> Transfer(string to, string tokenId)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, tokenId));
         }
 
+        /// <summary>
+        /// Burn a given NFT
+        /// </summary>
         public async Task<TransactionResult> Burn(string tokenId)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("burn"), Utils.ToJsonStringArray(tokenId));
         }
 
+        /// <summary>
+        /// Claim NFTs from a Drop contract
+        /// </summary>
         public async Task<TransactionResult[]> Claim(int quantity)
         {
             return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claim"), Utils.ToJsonStringArray(quantity));
         }
 
+        /// <summary>
+        /// Claim NFTs from a Drop contract and send them to the given address
+        /// </summary>
         public async Task<TransactionResult[]> ClaimTo(string address, int quantity)
         {
             return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claimTo"), Utils.ToJsonStringArray(address, quantity));
         }
 
+        /// <summary>
+        /// Mint an NFT (requires minting permission)
+        /// </summary>
         public async Task<TransactionResult> Mint(NFTMetadata nft)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(nft));
         }
 
+        /// <summary>
+        /// Mint an NFT and send it to the given wallet (requires minting permission)
+        /// </summary>
         public async Task<TransactionResult> MintTo(string address, NFTMetadata nft)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, nft));
         }
 
-        /// PRIVATE
+        // PRIVATE
 
         private string getRoute(string functionPath) {
             return this.address + ".erc721." + functionPath;

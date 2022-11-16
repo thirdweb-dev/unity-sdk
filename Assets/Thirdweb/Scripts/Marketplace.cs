@@ -10,9 +10,18 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        /// <summary>
+        /// Handle direct listings
+        /// </summary>
         public MarketplaceDirect direct;
+        /// <summary>
+        /// Handle auctions
+        /// </summary>
         public MarketplaceAuction auction;
 
+        /// <summary>
+        /// Interact with a Marketplace contract.
+        /// </summary>
         public Marketplace(string chain, string address)
         {
             this.chain = chain;
@@ -23,21 +32,33 @@ namespace Thirdweb
 
         /// READ FUNCTIONS
 
+        /// <summary>
+        /// Get a listing information
+        /// </summary>
         public async Task<Listing> GetListing(string listingId)
         {
             return await Bridge.InvokeRoute<Listing>(getRoute("getListing"), Utils.ToJsonStringArray(listingId));
         }
 
+        /// <summary>
+        /// Get all listings in this marketplace (including non-buyable ones)
+        /// </summary>
         public async Task<List<Listing>> GetAllListings(MarketplaceFilter filter = null)
         {
             return await Bridge.InvokeRoute<List<Listing>>(getRoute("getAllListings"), Utils.ToJsonStringArray(filter));
         }
 
+        /// <summary>
+        /// Get active listings in this marketplace (only ones that can be bought)
+        /// </summary>
         public async Task<List<Listing>> GetActiveListings(MarketplaceFilter filter = null)
         {
             return await Bridge.InvokeRoute<List<Listing>>(getRoute("getActiveListings"), Utils.ToJsonStringArray(filter));
         }
 
+        /// <summary>
+        /// Get all offers on a listing
+        /// </summary>
         public async Task<List<Offer>> GetOffers(string listingId)
         {
             return await Bridge.InvokeRoute<List<Offer>>(getRoute("getOffers"), Utils.ToJsonStringArray(listingId));
@@ -45,11 +66,17 @@ namespace Thirdweb
 
         /// WRITE FUNCTIONS
 
+        /// <summary>
+        /// Buy a listing
+        /// </summary>
         public async Task<TransactionResult> BuyListing(string listingId, int quantityDesired, string receiverAddress = null)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("buyoutListing"), Utils.ToJsonStringArray(listingId, quantityDesired, receiverAddress));
         }
 
+        /// <summary>
+        /// Make an offer on a listing
+        /// </summary>
         public async Task<TransactionResult> MakeOffer(string listingId, string pricePerToken, int? quantity = null)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("makeOffer"), Utils.ToJsonStringArray(listingId, pricePerToken, quantity));

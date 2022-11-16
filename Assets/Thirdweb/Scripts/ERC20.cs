@@ -15,7 +15,7 @@ namespace Thirdweb
         /// </summary>
         public ERC20Signature signature;
         /// <summary>
-        /// Fetch claim conditions for a given ERC20 drop contract
+        /// Query claim conditions
         /// </summary>
         public ERC20ClaimConditions claimConditions;
 
