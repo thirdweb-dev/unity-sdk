@@ -12,12 +12,14 @@ namespace Thirdweb
         public string chain;
         public string address;
         public ERC1155Signature signature;
+        public ERC1155ClaimConditions claimConditions;
 
         public ERC1155(string chain, string address)
         {
             this.chain = chain;
             this.address = address;
             this.signature = new ERC1155Signature(chain, address);
+            this.claimConditions = new ERC1155ClaimConditions(chain, address);
         }
 
         /// READ FUNCTIONS
@@ -118,6 +120,57 @@ namespace Thirdweb
 
         private string getRoute(string functionPath) {
             return this.address + ".erc1155." + functionPath;
+        }
+    }
+
+     /// <summary>
+    /// Fetch claim conditions for a given ERC1155 drop contract
+    /// </summary>
+    public class ERC1155ClaimConditions
+    {
+        public string chain;
+        public string address;
+
+        public ERC1155ClaimConditions(string chain, string address)
+        {
+            this.chain = chain;
+            this.address = address;
+        }
+
+        /// <summary>
+        /// Get the active claim condition
+        /// </summary>
+        public async Task<ClaimConditions> GetActive(string tokenId)
+        {
+            return await Bridge.InvokeRoute<ClaimConditions>(getRoute("getActive"), Utils.ToJsonStringArray(tokenId));
+        }
+
+        /// <summary>
+        /// Check whether the connected wallet is eligible to claim
+        /// </summary>
+        public async Task<bool> CanClaim(string tokenId, int quantity, string addressToCheck = null)
+        {
+            return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(tokenId, quantity, addressToCheck));
+        }
+
+        /// <summary>
+        /// Get the reasons why the connected wallet is not eligible to claim
+        /// </summary>
+        public async Task<string[]> GetIneligibilityReasons(string tokenId, int quantity, string addressToCheck = null)
+        {
+            return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(tokenId, quantity, addressToCheck));
+        }
+
+        /// <summary>
+        /// Get the special values set in the allowlist for the given wallet
+        /// </summary>
+        public async Task<bool> GetClaimerProofs(string tokenId, string claimerAddress)
+        {
+            return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+        }
+
+        private string getRoute(string functionPath) {
+            return this.address + ".erc1155.claimConditions." + functionPath;
         }
     }
 

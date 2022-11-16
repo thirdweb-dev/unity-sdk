@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace Thirdweb
 {
     /// <summary>
-    /// Interact with any <c>ERC20</c> compatible contract.
+    /// Interact with any ERC20 compatible contract.
     /// </summary>
     public class ERC20
     {
@@ -14,12 +14,20 @@ namespace Thirdweb
         /// Handle signature minting functionality
         /// </summary>
         public ERC20Signature signature;
+        /// <summary>
+        /// Fetch claim conditions for a given ERC20 drop contract
+        /// </summary>
+        public ERC20ClaimConditions claimConditions;
 
+        /// <summary>
+        /// Interact with any ERC20 compatible contract.
+        /// </summary>
         public ERC20(string chain, string address)
         {
             this.chain = chain;
             this.address = address;
             this.signature = new ERC20Signature(chain, address);
+            this.claimConditions = new ERC20ClaimConditions(chain, address);
         }
 
         // READ FUNCTIONS
@@ -184,11 +192,70 @@ namespace Thirdweb
         public ERC20SignedPayloadOutput payload;
     }
 
+    /// <summary>
+    /// Fetch claim conditions for a given ERC20 drop contract
+    /// </summary>
+    public class ERC20ClaimConditions
+    {
+        public string chain;
+        public string address;
+
+        public ERC20ClaimConditions(string chain, string address)
+        {
+            this.chain = chain;
+            this.address = address;
+        }
+
+
+        /// <summary>
+        /// Get the active claim condition
+        /// </summary>
+        public async Task<ClaimConditions> GetActive()
+        {
+            return await Bridge.InvokeRoute<ClaimConditions>(getRoute("getActive"), new string[] { });
+        }
+
+        /// <summary>
+        /// Check whether the connected wallet is eligible to claim
+        /// </summary>
+        public async Task<bool> CanClaim(string quantity, string? addressToCheck = null)
+        {
+            return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(quantity, addressToCheck));
+        }
+
+        /// <summary>
+        /// Get the reasons why the connected wallet is not eligible to claim
+        /// </summary>
+        public async Task<string[]> GetIneligibilityReasons(string quantity, string? addressToCheck = null)
+        {
+            return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(quantity, addressToCheck));
+        }
+
+        /// <summary>
+        /// Get the special values set in the allowlist for the given wallet
+        /// </summary>
+        public async Task<bool> GetClaimerProofs(string claimerAddress)
+        {
+            return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+        }
+
+        private string getRoute(string functionPath) {
+            return this.address + ".erc20.claimConditions." + functionPath;
+        }
+    }
+
+
+    /// <summary>
+    /// Generate, verify and mint signed mintable payloads
+    /// </summary>
     public class ERC20Signature
     {
         public string chain;
         public string address;
 
+        /// <summary>
+        /// Generate, verify and mint signed mintable payloads
+        /// </summary>
         public ERC20Signature(string chain, string address)
         {
             this.chain = chain;

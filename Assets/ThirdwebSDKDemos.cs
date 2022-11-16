@@ -128,14 +128,18 @@ public class ThirdwebSDKDemos : MonoBehaviour
 
         // claim
         var contract = sdk.GetContract("0x86B7df0dc0A790789D8fDE4C604EF8187FF8AD2A"); // Edition Drop
-        var result = await contract.ERC1155.Claim("0", 1);
-        var newSupply = await contract.ERC1155.TotalSupply("0");
-        if (result[0].isSuccessful()) {
-            resultText.text = "Claim successful! New supply: " + newSupply;
+        var canClaim = await contract.ERC1155.claimConditions.CanClaim("0", 1);
+        if (canClaim) {
+            var result = await contract.ERC1155.Claim("0", 1);
+            var newSupply = await contract.ERC1155.TotalSupply("0");
+            if (result[0].isSuccessful()) {
+               resultText.text = "Claim successful! New supply: " + newSupply;
+            } else {
+                resultText.text = "Claim failed (see console)";
+            }
         } else {
-            resultText.text = "Claim failed (see console)";
+            resultText.text = "Can't claim";
         }
-
 
         // sig mint additional supply
         // var contract = sdk.GetContract("0xdb9AAb1cB8336CCd50aF8aFd7d75769CD19E5FEc"); // Edition

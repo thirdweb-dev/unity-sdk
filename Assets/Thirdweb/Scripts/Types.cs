@@ -14,7 +14,7 @@ namespace Thirdweb
         public string image;
         public string name;
         public string external_url;
-        public Dictionary<string, string> properties;
+        public Dictionary<string, object> properties;
     }
 
     [System.Serializable]
@@ -139,6 +139,30 @@ namespace Thirdweb
         public string seller;
         public string tokenContract;
         public string tokenId;
+    }
+
+    // Claim conditions
+
+    [System.Serializable]
+    public class ClaimConditions
+    {
+        public string availableSupply;
+        public string currentMintSupply;
+        public CurrencyValue currencyMetadata;
+        public string price;
+        public string currencyAddress;
+        public string maxClaimableSupply;
+        public string maxClaimablePerWallet;
+        public string waitInSeconds;
+    }
+
+    [System.Serializable]
+    public class SnapshotEntry
+    {
+        public string address;
+        public string maxClaimable;
+        public string price;
+        public string currencyAddress;
     }
 
     // Transactions

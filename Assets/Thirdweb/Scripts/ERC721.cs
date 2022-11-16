@@ -12,12 +12,14 @@ namespace Thirdweb
         public string chain;
         public string address;
         public ERC721Signature signature;
+        public ERC721ClaimConditions claimConditions;
 
         public ERC721(string chain, string address)
         {
             this.chain = chain;
             this.address = address;
             this.signature = new ERC721Signature(chain, address);
+            this.claimConditions = new ERC721ClaimConditions(chain, address);
         }
 
         /// READ FUNCTIONS
@@ -113,6 +115,58 @@ namespace Thirdweb
 
         private string getRoute(string functionPath) {
             return this.address + ".erc721." + functionPath;
+        }
+    }
+
+    /// <summary>
+    /// Fetch claim conditions for a given ERC721 drop contract
+    /// </summary>
+    public class ERC721ClaimConditions
+    {
+        public string chain;
+        public string address;
+
+        public ERC721ClaimConditions(string chain, string address)
+        {
+            this.chain = chain;
+            this.address = address;
+        }
+
+
+        /// <summary>
+        /// Get the active claim condition
+        /// </summary>
+        public async Task<ClaimConditions> GetActive()
+        {
+            return await Bridge.InvokeRoute<ClaimConditions>(getRoute("getActive"), new string[] { });
+        }
+
+        /// <summary>
+        /// Check whether the connected wallet is eligible to claim
+        /// </summary>
+        public async Task<bool> CanClaim(int quantity, string addressToCheck = null)
+        {
+            return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(quantity, addressToCheck));
+        }
+
+        /// <summary>
+        /// Get the reasons why the connected wallet is not eligible to claim
+        /// </summary>
+        public async Task<string[]> GetIneligibilityReasons(int quantity, string addressToCheck = null)
+        {
+            return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(quantity, addressToCheck));
+        }
+
+        /// <summary>
+        /// Get the special values set in the allowlist for the given wallet
+        /// </summary>
+        public async Task<bool> GetClaimerProofs(string claimerAddress)
+        {
+            return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+        }
+
+        private string getRoute(string functionPath) {
+            return this.address + ".erc721.claimConditions." + functionPath;
         }
     }
 
