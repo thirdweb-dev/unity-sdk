@@ -1,7 +1,7 @@
 /// --- Thirdweb Brige ---
 import { ethers } from "./ethers.js";
 import { ThirdwebSDK } from "https://esm.sh/@thirdweb-dev/sdk@nightly?bundle";
-// import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
+
 // big number transform
 const bigNumberReplacer = (key, value) => {
   // if we find a BigNumber then make it into a string (since that is safe)
@@ -20,7 +20,7 @@ const bigNumberReplacer = (key, value) => {
 const w = window;
 w.bridge = {};
 w.bridge.initialize = (chain, options) => {
-  console.log("bridge.initialize", chain, options);
+  console.debug("thirdwebSDK initialization:", chain, options);
   const sdk = new ThirdwebSDK(chain, JSON.parse(options));
   w.thirdweb = sdk;
 };
@@ -31,14 +31,11 @@ w.bridge.connect = async () => {
     const provider = new ethers.providers.Web3Provider(w.ethereum);
     await provider.send("eth_requestAccounts", []);
     if (w.thirdweb) {
-      console.log("connecting SDK");
       w.thirdweb.updateSignerOrProvider(provider.getSigner());
       w.ethereum.on("accountsChanged", async (accounts) => {
-        console.log("accountsChanged", accounts);
         w.thirdweb.updateSignerOrProvider(provider.getSigner());
       });
       w.ethereum.on("chainChanged", async (chain) => {
-        console.log("chainChanged", chain);
         w.thirdweb.updateSignerOrProvider(provider.getSigner());
       });
       return await w.thirdweb.wallet.getAddress();
@@ -57,7 +54,7 @@ w.bridge.switchNetwork = async (chainId) => {
     if (chainId) {
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x" + chainId.toString(16) }], // chainId must be in hexadecimal numbers
+        params: [{ chainId: "0x" + chainId.toString(16) }],
       });
     } else {
       console.error("Error switrching network");
@@ -82,7 +79,7 @@ w.bridge.invoke = async (route, payload) => {
       return arg;
     }
   });
-  console.log("invoke called", route, parsedArgs);
+  console.debug("thirdwebSDK call:", route, parsedArgs);
 
   // wallet call
   if (addrOrSDK.startsWith("sdk")) {
@@ -91,7 +88,6 @@ w.bridge.invoke = async (route, payload) => {
       prop = firstArg[1];
     }
     if (prop && routeArgs.length === 2) {
-      // TODO assumes contract call
       const result = await w.thirdweb[prop][routeArgs[1]](...parsedArgs);
       return JSON.stringify({ result: result }, bigNumberReplacer);
     } else {
@@ -102,13 +98,16 @@ w.bridge.invoke = async (route, payload) => {
 
   // contract call
   if (addrOrSDK.startsWith("0x")) {
-    let type = undefined;
+    let typeOrAbi = undefined;
     if (firstArg.length > 1) {
-      type = firstArg[1];
+      try {
+        typeOrAbi = JSON.parse(firstArg[1]); // try to parse ABI
+      } catch (e) {
+        typeOrAbi = firstArg[1];
+      }
     }
-    const contract = await w.thirdweb.getContract(addrOrSDK, type);
+    const contract = await w.thirdweb.getContract(addrOrSDK, typeOrAbi);
     if (routeArgs.length === 2) {
-      // TODO assumes contract call
       const result = await contract[routeArgs[1]](...parsedArgs);
       return JSON.stringify({ result: result }, bigNumberReplacer);
     } else if (routeArgs.length === 3) {

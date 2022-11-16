@@ -73,10 +73,11 @@ namespace Thirdweb
         /// Get an instance of a deployed contract.
         /// </summary>
         /// <param name="address">The contract address</param>
+        /// <param name="abi">Optionally pass the ABI for contracts that cannot be auto resolved. Expected format for the ABI is escaped JSON string</param>
         /// <returns>A contract instance</returns>
-        public Contract GetContract(string address)
+        public Contract GetContract(string address, string abi = null)
         {
-            return new Contract(this.chainOrRPC, address);
+            return new Contract(this.chainOrRPC, address, abi);
         }
     }
 }

@@ -9,6 +9,7 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public string abi;
         /// <summary>
         /// Call any ERC20 supported functions
         /// </summary>
@@ -26,9 +27,10 @@ namespace Thirdweb
         /// </summary>
         public Marketplace marketplace;
 
-        public Contract(string chain, string address) {
+        public Contract(string chain, string address, string abi = null) {
             this.chain = chain;
             this.address = address;
+            this.abi = abi;
             this.ERC20 = new ERC20(chain, address);
             this.ERC721 = new ERC721(chain, address);
             this.ERC1155 = new ERC1155(chain, address);
@@ -64,7 +66,11 @@ namespace Thirdweb
         }
 
         private string getRoute(string functionPath) {
-            return this.address + "." + functionPath;
+            if (abi != null) {
+                return this.address + "#" + abi + "." + functionPath;
+            } else {
+                return this.address + "." + functionPath;
+            }
         }
     }
 }
