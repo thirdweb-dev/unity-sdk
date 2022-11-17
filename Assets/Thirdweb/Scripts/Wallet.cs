@@ -60,9 +60,9 @@ namespace Thirdweb
         /// <summary>
         /// Prompt the connected wallet to switch to the giiven chainId
         /// </summary>
-        public void SwitchNetwork(int chainId)
+        public async Task SwitchNetwork(int chainId)
         {
-            Bridge.SwitchNetwork(chainId);
+            await Bridge.SwitchNetwork(chainId);
         }
 
         /// <summary>

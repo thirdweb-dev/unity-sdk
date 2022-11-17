@@ -66,12 +66,17 @@ namespace Thirdweb
             return result;
         }
 
-        public static void SwitchNetwork(int chainId) {
+        public static async Task SwitchNetwork(int chainId) {
             if (Application.isEditor) {
                 Debug.LogWarning("Switching networks is not supported in the editor. Please build and run the app instead.");
                 return;
             }
-            ThirdwebSwitchNetwork(chainId);
+            var task = new TaskCompletionSource<string>();
+            string taskId = Guid.NewGuid().ToString();
+            taskMap[taskId] = task;
+            ThirdwebSwitchNetwork(taskId, chainId, jsCallback);
+            await task.Task;
+            return;
         }
 
         public static async Task<T> InvokeRoute<T>(string route, string[] body)
@@ -105,6 +110,6 @@ namespace Thirdweb
         [DllImport("__Internal")]
         private static extern string ThirdwebConnect(string taskId, Action<string, string, string> cb);
         [DllImport("__Internal")]
-        private static extern string ThirdwebSwitchNetwork(int chainId);
+        private static extern string ThirdwebSwitchNetwork(string taskId, int chainId, Action<string, string, string> cb);
     }
 }

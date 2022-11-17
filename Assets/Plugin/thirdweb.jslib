@@ -54,8 +54,25 @@ var plugin = {
         dynCall_viii(cb, idPtr, null, buffer);
       });
   },
-  ThirdwebSwitchNetwork: async function (chainId) {
-    await window.bridge.switchNetwork(chainId);
+  ThirdwebSwitchNetwork: async function (taskId, chainId, cb) {
+    // convert taskId from pointer to str and allocate it to keep in memory
+    var id = UTF8ToString(taskId);
+    var idSize = lengthBytesUTF8(id) + 1;
+    var idPtr = _malloc(idSize);
+    stringToUTF8(id, idPtr, idSize);
+    // execute bridge call
+    window.bridge
+      .switchNetwork(chainId)
+      .then(() => {
+        dynCall_viii(cb, idPtr, null, null);
+      })
+      .catch((err) => {
+        var msg = err.message;
+        var bufferSize = lengthBytesUTF8(msg) + 1;
+        var buffer = _malloc(bufferSize);
+        stringToUTF8(msg, buffer, bufferSize);
+        dynCall_viii(cb, idPtr, null, buffer);
+      });
   },
 };
 

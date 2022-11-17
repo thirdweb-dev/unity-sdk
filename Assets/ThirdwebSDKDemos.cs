@@ -26,7 +26,7 @@ public class ThirdwebSDKDemos : MonoBehaviour
         loginButton.text = "Connected as: " + address.Substring(0, 6) + "...";
         int chain = await sdk.wallet.GetChainId();
         if (chain != 5) {
-            sdk.wallet.SwitchNetwork(5);
+            await sdk.wallet.SwitchNetwork(5);
         }
     }
 
@@ -61,6 +61,9 @@ public class ThirdwebSDKDemos : MonoBehaviour
         // resultText.text = "Fetching all NFTs";
         // List<NFT> result = await contract.ERC721.GetAll();
         // resultText.text = "Fetched " + result.Count + " NFTs";
+        // for (int i = 0; i < result.Count; i++) {
+        //     Debug.Log(result[i].metadata.name + " owned by " + result[i].owner);
+        // }
 
         // custom function call
         // string uri = await contract.Read<string>("tokenURI", count);

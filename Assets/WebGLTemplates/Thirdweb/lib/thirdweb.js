@@ -1,6 +1,6 @@
 /// --- Thirdweb Brige ---
 import { ethers } from "./ethers.js";
-import { ThirdwebSDK } from "https://esm.sh/@thirdweb-dev/sdk@nightly?bundle";
+import { ThirdwebSDK } from "https://esm.sh/@thirdweb-dev/sdk?bundle";
 
 // big number transform
 const bigNumberReplacer = (key, value) => {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Thirdweb
 {
     /// <summary>
-    /// Interact with any <c>ERC1155</c> compatible contract.
+    /// Interact with any ERC1155 compatible contract.
     /// </summary>
     public class ERC1155
     {
