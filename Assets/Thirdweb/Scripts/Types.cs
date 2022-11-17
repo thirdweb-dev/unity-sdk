@@ -149,7 +149,6 @@ namespace Thirdweb
         public string availableSupply;
         public string currentMintSupply;
         public CurrencyValue currencyMetadata;
-        public string price;
         public string currencyAddress;
         public string maxClaimableSupply;
         public string maxClaimablePerWallet;

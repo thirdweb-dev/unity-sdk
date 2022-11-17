@@ -51,7 +51,7 @@ public class ThirdwebSDKDemos : MonoBehaviour
     public async void GetERC721()
     {
         // fetch single NFT
-         var contract = sdk.GetContract("0x2e01763fA0e15e07294D74B63cE4b526B321E389"); // NFT Drop
+        var contract = sdk.GetContract("0x2e01763fA0e15e07294D74B63cE4b526B321E389"); // NFT Drop
         count++;
         resultText.text = "Fetching Token: " + count;
         NFT result = await contract.ERC721.Get(count.ToString());
@@ -59,7 +59,10 @@ public class ThirdwebSDKDemos : MonoBehaviour
 
         // fetch all NFTs
         // resultText.text = "Fetching all NFTs";
-        // List<NFT> result = await contract.ERC721.GetAll();
+        // List<NFT> result = await contract.ERC721.GetAll(new Thirdweb.QueryAllParams() {
+        //     start = 0,
+        //     count = 10,
+        // });
         // resultText.text = "Fetched " + result.Count + " NFTs";
         // for (int i = 0; i < result.Count; i++) {
         //     Debug.Log(result[i].metadata.name + " owned by " + result[i].owner);

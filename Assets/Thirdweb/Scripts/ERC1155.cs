@@ -44,9 +44,9 @@ namespace Thirdweb
         /// <summary>
         /// Get a all NFTs in this contract
         /// </summary>
-        public async Task<List<NFT>> GetAll()
+        public async Task<List<NFT>> GetAll(QueryAllParams queryParams = null)
         {
-            return await Bridge.InvokeRoute<List<NFT>>(getRoute("getAll"), new string[] { });
+            return await Bridge.InvokeRoute<List<NFT>>(getRoute("getAll"), Utils.ToJsonStringArray(queryParams));
         }
 
         /// <summary>
