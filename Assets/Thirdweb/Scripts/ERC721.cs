@@ -29,8 +29,8 @@ namespace Thirdweb
             this.chain = chain;
             this.address = address;
             this.abi = abi;
-            this.signature = new ERC721Signature(chain, address);
-            this.claimConditions = new ERC721ClaimConditions(chain, address);
+            this.signature = new ERC721Signature(chain, address, abi);
+            this.claimConditions = new ERC721ClaimConditions(chain, address, abi);
         }
 
         // READ FUNCTIONS
