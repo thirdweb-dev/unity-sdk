@@ -33,11 +33,12 @@ namespace Thirdweb
         {
             if (taskMap.ContainsKey(taskId))
             {
-                if (error != null) 
+                if (error != null)
                 {
                     // TODO wrap error in proper result type
                     taskMap[taskId].TrySetException(new Exception(error));
-                } else 
+                }
+                else
                 {
                     taskMap[taskId].TrySetResult(result);
                 }
@@ -45,16 +46,20 @@ namespace Thirdweb
             }
         }
 
-        public static void Initialize(string chainOrRPC, ThirdwebSDK.Options options) {
-            if (Application.isEditor) {
+        public static void Initialize(string chainOrRPC, ThirdwebSDK.Options options)
+        {
+            if (Application.isEditor)
+            {
                 Debug.LogWarning("Initializing the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
                 return;
             }
             ThirdwebInitialize(chainOrRPC, Utils.ToJson(options));
         }
 
-        public static async Task<string> Connect() {
-            if (Application.isEditor) {
+        public static async Task<string> Connect()
+        {
+            if (Application.isEditor)
+            {
                 Debug.LogWarning("Connecting wallets is not supported in the editor. Please build and run the app instead.");
                 return "0x0000000000000000000000000000000000000000";
             }
@@ -66,8 +71,10 @@ namespace Thirdweb
             return result;
         }
 
-        public static async Task SwitchNetwork(int chainId) {
-            if (Application.isEditor) {
+        public static async Task SwitchNetwork(int chainId)
+        {
+            if (Application.isEditor)
+            {
                 Debug.LogWarning("Switching networks is not supported in the editor. Please build and run the app instead.");
                 return;
             }
@@ -81,7 +88,8 @@ namespace Thirdweb
 
         public static async Task<T> InvokeRoute<T>(string route, string[] body)
         {
-            if (Application.isEditor) {
+            if (Application.isEditor)
+            {
                 Debug.LogWarning("Interacting with the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
                 return default(T);
             }
@@ -90,17 +98,9 @@ namespace Thirdweb
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
             ThirdwebInvoke(taskId, route, msg, jsCallback);
-            try 
-            {
-                string result = await task.Task;
-                // Debug.LogFormat("Result from {0}: {1}", route, result);
-                return JsonConvert.DeserializeObject<Result<T>>(result).result;
-            } 
-            catch (Exception)
-            {
-                // Debug.LogFormat("Error from {0}: {1}", route, e);
-                return default(T);
-            }
+            string result = await task.Task;
+            Debug.Log($"InvokeRoute Result: {result}");
+            return JsonConvert.DeserializeObject<Result<T>>(result).result;
         }
 
         [DllImport("__Internal")]
