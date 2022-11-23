@@ -24,7 +24,7 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC1155 compatible contract.
         /// </summary>
-        public ERC1155(string chain, string address, string abi = null)
+        public ERC1155(string chain, string address, string abi = "")
         {
             this.chain = chain;
             this.address = address;
@@ -177,7 +177,7 @@ namespace Thirdweb
 
         private string getRoute(string functionPath)
         {
-            return abi != null ? this.address + "#" + abi + ".erc1155." + functionPath : this.address + ".erc1155." + functionPath;
+            return abi != "" ? this.address + "#" + abi + ".erc1155." + functionPath : this.address + ".erc1155." + functionPath;
         }
     }
 
@@ -190,7 +190,7 @@ namespace Thirdweb
         public string address;
         public string abi;
 
-        public ERC1155ClaimConditions(string chain, string address, string abi = null)
+        public ERC1155ClaimConditions(string chain, string address, string abi = "")
         {
             this.chain = chain;
             this.address = address;
@@ -231,7 +231,7 @@ namespace Thirdweb
 
         private string getRoute(string functionPath)
         {
-            return abi != null ? this.address + "#" + abi + ".erc1155.claimConditions." + functionPath : this.address + ".erc1155.claimConditions." + functionPath;
+            return abi != "" ? this.address + "#" + abi + ".erc1155.claimConditions." + functionPath : this.address + ".erc1155.claimConditions." + functionPath;
         }
     }
 
@@ -333,7 +333,7 @@ namespace Thirdweb
         public string address;
         public string abi;
 
-        public ERC1155Signature(string chain, string address, string abi = null)
+        public ERC1155Signature(string chain, string address, string abi = "")
         {
             this.chain = chain;
             this.address = address;
@@ -362,7 +362,7 @@ namespace Thirdweb
 
         private string getRoute(string functionPath)
         {
-            return abi != null ? this.address + "#" + abi + ".erc1155.signature." + functionPath : this.address + ".erc1155.signature." + functionPath;
+            return abi != "" ? this.address + "#" + abi + ".erc1155.signature." + functionPath : this.address + ".erc1155.signature." + functionPath;
         }
     }
 }

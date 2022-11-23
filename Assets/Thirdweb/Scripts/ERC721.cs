@@ -24,11 +24,11 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC721 compatible contract.
         /// </summary>
-        public ERC721(string chain, string address, string abi = null)
+        public ERC721(string chain, string address, string abi = "")
         {
             this.chain = chain;
             this.address = address;
-            this.abi = null;
+            this.abi = abi;
             this.signature = new ERC721Signature(chain, address);
             this.claimConditions = new ERC721ClaimConditions(chain, address);
         }
@@ -180,7 +180,7 @@ namespace Thirdweb
 
         private string getRoute(string functionPath)
         {
-            return abi != null ? this.address + "#" + abi + ".erc721." + functionPath : this.address + ".erc721." + functionPath;
+            return abi != "" ? this.address + "#" + abi + ".erc721." + functionPath : this.address + ".erc721." + functionPath;
         }
     }
 
@@ -193,7 +193,7 @@ namespace Thirdweb
         public string address;
         public string abi;
 
-        public ERC721ClaimConditions(string chain, string address, string abi = null)
+        public ERC721ClaimConditions(string chain, string address, string abi = "")
         {
             this.chain = chain;
             this.address = address;
@@ -235,7 +235,7 @@ namespace Thirdweb
 
         private string getRoute(string functionPath)
         {
-            return abi != null ? this.address + "#" + abi + ".erc721.claimConditions." + functionPath : this.address + ".erc721.claimConditions." + functionPath;
+            return abi != "" ? this.address + "#" + abi + ".erc721.claimConditions." + functionPath : this.address + ".erc721.claimConditions." + functionPath;
         }
     }
 
@@ -302,7 +302,7 @@ namespace Thirdweb
         public string address;
         public string abi;
 
-        public ERC721Signature(string chain, string address, string abi = null)
+        public ERC721Signature(string chain, string address, string abi = "")
         {
             this.chain = chain;
             this.address = address;
@@ -326,7 +326,7 @@ namespace Thirdweb
 
         private string getRoute(string functionPath)
         {
-            return abi != null ? this.address + "#" + abi + ".erc721.signature." + functionPath : this.address + ".erc721.signature." + functionPath;
+            return abi != "" ? this.address + "#" + abi + ".erc721.signature." + functionPath : this.address + ".erc721.signature." + functionPath;
         }
     }
 }

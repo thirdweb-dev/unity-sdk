@@ -27,7 +27,7 @@ namespace Thirdweb
         /// </summary>
         public Marketplace marketplace;
 
-        public Contract(string chain, string address, string abi = null)
+        public Contract(string chain, string address, string abi = "")
         {
             this.chain = chain;
             this.address = address;
@@ -68,7 +68,7 @@ namespace Thirdweb
 
         private string getRoute(string functionPath)
         {
-            return abi != null ? this.address + "#" + abi + "." + functionPath : this.address + "." + functionPath;
+            return abi != "" ? this.address + "#" + abi + "." + functionPath : this.address + "." + functionPath;
         }
     }
 }
