@@ -15,7 +15,7 @@ namespace Thirdweb
         /// Handle signature minting functionality
         /// </summary>
         public ERC1155Signature signature;
-                /// <summary>
+        /// <summary>
         /// Query claim conditions
         /// </summary>
         public ERC1155ClaimConditions claimConditions;
@@ -23,10 +23,11 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC1155 compatible contract.
         /// </summary>
-        public ERC1155(string chain, string address)
+        public ERC1155(string chain, string address, string abi = null)
         {
             this.chain = chain;
             this.address = address;
+            this.abi = abi;
             this.signature = new ERC1155Signature(chain, address);
             this.claimConditions = new ERC1155ClaimConditions(chain, address);
         }
@@ -69,7 +70,7 @@ namespace Thirdweb
         /// <summary>
         /// Get the balance of the given NFT for the given wallet address
         /// </summary>
-        public async Task<string> BalanceOf(string address, string tokenId) 
+        public async Task<string> BalanceOf(string address, string tokenId)
         {
             return await Bridge.InvokeRoute<string>(getRoute("balanceOf"), Utils.ToJsonStringArray(address, tokenId));
         }
@@ -173,12 +174,13 @@ namespace Thirdweb
 
         // PRIVATE
 
-        private string getRoute(string functionPath) {
-            return this.address + ".erc1155." + functionPath;
+        private string getRoute(string functionPath)
+        {
+            return abi != null ? this.address + "#" + abi + ".erc1155." + functionPath : this.address + ".erc1155." + functionPath;
         }
     }
 
-     /// <summary>
+    /// <summary>
     /// Fetch claim conditions for a given ERC1155 drop contract
     /// </summary>
     public class ERC1155ClaimConditions
@@ -224,14 +226,15 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
         }
 
-        private string getRoute(string functionPath) {
-            return this.address + ".erc1155.claimConditions." + functionPath;
+        private string getRoute(string functionPath)
+        {
+            return abi != null ? this.address + "#" + abi + ".erc1155.claimConditions." + functionPath : this.address + ".erc1155.claimConditions." + functionPath;
         }
     }
 
     // TODO switch to another JSON serializer that supports polymorphism
     [System.Serializable]
-    #nullable enable
+#nullable enable
     public class ERC1155MintPayload
     {
         public string to;
@@ -247,7 +250,8 @@ namespace Thirdweb
         // public long mintStartTime;
         // public long mintEndTime;
 
-        public ERC1155MintPayload(string receiverAddress, NFTMetadata metadata) {
+        public ERC1155MintPayload(string receiverAddress, NFTMetadata metadata)
+        {
             this.metadata = metadata;
             this.to = receiverAddress;
             this.price = "0";
@@ -279,7 +283,8 @@ namespace Thirdweb
         // public long mintStartTime;
         // public long mintEndTime;
 
-        public ERC1155MintAdditionalPayload(string receiverAddress, string tokenId) {
+        public ERC1155MintAdditionalPayload(string receiverAddress, string tokenId)
+        {
             this.tokenId = tokenId;
             this.to = receiverAddress;
             this.price = "0";
@@ -350,8 +355,9 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
         }
 
-        private string getRoute(string functionPath) {
-            return this.address + ".erc1155.signature." + functionPath;
+        private string getRoute(string functionPath)
+        {
+            return abi != null ? this.address + "#" + abi + ".erc1155.signature." + functionPath : this.address + ".erc1155.signature." + functionPath;
         }
     }
 }

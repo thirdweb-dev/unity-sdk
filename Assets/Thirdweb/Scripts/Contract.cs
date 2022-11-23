@@ -27,13 +27,14 @@ namespace Thirdweb
         /// </summary>
         public Marketplace marketplace;
 
-        public Contract(string chain, string address, string abi = null) {
+        public Contract(string chain, string address, string abi = null)
+        {
             this.chain = chain;
             this.address = address;
             this.abi = abi;
-            this.ERC20 = new ERC20(chain, address);
-            this.ERC721 = new ERC721(chain, address);
-            this.ERC1155 = new ERC1155(chain, address);
+            this.ERC20 = new ERC20(chain, address, abi);
+            this.ERC721 = new ERC721(chain, address, abi);
+            this.ERC1155 = new ERC1155(chain, address, abi);
             this.marketplace = new Marketplace(chain, address);
         }
 
@@ -45,7 +46,7 @@ namespace Thirdweb
         /// <returns>The data deserialized to the given typed</returns>
         public async Task<T> Read<T>(string functionName, params object[] args)
         {
-            string [] argsEncoded = new string[args.Length + 1];
+            string[] argsEncoded = new string[args.Length + 1];
             argsEncoded[0] = functionName;
             Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
             return await Bridge.InvokeRoute<T>(getRoute("call"), argsEncoded);
@@ -59,18 +60,15 @@ namespace Thirdweb
         /// <returns>The transaction receipt</returns>
         public async Task<TransactionResult> Write(string functionName, params object[] args)
         {
-            string [] argsEncoded = new string[args.Length + 1];
+            string[] argsEncoded = new string[args.Length + 1];
             argsEncoded[0] = functionName;
             Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), argsEncoded);
         }
 
-        private string getRoute(string functionPath) {
-            if (abi != null) {
-                return this.address + "#" + abi + "." + functionPath;
-            } else {
-                return this.address + "." + functionPath;
-            }
+        private string getRoute(string functionPath)
+        {
+            return abi != null ? this.address + "#" + abi + "." + functionPath : this.address + "." + functionPath;
         }
     }
 }

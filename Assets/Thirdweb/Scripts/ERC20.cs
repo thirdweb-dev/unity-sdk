@@ -22,10 +22,11 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
-        public ERC20(string chain, string address)
+        public ERC20(string chain, string address, string abi = null)
         {
             this.chain = chain;
             this.address = address;
+            this.abi = null;
             this.signature = new ERC20Signature(chain, address);
             this.claimConditions = new ERC20ClaimConditions(chain, address);
         }
@@ -140,13 +141,14 @@ namespace Thirdweb
 
         // PRIVATE
 
-        private string getRoute(string functionPath) {
-            return this.address + ".erc20." + functionPath;
+        private string getRoute(string functionPath)
+        {
+            return abi != null ? this.address + "#" + abi + ".erc20." + functionPath : this.address + ".erc20." + functionPath;
         }
     }
 
     [System.Serializable]
-    #nullable enable
+#nullable enable
     public class ERC20MintPayload
     {
         public string to;
@@ -159,7 +161,8 @@ namespace Thirdweb
         // public long mintStartTime;
         // public long mintEndTime;
 
-        public ERC20MintPayload(string receiverAddress, string quantity) {
+        public ERC20MintPayload(string receiverAddress, string quantity)
+        {
             this.to = receiverAddress;
             this.quantity = quantity;
             this.price = "0";
@@ -239,8 +242,9 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
         }
 
-        private string getRoute(string functionPath) {
-            return this.address + ".erc20.claimConditions." + functionPath;
+        private string getRoute(string functionPath)
+        {
+            return abi != null ? this.address + "#" + abi + ".erc20.claimConditions." + functionPath : this.address + ".erc20.claimConditions." + functionPath;
         }
     }
 
@@ -286,8 +290,9 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
         }
 
-        private string getRoute(string functionPath) {
-            return this.address + ".erc20.signature." + functionPath;
+        private string getRoute(string functionPath)
+        {
+            return abi != null ? this.address + "#" + abi + ".erc20.signature." + functionPath : this.address + ".erc20.signature." + functionPath;
         }
     }
 }
