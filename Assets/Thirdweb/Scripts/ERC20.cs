@@ -10,6 +10,7 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public string abi;
         /// <summary>
         /// Handle signature minting functionality
         /// </summary>
@@ -202,11 +203,13 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public string abi;
 
-        public ERC20ClaimConditions(string chain, string address)
+        public ERC20ClaimConditions(string chain, string address, string abi = null)
         {
             this.chain = chain;
             this.address = address;
+            this.abi = abi;
         }
 
 
@@ -256,14 +259,16 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public string abi;
 
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string chain, string address)
+        public ERC20Signature(string chain, string address, string abi = null)
         {
             this.chain = chain;
             this.address = address;
+            this.abi = abi;
         }
 
         /// <summary>

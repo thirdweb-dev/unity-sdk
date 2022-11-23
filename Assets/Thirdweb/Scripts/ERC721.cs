@@ -11,6 +11,7 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public string abi;
         /// <summary>
         /// Handle signature minting functionality
         /// </summary>
@@ -190,11 +191,13 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public string abi;
 
-        public ERC721ClaimConditions(string chain, string address)
+        public ERC721ClaimConditions(string chain, string address, string abi = null)
         {
             this.chain = chain;
             this.address = address;
+            this.abi = abi;
         }
 
 
@@ -297,11 +300,13 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public string abi;
 
-        public ERC721Signature(string chain, string address)
+        public ERC721Signature(string chain, string address, string abi = null)
         {
             this.chain = chain;
             this.address = address;
+            this.abi = abi;
         }
 
         public async Task<ERC721SignedPayload> Generate(ERC721MintPayload payloadToSign)
