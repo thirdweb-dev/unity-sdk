@@ -100,6 +100,12 @@ namespace Thirdweb
             ThirdwebInvoke(taskId, route, msg, jsCallback);
             string result = await task.Task;
             Debug.Log($"InvokeRoute Result: {result}");
+            if (typeof(T) == typeof(string))
+            {
+                int start = result.IndexOf(':') + 1;
+                int end = result.LastIndexOf('}');
+                return (T)(object)result.Substring(start, end - start);
+            }
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
         }
 
