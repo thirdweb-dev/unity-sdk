@@ -5,8 +5,12 @@ namespace Thirdweb
     /// <summary>
     /// Connect and Interact with a Wallet.
     /// </summary>
-    public class Wallet
+    public class Wallet : Routable
     {
+        public Wallet() : base($"sdk{subSeparator}wallet")
+        {
+        }
+        
         /// <summary>
         /// Connect a user's wallet via browser extension
         /// </summary>
@@ -21,7 +25,7 @@ namespace Thirdweb
         /// <param name="domain">The domain to authenticate to</param>
         public async Task<LoginPayload> Authenticate(string domain) 
         {
-            return await Bridge.InvokeRoute<LoginPayload>("sdk#auth.login", Utils.ToJsonStringArray(domain));
+            return await Bridge.InvokeRoute<LoginPayload>($"sdk{subSeparator}auth{separator}login", Utils.ToJsonStringArray(domain));
         }
 
         /// <summary>
@@ -95,12 +99,6 @@ namespace Thirdweb
         public async Task<TransactionResult> SendRawTransaction(TransactionRequest transactionRequest)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("sendRawTransaction"), Utils.ToJsonStringArray(transactionRequest));
-        }
-
-        /// PRIVATE
-
-        private string getRoute(string functionPath) {
-            return "sdk#wallet." + functionPath;
         }
     }
 }

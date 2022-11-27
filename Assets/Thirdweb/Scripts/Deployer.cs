@@ -5,8 +5,13 @@ namespace Thirdweb
     /// <summary>
     /// Deploy contracts to the blockchain.
     /// </summary>
-    public class Deployer
+    public class Deployer : Routable
     {
+
+        public Deployer() : base($"sdk{subSeparator}deployer")
+        {
+        }
+
         public async Task<string> DeployNFTCollection(NFTContractDeployMetadata metadata)
         {
             return await Bridge.InvokeRoute<string>(getRoute("deployNFTCollection"), Utils.ToJsonStringArray(metadata));
@@ -63,12 +68,6 @@ namespace Thirdweb
 
         public async Task<string> DeployFromContractUri(string uri, object[] constructorParams) {
             return await Bridge.InvokeRoute<string>(getRoute("deployContractFromUri"), Utils.ToJsonStringArray(uri, constructorParams));
-        }
-
-        /// PRIVATE
-
-        private string getRoute(string functionPath) {
-            return "sdk#deployer." + functionPath;
         }
     }
 

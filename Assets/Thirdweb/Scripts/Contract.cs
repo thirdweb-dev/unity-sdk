@@ -27,7 +27,7 @@ namespace Thirdweb
         /// </summary>
         public Marketplace marketplace;
 
-        public Contract(string chain, string address, string abi = null) : base(abi != null ? $"{address}#{abi}" : address)
+        public Contract(string chain, string address, string abi = null) : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
         {
             this.chain = chain;
             this.address = address;

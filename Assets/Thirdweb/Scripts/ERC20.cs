@@ -20,7 +20,7 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
-        public ERC20(string parentRoute) : base($"{parentRoute}.erc20")
+        public ERC20(string parentRoute) : base(Routable.append(parentRoute, "erc20"))
         {
             this.signature = new ERC20Signature(baseRoute);
             this.claimConditions = new ERC20ClaimConditions(baseRoute);
@@ -188,7 +188,7 @@ namespace Thirdweb
     #nullable enable
     public class ERC20ClaimConditions : Routable
     {
-        public ERC20ClaimConditions(string parentRoute) : base($"{parentRoute}.claimConditions") 
+        public ERC20ClaimConditions(string parentRoute) : base(Routable.append(parentRoute, "claimConditions")) 
         {
         }
 
@@ -234,7 +234,7 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string parentRoute) : base($"{parentRoute}.signature") 
+        public ERC20Signature(string parentRoute) : base(Routable.append(parentRoute, "signature")) 
         {
         }
 

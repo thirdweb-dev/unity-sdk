@@ -1,5 +1,12 @@
 namespace Thirdweb {
     public abstract class Routable {
+        public static string separator = "/";
+        public static string subSeparator = "#";
+
+        public static string append(string route, string subRoute) {
+            return $"{route}{separator}{subRoute}";
+        }
+
         protected string baseRoute;
 
         public Routable(string baseRoute) {
@@ -7,7 +14,7 @@ namespace Thirdweb {
         }
 
         protected string getRoute(string functionName) {
-            return $"{baseRoute}.{functionName}";
+            return $"{baseRoute}{separator}{functionName}";
         }
     }
 }

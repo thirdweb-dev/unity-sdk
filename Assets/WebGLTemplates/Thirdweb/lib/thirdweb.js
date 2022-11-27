@@ -2,6 +2,9 @@
 import { ethers } from "./ethers.js";
 import { ThirdwebSDK } from "https://esm.sh/@thirdweb-dev/sdk?bundle";
 
+const separator = "/";
+const subSeparator = "#";
+
 // big number transform
 const bigNumberReplacer = (key, value) => {
   // if we find a BigNumber then make it into a string (since that is safe)
@@ -67,8 +70,8 @@ w.bridge.switchNetwork = async (chainId) => {
 };
 
 w.bridge.invoke = async (route, payload) => {
-  const routeArgs = route.split(".");
-  const firstArg = routeArgs[0].split("#");
+  const routeArgs = route.split(separator);
+  const firstArg = routeArgs[0].split(subSeparator);
   const addrOrSDK = firstArg[0];
 
   const fnArgs = JSON.parse(payload).arguments;
