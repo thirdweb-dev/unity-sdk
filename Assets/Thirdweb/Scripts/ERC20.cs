@@ -10,6 +10,7 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public string abi;
         /// <summary>
         /// Handle signature minting functionality
         /// </summary>
@@ -22,12 +23,13 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
-        public ERC20(string chain, string address)
+        public ERC20(string chain, string address, string abi = "")
         {
             this.chain = chain;
             this.address = address;
-            this.signature = new ERC20Signature(chain, address);
-            this.claimConditions = new ERC20ClaimConditions(chain, address);
+            this.abi = abi;
+            this.signature = new ERC20Signature(chain, address, abi);
+            this.claimConditions = new ERC20ClaimConditions(chain, address, abi);
         }
 
         // READ FUNCTIONS
@@ -140,13 +142,14 @@ namespace Thirdweb
 
         // PRIVATE
 
-        private string getRoute(string functionPath) {
-            return this.address + ".erc20." + functionPath;
+        private string getRoute(string functionPath)
+        {
+            return abi != "" ? this.address + "#" + abi + ".erc20." + functionPath : this.address + ".erc20." + functionPath;
         }
     }
 
     [System.Serializable]
-    #nullable enable
+#nullable enable
     public class ERC20MintPayload
     {
         public string to;
@@ -159,7 +162,8 @@ namespace Thirdweb
         // public long mintStartTime;
         // public long mintEndTime;
 
-        public ERC20MintPayload(string receiverAddress, string quantity) {
+        public ERC20MintPayload(string receiverAddress, string quantity)
+        {
             this.to = receiverAddress;
             this.quantity = quantity;
             this.price = "0";
@@ -199,11 +203,13 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public string abi;
 
-        public ERC20ClaimConditions(string chain, string address)
+        public ERC20ClaimConditions(string chain, string address, string abi = "")
         {
             this.chain = chain;
             this.address = address;
+            this.abi = abi;
         }
 
 
@@ -239,8 +245,9 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
         }
 
-        private string getRoute(string functionPath) {
-            return this.address + ".erc20.claimConditions." + functionPath;
+        private string getRoute(string functionPath)
+        {
+            return abi != "" ? this.address + "#" + abi + ".erc20.claimConditions." + functionPath : this.address + ".erc20.claimConditions." + functionPath;
         }
     }
 
@@ -252,14 +259,16 @@ namespace Thirdweb
     {
         public string chain;
         public string address;
+        public string abi;
 
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string chain, string address)
+        public ERC20Signature(string chain, string address, string abi = "")
         {
             this.chain = chain;
             this.address = address;
+            this.abi = abi;
         }
 
         /// <summary>
@@ -286,8 +295,9 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
         }
 
-        private string getRoute(string functionPath) {
-            return this.address + ".erc20.signature." + functionPath;
+        private string getRoute(string functionPath)
+        {
+            return abi != "" ? this.address + "#" + abi + ".erc20.signature." + functionPath : this.address + ".erc20.signature." + functionPath;
         }
     }
 }
