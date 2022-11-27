@@ -6,7 +6,7 @@ namespace Thirdweb
     /// <summary>
     /// Interact with a Marketplace contract.
     /// </summary>
-    public class Marketplace
+    public class Marketplace : Routable
     {
         public string chain;
         public string address;
@@ -22,12 +22,12 @@ namespace Thirdweb
         /// <summary>
         /// Interact with a Marketplace contract.
         /// </summary>
-        public Marketplace(string chain, string address)
+        public Marketplace(string chain, string address) : base($"{address}#marketplace")
         {
             this.chain = chain;
             this.address = address;
-            this.direct = new MarketplaceDirect(chain, address);
-            this.auction = new MarketplaceAuction(chain, address);
+            this.direct = new MarketplaceDirect(baseRoute);
+            this.auction = new MarketplaceAuction(baseRoute);
         }
 
         /// READ FUNCTIONS
@@ -81,24 +81,14 @@ namespace Thirdweb
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("makeOffer"), Utils.ToJsonStringArray(listingId, pricePerToken, quantity));
         }
-
-        /// PRIVATE
-
-        private string getRoute(string functionPath) {
-            return this.address + "#marketplace." + functionPath;
-        }
     }
 
     // DIRECT
 
-    public class MarketplaceDirect {
-        public string chain;
-        public string address;
-
-        public MarketplaceDirect(string chain, string address)
+    public class MarketplaceDirect : Routable
+    {
+        public MarketplaceDirect(string parentRoute) : base($"{parentRoute}.direct")
         {
-            this.chain = chain;
-            this.address = address;
         }
 
         public async Task<DirectListing> GetListing(string listingId)
@@ -125,22 +115,13 @@ namespace Thirdweb
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("cancelListing"), Utils.ToJsonStringArray(listingId));
         }
-
-        private string getRoute(string functionPath) {
-            return this.address + "#marketplace.direct." + functionPath;
-        }
     }
 
     // AUCTION
 
-    public class MarketplaceAuction {
-        public string chain;
-        public string address;
-
-        public MarketplaceAuction(string chain, string address)
+    public class MarketplaceAuction : Routable {
+        public MarketplaceAuction(string parentRoute) : base($"{parentRoute}.auction")
         {
-            this.chain = chain;
-            this.address = address;
         }
 
         public async Task<AuctionListing> GetListing(string listingId)
@@ -176,10 +157,6 @@ namespace Thirdweb
         public async Task<TransactionResult> ExecuteSale(string listingId)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("executeSale"), Utils.ToJsonStringArray(listingId));
-        }
-
-        private string getRoute(string functionPath) {
-            return this.address + "#marketplace.auction." + functionPath;
         }
     }
 }

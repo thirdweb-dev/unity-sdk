@@ -5,7 +5,7 @@ namespace Thirdweb
     /// <summary>
     /// Convenient wrapper to interact with any EVM contract
     /// </summary>
-    public class Contract
+    public class Contract : Routable
     {
         public string chain;
         public string address;
@@ -27,14 +27,14 @@ namespace Thirdweb
         /// </summary>
         public Marketplace marketplace;
 
-        public Contract(string chain, string address, string abi = "")
+        public Contract(string chain, string address, string abi = null) : base(abi != null ? $"{address}#{abi}" : address)
         {
             this.chain = chain;
             this.address = address;
             this.abi = abi;
-            this.ERC20 = new ERC20(chain, address, abi);
-            this.ERC721 = new ERC721(chain, address, abi);
-            this.ERC1155 = new ERC1155(chain, address, abi);
+            this.ERC20 = new ERC20(baseRoute);
+            this.ERC721 = new ERC721(baseRoute);
+            this.ERC1155 = new ERC1155(baseRoute);
             this.marketplace = new Marketplace(chain, address);
         }
 
@@ -64,11 +64,6 @@ namespace Thirdweb
             argsEncoded[0] = functionName;
             Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), argsEncoded);
-        }
-
-        private string getRoute(string functionPath)
-        {
-            return abi != "" ? this.address + "#" + abi + "." + functionPath : this.address + "." + functionPath;
         }
     }
 }

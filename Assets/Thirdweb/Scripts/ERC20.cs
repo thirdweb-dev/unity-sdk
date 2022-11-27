@@ -6,11 +6,8 @@ namespace Thirdweb
     /// <summary>
     /// Interact with any ERC20 compatible contract.
     /// </summary>
-    public class ERC20
+    public class ERC20 : Routable
     {
-        public string chain;
-        public string address;
-        public string abi;
         /// <summary>
         /// Handle signature minting functionality
         /// </summary>
@@ -23,13 +20,10 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
-        public ERC20(string chain, string address, string abi = "")
+        public ERC20(string parentRoute) : base($"{parentRoute}.erc20")
         {
-            this.chain = chain;
-            this.address = address;
-            this.abi = abi;
-            this.signature = new ERC20Signature(chain, address, abi);
-            this.claimConditions = new ERC20ClaimConditions(chain, address, abi);
+            this.signature = new ERC20Signature(baseRoute);
+            this.claimConditions = new ERC20ClaimConditions(baseRoute);
         }
 
         // READ FUNCTIONS
@@ -139,17 +133,9 @@ namespace Thirdweb
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, amount));
         }
-
-        // PRIVATE
-
-        private string getRoute(string functionPath)
-        {
-            return abi != "" ? this.address + "#" + abi + ".erc20." + functionPath : this.address + ".erc20." + functionPath;
-        }
     }
 
     [System.Serializable]
-#nullable enable
     public class ERC20MintPayload
     {
         public string to;
@@ -199,19 +185,12 @@ namespace Thirdweb
     /// <summary>
     /// Fetch claim conditions for a given ERC20 drop contract
     /// </summary>
-    public class ERC20ClaimConditions
+    #nullable enable
+    public class ERC20ClaimConditions : Routable
     {
-        public string chain;
-        public string address;
-        public string abi;
-
-        public ERC20ClaimConditions(string chain, string address, string abi = "")
+        public ERC20ClaimConditions(string parentRoute) : base($"{parentRoute}.claimConditions") 
         {
-            this.chain = chain;
-            this.address = address;
-            this.abi = abi;
         }
-
 
         /// <summary>
         /// Get the active claim condition
@@ -244,31 +223,19 @@ namespace Thirdweb
         {
             return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
         }
-
-        private string getRoute(string functionPath)
-        {
-            return abi != "" ? this.address + "#" + abi + ".erc20.claimConditions." + functionPath : this.address + ".erc20.claimConditions." + functionPath;
-        }
     }
 
 
     /// <summary>
     /// Generate, verify and mint signed mintable payloads
     /// </summary>
-    public class ERC20Signature
+    public class ERC20Signature : Routable
     {
-        public string chain;
-        public string address;
-        public string abi;
-
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string chain, string address, string abi = "")
+        public ERC20Signature(string parentRoute) : base($"{parentRoute}.signature") 
         {
-            this.chain = chain;
-            this.address = address;
-            this.abi = abi;
         }
 
         /// <summary>
@@ -293,11 +260,6 @@ namespace Thirdweb
         public async Task<TransactionResult> Mint(ERC20SignedPayload signedPayload)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
-        }
-
-        private string getRoute(string functionPath)
-        {
-            return abi != "" ? this.address + "#" + abi + ".erc20.signature." + functionPath : this.address + ".erc20.signature." + functionPath;
         }
     }
 }

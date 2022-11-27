@@ -52,7 +52,7 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<string>(getRoute("deployTokenDrop"), Utils.ToJsonStringArray(metadata));
         }
 
-        public async Task<string> DeployTokenDrop(MarketplaceContractDeployMetadata metadata)
+        public async Task<string> DeployMarketplace(MarketplaceContractDeployMetadata metadata)
         {
             return await Bridge.InvokeRoute<string>(getRoute("deployMarketplace"), Utils.ToJsonStringArray(metadata));
         }
