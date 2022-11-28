@@ -119,7 +119,8 @@ namespace Thirdweb
 
     // AUCTION
 
-    public class MarketplaceAuction : Routable {
+    public class MarketplaceAuction : Routable
+    {
         public MarketplaceAuction(string parentRoute) : base(Routable.append(parentRoute, "auction"))
         {
         }

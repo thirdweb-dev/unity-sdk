@@ -10,11 +10,11 @@ namespace Thirdweb
         public Wallet() : base($"sdk{subSeparator}wallet")
         {
         }
-        
+
         /// <summary>
         /// Connect a user's wallet via browser extension
         /// </summary>
-        public Task<string> Connect() 
+        public Task<string> Connect()
         {
             return Bridge.Connect();
         }
@@ -23,7 +23,7 @@ namespace Thirdweb
         /// Authenticate the user by signing a payload that can be used to securely identify users. See https://portal.thirdweb.com/auth
         /// </summary>
         /// <param name="domain">The domain to authenticate to</param>
-        public async Task<LoginPayload> Authenticate(string domain) 
+        public async Task<LoginPayload> Authenticate(string domain)
         {
             return await Bridge.InvokeRoute<LoginPayload>($"sdk{subSeparator}auth{separator}login", Utils.ToJsonStringArray(domain));
         }

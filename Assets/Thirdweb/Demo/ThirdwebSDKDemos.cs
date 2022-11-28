@@ -42,14 +42,14 @@ public class ThirdwebSDKDemos : MonoBehaviour
     public async void OnSignClick()
     {
         resultText.text = "Signing...";
-        var data = await sdk.wallet.Authenticate("example.com");
-        if (data.payload.address != null)
+        try
         {
+            var data = await sdk.wallet.Authenticate("example.com");
             resultText.text = "Sig: " + data.payload.address.Substring(0, 6) + "...";
         }
-        else
+        catch (System.Exception e)
         {
-            resultText.text = "Failed to authenticate";
+            resultText.text = "Auth Error: " + e.Message;
         }
     }
 
@@ -80,12 +80,14 @@ public class ThirdwebSDKDemos : MonoBehaviour
 
     public async void GetERC1155()
     {
-        var contract = sdk.GetContract("0x86B7df0dc0A790789D8fDE4C604EF8187FF8AD2A"); // Edition Drop
-                                                                                      // Fetch single NFT
-                                                                                      // count++;
-                                                                                      // resultText.text = "Fetching Token: " + count;
-                                                                                      // NFT result = await contract.ERC1155.Get(count.ToString());
-                                                                                      // resultText.text = result.metadata.name + " (x" + result.supply + ")";
+        var contract = sdk.GetContract("0x86B7df0dc0A790789D8fDE4C604EF8187FF8AD2A");
+
+        // Edition Drop
+        // Fetch single NFT
+        // count++;
+        // resultText.text = "Fetching Token: " + count;
+        // NFT result = await contract.ERC1155.Get(count.ToString());
+        // resultText.text = result.metadata.name + " (x" + result.supply + ")";
 
         // fetch all NFTs
         resultText.text = "Fetching all NFTs";
@@ -124,15 +126,15 @@ public class ThirdwebSDKDemos : MonoBehaviour
         };
         string connectedAddress = await sdk.wallet.GetAddress();
         var payload = new ERC721MintPayload(connectedAddress, meta);
-        var p = await contract.ERC721.signature.Generate(payload); // typically generated on the backend
-        var result = await contract.ERC721.signature.Mint(p);
-        if (result.isSuccessful())
+        try
         {
+            var p = await contract.ERC721.signature.Generate(payload); // typically generated on the backend
+            var result = await contract.ERC721.signature.Mint(p);
             resultText.text = "SigMinted tokenId: " + result.id;
         }
-        else
+        catch (System.Exception e)
         {
-            resultText.text = "SigMint failed (see console)";
+            resultText.text = "Sigmint Failed (see console): " + e.Message;
         }
     }
 
@@ -146,15 +148,15 @@ public class ThirdwebSDKDemos : MonoBehaviour
         var canClaim = await contract.ERC1155.claimConditions.CanClaim("0", 1);
         if (canClaim)
         {
-            var result = await contract.ERC1155.Claim("0", 1);
-            var newSupply = await contract.ERC1155.TotalSupply("0");
-            if (result[0].isSuccessful())
+            try
             {
+                var result = await contract.ERC1155.Claim("0", 1);
+                var newSupply = await contract.ERC1155.TotalSupply("0");
                 resultText.text = "Claim successful! New supply: " + newSupply;
             }
-            else
+            catch (System.Exception e)
             {
-                resultText.text = "Claim failed (see console)";
+                resultText.text = "Claim Failed: " + e.Message;
             }
         }
         else
@@ -177,17 +179,15 @@ public class ThirdwebSDKDemos : MonoBehaviour
 
         // Mint
         var contract = sdk.GetContract("0xB4870B21f80223696b68798a755478C86ce349bE"); // Token
-        var result = await contract.ERC20.Mint("1.2");
-        if (result.isSuccessful())
+        try
         {
+            var result = await contract.ERC20.Mint("1.2");
             resultText.text = "mint successful";
         }
-        else
+        catch (System.Exception e)
         {
-            resultText.text = "Mint failed (see console)";
+            resultText.text = "Mint failed (see console): " + e.Message;
         }
-
-
 
         // sig mint
         // var contract = sdk.GetContract("0xB4870B21f80223696b68798a755478C86ce349bE"); // Token
@@ -213,14 +213,14 @@ public class ThirdwebSDKDemos : MonoBehaviour
 
         // buy listing
         var marketplace = sdk.GetContract("0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A").marketplace; // Marketplace
-        var result = await marketplace.BuyListing("0", 1);
-        if (result.isSuccessful())
+        try
         {
+            var result = await marketplace.BuyListing("0", 1);
             resultText.text = "NFT bought successfully";
         }
-        else
+        catch (System.Exception e)
         {
-            resultText.text = "Buy failed (see console)";
+            resultText.text = "Error Buying listing (see console): " + e.Message;
         }
     }
 

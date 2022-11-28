@@ -17,7 +17,7 @@ var plugin = {
       })
       .catch((err) => {
         console.error("ThirdwebSDK invoke error", err);
-        var msg = err.message;
+        var msg = err.reason || err.message;
         var bufferSize = lengthBytesUTF8(msg) + 1;
         var buffer = _malloc(bufferSize);
         stringToUTF8(msg, buffer, bufferSize);
