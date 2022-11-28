@@ -21,7 +21,7 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC1155 compatible contract.
         /// </summary>
-        public ERC1155(string parentRoute) : base($"{parentRoute}.erc1155")
+        public ERC1155(string parentRoute) : base(Routable.append(parentRoute, "erc1155"))
         {
             this.signature = new ERC1155Signature(baseRoute);
             this.claimConditions = new ERC1155ClaimConditions(baseRoute);
@@ -173,7 +173,7 @@ namespace Thirdweb
     /// </summary>
     public class ERC1155ClaimConditions : Routable
     {
-        public ERC1155ClaimConditions(string parentRoute) : base($"{parentRoute}.claimConditions") 
+        public ERC1155ClaimConditions(string parentRoute) : base(Routable.append(parentRoute, "claimConditions")) 
         {
         }
 
@@ -310,7 +310,7 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC1155Signature(string parentRoute) : base($"{parentRoute}.signature") 
+        public ERC1155Signature(string parentRoute) : base(Routable.append(parentRoute, "signature")) 
         {
         }
 

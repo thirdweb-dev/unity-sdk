@@ -22,7 +22,7 @@ namespace Thirdweb
         /// <summary>
         /// Interact with a Marketplace contract.
         /// </summary>
-        public Marketplace(string chain, string address) : base($"{address}#marketplace")
+        public Marketplace(string chain, string address) : base($"{address}{subSeparator}marketplace")
         {
             this.chain = chain;
             this.address = address;
@@ -87,7 +87,7 @@ namespace Thirdweb
 
     public class MarketplaceDirect : Routable
     {
-        public MarketplaceDirect(string parentRoute) : base($"{parentRoute}.direct")
+        public MarketplaceDirect(string parentRoute) : base(Routable.append(parentRoute, "direct"))
         {
         }
 
@@ -120,7 +120,7 @@ namespace Thirdweb
     // AUCTION
 
     public class MarketplaceAuction : Routable {
-        public MarketplaceAuction(string parentRoute) : base($"{parentRoute}.auction")
+        public MarketplaceAuction(string parentRoute) : base(Routable.append(parentRoute, "auction"))
         {
         }
 
