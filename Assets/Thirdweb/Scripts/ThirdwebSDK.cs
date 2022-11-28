@@ -61,7 +61,7 @@ namespace Thirdweb
         /// </summary>
         /// <param name="chainOrRPC">The chain name or RPC url to connect to</param>
         /// <param name="options">Configuration options</param>
-        public ThirdwebSDK(string chainOrRPC, Options options = new Options()) 
+        public ThirdwebSDK(string chainOrRPC, Options options = new Options())
         {
             this.chainOrRPC = chainOrRPC;
             this.wallet = new Wallet();

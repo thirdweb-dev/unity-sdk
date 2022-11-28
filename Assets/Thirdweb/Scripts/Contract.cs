@@ -42,7 +42,7 @@ namespace Thirdweb
         /// Read data from a contract
         /// </summary>
         /// <param name="functionName">The contract function name to call</param>
-        /// <param name="args">The function arguments. Structs and Lists will get serialized automatically</param>
+        /// <param name="args">Optional function arguments. Structs and Lists will get serialized automatically</param>
         /// <returns>The data deserialized to the given typed</returns>
         public async Task<T> Read<T>(string functionName, params object[] args)
         {
@@ -56,13 +56,31 @@ namespace Thirdweb
         /// Execute a write transaction on a contract
         /// </summary>
         /// <param name="functionName">The contract function name to call</param>
-        /// <param name="args">The function arguments. Structs and Lists will get serialized automatically</param>
+        /// <param name="args">Optional function arguments. Structs and Lists will get serialized automatically</param>
         /// <returns>The transaction receipt</returns>
-        public async Task<TransactionResult> Write(string functionName, params object[] args)
+        public Task<TransactionResult> Write(string functionName, params object[] args)
         {
-            string[] argsEncoded = new string[args.Length + 1];
+            return Write(functionName, null, args);
+        }
+
+        /// <summary>
+        /// Execute a write transaction on a contract
+        /// </summary>
+        /// <param name="functionName">The contract function name to call</param>
+        /// <param name="transactionOverrides">Overrides to pass with the transaction</param>
+        /// <param name="args">Optional function arguments. Structs and Lists will get serialized automatically</param>
+        /// <returns>The transaction receipt</returns>
+        public async Task<TransactionResult> Write(string functionName, TransactionRequest? transactionOverrides, params object[] args)
+        {
+            args = args ?? new object[0];
+            var hasOverrides = transactionOverrides != null;
+            string[] argsEncoded = new string[args.Length + (hasOverrides ? 2 : 1)];
             argsEncoded[0] = functionName;
             Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
+            if (hasOverrides)
+            {
+                argsEncoded[argsEncoded.Length - 1] = Utils.ToJson(transactionOverrides);
+            }
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), argsEncoded);
         }
     }

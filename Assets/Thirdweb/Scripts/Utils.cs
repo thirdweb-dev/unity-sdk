@@ -11,11 +11,12 @@ namespace Thirdweb
         public const string AddressZero = "0x0000000000000000000000000000000000000000";
         public const string NativeTokenAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 
-        public static string[] ToJsonStringArray(params object[] args) {
+        public static string[] ToJsonStringArray(params object[] args)
+        {
             List<string> stringArgs = new List<string>();
             for (int i = 0; i < args.Length; i++)
             {
-                if (args[i] == null) 
+                if (args[i] == null)
                 {
                     continue;
                 }
@@ -32,14 +33,15 @@ namespace Thirdweb
             return stringArgs.ToArray();
         }
 
-        public static string ToJson(object obj) {
+        public static string ToJson(object obj)
+        {
             return JsonConvert.SerializeObject(obj, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
         }
 
         public static string ToBytes32HexString(byte[] bytes)
         {
             var hex = new StringBuilder(64);
-            foreach(var b in bytes)
+            foreach (var b in bytes)
             {
                 hex.AppendFormat("{0:x2}", b);
             }
@@ -49,7 +51,7 @@ namespace Thirdweb
         public static long UnixTimeNowMs()
         {
             var timeSpan = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0));
-            return (long) timeSpan.TotalMilliseconds;
+            return (long)timeSpan.TotalMilliseconds;
         }
     }
 }

@@ -176,7 +176,7 @@ namespace Thirdweb
     /// </summary>
     public class ERC721ClaimConditions : Routable
     {
-       public ERC721ClaimConditions(string parentRoute) : base(Routable.append(parentRoute, "claimConditions")) 
+        public ERC721ClaimConditions(string parentRoute) : base(Routable.append(parentRoute, "claimConditions"))
         {
         }
 
@@ -214,7 +214,7 @@ namespace Thirdweb
     }
 
     [System.Serializable]
-    #nullable enable
+#nullable enable
     public class ERC721MintPayload
     {
         public string to;
@@ -278,7 +278,7 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC721Signature(string parentRoute) : base(Routable.append(parentRoute, "signature")) 
+        public ERC721Signature(string parentRoute) : base(Routable.append(parentRoute, "signature"))
         {
         }
 

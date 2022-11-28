@@ -57,7 +57,8 @@ namespace Thirdweb
     // Marketplace
 
     [System.Serializable]
-    public class Listing {
+    public class Listing
+    {
         public string id;
         public string sellerAddress;
         public string assetContractAddress;
@@ -87,7 +88,8 @@ namespace Thirdweb
     }
 
     [System.Serializable]
-    public abstract class NewListing {
+    public abstract class NewListing
+    {
         public string type;
         public string assetContractAddress;
         public string tokenId;
@@ -100,23 +102,27 @@ namespace Thirdweb
     }
 
     [System.Serializable]
-    public class NewAuctionListing : NewListing {
+    public class NewAuctionListing : NewListing
+    {
         public new string reservePricePerToken;
 
-        public NewAuctionListing() {
+        public NewAuctionListing()
+        {
             this.type = "NewAuctionListing";
         }
     }
 
     [System.Serializable]
-    public class NewDirectListing : NewListing {
-        public NewDirectListing() {
+    public class NewDirectListing : NewListing
+    {
+        public NewDirectListing()
+        {
             this.type = "NewDirectListing";
         }
     }
 
     [System.Serializable]
-    public struct Offer 
+    public struct Offer
     {
         public string listingId;
         public string buyerAddress;
@@ -134,7 +140,7 @@ namespace Thirdweb
     }
 
     [System.Serializable]
-    public class MarketplaceFilter: QueryAllParams
+    public class MarketplaceFilter : QueryAllParams
     {
         public string seller;
         public string tokenContract;
@@ -183,7 +189,8 @@ namespace Thirdweb
         public Receipt receipt;
         public string id;
 
-        public bool isSuccessful() {
+        public bool isSuccessful()
+        {
             return receipt.transactionHash != null;
         }
     }

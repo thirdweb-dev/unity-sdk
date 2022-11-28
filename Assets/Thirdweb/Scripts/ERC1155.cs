@@ -90,7 +90,7 @@ namespace Thirdweb
         /// </summary>
         public async Task<int> TotalSupply(string tokenId)
         {
-            return await Bridge.InvokeRoute<int>(getRoute("totalUnclaimedSupply"), Utils.ToJsonStringArray(tokenId));
+            return await Bridge.InvokeRoute<int>(getRoute("totalSupply"), Utils.ToJsonStringArray(tokenId));
         }
 
         // WRITE FUNCTIONS
@@ -122,17 +122,17 @@ namespace Thirdweb
         /// <summary>
         /// Claim NFTs from a Drop contract
         /// </summary>
-        public async Task<TransactionResult[]> Claim(string tokenId, int amount)
+        public async Task<TransactionResult> Claim(string tokenId, int amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claim"), Utils.ToJsonStringArray(tokenId, amount));
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("claim"), Utils.ToJsonStringArray(tokenId, amount));
         }
 
         /// <summary>
         /// Claim NFTs from a Drop contract and send them to the given address
         /// </summary>
-        public async Task<TransactionResult[]> ClaimTo(string address, string tokenId, int amount)
+        public async Task<TransactionResult> ClaimTo(string address, string tokenId, int amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claimTo"), Utils.ToJsonStringArray(address, tokenId, amount));
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("claimTo"), Utils.ToJsonStringArray(address, tokenId, amount));
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace Thirdweb
     /// </summary>
     public class ERC1155ClaimConditions : Routable
     {
-        public ERC1155ClaimConditions(string parentRoute) : base(Routable.append(parentRoute, "claimConditions")) 
+        public ERC1155ClaimConditions(string parentRoute) : base(Routable.append(parentRoute, "claimConditions"))
         {
         }
 
@@ -212,7 +212,7 @@ namespace Thirdweb
 
     // TODO switch to another JSON serializer that supports polymorphism
     [System.Serializable]
-    #nullable enable
+#nullable enable
     public class ERC1155MintPayload
     {
         public string to;
@@ -310,7 +310,7 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC1155Signature(string parentRoute) : base(Routable.append(parentRoute, "signature")) 
+        public ERC1155Signature(string parentRoute) : base(Routable.append(parentRoute, "signature"))
         {
         }
 

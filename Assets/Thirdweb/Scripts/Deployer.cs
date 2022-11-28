@@ -62,11 +62,13 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<string>(getRoute("deployMarketplace"), Utils.ToJsonStringArray(metadata));
         }
 
-        public async Task<string> DeployReleasedContract(string releaserAddress, string contractName, object[] constructorParams) {
+        public async Task<string> DeployReleasedContract(string releaserAddress, string contractName, object[] constructorParams)
+        {
             return await Bridge.InvokeRoute<string>(getRoute("deployReleasedContract"), Utils.ToJsonStringArray(releaserAddress, contractName, constructorParams));
         }
 
-        public async Task<string> DeployFromContractUri(string uri, object[] constructorParams) {
+        public async Task<string> DeployFromContractUri(string uri, object[] constructorParams)
+        {
             return await Bridge.InvokeRoute<string>(getRoute("deployContractFromUri"), Utils.ToJsonStringArray(uri, constructorParams));
         }
     }
