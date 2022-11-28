@@ -228,12 +228,36 @@ public class ThirdwebSDKDemos : MonoBehaviour
     {
         resultText.text = "Deploying...";
 
-        // fetch listings
+        // deploy nft collection contract
         var address = await sdk.deployer.DeployNFTCollection(new NFTContractDeployMetadata
         {
             name = "Unity Collection",
             primary_sale_recipient = await sdk.wallet.GetAddress(),
         });
         resultText.text = "Deployed: " + address;
+    }
+
+    public async void CustomContract()
+    {
+        var contract = sdk.GetContract("0x62Cf5485B6C24b707E47C5E0FB2EAe7EbE18EC4c");
+        try
+        {
+            // custom read
+            resultText.text = "Fetching contract data...";
+            var result = await contract.Read<string>("uri", 0);
+            resultText.text = "Read custom token uri: " + result;
+            // custom write
+            await contract.Write("claimKitten");
+            // custom write with transaction overrides
+            // await contract.Write("claim", new TransactionRequest
+            // {
+            //     value = "50000000000000000" // 0.05 ETH
+            // }, "0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", 0, 1);
+            resultText.text = "Custom contraact call successful";
+        }
+        catch (System.Exception e)
+        {
+            resultText.text = "Error calling contract (see console): " + e.Message;
+        }
     }
 }
