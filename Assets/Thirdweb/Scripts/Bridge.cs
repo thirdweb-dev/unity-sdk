@@ -90,17 +90,9 @@ namespace Thirdweb
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
             ThirdwebInvoke(taskId, route, msg, jsCallback);
-            try 
-            {
-                string result = await task.Task;
-                // Debug.LogFormat("Result from {0}: {1}", route, result);
-                return JsonConvert.DeserializeObject<Result<T>>(result).result;
-            } 
-            catch (Exception)
-            {
-                // Debug.LogFormat("Error from {0}: {1}", route, e);
-                return default(T);
-            }
+            string result = await task.Task;
+            Debug.Log($"InvokeRoute Result: {result}");
+            return JsonConvert.DeserializeObject<Result<T>>(result).result;
         }
 
         [DllImport("__Internal")]
