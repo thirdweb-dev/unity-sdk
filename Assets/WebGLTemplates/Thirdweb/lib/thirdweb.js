@@ -85,6 +85,9 @@ w.bridge.invoke = async (route, payload) => {
     if (prop && routeArgs.length === 2) {
       const result = await w.thirdweb[prop][routeArgs[1]](...parsedArgs);
       return JSON.stringify({ result: result }, bigNumberReplacer);
+    } else if (routeArgs.length === 2) {
+      const result = await w.thirdweb[routeArgs[1]](...parsedArgs);
+      return JSON.stringify({ result: result }, bigNumberReplacer);
     } else {
       throw "Invalid Route";
     }

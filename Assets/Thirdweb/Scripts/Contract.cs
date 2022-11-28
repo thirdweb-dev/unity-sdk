@@ -38,6 +38,11 @@ namespace Thirdweb
             this.marketplace = new Marketplace(chain, address);
         }
 
+        public async Task<CurrencyValue> GetBalance()
+        {
+            return await Bridge.InvokeRoute<CurrencyValue>($"sdk{separator}getBalance", Utils.ToJsonStringArray(address));
+        }
+
         /// <summary>
         /// Read data from a contract
         /// </summary>
