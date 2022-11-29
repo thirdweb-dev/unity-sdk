@@ -58,21 +58,27 @@ namespace Thirdweb
 
         public static string ToWei(this string eth)
         {
-            double ethDouble = double.Parse(eth);
+            double ethDouble = 0;
+            if (!double.TryParse(eth, out ethDouble))
+                return "INVALID_ARGUMENTS";
             BigInteger wei = (BigInteger)(ethDouble * DECIMALS_18);
             return wei.ToString();
         }
 
         public static string ToEth(this string wei)
         {
-            BigInteger weiBigInt = BigInteger.Parse(wei);
+            BigInteger weiBigInt = 0;
+            if (!BigInteger.TryParse(wei, out weiBigInt))
+                return "INVALID_ARGUMENTS";
             double eth = (double)weiBigInt / DECIMALS_18;
             return eth.ToString();
         }
 
         public static string FormatERC20(this string wei, int decimals = 18, int decimalsToDisplay = 4)
         {
-            BigInteger weiBigInt = BigInteger.Parse(wei);
+            BigInteger weiBigInt = 0;
+            if (!BigInteger.TryParse(wei, out weiBigInt))
+                return "INVALID_ARGUMENTS";
             double eth = (double)weiBigInt / Math.Pow(10.0, decimals);
             string format = "#,0";
             if (decimalsToDisplay > 0)
