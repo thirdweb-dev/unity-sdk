@@ -1,5 +1,6 @@
 /// --- Thirdweb Brige ---
 import { ethers } from "./ethers.js";
+import { ThirdwebStorage } from "https://esm.sh/@thirdweb-dev/storage?bundle";
 import { ThirdwebSDK } from "https://esm.sh/@thirdweb-dev/sdk?bundle";
 
 const separator = "/";
@@ -24,7 +25,16 @@ const w = window;
 w.bridge = {};
 w.bridge.initialize = (chain, options) => {
   console.debug("thirdwebSDK initialization:", chain, options);
-  const sdk = new ThirdwebSDK(chain, JSON.parse(options));
+  const sdkOptions = JSON.parse(options);
+  let storage = new ThirdwebStorage();
+  if (sdkOptions && sdkOptions.ipfsGatewayUrl) {
+    storage = new ThirdwebStorage({
+      gatewayUrls: {
+        "ipfs://": [sdkOptions.ipfsGatewayUrl],
+      },
+    });
+  }
+  const sdk = new ThirdwebSDK(chain, sdkOptions, storage);
   w.thirdweb = sdk;
 };
 
