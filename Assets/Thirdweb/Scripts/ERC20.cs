@@ -55,17 +55,17 @@ namespace Thirdweb
         /// <summary>
         /// Get how much allowance the given address is allowed to spend on behalf of the connected wallet
         /// </summary>
-        public async Task<string> Allowance(string spender)
+        public async Task<CurrencyValue> Allowance(string spender)
         {
-            return await Bridge.InvokeRoute<string>(getRoute("allowance"), Utils.ToJsonStringArray(spender));
+            return await Bridge.InvokeRoute<CurrencyValue>(getRoute("allowance"), Utils.ToJsonStringArray(spender));
         }
 
         /// <summary>
         /// Get how much allowance the given address is allowed to spend on behalf of the specified wallet
         /// </summary>
-        public async Task<string> AllowanceOf(string owner, string spender)
+        public async Task<CurrencyValue> AllowanceOf(string owner, string spender)
         {
-            return await Bridge.InvokeRoute<string>(getRoute("allowanceOf"), Utils.ToJsonStringArray(owner, spender));
+            return await Bridge.InvokeRoute<CurrencyValue>(getRoute("allowanceOf"), Utils.ToJsonStringArray(owner, spender));
         }
 
         /// <summary>
