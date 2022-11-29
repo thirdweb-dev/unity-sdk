@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Thirdweb
 {
-    public class Utils
+    public static class Utils
     {
 
         public const string AddressZero = "0x0000000000000000000000000000000000000000";
