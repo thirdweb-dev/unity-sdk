@@ -11,7 +11,7 @@ namespace Thirdweb
 
         public const string AddressZero = "0x0000000000000000000000000000000000000000";
         public const string NativeTokenAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-        public const long DECIMALS_18 = 1000000000000000000;
+        public const double DECIMALS_18 = 1000000000000000000;
 
         public static string[] ToJsonStringArray(params object[] args)
         {
@@ -56,19 +56,24 @@ namespace Thirdweb
             return (long)timeSpan.TotalMilliseconds;
         }
 
-        public static BigInteger ToWei(this double eth)
+        public static string ToWei(this string eth)
         {
-            return (BigInteger)(eth * DECIMALS_18);
+            double ethDouble = double.Parse(eth);
+            BigInteger wei = (BigInteger)(ethDouble * DECIMALS_18);
+            return wei.ToString();
         }
 
-        public static double ToEth(this BigInteger wei)
+        public static string ToEth(this string wei)
         {
-            return (double)wei / DECIMALS_18;
+            BigInteger weiBigInt = BigInteger.Parse(wei);
+            double eth = (double)weiBigInt / DECIMALS_18;
+            return eth.ToString();
         }
 
-        public static string FormatERC20(this BigInteger weiValue, int decimals = 18, int decimalsToDisplay = 4)
+        public static string FormatERC20(this string wei, int decimals = 18, int decimalsToDisplay = 4)
         {
-            double eth = (double)weiValue / Math.Pow(10.0, (double)decimals);
+            BigInteger weiDouble = BigInteger.Parse(wei);
+            double eth = (double)weiDouble / Math.Pow(10.0, (double)decimals);
             string format = "#,0";
             if (decimalsToDisplay > 0)
                 format += ".";
