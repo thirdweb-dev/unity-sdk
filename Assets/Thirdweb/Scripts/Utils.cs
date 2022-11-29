@@ -60,25 +60,21 @@ namespace Thirdweb
         {
             double ethDouble = 0;
             if (!double.TryParse(eth, out ethDouble))
-                return "INVALID_ARGUMENTS";
+                throw new ArgumentException("Invalid eth value.");
             BigInteger wei = (BigInteger)(ethDouble * DECIMALS_18);
             return wei.ToString();
         }
 
-        public static string ToEth(this string wei)
+        public static string ToEth(this string wei, int decimalsToDisplay = 4)
         {
-            BigInteger weiBigInt = 0;
-            if (!BigInteger.TryParse(wei, out weiBigInt))
-                return "INVALID_ARGUMENTS";
-            double eth = (double)weiBigInt / DECIMALS_18;
-            return eth.ToString();
+            return FormatERC20(wei, decimalsToDisplay);
         }
 
         public static string FormatERC20(this string wei, int decimalsToDisplay = 4, int decimals = 18)
         {
             BigInteger weiBigInt = 0;
             if (!BigInteger.TryParse(wei, out weiBigInt))
-                return "INVALID_ARGUMENTS";
+                throw new ArgumentException("Invalid wei value.");
             double eth = (double)weiBigInt / Math.Pow(10.0, decimals);
             string format = "#,0";
             if (decimalsToDisplay > 0)
