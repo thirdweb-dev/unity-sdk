@@ -77,7 +77,10 @@ w.bridge.invoke = async (route, payload) => {
   const fnArgs = JSON.parse(payload).arguments;
   const parsedArgs = fnArgs.map((arg) => {
     try {
-      return JSON.parse(arg);
+      return typeof arg === "string" &&
+        (arg.startsWith("{") || arg.startsWith("["))
+        ? JSON.parse(arg)
+        : arg;
     } catch (e) {
       return arg;
     }
