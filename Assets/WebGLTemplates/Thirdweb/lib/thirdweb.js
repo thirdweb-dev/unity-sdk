@@ -28,18 +28,25 @@ w.bridge.initialize = (chain, options) => {
   w.thirdweb = sdk;
 };
 
+const updateSDKSigner = () => {
+  if (w.thirdweb) {
+    const provider = new ethers.providers.Web3Provider(w.ethereum);
+    w.thirdweb.updateSignerOrProvider(provider.getSigner());
+  }
+};
+
 w.bridge.connect = async () => {
   if (w.ethereum) {
     await w.ethereum.enable;
     const provider = new ethers.providers.Web3Provider(w.ethereum);
     await provider.send("eth_requestAccounts", []);
     if (w.thirdweb) {
-      w.thirdweb.updateSignerOrProvider(provider.getSigner());
+      updateSDKSigner();
       w.ethereum.on("accountsChanged", async (accounts) => {
-        w.thirdweb.updateSignerOrProvider(provider.getSigner());
+        updateSDKSigner();
       });
       w.ethereum.on("chainChanged", async (chain) => {
-        w.thirdweb.updateSignerOrProvider(provider.getSigner());
+        updateSDKSigner();
       });
       return await w.thirdweb.wallet.getAddress();
     } else {
@@ -56,6 +63,7 @@ w.bridge.switchNetwork = async (chainId) => {
       method: "wallet_switchEthereumChain",
       params: [{ chainId: "0x" + chainId.toString(16) }],
     });
+    updateSDKSigner();
   } else {
     throw "Error Switching Network";
   }
