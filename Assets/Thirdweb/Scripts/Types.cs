@@ -43,7 +43,7 @@ namespace Thirdweb
         {
             return
             $"NFTMetadataWithSupply:"
-            + $"\n>>>>>\n{metadata.ToString()}\n<<<<<\n"
+            + $"\n>>>>>\n{metadata.ToString()}\n<<<<<"
             + $"\n>supply: {supply}";
         }
     }
@@ -61,7 +61,7 @@ namespace Thirdweb
         {
             return
             $"NFT:"
-            + $"\n>>>>>\n{metadata.ToString()}\n<<<<<\n"
+            + $"\n>>>>>\n{metadata.ToString()}\n<<<<<"
             + $"\n>owner: {owner}"
             + $"\n>type: {type}"
             + $"\n>supply: {supply}"
@@ -133,11 +133,11 @@ namespace Thirdweb
             + $"\n>sellerAddress: {sellerAddress}"
             + $"\n>assetContractAddress: {assetContractAddress}"
             + $"\n>tokenId: {tokenId}"
-            + $"\n>>>>>\n{asset.ToString()}\n<<<<<\n"
+            + $"\n>>>>>\n{asset.ToString()}\n<<<<<"
             + $"\n>quantity: {quantity}"
             + $"\n>currencyContractAddress: {currencyContractAddress}"
             + $"\n>buyoutPrice: {buyoutPrice}"
-            + $"\n>>>>>\n{buyoutCurrencyValuePerToken.ToString()}\n<<<<<\n"
+            + $"\n>>>>>\n{buyoutCurrencyValuePerToken.ToString()}\n<<<<<"
             + $"\n>type: {type}";
         }
     }
@@ -152,7 +152,7 @@ namespace Thirdweb
         {
             return
             $"DirectListing:"
-            + $"\n>>>>>\n{base.ToString()}\n<<<<<\n"
+            + $"\n>>>>>\n{base.ToString()}\n<<<<<"
             + $"\n>startTimeInSeconds: {startTimeInSeconds}"
             + $"\n>secondsUntilEnd: {secondsUntilEnd}";
         }
@@ -170,11 +170,11 @@ namespace Thirdweb
         {
             return
             $"AuctionListing:"
-            + $"\n>>>>>\n{base.ToString()}\n<<<<<\n"
+            + $"\n>>>>>\n{base.ToString()}\n<<<<<"
             + $"\n>startTimeInEpochSeconds: {startTimeInEpochSeconds}"
             + $"\n>endTimeInEpochSeconds: {endTimeInEpochSeconds}"
             + $"\n>reservePrice: {reservePrice}"
-            + $"\n>>>>>\n{reservePriceCurrencyValuePerToken.ToString()}\n<<<<<\n";
+            + $"\n>>>>>\n{reservePriceCurrencyValuePerToken.ToString()}\n<<<<<";
         }
     }
 
@@ -221,7 +221,7 @@ namespace Thirdweb
         {
             return
             $"NewAuctionListing:"
-            + $"\n>>>>>\n{base.ToString()}\n<<<<<\n"
+            + $"\n>>>>>\n{base.ToString()}\n<<<<<"
             + $"\n>reservePricePerToken: {reservePricePerToken}";
         }
     }
@@ -238,7 +238,7 @@ namespace Thirdweb
         {
             return
             $"NewDirectListing:"
-            + $"\n>>>>>\n{base.ToString()}\n<<<<<\n";
+            + $"\n>>>>>\n{base.ToString()}\n<<<<<";
         }
     }
 
@@ -260,7 +260,7 @@ namespace Thirdweb
             + $"\n>buyerAddress: {buyerAddress}"
             + $"\n>quantityDesired: {quantityDesired}"
             + $"\n>pricePerToken: {pricePerToken}"
-            + $"\n>>>>>\n{currencyValue.ToString()}\n<<<<<\n"
+            + $"\n>>>>>\n{currencyValue.ToString()}\n<<<<<"
             + $"\n>currencyContractAddress: {currencyContractAddress}";
         }
     }
@@ -291,7 +291,7 @@ namespace Thirdweb
         {
             return
             $"MarketplaceFilter:"
-            + $"\n>>>>>\n{base.ToString()}\n<<<<<\n"
+            + $"\n>>>>>\n{base.ToString()}\n<<<<<"
             + $"\n>seller: {seller}"
             + $"\n>tokenContract: {tokenContract}"
             + $"\n>tokenId: {tokenId}";
@@ -317,7 +317,7 @@ namespace Thirdweb
             $"ClaimConditions:"
             + $"\n>availableSupply: {availableSupply}"
             + $"\n>currentMintSupply: {currentMintSupply}"
-            + $"\n>>>>>\n{currencyMetadata.ToString()}\n<<<<<\n"
+            + $"\n>>>>>\n{currencyMetadata.ToString()}\n<<<<<"
             + $"\n>currencyAddress: {currencyAddress}"
             + $"\n>maxClaimableSupply: {maxClaimableSupply}"
             + $"\n>maxClaimablePerWallet: {maxClaimablePerWallet}"
@@ -422,7 +422,7 @@ namespace Thirdweb
         {
             return
             $"LoginPayloadData:"
-            + $"\n>>>>>\n{payload.ToString()}\n<<<<<\n"
+            + $"\n>>>>>\n{payload.ToString()}\n<<<<<"
             + $"\n>signature: {signature}";
         }
     }
