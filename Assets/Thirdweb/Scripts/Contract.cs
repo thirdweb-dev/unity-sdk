@@ -26,6 +26,10 @@ namespace Thirdweb
         /// Call any Marketplace supported functions
         /// </summary>
         public Marketplace marketplace;
+        /// <summary>
+        /// Call any Pack supported functions
+        /// </summary>
+        public Pack pack;
 
         public Contract(string chain, string address, string abi = null) : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
         {
@@ -36,6 +40,7 @@ namespace Thirdweb
             this.ERC721 = new ERC721(baseRoute);
             this.ERC1155 = new ERC1155(baseRoute);
             this.marketplace = new Marketplace(chain, address);
+            this.pack = new Pack(chain, address);
         }
 
         public async Task<CurrencyValue> GetBalance()
