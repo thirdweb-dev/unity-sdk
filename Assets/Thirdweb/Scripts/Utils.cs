@@ -73,7 +73,7 @@ namespace Thirdweb
         public static string FormatERC20(this string wei, int decimals = 18, int decimalsToDisplay = 4)
         {
             BigInteger weiDouble = BigInteger.Parse(wei);
-            double eth = (double)weiDouble / Math.Pow(10.0, (double)decimals);
+            double eth = (double)weiDouble / Math.Pow(10.0, decimals);
             string format = "#,0";
             if (decimalsToDisplay > 0)
                 format += ".";
