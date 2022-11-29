@@ -74,7 +74,7 @@ namespace Thirdweb
             return eth.ToString();
         }
 
-        public static string FormatERC20(this string wei, int decimals = 18, int decimalsToDisplay = 4)
+        public static string FormatERC20(this string wei, int decimalsToDisplay = 4, int decimals = 18)
         {
             BigInteger weiBigInt = 0;
             if (!BigInteger.TryParse(wei, out weiBigInt))
