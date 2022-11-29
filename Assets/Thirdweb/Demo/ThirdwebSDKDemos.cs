@@ -251,7 +251,7 @@ public class ThirdwebSDKDemos : MonoBehaviour
             // custom write with transaction overrides
             // await contract.Write("claim", new TransactionRequest
             // {
-            //     value = "50000000000000000" // 0.05 ETH
+            //     value = "0.05".ToWei() // 0.05 ETH
             // }, "0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", 0, 1);
             resultText.text = "Custom contraact call successful";
         }

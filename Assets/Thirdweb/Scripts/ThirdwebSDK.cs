@@ -12,6 +12,7 @@ namespace Thirdweb
         public struct Options
         {
             public GaslessOptions? gasless;
+            public string ipfsGatewayUrl;
         }
 
         /// <summary>

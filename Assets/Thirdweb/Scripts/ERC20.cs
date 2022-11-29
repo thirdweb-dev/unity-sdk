@@ -81,7 +81,7 @@ namespace Thirdweb
         /// <summary>
         /// Set how much allowance the given address is allowed to spend on behalf of the connected wallet
         /// </summary>
-        public async Task<TransactionResult> SetAllowance(string spender, bool amount)
+        public async Task<TransactionResult> SetAllowance(string spender, string amount)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("setAllowance"), Utils.ToJsonStringArray(spender, amount));
         }
