@@ -79,7 +79,7 @@
             const script = document.createElement("script");
             script.src = loaderUrl;
             script.onload = () => {
-              import('./lib/thirdweb.js').then(module => {
+              import('./lib/thirdweb-unity-bridge.js').then(module => {
                 createUnityInstance(canvas, config, (progress) => {
                   spinner.style.display = "none";
                   progressBarEmpty.style.display = "";
