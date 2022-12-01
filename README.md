@@ -42,7 +42,7 @@ Note that in order to communicate with the SDK, you need to `Build and run` your
 // instantiate a read only SDK on any EVM chain
 var sdk = new ThirdwebSDK("goerli");
 
-// connect a wallet via browser extension
+// connect the user's wallet - supports Metamask, Coinbase Wallet, WalletConnect and more
 var walletAddress = await sdk.wallet.Connect();
 
 // interact with the wallet
