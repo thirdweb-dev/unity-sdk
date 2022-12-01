@@ -12,11 +12,24 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Connect a user's wallet via browser extension
+        /// Connect a user's wallet via a given wallet provider
         /// </summary>
-        public Task<string> Connect()
+        /// <param name="walletConnection">The wallet provider and chainId to connect to. Defaults to the injected browser extension.</param>
+        public Task<string> Connect(WalletConnection? walletConnection = null)
         {
-            return Bridge.Connect();
+            var connection = walletConnection ?? new WalletConnection()
+            {
+                provider = WalletProvider.Injected,
+            }; ;
+            return Bridge.Connect(connection);
+        }
+
+        /// <summary>
+        /// Disconnect the user's wallet
+        /// </summary>
+        public Task Disconnect()
+        {
+            return Bridge.Disconnect();
         }
 
         /// <summary>
@@ -99,6 +112,29 @@ namespace Thirdweb
         public async Task<TransactionResult> SendRawTransaction(TransactionRequest transactionRequest)
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("sendRawTransaction"), Utils.ToJsonStringArray(transactionRequest));
+        }
+    }
+
+    public struct WalletConnection
+    {
+        public WalletProvider provider;
+        public int chainId;
+    }
+
+    public class WalletProvider
+    {
+        private WalletProvider(string value) { Value = value; }
+
+        public static string Value { get; private set; }
+
+        public static WalletProvider MetaMask { get { return new WalletProvider("metamask"); } }
+        public static WalletProvider CoinbaseWallet { get { return new WalletProvider("coinbaseWallet"); } }
+        public static WalletProvider WalletConnect { get { return new WalletProvider("walletConnect"); } }
+        public static WalletProvider Injected { get { return new WalletProvider("injected"); } }
+
+        public override string ToString()
+        {
+            return Value;
         }
     }
 }

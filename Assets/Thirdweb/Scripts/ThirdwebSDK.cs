@@ -11,6 +11,7 @@ namespace Thirdweb
         [System.Serializable]
         public struct Options
         {
+            public string appName;
             public GaslessOptions? gasless;
             public string ipfsGatewayUrl;
         }

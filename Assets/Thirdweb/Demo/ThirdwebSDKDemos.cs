@@ -7,36 +7,67 @@ public class ThirdwebSDKDemos : MonoBehaviour
 {
     private ThirdwebSDK sdk;
     private int count;
-    public Text loginButton;
-    public Text balanceText;
+    public Text walletInfotext;
+    public GameObject connectButtonsContainer;
+    public GameObject walletInfoContainer;
     public Text resultText;
 
     void Start()
     {
         sdk = new ThirdwebSDK("goerli");
+        InitializeState();
+    }
+
+    private void InitializeState()
+    {
+        connectButtonsContainer.SetActive(true);
+        walletInfoContainer.SetActive(false);
     }
 
     void Update()
     {
     }
 
-    public async void OnLoginCLick()
+    public void MetamaskLogin()
     {
-        loginButton.text = "Connecting...";
-        string address = await sdk.wallet.Connect();
-        loginButton.text = "Connected as: " + address.Substring(0, 6) + "...";
-        int chain = await sdk.wallet.GetChainId();
-        if (chain != 5)
+        ConnectWallet(WalletProvider.MetaMask);
+    }
+
+    public void CoinbaseWalletLogin()
+    {
+        ConnectWallet(WalletProvider.CoinbaseWallet);
+    }
+
+    public void WalletConnectLogin()
+    {
+        ConnectWallet(WalletProvider.WalletConnect);
+    }
+
+    public async void DisconnectWallet()
+    {
+        await sdk.wallet.Disconnect();
+        connectButtonsContainer.SetActive(true);
+        walletInfoContainer.SetActive(false);
+    }
+
+    private async void ConnectWallet(WalletProvider provider)
+    {
+        connectButtonsContainer.SetActive(false);
+        walletInfoContainer.SetActive(true);
+        walletInfotext.text = "Connecting...";
+        string address = await sdk.wallet.Connect(new WalletConnection()
         {
-            await sdk.wallet.SwitchNetwork(5);
-        }
+            provider = provider,
+            chainId = 5 // Switch the wallet Goerli on connection
+        });
+        walletInfotext.text = "Connected as: " + address;
     }
 
     public async void OnBalanceClick()
     {
-        balanceText.text = "Loading...";
+        resultText.text = "Loading...";
         CurrencyValue balance = await sdk.wallet.GetBalance();
-        balanceText.text = "Balance: " + balance.displayValue.Substring(0, 3) + " " + balance.symbol;
+        resultText.text = "Balance: " + balance.displayValue.Substring(0, 3) + " " + balance.symbol;
     }
 
     public async void OnSignClick()
