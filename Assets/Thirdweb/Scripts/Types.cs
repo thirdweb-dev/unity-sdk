@@ -447,4 +447,13 @@ namespace Thirdweb
             + $"\n>chain_id: {chain_id}";
         }
     }
+
+    [System.Serializable]
+    public struct FundWalletOptions
+    {
+        public string appId;
+        public string address;
+        public int chainId;
+        public List<string> assets;
+    }
 }
