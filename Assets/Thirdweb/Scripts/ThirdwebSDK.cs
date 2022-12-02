@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace Thirdweb
 {
     /// <summary>
@@ -80,6 +82,15 @@ namespace Thirdweb
         public Contract GetContract(string address, string abi = null)
         {
             return new Contract(this.chainOrRPC, address, abi);
+        }
+
+        /// <summary>
+        /// Prompt the user to fund their wallet using one of the thirdweb pay providers (defaults to Coinbase Pay).
+        /// </summary>
+        /// <param name="options">The options like wallet address to fund, on which chain, etc</param>
+        public async Task FundWallet(FundWalletOptions options)
+        {
+            await Bridge.FundWallet(options);
         }
     }
 }
