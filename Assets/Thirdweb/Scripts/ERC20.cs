@@ -105,17 +105,17 @@ namespace Thirdweb
         /// <summary>
         /// Claim a given amount of currency for compatible drop contracts
         /// </summary>
-        public async Task<TransactionResult[]> Claim(string amount)
+        public async Task<TransactionResult> Claim(string amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claim"), Utils.ToJsonStringArray(amount));
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("claim"), Utils.ToJsonStringArray(amount));
         }
 
         /// <summary>
         /// Claim a given amount of currency to a given destination wallet for compatible drop contracts
         /// </summary>
-        public async Task<TransactionResult[]> ClaimTo(string address, int amount)
+        public async Task<TransactionResult> ClaimTo(string address, int amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claimTo"), Utils.ToJsonStringArray(address, amount));
+            return await Bridge.InvokeRoute<TransactionResult>(getRoute("claimTo"), Utils.ToJsonStringArray(address, amount));
         }
 
         /// <summary>
