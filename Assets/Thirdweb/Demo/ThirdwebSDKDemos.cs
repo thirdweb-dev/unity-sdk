@@ -260,12 +260,19 @@ public class ThirdwebSDKDemos : MonoBehaviour
         resultText.text = "Deploying...";
 
         // deploy nft collection contract
-        var address = await sdk.deployer.DeployNFTCollection(new NFTContractDeployMetadata
+        try
         {
-            name = "Unity Collection",
-            primary_sale_recipient = await sdk.wallet.GetAddress(),
-        });
-        resultText.text = "Deployed: " + address;
+            var address = await sdk.deployer.DeployNFTCollection(new NFTContractDeployMetadata
+            {
+                name = "Unity Collection",
+                primary_sale_recipient = await sdk.wallet.GetAddress(),
+            });
+            resultText.text = "Deployed: " + address;
+        }
+        catch (System.Exception e)
+        {
+            resultText.text = "Deploy Failed (see console): " + e.Message;
+        }
     }
 
     public async void CustomContract()
