@@ -43,6 +43,23 @@ public class ThirdwebSDKDemos : MonoBehaviour
         ConnectWallet(WalletProvider.WalletConnect);
     }
 
+    public void MagicAuthLogin()
+    {
+        // Requires passing a magic.link API key in the SDK options:
+        // sdk = new ThirdwebSDK("goerli", new ThirdwebSDK.Options()
+        // {
+        //     wallet = new ThirdwebSDK.WalletOptions()
+        //     {
+        //         appName = "Thirdweb SDK Demo",
+        //         extras = new Dictionary<string, object>()
+        //         {
+        //             {"apiKey", "your_api_key"}
+        //         }
+        //     }
+        // });
+        ConnectWallet(WalletProvider.MagicAuth);
+    }
+
     public async void DisconnectWallet()
     {
         await sdk.wallet.Disconnect();
@@ -55,19 +72,26 @@ public class ThirdwebSDKDemos : MonoBehaviour
         connectButtonsContainer.SetActive(false);
         walletInfoContainer.SetActive(true);
         walletInfotext.text = "Connecting...";
-        string address = await sdk.wallet.Connect(new WalletConnection()
+        try
         {
-            provider = provider,
-            chainId = 5 // Switch the wallet Goerli on connection
-        });
-        walletInfotext.text = "Connected as: " + address;
+            string address = await sdk.wallet.Connect(new WalletConnection()
+            {
+                provider = provider,
+                chainId = 5 // Switch the wallet Goerli on connection
+            });
+            walletInfotext.text = "Connected as: " + address;
+        }
+        catch (System.Exception e)
+        {
+            walletInfotext.text = "Error (see console): " + e.Message;
+        }
     }
 
     public async void OnBalanceClick()
     {
         resultText.text = "Loading...";
         CurrencyValue balance = await sdk.wallet.GetBalance();
-        resultText.text = "Balance: " + balance.displayValue.Substring(0, 3) + " " + balance.symbol;
+        resultText.text = "Balance: " + balance.displayValue.Substring(0, 5) + " " + balance.symbol;
     }
 
     public async void OnSignClick()
