@@ -113,6 +113,19 @@ namespace Thirdweb
         {
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("sendRawTransaction"), Utils.ToJsonStringArray(transactionRequest));
         }
+
+        /// <summary>
+        /// Prompt the user to fund their wallet using one of the thirdweb pay providers (defaults to Coinbase Pay).
+        /// </summary>
+        /// <param name="options">The options like wallet address to fund, on which chain, etc</param>
+        public async Task FundWallet(FundWalletOptions options)
+        {
+            if (options.address == null)
+            {
+                options.address = await GetAddress();
+            }
+            await Bridge.FundWallet(options);
+        }
     }
 
     public struct WalletConnection
@@ -131,6 +144,7 @@ namespace Thirdweb
         public static WalletProvider CoinbaseWallet { get { return new WalletProvider("coinbaseWallet"); } }
         public static WalletProvider WalletConnect { get { return new WalletProvider("walletConnect"); } }
         public static WalletProvider Injected { get { return new WalletProvider("injected"); } }
+        public static WalletProvider MagicAuth { get { return new WalletProvider("magicAuth"); } }
 
         public override string ToString()
         {
