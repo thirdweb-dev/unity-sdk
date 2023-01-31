@@ -142,7 +142,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Connected As: 0x0000000000000000000000000000000000000000'
+  m_text: 'Connected As: 0x000...000'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -169,7 +169,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.35
+  m_fontSize: 53.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -521,7 +521,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: -160}
-  m_SizeDelta: {x: 1200, y: 256}
+  m_SizeDelta: {x: 880, y: 256}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &472489318
 CanvasRenderer:
@@ -2027,7 +2027,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: -50, y: 0}
-  m_SizeDelta: {x: 1200, y: 125}
+  m_SizeDelta: {x: 880, y: 125}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &1620813803
 CanvasRenderer:
@@ -2311,8 +2311,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 600, y: -190.5}
-  m_SizeDelta: {x: 1194, y: 125}
+  m_AnchoredPosition: {x: 440, y: -190.5}
+  m_SizeDelta: {x: 874, y: 125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1650537833
 CanvasRenderer:
@@ -2597,8 +2597,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 600, y: -65.5}
-  m_SizeDelta: {x: 1194, y: 125}
+  m_AnchoredPosition: {x: 440, y: -65.5}
+  m_SizeDelta: {x: 874, y: 125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2050955169
 CanvasRenderer:
@@ -2689,10 +2689,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56e0ba15cb38b4345825030a6c81d2dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chain: 0
+  chain: ethereum
+  chainID: 1
   supportedWallets: 0000000001000000020000000300000004000000
   connectButton: {fileID: 1335404547334051784}
-  connectDropdown: {fileID: 1335404547797609897}
+  connectDropdown: {fileID: 1335404547797609896}
   walletButtons:
   - wallet: 0
     walletButton: {fileID: 1335404546759128316}
@@ -2705,7 +2706,7 @@ MonoBehaviour:
   - wallet: 4
     walletButton: {fileID: 679192013}
   connectedButton: {fileID: 1620813798}
-  connectedDropdown: {fileID: 472489314}
+  connectedDropdown: {fileID: 472489313}
   connectInfoText: {fileID: 1457839850}
   walletAddressText: {fileID: 262581968}
 --- !u!1 &1335404546301859018

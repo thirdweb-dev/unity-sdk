@@ -6,26 +6,6 @@ using System;
 using TMPro;
 
 // Can be added to SDK
-public enum Chain
-{
-    Ethereum,
-    Goerli,
-    Polygon,
-    Mumbai,
-    Arbitrum,
-    ArbitrumGoerli,
-    Avalanche,
-    AvalancheFujiTestnet,
-    BinanceSmartChainMainnet,
-    BinanceSmartChainTestnet,
-    Fantom,
-    FantomTestnet,
-    Optimism,
-    OptimismGoerli,
-}
-
-// Can be added to SDK
-[Serializable]
 public enum Wallet
 {
     MetaMask,
@@ -46,22 +26,21 @@ public struct WalletButton
 public class Prefab_ConnectWallet : MonoBehaviour
 {
     [Header("SETTINGS")]
-    public Chain chain;
-    public List<Wallet> supportedWallets;
+    public string chain = "ethereum";
+    public int chainID = 1;
+    public List<Wallet> supportedWallets = new List<Wallet> { Wallet.MetaMask, Wallet.CoinbaseWallet, Wallet.Injected, Wallet.MagicAuth };
 
     [Header("UI - CONNECTING")]
     public GameObject connectButton;
-    public Transform connectDropdown;
+    public GameObject connectDropdown;
     public List<WalletButton> walletButtons;
 
     [Header("UI - CONNECTED")]
     public GameObject connectedButton;
-    public Transform connectedDropdown;
+    public GameObject connectedDropdown;
     public TMP_Text connectInfoText;
     public TMP_Text walletAddressText;
 
-    bool dropdownExpand;
-    Coroutine dropdownRoutine;
     string address;
 
     ThirdwebSDK SDK;
@@ -84,41 +63,34 @@ public class Prefab_ConnectWallet : MonoBehaviour
         foreach (WalletButton wb in walletButtons)
             wb.walletButton.SetActive(supportedWallets.Contains(wb.wallet));
 
-        connectDropdown.localScale = Vector3.zero;
-        connectDropdown.gameObject.SetActive(false);
-
-        connectedDropdown.localScale = Vector3.zero;
-        connectedDropdown.gameObject.SetActive(false);
-
         connectButton.SetActive(true);
         connectedButton.SetActive(false);
 
-        dropdownExpand = false;
+        connectDropdown.SetActive(false);
+        connectedDropdown.SetActive(false);
     }
 
     // Connecting
 
     public async void OnConnect(Wallet _wallet)
     {
-        WalletProvider _provider = GetWalletProvider(_wallet);
-        int _chainID = GetChainID(chain);
-
         try
         {
             address = await SDK.wallet.Connect(
                new WalletConnection()
                {
-                   provider = _provider,
-                   chainId = _chainID
+                   provider = GetWalletProvider(_wallet),
+                   chainId = chainID
                });
 
             connectInfoText.text = $"{_wallet} ({chain})";
-            walletAddressText.text = $"Connected As: {address}";
+            walletAddressText.text = $"Connected As: {address.ShortenAddress()}";
 
             connectButton.SetActive(false);
             connectedButton.SetActive(true);
 
-            dropdownExpand = false;
+            connectDropdown.SetActive(false);
+            connectedDropdown.SetActive(false);
 
             LogThirdweb($"Connected successfully to: {address}");
         }
@@ -137,16 +109,11 @@ public class Prefab_ConnectWallet : MonoBehaviour
             await SDK.wallet.Disconnect();
             address = null;
 
-            connectDropdown.localScale = Vector3.zero;
-            connectDropdown.gameObject.SetActive(false);
-
-            connectedDropdown.localScale = Vector3.zero;
-            connectedDropdown.gameObject.SetActive(false);
-
             connectButton.SetActive(true);
             connectedButton.SetActive(false);
 
-            dropdownExpand = false;
+            connectDropdown.SetActive(false);
+            connectedDropdown.SetActive(false);
 
             LogThirdweb($"Disconnected successfully.");
 
@@ -170,65 +137,13 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
     public void OnClickDropdown()
     {
-        dropdownExpand = !dropdownExpand;
-
-        if (dropdownRoutine != null)
-            StopCoroutine(dropdownRoutine);
-
-        dropdownRoutine = StartCoroutine(DropdownRoutine(String.IsNullOrEmpty(address) ? connectDropdown : connectedDropdown));
-    }
-
-    IEnumerator DropdownRoutine(Transform _object)
-    {
-        _object.gameObject.SetActive(true);
-        Vector3 targetScale = dropdownExpand ? Vector3.one : Vector3.zero;
-        while (Math.Abs(_object.localScale.x - targetScale.x) > 0.01f)
-        {
-            _object.localScale = Vector3.Lerp(_object.localScale, targetScale, 10f * Time.deltaTime);
-            yield return new WaitForEndOfFrame();
-        }
-        _object.localScale = targetScale;
-        _object.gameObject.SetActive(dropdownExpand);
+        if (String.IsNullOrEmpty(address))
+            connectDropdown.SetActive(!connectDropdown.activeInHierarchy);
+        else
+            connectedDropdown.SetActive(!connectedDropdown.activeInHierarchy);
     }
 
     // Utility
-
-    int GetChainID(Chain _chain)
-    {
-        switch (chain)
-        {
-            case Chain.Ethereum:
-                return 1;
-            case Chain.Goerli:
-                return 5;
-            case Chain.Polygon:
-                return 137;
-            case Chain.Mumbai:
-                return 80001;
-            case Chain.Arbitrum:
-                return 42161;
-            case Chain.ArbitrumGoerli:
-                return 421613;
-            case Chain.Avalanche:
-                return 43114;
-            case Chain.AvalancheFujiTestnet:
-                return 43113;
-            case Chain.BinanceSmartChainMainnet:
-                return 56;
-            case Chain.BinanceSmartChainTestnet:
-                return 97;
-            case Chain.Fantom:
-                return 250;
-            case Chain.FantomTestnet:
-                return 4002;
-            case Chain.Optimism:
-                return 10;
-            case Chain.OptimismGoerli:
-                return 420;
-            default:
-                throw new UnityException($"Chain ID for chain {_chain} unimplemented!");
-        }
-    }
 
     WalletProvider GetWalletProvider(Wallet _wallet)
     {
