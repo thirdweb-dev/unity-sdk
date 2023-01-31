@@ -6,9 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Thirdweb/Demo/ThirdwebDemoScene.unity
+    path: Assets/Thirdweb/Core/Demo/ThirdwebDemoScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
-    path: Assets/Thirdweb/_Scenes/Scene_Prefabs.unity
+    path: Assets/Thirdweb/Examples/Scenes/Scene_Prefabs.unity
     guid: bd374468f6e2ace4c81d8f34ac8672ca
   m_configObjects: {}

@@ -2690,12 +2690,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chain: 0
-  supportedWallets: 00000000
+  supportedWallets: 0000000001000000020000000300000004000000
   connectButton: {fileID: 1335404547334051784}
   connectDropdown: {fileID: 1335404547797609897}
   walletButtons:
   - wallet: 0
     walletButton: {fileID: 1335404546759128316}
+  - wallet: 1
+    walletButton: {fileID: 1045367075}
+  - wallet: 2
+    walletButton: {fileID: 351517269}
+  - wallet: 3
+    walletButton: {fileID: 1632169853}
+  - wallet: 4
+    walletButton: {fileID: 679192013}
   connectedButton: {fileID: 1620813798}
   connectedDropdown: {fileID: 472489314}
   connectInfoText: {fileID: 1457839850}
