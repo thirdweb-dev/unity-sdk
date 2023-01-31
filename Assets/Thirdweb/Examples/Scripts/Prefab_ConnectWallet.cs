@@ -5,7 +5,6 @@ using System;
 using TMPro;
 using UnityEngine.UI;
 
-// Can be added to SDK
 public enum Wallet
 {
     MetaMask,
@@ -14,7 +13,6 @@ public enum Wallet
     MagicAuth,
 }
 
-// Can be replaced with Serializeable Dictionary (asset)
 [Serializable]
 public struct WalletButton
 {
