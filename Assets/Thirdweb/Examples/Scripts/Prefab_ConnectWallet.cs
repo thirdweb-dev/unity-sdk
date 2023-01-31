@@ -18,6 +18,7 @@ public struct WalletButton
 {
     public Wallet wallet;
     public GameObject walletButton;
+    public Sprite icon;
 }
 
 public class Prefab_ConnectWallet : MonoBehaviour
@@ -36,6 +37,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public GameObject connectedDropdown;
     public TMP_Text connectInfoText;
     public TMP_Text walletAddressText;
+    public Image dropdownIcon;
 
     string address;
 
@@ -95,14 +97,16 @@ public class Prefab_ConnectWallet : MonoBehaviour
                    chainId = GetChainID(chain),
                });
 
-            connectInfoText.text = $"{_wallet} ({chain})";
-            walletAddressText.text = $"Connected As: {address.ShortenAddress()}";
+            connectInfoText.text = chain;
+            walletAddressText.text = address.ShortenAddress();
 
             connectButton.SetActive(false);
             connectedButton.SetActive(true);
 
             connectDropdown.SetActive(false);
             connectedDropdown.SetActive(false);
+
+            dropdownIcon.sprite = walletButtons.Find(x => x.wallet == _wallet).icon;
 
             LogThirdweb($"Connected successfully to: {address}");
         }
