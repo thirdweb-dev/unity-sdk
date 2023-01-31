@@ -1,9 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Thirdweb;
 using System;
 using TMPro;
+using UnityEngine.UI;
 
 // Can be added to SDK
 public enum Wallet
@@ -11,7 +11,6 @@ public enum Wallet
     MetaMask,
     CoinbaseWallet,
     WalletConnect,
-    Injected,
     MagicAuth,
 }
 
@@ -26,16 +25,15 @@ public struct WalletButton
 public class Prefab_ConnectWallet : MonoBehaviour
 {
     [Header("SETTINGS")]
-    public string chain = "ethereum";
-    public int chainID = 1;
-    public List<Wallet> supportedWallets = new List<Wallet> { Wallet.MetaMask, Wallet.CoinbaseWallet, Wallet.Injected, Wallet.MagicAuth };
+    public string chain = "goerli";
+    public List<Wallet> supportedWallets = new List<Wallet> { Wallet.MetaMask, Wallet.CoinbaseWallet, Wallet.WalletConnect };
 
-    [Header("UI - CONNECTING")]
+    [Header("UI - CONNECTING (DO NOT EDIT)")]
     public GameObject connectButton;
     public GameObject connectDropdown;
     public List<WalletButton> walletButtons;
 
-    [Header("UI - CONNECTED")]
+    [Header("UI - CONNECTED (DO NOT EDIT)")]
     public GameObject connectedButton;
     public GameObject connectedDropdown;
     public TMP_Text connectInfoText;
@@ -60,8 +58,24 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         address = null;
 
+        if (supportedWallets.Count == 1)
+            connectButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(supportedWallets[0]));
+        else
+            connectButton.GetComponent<Button>().onClick.AddListener(() => OnClickDropdown());
+
+
         foreach (WalletButton wb in walletButtons)
-            wb.walletButton.SetActive(supportedWallets.Contains(wb.wallet));
+        {
+            if (supportedWallets.Contains(wb.wallet))
+            {
+                wb.walletButton.SetActive(true);
+                wb.walletButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(wb.wallet));
+            }
+            else
+            {
+                wb.walletButton.SetActive(false);
+            }
+        }
 
         connectButton.SetActive(true);
         connectedButton.SetActive(false);
@@ -80,7 +94,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
                new WalletConnection()
                {
                    provider = GetWalletProvider(_wallet),
-                   chainId = chainID
+                   chainId = GetChainID(chain),
                });
 
             connectInfoText.text = $"{_wallet} ({chain})";
@@ -96,7 +110,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         }
         catch (Exception e)
         {
-            LogThirdweb($"Error Connecting Wallet: ${e.Message}");
+            LogThirdweb($"Error Connecting Wallet: {e.Message}");
         }
     }
 
@@ -120,20 +134,11 @@ public class Prefab_ConnectWallet : MonoBehaviour
         }
         catch (Exception e)
         {
-            LogThirdweb($"Error Disconnecting Wallet: ${e.Message}");
+            LogThirdweb($"Error Disconnecting Wallet: {e.Message}");
         }
     }
 
     // UI
-
-    public void OnTryConnect(string _walletStr)
-    {
-        Wallet wallet;
-        if (Enum.TryParse<Wallet>(_walletStr, out wallet))
-            OnConnect(wallet);
-        else
-            LogThirdweb($"Did not find wallet: {_walletStr}");
-    }
 
     public void OnClickDropdown()
     {
@@ -155,12 +160,50 @@ public class Prefab_ConnectWallet : MonoBehaviour
                 return WalletProvider.CoinbaseWallet;
             case Wallet.WalletConnect:
                 return WalletProvider.WalletConnect;
-            case Wallet.Injected:
-                return WalletProvider.Injected;
             case Wallet.MagicAuth:
                 return WalletProvider.MagicAuth;
             default:
                 throw new UnityException($"Wallet Provider for wallet {_wallet} unimplemented!");
+        }
+    }
+
+    int GetChainID(string _chain)
+    {
+        switch (_chain)
+        {
+            case "mainnet":
+            case "ethereum":
+                return 1;
+            case "goerli":
+                return 5;
+            case "polygon":
+            case "matic":
+                return 137;
+            case "mumbai":
+                return 80001;
+            case "fantom":
+                return 250;
+            case "fantom-testnet":
+                return 4002;
+            case "avalanche":
+                return 43114;
+            case "avalanche-testnet":
+            case "avalanche-fuji":
+                return 43113;
+            case "optimism":
+                return 10;
+            case "optimism-goerli":
+                return 420;
+            case "arbitrum":
+                return 42161;
+            case "arbitrum-goerli":
+                return 421613;
+            case "binance":
+                return 56;
+            case "binance-testnet":
+                return 97;
+            default:
+                throw new UnityException($"Chain ID for chain {_chain} unimplemented!");
         }
     }
 
