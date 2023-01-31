@@ -11,7 +11,17 @@ public enum Chain
     Ethereum,
     Goerli,
     Polygon,
-    Mumbai
+    Mumbai,
+    Arbitrum,
+    ArbitrumGoerli,
+    Avalanche,
+    AvalancheFujiTestnet,
+    BinanceSmartChainMainnet,
+    BinanceSmartChainTestnet,
+    Fantom,
+    FantomTestnet,
+    Optimism,
+    OptimismGoerli,
 }
 
 // Can be added to SDK
@@ -195,6 +205,26 @@ public class Prefab_ConnectWallet : MonoBehaviour
                 return 137;
             case Chain.Mumbai:
                 return 80001;
+            case Chain.Arbitrum:
+                return 42161;
+            case Chain.ArbitrumGoerli:
+                return 421613;
+            case Chain.Avalanche:
+                return 43114;
+            case Chain.AvalancheFujiTestnet:
+                return 43113;
+            case Chain.BinanceSmartChainMainnet:
+                return 56;
+            case Chain.BinanceSmartChainTestnet:
+                return 97;
+            case Chain.Fantom:
+                return 250;
+            case Chain.FantomTestnet:
+                return 4002;
+            case Chain.Optimism:
+                return 10;
+            case Chain.OptimismGoerli:
+                return 420;
             default:
                 throw new UnityException($"Chain ID for chain {_chain} unimplemented!");
         }
