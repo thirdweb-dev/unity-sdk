@@ -83,5 +83,11 @@ namespace Thirdweb
                 format += "#";
             return eth.ToString(format);
         }
+
+        public static string ShortenAddress(this string address)
+        {
+            if (address.Length != 42) throw new ArgumentException("Invalid Address Length.");
+            return $"{address.Substring(0, 5)}...{address.Substring(39)}";
+        }
     }
 }
