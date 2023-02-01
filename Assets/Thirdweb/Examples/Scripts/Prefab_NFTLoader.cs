@@ -13,13 +13,13 @@ public enum NFTType
 [Serializable]
 public struct NFTQuery
 {
-    public List<NFTQuery_Single> singleQueries;
-    public List<NFTQuery_Multi> multiQueries;
-    public List<NFTQuery_Owned> ownedQueries;
+    public List<SingleQuery> loadOneNft;
+    public List<MultiQuery> loadMultipleNfts;
+    public List<OwnedQuery> loadOwnedNfts;
 }
 
 [Serializable]
-public struct NFTQuery_Single
+public struct SingleQuery
 {
     public string contractAddress;
     public string tokenID;
@@ -27,7 +27,7 @@ public struct NFTQuery_Single
 }
 
 [Serializable]
-public struct NFTQuery_Multi
+public struct MultiQuery
 {
     public string contractAddress;
     public int startID;
@@ -36,7 +36,7 @@ public struct NFTQuery_Multi
 }
 
 [Serializable]
-public struct NFTQuery_Owned
+public struct OwnedQuery
 {
     public string contractAddress;
     public string owner;
@@ -66,7 +66,7 @@ public class Prefab_NFTLoader : MonoBehaviour
 
         List<NFT> nftsToLoad = new List<NFT>();
 
-        foreach (NFTQuery_Single singleQuery in query.singleQueries)
+        foreach (SingleQuery singleQuery in query.loadOneNft)
         {
             Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(singleQuery.contractAddress);
 
@@ -77,7 +77,7 @@ public class Prefab_NFTLoader : MonoBehaviour
             nftsToLoad.Add(tempNFT);
         }
 
-        foreach (NFTQuery_Multi multiQuery in query.multiQueries)
+        foreach (MultiQuery multiQuery in query.loadMultipleNfts)
         {
             Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(multiQuery.contractAddress);
 
@@ -88,7 +88,7 @@ public class Prefab_NFTLoader : MonoBehaviour
             nftsToLoad.AddRange(tempNFTList);
         }
 
-        foreach (NFTQuery_Owned ownedQuery in query.ownedQueries)
+        foreach (OwnedQuery ownedQuery in query.loadOwnedNfts)
         {
             Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(ownedQuery.contractAddress);
 
@@ -104,8 +104,7 @@ public class Prefab_NFTLoader : MonoBehaviour
         foreach (NFT nft in nftsToLoad)
         {
             Prefab_NFT nftPrefabScript = Instantiate(nftPrefab, contentParent);
-            nftPrefabScript.nft = nft;
-            nftPrefabScript.LoadNFT();
+            nftPrefabScript.LoadNFT(nft);
             // Potentially wait a little here if you are loading a lot without a private IPFS gateway
             // Could also put this foreach in a separate Coroutine to avoid async object spawning
         }

@@ -7,16 +7,11 @@ using UnityEngine.Networking;
 
 public class Prefab_NFT : MonoBehaviour
 {
-    [Header("SETTINGS")]
-    public NFT nft;
-
-    [Header("UI ELEMENTS (DO NOT EDIT)")]
+    [Header("UI ELEMENTS")]
     public Image nftImage;
-    public TMP_Text nftMetadata;
 
-    public void LoadNFT()
+    public void LoadNFT(NFT nft)
     {
-        nftMetadata.text = nft.ToString();
         StartCoroutine(LoadNFTRoutine(nft));
     }
 
