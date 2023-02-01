@@ -591,6 +591,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   contractAddress: 0x2e01763fA0e15e07294D74B63cE4b526B321E389
   tokenID: 0
+  isERC1155: 0
   nftImage: {fileID: 7568917607133685709}
   nftMetadata: {fileID: 7568917606938676257}
 --- !u!1 &7568917608239700839
