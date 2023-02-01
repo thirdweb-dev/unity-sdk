@@ -26,12 +26,12 @@ public class Prefab_ConnectWallet : MonoBehaviour
     [Header("SETTINGS")]
     public List<Wallet> supportedWallets = new List<Wallet> { Wallet.MetaMask, Wallet.CoinbaseWallet, Wallet.WalletConnect };
 
-    [Header("UI - CONNECTING (DO NOT EDIT)")]
+    [Header("UI ELEMENTS (DO NOT EDIT)")]
+    // Connecting
     public GameObject connectButton;
     public GameObject connectDropdown;
     public List<WalletButton> walletButtons;
-
-    [Header("UI - CONNECTED (DO NOT EDIT)")]
+    // Connected
     public GameObject connectedButton;
     public GameObject connectedDropdown;
     public TMP_Text connectInfoText;
