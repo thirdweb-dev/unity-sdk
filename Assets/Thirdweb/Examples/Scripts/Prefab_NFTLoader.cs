@@ -4,6 +4,13 @@ using UnityEngine;
 using Thirdweb;
 
 [Serializable]
+public enum NFTType
+{
+    ERC721,
+    ERC1155
+}
+
+[Serializable]
 public struct NFTQuery
 {
     public List<NFTQuery_Single> singleQueries;
@@ -16,7 +23,7 @@ public struct NFTQuery_Single
 {
     public string contractAddress;
     public string tokenID;
-    public bool isERC1155;
+    public NFTType type;
 }
 
 [Serializable]
@@ -25,7 +32,7 @@ public struct NFTQuery_Multi
     public string contractAddress;
     public int startID;
     public int count;
-    public bool isERC1155;
+    public NFTType type;
 }
 
 [Serializable]
@@ -33,7 +40,7 @@ public struct NFTQuery_Owned
 {
     public string contractAddress;
     public string owner;
-    public bool isERC1155;
+    public NFTType type;
 }
 
 public class Prefab_NFTLoader : MonoBehaviour
@@ -63,7 +70,7 @@ public class Prefab_NFTLoader : MonoBehaviour
         {
             Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(singleQuery.contractAddress);
 
-            NFT tempNFT = singleQuery.isERC1155 ?
+            NFT tempNFT = singleQuery.type == NFTType.ERC1155 ?
                 await tempContract.ERC1155.Get(singleQuery.tokenID) :
                 await tempContract.ERC721.Get(singleQuery.tokenID);
 
@@ -74,7 +81,7 @@ public class Prefab_NFTLoader : MonoBehaviour
         {
             Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(multiQuery.contractAddress);
 
-            List<NFT> tempNFTList = multiQuery.isERC1155 ?
+            List<NFT> tempNFTList = multiQuery.type == NFTType.ERC1155 ?
                 await tempContract.ERC1155.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count }) :
                 await tempContract.ERC721.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count });
 
@@ -85,7 +92,7 @@ public class Prefab_NFTLoader : MonoBehaviour
         {
             Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(ownedQuery.contractAddress);
 
-            List<NFT> tempNFTList = ownedQuery.isERC1155 ?
+            List<NFT> tempNFTList = ownedQuery.type == NFTType.ERC1155 ?
                 await tempContract.ERC1155.GetOwned(ownedQuery.owner) :
                 await tempContract.ERC721.GetOwned(ownedQuery.owner);
 
