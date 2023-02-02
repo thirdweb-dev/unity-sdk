@@ -96,25 +96,36 @@ public class Prefab_ConnectWallet : MonoBehaviour
                    chainId = (int)ThirdwebManager.Instance.chain,
                });
 
-            CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
-            balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
-            walletAddressText.text = address.ShortenAddress();
-            currentNetworkText.text = ThirdwebManager.Instance.chainIdentifiers[ThirdwebManager.Instance.chain];
-
-            connectButton.SetActive(false);
-            connectedButton.SetActive(true);
-            connectDropdown.SetActive(false);
-            connectedDropdown.SetActive(false);
-            networkDropdown.SetActive(false);
-            walletImage.sprite = walletButtons.Find(x => x.wallet == _wallet).icon;
             wallet = _wallet;
-
+            OnConnected();
             print($"Connected successfully to: {address}");
         }
         catch (Exception e)
         {
             print($"Error Connecting Wallet: {e.Message}");
         }
+    }
+
+    async void OnConnected()
+    {
+        try
+        {
+            CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
+            balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
+            walletAddressText.text = address.ShortenAddress();
+            currentNetworkText.text = ThirdwebManager.Instance.chainIdentifiers[ThirdwebManager.Instance.chain];
+            connectButton.SetActive(false);
+            connectedButton.SetActive(true);
+            connectDropdown.SetActive(false);
+            connectedDropdown.SetActive(false);
+            networkDropdown.SetActive(false);
+            walletImage.sprite = walletButtons.Find(x => x.wallet == wallet).icon;
+        }
+        catch (Exception e)
+        {
+            print($"Error Fetching Native Balance: {e.Message}");
+        }
+
     }
 
     // Disconnecting
@@ -124,14 +135,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         try
         {
             await ThirdwebManager.Instance.SDK.wallet.Disconnect();
-            address = null;
-
-            connectButton.SetActive(true);
-            connectedButton.SetActive(false);
-
-            connectDropdown.SetActive(false);
-            connectedDropdown.SetActive(false);
-
+            OnDisconnected();
             print($"Disconnected successfully.");
 
         }
@@ -141,12 +145,32 @@ public class Prefab_ConnectWallet : MonoBehaviour
         }
     }
 
+    void OnDisconnected()
+    {
+        address = null;
+        connectButton.SetActive(true);
+        connectedButton.SetActive(false);
+        connectDropdown.SetActive(false);
+        connectedDropdown.SetActive(false);
+    }
+
     // Switching Network
 
-    public void OnSwitchNetwork(Chain _chain)
+    public async void OnSwitchNetwork(Chain _chain)
     {
-        ThirdwebManager.Instance.chain = _chain;
-        OnConnect(wallet);
+
+        try
+        {
+            ThirdwebManager.Instance.chain = _chain;
+            await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork((int)_chain);
+            OnConnected();
+            print($"Switched Network Successfully: {_chain}");
+
+        }
+        catch (Exception e)
+        {
+            print($"Error Switching Network: {e.Message}");
+        }
     }
 
     // UI
