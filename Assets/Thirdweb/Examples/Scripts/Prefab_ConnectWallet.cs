@@ -24,15 +24,14 @@ public struct WalletButton
 public class Prefab_ConnectWallet : MonoBehaviour
 {
     [Header("SETTINGS")]
-    public string chain = "goerli";
     public List<Wallet> supportedWallets = new List<Wallet> { Wallet.MetaMask, Wallet.CoinbaseWallet, Wallet.WalletConnect };
 
-    [Header("UI - CONNECTING (DO NOT EDIT)")]
+    [Header("UI ELEMENTS (DO NOT EDIT)")]
+    // Connecting
     public GameObject connectButton;
     public GameObject connectDropdown;
     public List<WalletButton> walletButtons;
-
-    [Header("UI - CONNECTED (DO NOT EDIT)")]
+    // Connected
     public GameObject connectedButton;
     public GameObject connectedDropdown;
     public TMP_Text connectInfoText;
@@ -40,17 +39,6 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public Image dropdownIcon;
 
     string address;
-
-    ThirdwebSDK SDK;
-
-    // SDK Initialization
-
-    private void Awake()
-    {
-#if !UNITY_EDITOR
-        SDK = new ThirdwebSDK(chain.ToString().ToLower());
-#endif
-    }
 
     // UI Initialization
 
@@ -90,14 +78,14 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         try
         {
-            address = await SDK.wallet.Connect(
+            address = await ThirdwebManager.Instance.SDK.wallet.Connect(
                new WalletConnection()
                {
                    provider = GetWalletProvider(_wallet),
-                   chainId = GetChainID(chain),
+                   chainId = ThirdwebManager.Instance.GetChainID(),
                });
 
-            connectInfoText.text = chain;
+            connectInfoText.text = ThirdwebManager.Instance.chain;
             walletAddressText.text = address.ShortenAddress();
 
             connectButton.SetActive(false);
@@ -108,11 +96,11 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
             dropdownIcon.sprite = walletButtons.Find(x => x.wallet == _wallet).icon;
 
-            LogThirdweb($"Connected successfully to: {address}");
+            print($"Connected successfully to: {address}");
         }
         catch (Exception e)
         {
-            LogThirdweb($"Error Connecting Wallet: {e.Message}");
+            print($"Error Connecting Wallet: {e.Message}");
         }
     }
 
@@ -122,7 +110,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         try
         {
-            await SDK.wallet.Disconnect();
+            await ThirdwebManager.Instance.SDK.wallet.Disconnect();
             address = null;
 
             connectButton.SetActive(true);
@@ -131,12 +119,12 @@ public class Prefab_ConnectWallet : MonoBehaviour
             connectDropdown.SetActive(false);
             connectedDropdown.SetActive(false);
 
-            LogThirdweb($"Disconnected successfully.");
+            print($"Disconnected successfully.");
 
         }
         catch (Exception e)
         {
-            LogThirdweb($"Error Disconnecting Wallet: {e.Message}");
+            print($"Error Disconnecting Wallet: {e.Message}");
         }
     }
 
@@ -167,50 +155,5 @@ public class Prefab_ConnectWallet : MonoBehaviour
             default:
                 throw new UnityException($"Wallet Provider for wallet {_wallet} unimplemented!");
         }
-    }
-
-    int GetChainID(string _chain)
-    {
-        switch (_chain)
-        {
-            case "mainnet":
-            case "ethereum":
-                return 1;
-            case "goerli":
-                return 5;
-            case "polygon":
-            case "matic":
-                return 137;
-            case "mumbai":
-                return 80001;
-            case "fantom":
-                return 250;
-            case "fantom-testnet":
-                return 4002;
-            case "avalanche":
-                return 43114;
-            case "avalanche-testnet":
-            case "avalanche-fuji":
-                return 43113;
-            case "optimism":
-                return 10;
-            case "optimism-goerli":
-                return 420;
-            case "arbitrum":
-                return 42161;
-            case "arbitrum-goerli":
-                return 421613;
-            case "binance":
-                return 56;
-            case "binance-testnet":
-                return 97;
-            default:
-                throw new UnityException($"Chain ID for chain {_chain} unimplemented!");
-        }
-    }
-
-    void LogThirdweb(string _message)
-    {
-        Debug.Log($"[Thirdweb] {_message}");
     }
 }
