@@ -25,6 +25,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
 {
     [Header("SETTINGS")]
     public List<Wallet> supportedWallets = new List<Wallet> { Wallet.MetaMask, Wallet.CoinbaseWallet, Wallet.WalletConnect };
+    public bool supportSwitchingNetwork = false;
 
     [Header("UI ELEMENTS (DO NOT EDIT)")]
     // Connecting
@@ -38,8 +39,14 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public TMP_Text walletAddressText;
     public Image walletImage;
     public TMP_Text currentNetworkText;
+    // Network Switching
+    public GameObject networkSwitchButton;
+    public GameObject networkDropdown;
+    public GameObject networkButtonPrefab;
 
     string address;
+    Wallet wallet;
+
 
     // UI Initialization
 
@@ -71,6 +78,9 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
         connectDropdown.SetActive(false);
         connectedDropdown.SetActive(false);
+
+        networkSwitchButton.SetActive(supportSwitchingNetwork);
+        networkDropdown.SetActive(false);
     }
 
     // Connecting
@@ -83,21 +93,21 @@ public class Prefab_ConnectWallet : MonoBehaviour
                new WalletConnection()
                {
                    provider = GetWalletProvider(_wallet),
-                   chainId = ThirdwebManager.Instance.GetChainID(),
+                   chainId = (int)ThirdwebManager.Instance.chain,
                });
 
             CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
             balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
             walletAddressText.text = address.ShortenAddress();
-            currentNetworkText.text = ThirdwebManager.Instance.chain;
+            currentNetworkText.text = ThirdwebManager.Instance.chainIdentifiers[ThirdwebManager.Instance.chain];
 
             connectButton.SetActive(false);
             connectedButton.SetActive(true);
-
             connectDropdown.SetActive(false);
             connectedDropdown.SetActive(false);
-
+            networkDropdown.SetActive(false);
             walletImage.sprite = walletButtons.Find(x => x.wallet == _wallet).icon;
+            wallet = _wallet;
 
             print($"Connected successfully to: {address}");
         }
@@ -131,6 +141,14 @@ public class Prefab_ConnectWallet : MonoBehaviour
         }
     }
 
+    // Switching Network
+
+    public void OnSwitchNetwork(Chain _chain)
+    {
+        ThirdwebManager.Instance.chain = _chain;
+        OnConnect(wallet);
+    }
+
     // UI
 
     public void OnClickDropdown()
@@ -139,6 +157,31 @@ public class Prefab_ConnectWallet : MonoBehaviour
             connectDropdown.SetActive(!connectDropdown.activeInHierarchy);
         else
             connectedDropdown.SetActive(!connectedDropdown.activeInHierarchy);
+    }
+
+    public void OnClickNetworkSwitch()
+    {
+        if (networkDropdown.activeInHierarchy)
+        {
+            networkDropdown.SetActive(false);
+            return;
+        }
+
+        networkDropdown.SetActive(true);
+
+        foreach (Transform child in networkDropdown.transform)
+            Destroy(child.gameObject);
+
+        foreach (Chain chain in Enum.GetValues(typeof(Chain)))
+        {
+            if (chain == ThirdwebManager.Instance.chain || !ThirdwebManager.Instance.supportedNetworks.Contains(chain))
+                continue;
+
+            GameObject networkButton = Instantiate(networkButtonPrefab, networkDropdown.transform);
+            networkButton.GetComponent<Button>().onClick.RemoveAllListeners();
+            networkButton.GetComponent<Button>().onClick.AddListener(() => OnSwitchNetwork(chain));
+            networkButton.GetComponentInChildren<TMP_Text>().text = ThirdwebManager.Instance.chainIdentifiers[chain];
+        }
     }
 
     // Utility
