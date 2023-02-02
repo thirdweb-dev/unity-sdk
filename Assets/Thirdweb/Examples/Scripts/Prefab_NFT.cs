@@ -9,9 +9,11 @@ public class Prefab_NFT : MonoBehaviour
 {
     [Header("UI ELEMENTS")]
     public Image nftImage;
+    public TMP_Text nftName;
 
     public void LoadNFT(NFT nft)
     {
+        nftName.text = nft.metadata.name;
         StartCoroutine(LoadNFTRoutine(nft));
     }
 
