@@ -71,4 +71,33 @@ var address = await sdk.deployer.DeployNFTCollection(new NFTContractDeployMetada
 });
 ```
 
+# Prefabs
+
+The `Examples` folder contains a demo scene using our user-friendly prefabs, check it out!
+
+All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/ThirdwebManager.cs) prefab to get the SDK Instance, drag and drop it into your scene and select the networks you want to support from the Inspector.
+
+[Connect Wallet Prefab](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_ConnectWallet.cs) - All-in one drag & drop wallet supporting multiple wallet providers, network switching, balance displaying and more!
+- Drag and drop it into your scene and select the wallet providers you want to support from the Inspector.
+- You may also choose whether you want to activate the Network Switching feature (leave unchecked if your app only requires one network).
+
+[NFT Loader](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_NFTLoader.cs) - Standalone drag & drop grid/scroll view of NFTs you ask it to display!
+- Go to the prefab's Settings in the Inspector.
+- Load specific NFTs with token ID.
+- Load a specific range of NFTs.
+- Load NFTs owned by a specific wallet.
+- Or any combination of the above - they will all be displayed automatically in a grid view with vertical scroll!
+- Customize the prefab's ScrollView and Content gameobjects if you want your content to behave differently.
+
+[NFT Prefab](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_NFT.cs) - Displays an NFT by calling LoadNFT through script!
+- Instantiate this Prefab through script.
+- Get its Prefab_NFT component.
+- Call the LoadNFT function and pass it your NFT struct to display your fetched NFT's images automatically.
+- Customize the prefab to add text/decorations and customize LoadNFT to use your NFT's metadata if you want to populate that text.
+```csharp
+NFT nft = await contract.ERC721.Get(0);
+Prefab_NFT nftPrefabScript = Instantiate(nftPrefab);
+nftPrefabScript.LoadNFT(nft);
+```
+
 See full documentation on the [thirdweb portal](https://portal.thirdweb.com).
