@@ -98,7 +98,7 @@ MonoBehaviour:
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 12
-  m_fontSizeMax: 20
+  m_fontSizeMax: 25
   m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
@@ -1537,12 +1537,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 25
+  m_fontSize: 26.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 12
-  m_fontSizeMax: 25
+  m_fontSizeMax: 30
   m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
@@ -1756,8 +1756,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -50, y: 26.896}
-  m_SizeDelta: {x: 350, y: 71.208}
+  m_AnchoredPosition: {x: -50, y: 29.2805}
+  m_SizeDelta: {x: 373.4401, y: 75.9769}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &1620813803
 CanvasRenderer:
@@ -1865,8 +1865,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0.16470589, g: 0.18039216, b: 0.2, a: 1}
-  m_EffectDistance: {x: 2, y: -2}
+  m_EffectColor: {r: 0.39215687, g: 0.42745098, b: 0.47843137, a: 1}
+  m_EffectDistance: {x: 2, y: -1}
   m_UseGraphicAlpha: 1
 --- !u!1 &1650537829
 GameObject:
@@ -2257,7 +2257,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 696252699284340127}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2307,9 +2307,39 @@ MonoBehaviour:
   walletAddressText: {fileID: 262581968}
   walletImage: {fileID: 1430547140}
   currentNetworkText: {fileID: 270904384543002881}
+  chainImage: {fileID: 4426890310649894616}
   networkSwitchButton: {fileID: 8064088946564898694}
   networkDropdown: {fileID: 8325283099334609011}
   networkButtonPrefab: {fileID: 6070093235809079241, guid: 814bcc588eda3914ab104d1c06491bc8, type: 3}
+  networkSprites:
+  - chain: 1
+    sprite: {fileID: 21300000, guid: dbbdf80d1296a22458630fa30ef325d8, type: 3}
+  - chain: 5
+    sprite: {fileID: 21300000, guid: dbbdf80d1296a22458630fa30ef325d8, type: 3}
+  - chain: 137
+    sprite: {fileID: 21300000, guid: d880943312252824196f784e3544915b, type: 3}
+  - chain: 80001
+    sprite: {fileID: 21300000, guid: d880943312252824196f784e3544915b, type: 3}
+  - chain: 250
+    sprite: {fileID: 21300000, guid: 07733ef4429a1af488fa72efc70f19d9, type: 3}
+  - chain: 4002
+    sprite: {fileID: 21300000, guid: 07733ef4429a1af488fa72efc70f19d9, type: 3}
+  - chain: 43114
+    sprite: {fileID: 21300000, guid: 68a7ebf0392b6b44195f302ec7141844, type: 3}
+  - chain: 43113
+    sprite: {fileID: 21300000, guid: 68a7ebf0392b6b44195f302ec7141844, type: 3}
+  - chain: 10
+    sprite: {fileID: 21300000, guid: 23fd361ca38919c44bb007684c7009f6, type: 3}
+  - chain: 420
+    sprite: {fileID: 21300000, guid: 23fd361ca38919c44bb007684c7009f6, type: 3}
+  - chain: 42161
+    sprite: {fileID: 21300000, guid: 1b3b04de0bf86dc4c93fca24e24ae74d, type: 3}
+  - chain: 421613
+    sprite: {fileID: 21300000, guid: 1b3b04de0bf86dc4c93fca24e24ae74d, type: 3}
+  - chain: 56
+    sprite: {fileID: 21300000, guid: c49c294f3a994a0489dc806203ebb2a6, type: 3}
+  - chain: 97
+    sprite: {fileID: 21300000, guid: c49c294f3a994a0489dc806203ebb2a6, type: 3}
 --- !u!1 &1335404546301859018
 GameObject:
   m_ObjectHideFlags: 0
@@ -3511,7 +3541,7 @@ GameObject:
   - component: {fileID: 8399191895057662164}
   - component: {fileID: 4426890310649894616}
   m_Layer: 5
-  m_Name: Image_Dropdown
+  m_Name: Image_Chain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3565,7 +3595,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 34adbe06ddf43a74b9cf3d57271e9984, type: 3}
+  m_Sprite: {fileID: 21300000, guid: dbbdf80d1296a22458630fa30ef325d8, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -3751,8 +3781,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 11.100426, y: -105.096466}
-  m_SizeDelta: {x: 72.719635, y: 0}
+  m_AnchoredPosition: {x: 0.052886963, y: -105.096466}
+  m_SizeDelta: {x: 94.8145, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &8856659653986850489
 CanvasRenderer:
