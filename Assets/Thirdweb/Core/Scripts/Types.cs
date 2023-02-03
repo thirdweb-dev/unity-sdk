@@ -456,4 +456,50 @@ namespace Thirdweb
         public int chainId;
         public List<string> assets;
     }
+
+    [System.Serializable]
+    public struct ContractEvent
+    {
+        string eventName;
+        object data;
+        EventTransaction transaction;
+
+        public override string ToString()
+        {
+            return
+            $"ContractEvent:"
+            + $"\n>eventName: {eventName}"
+            + $"\n>data: {data.ToString()}"
+            + $"\n{transaction.ToString()}";
+        }
+    }
+
+    [System.Serializable]
+    public struct EventTransaction
+    {
+        int blockNumber;
+        string blockHash;
+        int transactionIndex;
+        bool removed;
+        string address;
+        string data;
+        List<string> topics;
+        string transactionHash;
+        int logIndex;
+
+        public override string ToString()
+        {
+            return
+            $"EventTransaction:"
+            + $"\n>blockNumber: {blockNumber}"
+            + $"\n>blockHash: {blockHash}"
+            + $"\n>transactionIndex: {transactionIndex}"
+            + $"\n>removed: {removed}"
+                        + $"\n>address: {address}"
+            + $"\n>data: {data}"
+            + $"\n>topics: {topics}"
+            + $"\n>transactionHash: {transactionHash}"
+            + $"\n>logIndex: {logIndex}";
+        }
+    }
 }

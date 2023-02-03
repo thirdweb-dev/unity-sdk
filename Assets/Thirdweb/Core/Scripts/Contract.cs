@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Thirdweb
 {
@@ -92,6 +93,15 @@ namespace Thirdweb
                 argsEncoded[argsEncoded.Length - 1] = Utils.ToJson(transactionOverrides);
             }
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), argsEncoded);
+        }
+
+        /// <summary>
+        /// Requests all events from a contract
+        /// </summary>
+        /// <returns>ContractEvent List</returns>
+        public async Task<List<ContractEvent>> GetAllEvents()
+        {
+            return await Bridge.InvokeRoute<List<ContractEvent>>($"events{separator}getAllEvents", null);
         }
     }
 }
