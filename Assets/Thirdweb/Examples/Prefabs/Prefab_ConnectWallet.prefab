@@ -2307,6 +2307,7 @@ MonoBehaviour:
   walletAddressText: {fileID: 262581968}
   walletImage: {fileID: 1430547140}
   currentNetworkText: {fileID: 270904384543002881}
+  currentNetworkImage: {fileID: 1390862793022922592}
   chainImage: {fileID: 4426890310649894616}
   networkSwitchButton: {fileID: 8064088946564898694}
   networkDropdown: {fileID: 8325283099334609011}

@@ -46,6 +46,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public TMP_Text walletAddressText;
     public Image walletImage;
     public TMP_Text currentNetworkText;
+    public Image currentNetworkImage;
     public Image chainImage;
     // Network Switching
     public GameObject networkSwitchButton;
@@ -119,17 +120,19 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         try
         {
+            Chain _chain = ThirdwebManager.Instance.chain;
             CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
             balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
             walletAddressText.text = address.ShortenAddress();
-            currentNetworkText.text = ThirdwebManager.Instance.chainIdentifiers[ThirdwebManager.Instance.chain];
+            currentNetworkText.text = ThirdwebManager.Instance.chainIdentifiers[_chain];
+            currentNetworkImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
             connectButton.SetActive(false);
             connectedButton.SetActive(true);
             connectDropdown.SetActive(false);
             connectedDropdown.SetActive(false);
             networkDropdown.SetActive(false);
             walletImage.sprite = walletButtons.Find(x => x.wallet == wallet).icon;
-            chainImage.sprite = networkSprites.Find(x => x.chain == ThirdwebManager.Instance.chain).sprite;
+            chainImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
         }
         catch (Exception e)
         {
