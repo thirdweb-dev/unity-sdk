@@ -13,7 +13,7 @@ public class Prefab_Events : MonoBehaviour
 
     public async void GetAllEvents(Contract contract)
     {
-        List<ContractEvent> allContractEvents = await contract.GetAllEvents();
+        List<ContractEvent> allContractEvents = await contract.events.GetAllEvents();
         foreach (ContractEvent contractEvent in allContractEvents)
             Debug.Log($"{contractEvent.ToString()}\n");
     }

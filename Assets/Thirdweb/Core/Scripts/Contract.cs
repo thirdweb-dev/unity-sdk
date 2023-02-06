@@ -31,6 +31,10 @@ namespace Thirdweb
         /// Call any Pack supported functions
         /// </summary>
         public Pack pack;
+        /// <summary>
+        /// Call any Contract Event functions
+        /// </summary>
+        public Events events;
 
         public Contract(string chain, string address, string abi = null) : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
         {
@@ -42,6 +46,7 @@ namespace Thirdweb
             this.ERC1155 = new ERC1155(baseRoute);
             this.marketplace = new Marketplace(chain, address);
             this.pack = new Pack(chain, address);
+            this.events = new Events(baseRoute);
         }
 
         public async Task<CurrencyValue> GetBalance()
@@ -93,15 +98,6 @@ namespace Thirdweb
                 argsEncoded[argsEncoded.Length - 1] = Utils.ToJson(transactionOverrides);
             }
             return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), argsEncoded);
-        }
-
-        /// <summary>
-        /// Requests all events from a contract
-        /// </summary>
-        /// <returns>ContractEvent List</returns>
-        public async Task<List<ContractEvent>> GetAllEvents()
-        {
-            return await Bridge.InvokeRoute<List<ContractEvent>>($"events{separator}getAllEvents", null);
         }
     }
 }
