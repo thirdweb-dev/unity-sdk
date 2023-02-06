@@ -4,17 +4,19 @@ using Thirdweb;
 
 // Your Event data structure
 [System.Serializable]
-public struct MyEvent
+public struct TransferEvent
 {
-    public string prevURI;
-    public string newURI;
+    public string from;
+    public string to;
+    public string tokenID;
 
     public override string ToString()
     {
         return
-            $"MyEvent:"
-            + $"\n>prevURI: {prevURI}"
-            + $"\n>newURI: {newURI.ToString()}";
+            $"TransferEvent:"
+            + $"\n>prevURI: {from}"
+            + $"\n>newURI: {to}"
+            + $"\n>tokenID: {tokenID}";
     }
 }
 
@@ -27,14 +29,19 @@ public class Prefab_Events : MonoBehaviour
     public void GetEventsTest()
     {
         Contract myContract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
-        GetEvents(myContract, "ContractURIUpdated");
+
+        // Optional event query options
+        EventQueryOptions myOptions = new EventQueryOptions();
+        myOptions.filters = new Dictionary<string, object> { { "tokenID", "1" } };
+
+        GetEvents(myContract, "Transfer", myOptions);
     }
 
     public async void GetEvents(Contract contract, string eventName, EventQueryOptions eventQueryOptions = null)
     {
-        List<ContractEvent<MyEvent>> allEvents = await contract.events.Get<MyEvent>(eventName, eventQueryOptions);
+        List<ContractEvent<TransferEvent>> allEvents = await contract.events.Get<TransferEvent>(eventName, eventQueryOptions);
 
-        foreach (ContractEvent<MyEvent> contractEvent in allEvents)
+        foreach (ContractEvent<TransferEvent> contractEvent in allEvents)
             Debug.Log($"{contractEvent.ToString()}\n");
     }
 
@@ -46,11 +53,7 @@ public class Prefab_Events : MonoBehaviour
 
         // Optional event query options
         EventQueryOptions myOptions = new EventQueryOptions();
-        Dictionary<string, object> myFilters = new Dictionary<string, object> {
-            { "newURI", "ipfs://QmNckvfgMj6WUeGszGToiptXYJx2DLPQpZ5RUhoMcDa9JD/0" }
-        };
-        myOptions.filters = myFilters;
-        myOptions.fromBlock = "0";
+        myOptions.fromBlock = "100";
 
         GetAllEvents(myContract, myOptions);
     }
