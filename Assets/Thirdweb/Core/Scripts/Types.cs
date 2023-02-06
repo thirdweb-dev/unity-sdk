@@ -457,6 +457,8 @@ namespace Thirdweb
         public List<string> assets;
     }
 
+    // Events
+
     [System.Serializable]
     public class EventQueryOptions
     {
