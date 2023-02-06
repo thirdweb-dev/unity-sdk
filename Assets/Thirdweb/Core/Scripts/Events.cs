@@ -12,13 +12,14 @@ namespace Thirdweb
 
         // READ FUNCTIONS
 
-        /// <summary>
-        /// Requests all events from a contract
-        /// </summary>
-        /// <returns>ContractEvent List</returns>
-        public async Task<List<ContractEvent>> GetAllEvents()
+        public async Task<List<ContractEvent<T>>> Get<T>(string eventName, EventQueryOptions eventQueryOptions = null)
         {
-            return await Bridge.InvokeRoute<List<ContractEvent>>(getRoute("getAllEvents"), new string[] { });
+            return await Bridge.InvokeRoute<List<ContractEvent<T>>>(getRoute("getEvents"), Utils.ToJsonStringArray(eventName, eventQueryOptions));
+        }
+
+        public async Task<List<ContractEvent<object>>> GetAll(EventQueryOptions eventQueryOptions = null)
+        {
+            return await Bridge.InvokeRoute<List<ContractEvent<object>>>(getRoute("getAllEvents"), Utils.ToJsonStringArray(eventQueryOptions));
         }
     }
 }

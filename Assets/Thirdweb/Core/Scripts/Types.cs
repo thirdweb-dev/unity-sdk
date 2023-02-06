@@ -458,11 +458,20 @@ namespace Thirdweb
     }
 
     [System.Serializable]
-    public struct ContractEvent
+    public class EventQueryOptions
     {
-        string eventName;
-        object data;
-        EventTransaction transaction;
+        public Dictionary<string, object> filters;
+        public string fromBlock;
+        public string order; // "asc" or "desc"
+        public string toBlock;
+    }
+
+    [System.Serializable]
+    public struct ContractEvent<T>
+    {
+        public string eventName;
+        public T data;
+        public EventTransaction transaction;
 
         public override string ToString()
         {
@@ -477,15 +486,17 @@ namespace Thirdweb
     [System.Serializable]
     public struct EventTransaction
     {
-        int blockNumber;
-        string blockHash;
-        int transactionIndex;
-        bool removed;
-        string address;
-        string data;
-        List<string> topics;
-        string transactionHash;
-        int logIndex;
+        public int blockNumber;
+        public string blockHash;
+        public int transactionIndex;
+        public bool removed;
+        public string address;
+        public string data;
+        public List<string> topics;
+        public string transactionHash;
+        public int logIndex;
+        public string @event;
+        public string eventSignature;
 
         public override string ToString()
         {
@@ -495,11 +506,13 @@ namespace Thirdweb
             + $"\n>blockHash: {blockHash}"
             + $"\n>transactionIndex: {transactionIndex}"
             + $"\n>removed: {removed}"
-                        + $"\n>address: {address}"
+            + $"\n>address: {address}"
             + $"\n>data: {data}"
             + $"\n>topics: {topics}"
             + $"\n>transactionHash: {transactionHash}"
-            + $"\n>logIndex: {logIndex}";
+            + $"\n>logIndex: {logIndex}"
+            + $"\n>event: {@event}"
+            + $"\n>eventSignature: {eventSignature}";
         }
     }
 }
