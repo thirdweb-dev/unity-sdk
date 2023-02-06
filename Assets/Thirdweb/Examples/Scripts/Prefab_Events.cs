@@ -26,20 +26,15 @@ public class Prefab_Events : MonoBehaviour
 
     // Get all events filtered by name (and optionally add more filters)
 
-    public void GetEventsTest()
+    public async void GetEventsTest()
     {
-        Contract myContract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
+        Contract contract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
 
         // Optional event query options
-        EventQueryOptions myOptions = new EventQueryOptions();
-        myOptions.filters = new Dictionary<string, object> { { "tokenID", "1" } };
+        EventQueryOptions options = new EventQueryOptions();
+        options.filters = new Dictionary<string, object> { { "tokenID", 1 } };
 
-        GetEvents(myContract, "Transfer", myOptions);
-    }
-
-    public async void GetEvents(Contract contract, string eventName, EventQueryOptions eventQueryOptions = null)
-    {
-        List<ContractEvent<TransferEvent>> allEvents = await contract.events.Get<TransferEvent>(eventName, eventQueryOptions);
+        List<ContractEvent<TransferEvent>> allEvents = await contract.events.Get<TransferEvent>("Transfer", options);
 
         foreach (ContractEvent<TransferEvent> contractEvent in allEvents)
             Debug.Log($"{contractEvent.ToString()}\n");
@@ -47,20 +42,15 @@ public class Prefab_Events : MonoBehaviour
 
     // Get all contract events
 
-    public void GetAllEventsTest()
+    public async void GetAllEventsTest()
     {
-        Contract myContract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
+        Contract contract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
 
         // Optional event query options
-        EventQueryOptions myOptions = new EventQueryOptions();
-        myOptions.fromBlock = "100";
+        EventQueryOptions options = new EventQueryOptions();
+        options.fromBlock = "100";
 
-        GetAllEvents(myContract, myOptions);
-    }
-
-    public async void GetAllEvents(Contract contract, EventQueryOptions eventQueryOptions = null)
-    {
-        List<ContractEvent<object>> allContractEvents = await contract.events.GetAll(eventQueryOptions);
+        List<ContractEvent<object>> allContractEvents = await contract.events.GetAll(options);
 
         foreach (ContractEvent<object> contractEvent in allContractEvents)
             Debug.Log($"{contractEvent.ToString()}\n");
