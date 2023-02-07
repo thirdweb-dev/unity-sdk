@@ -49,7 +49,7 @@ public class Prefab_Events : MonoBehaviour
         // Optional event query options
         EventQueryOptions options = new EventQueryOptions();
         options.fromBlock = 0;
-        options.toBlock = 1000000;
+        options.toBlock = 16500000;
         options.order = "desc";
 
         List<ContractEvent<object>> allContractEvents = await contract.events.GetAll(options);
