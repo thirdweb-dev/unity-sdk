@@ -8,7 +8,7 @@ public struct TransferEvent
 {
     public string from;
     public string to;
-    public string tokenID;
+    public string tokenId;
 
     public override string ToString()
     {
@@ -16,7 +16,7 @@ public struct TransferEvent
             $"TransferEvent:"
             + $"\n>prevURI: {from}"
             + $"\n>newURI: {to}"
-            + $"\n>tokenID: {tokenID}";
+            + $"\n>tokenId: {tokenId}";
     }
 }
 
