@@ -111,7 +111,7 @@ namespace Thirdweb
             taskMap[taskId] = task;
             ThirdwebInvoke(taskId, route, msg, jsCallback);
             string result = await task.Task;
-            Debug.Log($"InvokeRoute Result: {result}");
+            // Debug.Log($"InvokeRoute Result: {result}");
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
         }
 

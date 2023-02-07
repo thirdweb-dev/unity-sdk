@@ -462,10 +462,18 @@ namespace Thirdweb
     [System.Serializable]
     public class EventQueryOptions
     {
-        public int? fromBlock = null;
-        public string order = null; // "asc" or "desc"
-        public int? toBlock = null;
-        public Dictionary<string, object> filters = null;
+        public int? fromBlock;
+        public string order; // "asc" or "desc"
+        public int? toBlock;
+        public Dictionary<string, object> filters;
+
+        public EventQueryOptions(Dictionary<string, object> filters = null, int? fromBlock = null, int? toBlock = null, string order = null)
+        {
+            this.fromBlock = fromBlock;
+            this.order = order;
+            this.toBlock = toBlock;
+            this.filters = filters;
+        }
     }
 
     [System.Serializable]
