@@ -456,4 +456,73 @@ namespace Thirdweb
         public int chainId;
         public List<string> assets;
     }
+
+    // Events
+
+    [System.Serializable]
+    public class EventQueryOptions
+    {
+        public int? fromBlock;
+        public string order; // "asc" or "desc"
+        public int? toBlock;
+        public Dictionary<string, object> filters;
+
+        public EventQueryOptions(Dictionary<string, object> filters = null, int? fromBlock = null, int? toBlock = null, string order = null)
+        {
+            this.fromBlock = fromBlock;
+            this.order = order;
+            this.toBlock = toBlock;
+            this.filters = filters;
+        }
+    }
+
+    [System.Serializable]
+    public struct ContractEvent<T>
+    {
+        public string eventName;
+        public T data;
+        public EventTransaction transaction;
+
+        public override string ToString()
+        {
+            return
+            $"ContractEvent:"
+            + $"\n>eventName: {eventName}"
+            + $"\n>data: {data.ToString()}"
+            + $"\n{transaction.ToString()}";
+        }
+    }
+
+    [System.Serializable]
+    public struct EventTransaction
+    {
+        public int blockNumber;
+        public string blockHash;
+        public int transactionIndex;
+        public bool removed;
+        public string address;
+        public string data;
+        public List<string> topics;
+        public string transactionHash;
+        public int logIndex;
+        public string @event;
+        public string eventSignature;
+
+        public override string ToString()
+        {
+            return
+            $"EventTransaction:"
+            + $"\n>blockNumber: {blockNumber}"
+            + $"\n>blockHash: {blockHash}"
+            + $"\n>transactionIndex: {transactionIndex}"
+            + $"\n>removed: {removed}"
+            + $"\n>address: {address}"
+            + $"\n>data: {data}"
+            + $"\n>topics: {topics}"
+            + $"\n>transactionHash: {transactionHash}"
+            + $"\n>logIndex: {logIndex}"
+            + $"\n>event: {@event}"
+            + $"\n>eventSignature: {eventSignature}";
+        }
+    }
 }
