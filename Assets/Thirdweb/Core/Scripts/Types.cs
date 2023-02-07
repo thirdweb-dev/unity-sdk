@@ -460,15 +460,6 @@ namespace Thirdweb
     // Events
 
     [System.Serializable]
-    public class EventQueryOptions
-    {
-        public int fromBlock;
-        public string order; // "asc" or "desc"
-        public int toBlock;
-        public Dictionary<string, object> filters;
-    }
-
-    [System.Serializable]
     public struct ContractEvent<T>
     {
         public string eventName;
