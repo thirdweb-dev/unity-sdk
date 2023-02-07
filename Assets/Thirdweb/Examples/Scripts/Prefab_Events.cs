@@ -32,7 +32,7 @@ public class Prefab_Events : MonoBehaviour
 
         // Optional event query options
         EventQueryOptions options = new EventQueryOptions();
-        options.filters = new Dictionary<string, object> { { "tokenID", 1 } };
+        options.filters = new Dictionary<string, object> { { "tokenId", 20 } };
 
         List<ContractEvent<TransferEvent>> allEvents = await contract.events.Get<TransferEvent>("Transfer", options);
 
@@ -48,7 +48,9 @@ public class Prefab_Events : MonoBehaviour
 
         // Optional event query options
         EventQueryOptions options = new EventQueryOptions();
-        options.fromBlock = "100";
+        options.fromBlock = 10000000;
+        options.toBlock = 16000000;
+        options.order = "desc";
 
         List<ContractEvent<object>> allContractEvents = await contract.events.GetAll(options);
 
