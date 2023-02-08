@@ -26,6 +26,16 @@ namespace Thirdweb
             public string[] arguments;
         }
 
+        [System.Serializable]
+        private struct CallbackMessageBody
+        {
+            public CallbackMessageBody(string[] arguments)
+            {
+                this.arguments = arguments;
+            }
+            public string[] arguments;
+        }
+
         private static Dictionary<string, TaskCompletionSource<string>> taskMap = new Dictionary<string, TaskCompletionSource<string>>();
 
         [AOT.MonoPInvokeCallback(typeof(Action<string, string, string>))]
@@ -98,7 +108,7 @@ namespace Thirdweb
             await task.Task;
         }
 
-        public static async Task<T> InvokeRoute<T>(string route, string[] body)
+        public static async Task<T> InvokeRoute<T>(string route, string[] body, string[] sendMessage = null)
         {
             if (Application.isEditor)
             {
@@ -106,10 +116,11 @@ namespace Thirdweb
                 return default(T);
             }
             var msg = Utils.ToJson(new RequestMessageBody(body));
+            var callback = Utils.ToJson(new CallbackMessageBody(sendMessage));
             string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
-            ThirdwebInvoke(taskId, route, msg, jsCallback);
+            ThirdwebInvoke(taskId, route, msg, callback, jsCallback);
             string result = await task.Task;
             // Debug.Log($"InvokeRoute Result: {result}");
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
@@ -131,7 +142,7 @@ namespace Thirdweb
         }
 
         [DllImport("__Internal")]
-        private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
+        private static extern string ThirdwebInvoke(string taskId, string route, string payload, string callback, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebInitialize(string chainOrRPC, string options);
         [DllImport("__Internal")]
