@@ -49,7 +49,7 @@ var walletAddress = await sdk.wallet.Connect();
 CurrencyValue balance = await sdk.wallet.GetBalance();
 var signature = await sdk.wallet.Sign("message to sign");
 
-// get an instance of a deployed contract (no ABI requried!)
+// get an instance of a deployed contract (no ABI required!)
 var contract = sdk.GetContract("0x...");
 
 // fetch data from any ERC20/721/1155 or marketplace contract
@@ -77,7 +77,7 @@ The `Examples` folder contains a demo scene using our user-friendly prefabs, che
 
 All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/ThirdwebManager.cs) prefab to get the SDK Instance, drag and drop it into your scene and select the networks you want to support from the Inspector.
 
-[Connect Wallet](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_ConnectWallet.cs) - All-in one drag & drop wallet supporting multiple wallet providers, network switching, balance displaying and more!
+[Connect Wallet](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_ConnectWallet.cs) - All-in-one drag & drop wallet supporting multiple wallet providers, network switching, balance displaying and more!
 - Drag and drop it into your scene and select the wallet providers you want to support from the Inspector.
 - You may also choose whether you want to activate the Network Switching feature (leave unchecked if your app only requires one network).
 
