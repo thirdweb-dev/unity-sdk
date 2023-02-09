@@ -85,6 +85,7 @@
                   progressBarEmpty.style.display = "";
                   progressBarFull.style.width = `${100 * progress}%`;
                 }).then((unityInstance) => {
+                  window.unityInstance = unityInstance;
                   loadingCover.style.display = "none";
                   if (canFullscreen) {
                     if (!hideFullScreenButton) {
