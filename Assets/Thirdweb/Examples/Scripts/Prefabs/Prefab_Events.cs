@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Thirdweb;
+using Newtonsoft.Json;
 
 // Your Event data structure
 [System.Serializable]
@@ -90,13 +91,13 @@ public class Prefab_Events : MonoBehaviour
                 "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
             );
 
-            string result = await contract.events.AddListener(
+            await contract.events.AddListener(
                 "Transfer",
                 "Prefab_Events",
                 "OnTransfer"
             );
 
-            Debug.Log($"Event listener added! Result: {result}");
+            Debug.Log("Event listener added!");
         }
         catch (System.Exception e)
         {
@@ -113,13 +114,13 @@ public class Prefab_Events : MonoBehaviour
                 "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
             );
 
-            string result = await contract.events.RemoveListener(
+            await contract.events.RemoveListener(
                 "Transfer",
                 "Prefab_Events",
                 "OnTransfer"
             );
 
-            Debug.Log($"Event listener removed! Result: {result}");
+            Debug.Log("Event listener removed!");
         }
         catch (System.Exception e)
         {
@@ -136,9 +137,9 @@ public class Prefab_Events : MonoBehaviour
                 "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
             );
 
-            string result = await contract.events.ListenToAll("Prefab_Events", "OnAnyEvent");
+            await contract.events.ListenToAll("Prefab_Events", "OnAnyEvent");
 
-            Debug.Log($"Listening to all events! Result: {result}");
+            Debug.Log("Listening to all events!");
         }
         catch (System.Exception e)
         {
@@ -155,9 +156,9 @@ public class Prefab_Events : MonoBehaviour
                 "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
             );
 
-            string result = await contract.events.RemoveAllListeners();
+            await contract.events.RemoveAllListeners();
 
-            Debug.Log($"Removed all event listeners! Result: {result}");
+            Debug.Log("Removed all event listeners!");
         }
         catch (System.Exception e)
         {
@@ -165,13 +166,15 @@ public class Prefab_Events : MonoBehaviour
         }
     }
 
-    public void OnTransfer()
+    public void OnTransfer(string transferEventStr)
     {
-        Debug.Log("[EventListener] Transfer event was just emitted!");
+        ContractEvent<TransferEvent> transferEvent = JsonConvert.DeserializeObject<ContractEvent<TransferEvent>>(transferEventStr);
+        Debug.Log($"[EventListener] Transfer event was just emitted!\n{transferEvent.ToString()}");
     }
 
-    public void OnAnyEvent()
+    public void OnAnyEvent(string contractEventStr)
     {
-        Debug.Log("[EventListener] An event was just emitted!");
+        ContractEvent<object> contractEvent = JsonConvert.DeserializeObject<ContractEvent<object>>(contractEventStr);
+        Debug.Log($"[EventListener] An event was just emitted!\n{contractEvent.ToString()}");
     }
 }
