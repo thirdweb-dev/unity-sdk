@@ -1,5 +1,5 @@
 var plugin = {
-  ThirdwebInvoke: function (taskId, route, payload, cb) {
+  ThirdwebInvoke: function (taskId, route, payload, callback, cb) {
     // convert taskId from pointer to str and allocate it to keep in memory
     var id = UTF8ToString(taskId);
     var idSize = lengthBytesUTF8(id) + 1;
@@ -7,7 +7,11 @@ var plugin = {
     stringToUTF8(id, idPtr, idSize);
     // execute bridge call
     window.bridge
-      .invoke(UTF8ToString(route), UTF8ToString(payload))
+      .invoke(
+        UTF8ToString(route),
+        UTF8ToString(payload),
+        UTF8ToString(callback)
+      )
       .then((returnStr) => {
         var bufferSize = lengthBytesUTF8(returnStr) + 1;
         var buffer = _malloc(bufferSize);

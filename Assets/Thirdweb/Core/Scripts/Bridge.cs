@@ -116,6 +116,7 @@ namespace Thirdweb
                 return default(T);
             }
             var msg = Utils.ToJson(new RequestMessageBody(body));
+            if (sendMessage == null) sendMessage = new string[] { };
             var callback = Utils.ToJson(new CallbackMessageBody(sendMessage));
             string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
