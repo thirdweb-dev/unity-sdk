@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
 
 namespace Thirdweb
 {
@@ -35,19 +34,19 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<List<ContractEvent<object>>>(getRoute("getAllEvents"), Utils.ToJsonStringArray(eventQueryOptions));
         }
 
-        public async Task<string> AddListener(string eventName, Action<string> action)
+        public async Task<string> AddListener(string eventName, string gameObject, string function, string[] args = null)
         {
-            return await Bridge.InvokeRoute<string>(getRoute("addEventListener"), Utils.ToJsonStringArray(eventName), action);
+            return await Bridge.InvokeRoute<string>(getRoute("addEventListener"), Utils.ToJsonStringArray(eventName), Utils.ToJsonStringArray(gameObject, function, args));
         }
 
-        public async Task<string> RemoveListener(string eventName, Action<string> action)
+        public async Task<string> RemoveListener(string eventName, string gameObject, string function, string[] args = null)
         {
-            return await Bridge.InvokeRoute<string>(getRoute("removeEventListener"), Utils.ToJsonStringArray(eventName), action);
+            return await Bridge.InvokeRoute<string>(getRoute("removeEventListener"), Utils.ToJsonStringArray(eventName), Utils.ToJsonStringArray(gameObject, function, args));
         }
 
-        public async Task<string> ListenToAll(Action<string> action)
+        public async Task<string> ListenToAll(string gameObject, string function, string[] args = null)
         {
-            return await Bridge.InvokeRoute<string>(getRoute("listenToAllEvents"), new string[] { }, action);
+            return await Bridge.InvokeRoute<string>(getRoute("listenToAllEvents"), new string[] { }, Utils.ToJsonStringArray(gameObject, function, args));
         }
 
         public async Task<string> RemoveAllListeners()
