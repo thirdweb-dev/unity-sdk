@@ -37,6 +37,7 @@ namespace Thirdweb
         }
 
         private static Dictionary<string, TaskCompletionSource<string>> taskMap = new Dictionary<string, TaskCompletionSource<string>>();
+        private static Dictionary<string, Action<string>> taskActionMap = new Dictionary<string, Action<string>>();
 
         [AOT.MonoPInvokeCallback(typeof(Action<string, string, string>))]
         private static void jsCallback(string taskId, string result, string error)
@@ -49,10 +50,22 @@ namespace Thirdweb
                 }
                 else
                 {
+                    if (String.IsNullOrEmpty(result)) result = taskId;
                     taskMap[taskId].TrySetResult(result);
                 }
                 taskMap.Remove(taskId);
             }
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(Action<string, string>))]
+        private static void jsAction(string taskId, string actionResult)
+        {
+            Debug.LogWarning($"In JS ACTION: {taskId} | result: {actionResult}");
+
+            if (taskActionMap.ContainsKey(taskId))
+                taskActionMap[taskId].Invoke(actionResult);
+            else
+                Debug.LogWarning($"No Action for task ID: {taskId}");
         }
 
         public static void Initialize(string chainOrRPC, ThirdwebSDK.Options options)
@@ -108,7 +121,7 @@ namespace Thirdweb
             await task.Task;
         }
 
-        public static async Task<T> InvokeRoute<T>(string route, string[] body, string[] sendMessage = null)
+        public static async Task<T> InvokeRoute<T>(string route, string[] body, Action<string> action = null)
         {
             if (Application.isEditor)
             {
@@ -116,12 +129,11 @@ namespace Thirdweb
                 return default(T);
             }
             var msg = Utils.ToJson(new RequestMessageBody(body));
-            if (sendMessage == null) sendMessage = new string[] { };
-            var callback = Utils.ToJson(new CallbackMessageBody(sendMessage));
             string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
-            ThirdwebInvoke(taskId, route, msg, callback, jsCallback);
+            if (action != null) taskActionMap[taskId] = action;
+            ThirdwebInvoke(taskId, route, msg, jsAction, jsCallback);
             string result = await task.Task;
             Debug.Log($"InvokeRoute Result: {result}");
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
@@ -143,7 +155,7 @@ namespace Thirdweb
         }
 
         [DllImport("__Internal")]
-        private static extern string ThirdwebInvoke(string taskId, string route, string payload, string callback, Action<string, string, string> cb);
+        private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string> action, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebInitialize(string chainOrRPC, string options);
         [DllImport("__Internal")]

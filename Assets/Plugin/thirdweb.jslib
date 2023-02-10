@@ -1,5 +1,5 @@
 var plugin = {
-  ThirdwebInvoke: function (taskId, route, payload, callback, cb) {
+  ThirdwebInvoke: function (taskId, route, payload, action, cb) {
     // convert taskId from pointer to str and allocate it to keep in memory
     var id = UTF8ToString(taskId);
     var idSize = lengthBytesUTF8(id) + 1;
@@ -8,9 +8,24 @@ var plugin = {
     // execute bridge call
     window.bridge
       .invoke(
+        UTF8ToString(taskId),
         UTF8ToString(route),
         UTF8ToString(payload),
-        UTF8ToString(callback)
+        (newTaskId, result) => {
+          console.log("In JSLib" + result);
+
+          var newTaskIdSize = lengthBytesUTF8(newTaskId) + 1;
+          var newTaskIdBuffer = _malloc(newTaskIdSize);
+          stringToUTF8(newTaskId, newTaskIdBuffer, newTaskIdSize);
+
+          var bufferSize1 = lengthBytesUTF8(result) + 1;
+          var buffer1 = _malloc(bufferSize1);
+          stringToUTF8(result, buffer1, bufferSize1);
+
+          console.log("In JSLib");
+
+          dynCall_vii(action, newTaskIdBuffer, buffer1);
+        }
       )
       .then((returnStr) => {
         var bufferSize = lengthBytesUTF8(returnStr) + 1;

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Thirdweb;
 using Newtonsoft.Json;
+using System;
 
 // Your Event data structure
 [System.Serializable]
@@ -91,11 +92,7 @@ public class Prefab_Events : MonoBehaviour
                 "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
             );
 
-            await contract.events.AddListener(
-                "Transfer",
-                "Prefab_Events",
-                "OnTransfer"
-            );
+            await contract.events.AddListener("Transfer", (string transferEventStr) => OnTransfer(transferEventStr));
 
             Debug.Log("Event listener added!");
         }
@@ -114,11 +111,7 @@ public class Prefab_Events : MonoBehaviour
                 "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
             );
 
-            await contract.events.RemoveListener(
-                "Transfer",
-                "Prefab_Events",
-                "OnTransfer"
-            );
+            await contract.events.RemoveListener("Transfer", (string transferEventStr) => OnTransfer(transferEventStr));
 
             Debug.Log("Event listener removed!");
         }
@@ -137,7 +130,7 @@ public class Prefab_Events : MonoBehaviour
                 "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
             );
 
-            await contract.events.ListenToAll("Prefab_Events", "OnAnyEvent");
+            await contract.events.ListenToAll((string contractEventStr) => OnAnyEvent(contractEventStr));
 
             Debug.Log("Listening to all events!");
         }
