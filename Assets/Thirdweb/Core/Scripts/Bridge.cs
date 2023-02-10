@@ -108,7 +108,7 @@ namespace Thirdweb
             await task.Task;
         }
 
-        public static async Task<T> InvokeRoute<T>(string route, string[] body, string[] sendMessage = null)
+        public static async Task<T> InvokeRoute<T>(string route, string[] body)
         {
             if (Application.isEditor)
             {
@@ -116,15 +116,31 @@ namespace Thirdweb
                 return default(T);
             }
             var msg = Utils.ToJson(new RequestMessageBody(body));
-            if (sendMessage == null) sendMessage = new string[] { };
-            var callback = Utils.ToJson(new CallbackMessageBody(sendMessage));
             string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
-            ThirdwebInvoke(taskId, route, msg, callback, jsCallback);
+            ThirdwebInvoke(taskId, route, msg, jsCallback);
             string result = await task.Task;
             Debug.Log($"InvokeRoute Result: {result}");
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
+        }
+
+        public static void InvokeListener(string route, string[] body, string[] callbackArgs)
+        {
+            if (Application.isEditor)
+            {
+                Debug.LogWarning("Interacting with the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                return;
+            }
+            else if (GameObject.Find("ThirdwebManager") == null)
+            {
+                Debug.LogWarning("You must add the ThirdwebManager prefab to your scene to access this functionality.");
+                return;
+            }
+
+            var msg = Utils.ToJson(new RequestMessageBody(body));
+            var cbArgs = Utils.ToJson(new CallbackMessageBody(callbackArgs));
+            ThirdwebInvokeListener(route, msg, cbArgs);
         }
 
         public static async Task FundWallet(FundWalletOptions payload)
@@ -143,7 +159,9 @@ namespace Thirdweb
         }
 
         [DllImport("__Internal")]
-        private static extern string ThirdwebInvoke(string taskId, string route, string payload, string callback, Action<string, string, string> cb);
+        private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebInvokeListener(string route, string payload, string callbackArgs);
         [DllImport("__Internal")]
         private static extern string ThirdwebInitialize(string chainOrRPC, string options);
         [DllImport("__Internal")]

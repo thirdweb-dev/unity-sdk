@@ -82,69 +82,40 @@ public class Prefab_Events : MonoBehaviour
 
     // Event listeners
 
-    public async void AddEventListener()
+    public void AddEventListener()
     {
-        try
-        {
-            Contract contract = new Contract(
-                "goerli",
-                "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
-            );
+        Contract contract = new Contract(
+            "goerli",
+            "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
+        );
 
-            await contract.events.AddListener(
-                "Transfer",
-                "Prefab_Events",
-                "OnTransfer"
-            );
+        contract.events.AddListener("Transfer", gameObject.name, "OnEventTriggered");
 
-            Debug.Log("Event listener added!");
-        }
-        catch (System.Exception e)
-        {
-            Debug.Log($"Error: {e.Message}");
-        }
+        Debug.Log("Event listener added!");
     }
 
-    public async void RemoveEventListener()
+    public void RemoveEventListener()
     {
-        try
-        {
-            Contract contract = new Contract(
-                "goerli",
-                "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
-            );
+        Contract contract = new Contract(
+            "goerli",
+            "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
+        );
 
-            await contract.events.RemoveListener(
-                "Transfer",
-                "Prefab_Events",
-                "OnTransfer"
-            );
+        contract.events.RemoveListener("Transfer", gameObject.name, "OnTransfer");
 
-            Debug.Log("Event listener removed!");
-        }
-        catch (System.Exception e)
-        {
-            Debug.Log($"Error: {e.Message}");
-        }
+        Debug.Log("Event listener removed!");
     }
 
-    public async void ListenToAllEvents()
+    public void ListenToAllEvents()
     {
-        try
-        {
-            Contract contract = new Contract(
-                "goerli",
-                "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
-            );
+        Contract contract = new Contract(
+            "goerli",
+            "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
+        );
 
-            await contract.events.ListenToAll("Prefab_Events", "OnAnyEvent");
+        contract.events.ListenToAll(gameObject.name, "OnEventTriggered");
 
-            Debug.Log("Listening to all events!");
-        }
-        catch (System.Exception e)
-        {
-            Debug.Log($"Error: {e.Message}");
-        }
+        Debug.Log("Listening to all events!");
     }
 
     public async void RemoveAllEventListeners()
@@ -166,13 +137,7 @@ public class Prefab_Events : MonoBehaviour
         }
     }
 
-    public void OnTransfer(string transferEventStr)
-    {
-        ContractEvent<TransferEvent> transferEvent = JsonConvert.DeserializeObject<ContractEvent<TransferEvent>>(transferEventStr);
-        Debug.Log($"[EventListener] Transfer event was just emitted!\n{transferEvent.ToString()}");
-    }
-
-    public void OnAnyEvent(string contractEventStr)
+    public void OnEventTriggered(string contractEventStr)
     {
         ContractEvent<object> contractEvent = JsonConvert.DeserializeObject<ContractEvent<object>>(contractEventStr);
         Debug.Log($"[EventListener] An event was just emitted!\n{contractEvent.ToString()}");

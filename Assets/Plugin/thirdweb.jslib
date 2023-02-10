@@ -1,5 +1,5 @@
 var plugin = {
-  ThirdwebInvoke: function (taskId, route, payload, callback, cb) {
+  ThirdwebInvoke: function (taskId, route, payload, cb) {
     // convert taskId from pointer to str and allocate it to keep in memory
     var id = UTF8ToString(taskId);
     var idSize = lengthBytesUTF8(id) + 1;
@@ -7,11 +7,7 @@ var plugin = {
     stringToUTF8(id, idPtr, idSize);
     // execute bridge call
     window.bridge
-      .invoke(
-        UTF8ToString(route),
-        UTF8ToString(payload),
-        UTF8ToString(callback)
-      )
+      .invoke(UTF8ToString(route), UTF8ToString(payload))
       .then((returnStr) => {
         var bufferSize = lengthBytesUTF8(returnStr) + 1;
         var buffer = _malloc(bufferSize);
@@ -27,6 +23,14 @@ var plugin = {
         stringToUTF8(msg, buffer, bufferSize);
         dynCall_viii(cb, idPtr, null, buffer);
       });
+  },
+  ThirdwebInvokeListener: function (route, payload, callbackArgs) {
+    // execute bridge call
+    window.bridge.invokeListener(
+      UTF8ToString(route),
+      UTF8ToString(payload),
+      UTF8ToString(callbackArgs)
+    );
   },
   ThirdwebInitialize: function (chain, options) {
     window.bridge.initialize(UTF8ToString(chain), UTF8ToString(options));
