@@ -103,6 +103,7 @@ nftPrefabScript.LoadNFT(nft);
 [Events](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_Events.cs) - Fetch and manipulate Contract Events with a simple API!
 - Get specific events from any contract.
 - Get all events from any contract.
+- Event listener support with callback actions.
 - Optional query filters.
 
 See full documentation on the [thirdweb portal](https://portal.thirdweb.com).
