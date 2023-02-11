@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
 
 namespace Thirdweb
 {
@@ -34,21 +35,32 @@ namespace Thirdweb
             return await Bridge.InvokeRoute<List<ContractEvent<object>>>(getRoute("getAllEvents"), Utils.ToJsonStringArray(eventQueryOptions));
         }
 
-        public void AddListener(string eventName, string gameObjectName, string functionName)
+        /// <summary>
+        /// Listens an event and executes callback
+        /// </summary>
+        /// <param name="eventName">Event name filter</param>
+        /// <param name="action">Callback action</param>
+        /// <typeparam name="T">Action return type</typeparam>
+        /// <returns>Task ID string</returns>
+        public string AddListener<T>(string eventName, Action<T> action)
         {
-            Bridge.InvokeListener(getRoute("addEventListener"), Utils.ToJsonStringArray(eventName), Utils.ToJsonStringArray(gameObjectName, functionName));
+            return Bridge.InvokeListener<T>(getRoute("addEventListener"), Utils.ToJsonStringArray(eventName), action);
         }
 
-        public void RemoveListener(string eventName, string gameObjectName, string functionName)
+        /// <summary>
+        /// Listens to all events and executes callback every time
+        /// </summary>
+        /// <param name="action">Callback action</param>
+        /// <typeparam name="T">Action return type</typeparam>
+        /// <returns>Task ID string</returns>
+        public string ListenToAll<T>(Action<T> action)
         {
-            Bridge.InvokeListener(getRoute("removeEventListener"), Utils.ToJsonStringArray(eventName), Utils.ToJsonStringArray(gameObjectName, functionName));
+            return Bridge.InvokeListener(getRoute("listenToAllEvents"), new string[] { }, action);
         }
 
-        public void ListenToAll(string gameObjectName, string functionName)
-        {
-            Bridge.InvokeListener(getRoute("listenToAllEvents"), new string[] { }, Utils.ToJsonStringArray(gameObjectName, functionName));
-        }
-
+        /// <summary>
+        /// Removes all event listeners
+        /// </summary>
         public async Task<string> RemoveAllListeners()
         {
             return await Bridge.InvokeRoute<string>(getRoute("removeAllListeners"), new string[] { });

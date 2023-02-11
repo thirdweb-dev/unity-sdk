@@ -26,17 +26,9 @@ namespace Thirdweb
             public string[] arguments;
         }
 
-        [System.Serializable]
-        private struct CallbackMessageBody
-        {
-            public CallbackMessageBody(string[] arguments)
-            {
-                this.arguments = arguments;
-            }
-            public string[] arguments;
-        }
-
         private static Dictionary<string, TaskCompletionSource<string>> taskMap = new Dictionary<string, TaskCompletionSource<string>>();
+        private static Dictionary<string, Delegate> taskActionMap = new Dictionary<string, Delegate>();
+        private static Dictionary<string, Type> taskActionTypeMap = new Dictionary<string, Type>();
 
         [AOT.MonoPInvokeCallback(typeof(Action<string, string, string>))]
         private static void jsCallback(string taskId, string result, string error)
@@ -52,6 +44,21 @@ namespace Thirdweb
                     taskMap[taskId].TrySetResult(result);
                 }
                 taskMap.Remove(taskId);
+            }
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(Action<string, string>))]
+        private static void jsAction(string taskId, string result)
+        {
+            if (taskActionMap.ContainsKey(taskId))
+            {
+                Debug.Log("ContainsKey");
+                Type tempType = taskActionTypeMap[taskId];
+                taskActionMap[taskId].DynamicInvoke(tempType == typeof(string) ? result : JsonConvert.DeserializeObject(result, tempType));
+            }
+            else
+            {
+                Debug.Log("Does Not Contain Key");
             }
         }
 
@@ -121,26 +128,29 @@ namespace Thirdweb
             taskMap[taskId] = task;
             ThirdwebInvoke(taskId, route, msg, jsCallback);
             string result = await task.Task;
-            Debug.Log($"InvokeRoute Result: {result}");
+            // Debug.Log($"InvokeRoute Result: {result}");
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
         }
 
-        public static void InvokeListener(string route, string[] body, string[] callbackArgs)
+        public static string InvokeListener<T>(string route, string[] body, Action<T> action)
         {
             if (Application.isEditor)
             {
                 Debug.LogWarning("Interacting with the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
-                return;
+                return null;
             }
             else if (GameObject.Find("ThirdwebManager") == null)
             {
                 Debug.LogWarning("You must add the ThirdwebManager prefab to your scene to access this functionality.");
-                return;
+                return null;
             }
 
+            string taskId = Guid.NewGuid().ToString();
+            taskActionTypeMap[taskId] = typeof(T);
+            taskActionMap[taskId] = action;
             var msg = Utils.ToJson(new RequestMessageBody(body));
-            var cbArgs = Utils.ToJson(new CallbackMessageBody(callbackArgs));
-            ThirdwebInvokeListener(route, msg, cbArgs);
+            ThirdwebInvokeListener(taskId, route, msg, jsAction);
+            return taskId;
         }
 
         public static async Task FundWallet(FundWalletOptions payload)
@@ -161,7 +171,7 @@ namespace Thirdweb
         [DllImport("__Internal")]
         private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
         [DllImport("__Internal")]
-        private static extern string ThirdwebInvokeListener(string route, string payload, string callbackArgs);
+        private static extern string ThirdwebInvokeListener(string taskId, string route, string payload, Action<string, string> action);
         [DllImport("__Internal")]
         private static extern string ThirdwebInitialize(string chainOrRPC, string options);
         [DllImport("__Internal")]

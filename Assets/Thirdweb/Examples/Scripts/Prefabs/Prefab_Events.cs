@@ -89,21 +89,9 @@ public class Prefab_Events : MonoBehaviour
             "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
         );
 
-        contract.events.AddListener("Transfer", gameObject.name, "OnEventTriggered");
+        contract.events.AddListener("Transfer", (ContractEvent<TransferEvent> transferEvent) => OnTransferEventTriggered(transferEvent));
 
         Debug.Log("Event listener added!");
-    }
-
-    public void RemoveEventListener()
-    {
-        Contract contract = new Contract(
-            "goerli",
-            "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
-        );
-
-        contract.events.RemoveListener("Transfer", gameObject.name, "OnTransfer");
-
-        Debug.Log("Event listener removed!");
     }
 
     public void ListenToAllEvents()
@@ -113,7 +101,7 @@ public class Prefab_Events : MonoBehaviour
             "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
         );
 
-        contract.events.ListenToAll(gameObject.name, "OnEventTriggered");
+        contract.events.ListenToAll((ContractEvent<object> transferEvent) => OnEventTriggered(transferEvent));
 
         Debug.Log("Listening to all events!");
     }
@@ -137,9 +125,13 @@ public class Prefab_Events : MonoBehaviour
         }
     }
 
-    public void OnEventTriggered(string contractEventStr)
+    public void OnTransferEventTriggered(ContractEvent<TransferEvent> transferEvent)
     {
-        ContractEvent<object> contractEvent = JsonConvert.DeserializeObject<ContractEvent<object>>(contractEventStr);
+        Debug.Log($"[EventListener] A transfer event was just emitted!\n{transferEvent.ToString()}");
+    }
+
+    public void OnEventTriggered<T>(ContractEvent<T> contractEvent)
+    {
         Debug.Log($"[EventListener] An event was just emitted!\n{contractEvent.ToString()}");
     }
 }
