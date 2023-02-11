@@ -101,7 +101,7 @@ public class Prefab_Events : MonoBehaviour
             "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
         );
 
-        contract.events.ListenToAll((ContractEvent<object> transferEvent) => OnEventTriggered(transferEvent));
+        contract.events.ListenToAll((ContractEvent<object> anyEvent) => OnEventTriggered(anyEvent));
 
         Debug.Log("Listening to all events!");
     }
