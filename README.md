@@ -24,13 +24,17 @@ Head over to the [releases](https://github.com/thirdweb-dev/unity-sdk/releases) 
 
 Drag and drop the file into your project.
 
-The package comes with a sample Scene showcasing the different capabilities of the SDK.
+The package comes with a sample Scene and Prefab examples showcasing the different capabilities of the SDK.
+
+Note: you may need to install the [Newtonsoft.Json](https://github.com/jilleJr/Newtonsoft.Json-for-Unity/wiki/Install-official-via-UPM) package manually if you experience importing errors on different Unity versions.
 
 # Build
 
 - Open your `Build settings`, select `WebGL` as the target platform.
 - Open `Player settings` > `Resolution and Presentation` and under `WebGLTemplate` choose `Thirdweb`.
 - Save and click `Build and Run` to test out your game in a browser.
+
+If you're uploading your build, set `Compression Format` to `Disabled` in `Player Settings` > `Publishing Settings`.
 
 Note that in order to communicate with the SDK, you need to `Build and run` your project so it runs in a browser context.
 
