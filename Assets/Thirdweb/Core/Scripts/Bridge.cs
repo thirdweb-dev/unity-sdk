@@ -26,7 +26,20 @@ namespace Thirdweb
             public string[] arguments;
         }
 
+        private struct GenericAction
+        {
+            public Type t;
+            public Delegate d;
+
+            public GenericAction(Type t, Delegate d)
+            {
+                this.t = t;
+                this.d = d;
+            }
+        }
+
         private static Dictionary<string, TaskCompletionSource<string>> taskMap = new Dictionary<string, TaskCompletionSource<string>>();
+        private static Dictionary<string, GenericAction> taskActionMap = new Dictionary<string, GenericAction>();
 
         [AOT.MonoPInvokeCallback(typeof(Action<string, string, string>))]
         private static void jsCallback(string taskId, string result, string error)
@@ -42,6 +55,16 @@ namespace Thirdweb
                     taskMap[taskId].TrySetResult(result);
                 }
                 taskMap.Remove(taskId);
+            }
+        }
+
+        [AOT.MonoPInvokeCallback(typeof(Action<string, string>))]
+        private static void jsAction(string taskId, string result)
+        {
+            if (taskActionMap.ContainsKey(taskId))
+            {
+                Type tempType = taskActionMap[taskId].t;
+                taskActionMap[taskId].d.DynamicInvoke(tempType == typeof(string) ? result : JsonConvert.DeserializeObject(result, tempType));
             }
         }
 
@@ -115,6 +138,21 @@ namespace Thirdweb
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
         }
 
+        public static string InvokeListener<T>(string route, string[] body, Action<T> action)
+        {
+            if (Application.isEditor)
+            {
+                Debug.LogWarning("Interacting with the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                return null;
+            }
+
+            string taskId = Guid.NewGuid().ToString();
+            taskActionMap[taskId] = new GenericAction(typeof(T), action);
+            var msg = Utils.ToJson(new RequestMessageBody(body));
+            ThirdwebInvokeListener(taskId, route, msg, jsAction);
+            return taskId;
+        }
+
         public static async Task FundWallet(FundWalletOptions payload)
         {
             if (Application.isEditor)
@@ -132,6 +170,8 @@ namespace Thirdweb
 
         [DllImport("__Internal")]
         private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebInvokeListener(string taskId, string route, string payload, Action<string, string> action);
         [DllImport("__Internal")]
         private static extern string ThirdwebInitialize(string chainOrRPC, string options);
         [DllImport("__Internal")]

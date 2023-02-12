@@ -24,6 +24,30 @@ var plugin = {
         dynCall_viii(cb, idPtr, null, buffer);
       });
   },
+  ThirdwebInvokeListener: function (taskId, route, payload, action) {
+    // execute bridge call
+    window.bridge.invokeListener(
+      UTF8ToString(taskId),
+      UTF8ToString(route),
+      UTF8ToString(payload),
+      action,
+      (jsAction, jsTaskId, jsResult) => {
+        // Handle Task ID
+        var jsId = jsTaskId;
+        var jsIdSize = lengthBytesUTF8(jsId) + 1;
+        var jsIdBuffer = _malloc(jsIdSize);
+        stringToUTF8(jsId, jsIdBuffer, jsIdSize);
+
+        // Handle Result
+        var jsRes = jsResult;
+        var jsResSize = lengthBytesUTF8(jsRes) + 1;
+        var jsResBuffer = _malloc(jsResSize);
+        stringToUTF8(jsRes, jsResBuffer, jsResSize);
+
+        dynCall_vii(jsAction, jsIdBuffer, jsResBuffer);
+      }
+    );
+  },
   ThirdwebInitialize: function (chain, options) {
     window.bridge.initialize(UTF8ToString(chain), UTF8ToString(options));
   },

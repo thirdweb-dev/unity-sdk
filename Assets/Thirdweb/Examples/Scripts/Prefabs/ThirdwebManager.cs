@@ -60,4 +60,5 @@ public class ThirdwebManager : MonoBehaviour
         SDK = new ThirdwebSDK(chainIdentifiers[chain]);
 #endif
     }
+
 }
