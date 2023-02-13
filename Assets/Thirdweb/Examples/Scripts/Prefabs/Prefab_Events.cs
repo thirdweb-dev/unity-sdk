@@ -82,18 +82,6 @@ public class Prefab_Events : MonoBehaviour
 
     // Event listeners
 
-    public void AddEventListener()
-    {
-        Contract contract = new Contract(
-            "goerli",
-            "0x2e01763fA0e15e07294D74B63cE4b526B321E389"
-        );
-
-        contract.events.AddListener("Transfer", (ContractEvent<TransferEvent> transferEvent) => OnTransferEventTriggered(transferEvent));
-
-        Debug.Log("Event listener added!");
-    }
-
     public void ListenToAllEvents()
     {
         Contract contract = new Contract(
