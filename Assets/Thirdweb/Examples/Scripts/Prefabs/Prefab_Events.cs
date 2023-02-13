@@ -90,11 +90,6 @@ public class Prefab_Events : MonoBehaviour
         }
     }
 
-    public void OnTransferEventTriggered(ContractEvent<TransferEvent> transferEvent)
-    {
-        Debug.Log($"[EventListener] OnTransferEventTriggered: A transfer event was just emitted!\n{transferEvent.ToString()}");
-    }
-
     public void OnEventTriggered<T>(ContractEvent<T> contractEvent)
     {
         Debug.Log($"[EventListener] OnEventTriggered: An event was just emitted!\n{contractEvent.ToString()}");
