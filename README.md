@@ -110,4 +110,22 @@ nftPrefabScript.LoadNFT(nft);
 - Event listener support with callback actions.
 - Optional query filters.
 
+[Reading](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_Reading.cs) - Reading from a contract!
+- Fetch ERC20 Token(s).
+- Fetch ERC721 NFT(s).
+- Fetch ERC1155 NFT(s).
+- Fetch Marketplace Listing(s).
+
+[Writing](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_Writing.cs) - Writing to a contract!
+- Mint ERC20 Token(s).
+- Mint ERC721 NFT(s).
+- Mint ERC1155 NFT(s).
+- Buy Marketplace Listing(s).
+
+[Miscellaneous](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_Miscellaneous.cs) - More examples!
+- Get (Native) Balance.
+- Custom Contract Read/Write Calls.
+- Authentication.
+- Deployment.
+
 See full documentation on the [thirdweb portal](https://portal.thirdweb.com).
