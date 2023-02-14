@@ -9,11 +9,11 @@ public class Prefab_Miscellaneous : MonoBehaviour
         try
         {
             CurrencyValue balance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
-            Debug.Log($"[Get Balance] Native Balance:\n{balance.ToString()}");
+            Debugger.Instance.Log("[Get Balance] Native Balance", balance.ToString());
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Get Balance] Error", e.Message);
         }
     }
 
@@ -27,7 +27,7 @@ public class Prefab_Miscellaneous : MonoBehaviour
             Debug.Log($"[Custom Call] Read Custom URI:\n{uri}");
 
             TransactionResult transactionResult = await contract.Write("claimKitten");
-            Debug.Log($"[Custom Call] Write Successful:\n{transactionResult}");
+            Debugger.Instance.Log("[Custom Call] Write Successful", transactionResult.ToString());
 
             // With Transaction Overrides:
             // await contract.Write("claim", new TransactionRequest
@@ -37,7 +37,7 @@ public class Prefab_Miscellaneous : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Custom Call] Error", e.Message);
         }
     }
 
@@ -46,11 +46,11 @@ public class Prefab_Miscellaneous : MonoBehaviour
         try
         {
             LoginPayload data = await ThirdwebManager.Instance.SDK.wallet.Authenticate("example.com");
-            Debug.Log($"[Authenticate] Successful:\n{data.ToString()}");
+            Debugger.Instance.Log("[Authenticate] Successful", data.ToString());
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Authenticate] Error", e.Message);
         }
     }
 
@@ -65,11 +65,11 @@ public class Prefab_Miscellaneous : MonoBehaviour
                     primary_sale_recipient = await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
                 }
             );
-            Debug.Log($"[Deploy] Successful: At {address}");
+            Debugger.Instance.Log("[Deploy] Successful", $"Address: {address}");
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Deploy] Error", e.Message);
         }
     }
 

@@ -35,13 +35,11 @@ public class Prefab_Events : MonoBehaviour
             EventQueryOptions options = new EventQueryOptions(filters);
 
             List<ContractEvent<TransferEvent>> allEvents = await contract.events.Get<TransferEvent>("Transfer", options);
-            Debug.Log($"[Get Events] Get - TransferEvent:\n{allEvents.ToString()}");
-            foreach (ContractEvent<TransferEvent> contractEvent in allEvents)
-                Debug.Log($"--[Get Events] ContractEvent:\n{contractEvent.ToString()}\n");
+            Debugger.Instance.Log("[Get Events] Get - TransferEvent #1", allEvents[0].ToString());
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Get Events] Error", e.Message);
         }
     }
 
@@ -57,13 +55,11 @@ public class Prefab_Events : MonoBehaviour
             EventQueryOptions options = new EventQueryOptions(null, 0, 16500000, "desc");
 
             List<ContractEvent<object>> allContractEvents = await contract.events.GetAll(options);
-            Debug.Log($"[Get All Events] GetAll:\n{allContractEvents.ToString()}");
-            foreach (ContractEvent<object> contractEvent in allContractEvents)
-                Debug.Log($"--[Get All Events] ContractEvent:\n{contractEvent.ToString()}\n");
+            Debugger.Instance.Log("[Get All Events] Get - ContractEvent #1", allContractEvents[0].ToString());
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Get All Events] Error", e.Message);
         }
     }
 
@@ -73,7 +69,7 @@ public class Prefab_Events : MonoBehaviour
     {
         Contract contract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
         contract.events.ListenToAll((ContractEvent<object> anyEvent) => OnEventTriggered(anyEvent));
-        Debug.Log("Listening to all events!");
+        Debugger.Instance.Log("Listening to all events!", "Try to trigger an event on the specified contract to get a callback.");
     }
 
     public async void RemoveAllEventListeners()
@@ -82,16 +78,16 @@ public class Prefab_Events : MonoBehaviour
         {
             Contract contract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
             await contract.events.RemoveAllListeners();
-            Debug.Log("Removed all event listeners!");
+            Debugger.Instance.Log("Removed all event listeners!", "Events emitted will not trigger callbacks anymore.");
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Remove All Event Listeners] Error", e.Message);
         }
     }
 
     public void OnEventTriggered<T>(ContractEvent<T> contractEvent)
     {
-        Debug.Log($"[EventListener] OnEventTriggered: An event was just emitted!\n{contractEvent.ToString()}");
+        Debugger.Instance.Log("[EventListener] OnEventTriggered", $"An event was just emitted!\n{contractEvent.ToString()}");
     }
 }

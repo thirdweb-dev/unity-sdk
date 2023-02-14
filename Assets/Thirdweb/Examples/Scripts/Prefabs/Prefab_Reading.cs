@@ -12,14 +12,13 @@ public class Prefab_Reading : MonoBehaviour
             Contract contract = new Contract("goerli", "0xB4870B21f80223696b68798a755478C86ce349bE");
 
             Currency currencyInfo = await contract.ERC20.Get();
-            Debug.Log($"[Fetch ERC20] Currency:\n{currencyInfo.ToString()}");
+            Debugger.Instance.Log("[Fetch ERC20] Get", currencyInfo.ToString());
 
-            CurrencyValue currencyValue = await contract.ERC20.TotalSupply();
-            Debug.Log($"[Fetch ERC20] Total Supply:\n{currencyValue.ToString()}");
+            // CurrencyValue currencyValue = await contract.ERC20.TotalSupply();
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Fetch ERC20] Error", e.Message);
         }
     }
 
@@ -30,20 +29,14 @@ public class Prefab_Reading : MonoBehaviour
             Contract contract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
 
             NFT getResult = await contract.ERC721.Get("1");
-            Debug.Log($"[Fetch ERC721] Get:\n{getResult.ToString()}");
+            Debugger.Instance.Log("[Fetch ERC721] Get", getResult.ToString());
 
-            List<NFT> getAllResult = await contract.ERC721.GetAll(new Thirdweb.QueryAllParams() { start = 0, count = 10 });
-            Debug.Log($"[Fetch ERC721] GetAll:\n{getAllResult.ToString()}");
-            foreach (NFT nft in getAllResult)
-                Debug.Log($"--[Fetch ERC721] NFT:\n{nft.ToString()}\n");
-
-            string tokenURI = await contract.Read<string>("tokenURI", "1");
-            Debug.Log($"[Fetch ERC721] Custom Call - tokenURI(1): {tokenURI}");
-
+            // List<NFT> getAllResult = await contract.ERC721.GetAll(new Thirdweb.QueryAllParams() { start = 0, count = 10 });
+            // List<NFT> getOwnedResult = await contract.ERC721.GetOwned("someAddress");
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Fetch ERC721] Error", e.Message);
         }
     }
 
@@ -54,16 +47,13 @@ public class Prefab_Reading : MonoBehaviour
             Contract contract = new Contract("goerli", "0x86B7df0dc0A790789D8fDE4C604EF8187FF8AD2A");
 
             NFT getResult = await contract.ERC1155.Get("1");
-            Debug.Log($"[Fetch ERC1155] Get:\n{getResult.ToString()}");
+            Debugger.Instance.Log("[Fetch ERC1155] Get", getResult.ToString());
 
-            List<NFT> getAllResult = await contract.ERC1155.GetAll(new Thirdweb.QueryAllParams() { start = 0, count = 10 });
-            Debug.Log($"[Fetch ERC1155] GetAll:\n{getAllResult.ToString()}");
-            foreach (NFT nft in getAllResult)
-                Debug.Log($"--[Fetch ERC1155] NFT:\n{nft.ToString()}\n");
+            // List<NFT> getAllResult = await contract.ERC1155.GetAll(new Thirdweb.QueryAllParams() { start = 0, count = 10 });
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Fetch ERC1155] Error", e.Message);
         }
     }
 
@@ -75,13 +65,11 @@ public class Prefab_Reading : MonoBehaviour
             Marketplace marketplace = contract.marketplace;
 
             List<Listing> getAllListingsResult = await marketplace.GetAllListings();
-            Debug.Log($"[Fetch Listings] GetAllListings:\n{getAllListingsResult.ToString()}");
-            foreach (Listing listing in getAllListingsResult)
-                Debug.Log($"--[Fetch Listings] Listing:\n{listing.ToString()}\n");
+            Debugger.Instance.Log("[Fetch Listings] Listing #1", getAllListingsResult[0].ToString());
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Fetch Listings] Error", e.Message);
         }
     }
 }

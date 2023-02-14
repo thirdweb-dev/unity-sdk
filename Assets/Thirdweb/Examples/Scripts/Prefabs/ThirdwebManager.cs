@@ -54,7 +54,7 @@ public class ThirdwebManager : MonoBehaviour
         if (Instance == null)
             Instance = this;
         else
-            Destroy(gameObject);
+            Destroy(this.gameObject);
 
 #if !UNITY_EDITOR
         SDK = new ThirdwebSDK(chainIdentifiers[chain]);
