@@ -36,18 +36,6 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Listens an event and executes callback
-        /// </summary>
-        /// <param name="eventName">Event name filter</param>
-        /// <param name="action">Callback action</param>
-        /// <typeparam name="T">Action return type</typeparam>
-        /// <returns>Task ID string</returns>
-        public string AddListener<T>(string eventName, Action<T> action)
-        {
-            return Bridge.InvokeListener<T>(getRoute("addEventListener"), Utils.ToJsonStringArray(eventName), action);
-        }
-
-        /// <summary>
         /// Listens to all events and executes callback every time
         /// </summary>
         /// <param name="action">Callback action</param>
