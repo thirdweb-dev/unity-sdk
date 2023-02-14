@@ -38,7 +38,7 @@ namespace Thirdweb
         /// <param name="domain">The domain to authenticate to</param>
         public async Task<LoginPayload> Authenticate(string domain)
         {
-            return await Bridge.InvokeRoute<LoginPayload>($"sdk{subSeparator}auth{separator}login", Utils.ToJsonStringArray(domain));
+            return await Bridge.InvokeRoute<LoginPayload>($"auth{subSeparator}login", Utils.ToJsonStringArray(domain));
         }
 
         /// <summary>
