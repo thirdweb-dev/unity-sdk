@@ -12,7 +12,7 @@ public class Prefab_Writing : MonoBehaviour
             Contract contract = new Contract("goerli", "0xB4870B21f80223696b68798a755478C86ce349bE");
 
             TransactionResult transactionResult = await contract.ERC20.Mint("1.2");
-            Debug.Log($"[Mint ERC20] Successful:\n{transactionResult.ToString()}");
+            Debugger.Instance.Log("[Mint ERC20] Successful", transactionResult.ToString());
 
             // Signature Minting
             // var payload = new ERC20MintPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", "3.2");
@@ -21,7 +21,7 @@ public class Prefab_Writing : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Mint ERC20] Error", e.Message);
         }
     }
 
@@ -43,7 +43,7 @@ public class Prefab_Writing : MonoBehaviour
             ERC721SignedPayload signedPayload = await contract.ERC721.signature.Generate(payload); // Typically generated on the backend
 
             TransactionResult transactionResult = await contract.ERC721.signature.Mint(signedPayload);
-            Debug.Log($"[Mint ERC721] Successful:\n{transactionResult.ToString()}");
+            Debugger.Instance.Log("[Mint ERC721] Successful", transactionResult.ToString());
 
             // NFT Drop Claiming
             // var result = await contract.ERC721.Claim(1);
@@ -51,7 +51,7 @@ public class Prefab_Writing : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Mint ERC721] Error", e.Message);
         }
     }
 
@@ -65,15 +65,12 @@ public class Prefab_Writing : MonoBehaviour
             bool canClaim = await contract.ERC1155.claimConditions.CanClaim("0", 1);
             if (!canClaim)
             {
-                Debug.Log("[Mint ERC1155] Cannot claim!");
+                Debugger.Instance.Log("[Mint ERC721] Cannot Claim", "Connected wallet not eligible to claim.");
                 return;
             }
 
             TransactionResult transactionResult = await contract.ERC1155.Claim("0", 1);
-            Debug.Log($"[Mint ERC1155] Successful:\n{transactionResult.ToString()}");
-
-            int newSupply = await contract.ERC1155.TotalSupply("0");
-            Debug.Log($"[Mint ERC1155] New Supply: {newSupply}");
+            Debugger.Instance.Log("[Mint ERC1155] Successful", transactionResult.ToString());
 
             // Edition Drop - Signature minting additional supply
             // var payload = new ERC1155MintAdditionalPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", "1");
@@ -84,7 +81,7 @@ public class Prefab_Writing : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Mint ERC1155] Error", e.Message);
         }
     }
 
@@ -96,11 +93,11 @@ public class Prefab_Writing : MonoBehaviour
             Marketplace marketplace = contract.marketplace;
 
             TransactionResult transactionResult = await marketplace.BuyListing("0", 1);
-            Debug.Log($"[Buy Listing] Successful:\n{transactionResult.ToString()}");
+            Debugger.Instance.Log("[Buy Listing] Successful", transactionResult.ToString());
         }
         catch (System.Exception e)
         {
-            Debug.Log($"Error: {e.Message}");
+            Debugger.Instance.Log("[Buy Listing] Error", e.Message);
         }
     }
 }
