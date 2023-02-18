@@ -1305,7 +1305,7 @@ GameObject:
   - component: {fileID: 1952274085}
   - component: {fileID: 1952274084}
   m_Layer: 0
-  m_Name: Nethereum_Tests
+  m_Name: Nethereum_Test
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1320,7 +1320,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1952274083}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b28ce7cc1ab6154cbe072b628ffb9dd, type: 3}
+  m_Script: {fileID: 11500000, guid: 50d0783a6de78624ca0bd897bad228b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1952274085
