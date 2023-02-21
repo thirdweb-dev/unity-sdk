@@ -32,8 +32,8 @@ public struct NetworkSprite
 public class Prefab_ConnectWallet : MonoBehaviour
 {
     [Header("SETTINGS")]
-    public List<Wallet> supportedWallets = new List<Wallet> { Wallet.MetaMask, Wallet.CoinbaseWallet, Wallet.WalletConnect };
-    public bool supportSwitchingNetwork = false;
+    public List<Wallet> supportedWallets;
+    public bool supportSwitchingNetwork;
 
     [Header("UI ELEMENTS (DO NOT EDIT)")]
     // Connecting
