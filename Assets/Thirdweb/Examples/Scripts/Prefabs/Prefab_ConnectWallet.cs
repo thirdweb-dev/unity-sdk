@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public enum Wallet
 {
     MetaMask,
+    Injected,
     CoinbaseWallet,
     WalletConnect,
     MagicAuth,
@@ -230,6 +231,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
         {
             case Wallet.MetaMask:
                 return WalletProvider.MetaMask;
+            case Wallet.Injected:
+                return WalletProvider.Injected;
             case Wallet.CoinbaseWallet:
                 return WalletProvider.CoinbaseWallet;
             case Wallet.WalletConnect:
