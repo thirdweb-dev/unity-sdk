@@ -2284,21 +2284,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56e0ba15cb38b4345825030a6c81d2dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  supportedWallets: 000000000100000002000000
+  supportedWallets: 010000000200000003000000
   supportSwitchingNetwork: 1
   connectButton: {fileID: 1335404547334051784}
   connectDropdown: {fileID: 1335404547797609896}
   walletButtons:
-  - wallet: 0
+  - wallet: 1
     walletButton: {fileID: 1335404546759128316}
     icon: {fileID: 21300000, guid: 217680bfb64fc074392309113986a3ee, type: 3}
-  - wallet: 1
+  - wallet: 2
     walletButton: {fileID: 1045367075}
     icon: {fileID: 21300000, guid: 3e92fa75bd5ab3047974f1a4f9dc4832, type: 3}
-  - wallet: 2
+  - wallet: 3
     walletButton: {fileID: 351517269}
     icon: {fileID: 21300000, guid: d5a5e5db03872be4c8c6303a906b29bd, type: 3}
-  - wallet: 3
+  - wallet: 4
     walletButton: {fileID: 679192013}
     icon: {fileID: 21300000, guid: 59f310e18bee0db49a8061c8ff8b9743, type: 3}
   connectedButton: {fileID: 1620813798}
@@ -2430,7 +2430,7 @@ GameObject:
   - component: {fileID: 1335404546759128315}
   - component: {fileID: 1335404546759128314}
   m_Layer: 5
-  m_Name: Button_Metamask
+  m_Name: Button_Injected
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
