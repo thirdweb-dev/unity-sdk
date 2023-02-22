@@ -26,7 +26,7 @@ Drag and drop the file into your project.
 
 The package comes with a sample Scene and Prefab examples showcasing the different capabilities of the SDK.
 
-Note: you may need to install the [Newtonsoft.Json](https://github.com/jilleJr/Newtonsoft.Json-for-Unity/wiki/Install-official-via-UPM) package manually if you experience importing errors on different Unity versions.
+Note: The Newtonsoft DLL is included as part of the Unity Package, feel free to deselect it if you already have it installed as a dependency to avoid conflicts.
 
 # Build
 
