@@ -965,7 +965,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 874d8401331ede14087e8d8d486ddda6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4a851c149a30f1e4b8088ab52b81444d, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -2145,7 +2145,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6d6088174bb906b49ad8428526ee337b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 97e254ea33741df4686d7097f9d1435b, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -2286,6 +2286,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   supportedWallets: 010000000200000003000000
   supportSwitchingNetwork: 1
+  OnConnectedCallback:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDisconnectedCallback:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSwitchNetworkCallback:
+    m_PersistentCalls:
+      m_Calls: []
   connectButton: {fileID: 1335404547334051784}
   connectDropdown: {fileID: 1335404547797609896}
   walletButtons:
