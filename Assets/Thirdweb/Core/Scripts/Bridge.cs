@@ -72,7 +72,7 @@ namespace Thirdweb
         {
             if (Application.isEditor)
             {
-                Debug.LogWarning("Initializing the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                // Debug.LogWarning("Initializing the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
                 return;
             }
             ThirdwebInitialize(chainOrRPC, Utils.ToJson(options));

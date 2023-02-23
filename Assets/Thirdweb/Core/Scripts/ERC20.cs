@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using System.Numerics;
 
 namespace Thirdweb
 {
@@ -33,7 +34,20 @@ namespace Thirdweb
         /// </summary>
         public async Task<Currency> Get()
         {
-            return await Bridge.InvokeRoute<Currency>(getRoute("get"), new string[] { });
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<Currency>(getRoute("get"), new string[] { });
+            }
+            else
+            {
+                string contract = baseRoute.Substring(0, baseRoute.IndexOf("/"));
+                var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract);
+                Currency c = new Currency();
+                c.decimals = (await erc20.DecimalsQueryAsync()).ToString();
+                c.name = await erc20.NameQueryAsync();
+                c.symbol = await erc20.SymbolQueryAsync();
+                return c;
+            }
         }
 
         /// <summary>
@@ -41,7 +55,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<CurrencyValue> Balance()
         {
-            return await Bridge.InvokeRoute<CurrencyValue>(getRoute("balance"), new string[] { });
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("balance"), new string[] { });
+            }
+            else
+            {
+                return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
+            }
         }
 
         /// <summary>
@@ -49,7 +70,23 @@ namespace Thirdweb
         /// </summary>
         public async Task<CurrencyValue> BalanceOf(string address)
         {
-            return await Bridge.InvokeRoute<CurrencyValue>(getRoute("balanceOf"), Utils.ToJsonStringArray(address));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("balanceOf"), Utils.ToJsonStringArray(address));
+            }
+            else
+            {
+                string contract = baseRoute.Substring(0, baseRoute.IndexOf("/"));
+                var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract);
+                string balance = (await erc20.BalanceOfQueryAsync(address)).ToString();
+                CurrencyValue cv = new CurrencyValue();
+                cv.decimals = (await erc20.DecimalsQueryAsync()).ToString();
+                cv.name = await erc20.NameQueryAsync();
+                cv.symbol = await erc20.SymbolQueryAsync();
+                cv.value = balance;
+                cv.displayValue = balance.ToEth();
+                return cv;
+            }
         }
 
         /// <summary>
@@ -57,7 +94,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<CurrencyValue> Allowance(string spender)
         {
-            return await Bridge.InvokeRoute<CurrencyValue>(getRoute("allowance"), Utils.ToJsonStringArray(spender));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("allowance"), Utils.ToJsonStringArray(spender));
+            }
+            else
+            {
+                return await AllowanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), spender);
+            }
         }
 
         /// <summary>
@@ -65,7 +109,23 @@ namespace Thirdweb
         /// </summary>
         public async Task<CurrencyValue> AllowanceOf(string owner, string spender)
         {
-            return await Bridge.InvokeRoute<CurrencyValue>(getRoute("allowanceOf"), Utils.ToJsonStringArray(owner, spender));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("allowanceOf"), Utils.ToJsonStringArray(owner, spender));
+            }
+            else
+            {
+                string contract = baseRoute.Substring(0, baseRoute.IndexOf("/"));
+                var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract);
+                string allowance = (await erc20.AllowanceQueryAsync(owner, spender)).ToString();
+                CurrencyValue cv = new CurrencyValue();
+                cv.decimals = (await erc20.DecimalsQueryAsync()).ToString();
+                cv.name = await erc20.NameQueryAsync();
+                cv.symbol = await erc20.SymbolQueryAsync();
+                cv.value = allowance;
+                cv.displayValue = allowance.ToEth();
+                return cv;
+            }
         }
 
         /// <summary>
@@ -73,7 +133,23 @@ namespace Thirdweb
         /// </summary>
         public async Task<CurrencyValue> TotalSupply()
         {
-            return await Bridge.InvokeRoute<CurrencyValue>(getRoute("totalSupply"), new string[] { });
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("totalSupply"), new string[] { });
+            }
+            else
+            {
+                string contract = baseRoute.Substring(0, baseRoute.IndexOf("/"));
+                var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract);
+                string totalSupply = (await erc20.TotalSupplyQueryAsync()).ToString();
+                CurrencyValue cv = new CurrencyValue();
+                cv.decimals = (await erc20.DecimalsQueryAsync()).ToString();
+                cv.name = await erc20.NameQueryAsync();
+                cv.symbol = await erc20.SymbolQueryAsync();
+                cv.value = totalSupply;
+                cv.displayValue = totalSupply.ToEth();
+                return cv;
+            }
         }
 
         // WRITE FUNCTIONS
