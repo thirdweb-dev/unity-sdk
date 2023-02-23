@@ -34,7 +34,7 @@ public class ThirdwebManager : MonoBehaviour
         {Chain.Polygon, "polygon"},
         {Chain.Mumbai, "mumbai"},
         {Chain.Fantom, "fantom"},
-        {Chain.FantomTestnet, "testnet"},
+        {Chain.FantomTestnet, "fantom-testnet"},
         {Chain.Avalanche, "avalanche"},
         {Chain.AvalancheTestnet, "avalanche-testnet"},
         {Chain.Optimism, "optimism"},
