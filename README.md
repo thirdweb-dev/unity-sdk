@@ -26,7 +26,7 @@ Drag and drop the file into your project.
 
 The package comes with a sample Scene and Prefab examples showcasing the different capabilities of the SDK.
 
-Note: you may need to install the [Newtonsoft.Json](https://github.com/jilleJr/Newtonsoft.Json-for-Unity/wiki/Install-official-via-UPM) package manually if you experience importing errors on different Unity versions.
+Note: The Newtonsoft DLL is included as part of the Unity Package, feel free to deselect it if you already have it installed as a dependency to avoid conflicts.
 
 # Build
 
@@ -84,6 +84,7 @@ All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-
 [Connect Wallet](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_ConnectWallet.cs) - All-in-one drag & drop wallet supporting multiple wallet providers, network switching, balance displaying and more!
 - Drag and drop it into your scene and select the wallet providers you want to support from the Inspector.
 - You may also choose whether you want to activate the Network Switching feature (leave unchecked if your app only requires one network).
+- You can add callbacks from the inspector for when the wallet is connected, disconnected, or the ntwork is switched.
 
 [NFT Loader](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_NFTLoader.cs) - Standalone drag & drop grid/scroll view of NFTs you ask it to display!
 - Go to the prefab's Settings in the Inspector.

@@ -4,10 +4,12 @@ using Thirdweb;
 using System;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public enum Wallet
 {
     MetaMask,
+    Injected,
     CoinbaseWallet,
     WalletConnect,
     MagicAuth,
@@ -31,8 +33,13 @@ public struct NetworkSprite
 public class Prefab_ConnectWallet : MonoBehaviour
 {
     [Header("SETTINGS")]
-    public List<Wallet> supportedWallets = new List<Wallet> { Wallet.MetaMask, Wallet.CoinbaseWallet, Wallet.WalletConnect };
-    public bool supportSwitchingNetwork = false;
+    public List<Wallet> supportedWallets;
+    public bool supportSwitchingNetwork;
+
+    [Header("CUSTOM CALLBACKS")]
+    public UnityEvent OnConnectedCallback;
+    public UnityEvent OnDisconnectedCallback;
+    public UnityEvent OnSwitchNetworkCallback;
 
     [Header("UI ELEMENTS (DO NOT EDIT)")]
     // Connecting
@@ -108,6 +115,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
             wallet = _wallet;
             OnConnected();
+            if (OnConnectedCallback != null)
+                OnConnectedCallback.Invoke();
             print($"Connected successfully to: {address}");
         }
         catch (Exception e)
@@ -149,6 +158,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
         {
             await ThirdwebManager.Instance.SDK.wallet.Disconnect();
             OnDisconnected();
+            if (OnDisconnectedCallback != null)
+                OnDisconnectedCallback.Invoke();
             print($"Disconnected successfully.");
 
         }
@@ -177,6 +188,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
             ThirdwebManager.Instance.chain = _chain;
             await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork((int)_chain);
             OnConnected();
+            if (OnSwitchNetworkCallback != null)
+                OnSwitchNetworkCallback.Invoke();
             print($"Switched Network Successfully: {_chain}");
 
         }
@@ -230,6 +243,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
         {
             case Wallet.MetaMask:
                 return WalletProvider.MetaMask;
+            case Wallet.Injected:
+                return WalletProvider.Injected;
             case Wallet.CoinbaseWallet:
                 return WalletProvider.CoinbaseWallet;
             case Wallet.WalletConnect:
