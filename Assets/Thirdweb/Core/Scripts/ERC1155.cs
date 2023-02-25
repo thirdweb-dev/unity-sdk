@@ -22,13 +22,16 @@ namespace Thirdweb
         /// </summary>
         public ERC1155ClaimConditions claimConditions;
 
+        Contract contract;
+
         /// <summary>
         /// Interact with any ERC1155 compatible contract.
         /// </summary>
-        public ERC1155(string parentRoute) : base(Routable.append(parentRoute, "erc1155"))
+        public ERC1155(string parentRoute, Contract contract) : base(Routable.append(parentRoute, "erc1155"))
         {
             this.signature = new ERC1155Signature(baseRoute);
             this.claimConditions = new ERC1155ClaimConditions(baseRoute);
+            this.contract = contract;
         }
 
         // READ FUNCTIONS
@@ -44,8 +47,7 @@ namespace Thirdweb
             }
             else
             {
-                string contract = Utils.GetBaseContract(baseRoute);
-                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract);
+                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract.address);
                 NFT nft = new NFT();
                 nft.owner = "";
                 nft.type = "ERC1155";
@@ -133,8 +135,7 @@ namespace Thirdweb
             }
             else
             {
-                string contract = Utils.GetBaseContract(baseRoute);
-                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract);
+                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract.address);
                 return (await erc1155.BalanceOfQueryAsync(address, BigInteger.Parse(tokenId))).ToString();
             }
         }
@@ -152,8 +153,7 @@ namespace Thirdweb
             }
             else
             {
-                string contract = Utils.GetBaseContract(baseRoute);
-                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract);
+                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract.address);
                 return (await erc1155.IsApprovedForAllQueryAsync(address, approvedContract)).ToString();
             }
         }
@@ -181,8 +181,7 @@ namespace Thirdweb
             }
             else
             {
-                string contract = Utils.GetBaseContract(baseRoute);
-                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract);
+                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract.address);
                 return (int)(await erc1155.TotalSupplyQueryAsync(BigInteger.Parse(tokenId)));
             }
         }

@@ -46,9 +46,9 @@ namespace Thirdweb
             this.chain = chain;
             this.address = address;
             this.abi = abi;
-            this.ERC20 = new ERC20(baseRoute);
-            this.ERC721 = new ERC721(baseRoute);
-            this.ERC1155 = new ERC1155(baseRoute);
+            this.ERC20 = new ERC20(baseRoute, this);
+            this.ERC721 = new ERC721(baseRoute, this);
+            this.ERC1155 = new ERC1155(baseRoute, this);
             this.marketplace = new Marketplace(chain, address);
             this.pack = new Pack(chain, address);
             this.events = new Events(baseRoute);
@@ -56,7 +56,18 @@ namespace Thirdweb
 
         public async Task<CurrencyValue> GetBalance()
         {
-            return await Bridge.InvokeRoute<CurrencyValue>($"sdk{separator}getBalance", Utils.ToJsonStringArray(address));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("balance"), new string[] { });
+            }
+            else
+            {
+                BigInteger balance = await ThirdwebManager.Instance.WEB3.Eth.GetBalance.SendRequestAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
+                CurrencyValue cv = new CurrencyValue();
+                cv.value = balance.ToString();
+                cv.displayValue = balance.ToString().ToEth();
+                return cv;
+            }
         }
 
         /// <summary>
