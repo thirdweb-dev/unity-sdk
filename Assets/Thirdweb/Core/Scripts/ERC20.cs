@@ -40,7 +40,7 @@ namespace Thirdweb
             }
             else
             {
-                string contract = baseRoute.Substring(0, baseRoute.IndexOf("/"));
+                string contract = Utils.GetBaseContract(baseRoute);
                 var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract);
                 Currency c = new Currency();
                 c.decimals = (await erc20.DecimalsQueryAsync()).ToString();
@@ -76,15 +76,11 @@ namespace Thirdweb
             }
             else
             {
-                string contract = baseRoute.Substring(0, baseRoute.IndexOf("/"));
+                string contract = Utils.GetBaseContract(baseRoute);
                 var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract);
                 string balance = (await erc20.BalanceOfQueryAsync(address)).ToString();
-                CurrencyValue cv = new CurrencyValue();
-                cv.decimals = (await erc20.DecimalsQueryAsync()).ToString();
-                cv.name = await erc20.NameQueryAsync();
-                cv.symbol = await erc20.SymbolQueryAsync();
-                cv.value = balance;
-                cv.displayValue = balance.ToEth();
+                Currency c = await Get();
+                CurrencyValue cv = new CurrencyValue(c.name, c.symbol, c.decimals, balance, balance.ToEth());
                 return cv;
             }
         }
@@ -115,15 +111,11 @@ namespace Thirdweb
             }
             else
             {
-                string contract = baseRoute.Substring(0, baseRoute.IndexOf("/"));
+                string contract = Utils.GetBaseContract(baseRoute);
                 var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract);
                 string allowance = (await erc20.AllowanceQueryAsync(owner, spender)).ToString();
-                CurrencyValue cv = new CurrencyValue();
-                cv.decimals = (await erc20.DecimalsQueryAsync()).ToString();
-                cv.name = await erc20.NameQueryAsync();
-                cv.symbol = await erc20.SymbolQueryAsync();
-                cv.value = allowance;
-                cv.displayValue = allowance.ToEth();
+                Currency c = await Get();
+                CurrencyValue cv = new CurrencyValue(c.name, c.symbol, c.decimals, allowance, allowance.ToEth());
                 return cv;
             }
         }
@@ -139,15 +131,11 @@ namespace Thirdweb
             }
             else
             {
-                string contract = baseRoute.Substring(0, baseRoute.IndexOf("/"));
+                string contract = Utils.GetBaseContract(baseRoute);
                 var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract);
                 string totalSupply = (await erc20.TotalSupplyQueryAsync()).ToString();
-                CurrencyValue cv = new CurrencyValue();
-                cv.decimals = (await erc20.DecimalsQueryAsync()).ToString();
-                cv.name = await erc20.NameQueryAsync();
-                cv.symbol = await erc20.SymbolQueryAsync();
-                cv.value = totalSupply;
-                cv.displayValue = totalSupply.ToEth();
+                Currency c = await Get();
+                CurrencyValue cv = new CurrencyValue(c.name, c.symbol, c.decimals, totalSupply, totalSupply.ToEth());
                 return cv;
             }
         }

@@ -14,13 +14,14 @@ namespace Thirdweb
         public string image;
         public string name;
         public string external_url;
-        public Dictionary<string, object> properties;
+        public object attributes;
 
         public override string ToString()
         {
             string propertiesStr = "";
-            foreach (var property in properties)
-                propertiesStr = $"\n>>key: {property.Key.ToString()} // value: {property.Value.ToString()}";
+            if (attributes != null)
+                propertiesStr += attributes.ToString();
+
             return
             $"NFTMetadata:"
             + $"\n>id: {id}"
@@ -78,6 +79,13 @@ namespace Thirdweb
         public string symbol;
         public string decimals;
 
+        public Currency(string name, string symbol, string decimals)
+        {
+            this.name = name;
+            this.symbol = symbol;
+            this.decimals = decimals;
+        }
+
         public override string ToString()
         {
             return
@@ -96,6 +104,15 @@ namespace Thirdweb
         public string decimals;
         public string value;
         public string displayValue;
+
+        public CurrencyValue(string name, string symbol, string decimals, string value, string displayValue)
+        {
+            this.name = name;
+            this.symbol = symbol;
+            this.decimals = decimals;
+            this.value = value;
+            this.displayValue = displayValue;
+        }
 
         public override string ToString()
         {

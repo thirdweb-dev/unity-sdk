@@ -98,5 +98,21 @@ namespace Thirdweb
             return false;
 #endif
         }
+
+        public static string GetBaseContract(this string baseRoute)
+        {
+            if (baseRoute.Contains("#"))
+                return baseRoute.Substring(0, baseRoute.IndexOf("#"));
+            else
+                return baseRoute.Substring(0, baseRoute.IndexOf("/"));
+        }
+
+        public static string ReplaceIPFS(this string tokenURI)
+        {
+            if (tokenURI.StartsWith("ipfs://"))
+                return tokenURI.Replace("ipfs://", "https://gateway.ipfscdn.io/ipfs/");
+            else
+                return tokenURI;
+        }
     }
 }

@@ -29,7 +29,7 @@ public class ThirdwebManager : MonoBehaviour
     public List<Chain> supportedNetworks;
 
     [Header("SETTINGS - NATIVE")]
-    public string RPC = "https://polygon-mumbai.g.alchemy.com/v2/8xhjCEWFVQ1gJZAW_6KgpjMgdnkqrBNl";
+    public string RPC = "https://goerli.blockpi.network/v1/rpc/public";
 
     public Dictionary<Chain, string> chainIdentifiers = new Dictionary<Chain, string>
     {

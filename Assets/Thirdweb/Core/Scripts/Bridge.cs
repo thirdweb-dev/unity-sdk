@@ -70,9 +70,9 @@ namespace Thirdweb
 
         public static void Initialize(string chainOrRPC, ThirdwebSDK.Options options)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                // Debug.LogWarning("Initializing the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Initializing the thirdweb SDK is not fully supported in the editor.");
                 return;
             }
             ThirdwebInitialize(chainOrRPC, Utils.ToJson(options));
@@ -80,9 +80,9 @@ namespace Thirdweb
 
         public static async Task<string> Connect(WalletConnection walletConnection)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Connecting wallets is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Connecting wallets is not fully supported in the editor.");
                 return Utils.AddressZero;
             }
             var task = new TaskCompletionSource<string>();
@@ -95,9 +95,9 @@ namespace Thirdweb
 
         public static async Task Disconnect()
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Disconnecting wallets is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Disconnecting wallets is not fully supported in the editor.");
                 return;
             }
             var task = new TaskCompletionSource<string>();
@@ -109,9 +109,9 @@ namespace Thirdweb
 
         public static async Task SwitchNetwork(int chainId)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Switching networks is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Switching networks is not fully supported in the editor.");
                 return;
             }
             var task = new TaskCompletionSource<string>();
@@ -123,9 +123,9 @@ namespace Thirdweb
 
         public static async Task<T> InvokeRoute<T>(string route, string[] body)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Interacting with the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
                 return default(T);
             }
             var msg = Utils.ToJson(new RequestMessageBody(body));
@@ -140,9 +140,9 @@ namespace Thirdweb
 
         public static string InvokeListener<T>(string route, string[] body, Action<T> action)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Interacting with the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
                 return null;
             }
 
@@ -155,9 +155,9 @@ namespace Thirdweb
 
         public static async Task FundWallet(FundWalletOptions payload)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Interacting with the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
                 return;
             }
             var msg = Utils.ToJson(payload);

@@ -1,4 +1,10 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Numerics;
+using UnityEngine;
+using UnityEngine.Networking;
+using Newtonsoft.Json;
 
 namespace Thirdweb
 {
@@ -61,10 +67,22 @@ namespace Thirdweb
         /// <returns>The data deserialized to the given typed</returns>
         public async Task<T> Read<T>(string functionName, params object[] args)
         {
-            string[] argsEncoded = new string[args.Length + 1];
-            argsEncoded[0] = functionName;
-            Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
-            return await Bridge.InvokeRoute<T>(getRoute("call"), argsEncoded);
+            if (Utils.IsWebGLBuild())
+            {
+                string[] argsEncoded = new string[args.Length + 1];
+                argsEncoded[0] = functionName;
+                Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
+                return await Bridge.InvokeRoute<T>(getRoute("call"), argsEncoded);
+            }
+            else
+            {
+                if (this.abi == null)
+                    throw new UnityException("You must pass an ABI for native platform custom calls");
+
+                var contract = ThirdwebManager.Instance.WEB3.Eth.GetContract(this.abi, this.address);
+                var function = contract.GetFunction(functionName);
+                return await function.CallAsync<T>(args);
+            }
         }
 
         /// <summary>
