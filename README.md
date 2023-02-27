@@ -13,6 +13,8 @@
 
 # Supported platforms
 
+We're using Unity Version 2021.3.12f1, but any version of 2021 should work fine.
+
 - [x] WebGL
 - [ ] Desktop (coming soon)
 - [ ] Android (coming soon)
