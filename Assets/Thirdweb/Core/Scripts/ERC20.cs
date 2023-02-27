@@ -43,7 +43,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract.address);
+                var erc20 = ThirdwebManager.Instance.SDK.web3.Eth.ERC20.GetContractService(contract.address);
                 Currency c = new Currency();
                 c.decimals = (await erc20.DecimalsQueryAsync()).ToString();
                 c.name = await erc20.NameQueryAsync();
@@ -78,7 +78,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract.address);
+                var erc20 = ThirdwebManager.Instance.SDK.web3.Eth.ERC20.GetContractService(contract.address);
                 string balance = (await erc20.BalanceOfQueryAsync(address)).ToString();
                 Currency c = await Get();
                 CurrencyValue cv = new CurrencyValue(c.name, c.symbol, c.decimals, balance, balance.ToEth());
@@ -112,7 +112,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract.address);
+                var erc20 = ThirdwebManager.Instance.SDK.web3.Eth.ERC20.GetContractService(contract.address);
                 string allowance = (await erc20.AllowanceQueryAsync(owner, spender)).ToString();
                 Currency c = await Get();
                 CurrencyValue cv = new CurrencyValue(c.name, c.symbol, c.decimals, allowance, allowance.ToEth());
@@ -131,7 +131,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc20 = ThirdwebManager.Instance.WEB3.Eth.ERC20.GetContractService(contract.address);
+                var erc20 = ThirdwebManager.Instance.SDK.web3.Eth.ERC20.GetContractService(contract.address);
                 string totalSupply = (await erc20.TotalSupplyQueryAsync()).ToString();
                 Currency c = await Get();
                 CurrencyValue cv = new CurrencyValue(c.name, c.symbol, c.decimals, totalSupply, totalSupply.ToEth());

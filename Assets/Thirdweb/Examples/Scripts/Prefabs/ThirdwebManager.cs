@@ -1,7 +1,6 @@
 using UnityEngine;
 using Thirdweb;
 using System.Collections.Generic;
-using Nethereum.Web3;
 
 [System.Serializable]
 public enum Chain
@@ -24,12 +23,14 @@ public enum Chain
 
 public class ThirdwebManager : MonoBehaviour
 {
-    [Header("SETTINGS - WEBGL")]
+    [Header("SETTINGS - REQUIRED")]
     public Chain chain = Chain.Goerli;
     public List<Chain> supportedNetworks;
 
-    [Header("SETTINGS - NATIVE")]
-    public string RPC = "https://goerli.blockpi.network/v1/rpc/public";
+    [Header("SETTINGS - OPTIONAL")]
+    public string RPC_OVERRIDE = "https://goerli.blockpi.network/v1/rpc/public";
+
+    private string API_KEY = "339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3";
 
     public Dictionary<Chain, string> chainIdentifiers = new Dictionary<Chain, string>
     {
@@ -38,7 +39,7 @@ public class ThirdwebManager : MonoBehaviour
         {Chain.Polygon, "polygon"},
         {Chain.Mumbai, "mumbai"},
         {Chain.Fantom, "fantom"},
-        {Chain.FantomTestnet, "testnet"},
+        {Chain.FantomTestnet, "fantom-testnet"},
         {Chain.Avalanche, "avalanche"},
         {Chain.AvalancheTestnet, "avalanche-testnet"},
         {Chain.Optimism, "optimism"},
@@ -50,8 +51,6 @@ public class ThirdwebManager : MonoBehaviour
     };
 
     public ThirdwebSDK SDK;
-    public Web3 WEB3;
-
 
     public static ThirdwebManager Instance;
 
@@ -62,10 +61,9 @@ public class ThirdwebManager : MonoBehaviour
         else
             Destroy(this.gameObject);
 
-        SDK = new ThirdwebSDK(chainIdentifiers[chain]);
+        string rpc = RPC_OVERRIDE.StartsWith("https://") ? RPC_OVERRIDE : $"https://{chainIdentifiers[chain]}.rpc.thirdweb.com/{API_KEY}";
 
-        if (!Utils.IsWebGLBuild())
-            WEB3 = new Web3(RPC);
+        SDK = new ThirdwebSDK(rpc);
     }
 
 }

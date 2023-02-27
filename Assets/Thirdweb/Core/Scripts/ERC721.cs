@@ -47,7 +47,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc721 = ThirdwebManager.Instance.WEB3.Eth.ERC721.GetContractService(contract.address);
+                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(contract.address);
                 NFT nft = new NFT();
                 nft.owner = await OwnerOf(tokenId);
                 nft.type = "ERC721";
@@ -89,7 +89,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc721 = ThirdwebManager.Instance.WEB3.Eth.ERC721.GetContractService(contract.address);
+                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(contract.address);
                 int totalSupply = (int)await erc721.TotalSupplyQueryAsync();
                 int start;
                 int end;
@@ -153,7 +153,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc721 = ThirdwebManager.Instance.WEB3.Eth.ERC721.GetContractService(contract.address);
+                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(contract.address);
                 string owner = address == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : address;
                 var tokenIdsOfOwner = await erc721.GetAllTokenIdsOfOwnerUsingTokenOfOwnerByIndexAndMultiCallAsync(owner);
                 List<NFT> ownedNfts = new List<NFT>();
@@ -176,7 +176,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc721 = ThirdwebManager.Instance.WEB3.Eth.ERC721.GetContractService(contract.address);
+                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(contract.address);
                 return (await erc721.OwnerOfQueryAsync(BigInteger.Parse(tokenId))).ToString();
             }
         }
@@ -207,7 +207,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc721 = ThirdwebManager.Instance.WEB3.Eth.ERC721.GetContractService(contract.address);
+                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(contract.address);
                 return (await erc721.BalanceOfQueryAsync(address)).ToString();
             }
         }
@@ -225,7 +225,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc721 = ThirdwebManager.Instance.WEB3.Eth.ERC721.GetContractService(contract.address);
+                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(contract.address);
                 return await erc721.IsApprovedForAllQueryAsync(address, approvedContract);
             }
         }
@@ -241,7 +241,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc721 = ThirdwebManager.Instance.WEB3.Eth.ERC721.GetContractService(contract.address);
+                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(contract.address);
                 return (int)(await erc721.TotalSupplyQueryAsync());
             }
         }

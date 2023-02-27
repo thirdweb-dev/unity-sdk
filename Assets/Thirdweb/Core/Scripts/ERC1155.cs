@@ -47,7 +47,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract.address);
+                var erc1155 = ThirdwebManager.Instance.SDK.web3.Eth.ERC1155.GetContractService(contract.address);
                 NFT nft = new NFT();
                 nft.owner = "";
                 nft.type = "ERC1155";
@@ -135,7 +135,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract.address);
+                var erc1155 = ThirdwebManager.Instance.SDK.web3.Eth.ERC1155.GetContractService(contract.address);
                 return (await erc1155.BalanceOfQueryAsync(address, BigInteger.Parse(tokenId))).ToString();
             }
         }
@@ -153,7 +153,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract.address);
+                var erc1155 = ThirdwebManager.Instance.SDK.web3.Eth.ERC1155.GetContractService(contract.address);
                 return (await erc1155.IsApprovedForAllQueryAsync(address, approvedContract)).ToString();
             }
         }
@@ -181,7 +181,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc1155 = ThirdwebManager.Instance.WEB3.Eth.ERC1155.GetContractService(contract.address);
+                var erc1155 = ThirdwebManager.Instance.SDK.web3.Eth.ERC1155.GetContractService(contract.address);
                 return (int)(await erc1155.TotalSupplyQueryAsync(BigInteger.Parse(tokenId)));
             }
         }

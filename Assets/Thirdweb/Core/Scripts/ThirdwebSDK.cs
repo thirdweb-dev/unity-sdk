@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Nethereum.Web3;
 
 namespace Thirdweb
 {
@@ -80,6 +81,8 @@ namespace Thirdweb
         /// </summary>
         public Deployer deployer;
 
+        public Web3 web3;
+
         /// <summary>
         /// Create an instance of the thirdweb SDK. Requires a webGL browser context.
         /// </summary>
@@ -91,6 +94,9 @@ namespace Thirdweb
             this.wallet = new Wallet();
             this.deployer = new Deployer();
             Bridge.Initialize(chainOrRPC, options);
+
+            if (!Utils.IsWebGLBuild())
+                this.web3 = new Web3(chainOrRPC);
         }
 
         /// <summary>
