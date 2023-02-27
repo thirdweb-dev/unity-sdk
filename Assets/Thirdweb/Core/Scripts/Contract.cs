@@ -62,7 +62,7 @@ namespace Thirdweb
             }
             else
             {
-                BigInteger balance = await ThirdwebManager.Instance.SDK.web3.Eth.GetBalance.SendRequestAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
+                BigInteger balance = await ThirdwebManager.Instance.SDK.web3.Eth.GetBalance.SendRequestAsync(address);
                 CurrencyValue cv = new CurrencyValue();
                 cv.value = balance.ToString();
                 cv.displayValue = balance.ToString().ToEth();
