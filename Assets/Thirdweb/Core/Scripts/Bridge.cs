@@ -75,7 +75,9 @@ namespace Thirdweb
                 Debug.LogWarning("Initializing the thirdweb SDK is not fully supported in the editor.");
                 return;
             }
+#if UNITY_WEBGL
             ThirdwebInitialize(chainOrRPC, Utils.ToJson(options));
+#endif
         }
 
         public static async Task<string> Connect(WalletConnection walletConnection)
@@ -88,7 +90,9 @@ namespace Thirdweb
             var task = new TaskCompletionSource<string>();
             string taskId = Guid.NewGuid().ToString();
             taskMap[taskId] = task;
+#if UNITY_WEBGL
             ThirdwebConnect(taskId, walletConnection.provider.ToString(), walletConnection.chainId, jsCallback);
+#endif
             string result = await task.Task;
             return result;
         }
@@ -103,7 +107,9 @@ namespace Thirdweb
             var task = new TaskCompletionSource<string>();
             string taskId = Guid.NewGuid().ToString();
             taskMap[taskId] = task;
+#if UNITY_WEBGL
             ThirdwebDisconnect(taskId, jsCallback);
+#endif
             await task.Task;
         }
 
@@ -117,7 +123,9 @@ namespace Thirdweb
             var task = new TaskCompletionSource<string>();
             string taskId = Guid.NewGuid().ToString();
             taskMap[taskId] = task;
+#if UNITY_WEBGL
             ThirdwebSwitchNetwork(taskId, chainId, jsCallback);
+#endif
             await task.Task;
         }
 
@@ -132,7 +140,9 @@ namespace Thirdweb
             string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
+#if UNITY_WEBGL
             ThirdwebInvoke(taskId, route, msg, jsCallback);
+#endif
             string result = await task.Task;
             // Debug.Log($"InvokeRoute Result: {result}");
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
@@ -149,7 +159,9 @@ namespace Thirdweb
             string taskId = Guid.NewGuid().ToString();
             taskActionMap[taskId] = new GenericAction(typeof(T), action);
             var msg = Utils.ToJson(new RequestMessageBody(body));
+#if UNITY_WEBGL
             ThirdwebInvokeListener(taskId, route, msg, jsAction);
+#endif
             return taskId;
         }
 
@@ -164,10 +176,13 @@ namespace Thirdweb
             string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
+#if UNITY_WEBGL
             ThirdwebFundWallet(taskId, msg, jsCallback);
+#endif
             await task.Task;
         }
 
+#if UNITY_WEBGL
         [DllImport("__Internal")]
         private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
         [DllImport("__Internal")]
@@ -182,5 +197,6 @@ namespace Thirdweb
         private static extern string ThirdwebSwitchNetwork(string taskId, int chainId, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebFundWallet(string taskId, string payload, Action<string, string, string> cb);
+#endif
     }
 }
