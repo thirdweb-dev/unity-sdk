@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using System.Numerics;
+using Thirdweb.Contracts.TokenERC20;
+using UnityEngine;
 
 namespace Thirdweb
 {
@@ -20,6 +22,8 @@ namespace Thirdweb
 
         string contractAddress;
 
+        TokenERC20Service tokenERC20Service;
+
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
@@ -28,6 +32,8 @@ namespace Thirdweb
             this.signature = new ERC20Signature(baseRoute);
             this.claimConditions = new ERC20ClaimConditions(baseRoute);
             this.contractAddress = contractAddress;
+            if (!Utils.IsWebGLBuild())
+                this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
         }
 
         // READ FUNCTIONS
@@ -43,11 +49,10 @@ namespace Thirdweb
             }
             else
             {
-                var erc20 = ThirdwebManager.Instance.SDK.web3.Eth.ERC20.GetContractService(contractAddress);
                 Currency c = new Currency();
-                c.decimals = (await erc20.DecimalsQueryAsync()).ToString();
-                c.name = await erc20.NameQueryAsync();
-                c.symbol = await erc20.SymbolQueryAsync();
+                c.decimals = (await tokenERC20Service.DecimalsQueryAsync()).ToString();
+                c.name = await tokenERC20Service.NameQueryAsync();
+                c.symbol = await tokenERC20Service.SymbolQueryAsync();
                 return c;
             }
         }
@@ -78,8 +83,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc20 = ThirdwebManager.Instance.SDK.web3.Eth.ERC20.GetContractService(contractAddress);
-                string balance = (await erc20.BalanceOfQueryAsync(address)).ToString();
+                string balance = (await tokenERC20Service.BalanceOfQueryAsync(address)).ToString();
                 Currency c = await Get();
                 CurrencyValue cv = new CurrencyValue(c.name, c.symbol, c.decimals, balance, balance.ToEth());
                 return cv;
@@ -112,8 +116,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc20 = ThirdwebManager.Instance.SDK.web3.Eth.ERC20.GetContractService(contractAddress);
-                string allowance = (await erc20.AllowanceQueryAsync(owner, spender)).ToString();
+                string allowance = (await tokenERC20Service.AllowanceQueryAsync(owner, spender)).ToString();
                 Currency c = await Get();
                 CurrencyValue cv = new CurrencyValue(c.name, c.symbol, c.decimals, allowance, allowance.ToEth());
                 return cv;
@@ -131,8 +134,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc20 = ThirdwebManager.Instance.SDK.web3.Eth.ERC20.GetContractService(contractAddress);
-                string totalSupply = (await erc20.TotalSupplyQueryAsync()).ToString();
+                string totalSupply = (await tokenERC20Service.TotalSupplyQueryAsync()).ToString();
                 Currency c = await Get();
                 CurrencyValue cv = new CurrencyValue(c.name, c.symbol, c.decimals, totalSupply, totalSupply.ToEth());
                 return cv;
@@ -146,7 +148,33 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> SetAllowance(string spender, string amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("setAllowance"), Utils.ToJsonStringArray(spender, amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("setAllowance"), Utils.ToJsonStringArray(spender, amount));
+            }
+            else
+            {
+                BigInteger currentAllowance = await tokenERC20Service.AllowanceQueryAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), spender);
+                BigInteger diff = BigInteger.Parse(amount) - currentAllowance;
+                TransactionResult result = new TransactionResult();
+
+                if (diff == 0)
+                {
+                    result = null;
+                }
+                else if (diff < 0)
+                {
+                    var receipt = await tokenERC20Service.DecreaseAllowanceRequestAndWaitForReceiptAsync(spender, diff * -1);
+                    result = receipt.ToTransactionResult();
+                }
+                else
+                {
+                    var receipt = await tokenERC20Service.IncreaseAllowanceRequestAndWaitForReceiptAsync(spender, diff);
+                    result = receipt.ToTransactionResult();
+                }
+
+                return result;
+            }
         }
 
         /// <summary>
@@ -154,7 +182,15 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Transfer(string to, string amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, amount));
+            }
+            else
+            {
+                var receipt = await tokenERC20Service.TransferRequestAndWaitForReceiptAsync(to, BigInteger.Parse(amount));
+                return receipt.ToTransactionResult();
+            }
         }
 
         /// <summary>
@@ -162,7 +198,15 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Burn(string amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("burn"), Utils.ToJsonStringArray(amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("burn"), Utils.ToJsonStringArray(amount));
+            }
+            else
+            {
+                var receipt = await tokenERC20Service.BurnRequestAndWaitForReceiptAsync(BigInteger.Parse(amount));
+                return receipt.ToTransactionResult();
+            }
         }
 
         /// <summary>
@@ -170,7 +214,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Claim(string amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("claim"), Utils.ToJsonStringArray(amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("claim"), Utils.ToJsonStringArray(amount));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -178,7 +229,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> ClaimTo(string address, int amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("claimTo"), Utils.ToJsonStringArray(address, amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("claimTo"), Utils.ToJsonStringArray(address, amount));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -186,7 +244,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Mint(string amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(amount));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -194,7 +259,15 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> MintTo(string address, string amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, amount));
+            }
+            else
+            {
+                var receipt = await tokenERC20Service.MintToRequestAndWaitForReceiptAsync(address, BigInteger.Parse(amount));
+                return receipt.ToTransactionResult();
+            }
         }
     }
 

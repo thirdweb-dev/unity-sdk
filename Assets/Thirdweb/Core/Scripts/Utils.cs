@@ -106,5 +106,18 @@ namespace Thirdweb
             else
                 return tokenURI;
         }
+
+        public static TransactionResult ToTransactionResult(this Nethereum.RPC.Eth.DTOs.TransactionReceipt receipt)
+        {
+            TransactionResult result = new TransactionResult();
+            result.receipt.from = receipt.From;
+            result.receipt.to = receipt.To;
+            result.receipt.transactionIndex = int.Parse(receipt.TransactionIndex.ToString());
+            result.receipt.gasUsed = receipt.GasUsed.ToString();
+            result.receipt.blockHash = receipt.BlockHash;
+            result.receipt.transactionHash = receipt.TransactionHash;
+            result.id = receipt.Status.ToString();
+            return result;
+        }
     }
 }
