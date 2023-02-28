@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using System.Numerics;
 using Thirdweb.Contracts.TokenERC20;
+using Thirdweb.Contracts.DropERC20;
 using UnityEngine;
 
 namespace Thirdweb
@@ -20,20 +21,22 @@ namespace Thirdweb
         /// </summary>
         public ERC20ClaimConditions claimConditions;
 
-        string contractAddress;
-
         TokenERC20Service tokenERC20Service;
+        DropERC20Service dropERC20Service;
 
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
         public ERC20(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "erc20"))
         {
-            this.signature = new ERC20Signature(baseRoute);
-            this.claimConditions = new ERC20ClaimConditions(baseRoute);
-            this.contractAddress = contractAddress;
             if (!Utils.IsWebGLBuild())
+            {
                 this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+            }
+
+            this.signature = new ERC20Signature(baseRoute, contractAddress);
+            this.claimConditions = new ERC20ClaimConditions(baseRoute, contractAddress);
         }
 
         // READ FUNCTIONS
@@ -220,7 +223,7 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return await ClaimTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), int.Parse(amount));
             }
         }
 
@@ -235,7 +238,18 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var claimConditionID = await dropERC20Service.ClaimConditionQueryAsync();
+                var claimConditions = await dropERC20Service.GetClaimConditionByIdQueryAsync(claimConditionID.CurrentStartId);
+                Contracts.DropERC20.ContractDefinition.AllowlistProof proof = new Contracts.DropERC20.ContractDefinition.AllowlistProof(); // TODO: Check actual process
+                byte[] data = new byte[0];
+                var result = await dropERC20Service.ClaimRequestAndWaitForReceiptAsync(
+                    address, (BigInteger)amount,
+                    claimConditions.Condition.Currency,
+                    claimConditions.Condition.PricePerToken,
+                    proof,
+                    data);
+
+                return result.ToTransactionResult();
             }
         }
 
@@ -250,7 +264,7 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return await MintTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), amount);
             }
         }
 
@@ -324,8 +338,12 @@ namespace Thirdweb
 #nullable enable
     public class ERC20ClaimConditions : Routable
     {
-        public ERC20ClaimConditions(string parentRoute) : base(Routable.append(parentRoute, "claimConditions"))
+        DropERC20Service dropERC20Service;
+
+        public ERC20ClaimConditions(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "claimConditions"))
         {
+            if (!Utils.IsWebGLBuild())
+                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
         }
 
         /// <summary>
@@ -333,7 +351,29 @@ namespace Thirdweb
         /// </summary>
         public async Task<ClaimConditions> GetActive()
         {
-            return await Bridge.InvokeRoute<ClaimConditions>(getRoute("getActive"), new string[] { });
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<ClaimConditions>(getRoute("getActive"), new string[] { });
+            }
+            else
+            {
+                // TODO: fix
+                var claimID = await dropERC20Service.GetActiveClaimConditionIdQueryAsync();
+                var conditions = await dropERC20Service.GetClaimConditionByIdQueryAsync(claimID);
+                ClaimConditions claimConditions = new ClaimConditions();
+                claimConditions.availableSupply = conditions.Condition.MaxClaimableSupply.ToString();
+                claimConditions.currentMintSupply = conditions.Condition.SupplyClaimed.ToString();
+                claimConditions.currencyAddress = conditions.Condition.Currency;
+                claimConditions.maxClaimableSupply = conditions.Condition.MaxClaimableSupply.ToString();
+                claimConditions.maxClaimablePerWallet = conditions.Condition.MaxClaimableSupply.ToString();
+                claimConditions.waitInSeconds = conditions.Condition.StartTimestamp.ToString();
+
+                Contract currencyContract = ThirdwebManager.Instance.SDK.GetContract(conditions.Condition.Currency);
+                CurrencyValue currencyMetadata = await currencyContract.ERC20.TotalSupply();
+                claimConditions.currencyMetadata = currencyMetadata;
+
+                return claimConditions;
+            }
         }
 
         /// <summary>
@@ -341,7 +381,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<bool> CanClaim(string quantity, string? addressToCheck = null)
         {
-            return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(quantity, addressToCheck));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(quantity, addressToCheck));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -349,7 +396,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<string[]> GetIneligibilityReasons(string quantity, string? addressToCheck = null)
         {
-            return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(quantity, addressToCheck));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(quantity, addressToCheck));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -357,7 +411,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<bool> GetClaimerProofs(string claimerAddress)
         {
-            return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
     }
 
@@ -367,11 +428,15 @@ namespace Thirdweb
     /// </summary>
     public class ERC20Signature : Routable
     {
+        DropERC20Service dropERC20Service;
+
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string parentRoute) : base(Routable.append(parentRoute, "signature"))
+        public ERC20Signature(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "signature"))
         {
+            if (!Utils.IsWebGLBuild())
+                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
         }
 
         /// <summary>
@@ -379,7 +444,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<ERC20SignedPayload> Generate(ERC20MintPayload payloadToSign)
         {
-            return await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -387,7 +459,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<bool> Verify(ERC20SignedPayload signedPayload)
         {
-            return await Bridge.InvokeRoute<bool>(getRoute("verify"), Utils.ToJsonStringArray(signedPayload));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<bool>(getRoute("verify"), Utils.ToJsonStringArray(signedPayload));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -395,7 +474,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Mint(ERC20SignedPayload signedPayload)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
     }
 }
