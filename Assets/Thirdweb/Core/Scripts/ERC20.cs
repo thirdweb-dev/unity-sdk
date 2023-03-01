@@ -27,16 +27,16 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
-        public ERC20(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "erc20"))
+        public ERC20(string parentRoute, string address) : base(Routable.append(parentRoute, "erc20"))
         {
             if (!Utils.IsWebGLBuild())
             {
-                this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
-                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.web3, address);
+                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, address);
             }
 
-            this.signature = new ERC20Signature(baseRoute, contractAddress);
-            this.claimConditions = new ERC20ClaimConditions(baseRoute, contractAddress);
+            this.signature = new ERC20Signature(baseRoute);
+            this.claimConditions = new ERC20ClaimConditions(baseRoute);
         }
 
         // READ FUNCTIONS
@@ -338,12 +338,9 @@ namespace Thirdweb
 #nullable enable
     public class ERC20ClaimConditions : Routable
     {
-        DropERC20Service dropERC20Service;
 
-        public ERC20ClaimConditions(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "claimConditions"))
+        public ERC20ClaimConditions(string parentRoute) : base(Routable.append(parentRoute, "claimConditions"))
         {
-            if (!Utils.IsWebGLBuild())
-                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
         }
 
         /// <summary>
@@ -357,22 +354,7 @@ namespace Thirdweb
             }
             else
             {
-                // TODO: fix
-                var claimID = await dropERC20Service.GetActiveClaimConditionIdQueryAsync();
-                var conditions = await dropERC20Service.GetClaimConditionByIdQueryAsync(claimID);
-                ClaimConditions claimConditions = new ClaimConditions();
-                claimConditions.availableSupply = conditions.Condition.MaxClaimableSupply.ToString();
-                claimConditions.currentMintSupply = conditions.Condition.SupplyClaimed.ToString();
-                claimConditions.currencyAddress = conditions.Condition.Currency;
-                claimConditions.maxClaimableSupply = conditions.Condition.MaxClaimableSupply.ToString();
-                claimConditions.maxClaimablePerWallet = conditions.Condition.MaxClaimableSupply.ToString();
-                claimConditions.waitInSeconds = conditions.Condition.StartTimestamp.ToString();
-
-                Contract currencyContract = ThirdwebManager.Instance.SDK.GetContract(conditions.Condition.Currency);
-                CurrencyValue currencyMetadata = await currencyContract.ERC20.TotalSupply();
-                claimConditions.currencyMetadata = currencyMetadata;
-
-                return claimConditions;
+                throw new UnityException("This functionality is not yet available on your current platform.");
             }
         }
 
@@ -428,15 +410,12 @@ namespace Thirdweb
     /// </summary>
     public class ERC20Signature : Routable
     {
-        DropERC20Service dropERC20Service;
 
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "signature"))
+        public ERC20Signature(string parentRoute) : base(Routable.append(parentRoute, "signature"))
         {
-            if (!Utils.IsWebGLBuild())
-                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
         }
 
         /// <summary>

@@ -5,6 +5,8 @@ using System.Numerics;
 using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using Thirdweb.Contracts.TokenERC1155;
+using Thirdweb.Contracts.DropERC1155;
 
 namespace Thirdweb
 {
@@ -22,16 +24,22 @@ namespace Thirdweb
         /// </summary>
         public ERC1155ClaimConditions claimConditions;
 
-        string contractAddress;
+        TokenERC1155Service tokenERC1155Service;
+        DropERC1155Service dropERC1155Service;
 
         /// <summary>
         /// Interact with any ERC1155 compatible contract.
         /// </summary>
-        public ERC1155(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "erc1155"))
+        public ERC1155(string parentRoute, string address) : base(Routable.append(parentRoute, "erc1155"))
         {
+            if (!Utils.IsWebGLBuild())
+            {
+                this.tokenERC1155Service = new TokenERC1155Service(ThirdwebManager.Instance.SDK.web3, address);
+                this.dropERC1155Service = new DropERC1155Service(ThirdwebManager.Instance.SDK.web3, address);
+            }
+
             this.signature = new ERC1155Signature(baseRoute);
             this.claimConditions = new ERC1155ClaimConditions(baseRoute);
-            this.contractAddress = contractAddress;
         }
 
         // READ FUNCTIONS
@@ -47,14 +55,13 @@ namespace Thirdweb
             }
             else
             {
-                var erc1155 = ThirdwebManager.Instance.SDK.web3.Eth.ERC1155.GetContractService(contractAddress);
                 NFT nft = new NFT();
                 nft.owner = "";
                 nft.type = "ERC1155";
                 nft.supply = await TotalSupply(tokenId);
                 nft.quantityOwned = 404;
 
-                string tokenURI = await erc1155.UriQueryAsync(BigInteger.Parse(tokenId));
+                string tokenURI = await tokenERC1155Service.UriQueryAsync(BigInteger.Parse(tokenId));
                 tokenURI = tokenURI.ReplaceIPFS();
 
                 using (UnityWebRequest req = UnityWebRequest.Get(tokenURI))
@@ -135,8 +142,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc1155 = ThirdwebManager.Instance.SDK.web3.Eth.ERC1155.GetContractService(contractAddress);
-                return (await erc1155.BalanceOfQueryAsync(address, BigInteger.Parse(tokenId))).ToString();
+                return (await tokenERC1155Service.BalanceOfQueryAsync(address, BigInteger.Parse(tokenId))).ToString();
             }
         }
 
@@ -153,8 +159,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc1155 = ThirdwebManager.Instance.SDK.web3.Eth.ERC1155.GetContractService(contractAddress);
-                return (await erc1155.IsApprovedForAllQueryAsync(address, approvedContract)).ToString();
+                return (await tokenERC1155Service.IsApprovedForAllQueryAsync(address, approvedContract)).ToString();
             }
         }
 
@@ -181,8 +186,7 @@ namespace Thirdweb
             }
             else
             {
-                var erc1155 = ThirdwebManager.Instance.SDK.web3.Eth.ERC1155.GetContractService(contractAddress);
-                return (int)(await erc1155.TotalSupplyQueryAsync(BigInteger.Parse(tokenId)));
+                return (int)(await tokenERC1155Service.TotalSupplyQueryAsync(BigInteger.Parse(tokenId)));
             }
         }
 
@@ -193,7 +197,15 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> SetApprovalForAll(string contractToApprove, bool approved)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("setApprovalForAll"), Utils.ToJsonStringArray(contractToApprove, approved));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("setApprovalForAll"), Utils.ToJsonStringArray(contractToApprove, approved));
+            }
+            else
+            {
+                var receipt = await tokenERC1155Service.SetApprovalForAllRequestAndWaitForReceiptAsync(contractToApprove, approved);
+                return receipt.ToTransactionResult();
+            }
         }
 
         /// <summary>
@@ -201,7 +213,15 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Transfer(string to, string tokenId, int amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, tokenId, amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, tokenId, amount));
+            }
+            else
+            {
+                var receipt = await tokenERC1155Service.SafeTransferFromRequestAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), to, BigInteger.Parse(tokenId), amount, new byte[0]);
+                return receipt.ToTransactionResult();
+            }
         }
 
         /// <summary>
@@ -209,7 +229,15 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Burn(string tokenId, int amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("burn"), Utils.ToJsonStringArray(tokenId, amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("burn"), Utils.ToJsonStringArray(tokenId, amount));
+            }
+            else
+            {
+                var receipt = await tokenERC1155Service.BurnRequestAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), BigInteger.Parse(tokenId), amount);
+                return receipt.ToTransactionResult();
+            }
         }
 
         /// <summary>
@@ -217,7 +245,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Claim(string tokenId, int amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("claim"), Utils.ToJsonStringArray(tokenId, amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("claim"), Utils.ToJsonStringArray(tokenId, amount));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -225,7 +260,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> ClaimTo(string address, string tokenId, int amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("claimTo"), Utils.ToJsonStringArray(address, tokenId, amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("claimTo"), Utils.ToJsonStringArray(address, tokenId, amount));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -233,7 +275,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Mint(NFTMetadataWithSupply nft)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(nft));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(nft));
+            }
+            else
+            {
+                return await MintTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), nft);
+            }
         }
 
         /// <summary>
@@ -241,7 +290,15 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> MintTo(string address, NFTMetadataWithSupply nft)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, nft));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, nft));
+            }
+            else
+            {
+                var receipt = await tokenERC1155Service.MintToRequestAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), BigInteger.Parse(nft.metadata.id), nft.metadata.uri, 1);
+                return receipt.ToTransactionResult();
+            }
         }
 
         /// <summary>
@@ -249,7 +306,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> MintAdditionalSupply(string tokenId, int additionalSupply)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintAdditionalSupply"), Utils.ToJsonStringArray(tokenId, additionalSupply, additionalSupply));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintAdditionalSupply"), Utils.ToJsonStringArray(tokenId, additionalSupply, additionalSupply));
+            }
+            else
+            {
+                return await MintAdditionalSupplyTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), tokenId, additionalSupply);
+            }
         }
 
         /// <summary>
@@ -257,7 +321,16 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> MintAdditionalSupplyTo(string address, string tokenId, int additionalSupply)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintAdditionalSupplyTo"), Utils.ToJsonStringArray(address, tokenId, additionalSupply));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintAdditionalSupplyTo"), Utils.ToJsonStringArray(address, tokenId, additionalSupply));
+            }
+            else
+            {
+                var uri = await tokenERC1155Service.UriQueryAsync(BigInteger.Parse(tokenId));
+                var receipt = await tokenERC1155Service.MintToRequestAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), BigInteger.Parse(tokenId), uri, additionalSupply);
+                return receipt.ToTransactionResult();
+            }
         }
     }
 
@@ -275,7 +348,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<ClaimConditions> GetActive(string tokenId)
         {
-            return await Bridge.InvokeRoute<ClaimConditions>(getRoute("getActive"), Utils.ToJsonStringArray(tokenId));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<ClaimConditions>(getRoute("getActive"), Utils.ToJsonStringArray(tokenId));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -283,7 +363,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<bool> CanClaim(string tokenId, int quantity, string addressToCheck = null)
         {
-            return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(tokenId, quantity, addressToCheck));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(tokenId, quantity, addressToCheck));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -291,7 +378,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<string[]> GetIneligibilityReasons(string tokenId, int quantity, string addressToCheck = null)
         {
-            return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(tokenId, quantity, addressToCheck));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(tokenId, quantity, addressToCheck));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -299,7 +393,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<bool> GetClaimerProofs(string tokenId, string claimerAddress)
         {
-            return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
     }
 
@@ -417,7 +518,14 @@ namespace Thirdweb
 
         public async Task<ERC1155SignedPayload> GenerateFromTokenId(ERC1155MintAdditionalPayload payloadToSign)
         {
-            return await Bridge.InvokeRoute<ERC1155SignedPayload>(getRoute("generateFromTokenId"), Utils.ToJsonStringArray(payloadToSign));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<ERC1155SignedPayload>(getRoute("generateFromTokenId"), Utils.ToJsonStringArray(payloadToSign));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -425,7 +533,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<bool> Verify(ERC1155SignedPayload signedPayload)
         {
-            return await Bridge.InvokeRoute<bool>(getRoute("verify"), Utils.ToJsonStringArray(signedPayload));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<bool>(getRoute("verify"), Utils.ToJsonStringArray(signedPayload));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -433,7 +548,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Mint(ERC1155SignedPayload signedPayload)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
     }
 }

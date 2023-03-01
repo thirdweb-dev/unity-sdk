@@ -30,12 +30,12 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC721 compatible contract.
         /// </summary>
-        public ERC721(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "erc721"))
+        public ERC721(string parentRoute, string address) : base(Routable.append(parentRoute, "erc721"))
         {
             if (!Utils.IsWebGLBuild())
             {
-                this.tokenERC721Service = new TokenERC721Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
-                this.dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.tokenERC721Service = new TokenERC721Service(ThirdwebManager.Instance.SDK.web3, address);
+                this.dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.web3, address);
             }
 
             this.signature = new ERC721Signature(baseRoute);
@@ -405,7 +405,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<ClaimConditions> GetActive()
         {
-            return await Bridge.InvokeRoute<ClaimConditions>(getRoute("getActive"), new string[] { });
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<ClaimConditions>(getRoute("getActive"), new string[] { });
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -413,7 +420,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<bool> CanClaim(int quantity, string addressToCheck = null)
         {
-            return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(quantity, addressToCheck));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(quantity, addressToCheck));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -421,7 +435,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<string[]> GetIneligibilityReasons(int quantity, string addressToCheck = null)
         {
-            return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(quantity, addressToCheck));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(quantity, addressToCheck));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -429,7 +450,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<bool> GetClaimerProofs(string claimerAddress)
         {
-            return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
     }
 
@@ -507,7 +535,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<ERC721SignedPayload> Generate(ERC721MintPayload payloadToSign)
         {
-            return await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -515,7 +550,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<bool> Verify(ERC721SignedPayload signedPayload)
         {
-            return await Bridge.InvokeRoute<bool>(getRoute("verify"), Utils.ToJsonStringArray(signedPayload));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<bool>(getRoute("verify"), Utils.ToJsonStringArray(signedPayload));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -523,7 +565,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Mint(ERC721SignedPayload signedPayload)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
     }
 }

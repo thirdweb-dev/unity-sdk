@@ -116,16 +116,30 @@ namespace Thirdweb
         /// <returns>The transaction receipt</returns>
         public async Task<TransactionResult> Write(string functionName, TransactionRequest? transactionOverrides, params object[] args)
         {
-            args = args ?? new object[0];
-            var hasOverrides = transactionOverrides != null;
-            string[] argsEncoded = new string[args.Length + (hasOverrides ? 2 : 1)];
-            argsEncoded[0] = functionName;
-            Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
-            if (hasOverrides)
+
+            if (Utils.IsWebGLBuild())
             {
-                argsEncoded[argsEncoded.Length - 1] = Utils.ToJson(transactionOverrides);
+                args = args ?? new object[0];
+                var hasOverrides = transactionOverrides != null;
+                string[] argsEncoded = new string[args.Length + (hasOverrides ? 2 : 1)];
+                argsEncoded[0] = functionName;
+                Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
+                if (hasOverrides)
+                {
+                    argsEncoded[argsEncoded.Length - 1] = Utils.ToJson(transactionOverrides);
+                }
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), argsEncoded);
             }
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), argsEncoded);
+            else
+            {
+                if (this.abi == null)
+                    throw new UnityException("You must pass an ABI for native platform custom calls");
+
+                var contract = ThirdwebManager.Instance.SDK.web3.Eth.GetContract(this.abi, this.address);
+                var function = contract.GetFunction(functionName);
+                var receipt = await function.SendTransactionAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, args);
+                return receipt.ToTransactionResult();
+            }
         }
     }
 }
