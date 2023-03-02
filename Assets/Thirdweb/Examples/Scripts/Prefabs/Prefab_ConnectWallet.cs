@@ -41,6 +41,9 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public UnityEvent OnConnectedCallback;
     public UnityEvent OnDisconnectedCallback;
     public UnityEvent OnSwitchNetworkCallback;
+    public UnityEvent OnFailedConnectCallback;
+    public UnityEvent OnFailedDisconnectCallback;
+    public UnityEvent OnFailedSwitchNetworkCallback;
 
     [Header("UI ELEMENTS (DO NOT EDIT)")]
     // Connecting
@@ -68,8 +71,28 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
     // UI Initialization
 
-    private void Start()
+    private async void Start()
     {
+        if (!Utils.IsWebGLBuild())
+        {
+            connectButton.SetActive(false);
+            connectedButton.SetActive(true);
+            connectDropdown.SetActive(false);
+            connectedDropdown.SetActive(false);
+            networkDropdown.SetActive(false);
+
+            address = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            Chain _chain = ThirdwebManager.Instance.chain;
+            CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
+            balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
+            walletAddressText.text = address.ShortenAddress();
+            chainImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
+
+            connectedButton.GetComponent<Button>().onClick.AddListener(() => OnCopyAddress());
+            OnConnectedCallback?.Invoke();
+            return;
+        }
+
         address = null;
 
         if (supportedWallets.Count == 1)
@@ -90,6 +113,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
                 wb.walletButton.SetActive(false);
             }
         }
+
+        connectedButton.GetComponent<Button>().onClick.AddListener(() => OnClickDropdown());
 
         connectButton.SetActive(true);
         connectedButton.SetActive(false);
@@ -121,6 +146,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         }
         catch (Exception e)
         {
+            OnFailedConnectCallback?.Invoke();
             print($"Error Connecting Wallet: {e.Message}");
         }
     }
@@ -164,6 +190,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         }
         catch (Exception e)
         {
+            OnFailedDisconnectCallback?.Invoke();
             print($"Error Disconnecting Wallet: {e.Message}");
         }
     }
@@ -193,6 +220,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         }
         catch (Exception e)
         {
+            OnFailedSwitchNetworkCallback?.Invoke();
             print($"Error Switching Network: {e.Message}");
         }
     }
@@ -231,6 +259,12 @@ public class Prefab_ConnectWallet : MonoBehaviour
             networkButton.transform.Find("Text_Network").GetComponent<TMP_Text>().text = ThirdwebManager.Instance.chainIdentifiers[chain];
             networkButton.transform.Find("Icon_Network").GetComponent<Image>().sprite = networkSprites.Find(x => x.chain == chain).sprite;
         }
+    }
+
+    void OnCopyAddress()
+    {
+        GUIUtility.systemCopyBuffer = address;
+        Debugger.Instance.Log("Copied your address to your clipboard!", $"Address: {address}");
     }
 
     // Utility

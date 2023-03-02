@@ -45,4 +45,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chain: 5
-  supportedNetworks: 01000000050000008900000081380100
+  rpcOverride: 
+  chainIdOverride: -1

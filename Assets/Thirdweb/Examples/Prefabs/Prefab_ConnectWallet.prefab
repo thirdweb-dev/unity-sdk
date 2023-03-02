@@ -1434,7 +1434,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 217680bfb64fc074392309113986a3ee, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4a851c149a30f1e4b8088ab52b81444d, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -1840,19 +1840,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1620813802}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1335404546467394145}
-        m_TargetAssemblyTypeName: Prefab_ConnectWallet, Assembly-CSharp
-        m_MethodName: OnClickDropdown
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1620813800
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2286,6 +2274,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   supportedWallets: 010000000200000003000000
   supportSwitchingNetwork: 1
+  supportedNetworks: 0500000081380100ed6e060061000000
   OnConnectedCallback:
     m_PersistentCalls:
       m_Calls: []
@@ -2293,6 +2282,15 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnSwitchNetworkCallback:
+    m_PersistentCalls:
+      m_Calls: []
+  OnFailedConnectCallback:
+    m_PersistentCalls:
+      m_Calls: []
+  OnFailedDisconnectCallback:
+    m_PersistentCalls:
+      m_Calls: []
+  OnFailedSwitchNetworkCallback:
     m_PersistentCalls:
       m_Calls: []
   connectButton: {fileID: 1335404547334051784}
