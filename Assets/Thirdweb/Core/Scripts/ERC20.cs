@@ -279,7 +279,7 @@ namespace Thirdweb
             }
             else
             {
-                var receipt = await tokenERC20Service.MintToRequestAndWaitForReceiptAsync(address, BigInteger.Parse(amount));
+                var receipt = await tokenERC20Service.MintToRequestAndWaitForReceiptAsync(address, BigInteger.Parse(amount.ToWei()));
                 return receipt.ToTransactionResult();
             }
         }

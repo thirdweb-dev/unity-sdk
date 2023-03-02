@@ -1,6 +1,9 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Nethereum.Web3;
+using Nethereum.Web3.Accounts;
+using UnityEngine;
 
 namespace Thirdweb
 {
@@ -83,20 +86,51 @@ namespace Thirdweb
 
         public Web3 web3;
 
+        public Account account;
+
         /// <summary>
         /// Create an instance of the thirdweb SDK. Requires a webGL browser context.
         /// </summary>
         /// <param name="chainOrRPC">The chain name or RPC url to connect to</param>
         /// <param name="options">Configuration options</param>
-        public ThirdwebSDK(string chainOrRPC, Options options = new Options())
+        public ThirdwebSDK(string chainOrRPC, int chainId = -1, Options options = new Options())
         {
+            if (!chainOrRPC.StartsWith("https://"))
+                throw new UnityException("Invalid RPC URL!");
+
             this.chainOrRPC = chainOrRPC;
             this.wallet = new Wallet();
             this.deployer = new Deployer();
             Bridge.Initialize(chainOrRPC, options);
 
             if (!Utils.IsWebGLBuild())
-                this.web3 = new Web3(chainOrRPC);
+            {
+                if (chainId == -1)
+                    throw new UnityException("Chain ID override required for native platforms!");
+
+                var path = Application.persistentDataPath + "/account.json";
+                var keyStoreService = new Nethereum.KeyStore.KeyStoreScryptService();
+                var password = SystemInfo.deviceUniqueIdentifier;
+
+                if (File.Exists(path))
+                {
+                    var encryptedJson = File.ReadAllText(path);
+                    var key = keyStoreService.DecryptKeyStoreFromJson(password, encryptedJson);
+                    this.account = new Account(key, chainId);
+                }
+                else
+                {
+                    var scryptParams = new Nethereum.KeyStore.Model.ScryptParams { Dklen = 32, N = 262144, R = 1, P = 8 };
+                    var ecKey = Nethereum.Signer.EthECKey.GenerateKey();
+                    var keyStore = keyStoreService.EncryptAndGenerateKeyStore(password, ecKey.GetPrivateKeyAsBytes(), ecKey.GetPublicAddress(), scryptParams);
+                    var json = keyStoreService.SerializeKeyStoreToJson(keyStore);
+                    File.WriteAllText(path, json);
+                    this.account = new Account(ecKey, chainId);
+                }
+
+                this.web3 = new Web3(this.account, chainOrRPC);
+                Debug.Log($"Connected to RPC {chainOrRPC} (Chain ID: {chainId}) with account {account.Address}");
+            }
         }
 
         /// <summary>

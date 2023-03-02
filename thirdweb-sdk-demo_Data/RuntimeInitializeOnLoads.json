@@ -1,0 +1,1 @@
+{"root":[{"assemblyName":"Assembly-CSharp","nameSpace":"UnityAsyncAwaitUtil","className":"SyncContextUtil","methodName":"Install","loadTypes":1,"isUnityClass":true},{"assemblyName":"endel.nativewebsocket","nameSpace":"","className":"MainThreadUtil","methodName":"Setup","loadTypes":1,"isUnityClass":false}]}

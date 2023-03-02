@@ -23,12 +23,15 @@ public enum Chain
 
 public class ThirdwebManager : MonoBehaviour
 {
-    [Header("SETTINGS - REQUIRED")]
+    [Header("REQUIRED SETTINGS")]
+    [Tooltip("The chain to initialize the SDK with")]
     public Chain chain = Chain.Goerli;
-    public List<Chain> supportedNetworks;
 
-    [Header("SETTINGS - OPTIONAL")]
-    public string RPC_OVERRIDE = "https://goerli.blockpi.network/v1/rpc/public";
+    [Header("OPTIONAL SETTINGS")]
+    [Tooltip("Supported by all platforms")]
+    public string rpcOverride = "";
+    [Tooltip("Supported by native platforms")]
+    public int chainIdOverride = -1;
 
     private string API_KEY = "339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3";
 
@@ -61,9 +64,17 @@ public class ThirdwebManager : MonoBehaviour
         else
             Destroy(this.gameObject);
 
-        string rpc = RPC_OVERRIDE.StartsWith("https://") ? RPC_OVERRIDE : $"https://{chainIdentifiers[chain]}.rpc.thirdweb.com/{API_KEY}";
 
-        SDK = new ThirdwebSDK(rpc);
+        if (!Utils.IsWebGLBuild() && rpcOverride.StartsWith("https://") && chainIdOverride == -1)
+        {
+            throw new UnityException("To use custom RPC overrides on native platforms, please provide the corresponding Chain ID Override!");
+        }
+        else
+        {
+            string rpc = rpcOverride.StartsWith("https://") ? rpcOverride : $"https://{chainIdentifiers[chain]}.rpc.thirdweb.com/{API_KEY}";
+            int chainId = chainIdOverride == -1 ? (int)chain : chainIdOverride;
+            SDK = new ThirdwebSDK(rpc, chainId);
+        }
+
     }
-
 }

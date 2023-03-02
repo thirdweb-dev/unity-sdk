@@ -35,6 +35,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     [Header("SETTINGS")]
     public List<Wallet> supportedWallets;
     public bool supportSwitchingNetwork;
+    public List<Chain> supportedNetworks;
 
     [Header("CUSTOM CALLBACKS")]
     public UnityEvent OnConnectedCallback;
@@ -221,7 +222,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
         foreach (Chain chain in Enum.GetValues(typeof(Chain)))
         {
-            if (chain == ThirdwebManager.Instance.chain || !ThirdwebManager.Instance.supportedNetworks.Contains(chain))
+            if (chain == ThirdwebManager.Instance.chain || !supportedNetworks.Contains(chain))
                 continue;
 
             GameObject networkButton = Instantiate(networkButtonPrefab, networkDropdown.transform);
