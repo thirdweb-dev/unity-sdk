@@ -11,16 +11,17 @@ namespace Thirdweb
     /// </summary>
     public class Deployer : Routable
     {
-
-        public Deployer() : base($"sdk{subSeparator}deployer")
-        {
-        }
+        public Deployer()
+            : base($"sdk{subSeparator}deployer") { }
 
         public async Task<string> DeployNFTCollection(NFTContractDeployMetadata metadata)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("deployNFTCollection"), Utils.ToJsonStringArray(metadata));
+                return await Bridge.InvokeRoute<string>(
+                    getRoute("deployNFTCollection"),
+                    Utils.ToJsonStringArray(metadata)
+                );
             }
             else
             {
@@ -39,9 +40,13 @@ namespace Thirdweb
                 throw new UnityException("This functionality is not yet available on your current platform.");
 
                 var deploymentMessage = new DropERC721Deployment();
-                var deploymentHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetContractDeploymentHandler<DropERC721Deployment>();
+                var deploymentHandler =
+                    ThirdwebManager.Instance.SDK.web3.Eth.GetContractDeploymentHandler<DropERC721Deployment>();
                 var deploymentReceipt = await deploymentHandler.SendRequestAndWaitForReceiptAsync(deploymentMessage);
-                DropERC721Service dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.web3, deploymentReceipt.ContractAddress);
+                DropERC721Service dropERC721Service = new DropERC721Service(
+                    ThirdwebManager.Instance.SDK.web3,
+                    deploymentReceipt.ContractAddress
+                );
                 var initializeReceipt = await dropERC721Service.InitializeRequestAndWaitForReceiptAsync(
                     defaultAdmin: await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
                     name: metadata.name,
@@ -62,7 +67,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("deploySignatureDrop"), Utils.ToJsonStringArray(metadata));
+                return await Bridge.InvokeRoute<string>(
+                    getRoute("deploySignatureDrop"),
+                    Utils.ToJsonStringArray(metadata)
+                );
             }
             else
             {
@@ -98,7 +106,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("deployEditionDrop"), Utils.ToJsonStringArray(metadata));
+                return await Bridge.InvokeRoute<string>(
+                    getRoute("deployEditionDrop"),
+                    Utils.ToJsonStringArray(metadata)
+                );
             }
             else
             {
@@ -146,7 +157,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("deployMarketplace"), Utils.ToJsonStringArray(metadata));
+                return await Bridge.InvokeRoute<string>(
+                    getRoute("deployMarketplace"),
+                    Utils.ToJsonStringArray(metadata)
+                );
             }
             else
             {
@@ -154,11 +168,18 @@ namespace Thirdweb
             }
         }
 
-        public async Task<string> DeployReleasedContract(string releaserAddress, string contractName, object[] constructorParams)
+        public async Task<string> DeployReleasedContract(
+            string releaserAddress,
+            string contractName,
+            object[] constructorParams
+        )
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("deployReleasedContract"), Utils.ToJsonStringArray(releaserAddress, contractName, constructorParams));
+                return await Bridge.InvokeRoute<string>(
+                    getRoute("deployReleasedContract"),
+                    Utils.ToJsonStringArray(releaserAddress, contractName, constructorParams)
+                );
             }
             else
             {
@@ -170,7 +191,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("deployContractFromUri"), Utils.ToJsonStringArray(uri, constructorParams));
+                return await Bridge.InvokeRoute<string>(
+                    getRoute("deployContractFromUri"),
+                    Utils.ToJsonStringArray(uri, constructorParams)
+                );
             }
             else
             {

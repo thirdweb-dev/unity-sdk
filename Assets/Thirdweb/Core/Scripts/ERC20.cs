@@ -16,6 +16,7 @@ namespace Thirdweb
         /// Handle signature minting functionality
         /// </summary>
         public ERC20Signature signature;
+
         /// <summary>
         /// Query claim conditions
         /// </summary>
@@ -27,7 +28,8 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
-        public ERC20(string parentRoute, string address) : base(Routable.append(parentRoute, "erc20"))
+        public ERC20(string parentRoute, string address)
+            : base(Routable.append(parentRoute, "erc20"))
         {
             if (!Utils.IsWebGLBuild())
             {
@@ -115,7 +117,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("allowanceOf"), Utils.ToJsonStringArray(owner, spender));
+                return await Bridge.InvokeRoute<CurrencyValue>(
+                    getRoute("allowanceOf"),
+                    Utils.ToJsonStringArray(owner, spender)
+                );
             }
             else
             {
@@ -153,11 +158,17 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("setAllowance"), Utils.ToJsonStringArray(spender, amount));
+                return await Bridge.InvokeRoute<TransactionResult>(
+                    getRoute("setAllowance"),
+                    Utils.ToJsonStringArray(spender, amount)
+                );
             }
             else
             {
-                BigInteger currentAllowance = await tokenERC20Service.AllowanceQueryAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), spender);
+                BigInteger currentAllowance = await tokenERC20Service.AllowanceQueryAsync(
+                    await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                    spender
+                );
                 BigInteger diff = BigInteger.Parse(amount) - currentAllowance;
                 TransactionResult result = new TransactionResult();
 
@@ -167,7 +178,10 @@ namespace Thirdweb
                 }
                 else if (diff < 0)
                 {
-                    var receipt = await tokenERC20Service.DecreaseAllowanceRequestAndWaitForReceiptAsync(spender, diff * -1);
+                    var receipt = await tokenERC20Service.DecreaseAllowanceRequestAndWaitForReceiptAsync(
+                        spender,
+                        diff * -1
+                    );
                     result = receipt.ToTransactionResult();
                 }
                 else
@@ -187,11 +201,17 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, amount));
+                return await Bridge.InvokeRoute<TransactionResult>(
+                    getRoute("transfer"),
+                    Utils.ToJsonStringArray(to, amount)
+                );
             }
             else
             {
-                var receipt = await tokenERC20Service.TransferRequestAndWaitForReceiptAsync(to, BigInteger.Parse(amount));
+                var receipt = await tokenERC20Service.TransferRequestAndWaitForReceiptAsync(
+                    to,
+                    BigInteger.Parse(amount)
+                );
                 return receipt.ToTransactionResult();
             }
         }
@@ -234,20 +254,28 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("claimTo"), Utils.ToJsonStringArray(address, amount));
+                return await Bridge.InvokeRoute<TransactionResult>(
+                    getRoute("claimTo"),
+                    Utils.ToJsonStringArray(address, amount)
+                );
             }
             else
             {
                 var claimConditionID = await dropERC20Service.ClaimConditionQueryAsync();
-                var claimConditions = await dropERC20Service.GetClaimConditionByIdQueryAsync(claimConditionID.CurrentStartId);
-                Contracts.DropERC20.ContractDefinition.AllowlistProof proof = new Contracts.DropERC20.ContractDefinition.AllowlistProof(); // TODO: Check actual process
+                var claimConditions = await dropERC20Service.GetClaimConditionByIdQueryAsync(
+                    claimConditionID.CurrentStartId
+                );
+                Contracts.DropERC20.ContractDefinition.AllowlistProof proof =
+                    new Contracts.DropERC20.ContractDefinition.AllowlistProof(); // TODO: Check actual process
                 byte[] data = new byte[0];
                 var result = await dropERC20Service.ClaimRequestAndWaitForReceiptAsync(
-                    address, (BigInteger)amount,
+                    address,
+                    (BigInteger)amount,
                     claimConditions.Condition.Currency,
                     claimConditions.Condition.PricePerToken,
                     proof,
-                    data);
+                    data
+                );
 
                 return result.ToTransactionResult();
             }
@@ -275,11 +303,17 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, amount));
+                return await Bridge.InvokeRoute<TransactionResult>(
+                    getRoute("mintTo"),
+                    Utils.ToJsonStringArray(address, amount)
+                );
             }
             else
             {
-                var receipt = await tokenERC20Service.MintToRequestAndWaitForReceiptAsync(address, BigInteger.Parse(amount.ToWei()));
+                var receipt = await tokenERC20Service.MintToRequestAndWaitForReceiptAsync(
+                    address,
+                    BigInteger.Parse(amount.ToWei())
+                );
                 return receipt.ToTransactionResult();
             }
         }
@@ -294,6 +328,7 @@ namespace Thirdweb
         public string primarySaleRecipient;
         public string quantity;
         public string uid;
+
         // TODO implement these, needs JS bridging support
         // public long mintStartTime;
         // public long mintEndTime;
@@ -338,10 +373,8 @@ namespace Thirdweb
 #nullable enable
     public class ERC20ClaimConditions : Routable
     {
-
-        public ERC20ClaimConditions(string parentRoute) : base(Routable.append(parentRoute, "claimConditions"))
-        {
-        }
+        public ERC20ClaimConditions(string parentRoute)
+            : base(Routable.append(parentRoute, "claimConditions")) { }
 
         /// <summary>
         /// Get the active claim condition
@@ -365,7 +398,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(quantity, addressToCheck));
+                return await Bridge.InvokeRoute<bool>(
+                    getRoute("canClaim"),
+                    Utils.ToJsonStringArray(quantity, addressToCheck)
+                );
             }
             else
             {
@@ -380,7 +416,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(quantity, addressToCheck));
+                return await Bridge.InvokeRoute<string[]>(
+                    getRoute("getClaimIneligibilityReasons"),
+                    Utils.ToJsonStringArray(quantity, addressToCheck)
+                );
             }
             else
             {
@@ -395,7 +434,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+                return await Bridge.InvokeRoute<bool>(
+                    getRoute("getClaimerProofs"),
+                    Utils.ToJsonStringArray(claimerAddress)
+                );
             }
             else
             {
@@ -404,19 +446,16 @@ namespace Thirdweb
         }
     }
 
-
     /// <summary>
     /// Generate, verify and mint signed mintable payloads
     /// </summary>
     public class ERC20Signature : Routable
     {
-
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string parentRoute) : base(Routable.append(parentRoute, "signature"))
-        {
-        }
+        public ERC20Signature(string parentRoute)
+            : base(Routable.append(parentRoute, "signature")) { }
 
         /// <summary>
         /// Generate a signed mintable payload. Requires minting permission.
@@ -425,7 +464,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+                return await Bridge.InvokeRoute<ERC20SignedPayload>(
+                    getRoute("generate"),
+                    Utils.ToJsonStringArray(payloadToSign)
+                );
             }
             else
             {
@@ -455,7 +497,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
+                return await Bridge.InvokeRoute<TransactionResult>(
+                    getRoute("mint"),
+                    Utils.ToJsonStringArray(signedPayload)
+                );
             }
             else
             {

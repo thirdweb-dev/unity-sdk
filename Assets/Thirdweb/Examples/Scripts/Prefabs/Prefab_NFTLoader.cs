@@ -74,13 +74,13 @@ public class Prefab_NFTLoader : MonoBehaviour
             {
                 Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(singleQuery.contractAddress);
 
-                NFT tempNFT = singleQuery.type == NFTType.ERC1155 ?
-                    await tempContract.ERC1155.Get(singleQuery.tokenID) :
-                    await tempContract.ERC721.Get(singleQuery.tokenID);
+                NFT tempNFT =
+                    singleQuery.type == NFTType.ERC1155
+                        ? await tempContract.ERC1155.Get(singleQuery.tokenID)
+                        : await tempContract.ERC721.Get(singleQuery.tokenID);
 
                 nftsToLoad.Add(tempNFT);
             }
-
         }
         catch (Exception e)
         {
@@ -93,9 +93,14 @@ public class Prefab_NFTLoader : MonoBehaviour
             {
                 Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(multiQuery.contractAddress);
 
-                List<NFT> tempNFTList = multiQuery.type == NFTType.ERC1155 ?
-                    await tempContract.ERC1155.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count }) :
-                    await tempContract.ERC721.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count });
+                List<NFT> tempNFTList =
+                    multiQuery.type == NFTType.ERC1155
+                        ? await tempContract.ERC1155.GetAll(
+                            new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count }
+                        )
+                        : await tempContract.ERC721.GetAll(
+                            new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count }
+                        );
 
                 nftsToLoad.AddRange(tempNFTList);
             }
@@ -105,16 +110,16 @@ public class Prefab_NFTLoader : MonoBehaviour
             print($"Error Loading MultiQuery NFTs: {e.Message}");
         }
 
-
         try
         {
             foreach (OwnedQuery ownedQuery in query.loadOwnedNfts)
             {
                 Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(ownedQuery.contractAddress);
 
-                List<NFT> tempNFTList = ownedQuery.type == NFTType.ERC1155 ?
-                    await tempContract.ERC1155.GetOwned(ownedQuery.owner) :
-                    await tempContract.ERC721.GetOwned(ownedQuery.owner);
+                List<NFT> tempNFTList =
+                    ownedQuery.type == NFTType.ERC1155
+                        ? await tempContract.ERC1155.GetOwned(ownedQuery.owner)
+                        : await tempContract.ERC721.GetOwned(ownedQuery.owner);
 
                 nftsToLoad.AddRange(tempNFTList);
             }

@@ -13,10 +13,13 @@ namespace Thirdweb.Contracts.Pack.ContractDefinition
     {
         [Parameter("address", "assetContract", 1)]
         public virtual string AssetContract { get; set; }
+
         [Parameter("uint8", "tokenType", 2)]
         public virtual byte TokenType { get; set; }
+
         [Parameter("uint256", "tokenId", 3)]
         public virtual BigInteger TokenId { get; set; }
+
         [Parameter("uint256", "totalAmount", 4)]
         public virtual BigInteger TotalAmount { get; set; }
     }

@@ -17,15 +17,8 @@ namespace UnityAsyncAwaitUtil
             UnityThreadId = Thread.CurrentThread.ManagedThreadId;
         }
 
-        public static int UnityThreadId
-        {
-            get; private set;
-        }
+        public static int UnityThreadId { get; private set; }
 
-        public static SynchronizationContext UnitySynchronizationContext
-        {
-            get; private set;
-        }
+        public static SynchronizationContext UnitySynchronizationContext { get; private set; }
     }
 }
-

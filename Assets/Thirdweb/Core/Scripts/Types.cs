@@ -2,7 +2,6 @@ using System.Collections.Generic;
 
 namespace Thirdweb
 {
-
     // NFTs
 
     [System.Serializable]
@@ -22,15 +21,14 @@ namespace Thirdweb
             if (attributes != null)
                 propertiesStr += attributes.ToString();
 
-            return
-            $"NFTMetadata:"
-            + $"\n>id: {id}"
-            + $"\n>uri: {uri}"
-            + $"\n>description: {description}"
-            + $"\n>image: {image}"
-            + $"\n>name: {name}"
-            + $"\n>external_url: {external_url}"
-            + $"\n>properties: {propertiesStr}";
+            return $"NFTMetadata:"
+                + $"\n>id: {id}"
+                + $"\n>uri: {uri}"
+                + $"\n>description: {description}"
+                + $"\n>image: {image}"
+                + $"\n>name: {name}"
+                + $"\n>external_url: {external_url}"
+                + $"\n>properties: {propertiesStr}";
         }
     }
 
@@ -42,10 +40,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"NFTMetadataWithSupply:"
-            + $"\n>>>>>\n{metadata.ToString()}\n<<<<<"
-            + $"\n>supply: {supply}";
+            return $"NFTMetadataWithSupply:" + $"\n>>>>>\n{metadata.ToString()}\n<<<<<" + $"\n>supply: {supply}";
         }
     }
 
@@ -60,13 +55,12 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"NFT:"
-            + $"\n>>>>>\n{metadata.ToString()}\n<<<<<"
-            + $"\n>owner: {owner}"
-            + $"\n>type: {type}"
-            + $"\n>supply: {supply}"
-            + $"\n>quantityOwned: {quantityOwned}";
+            return $"NFT:"
+                + $"\n>>>>>\n{metadata.ToString()}\n<<<<<"
+                + $"\n>owner: {owner}"
+                + $"\n>type: {type}"
+                + $"\n>supply: {supply}"
+                + $"\n>quantityOwned: {quantityOwned}";
         }
     }
 
@@ -88,11 +82,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"Currency:"
-            + $"\n>name: {name}"
-            + $"\n>symbol: {symbol}"
-            + $"\n>decimals: {decimals}";
+            return $"Currency:" + $"\n>name: {name}" + $"\n>symbol: {symbol}" + $"\n>decimals: {decimals}";
         }
     }
 
@@ -116,13 +106,12 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"CurrencyValue:"
-            + $"\n>name: {name}"
-            + $"\n>symbol: {symbol}"
-            + $"\n>decimals: {decimals}"
-            + $"\n>value: {value}"
-            + $"\n>displayValue: {displayValue}";
+            return $"CurrencyValue:"
+                + $"\n>name: {name}"
+                + $"\n>symbol: {symbol}"
+                + $"\n>decimals: {decimals}"
+                + $"\n>value: {value}"
+                + $"\n>displayValue: {displayValue}";
         }
     }
 
@@ -144,18 +133,17 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"Listing:"
-            + $"\n>id: {id}"
-            + $"\n>sellerAddress: {sellerAddress}"
-            + $"\n>assetContractAddress: {assetContractAddress}"
-            + $"\n>tokenId: {tokenId}"
-            + $"\n>>>>>\n{asset.ToString()}\n<<<<<"
-            + $"\n>quantity: {quantity}"
-            + $"\n>currencyContractAddress: {currencyContractAddress}"
-            + $"\n>buyoutPrice: {buyoutPrice}"
-            + $"\n>>>>>\n{buyoutCurrencyValuePerToken.ToString()}\n<<<<<"
-            + $"\n>type: {type}";
+            return $"Listing:"
+                + $"\n>id: {id}"
+                + $"\n>sellerAddress: {sellerAddress}"
+                + $"\n>assetContractAddress: {assetContractAddress}"
+                + $"\n>tokenId: {tokenId}"
+                + $"\n>>>>>\n{asset.ToString()}\n<<<<<"
+                + $"\n>quantity: {quantity}"
+                + $"\n>currencyContractAddress: {currencyContractAddress}"
+                + $"\n>buyoutPrice: {buyoutPrice}"
+                + $"\n>>>>>\n{buyoutCurrencyValuePerToken.ToString()}\n<<<<<"
+                + $"\n>type: {type}";
         }
     }
 
@@ -167,11 +155,10 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"DirectListing:"
-            + $"\n>>>>>\n{base.ToString()}\n<<<<<"
-            + $"\n>startTimeInSeconds: {startTimeInSeconds}"
-            + $"\n>secondsUntilEnd: {secondsUntilEnd}";
+            return $"DirectListing:"
+                + $"\n>>>>>\n{base.ToString()}\n<<<<<"
+                + $"\n>startTimeInSeconds: {startTimeInSeconds}"
+                + $"\n>secondsUntilEnd: {secondsUntilEnd}";
         }
     }
 
@@ -185,13 +172,12 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"AuctionListing:"
-            + $"\n>>>>>\n{base.ToString()}\n<<<<<"
-            + $"\n>startTimeInEpochSeconds: {startTimeInEpochSeconds}"
-            + $"\n>endTimeInEpochSeconds: {endTimeInEpochSeconds}"
-            + $"\n>reservePrice: {reservePrice}"
-            + $"\n>>>>>\n{reservePriceCurrencyValuePerToken.ToString()}\n<<<<<";
+            return $"AuctionListing:"
+                + $"\n>>>>>\n{base.ToString()}\n<<<<<"
+                + $"\n>startTimeInEpochSeconds: {startTimeInEpochSeconds}"
+                + $"\n>endTimeInEpochSeconds: {endTimeInEpochSeconds}"
+                + $"\n>reservePrice: {reservePrice}"
+                + $"\n>>>>>\n{reservePriceCurrencyValuePerToken.ToString()}\n<<<<<";
         }
     }
 
@@ -210,17 +196,16 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"NewListing:"
-            + $"\n>type: {type}"
-            + $"\n>assetContractAddress: {assetContractAddress}"
-            + $"\n>tokenId: {tokenId}"
-            + $"\n>startTimestamp: {startTimestamp}"
-            + $"\n>listingDurationInSeconds: {listingDurationInSeconds}"
-            + $"\n>quantity: {quantity}"
-            + $"\n>currencyContractAddress: {currencyContractAddress}"
-            + $"\n>reservePricePerToken: {reservePricePerToken}"
-            + $"\n>buyoutPricePerToken: {buyoutPricePerToken}";
+            return $"NewListing:"
+                + $"\n>type: {type}"
+                + $"\n>assetContractAddress: {assetContractAddress}"
+                + $"\n>tokenId: {tokenId}"
+                + $"\n>startTimestamp: {startTimestamp}"
+                + $"\n>listingDurationInSeconds: {listingDurationInSeconds}"
+                + $"\n>quantity: {quantity}"
+                + $"\n>currencyContractAddress: {currencyContractAddress}"
+                + $"\n>reservePricePerToken: {reservePricePerToken}"
+                + $"\n>buyoutPricePerToken: {buyoutPricePerToken}";
         }
     }
 
@@ -236,10 +221,9 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"NewAuctionListing:"
-            + $"\n>>>>>\n{base.ToString()}\n<<<<<"
-            + $"\n>reservePricePerToken: {reservePricePerToken}";
+            return $"NewAuctionListing:"
+                + $"\n>>>>>\n{base.ToString()}\n<<<<<"
+                + $"\n>reservePricePerToken: {reservePricePerToken}";
         }
     }
 
@@ -253,9 +237,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"NewDirectListing:"
-            + $"\n>>>>>\n{base.ToString()}\n<<<<<";
+            return $"NewDirectListing:" + $"\n>>>>>\n{base.ToString()}\n<<<<<";
         }
     }
 
@@ -271,14 +253,13 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"Offer:"
-            + $"\n>listingId: {listingId}"
-            + $"\n>buyerAddress: {buyerAddress}"
-            + $"\n>quantityDesired: {quantityDesired}"
-            + $"\n>pricePerToken: {pricePerToken}"
-            + $"\n>>>>>\n{currencyValue.ToString()}\n<<<<<"
-            + $"\n>currencyContractAddress: {currencyContractAddress}";
+            return $"Offer:"
+                + $"\n>listingId: {listingId}"
+                + $"\n>buyerAddress: {buyerAddress}"
+                + $"\n>quantityDesired: {quantityDesired}"
+                + $"\n>pricePerToken: {pricePerToken}"
+                + $"\n>>>>>\n{currencyValue.ToString()}\n<<<<<"
+                + $"\n>currencyContractAddress: {currencyContractAddress}";
         }
     }
 
@@ -290,10 +271,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"QueryAllParams:"
-            + $"\n>start: {start}"
-            + $"\n>count: {count}";
+            return $"QueryAllParams:" + $"\n>start: {start}" + $"\n>count: {count}";
         }
     }
 
@@ -306,12 +284,11 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"MarketplaceFilter:"
-            + $"\n>>>>>\n{base.ToString()}\n<<<<<"
-            + $"\n>seller: {seller}"
-            + $"\n>tokenContract: {tokenContract}"
-            + $"\n>tokenId: {tokenId}";
+            return $"MarketplaceFilter:"
+                + $"\n>>>>>\n{base.ToString()}\n<<<<<"
+                + $"\n>seller: {seller}"
+                + $"\n>tokenContract: {tokenContract}"
+                + $"\n>tokenId: {tokenId}";
         }
     }
 
@@ -330,15 +307,14 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"ClaimConditions:"
-            + $"\n>availableSupply: {availableSupply}"
-            + $"\n>currentMintSupply: {currentMintSupply}"
-            + $"\n>>>>>\n{currencyMetadata.ToString()}\n<<<<<"
-            + $"\n>currencyAddress: {currencyAddress}"
-            + $"\n>maxClaimableSupply: {maxClaimableSupply}"
-            + $"\n>maxClaimablePerWallet: {maxClaimablePerWallet}"
-            + $"\n>waitInSeconds: {waitInSeconds}";
+            return $"ClaimConditions:"
+                + $"\n>availableSupply: {availableSupply}"
+                + $"\n>currentMintSupply: {currentMintSupply}"
+                + $"\n>>>>>\n{currencyMetadata.ToString()}\n<<<<<"
+                + $"\n>currencyAddress: {currencyAddress}"
+                + $"\n>maxClaimableSupply: {maxClaimableSupply}"
+                + $"\n>maxClaimablePerWallet: {maxClaimablePerWallet}"
+                + $"\n>waitInSeconds: {waitInSeconds}";
         }
     }
 
@@ -352,12 +328,11 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"SnapshotEntry:"
-            + $"\n>address: {address}"
-            + $"\n>maxClaimable: {maxClaimable}"
-            + $"\n>price: {price}"
-            + $"\n>currencyAddress: {currencyAddress}";
+            return $"SnapshotEntry:"
+                + $"\n>address: {address}"
+                + $"\n>maxClaimable: {maxClaimable}"
+                + $"\n>price: {price}"
+                + $"\n>currencyAddress: {currencyAddress}";
         }
     }
 
@@ -375,14 +350,13 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"Receipt:"
-            + $"\n>from: {from}"
-            + $"\n>to: {to}"
-            + $"\n>transactionIndex: {transactionIndex}"
-            + $"\n>gasUsed: {gasUsed}"
-            + $"\n>blockHash: {blockHash}"
-            + $"\n>transactionHash: {transactionHash}";
+            return $"Receipt:"
+                + $"\n>from: {from}"
+                + $"\n>to: {to}"
+                + $"\n>transactionIndex: {transactionIndex}"
+                + $"\n>gasUsed: {gasUsed}"
+                + $"\n>blockHash: {blockHash}"
+                + $"\n>transactionHash: {transactionHash}";
         }
     }
 
@@ -399,10 +373,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"TransactionResult:"
-            + $"\n{receipt.ToString()}"
-            + $"\n>id: {id}";
+            return $"TransactionResult:" + $"\n{receipt.ToString()}" + $"\n>id: {id}";
         }
     }
 
@@ -418,14 +389,13 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"TransactionRequest:"
-            + $"\n>from: {from}"
-            + $"\n>to: {to}"
-            + $"\n>data: {data}"
-            + $"\n>value: {value}"
-            + $"\n>gasLimit: {gasLimit}"
-            + $"\n>gasPrice: {gasPrice}";
+            return $"TransactionRequest:"
+                + $"\n>from: {from}"
+                + $"\n>to: {to}"
+                + $"\n>data: {data}"
+                + $"\n>value: {value}"
+                + $"\n>gasLimit: {gasLimit}"
+                + $"\n>gasPrice: {gasPrice}";
         }
     }
 
@@ -437,10 +407,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"LoginPayloadData:"
-            + $"\n>>>>>\n{payload.ToString()}\n<<<<<"
-            + $"\n>signature: {signature}";
+            return $"LoginPayloadData:" + $"\n>>>>>\n{payload.ToString()}\n<<<<<" + $"\n>signature: {signature}";
         }
     }
 
@@ -455,13 +422,12 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"LoginPayloadData:"
-            + $"\n>domain: {domain}"
-            + $"\n>address: {address}"
-            + $"\n>nonce: {nonce}"
-            + $"\n>expiration_time: {expiration_time}"
-            + $"\n>chain_id: {chain_id}";
+            return $"LoginPayloadData:"
+                + $"\n>domain: {domain}"
+                + $"\n>address: {address}"
+                + $"\n>nonce: {nonce}"
+                + $"\n>expiration_time: {expiration_time}"
+                + $"\n>chain_id: {chain_id}";
         }
     }
 
@@ -484,7 +450,12 @@ namespace Thirdweb
         public int? toBlock;
         public Dictionary<string, object> filters;
 
-        public EventQueryOptions(Dictionary<string, object> filters = null, int? fromBlock = null, int? toBlock = null, string order = null)
+        public EventQueryOptions(
+            Dictionary<string, object> filters = null,
+            int? fromBlock = null,
+            int? toBlock = null,
+            string order = null
+        )
         {
             this.fromBlock = fromBlock;
             this.order = order;
@@ -502,11 +473,10 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"ContractEvent:"
-            + $"\n>eventName: {eventName}"
-            + $"\n>data: {data.ToString()}"
-            + $"\n{transaction.ToString()}";
+            return $"ContractEvent:"
+                + $"\n>eventName: {eventName}"
+                + $"\n>data: {data.ToString()}"
+                + $"\n{transaction.ToString()}";
         }
     }
 
@@ -527,19 +497,18 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return
-            $"EventTransaction:"
-            + $"\n>blockNumber: {blockNumber}"
-            + $"\n>blockHash: {blockHash}"
-            + $"\n>transactionIndex: {transactionIndex}"
-            + $"\n>removed: {removed}"
-            + $"\n>address: {address}"
-            + $"\n>data: {data}"
-            + $"\n>topics: {topics}"
-            + $"\n>transactionHash: {transactionHash}"
-            + $"\n>logIndex: {logIndex}"
-            + $"\n>event: {@event}"
-            + $"\n>eventSignature: {eventSignature}";
+            return $"EventTransaction:"
+                + $"\n>blockNumber: {blockNumber}"
+                + $"\n>blockHash: {blockHash}"
+                + $"\n>transactionIndex: {transactionIndex}"
+                + $"\n>removed: {removed}"
+                + $"\n>address: {address}"
+                + $"\n>data: {data}"
+                + $"\n>topics: {topics}"
+                + $"\n>transactionHash: {transactionHash}"
+                + $"\n>logIndex: {logIndex}"
+                + $"\n>event: {@event}"
+                + $"\n>eventSignature: {eventSignature}";
         }
     }
 }

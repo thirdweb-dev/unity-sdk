@@ -13,10 +13,13 @@ namespace Thirdweb.Contracts.DropERC1155.ContractDefinition
     {
         [Parameter("bytes32[]", "proof", 1)]
         public virtual List<byte[]> Proof { get; set; }
+
         [Parameter("uint256", "quantityLimitPerWallet", 2)]
         public virtual BigInteger QuantityLimitPerWallet { get; set; }
+
         [Parameter("uint256", "pricePerToken", 3)]
         public virtual BigInteger PricePerToken { get; set; }
+
         [Parameter("address", "currency", 4)]
         public virtual string Currency { get; set; }
     }

@@ -8,7 +8,6 @@ namespace Thirdweb
 {
     public static class Utils
     {
-
         public const string AddressZero = "0x0000000000000000000000000000000000000000";
         public const string NativeTokenAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
         public const double DECIMALS_18 = 1000000000000000000;
@@ -37,7 +36,10 @@ namespace Thirdweb
 
         public static string ToJson(object obj)
         {
-            return JsonConvert.SerializeObject(obj, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+            return JsonConvert.SerializeObject(
+                obj,
+                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }
+            );
         }
 
         public static string ToBytes32HexString(byte[] bytes)
@@ -86,7 +88,8 @@ namespace Thirdweb
 
         public static string ShortenAddress(this string address)
         {
-            if (address.Length != 42) throw new ArgumentException("Invalid Address Length.");
+            if (address.Length != 42)
+                throw new ArgumentException("Invalid Address Length.");
             return $"{address.Substring(0, 5)}...{address.Substring(39)}";
         }
 

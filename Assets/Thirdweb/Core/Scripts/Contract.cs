@@ -16,32 +16,39 @@ namespace Thirdweb
         public string chain;
         public string address;
         public string abi;
+
         /// <summary>
         /// Call any ERC20 supported functions
         /// </summary>
         public ERC20 ERC20;
+
         /// <summary>
         /// Call any ERC721 supported functions
         /// </summary>
         public ERC721 ERC721;
+
         /// <summary>
         /// Call any ERC1155 supported functions
         /// </summary>
         public ERC1155 ERC1155;
+
         /// <summary>
         /// Call any Marketplace supported functions
         /// </summary>
         public Marketplace marketplace;
+
         /// <summary>
         /// Call any Pack supported functions
         /// </summary>
         public Pack pack;
+
         /// <summary>
         /// Call any Contract Event functions
         /// </summary>
         public Events events;
 
-        public Contract(string chain, string address, string abi = null) : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
+        public Contract(string chain, string address, string abi = null)
+            : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
         {
             this.chain = chain;
             this.address = address;
@@ -114,9 +121,12 @@ namespace Thirdweb
         /// <param name="transactionOverrides">Overrides to pass with the transaction</param>
         /// <param name="args">Optional function arguments. Structs and Lists will get serialized automatically</param>
         /// <returns>The transaction receipt</returns>
-        public async Task<TransactionResult> Write(string functionName, TransactionRequest? transactionOverrides, params object[] args)
+        public async Task<TransactionResult> Write(
+            string functionName,
+            TransactionRequest? transactionOverrides,
+            params object[] args
+        )
         {
-
             if (Utils.IsWebGLBuild())
             {
                 args = args ?? new object[0];
@@ -137,7 +147,11 @@ namespace Thirdweb
 
                 var contract = ThirdwebManager.Instance.SDK.web3.Eth.GetContract(this.abi, this.address);
                 var function = contract.GetFunction(functionName);
-                var receipt = await function.SendTransactionAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, args);
+                var receipt = await function.SendTransactionAndWaitForReceiptAsync(
+                    await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                    null,
+                    args
+                );
                 return receipt.ToTransactionResult();
             }
         }

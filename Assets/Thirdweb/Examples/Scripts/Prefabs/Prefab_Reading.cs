@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Thirdweb;
 
-
 public class Prefab_Reading : MonoBehaviour
 {
     public async void FetchERC20()

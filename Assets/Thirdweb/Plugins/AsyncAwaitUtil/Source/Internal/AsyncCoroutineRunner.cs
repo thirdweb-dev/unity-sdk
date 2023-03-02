@@ -16,8 +16,7 @@ namespace UnityAsyncAwaitUtil
             {
                 if (_instance == null)
                 {
-                    _instance = new GameObject("AsyncCoroutineRunner")
-                        .AddComponent<AsyncCoroutineRunner>();
+                    _instance = new GameObject("AsyncCoroutineRunner").AddComponent<AsyncCoroutineRunner>();
                 }
 
                 return _instance;

@@ -1,7 +1,6 @@
 using UnityEngine;
 using Thirdweb;
 
-
 public class Prefab_Writing : MonoBehaviour
 {
     public async void MintERC20()

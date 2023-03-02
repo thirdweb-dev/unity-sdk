@@ -10,9 +10,8 @@ namespace Thirdweb
     /// </summary>
     public class Wallet : Routable
     {
-        public Wallet() : base($"sdk{subSeparator}wallet")
-        {
-        }
+        public Wallet()
+            : base($"sdk{subSeparator}wallet") { }
 
         /// <summary>
         /// Connect a user's wallet via a given wallet provider
@@ -22,10 +21,8 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var connection = walletConnection ?? new WalletConnection()
-                {
-                    provider = WalletProvider.Injected,
-                }; ;
+                var connection = walletConnection ?? new WalletConnection() { provider = WalletProvider.Injected, };
+                ;
                 return Bridge.Connect(connection);
             }
             else
@@ -57,7 +54,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<LoginPayload>($"auth{subSeparator}login", Utils.ToJsonStringArray(domain));
+                return await Bridge.InvokeRoute<LoginPayload>(
+                    $"auth{subSeparator}login",
+                    Utils.ToJsonStringArray(domain)
+                );
             }
             else
             {
@@ -73,7 +73,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("balance"), Utils.ToJsonStringArray(currencyAddress));
+                return await Bridge.InvokeRoute<CurrencyValue>(
+                    getRoute("balance"),
+                    Utils.ToJsonStringArray(currencyAddress)
+                );
             }
             else
             {
@@ -84,8 +87,16 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var balance = await ThirdwebManager.Instance.SDK.web3.Eth.GetBalance.SendRequestAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
-                    return new CurrencyValue("Ether", "ETH", "18", balance.Value.ToString(), balance.Value.ToString().ToEth());
+                    var balance = await ThirdwebManager.Instance.SDK.web3.Eth.GetBalance.SendRequestAsync(
+                        await ThirdwebManager.Instance.SDK.wallet.GetAddress()
+                    );
+                    return new CurrencyValue(
+                        "Ether",
+                        "ETH",
+                        "18",
+                        balance.Value.ToString(),
+                        balance.Value.ToString().ToEth()
+                    );
                 }
             }
         }
@@ -153,11 +164,18 @@ namespace Thirdweb
         /// <summary>
         /// Transfer currency to a given address
         /// </summary>
-        public async Task<TransactionResult> Transfer(string to, string amount, string currencyAddress = Utils.NativeTokenAddress)
+        public async Task<TransactionResult> Transfer(
+            string to,
+            string amount,
+            string currencyAddress = Utils.NativeTokenAddress
+        )
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, amount, currencyAddress));
+                return await Bridge.InvokeRoute<TransactionResult>(
+                    getRoute("transfer"),
+                    Utils.ToJsonStringArray(to, amount, currencyAddress)
+                );
             }
             else
             {
@@ -168,7 +186,9 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var receipt = await ThirdwebManager.Instance.SDK.web3.Eth.GetEtherTransferService().TransferEtherAndWaitForReceiptAsync(to, decimal.Parse(amount));
+                    var receipt = await ThirdwebManager.Instance.SDK.web3.Eth
+                        .GetEtherTransferService()
+                        .TransferEtherAndWaitForReceiptAsync(to, decimal.Parse(amount));
                     return receipt.ToTransactionResult();
                 }
             }
@@ -186,7 +206,10 @@ namespace Thirdweb
             else
             {
                 var signer = new EthereumMessageSigner();
-                var signature = signer.EncodeUTF8AndSign(message, new EthECKey(ThirdwebManager.Instance.SDK.account.PrivateKey));
+                var signature = signer.EncodeUTF8AndSign(
+                    message,
+                    new EthECKey(ThirdwebManager.Instance.SDK.account.PrivateKey)
+                );
                 return signature; // TODO: Check viability
             }
         }
@@ -198,7 +221,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("recoverAddress"), Utils.ToJsonStringArray(message, signature));
+                return await Bridge.InvokeRoute<string>(
+                    getRoute("recoverAddress"),
+                    Utils.ToJsonStringArray(message, signature)
+                );
             }
             else
             {
@@ -215,7 +241,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("sendRawTransaction"), Utils.ToJsonStringArray(transactionRequest));
+                return await Bridge.InvokeRoute<TransactionResult>(
+                    getRoute("sendRawTransaction"),
+                    Utils.ToJsonStringArray(transactionRequest)
+                );
             }
             else
             {
@@ -226,7 +255,10 @@ namespace Thirdweb
                     new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
                     new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice))
                 );
-                var receipt = await ThirdwebManager.Instance.SDK.web3.TransactionManager.SendTransactionAndWaitForReceiptAsync(input);
+                var receipt =
+                    await ThirdwebManager.Instance.SDK.web3.TransactionManager.SendTransactionAndWaitForReceiptAsync(
+                        input
+                    );
                 return receipt.ToTransactionResult();
             }
         }
@@ -260,15 +292,33 @@ namespace Thirdweb
 
     public class WalletProvider
     {
-        private WalletProvider(string value) { Value = value; }
+        private WalletProvider(string value)
+        {
+            Value = value;
+        }
 
         public static string Value { get; private set; }
 
-        public static WalletProvider MetaMask { get { return new WalletProvider("metamask"); } }
-        public static WalletProvider CoinbaseWallet { get { return new WalletProvider("coinbaseWallet"); } }
-        public static WalletProvider WalletConnect { get { return new WalletProvider("walletConnect"); } }
-        public static WalletProvider Injected { get { return new WalletProvider("injected"); } }
-        public static WalletProvider MagicAuth { get { return new WalletProvider("magicAuth"); } }
+        public static WalletProvider MetaMask
+        {
+            get { return new WalletProvider("metamask"); }
+        }
+        public static WalletProvider CoinbaseWallet
+        {
+            get { return new WalletProvider("coinbaseWallet"); }
+        }
+        public static WalletProvider WalletConnect
+        {
+            get { return new WalletProvider("walletConnect"); }
+        }
+        public static WalletProvider Injected
+        {
+            get { return new WalletProvider("injected"); }
+        }
+        public static WalletProvider MagicAuth
+        {
+            get { return new WalletProvider("magicAuth"); }
+        }
 
         public override string ToString()
         {

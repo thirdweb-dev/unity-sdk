@@ -50,6 +50,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public GameObject connectButton;
     public GameObject connectDropdown;
     public List<WalletButton> walletButtons;
+
     // Connected
     public GameObject connectedButton;
     public GameObject connectedDropdown;
@@ -59,6 +60,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public TMP_Text currentNetworkText;
     public Image currentNetworkImage;
     public Image chainImage;
+
     // Network Switching
     public GameObject networkSwitchButton;
     public GameObject networkDropdown;
@@ -67,7 +69,6 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
     string address;
     Wallet wallet;
-
 
     // UI Initialization
 
@@ -99,7 +100,6 @@ public class Prefab_ConnectWallet : MonoBehaviour
             connectButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(supportedWallets[0]));
         else
             connectButton.GetComponent<Button>().onClick.AddListener(() => OnClickDropdown());
-
 
         foreach (WalletButton wb in walletButtons)
         {
@@ -133,11 +133,12 @@ public class Prefab_ConnectWallet : MonoBehaviour
         try
         {
             address = await ThirdwebManager.Instance.SDK.wallet.Connect(
-               new WalletConnection()
-               {
-                   provider = GetWalletProvider(_wallet),
-                   chainId = (int)ThirdwebManager.Instance.chain,
-               });
+                new WalletConnection()
+                {
+                    provider = GetWalletProvider(_wallet),
+                    chainId = (int)ThirdwebManager.Instance.chain,
+                }
+            );
 
             wallet = _wallet;
             OnConnected();
@@ -173,7 +174,6 @@ public class Prefab_ConnectWallet : MonoBehaviour
         {
             print($"Error Fetching Native Balance: {e.Message}");
         }
-
     }
 
     // Disconnecting
@@ -186,7 +186,6 @@ public class Prefab_ConnectWallet : MonoBehaviour
             OnDisconnected();
             OnDisconnectedCallback?.Invoke();
             print($"Disconnected successfully.");
-
         }
         catch (Exception e)
         {
@@ -208,7 +207,6 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
     public async void OnSwitchNetwork(Chain _chain)
     {
-
         try
         {
             ThirdwebManager.Instance.chain = _chain;
@@ -216,7 +214,6 @@ public class Prefab_ConnectWallet : MonoBehaviour
             OnConnected();
             OnSwitchNetworkCallback?.Invoke();
             print($"Switched Network Successfully: {_chain}");
-
         }
         catch (Exception e)
         {
@@ -256,8 +253,12 @@ public class Prefab_ConnectWallet : MonoBehaviour
             GameObject networkButton = Instantiate(networkButtonPrefab, networkDropdown.transform);
             networkButton.GetComponent<Button>().onClick.RemoveAllListeners();
             networkButton.GetComponent<Button>().onClick.AddListener(() => OnSwitchNetwork(chain));
-            networkButton.transform.Find("Text_Network").GetComponent<TMP_Text>().text = ThirdwebManager.Instance.chainIdentifiers[chain];
-            networkButton.transform.Find("Icon_Network").GetComponent<Image>().sprite = networkSprites.Find(x => x.chain == chain).sprite;
+            networkButton.transform.Find("Text_Network").GetComponent<TMP_Text>().text = ThirdwebManager
+                .Instance
+                .chainIdentifiers[chain];
+            networkButton.transform.Find("Icon_Network").GetComponent<Image>().sprite = networkSprites
+                .Find(x => x.chain == chain)
+                .sprite;
         }
     }
 

@@ -79,6 +79,7 @@ namespace Thirdweb
         /// Connect and Interact with a user's wallet
         /// </summary>
         public Wallet wallet;
+
         /// <summary>
         /// Deploy new contracts
         /// </summary>
@@ -120,9 +121,20 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var scryptParams = new Nethereum.KeyStore.Model.ScryptParams { Dklen = 32, N = 262144, R = 1, P = 8 };
+                    var scryptParams = new Nethereum.KeyStore.Model.ScryptParams
+                    {
+                        Dklen = 32,
+                        N = 262144,
+                        R = 1,
+                        P = 8
+                    };
                     var ecKey = Nethereum.Signer.EthECKey.GenerateKey();
-                    var keyStore = keyStoreService.EncryptAndGenerateKeyStore(password, ecKey.GetPrivateKeyAsBytes(), ecKey.GetPublicAddress(), scryptParams);
+                    var keyStore = keyStoreService.EncryptAndGenerateKeyStore(
+                        password,
+                        ecKey.GetPrivateKeyAsBytes(),
+                        ecKey.GetPublicAddress(),
+                        scryptParams
+                    );
                     var json = keyStoreService.SerializeKeyStoreToJson(keyStore);
                     File.WriteAllText(path, json);
                     this.account = new Account(ecKey, chainId);

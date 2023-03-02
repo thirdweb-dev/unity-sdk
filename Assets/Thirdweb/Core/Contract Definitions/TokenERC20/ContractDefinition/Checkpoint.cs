@@ -13,6 +13,7 @@ namespace Thirdweb.Contracts.TokenERC20.ContractDefinition
     {
         [Parameter("uint32", "fromBlock", 1)]
         public virtual uint FromBlock { get; set; }
+
         [Parameter("uint224", "votes", 2)]
         public virtual BigInteger Votes { get; set; }
     }

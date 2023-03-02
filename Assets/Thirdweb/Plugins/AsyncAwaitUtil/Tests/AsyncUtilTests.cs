@@ -135,8 +135,14 @@ namespace UnityAsyncAwaitUtil
 
         void PrintCurrentThreadContext(string prefix = null)
         {
-            Debug.Log(string.Format("{0}Current Thread: {1}, Scheduler: {2}",
-                prefix == null ? "" : prefix + ": ", Thread.CurrentThread.ManagedThreadId, SynchronizationContext.Current == null ? "null" : SynchronizationContext.Current.GetType().Name));
+            Debug.Log(
+                string.Format(
+                    "{0}Current Thread: {1}, Scheduler: {2}",
+                    prefix == null ? "" : prefix + ": ",
+                    Thread.CurrentThread.ManagedThreadId,
+                    SynchronizationContext.Current == null ? "null" : SynchronizationContext.Current.GetType().Name
+                )
+            );
         }
 
         async Task RunAsyncFromCoroutineTest2()
@@ -197,8 +203,7 @@ namespace UnityAsyncAwaitUtil
         {
             // We could use WWW here too which might be easier
             Debug.Log("Downloading asset bundle data...");
-            var assetBundle = await AssetBundle.LoadFromMemoryAsync(
-                await DownloadRawDataAsync(abUrl));
+            var assetBundle = await AssetBundle.LoadFromMemoryAsync(await DownloadRawDataAsync(abUrl));
 
             var prefab = (GameObject)(await assetBundle.LoadAssetAsync<GameObject>(assetName));
 

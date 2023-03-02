@@ -37,7 +37,11 @@ namespace UnityAsyncAwaitUtil
                 new Rect(
                     _settings.HorizontalMargin + _buttonHCount * (_settings.ButtonWidth + _settings.HorizontalSpacing),
                     _settings.VerticalMargin + _buttonVCount * (_settings.ButtonHeight + _settings.VerticalSpacing),
-                    _settings.ButtonWidth, _settings.ButtonHeight), text);
+                    _settings.ButtonWidth,
+                    _settings.ButtonHeight
+                ),
+                text
+            );
 
             _buttonVCount++;
 

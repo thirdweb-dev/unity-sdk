@@ -19,6 +19,7 @@ namespace Thirdweb
         /// Handle signature minting functionality
         /// </summary>
         public ERC721Signature signature;
+
         /// <summary>
         /// Query claim conditions
         /// </summary>
@@ -30,7 +31,8 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC721 compatible contract.
         /// </summary>
-        public ERC721(string parentRoute, string address) : base(Routable.append(parentRoute, "erc721"))
+        public ERC721(string parentRoute, string address)
+            : base(Routable.append(parentRoute, "erc721"))
         {
             if (!Utils.IsWebGLBuild())
             {
@@ -111,7 +113,9 @@ namespace Thirdweb
                 }
 
                 List<NFT> allNfts = new List<NFT>();
-                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(tokenERC721Service.ContractHandler.ContractAddress);
+                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(
+                    tokenERC721Service.ContractHandler.ContractAddress
+                );
                 var rawNfts = await erc721.GetAllMetadataUrlsUsingIdRangeAndMultiCallAsync(start, end);
                 foreach (var rawNft in rawNfts)
                 {
@@ -160,9 +164,13 @@ namespace Thirdweb
             }
             else
             {
-                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(tokenERC721Service.ContractHandler.ContractAddress);
+                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(
+                    tokenERC721Service.ContractHandler.ContractAddress
+                );
                 string owner = address == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : address;
-                var tokenIdsOfOwner = await erc721.GetAllTokenIdsOfOwnerUsingTokenOfOwnerByIndexAndMultiCallAsync(owner);
+                var tokenIdsOfOwner = await erc721.GetAllTokenIdsOfOwnerUsingTokenOfOwnerByIndexAndMultiCallAsync(
+                    owner
+                );
                 List<NFT> ownedNfts = new List<NFT>();
                 foreach (var tokenId in tokenIdsOfOwner)
                 {
@@ -226,7 +234,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(getRoute("isApproved"), Utils.ToJsonStringArray(address, approvedContract));
+                return await Bridge.InvokeRoute<bool>(
+                    getRoute("isApproved"),
+                    Utils.ToJsonStringArray(address, approvedContract)
+                );
             }
             else
             {
@@ -288,11 +299,17 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("setApprovalForAll"), Utils.ToJsonStringArray(contractToApprove, approved));
+                return await Bridge.InvokeRoute<TransactionResult>(
+                    getRoute("setApprovalForAll"),
+                    Utils.ToJsonStringArray(contractToApprove, approved)
+                );
             }
             else
             {
-                var result = await tokenERC721Service.SetApprovalForAllRequestAndWaitForReceiptAsync(contractToApprove, approved);
+                var result = await tokenERC721Service.SetApprovalForAllRequestAndWaitForReceiptAsync(
+                    contractToApprove,
+                    approved
+                );
                 return result.ToTransactionResult();
             }
         }
@@ -304,11 +321,18 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, tokenId));
+                return await Bridge.InvokeRoute<TransactionResult>(
+                    getRoute("transfer"),
+                    Utils.ToJsonStringArray(to, tokenId)
+                );
             }
             else
             {
-                var result = await tokenERC721Service.TransferFromRequestAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), to, BigInteger.Parse(tokenId));
+                var result = await tokenERC721Service.TransferFromRequestAndWaitForReceiptAsync(
+                    await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                    to,
+                    BigInteger.Parse(tokenId)
+                );
                 return result.ToTransactionResult();
             }
         }
@@ -336,7 +360,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claim"), Utils.ToJsonStringArray(quantity));
+                return await Bridge.InvokeRoute<TransactionResult[]>(
+                    getRoute("claim"),
+                    Utils.ToJsonStringArray(quantity)
+                );
             }
             else
             {
@@ -351,7 +378,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claimTo"), Utils.ToJsonStringArray(address, quantity));
+                return await Bridge.InvokeRoute<TransactionResult[]>(
+                    getRoute("claimTo"),
+                    Utils.ToJsonStringArray(address, quantity)
+                );
             }
             else
             {
@@ -381,7 +411,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, nft));
+                return await Bridge.InvokeRoute<TransactionResult>(
+                    getRoute("mintTo"),
+                    Utils.ToJsonStringArray(address, nft)
+                );
             }
             else
             {
@@ -396,9 +429,8 @@ namespace Thirdweb
     /// </summary>
     public class ERC721ClaimConditions : Routable
     {
-        public ERC721ClaimConditions(string parentRoute) : base(Routable.append(parentRoute, "claimConditions"))
-        {
-        }
+        public ERC721ClaimConditions(string parentRoute)
+            : base(Routable.append(parentRoute, "claimConditions")) { }
 
         /// <summary>
         /// Get the active claim condition
@@ -422,7 +454,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(quantity, addressToCheck));
+                return await Bridge.InvokeRoute<bool>(
+                    getRoute("canClaim"),
+                    Utils.ToJsonStringArray(quantity, addressToCheck)
+                );
             }
             else
             {
@@ -437,7 +472,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(quantity, addressToCheck));
+                return await Bridge.InvokeRoute<string[]>(
+                    getRoute("getClaimIneligibilityReasons"),
+                    Utils.ToJsonStringArray(quantity, addressToCheck)
+                );
             }
             else
             {
@@ -452,7 +490,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+                return await Bridge.InvokeRoute<bool>(
+                    getRoute("getClaimerProofs"),
+                    Utils.ToJsonStringArray(claimerAddress)
+                );
             }
             else
             {
@@ -474,6 +515,7 @@ namespace Thirdweb
         public int quantity;
         public NFTMetadata metadata;
         public string uid;
+
         // TODO implement these, needs JS bridging support
         // public long mintStartTime;
         // public long mintEndTime;
@@ -526,9 +568,8 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC721Signature(string parentRoute) : base(Routable.append(parentRoute, "signature"))
-        {
-        }
+        public ERC721Signature(string parentRoute)
+            : base(Routable.append(parentRoute, "signature")) { }
 
         /// <summary>
         /// Generate a signed mintable payload. Requires minting permission.
@@ -537,7 +578,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+                return await Bridge.InvokeRoute<ERC721SignedPayload>(
+                    getRoute("generate"),
+                    Utils.ToJsonStringArray(payloadToSign)
+                );
             }
             else
             {
@@ -567,7 +611,10 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
+                return await Bridge.InvokeRoute<TransactionResult>(
+                    getRoute("mint"),
+                    Utils.ToJsonStringArray(signedPayload)
+                );
             }
             else
             {

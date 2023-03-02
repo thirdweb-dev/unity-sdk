@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -23,6 +22,7 @@ namespace Thirdweb
             {
                 this.arguments = arguments;
             }
+
             public string[] arguments;
         }
 
@@ -38,7 +38,8 @@ namespace Thirdweb
             }
         }
 
-        private static Dictionary<string, TaskCompletionSource<string>> taskMap = new Dictionary<string, TaskCompletionSource<string>>();
+        private static Dictionary<string, TaskCompletionSource<string>> taskMap =
+            new Dictionary<string, TaskCompletionSource<string>>();
         private static Dictionary<string, GenericAction> taskActionMap = new Dictionary<string, GenericAction>();
 
         [AOT.MonoPInvokeCallback(typeof(Action<string, string, string>))]
@@ -64,7 +65,9 @@ namespace Thirdweb
             if (taskActionMap.ContainsKey(taskId))
             {
                 Type tempType = taskActionMap[taskId].t;
-                taskActionMap[taskId].d.DynamicInvoke(tempType == typeof(string) ? result : JsonConvert.DeserializeObject(result, tempType));
+                taskActionMap[taskId].d.DynamicInvoke(
+                    tempType == typeof(string) ? result : JsonConvert.DeserializeObject(result, tempType)
+                );
             }
         }
 
