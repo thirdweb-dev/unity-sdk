@@ -121,11 +121,7 @@ namespace Thirdweb
         /// <param name="transactionOverrides">Overrides to pass with the transaction</param>
         /// <param name="args">Optional function arguments. Structs and Lists will get serialized automatically</param>
         /// <returns>The transaction receipt</returns>
-        public async Task<TransactionResult> Write(
-            string functionName,
-            TransactionRequest? transactionOverrides,
-            params object[] args
-        )
+        public async Task<TransactionResult> Write(string functionName, TransactionRequest? transactionOverrides, params object[] args)
         {
             if (Utils.IsWebGLBuild())
             {

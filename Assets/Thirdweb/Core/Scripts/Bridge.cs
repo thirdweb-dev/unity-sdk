@@ -38,8 +38,7 @@ namespace Thirdweb
             }
         }
 
-        private static Dictionary<string, TaskCompletionSource<string>> taskMap =
-            new Dictionary<string, TaskCompletionSource<string>>();
+        private static Dictionary<string, TaskCompletionSource<string>> taskMap = new Dictionary<string, TaskCompletionSource<string>>();
         private static Dictionary<string, GenericAction> taskActionMap = new Dictionary<string, GenericAction>();
 
         [AOT.MonoPInvokeCallback(typeof(Action<string, string, string>))]

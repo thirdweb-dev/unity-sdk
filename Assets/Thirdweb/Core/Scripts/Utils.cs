@@ -36,10 +36,7 @@ namespace Thirdweb
 
         public static string ToJson(object obj)
         {
-            return JsonConvert.SerializeObject(
-                obj,
-                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }
-            );
+            return JsonConvert.SerializeObject(obj, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
         }
 
         public static string ToBytes32HexString(byte[] bytes)

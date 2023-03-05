@@ -73,9 +73,7 @@ public class ThirdwebManager : MonoBehaviour
         }
         else
         {
-            string rpc = rpcOverride.StartsWith("https://")
-                ? rpcOverride
-                : $"https://{chainIdentifiers[chain]}.rpc.thirdweb.com/{API_KEY}";
+            string rpc = rpcOverride.StartsWith("https://") ? rpcOverride : $"https://{chainIdentifiers[chain]}.rpc.thirdweb.com/{API_KEY}";
             int chainId = chainIdOverride == -1 ? (int)chain : chainIdOverride;
             SDK = new ThirdwebSDK(rpc, chainId);
         }

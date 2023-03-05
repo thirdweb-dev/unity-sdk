@@ -27,10 +27,7 @@ namespace Thirdweb.Contracts.DropERC20
                 .SendRequestAndWaitForReceiptAsync(dropERC20Deployment, cancellationTokenSource);
         }
 
-        public static Task<string> DeployContractAsync(
-            Nethereum.Web3.Web3 web3,
-            DropERC20Deployment dropERC20Deployment
-        )
+        public static Task<string> DeployContractAsync(Nethereum.Web3.Web3 web3, DropERC20Deployment dropERC20Deployment)
         {
             return web3.Eth.GetContractDeploymentHandler<DropERC20Deployment>().SendRequestAsync(dropERC20Deployment);
         }
@@ -41,11 +38,7 @@ namespace Thirdweb.Contracts.DropERC20
             CancellationTokenSource cancellationTokenSource = null
         )
         {
-            var receipt = await DeployContractAndWaitForReceiptAsync(
-                web3,
-                dropERC20Deployment,
-                cancellationTokenSource
-            );
+            var receipt = await DeployContractAndWaitForReceiptAsync(web3, dropERC20Deployment, cancellationTokenSource);
             return new DropERC20Service(web3, receipt.ContractAddress);
         }
 
@@ -64,10 +57,7 @@ namespace Thirdweb.Contracts.DropERC20
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<DEFAULT_ADMIN_ROLEFunction, byte[]>(
-                dEFAULT_ADMIN_ROLEFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<DEFAULT_ADMIN_ROLEFunction, byte[]>(dEFAULT_ADMIN_ROLEFunction, blockParameter);
         }
 
         public Task<byte[]> DEFAULT_ADMIN_ROLEQueryAsync(BlockParameter blockParameter = null)
@@ -80,10 +70,7 @@ namespace Thirdweb.Contracts.DropERC20
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<DOMAIN_SEPARATORFunction, byte[]>(
-                dOMAIN_SEPARATORFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<DOMAIN_SEPARATORFunction, byte[]>(dOMAIN_SEPARATORFunction, blockParameter);
         }
 
         public Task<byte[]> DOMAIN_SEPARATORQueryAsync(BlockParameter blockParameter = null)
@@ -91,10 +78,7 @@ namespace Thirdweb.Contracts.DropERC20
             return ContractHandler.QueryAsync<DOMAIN_SEPARATORFunction, byte[]>(null, blockParameter);
         }
 
-        public Task<BigInteger> AllowanceQueryAsync(
-            AllowanceFunction allowanceFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> AllowanceQueryAsync(AllowanceFunction allowanceFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<AllowanceFunction, BigInteger>(allowanceFunction, blockParameter);
         }
@@ -143,10 +127,7 @@ namespace Thirdweb.Contracts.DropERC20
             return ContractHandler.SendRequestAndWaitForReceiptAsync(approveFunction, cancellationToken);
         }
 
-        public Task<BigInteger> BalanceOfQueryAsync(
-            BalanceOfFunction balanceOfFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> BalanceOfQueryAsync(BalanceOfFunction balanceOfFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<BalanceOfFunction, BigInteger>(balanceOfFunction, blockParameter);
         }
@@ -237,11 +218,7 @@ namespace Thirdweb.Contracts.DropERC20
             );
         }
 
-        public Task<CheckpointsOutputDTO> CheckpointsQueryAsync(
-            string account,
-            uint pos,
-            BlockParameter blockParameter = null
-        )
+        public Task<CheckpointsOutputDTO> CheckpointsQueryAsync(string account, uint pos, BlockParameter blockParameter = null)
         {
             var checkpointsFunction = new CheckpointsFunction();
             checkpointsFunction.Account = account;
@@ -320,16 +297,10 @@ namespace Thirdweb.Contracts.DropERC20
 
         public Task<ClaimConditionOutputDTO> ClaimConditionQueryAsync(BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<ClaimConditionFunction, ClaimConditionOutputDTO>(
-                null,
-                blockParameter
-            );
+            return ContractHandler.QueryDeserializingToObjectAsync<ClaimConditionFunction, ClaimConditionOutputDTO>(null, blockParameter);
         }
 
-        public Task<byte[]> ContractTypeQueryAsync(
-            ContractTypeFunction contractTypeFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<byte[]> ContractTypeQueryAsync(ContractTypeFunction contractTypeFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<ContractTypeFunction, byte[]>(contractTypeFunction, blockParameter);
         }
@@ -339,10 +310,7 @@ namespace Thirdweb.Contracts.DropERC20
             return ContractHandler.QueryAsync<ContractTypeFunction, byte[]>(null, blockParameter);
         }
 
-        public Task<string> ContractURIQueryAsync(
-            ContractURIFunction contractURIFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<string> ContractURIQueryAsync(ContractURIFunction contractURIFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<ContractURIFunction, string>(contractURIFunction, blockParameter);
         }
@@ -352,10 +320,7 @@ namespace Thirdweb.Contracts.DropERC20
             return ContractHandler.QueryAsync<ContractURIFunction, string>(null, blockParameter);
         }
 
-        public Task<byte> ContractVersionQueryAsync(
-            ContractVersionFunction contractVersionFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<byte> ContractVersionQueryAsync(ContractVersionFunction contractVersionFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<ContractVersionFunction, byte>(contractVersionFunction, blockParameter);
         }
@@ -455,14 +420,7 @@ namespace Thirdweb.Contracts.DropERC20
             return ContractHandler.SendRequestAndWaitForReceiptAsync(delegateBySigFunction, cancellationToken);
         }
 
-        public Task<string> DelegateBySigRequestAsync(
-            string delegatee,
-            BigInteger nonce,
-            BigInteger expiry,
-            byte v,
-            byte[] r,
-            byte[] s
-        )
+        public Task<string> DelegateBySigRequestAsync(string delegatee, BigInteger nonce, BigInteger expiry, byte v, byte[] r, byte[] s)
         {
             var delegateBySigFunction = new DelegateBySigFunction();
             delegateBySigFunction.Delegatee = delegatee;
@@ -496,10 +454,7 @@ namespace Thirdweb.Contracts.DropERC20
             return ContractHandler.SendRequestAndWaitForReceiptAsync(delegateBySigFunction, cancellationToken);
         }
 
-        public Task<string> DelegatesQueryAsync(
-            DelegatesFunction delegatesFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<string> DelegatesQueryAsync(DelegatesFunction delegatesFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<DelegatesFunction, string>(delegatesFunction, blockParameter);
         }
@@ -533,10 +488,10 @@ namespace Thirdweb.Contracts.DropERC20
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<
-                GetClaimConditionByIdFunction,
-                GetClaimConditionByIdOutputDTO
-            >(getClaimConditionByIdFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<GetClaimConditionByIdFunction, GetClaimConditionByIdOutputDTO>(
+                getClaimConditionByIdFunction,
+                blockParameter
+            );
         }
 
         public Task<GetClaimConditionByIdOutputDTO> GetClaimConditionByIdQueryAsync(
@@ -547,10 +502,10 @@ namespace Thirdweb.Contracts.DropERC20
             var getClaimConditionByIdFunction = new GetClaimConditionByIdFunction();
             getClaimConditionByIdFunction.ConditionId = conditionId;
 
-            return ContractHandler.QueryDeserializingToObjectAsync<
-                GetClaimConditionByIdFunction,
-                GetClaimConditionByIdOutputDTO
-            >(getClaimConditionByIdFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<GetClaimConditionByIdFunction, GetClaimConditionByIdOutputDTO>(
+                getClaimConditionByIdFunction,
+                blockParameter
+            );
         }
 
         public Task<BigInteger> GetPastTotalSupplyQueryAsync(
@@ -558,39 +513,23 @@ namespace Thirdweb.Contracts.DropERC20
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<GetPastTotalSupplyFunction, BigInteger>(
-                getPastTotalSupplyFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<GetPastTotalSupplyFunction, BigInteger>(getPastTotalSupplyFunction, blockParameter);
         }
 
-        public Task<BigInteger> GetPastTotalSupplyQueryAsync(
-            BigInteger blockNumber,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> GetPastTotalSupplyQueryAsync(BigInteger blockNumber, BlockParameter blockParameter = null)
         {
             var getPastTotalSupplyFunction = new GetPastTotalSupplyFunction();
             getPastTotalSupplyFunction.BlockNumber = blockNumber;
 
-            return ContractHandler.QueryAsync<GetPastTotalSupplyFunction, BigInteger>(
-                getPastTotalSupplyFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<GetPastTotalSupplyFunction, BigInteger>(getPastTotalSupplyFunction, blockParameter);
         }
 
-        public Task<BigInteger> GetPastVotesQueryAsync(
-            GetPastVotesFunction getPastVotesFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> GetPastVotesQueryAsync(GetPastVotesFunction getPastVotesFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<GetPastVotesFunction, BigInteger>(getPastVotesFunction, blockParameter);
         }
 
-        public Task<BigInteger> GetPastVotesQueryAsync(
-            string account,
-            BigInteger blockNumber,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> GetPastVotesQueryAsync(string account, BigInteger blockNumber, BlockParameter blockParameter = null)
         {
             var getPastVotesFunction = new GetPastVotesFunction();
             getPastVotesFunction.Account = account;
@@ -604,24 +543,21 @@ namespace Thirdweb.Contracts.DropERC20
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<
-                GetPlatformFeeInfoFunction,
-                GetPlatformFeeInfoOutputDTO
-            >(getPlatformFeeInfoFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<GetPlatformFeeInfoFunction, GetPlatformFeeInfoOutputDTO>(
+                getPlatformFeeInfoFunction,
+                blockParameter
+            );
         }
 
         public Task<GetPlatformFeeInfoOutputDTO> GetPlatformFeeInfoQueryAsync(BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<
-                GetPlatformFeeInfoFunction,
-                GetPlatformFeeInfoOutputDTO
-            >(null, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<GetPlatformFeeInfoFunction, GetPlatformFeeInfoOutputDTO>(
+                null,
+                blockParameter
+            );
         }
 
-        public Task<byte[]> GetRoleAdminQueryAsync(
-            GetRoleAdminFunction getRoleAdminFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<byte[]> GetRoleAdminQueryAsync(GetRoleAdminFunction getRoleAdminFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<GetRoleAdminFunction, byte[]>(getRoleAdminFunction, blockParameter);
         }
@@ -634,10 +570,7 @@ namespace Thirdweb.Contracts.DropERC20
             return ContractHandler.QueryAsync<GetRoleAdminFunction, byte[]>(getRoleAdminFunction, blockParameter);
         }
 
-        public Task<string> GetRoleMemberQueryAsync(
-            GetRoleMemberFunction getRoleMemberFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<string> GetRoleMemberQueryAsync(GetRoleMemberFunction getRoleMemberFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<GetRoleMemberFunction, string>(getRoleMemberFunction, blockParameter);
         }
@@ -656,10 +589,7 @@ namespace Thirdweb.Contracts.DropERC20
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(
-                getRoleMemberCountFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(getRoleMemberCountFunction, blockParameter);
         }
 
         public Task<BigInteger> GetRoleMemberCountQueryAsync(byte[] role, BlockParameter blockParameter = null)
@@ -667,10 +597,7 @@ namespace Thirdweb.Contracts.DropERC20
             var getRoleMemberCountFunction = new GetRoleMemberCountFunction();
             getRoleMemberCountFunction.Role = role;
 
-            return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(
-                getRoleMemberCountFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(getRoleMemberCountFunction, blockParameter);
         }
 
         public Task<BigInteger> GetSupplyClaimedByWalletQueryAsync(
@@ -700,10 +627,7 @@ namespace Thirdweb.Contracts.DropERC20
             );
         }
 
-        public Task<BigInteger> GetVotesQueryAsync(
-            GetVotesFunction getVotesFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> GetVotesQueryAsync(GetVotesFunction getVotesFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<GetVotesFunction, BigInteger>(getVotesFunction, blockParameter);
         }
@@ -770,10 +694,7 @@ namespace Thirdweb.Contracts.DropERC20
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<HasRoleWithSwitchFunction, bool>(
-                hasRoleWithSwitchFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<HasRoleWithSwitchFunction, bool>(hasRoleWithSwitchFunction, blockParameter);
         }
 
         public Task<bool> HasRoleWithSwitchQueryAsync(byte[] role, string account, BlockParameter blockParameter = null)
@@ -782,10 +703,7 @@ namespace Thirdweb.Contracts.DropERC20
             hasRoleWithSwitchFunction.Role = role;
             hasRoleWithSwitchFunction.Account = account;
 
-            return ContractHandler.QueryAsync<HasRoleWithSwitchFunction, bool>(
-                hasRoleWithSwitchFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<HasRoleWithSwitchFunction, bool>(hasRoleWithSwitchFunction, blockParameter);
         }
 
         public Task<string> IncreaseAllowanceRequestAsync(IncreaseAllowanceFunction increaseAllowanceFunction)
@@ -890,10 +808,7 @@ namespace Thirdweb.Contracts.DropERC20
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<IsTrustedForwarderFunction, bool>(
-                isTrustedForwarderFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<IsTrustedForwarderFunction, bool>(isTrustedForwarderFunction, blockParameter);
         }
 
         public Task<bool> IsTrustedForwarderQueryAsync(string forwarder, BlockParameter blockParameter = null)
@@ -901,10 +816,7 @@ namespace Thirdweb.Contracts.DropERC20
             var isTrustedForwarderFunction = new IsTrustedForwarderFunction();
             isTrustedForwarderFunction.Forwarder = forwarder;
 
-            return ContractHandler.QueryAsync<IsTrustedForwarderFunction, bool>(
-                isTrustedForwarderFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<IsTrustedForwarderFunction, bool>(isTrustedForwarderFunction, blockParameter);
         }
 
         public Task<BigInteger> MaxTotalSupplyQueryAsync(
@@ -912,10 +824,7 @@ namespace Thirdweb.Contracts.DropERC20
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<MaxTotalSupplyFunction, BigInteger>(
-                maxTotalSupplyFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<MaxTotalSupplyFunction, BigInteger>(maxTotalSupplyFunction, blockParameter);
         }
 
         public Task<BigInteger> MaxTotalSupplyQueryAsync(BlockParameter blockParameter = null)
@@ -978,10 +887,7 @@ namespace Thirdweb.Contracts.DropERC20
             return ContractHandler.QueryAsync<NoncesFunction, BigInteger>(noncesFunction, blockParameter);
         }
 
-        public Task<uint> NumCheckpointsQueryAsync(
-            NumCheckpointsFunction numCheckpointsFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<uint> NumCheckpointsQueryAsync(NumCheckpointsFunction numCheckpointsFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<NumCheckpointsFunction, uint>(numCheckpointsFunction, blockParameter);
         }
@@ -1057,10 +963,7 @@ namespace Thirdweb.Contracts.DropERC20
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<PrimarySaleRecipientFunction, string>(
-                primarySaleRecipientFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<PrimarySaleRecipientFunction, string>(primarySaleRecipientFunction, blockParameter);
         }
 
         public Task<string> PrimarySaleRecipientQueryAsync(BlockParameter blockParameter = null)
@@ -1272,9 +1175,7 @@ namespace Thirdweb.Contracts.DropERC20
             return ContractHandler.SendRequestAndWaitForReceiptAsync(setPlatformFeeInfoFunction, cancellationToken);
         }
 
-        public Task<string> SetPrimarySaleRecipientRequestAsync(
-            SetPrimarySaleRecipientFunction setPrimarySaleRecipientFunction
-        )
+        public Task<string> SetPrimarySaleRecipientRequestAsync(SetPrimarySaleRecipientFunction setPrimarySaleRecipientFunction)
         {
             return ContractHandler.SendRequestAsync(setPrimarySaleRecipientFunction);
         }
@@ -1284,10 +1185,7 @@ namespace Thirdweb.Contracts.DropERC20
             CancellationTokenSource cancellationToken = null
         )
         {
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(
-                setPrimarySaleRecipientFunction,
-                cancellationToken
-            );
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(setPrimarySaleRecipientFunction, cancellationToken);
         }
 
         public Task<string> SetPrimarySaleRecipientRequestAsync(string saleRecipient)
@@ -1306,10 +1204,7 @@ namespace Thirdweb.Contracts.DropERC20
             var setPrimarySaleRecipientFunction = new SetPrimarySaleRecipientFunction();
             setPrimarySaleRecipientFunction.SaleRecipient = saleRecipient;
 
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(
-                setPrimarySaleRecipientFunction,
-                cancellationToken
-            );
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(setPrimarySaleRecipientFunction, cancellationToken);
         }
 
         public Task<string> SymbolQueryAsync(SymbolFunction symbolFunction, BlockParameter blockParameter = null)
@@ -1322,10 +1217,7 @@ namespace Thirdweb.Contracts.DropERC20
             return ContractHandler.QueryAsync<SymbolFunction, string>(null, blockParameter);
         }
 
-        public Task<BigInteger> TotalSupplyQueryAsync(
-            TotalSupplyFunction totalSupplyFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> TotalSupplyQueryAsync(TotalSupplyFunction totalSupplyFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<TotalSupplyFunction, BigInteger>(totalSupplyFunction, blockParameter);
         }
@@ -1408,10 +1300,7 @@ namespace Thirdweb.Contracts.DropERC20
             return ContractHandler.SendRequestAndWaitForReceiptAsync(transferFromFunction, cancellationToken);
         }
 
-        public Task<bool> VerifyClaimQueryAsync(
-            VerifyClaimFunction verifyClaimFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<bool> VerifyClaimQueryAsync(VerifyClaimFunction verifyClaimFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<VerifyClaimFunction, bool>(verifyClaimFunction, blockParameter);
         }

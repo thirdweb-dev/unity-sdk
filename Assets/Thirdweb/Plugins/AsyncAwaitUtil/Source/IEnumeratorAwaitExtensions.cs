@@ -58,10 +58,7 @@ public static class IEnumeratorAwaitExtensions
     public static SimpleCoroutineAwaiter<UnityEngine.Object> GetAwaiter(this ResourceRequest instruction)
     {
         var awaiter = new SimpleCoroutineAwaiter<UnityEngine.Object>();
-        RunOnUnityScheduler(
-            () =>
-                AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.ResourceRequest(awaiter, instruction))
-        );
+        RunOnUnityScheduler(() => AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.ResourceRequest(awaiter, instruction)));
         return awaiter;
     }
 
@@ -75,10 +72,7 @@ public static class IEnumeratorAwaitExtensions
     {
         var awaiter = new SimpleCoroutineAwaiter<AssetBundle>();
         RunOnUnityScheduler(
-            () =>
-                AsyncCoroutineRunner.Instance.StartCoroutine(
-                    InstructionWrappers.AssetBundleCreateRequest(awaiter, instruction)
-                )
+            () => AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.AssetBundleCreateRequest(awaiter, instruction))
         );
         return awaiter;
     }
@@ -87,10 +81,7 @@ public static class IEnumeratorAwaitExtensions
     {
         var awaiter = new SimpleCoroutineAwaiter<UnityEngine.Object>();
         RunOnUnityScheduler(
-            () =>
-                AsyncCoroutineRunner.Instance.StartCoroutine(
-                    InstructionWrappers.AssetBundleRequest(awaiter, instruction)
-                )
+            () => AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.AssetBundleRequest(awaiter, instruction))
         );
         return awaiter;
     }
@@ -98,36 +89,28 @@ public static class IEnumeratorAwaitExtensions
     public static SimpleCoroutineAwaiter<T> GetAwaiter<T>(this IEnumerator<T> coroutine)
     {
         var awaiter = new SimpleCoroutineAwaiter<T>();
-        RunOnUnityScheduler(
-            () => AsyncCoroutineRunner.Instance.StartCoroutine(new CoroutineWrapper<T>(coroutine, awaiter).Run())
-        );
+        RunOnUnityScheduler(() => AsyncCoroutineRunner.Instance.StartCoroutine(new CoroutineWrapper<T>(coroutine, awaiter).Run()));
         return awaiter;
     }
 
     public static SimpleCoroutineAwaiter<object> GetAwaiter(this IEnumerator coroutine)
     {
         var awaiter = new SimpleCoroutineAwaiter<object>();
-        RunOnUnityScheduler(
-            () => AsyncCoroutineRunner.Instance.StartCoroutine(new CoroutineWrapper<object>(coroutine, awaiter).Run())
-        );
+        RunOnUnityScheduler(() => AsyncCoroutineRunner.Instance.StartCoroutine(new CoroutineWrapper<object>(coroutine, awaiter).Run()));
         return awaiter;
     }
 
     static SimpleCoroutineAwaiter GetAwaiterReturnVoid(object instruction)
     {
         var awaiter = new SimpleCoroutineAwaiter();
-        RunOnUnityScheduler(
-            () => AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.ReturnVoid(awaiter, instruction))
-        );
+        RunOnUnityScheduler(() => AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.ReturnVoid(awaiter, instruction)));
         return awaiter;
     }
 
     static SimpleCoroutineAwaiter<T> GetAwaiterReturnSelf<T>(T instruction)
     {
         var awaiter = new SimpleCoroutineAwaiter<T>();
-        RunOnUnityScheduler(
-            () => AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.ReturnSelf(awaiter, instruction))
-        );
+        RunOnUnityScheduler(() => AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.ReturnSelf(awaiter, instruction)));
         return awaiter;
     }
 
@@ -342,9 +325,7 @@ public static class IEnumeratorAwaitExtensions
             {
                 // NOTE: This only works with scripting engine 4.6
                 // And could easily stop working with unity updates
-                var field = enumerator
-                    .GetType()
-                    .GetField("$this", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+                var field = enumerator.GetType().GetField("$this", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
 
                 if (field == null)
                 {
@@ -395,19 +376,13 @@ public static class IEnumeratorAwaitExtensions
             awaiter.Complete(instruction, null);
         }
 
-        public static IEnumerator AssetBundleRequest(
-            SimpleCoroutineAwaiter<UnityEngine.Object> awaiter,
-            AssetBundleRequest instruction
-        )
+        public static IEnumerator AssetBundleRequest(SimpleCoroutineAwaiter<UnityEngine.Object> awaiter, AssetBundleRequest instruction)
         {
             yield return instruction;
             awaiter.Complete(instruction.asset, null);
         }
 
-        public static IEnumerator ResourceRequest(
-            SimpleCoroutineAwaiter<UnityEngine.Object> awaiter,
-            ResourceRequest instruction
-        )
+        public static IEnumerator ResourceRequest(SimpleCoroutineAwaiter<UnityEngine.Object> awaiter, ResourceRequest instruction)
         {
             yield return instruction;
             awaiter.Complete(instruction.asset, null);

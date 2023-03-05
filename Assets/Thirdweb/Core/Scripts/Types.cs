@@ -221,9 +221,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return $"NewAuctionListing:"
-                + $"\n>>>>>\n{base.ToString()}\n<<<<<"
-                + $"\n>reservePricePerToken: {reservePricePerToken}";
+            return $"NewAuctionListing:" + $"\n>>>>>\n{base.ToString()}\n<<<<<" + $"\n>reservePricePerToken: {reservePricePerToken}";
         }
     }
 
@@ -450,12 +448,7 @@ namespace Thirdweb
         public int? toBlock;
         public Dictionary<string, object> filters;
 
-        public EventQueryOptions(
-            Dictionary<string, object> filters = null,
-            int? fromBlock = null,
-            int? toBlock = null,
-            string order = null
-        )
+        public EventQueryOptions(Dictionary<string, object> filters = null, int? fromBlock = null, int? toBlock = null, string order = null)
         {
             this.fromBlock = fromBlock;
             this.order = order;
@@ -473,10 +466,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return $"ContractEvent:"
-                + $"\n>eventName: {eventName}"
-                + $"\n>data: {data.ToString()}"
-                + $"\n{transaction.ToString()}";
+            return $"ContractEvent:" + $"\n>eventName: {eventName}" + $"\n>data: {data.ToString()}" + $"\n{transaction.ToString()}";
         }
     }
 

@@ -168,9 +168,7 @@ namespace Thirdweb
                     tokenERC721Service.ContractHandler.ContractAddress
                 );
                 string owner = address == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : address;
-                var tokenIdsOfOwner = await erc721.GetAllTokenIdsOfOwnerUsingTokenOfOwnerByIndexAndMultiCallAsync(
-                    owner
-                );
+                var tokenIdsOfOwner = await erc721.GetAllTokenIdsOfOwnerUsingTokenOfOwnerByIndexAndMultiCallAsync(owner);
                 List<NFT> ownedNfts = new List<NFT>();
                 foreach (var tokenId in tokenIdsOfOwner)
                 {
@@ -234,10 +232,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(
-                    getRoute("isApproved"),
-                    Utils.ToJsonStringArray(address, approvedContract)
-                );
+                return await Bridge.InvokeRoute<bool>(getRoute("isApproved"), Utils.ToJsonStringArray(address, approvedContract));
             }
             else
             {
@@ -306,10 +301,7 @@ namespace Thirdweb
             }
             else
             {
-                var result = await tokenERC721Service.SetApprovalForAllRequestAndWaitForReceiptAsync(
-                    contractToApprove,
-                    approved
-                );
+                var result = await tokenERC721Service.SetApprovalForAllRequestAndWaitForReceiptAsync(contractToApprove, approved);
                 return result.ToTransactionResult();
             }
         }
@@ -321,10 +313,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("transfer"),
-                    Utils.ToJsonStringArray(to, tokenId)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, tokenId));
             }
             else
             {
@@ -360,10 +349,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult[]>(
-                    getRoute("claim"),
-                    Utils.ToJsonStringArray(quantity)
-                );
+                return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claim"), Utils.ToJsonStringArray(quantity));
             }
             else
             {
@@ -378,10 +364,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult[]>(
-                    getRoute("claimTo"),
-                    Utils.ToJsonStringArray(address, quantity)
-                );
+                return await Bridge.InvokeRoute<TransactionResult[]>(getRoute("claimTo"), Utils.ToJsonStringArray(address, quantity));
             }
             else
             {
@@ -411,10 +394,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("mintTo"),
-                    Utils.ToJsonStringArray(address, nft)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, nft));
             }
             else
             {
@@ -454,10 +434,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(
-                    getRoute("canClaim"),
-                    Utils.ToJsonStringArray(quantity, addressToCheck)
-                );
+                return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(quantity, addressToCheck));
             }
             else
             {
@@ -490,10 +467,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(
-                    getRoute("getClaimerProofs"),
-                    Utils.ToJsonStringArray(claimerAddress)
-                );
+                return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
             }
             else
             {
@@ -578,10 +552,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<ERC721SignedPayload>(
-                    getRoute("generate"),
-                    Utils.ToJsonStringArray(payloadToSign)
-                );
+                return await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
             }
             else
             {
@@ -611,10 +582,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("mint"),
-                    Utils.ToJsonStringArray(signedPayload)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
             }
             else
             {

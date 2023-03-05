@@ -20,11 +20,7 @@ public class Prefab_Miscellaneous : MonoBehaviour
     {
         try
         {
-            Contract contract = new Contract(
-                "goerli",
-                "0x62Cf5485B6C24b707E47C5E0FB2EAe7EbE18EC4c",
-                MY_CUSTOM_CONTRACT_ABI
-            );
+            Contract contract = new Contract("goerli", "0x62Cf5485B6C24b707E47C5E0FB2EAe7EbE18EC4c", MY_CUSTOM_CONTRACT_ABI);
 
             string uri = await contract.Read<string>("uri", 0);
             Debugger.Instance.Log("[Custom Call] Read Custom URI Successful", uri);

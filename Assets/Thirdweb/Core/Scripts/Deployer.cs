@@ -18,10 +18,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(
-                    getRoute("deployNFTCollection"),
-                    Utils.ToJsonStringArray(metadata)
-                );
+                return await Bridge.InvokeRoute<string>(getRoute("deployNFTCollection"), Utils.ToJsonStringArray(metadata));
             }
             else
             {
@@ -40,8 +37,7 @@ namespace Thirdweb
                 throw new UnityException("This functionality is not yet available on your current platform.");
 
                 var deploymentMessage = new DropERC721Deployment();
-                var deploymentHandler =
-                    ThirdwebManager.Instance.SDK.web3.Eth.GetContractDeploymentHandler<DropERC721Deployment>();
+                var deploymentHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetContractDeploymentHandler<DropERC721Deployment>();
                 var deploymentReceipt = await deploymentHandler.SendRequestAndWaitForReceiptAsync(deploymentMessage);
                 DropERC721Service dropERC721Service = new DropERC721Service(
                     ThirdwebManager.Instance.SDK.web3,
@@ -67,10 +63,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(
-                    getRoute("deploySignatureDrop"),
-                    Utils.ToJsonStringArray(metadata)
-                );
+                return await Bridge.InvokeRoute<string>(getRoute("deploySignatureDrop"), Utils.ToJsonStringArray(metadata));
             }
             else
             {
@@ -106,10 +99,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(
-                    getRoute("deployEditionDrop"),
-                    Utils.ToJsonStringArray(metadata)
-                );
+                return await Bridge.InvokeRoute<string>(getRoute("deployEditionDrop"), Utils.ToJsonStringArray(metadata));
             }
             else
             {
@@ -157,10 +147,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(
-                    getRoute("deployMarketplace"),
-                    Utils.ToJsonStringArray(metadata)
-                );
+                return await Bridge.InvokeRoute<string>(getRoute("deployMarketplace"), Utils.ToJsonStringArray(metadata));
             }
             else
             {
@@ -168,11 +155,7 @@ namespace Thirdweb
             }
         }
 
-        public async Task<string> DeployReleasedContract(
-            string releaserAddress,
-            string contractName,
-            object[] constructorParams
-        )
+        public async Task<string> DeployReleasedContract(string releaserAddress, string contractName, object[] constructorParams)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -191,10 +174,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(
-                    getRoute("deployContractFromUri"),
-                    Utils.ToJsonStringArray(uri, constructorParams)
-                );
+                return await Bridge.InvokeRoute<string>(getRoute("deployContractFromUri"), Utils.ToJsonStringArray(uri, constructorParams));
             }
             else
             {

@@ -133,11 +133,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         try
         {
             address = await ThirdwebManager.Instance.SDK.wallet.Connect(
-                new WalletConnection()
-                {
-                    provider = GetWalletProvider(_wallet),
-                    chainId = (int)ThirdwebManager.Instance.chain,
-                }
+                new WalletConnection() { provider = GetWalletProvider(_wallet), chainId = (int)ThirdwebManager.Instance.chain, }
             );
 
             wallet = _wallet;
@@ -253,12 +249,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
             GameObject networkButton = Instantiate(networkButtonPrefab, networkDropdown.transform);
             networkButton.GetComponent<Button>().onClick.RemoveAllListeners();
             networkButton.GetComponent<Button>().onClick.AddListener(() => OnSwitchNetwork(chain));
-            networkButton.transform.Find("Text_Network").GetComponent<TMP_Text>().text = ThirdwebManager
-                .Instance
-                .chainIdentifiers[chain];
-            networkButton.transform.Find("Icon_Network").GetComponent<Image>().sprite = networkSprites
-                .Find(x => x.chain == chain)
-                .sprite;
+            networkButton.transform.Find("Text_Network").GetComponent<TMP_Text>().text = ThirdwebManager.Instance.chainIdentifiers[chain];
+            networkButton.transform.Find("Icon_Network").GetComponent<Image>().sprite = networkSprites.Find(x => x.chain == chain).sprite;
         }
     }
 

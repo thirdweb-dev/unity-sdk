@@ -54,10 +54,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<LoginPayload>(
-                    $"auth{subSeparator}login",
-                    Utils.ToJsonStringArray(domain)
-                );
+                return await Bridge.InvokeRoute<LoginPayload>($"auth{subSeparator}login", Utils.ToJsonStringArray(domain));
             }
             else
             {
@@ -73,10 +70,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<CurrencyValue>(
-                    getRoute("balance"),
-                    Utils.ToJsonStringArray(currencyAddress)
-                );
+                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("balance"), Utils.ToJsonStringArray(currencyAddress));
             }
             else
             {
@@ -90,13 +84,7 @@ namespace Thirdweb
                     var balance = await ThirdwebManager.Instance.SDK.web3.Eth.GetBalance.SendRequestAsync(
                         await ThirdwebManager.Instance.SDK.wallet.GetAddress()
                     );
-                    return new CurrencyValue(
-                        "Ether",
-                        "ETH",
-                        "18",
-                        balance.Value.ToString(),
-                        balance.Value.ToString().ToEth()
-                    );
+                    return new CurrencyValue("Ether", "ETH", "18", balance.Value.ToString(), balance.Value.ToString().ToEth());
                 }
             }
         }
@@ -164,11 +152,7 @@ namespace Thirdweb
         /// <summary>
         /// Transfer currency to a given address
         /// </summary>
-        public async Task<TransactionResult> Transfer(
-            string to,
-            string amount,
-            string currencyAddress = Utils.NativeTokenAddress
-        )
+        public async Task<TransactionResult> Transfer(string to, string amount, string currencyAddress = Utils.NativeTokenAddress)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -206,10 +190,7 @@ namespace Thirdweb
             else
             {
                 var signer = new EthereumMessageSigner();
-                var signature = signer.EncodeUTF8AndSign(
-                    message,
-                    new EthECKey(ThirdwebManager.Instance.SDK.account.PrivateKey)
-                );
+                var signature = signer.EncodeUTF8AndSign(message, new EthECKey(ThirdwebManager.Instance.SDK.account.PrivateKey));
                 return signature; // TODO: Check viability
             }
         }
@@ -221,10 +202,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(
-                    getRoute("recoverAddress"),
-                    Utils.ToJsonStringArray(message, signature)
-                );
+                return await Bridge.InvokeRoute<string>(getRoute("recoverAddress"), Utils.ToJsonStringArray(message, signature));
             }
             else
             {
@@ -255,10 +233,7 @@ namespace Thirdweb
                     new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
                     new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice))
                 );
-                var receipt =
-                    await ThirdwebManager.Instance.SDK.web3.TransactionManager.SendTransactionAndWaitForReceiptAsync(
-                        input
-                    );
+                var receipt = await ThirdwebManager.Instance.SDK.web3.TransactionManager.SendTransactionAndWaitForReceiptAsync(input);
                 return receipt.ToTransactionResult();
             }
         }

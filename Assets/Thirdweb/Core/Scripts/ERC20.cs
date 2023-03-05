@@ -117,10 +117,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<CurrencyValue>(
-                    getRoute("allowanceOf"),
-                    Utils.ToJsonStringArray(owner, spender)
-                );
+                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("allowanceOf"), Utils.ToJsonStringArray(owner, spender));
             }
             else
             {
@@ -158,10 +155,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("setAllowance"),
-                    Utils.ToJsonStringArray(spender, amount)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("setAllowance"), Utils.ToJsonStringArray(spender, amount));
             }
             else
             {
@@ -178,10 +172,7 @@ namespace Thirdweb
                 }
                 else if (diff < 0)
                 {
-                    var receipt = await tokenERC20Service.DecreaseAllowanceRequestAndWaitForReceiptAsync(
-                        spender,
-                        diff * -1
-                    );
+                    var receipt = await tokenERC20Service.DecreaseAllowanceRequestAndWaitForReceiptAsync(spender, diff * -1);
                     result = receipt.ToTransactionResult();
                 }
                 else
@@ -201,17 +192,11 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("transfer"),
-                    Utils.ToJsonStringArray(to, amount)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, amount));
             }
             else
             {
-                var receipt = await tokenERC20Service.TransferRequestAndWaitForReceiptAsync(
-                    to,
-                    BigInteger.Parse(amount)
-                );
+                var receipt = await tokenERC20Service.TransferRequestAndWaitForReceiptAsync(to, BigInteger.Parse(amount));
                 return receipt.ToTransactionResult();
             }
         }
@@ -254,19 +239,13 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("claimTo"),
-                    Utils.ToJsonStringArray(address, amount)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("claimTo"), Utils.ToJsonStringArray(address, amount));
             }
             else
             {
                 var claimConditionID = await dropERC20Service.ClaimConditionQueryAsync();
-                var claimConditions = await dropERC20Service.GetClaimConditionByIdQueryAsync(
-                    claimConditionID.CurrentStartId
-                );
-                Contracts.DropERC20.ContractDefinition.AllowlistProof proof =
-                    new Contracts.DropERC20.ContractDefinition.AllowlistProof(); // TODO: Check actual process
+                var claimConditions = await dropERC20Service.GetClaimConditionByIdQueryAsync(claimConditionID.CurrentStartId);
+                Contracts.DropERC20.ContractDefinition.AllowlistProof proof = new Contracts.DropERC20.ContractDefinition.AllowlistProof(); // TODO: Check actual process
                 byte[] data = new byte[0];
                 var result = await dropERC20Service.ClaimRequestAndWaitForReceiptAsync(
                     address,
@@ -303,17 +282,11 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("mintTo"),
-                    Utils.ToJsonStringArray(address, amount)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintTo"), Utils.ToJsonStringArray(address, amount));
             }
             else
             {
-                var receipt = await tokenERC20Service.MintToRequestAndWaitForReceiptAsync(
-                    address,
-                    BigInteger.Parse(amount.ToWei())
-                );
+                var receipt = await tokenERC20Service.MintToRequestAndWaitForReceiptAsync(address, BigInteger.Parse(amount.ToWei()));
                 return receipt.ToTransactionResult();
             }
         }
@@ -398,10 +371,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(
-                    getRoute("canClaim"),
-                    Utils.ToJsonStringArray(quantity, addressToCheck)
-                );
+                return await Bridge.InvokeRoute<bool>(getRoute("canClaim"), Utils.ToJsonStringArray(quantity, addressToCheck));
             }
             else
             {
@@ -434,10 +404,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(
-                    getRoute("getClaimerProofs"),
-                    Utils.ToJsonStringArray(claimerAddress)
-                );
+                return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
             }
             else
             {
@@ -464,10 +431,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<ERC20SignedPayload>(
-                    getRoute("generate"),
-                    Utils.ToJsonStringArray(payloadToSign)
-                );
+                return await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
             }
             else
             {
@@ -497,10 +461,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("mint"),
-                    Utils.ToJsonStringArray(signedPayload)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mint"), Utils.ToJsonStringArray(signedPayload));
             }
             else
             {

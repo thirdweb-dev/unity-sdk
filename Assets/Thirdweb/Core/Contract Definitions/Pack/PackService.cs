@@ -57,10 +57,7 @@ namespace Thirdweb.Contracts.Pack
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<DEFAULT_ADMIN_ROLEFunction, byte[]>(
-                dEFAULT_ADMIN_ROLEFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<DEFAULT_ADMIN_ROLEFunction, byte[]>(dEFAULT_ADMIN_ROLEFunction, blockParameter);
         }
 
         public Task<byte[]> DEFAULT_ADMIN_ROLEQueryAsync(BlockParameter blockParameter = null)
@@ -114,10 +111,7 @@ namespace Thirdweb.Contracts.Pack
             return ContractHandler.SendRequestAndWaitForReceiptAsync(addPackContentsFunction, cancellationToken);
         }
 
-        public Task<BigInteger> BalanceOfQueryAsync(
-            BalanceOfFunction balanceOfFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> BalanceOfQueryAsync(BalanceOfFunction balanceOfFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<BalanceOfFunction, BigInteger>(balanceOfFunction, blockParameter);
         }
@@ -136,10 +130,7 @@ namespace Thirdweb.Contracts.Pack
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<BalanceOfBatchFunction, List<BigInteger>>(
-                balanceOfBatchFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<BalanceOfBatchFunction, List<BigInteger>>(balanceOfBatchFunction, blockParameter);
         }
 
         public Task<List<BigInteger>> BalanceOfBatchQueryAsync(
@@ -152,16 +143,10 @@ namespace Thirdweb.Contracts.Pack
             balanceOfBatchFunction.Accounts = accounts;
             balanceOfBatchFunction.Ids = ids;
 
-            return ContractHandler.QueryAsync<BalanceOfBatchFunction, List<BigInteger>>(
-                balanceOfBatchFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<BalanceOfBatchFunction, List<BigInteger>>(balanceOfBatchFunction, blockParameter);
         }
 
-        public Task<bool> CanUpdatePackQueryAsync(
-            CanUpdatePackFunction canUpdatePackFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<bool> CanUpdatePackQueryAsync(CanUpdatePackFunction canUpdatePackFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<CanUpdatePackFunction, bool>(canUpdatePackFunction, blockParameter);
         }
@@ -174,10 +159,7 @@ namespace Thirdweb.Contracts.Pack
             return ContractHandler.QueryAsync<CanUpdatePackFunction, bool>(canUpdatePackFunction, blockParameter);
         }
 
-        public Task<byte[]> ContractTypeQueryAsync(
-            ContractTypeFunction contractTypeFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<byte[]> ContractTypeQueryAsync(ContractTypeFunction contractTypeFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<ContractTypeFunction, byte[]>(contractTypeFunction, blockParameter);
         }
@@ -187,10 +169,7 @@ namespace Thirdweb.Contracts.Pack
             return ContractHandler.QueryAsync<ContractTypeFunction, byte[]>(null, blockParameter);
         }
 
-        public Task<string> ContractURIQueryAsync(
-            ContractURIFunction contractURIFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<string> ContractURIQueryAsync(ContractURIFunction contractURIFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<ContractURIFunction, string>(contractURIFunction, blockParameter);
         }
@@ -200,10 +179,7 @@ namespace Thirdweb.Contracts.Pack
             return ContractHandler.QueryAsync<ContractURIFunction, string>(null, blockParameter);
         }
 
-        public Task<byte> ContractVersionQueryAsync(
-            ContractVersionFunction contractVersionFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<byte> ContractVersionQueryAsync(ContractVersionFunction contractVersionFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<ContractVersionFunction, byte>(contractVersionFunction, blockParameter);
         }
@@ -272,20 +248,18 @@ namespace Thirdweb.Contracts.Pack
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<
-                GetDefaultRoyaltyInfoFunction,
-                GetDefaultRoyaltyInfoOutputDTO
-            >(getDefaultRoyaltyInfoFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<GetDefaultRoyaltyInfoFunction, GetDefaultRoyaltyInfoOutputDTO>(
+                getDefaultRoyaltyInfoFunction,
+                blockParameter
+            );
         }
 
-        public Task<GetDefaultRoyaltyInfoOutputDTO> GetDefaultRoyaltyInfoQueryAsync(
-            BlockParameter blockParameter = null
-        )
+        public Task<GetDefaultRoyaltyInfoOutputDTO> GetDefaultRoyaltyInfoQueryAsync(BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<
-                GetDefaultRoyaltyInfoFunction,
-                GetDefaultRoyaltyInfoOutputDTO
-            >(null, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<GetDefaultRoyaltyInfoFunction, GetDefaultRoyaltyInfoOutputDTO>(
+                null,
+                blockParameter
+            );
         }
 
         public Task<GetPackContentsOutputDTO> GetPackContentsQueryAsync(
@@ -299,10 +273,7 @@ namespace Thirdweb.Contracts.Pack
             );
         }
 
-        public Task<GetPackContentsOutputDTO> GetPackContentsQueryAsync(
-            BigInteger packId,
-            BlockParameter blockParameter = null
-        )
+        public Task<GetPackContentsOutputDTO> GetPackContentsQueryAsync(BigInteger packId, BlockParameter blockParameter = null)
         {
             var getPackContentsFunction = new GetPackContentsFunction();
             getPackContentsFunction.PackId = packId;
@@ -313,10 +284,7 @@ namespace Thirdweb.Contracts.Pack
             );
         }
 
-        public Task<byte[]> GetRoleAdminQueryAsync(
-            GetRoleAdminFunction getRoleAdminFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<byte[]> GetRoleAdminQueryAsync(GetRoleAdminFunction getRoleAdminFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<GetRoleAdminFunction, byte[]>(getRoleAdminFunction, blockParameter);
         }
@@ -329,10 +297,7 @@ namespace Thirdweb.Contracts.Pack
             return ContractHandler.QueryAsync<GetRoleAdminFunction, byte[]>(getRoleAdminFunction, blockParameter);
         }
 
-        public Task<string> GetRoleMemberQueryAsync(
-            GetRoleMemberFunction getRoleMemberFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<string> GetRoleMemberQueryAsync(GetRoleMemberFunction getRoleMemberFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<GetRoleMemberFunction, string>(getRoleMemberFunction, blockParameter);
         }
@@ -351,10 +316,7 @@ namespace Thirdweb.Contracts.Pack
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(
-                getRoleMemberCountFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(getRoleMemberCountFunction, blockParameter);
         }
 
         public Task<BigInteger> GetRoleMemberCountQueryAsync(byte[] role, BlockParameter blockParameter = null)
@@ -362,10 +324,7 @@ namespace Thirdweb.Contracts.Pack
             var getRoleMemberCountFunction = new GetRoleMemberCountFunction();
             getRoleMemberCountFunction.Role = role;
 
-            return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(
-                getRoleMemberCountFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(getRoleMemberCountFunction, blockParameter);
         }
 
         public Task<GetRoyaltyInfoForTokenOutputDTO> GetRoyaltyInfoForTokenQueryAsync(
@@ -373,10 +332,10 @@ namespace Thirdweb.Contracts.Pack
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<
-                GetRoyaltyInfoForTokenFunction,
-                GetRoyaltyInfoForTokenOutputDTO
-            >(getRoyaltyInfoForTokenFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<GetRoyaltyInfoForTokenFunction, GetRoyaltyInfoForTokenOutputDTO>(
+                getRoyaltyInfoForTokenFunction,
+                blockParameter
+            );
         }
 
         public Task<GetRoyaltyInfoForTokenOutputDTO> GetRoyaltyInfoForTokenQueryAsync(
@@ -387,10 +346,10 @@ namespace Thirdweb.Contracts.Pack
             var getRoyaltyInfoForTokenFunction = new GetRoyaltyInfoForTokenFunction();
             getRoyaltyInfoForTokenFunction.TokenId = tokenId;
 
-            return ContractHandler.QueryDeserializingToObjectAsync<
-                GetRoyaltyInfoForTokenFunction,
-                GetRoyaltyInfoForTokenOutputDTO
-            >(getRoyaltyInfoForTokenFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<GetRoyaltyInfoForTokenFunction, GetRoyaltyInfoForTokenOutputDTO>(
+                getRoyaltyInfoForTokenFunction,
+                blockParameter
+            );
         }
 
         public Task<BigInteger> GetTokenCountOfBundleQueryAsync(
@@ -398,24 +357,15 @@ namespace Thirdweb.Contracts.Pack
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<GetTokenCountOfBundleFunction, BigInteger>(
-                getTokenCountOfBundleFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<GetTokenCountOfBundleFunction, BigInteger>(getTokenCountOfBundleFunction, blockParameter);
         }
 
-        public Task<BigInteger> GetTokenCountOfBundleQueryAsync(
-            BigInteger bundleId,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> GetTokenCountOfBundleQueryAsync(BigInteger bundleId, BlockParameter blockParameter = null)
         {
             var getTokenCountOfBundleFunction = new GetTokenCountOfBundleFunction();
             getTokenCountOfBundleFunction.BundleId = bundleId;
 
-            return ContractHandler.QueryAsync<GetTokenCountOfBundleFunction, BigInteger>(
-                getTokenCountOfBundleFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<GetTokenCountOfBundleFunction, BigInteger>(getTokenCountOfBundleFunction, blockParameter);
         }
 
         public Task<GetTokenOfBundleOutputDTO> GetTokenOfBundleQueryAsync(
@@ -445,10 +395,7 @@ namespace Thirdweb.Contracts.Pack
             );
         }
 
-        public Task<string> GetUriOfBundleQueryAsync(
-            GetUriOfBundleFunction getUriOfBundleFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<string> GetUriOfBundleQueryAsync(GetUriOfBundleFunction getUriOfBundleFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<GetUriOfBundleFunction, string>(getUriOfBundleFunction, blockParameter);
         }
@@ -515,10 +462,7 @@ namespace Thirdweb.Contracts.Pack
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<HasRoleWithSwitchFunction, bool>(
-                hasRoleWithSwitchFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<HasRoleWithSwitchFunction, bool>(hasRoleWithSwitchFunction, blockParameter);
         }
 
         public Task<bool> HasRoleWithSwitchQueryAsync(byte[] role, string account, BlockParameter blockParameter = null)
@@ -527,10 +471,7 @@ namespace Thirdweb.Contracts.Pack
             hasRoleWithSwitchFunction.Role = role;
             hasRoleWithSwitchFunction.Account = account;
 
-            return ContractHandler.QueryAsync<HasRoleWithSwitchFunction, bool>(
-                hasRoleWithSwitchFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<HasRoleWithSwitchFunction, bool>(hasRoleWithSwitchFunction, blockParameter);
         }
 
         public Task<string> InitializeRequestAsync(InitializeFunction initializeFunction)
@@ -599,11 +540,7 @@ namespace Thirdweb.Contracts.Pack
             return ContractHandler.QueryAsync<IsApprovedForAllFunction, bool>(isApprovedForAllFunction, blockParameter);
         }
 
-        public Task<bool> IsApprovedForAllQueryAsync(
-            string account,
-            string @operator,
-            BlockParameter blockParameter = null
-        )
+        public Task<bool> IsApprovedForAllQueryAsync(string account, string @operator, BlockParameter blockParameter = null)
         {
             var isApprovedForAllFunction = new IsApprovedForAllFunction();
             isApprovedForAllFunction.Account = account;
@@ -617,10 +554,7 @@ namespace Thirdweb.Contracts.Pack
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<IsTrustedForwarderFunction, bool>(
-                isTrustedForwarderFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<IsTrustedForwarderFunction, bool>(isTrustedForwarderFunction, blockParameter);
         }
 
         public Task<bool> IsTrustedForwarderQueryAsync(string forwarder, BlockParameter blockParameter = null)
@@ -628,10 +562,7 @@ namespace Thirdweb.Contracts.Pack
             var isTrustedForwarderFunction = new IsTrustedForwarderFunction();
             isTrustedForwarderFunction.Forwarder = forwarder;
 
-            return ContractHandler.QueryAsync<IsTrustedForwarderFunction, bool>(
-                isTrustedForwarderFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<IsTrustedForwarderFunction, bool>(isTrustedForwarderFunction, blockParameter);
         }
 
         public Task<string> MulticallRequestAsync(MulticallFunction multicallFunction)
@@ -681,10 +612,7 @@ namespace Thirdweb.Contracts.Pack
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<NextTokenIdToMintFunction, BigInteger>(
-                nextTokenIdToMintFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<NextTokenIdToMintFunction, BigInteger>(nextTokenIdToMintFunction, blockParameter);
         }
 
         public Task<BigInteger> NextTokenIdToMintQueryAsync(BlockParameter blockParameter = null)
@@ -692,9 +620,7 @@ namespace Thirdweb.Contracts.Pack
             return ContractHandler.QueryAsync<NextTokenIdToMintFunction, BigInteger>(null, blockParameter);
         }
 
-        public Task<string> OnERC1155BatchReceivedRequestAsync(
-            OnERC1155BatchReceivedFunction onERC1155BatchReceivedFunction
-        )
+        public Task<string> OnERC1155BatchReceivedRequestAsync(OnERC1155BatchReceivedFunction onERC1155BatchReceivedFunction)
         {
             return ContractHandler.SendRequestAsync(onERC1155BatchReceivedFunction);
         }
@@ -982,9 +908,7 @@ namespace Thirdweb.Contracts.Pack
             );
         }
 
-        public Task<string> SafeBatchTransferFromRequestAsync(
-            SafeBatchTransferFromFunction safeBatchTransferFromFunction
-        )
+        public Task<string> SafeBatchTransferFromRequestAsync(SafeBatchTransferFromFunction safeBatchTransferFromFunction)
         {
             return ContractHandler.SendRequestAsync(safeBatchTransferFromFunction);
         }
@@ -1047,13 +971,7 @@ namespace Thirdweb.Contracts.Pack
             return ContractHandler.SendRequestAndWaitForReceiptAsync(safeTransferFromFunction, cancellationToken);
         }
 
-        public Task<string> SafeTransferFromRequestAsync(
-            string from,
-            string to,
-            BigInteger id,
-            BigInteger amount,
-            byte[] data
-        )
+        public Task<string> SafeTransferFromRequestAsync(string from, string to, BigInteger id, BigInteger amount, byte[] data)
         {
             var safeTransferFromFunction = new SafeTransferFromFunction();
             safeTransferFromFunction.From = from;
@@ -1151,9 +1069,7 @@ namespace Thirdweb.Contracts.Pack
             return ContractHandler.SendRequestAndWaitForReceiptAsync(setContractURIFunction, cancellationToken);
         }
 
-        public Task<string> SetDefaultRoyaltyInfoRequestAsync(
-            SetDefaultRoyaltyInfoFunction setDefaultRoyaltyInfoFunction
-        )
+        public Task<string> SetDefaultRoyaltyInfoRequestAsync(SetDefaultRoyaltyInfoFunction setDefaultRoyaltyInfoFunction)
         {
             return ContractHandler.SendRequestAsync(setDefaultRoyaltyInfoFunction);
         }
@@ -1220,9 +1136,7 @@ namespace Thirdweb.Contracts.Pack
             return ContractHandler.SendRequestAndWaitForReceiptAsync(setOwnerFunction, cancellationToken);
         }
 
-        public Task<string> SetRoyaltyInfoForTokenRequestAsync(
-            SetRoyaltyInfoForTokenFunction setRoyaltyInfoForTokenFunction
-        )
+        public Task<string> SetRoyaltyInfoForTokenRequestAsync(SetRoyaltyInfoForTokenFunction setRoyaltyInfoForTokenFunction)
         {
             return ContractHandler.SendRequestAsync(setRoyaltyInfoForTokenFunction);
         }
@@ -1265,10 +1179,7 @@ namespace Thirdweb.Contracts.Pack
             BlockParameter blockParameter = null
         )
         {
-            return ContractHandler.QueryAsync<SupportsInterfaceFunction, bool>(
-                supportsInterfaceFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<SupportsInterfaceFunction, bool>(supportsInterfaceFunction, blockParameter);
         }
 
         public Task<bool> SupportsInterfaceQueryAsync(byte[] interfaceId, BlockParameter blockParameter = null)
@@ -1276,10 +1187,7 @@ namespace Thirdweb.Contracts.Pack
             var supportsInterfaceFunction = new SupportsInterfaceFunction();
             supportsInterfaceFunction.InterfaceId = interfaceId;
 
-            return ContractHandler.QueryAsync<SupportsInterfaceFunction, bool>(
-                supportsInterfaceFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryAsync<SupportsInterfaceFunction, bool>(supportsInterfaceFunction, blockParameter);
         }
 
         public Task<string> SymbolQueryAsync(SymbolFunction symbolFunction, BlockParameter blockParameter = null)
@@ -1292,10 +1200,7 @@ namespace Thirdweb.Contracts.Pack
             return ContractHandler.QueryAsync<SymbolFunction, string>(null, blockParameter);
         }
 
-        public Task<BigInteger> TotalSupplyQueryAsync(
-            TotalSupplyFunction totalSupplyFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> TotalSupplyQueryAsync(TotalSupplyFunction totalSupplyFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<TotalSupplyFunction, BigInteger>(totalSupplyFunction, blockParameter);
         }

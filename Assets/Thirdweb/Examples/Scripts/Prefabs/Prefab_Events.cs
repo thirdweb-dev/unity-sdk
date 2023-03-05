@@ -30,10 +30,7 @@ public class Prefab_Events : MonoBehaviour
             Dictionary<string, object> filters = new Dictionary<string, object> { { "tokenId", 20 } };
             EventQueryOptions options = new EventQueryOptions(filters);
 
-            List<ContractEvent<TransferEvent>> allEvents = await contract.events.Get<TransferEvent>(
-                "Transfer",
-                options
-            );
+            List<ContractEvent<TransferEvent>> allEvents = await contract.events.Get<TransferEvent>("Transfer", options);
             Debugger.Instance.Log("[Get Events] Get - TransferEvent #1", allEvents[0].ToString());
         }
         catch (System.Exception e)
@@ -66,12 +63,16 @@ public class Prefab_Events : MonoBehaviour
 
     public void ListenToAllEvents()
     {
-        Contract contract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
-        contract.events.ListenToAll((ContractEvent<object> anyEvent) => OnEventTriggered(anyEvent));
-        Debugger.Instance.Log(
-            "Listening to all events!",
-            "Try to trigger an event on the specified contract to get a callback."
-        );
+        try
+        {
+            Contract contract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
+            contract.events.ListenToAll((ContractEvent<object> anyEvent) => OnEventTriggered(anyEvent));
+            Debugger.Instance.Log("Listening to all events!", "Try to trigger an event on the specified contract to get a callback.");
+        }
+        catch (System.Exception e)
+        {
+            Debugger.Instance.Log("[Listen To All Events] Error", e.Message);
+        }
     }
 
     public async void RemoveAllEventListeners()
@@ -90,9 +91,6 @@ public class Prefab_Events : MonoBehaviour
 
     public void OnEventTriggered<T>(ContractEvent<T> contractEvent)
     {
-        Debugger.Instance.Log(
-            "[EventListener] OnEventTriggered",
-            $"An event was just emitted!\n{contractEvent.ToString()}"
-        );
+        Debugger.Instance.Log("[EventListener] OnEventTriggered", $"An event was just emitted!\n{contractEvent.ToString()}");
     }
 }

@@ -95,12 +95,8 @@ public class Prefab_NFTLoader : MonoBehaviour
 
                 List<NFT> tempNFTList =
                     multiQuery.type == NFTType.ERC1155
-                        ? await tempContract.ERC1155.GetAll(
-                            new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count }
-                        )
-                        : await tempContract.ERC721.GetAll(
-                            new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count }
-                        );
+                        ? await tempContract.ERC1155.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count })
+                        : await tempContract.ERC721.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count });
 
                 nftsToLoad.AddRange(tempNFTList);
             }

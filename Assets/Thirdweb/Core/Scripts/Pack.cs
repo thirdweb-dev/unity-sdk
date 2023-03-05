@@ -129,10 +129,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(
-                    getRoute("balanceOf"),
-                    Utils.ToJsonStringArray(address, tokenId)
-                );
+                return await Bridge.InvokeRoute<string>(getRoute("balanceOf"), Utils.ToJsonStringArray(address, tokenId));
             }
             else
             {
@@ -149,10 +146,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(
-                    getRoute("isApproved"),
-                    Utils.ToJsonStringArray(address, approvedContract)
-                );
+                return await Bridge.InvokeRoute<string>(getRoute("isApproved"), Utils.ToJsonStringArray(address, approvedContract));
             }
             else
             {
@@ -194,10 +188,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<PackContents>(
-                    getRoute("getPackContents"),
-                    Utils.ToJsonStringArray(packId)
-                );
+                return await Bridge.InvokeRoute<PackContents>(getRoute("getPackContents"), Utils.ToJsonStringArray(packId));
             }
             else
             {
@@ -253,10 +244,7 @@ namespace Thirdweb
             }
             else
             {
-                var receipt = await packService.SetApprovalForAllRequestAndWaitForReceiptAsync(
-                    contractToApprove,
-                    approved
-                );
+                var receipt = await packService.SetApprovalForAllRequestAndWaitForReceiptAsync(contractToApprove, approved);
                 return receipt.ToTransactionResult();
             }
         }
@@ -268,10 +256,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("transfer"),
-                    Utils.ToJsonStringArray(to, tokenId, amount)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, tokenId, amount));
             }
             else
             {
@@ -308,10 +293,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("createTo"),
-                    Utils.ToJsonStringArray(receiverAddress, pack)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("createTo"), Utils.ToJsonStringArray(receiverAddress, pack));
             }
             else
             {
@@ -343,12 +325,7 @@ namespace Thirdweb
             else
             {
                 throw new UnityException("This functionality is not yet available on your current platform.");
-                var receipt = await packService.AddPackContentsRequestAndWaitForReceiptAsync(
-                    BigInteger.Parse(packId),
-                    null,
-                    null,
-                    null
-                ); // TODO: fix
+                var receipt = await packService.AddPackContentsRequestAndWaitForReceiptAsync(BigInteger.Parse(packId), null, null, null); // TODO: fix
                 return receipt.ToTransactionResult();
             }
         }
@@ -365,10 +342,7 @@ namespace Thirdweb
             else
             {
                 throw new UnityException("This functionality is not yet available on your current platform.");
-                var receipt = await packService.OpenPackRequestAndWaitForReceiptAsync(
-                    BigInteger.Parse(packId),
-                    BigInteger.Parse(amount)
-                ); // TODO: fix
+                var receipt = await packService.OpenPackRequestAndWaitForReceiptAsync(BigInteger.Parse(packId), BigInteger.Parse(amount)); // TODO: fix
                 return new PackRewards(); // TODO: Decode event and create/return PackRewards
             }
         }
