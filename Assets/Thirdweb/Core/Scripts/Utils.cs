@@ -99,12 +99,12 @@ namespace Thirdweb
 #endif
         }
 
-        public static string ReplaceIPFS(this string tokenURI)
+        public static string ReplaceIPFS(this string uri)
         {
-            if (tokenURI.StartsWith("ipfs://"))
-                return tokenURI.Replace("ipfs://", "https://gateway.ipfscdn.io/ipfs/");
+            if (uri.StartsWith("ipfs://"))
+                return uri.Replace("ipfs://", "https://gateway.ipfscdn.io/ipfs/");
             else
-                return tokenURI;
+                return uri;
         }
 
         public static TransactionResult ToTransactionResult(this Nethereum.RPC.Eth.DTOs.TransactionReceipt receipt)

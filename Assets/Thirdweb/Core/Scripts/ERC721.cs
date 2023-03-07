@@ -62,27 +62,11 @@ namespace Thirdweb
                 nft.type = "ERC721";
                 nft.supply = await TotalCount();
                 nft.quantityOwned = 1;
-
                 string tokenURI = await tokenERC721Service.TokenURIQueryAsync(BigInteger.Parse(tokenId));
-                tokenURI = tokenURI.ReplaceIPFS();
-
-                using (UnityWebRequest req = UnityWebRequest.Get(tokenURI))
-                {
-                    await req.SendWebRequest();
-                    if (req.result != UnityWebRequest.Result.Success)
-                    {
-                        Debug.LogWarning($"Unable to fetch token {tokenId} uri metadata!");
-                        return nft;
-                    }
-
-                    string json = req.downloadHandler.text;
-                    nft.metadata = JsonConvert.DeserializeObject<NFTMetadata>(json);
-                }
-
+                nft.metadata = await tokenURI.DownloadText<NFTMetadata>();
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
                 nft.metadata.id = tokenId;
-                nft.metadata.uri = tokenURI;
-
+                nft.metadata.uri = tokenURI.ReplaceIPFS();
                 return nft;
             }
         }
@@ -126,26 +110,11 @@ namespace Thirdweb
                     nft.quantityOwned = 1;
 
                     string tokenURI = rawNft.MetadataUrl;
-                    tokenURI = tokenURI.ReplaceIPFS();
-
-                    using (UnityWebRequest req = UnityWebRequest.Get(tokenURI))
-                    {
-                        await req.SendWebRequest();
-                        if (req.result != UnityWebRequest.Result.Success)
-                        {
-                            Debug.LogWarning($"Unable to fetch token {rawNft.TokenId} uri metadata!");
-                            allNfts.Add(nft);
-                            continue;
-                        }
-
-                        string json = req.downloadHandler.text;
-                        nft.metadata = JsonConvert.DeserializeObject<NFTMetadata>(json);
-
-                        nft.metadata.image = nft.metadata.image.ReplaceIPFS();
-                        nft.metadata.id = rawNft.TokenId.ToString();
-                        nft.metadata.uri = tokenURI;
-                        allNfts.Add(nft);
-                    }
+                    nft.metadata = await tokenURI.DownloadText<NFTMetadata>();
+                    nft.metadata.image = nft.metadata.image.ReplaceIPFS();
+                    nft.metadata.id = rawNft.TokenId.ToString();
+                    nft.metadata.uri = tokenURI.ReplaceIPFS();
+                    allNfts.Add(nft);
                 }
 
                 return allNfts;
@@ -398,6 +367,7 @@ namespace Thirdweb
             }
             else
             {
+                throw new UnityException("This functionality is not yet available on your current platform.");
                 var result = await tokenERC721Service.MintToRequestAndWaitForReceiptAsync(address, nft.uri);
                 return result.ToTransactionResult();
             }

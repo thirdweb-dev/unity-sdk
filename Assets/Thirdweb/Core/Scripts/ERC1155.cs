@@ -62,27 +62,11 @@ namespace Thirdweb
                 nft.type = "ERC1155";
                 nft.supply = await TotalSupply(tokenId);
                 nft.quantityOwned = 404;
-
                 string tokenURI = await tokenERC1155Service.UriQueryAsync(BigInteger.Parse(tokenId));
-                tokenURI = tokenURI.ReplaceIPFS();
-
-                using (UnityWebRequest req = UnityWebRequest.Get(tokenURI))
-                {
-                    await req.SendWebRequest();
-                    if (req.result != UnityWebRequest.Result.Success)
-                    {
-                        Debug.LogWarning($"Unable to fetch token {tokenId} uri metadata!");
-                        return nft;
-                    }
-
-                    string json = req.downloadHandler.text;
-                    nft.metadata = JsonConvert.DeserializeObject<NFTMetadata>(json);
-                }
-
+                nft.metadata = await tokenURI.DownloadText<NFTMetadata>();
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
                 nft.metadata.id = tokenId;
-                nft.metadata.uri = tokenURI;
-
+                nft.metadata.uri = tokenURI.ReplaceIPFS();
                 return nft;
             }
         }
