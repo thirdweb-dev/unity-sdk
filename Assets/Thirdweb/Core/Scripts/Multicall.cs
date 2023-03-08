@@ -1,13 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Numerics;
-using Newtonsoft.Json;
-using UnityEngine.Networking;
 using UnityEngine;
 using System.Linq;
 using System.Threading.Tasks;
-using Nethereum.Contracts.Constants;
 using Nethereum.Contracts.QueryHandlers.MultiCall;
 using TokenERC721 = Thirdweb.Contracts.TokenERC721.ContractDefinition;
 
@@ -45,7 +40,7 @@ namespace Thirdweb
 
         public static async Task<List<TokenData721>> GetAllOwners721(string contractAddress, int startTokenId, int endTokenId)
         {
-            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetMultiQueryHandler(CommonAddresses.MULTICALL_ADDRESS);
+            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetMultiQueryHandler();
             var calls = new List<MulticallInputOutput<TokenERC721.OwnerOfFunction, TokenERC721.OwnerOfOutputDTO>>();
             for (int i = startTokenId; i <= endTokenId; i++)
             {
@@ -68,7 +63,7 @@ namespace Thirdweb
 
         public static async Task<List<TokenData721>> GetSpecificOwners721(string contractAddress, int[] tokenIds)
         {
-            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetMultiQueryHandler(CommonAddresses.MULTICALL_ADDRESS);
+            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetMultiQueryHandler();
             var calls = new List<MulticallInputOutput<TokenERC721.OwnerOfFunction, TokenERC721.OwnerOfOutputDTO>>();
             for (int i = 0; i < tokenIds.Length; i++)
             {
@@ -91,7 +86,7 @@ namespace Thirdweb
 
         public static async Task<List<TokenData721>> GetAllTokenUris721(string contractAddress, int startTokenId, int endTokenId)
         {
-            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetMultiQueryHandler(CommonAddresses.MULTICALL_ADDRESS);
+            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetMultiQueryHandler();
             var calls = new List<MulticallInputOutput<TokenERC721.TokenURIFunction, TokenERC721.TokenURIOutputDTO>>();
             for (int i = startTokenId; i <= endTokenId; i++)
             {
@@ -114,7 +109,7 @@ namespace Thirdweb
 
         public static async Task<List<TokenData721>> GetSpecificTokenUris721(string contractAddress, int[] tokenIds)
         {
-            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetMultiQueryHandler(CommonAddresses.MULTICALL_ADDRESS);
+            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetMultiQueryHandler();
             var calls = new List<MulticallInputOutput<TokenERC721.TokenURIFunction, TokenERC721.TokenURIOutputDTO>>();
             for (int i = 0; i < tokenIds.Length; i++)
             {
@@ -137,7 +132,7 @@ namespace Thirdweb
 
         public static async Task<List<int>> GetOwnedTokenIds721(string contractAddress, string ownerAddress)
         {
-            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetMultiQueryHandler(CommonAddresses.MULTICALL_ADDRESS);
+            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetMultiQueryHandler();
             var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
             var balance = BigInteger.Parse(await contract.ERC721.BalanceOf(ownerAddress));
             var calls = new List<MulticallInputOutput<TokenERC721.TokenOfOwnerByIndexFunction, TokenERC721.TokenOfOwnerByIndexOutputDTO>>();
