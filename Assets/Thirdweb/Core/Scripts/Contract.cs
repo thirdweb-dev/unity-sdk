@@ -143,11 +143,7 @@ namespace Thirdweb
 
                 var contract = ThirdwebManager.Instance.SDK.web3.Eth.GetContract(this.abi, this.address);
                 var function = contract.GetFunction(functionName);
-                var receipt = await function.SendTransactionAndWaitForReceiptAsync(
-                    await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
-                    null,
-                    args
-                );
+                var receipt = await function.SendTransactionAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, args);
                 return receipt.ToTransactionResult();
             }
         }

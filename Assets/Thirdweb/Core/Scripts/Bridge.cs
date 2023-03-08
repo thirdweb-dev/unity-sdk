@@ -64,9 +64,7 @@ namespace Thirdweb
             if (taskActionMap.ContainsKey(taskId))
             {
                 Type tempType = taskActionMap[taskId].t;
-                taskActionMap[taskId].d.DynamicInvoke(
-                    tempType == typeof(string) ? result : JsonConvert.DeserializeObject(result, tempType)
-                );
+                taskActionMap[taskId].d.DynamicInvoke(tempType == typeof(string) ? result : JsonConvert.DeserializeObject(result, tempType));
             }
         }
 

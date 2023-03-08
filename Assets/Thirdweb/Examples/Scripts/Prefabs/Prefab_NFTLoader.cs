@@ -74,10 +74,7 @@ public class Prefab_NFTLoader : MonoBehaviour
             {
                 Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(singleQuery.contractAddress);
 
-                NFT tempNFT =
-                    singleQuery.type == NFTType.ERC1155
-                        ? await tempContract.ERC1155.Get(singleQuery.tokenID)
-                        : await tempContract.ERC721.Get(singleQuery.tokenID);
+                NFT tempNFT = singleQuery.type == NFTType.ERC1155 ? await tempContract.ERC1155.Get(singleQuery.tokenID) : await tempContract.ERC721.Get(singleQuery.tokenID);
 
                 nftsToLoad.Add(tempNFT);
             }
@@ -112,10 +109,7 @@ public class Prefab_NFTLoader : MonoBehaviour
             {
                 Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(ownedQuery.contractAddress);
 
-                List<NFT> tempNFTList =
-                    ownedQuery.type == NFTType.ERC1155
-                        ? await tempContract.ERC1155.GetOwned(ownedQuery.owner)
-                        : await tempContract.ERC721.GetOwned(ownedQuery.owner);
+                List<NFT> tempNFTList = ownedQuery.type == NFTType.ERC1155 ? await tempContract.ERC1155.GetOwned(ownedQuery.owner) : await tempContract.ERC721.GetOwned(ownedQuery.owner);
 
                 nftsToLoad.AddRange(tempNFTList);
             }

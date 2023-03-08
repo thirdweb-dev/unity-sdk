@@ -71,18 +71,14 @@ public static class IEnumeratorAwaitExtensions
     public static SimpleCoroutineAwaiter<AssetBundle> GetAwaiter(this AssetBundleCreateRequest instruction)
     {
         var awaiter = new SimpleCoroutineAwaiter<AssetBundle>();
-        RunOnUnityScheduler(
-            () => AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.AssetBundleCreateRequest(awaiter, instruction))
-        );
+        RunOnUnityScheduler(() => AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.AssetBundleCreateRequest(awaiter, instruction)));
         return awaiter;
     }
 
     public static SimpleCoroutineAwaiter<UnityEngine.Object> GetAwaiter(this AssetBundleRequest instruction)
     {
         var awaiter = new SimpleCoroutineAwaiter<UnityEngine.Object>();
-        RunOnUnityScheduler(
-            () => AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.AssetBundleRequest(awaiter, instruction))
-        );
+        RunOnUnityScheduler(() => AsyncCoroutineRunner.Instance.StartCoroutine(InstructionWrappers.AssetBundleRequest(awaiter, instruction)));
         return awaiter;
     }
 
@@ -361,10 +357,7 @@ public static class IEnumeratorAwaitExtensions
             awaiter.Complete(null);
         }
 
-        public static IEnumerator AssetBundleCreateRequest(
-            SimpleCoroutineAwaiter<AssetBundle> awaiter,
-            AssetBundleCreateRequest instruction
-        )
+        public static IEnumerator AssetBundleCreateRequest(SimpleCoroutineAwaiter<AssetBundle> awaiter, AssetBundleCreateRequest instruction)
         {
             yield return instruction;
             awaiter.Complete(instruction.assetBundle, null);

@@ -8,7 +8,7 @@ public class Prefab_Writing : MonoBehaviour
         try
         {
             // Traditional Minting (Requires Minter Role)
-            Contract contract = new Contract("goerli", "0xB4870B21f80223696b68798a755478C86ce349bE");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xB4870B21f80223696b68798a755478C86ce349bE");
 
             TransactionResult transactionResult = await contract.ERC20.Mint("1.2");
             Debugger.Instance.Log("[Mint ERC20] Successful", transactionResult.ToString());
@@ -29,7 +29,7 @@ public class Prefab_Writing : MonoBehaviour
         try
         {
             // NFT Collection Signature Minting
-            Contract contract = new Contract("goerli", "0x8bFD00BD1D3A2778BDA12AFddE5E65Cca95082DF");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x8bFD00BD1D3A2778BDA12AFddE5E65Cca95082DF");
 
             NFTMetadata meta = new NFTMetadata()
             {
@@ -59,7 +59,7 @@ public class Prefab_Writing : MonoBehaviour
         try
         {
             // Edition Drop Claiming
-            Contract contract = new Contract("goerli", "0x86B7df0dc0A790789D8fDE4C604EF8187FF8AD2A");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x86B7df0dc0A790789D8fDE4C604EF8187FF8AD2A");
 
             bool canClaim = await contract.ERC1155.claimConditions.CanClaim("0", 1);
             if (!canClaim)
@@ -88,7 +88,7 @@ public class Prefab_Writing : MonoBehaviour
     {
         try
         {
-            Contract contract = new Contract("goerli", "0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A");
             Marketplace marketplace = contract.marketplace;
 
             TransactionResult transactionResult = await marketplace.BuyListing("0", 1);

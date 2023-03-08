@@ -185,10 +185,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("setApprovalForAll"),
-                    Utils.ToJsonStringArray(contractToApprove, approved)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("setApprovalForAll"), Utils.ToJsonStringArray(contractToApprove, approved));
             }
             else
             {
@@ -230,11 +227,7 @@ namespace Thirdweb
             }
             else
             {
-                var receipt = await tokenERC1155Service.BurnRequestAndWaitForReceiptAsync(
-                    await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
-                    BigInteger.Parse(tokenId),
-                    amount
-                );
+                var receipt = await tokenERC1155Service.BurnRequestAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), BigInteger.Parse(tokenId), amount);
                 return receipt.ToTransactionResult();
             }
         }
@@ -312,10 +305,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("mintAdditionalSupply"),
-                    Utils.ToJsonStringArray(tokenId, additionalSupply, additionalSupply)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintAdditionalSupply"), Utils.ToJsonStringArray(tokenId, additionalSupply, additionalSupply));
             }
             else
             {
@@ -330,20 +320,12 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("mintAdditionalSupplyTo"),
-                    Utils.ToJsonStringArray(address, tokenId, additionalSupply)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("mintAdditionalSupplyTo"), Utils.ToJsonStringArray(address, tokenId, additionalSupply));
             }
             else
             {
                 var uri = await tokenERC1155Service.UriQueryAsync(BigInteger.Parse(tokenId));
-                var receipt = await tokenERC1155Service.MintToRequestAndWaitForReceiptAsync(
-                    await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
-                    BigInteger.Parse(tokenId),
-                    uri,
-                    additionalSupply
-                );
+                var receipt = await tokenERC1155Service.MintToRequestAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), BigInteger.Parse(tokenId), uri, additionalSupply);
                 return receipt.ToTransactionResult();
             }
         }
@@ -394,10 +376,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string[]>(
-                    getRoute("getClaimIneligibilityReasons"),
-                    Utils.ToJsonStringArray(tokenId, quantity, addressToCheck)
-                );
+                return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(tokenId, quantity, addressToCheck));
             }
             else
             {
@@ -538,10 +517,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<ERC1155SignedPayload>(
-                    getRoute("generateFromTokenId"),
-                    Utils.ToJsonStringArray(payloadToSign)
-                );
+                return await Bridge.InvokeRoute<ERC1155SignedPayload>(getRoute("generateFromTokenId"), Utils.ToJsonStringArray(payloadToSign));
             }
             else
             {

@@ -111,11 +111,7 @@ namespace Thirdweb
                     {
                         if (!string.IsNullOrEmpty(filter.seller))
                         {
-                            if (
-                                allListings[i].sellerAddress != filter.seller
-                                || allListings[i].assetContractAddress != filter.tokenContract
-                                || allListings[i].tokenId != filter.tokenId
-                            )
+                            if (allListings[i].sellerAddress != filter.seller || allListings[i].assetContractAddress != filter.tokenContract || allListings[i].tokenId != filter.tokenId)
                             {
                                 continue;
                             }
@@ -171,10 +167,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("buyoutListing"),
-                    Utils.ToJsonStringArray(listingId, quantityDesired, receiverAddress)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("buyoutListing"), Utils.ToJsonStringArray(listingId, quantityDesired, receiverAddress));
             }
             else
             {
@@ -189,10 +182,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("makeOffer"),
-                    Utils.ToJsonStringArray(listingId, pricePerToken, quantity)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("makeOffer"), Utils.ToJsonStringArray(listingId, pricePerToken, quantity));
             }
             else
             {
@@ -248,10 +238,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("acceptOffer"),
-                    Utils.ToJsonStringArray(listing, addressOfOfferor)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("acceptOffer"), Utils.ToJsonStringArray(listing, addressOfOfferor));
             }
             else
             {

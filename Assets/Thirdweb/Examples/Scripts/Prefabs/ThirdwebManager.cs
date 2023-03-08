@@ -67,9 +67,7 @@ public class ThirdwebManager : MonoBehaviour
 
         if (!Utils.IsWebGLBuild() && rpcOverride.StartsWith("https://") && chainIdOverride == -1)
         {
-            throw new UnityException(
-                "To use custom RPC overrides on native platforms, please provide the corresponding Chain ID Override!"
-            );
+            throw new UnityException("To use custom RPC overrides on native platforms, please provide the corresponding Chain ID Override!");
         }
         else
         {

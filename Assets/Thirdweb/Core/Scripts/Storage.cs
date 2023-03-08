@@ -43,12 +43,7 @@ namespace Thirdweb
                 else
                 {
                     Texture2D itemTexture = ((DownloadHandlerTexture)req.downloadHandler).texture;
-                    Sprite itemSprite = Sprite.Create(
-                        itemTexture,
-                        new Rect(0.0f, 0.0f, itemTexture.width, itemTexture.height),
-                        new UnityEngine.Vector2(0.5f, 0.5f),
-                        100.0f
-                    );
+                    Sprite itemSprite = Sprite.Create(itemTexture, new Rect(0.0f, 0.0f, itemTexture.width, itemTexture.height), new UnityEngine.Vector2(0.5f, 0.5f), 100.0f);
                     return itemSprite;
                 }
             }

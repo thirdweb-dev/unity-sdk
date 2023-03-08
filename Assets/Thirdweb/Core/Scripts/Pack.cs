@@ -222,10 +222,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("isApproved"),
-                    Utils.ToJsonStringArray(contractToApprove, approved)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("isApproved"), Utils.ToJsonStringArray(contractToApprove, approved));
             }
             else
             {
@@ -283,14 +280,7 @@ namespace Thirdweb
             else
             {
                 throw new UnityException("This functionality is not yet available on your current platform.");
-                var receipt = await packService.CreatePackRequestAndWaitForReceiptAsync(
-                    null,
-                    null,
-                    pack.packMetadata.uri,
-                    404,
-                    BigInteger.Parse(pack.rewardsPerPack),
-                    receiverAddress
-                ); // TODO: fix
+                var receipt = await packService.CreatePackRequestAndWaitForReceiptAsync(null, null, pack.packMetadata.uri, 404, BigInteger.Parse(pack.rewardsPerPack), receiverAddress); // TODO: fix
                 return receipt.ToTransactionResult();
             }
         }
@@ -302,10 +292,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("addPackContents"),
-                    Utils.ToJsonStringArray(packId, newContents)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("addPackContents"), Utils.ToJsonStringArray(packId, newContents));
             }
             else
             {

@@ -23,10 +23,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<List<ContractEvent<T>>>(
-                    getRoute("getEvents"),
-                    Utils.ToJsonStringArray(eventName, eventQueryOptions)
-                );
+                return await Bridge.InvokeRoute<List<ContractEvent<T>>>(getRoute("getEvents"), Utils.ToJsonStringArray(eventName, eventQueryOptions));
             }
             else
             {
@@ -43,10 +40,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<List<ContractEvent<object>>>(
-                    getRoute("getAllEvents"),
-                    Utils.ToJsonStringArray(eventQueryOptions)
-                );
+                return await Bridge.InvokeRoute<List<ContractEvent<object>>>(getRoute("getAllEvents"), Utils.ToJsonStringArray(eventQueryOptions));
             }
             else
             {

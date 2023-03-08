@@ -22,9 +22,7 @@ namespace Thirdweb.Contracts.TokenERC20
             CancellationTokenSource cancellationTokenSource = null
         )
         {
-            return web3.Eth
-                .GetContractDeploymentHandler<TokenERC20Deployment>()
-                .SendRequestAndWaitForReceiptAsync(tokenERC20Deployment, cancellationTokenSource);
+            return web3.Eth.GetContractDeploymentHandler<TokenERC20Deployment>().SendRequestAndWaitForReceiptAsync(tokenERC20Deployment, cancellationTokenSource);
         }
 
         public static Task<string> DeployContractAsync(Nethereum.Web3.Web3 web3, TokenERC20Deployment tokenERC20Deployment)
@@ -52,10 +50,7 @@ namespace Thirdweb.Contracts.TokenERC20
             ContractHandler = web3.Eth.GetContractHandler(contractAddress);
         }
 
-        public Task<byte[]> DEFAULT_ADMIN_ROLEQueryAsync(
-            DEFAULT_ADMIN_ROLEFunction dEFAULT_ADMIN_ROLEFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<byte[]> DEFAULT_ADMIN_ROLEQueryAsync(DEFAULT_ADMIN_ROLEFunction dEFAULT_ADMIN_ROLEFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<DEFAULT_ADMIN_ROLEFunction, byte[]>(dEFAULT_ADMIN_ROLEFunction, blockParameter);
         }
@@ -65,10 +60,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.QueryAsync<DEFAULT_ADMIN_ROLEFunction, byte[]>(null, blockParameter);
         }
 
-        public Task<byte[]> DOMAIN_SEPARATORQueryAsync(
-            DOMAIN_SEPARATORFunction dOMAIN_SEPARATORFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<byte[]> DOMAIN_SEPARATORQueryAsync(DOMAIN_SEPARATORFunction dOMAIN_SEPARATORFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<DOMAIN_SEPARATORFunction, byte[]>(dOMAIN_SEPARATORFunction, blockParameter);
         }
@@ -97,10 +89,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(approveFunction);
         }
 
-        public Task<TransactionReceipt> ApproveRequestAndWaitForReceiptAsync(
-            ApproveFunction approveFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> ApproveRequestAndWaitForReceiptAsync(ApproveFunction approveFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(approveFunction, cancellationToken);
         }
@@ -114,11 +103,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(approveFunction);
         }
 
-        public Task<TransactionReceipt> ApproveRequestAndWaitForReceiptAsync(
-            string spender,
-            BigInteger amount,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> ApproveRequestAndWaitForReceiptAsync(string spender, BigInteger amount, CancellationTokenSource cancellationToken = null)
         {
             var approveFunction = new ApproveFunction();
             approveFunction.Spender = spender;
@@ -145,10 +130,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(burnFunction);
         }
 
-        public Task<TransactionReceipt> BurnRequestAndWaitForReceiptAsync(
-            BurnFunction burnFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> BurnRequestAndWaitForReceiptAsync(BurnFunction burnFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(burnFunction, cancellationToken);
         }
@@ -161,10 +143,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(burnFunction);
         }
 
-        public Task<TransactionReceipt> BurnRequestAndWaitForReceiptAsync(
-            BigInteger amount,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> BurnRequestAndWaitForReceiptAsync(BigInteger amount, CancellationTokenSource cancellationToken = null)
         {
             var burnFunction = new BurnFunction();
             burnFunction.Amount = amount;
@@ -177,10 +156,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(burnFromFunction);
         }
 
-        public Task<TransactionReceipt> BurnFromRequestAndWaitForReceiptAsync(
-            BurnFromFunction burnFromFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> BurnFromRequestAndWaitForReceiptAsync(BurnFromFunction burnFromFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(burnFromFunction, cancellationToken);
         }
@@ -194,11 +170,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(burnFromFunction);
         }
 
-        public Task<TransactionReceipt> BurnFromRequestAndWaitForReceiptAsync(
-            string account,
-            BigInteger amount,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> BurnFromRequestAndWaitForReceiptAsync(string account, BigInteger amount, CancellationTokenSource cancellationToken = null)
         {
             var burnFromFunction = new BurnFromFunction();
             burnFromFunction.Account = account;
@@ -207,15 +179,9 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAndWaitForReceiptAsync(burnFromFunction, cancellationToken);
         }
 
-        public Task<CheckpointsOutputDTO> CheckpointsQueryAsync(
-            CheckpointsFunction checkpointsFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<CheckpointsOutputDTO> CheckpointsQueryAsync(CheckpointsFunction checkpointsFunction, BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<CheckpointsFunction, CheckpointsOutputDTO>(
-                checkpointsFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryDeserializingToObjectAsync<CheckpointsFunction, CheckpointsOutputDTO>(checkpointsFunction, blockParameter);
         }
 
         public Task<CheckpointsOutputDTO> CheckpointsQueryAsync(string account, uint pos, BlockParameter blockParameter = null)
@@ -224,10 +190,7 @@ namespace Thirdweb.Contracts.TokenERC20
             checkpointsFunction.Account = account;
             checkpointsFunction.Pos = pos;
 
-            return ContractHandler.QueryDeserializingToObjectAsync<CheckpointsFunction, CheckpointsOutputDTO>(
-                checkpointsFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryDeserializingToObjectAsync<CheckpointsFunction, CheckpointsOutputDTO>(checkpointsFunction, blockParameter);
         }
 
         public Task<byte[]> ContractTypeQueryAsync(ContractTypeFunction contractTypeFunction, BlockParameter blockParameter = null)
@@ -275,10 +238,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(decreaseAllowanceFunction);
         }
 
-        public Task<TransactionReceipt> DecreaseAllowanceRequestAndWaitForReceiptAsync(
-            DecreaseAllowanceFunction decreaseAllowanceFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> DecreaseAllowanceRequestAndWaitForReceiptAsync(DecreaseAllowanceFunction decreaseAllowanceFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(decreaseAllowanceFunction, cancellationToken);
         }
@@ -292,11 +252,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(decreaseAllowanceFunction);
         }
 
-        public Task<TransactionReceipt> DecreaseAllowanceRequestAndWaitForReceiptAsync(
-            string spender,
-            BigInteger subtractedValue,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> DecreaseAllowanceRequestAndWaitForReceiptAsync(string spender, BigInteger subtractedValue, CancellationTokenSource cancellationToken = null)
         {
             var decreaseAllowanceFunction = new DecreaseAllowanceFunction();
             decreaseAllowanceFunction.Spender = spender;
@@ -310,10 +266,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(@delegateFunction);
         }
 
-        public Task<TransactionReceipt> DelegateRequestAndWaitForReceiptAsync(
-            DelegateFunction @delegateFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> DelegateRequestAndWaitForReceiptAsync(DelegateFunction @delegateFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(@delegateFunction, cancellationToken);
         }
@@ -326,10 +279,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(@delegateFunction);
         }
 
-        public Task<TransactionReceipt> DelegateRequestAndWaitForReceiptAsync(
-            string delegatee,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> DelegateRequestAndWaitForReceiptAsync(string delegatee, CancellationTokenSource cancellationToken = null)
         {
             var @delegateFunction = new DelegateFunction();
             @delegateFunction.Delegatee = delegatee;
@@ -342,10 +292,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(delegateBySigFunction);
         }
 
-        public Task<TransactionReceipt> DelegateBySigRequestAndWaitForReceiptAsync(
-            DelegateBySigFunction delegateBySigFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> DelegateBySigRequestAndWaitForReceiptAsync(DelegateBySigFunction delegateBySigFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(delegateBySigFunction, cancellationToken);
         }
@@ -397,10 +344,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.QueryAsync<DelegatesFunction, string>(delegatesFunction, blockParameter);
         }
 
-        public Task<BigInteger> GetPastTotalSupplyQueryAsync(
-            GetPastTotalSupplyFunction getPastTotalSupplyFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> GetPastTotalSupplyQueryAsync(GetPastTotalSupplyFunction getPastTotalSupplyFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<GetPastTotalSupplyFunction, BigInteger>(getPastTotalSupplyFunction, blockParameter);
         }
@@ -427,23 +371,14 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.QueryAsync<GetPastVotesFunction, BigInteger>(getPastVotesFunction, blockParameter);
         }
 
-        public Task<GetPlatformFeeInfoOutputDTO> GetPlatformFeeInfoQueryAsync(
-            GetPlatformFeeInfoFunction getPlatformFeeInfoFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<GetPlatformFeeInfoOutputDTO> GetPlatformFeeInfoQueryAsync(GetPlatformFeeInfoFunction getPlatformFeeInfoFunction, BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<GetPlatformFeeInfoFunction, GetPlatformFeeInfoOutputDTO>(
-                getPlatformFeeInfoFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryDeserializingToObjectAsync<GetPlatformFeeInfoFunction, GetPlatformFeeInfoOutputDTO>(getPlatformFeeInfoFunction, blockParameter);
         }
 
         public Task<GetPlatformFeeInfoOutputDTO> GetPlatformFeeInfoQueryAsync(BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<GetPlatformFeeInfoFunction, GetPlatformFeeInfoOutputDTO>(
-                null,
-                blockParameter
-            );
+            return ContractHandler.QueryDeserializingToObjectAsync<GetPlatformFeeInfoFunction, GetPlatformFeeInfoOutputDTO>(null, blockParameter);
         }
 
         public Task<byte[]> GetRoleAdminQueryAsync(GetRoleAdminFunction getRoleAdminFunction, BlockParameter blockParameter = null)
@@ -473,10 +408,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.QueryAsync<GetRoleMemberFunction, string>(getRoleMemberFunction, blockParameter);
         }
 
-        public Task<BigInteger> GetRoleMemberCountQueryAsync(
-            GetRoleMemberCountFunction getRoleMemberCountFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<BigInteger> GetRoleMemberCountQueryAsync(GetRoleMemberCountFunction getRoleMemberCountFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(getRoleMemberCountFunction, blockParameter);
         }
@@ -507,10 +439,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(grantRoleFunction);
         }
 
-        public Task<TransactionReceipt> GrantRoleRequestAndWaitForReceiptAsync(
-            GrantRoleFunction grantRoleFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> GrantRoleRequestAndWaitForReceiptAsync(GrantRoleFunction grantRoleFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(grantRoleFunction, cancellationToken);
         }
@@ -524,11 +453,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(grantRoleFunction);
         }
 
-        public Task<TransactionReceipt> GrantRoleRequestAndWaitForReceiptAsync(
-            byte[] role,
-            string account,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> GrantRoleRequestAndWaitForReceiptAsync(byte[] role, string account, CancellationTokenSource cancellationToken = null)
         {
             var grantRoleFunction = new GrantRoleFunction();
             grantRoleFunction.Role = role;
@@ -556,10 +481,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(increaseAllowanceFunction);
         }
 
-        public Task<TransactionReceipt> IncreaseAllowanceRequestAndWaitForReceiptAsync(
-            IncreaseAllowanceFunction increaseAllowanceFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> IncreaseAllowanceRequestAndWaitForReceiptAsync(IncreaseAllowanceFunction increaseAllowanceFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(increaseAllowanceFunction, cancellationToken);
         }
@@ -573,11 +495,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(increaseAllowanceFunction);
         }
 
-        public Task<TransactionReceipt> IncreaseAllowanceRequestAndWaitForReceiptAsync(
-            string spender,
-            BigInteger addedValue,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> IncreaseAllowanceRequestAndWaitForReceiptAsync(string spender, BigInteger addedValue, CancellationTokenSource cancellationToken = null)
         {
             var increaseAllowanceFunction = new IncreaseAllowanceFunction();
             increaseAllowanceFunction.Spender = spender;
@@ -591,10 +509,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(initializeFunction);
         }
 
-        public Task<TransactionReceipt> InitializeRequestAndWaitForReceiptAsync(
-            InitializeFunction initializeFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> InitializeRequestAndWaitForReceiptAsync(InitializeFunction initializeFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(initializeFunction, cancellationToken);
         }
@@ -648,10 +563,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAndWaitForReceiptAsync(initializeFunction, cancellationToken);
         }
 
-        public Task<bool> IsTrustedForwarderQueryAsync(
-            IsTrustedForwarderFunction isTrustedForwarderFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<bool> IsTrustedForwarderQueryAsync(IsTrustedForwarderFunction isTrustedForwarderFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<IsTrustedForwarderFunction, bool>(isTrustedForwarderFunction, blockParameter);
         }
@@ -669,10 +581,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(mintToFunction);
         }
 
-        public Task<TransactionReceipt> MintToRequestAndWaitForReceiptAsync(
-            MintToFunction mintToFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> MintToRequestAndWaitForReceiptAsync(MintToFunction mintToFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(mintToFunction, cancellationToken);
         }
@@ -686,11 +595,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(mintToFunction);
         }
 
-        public Task<TransactionReceipt> MintToRequestAndWaitForReceiptAsync(
-            string to,
-            BigInteger amount,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> MintToRequestAndWaitForReceiptAsync(string to, BigInteger amount, CancellationTokenSource cancellationToken = null)
         {
             var mintToFunction = new MintToFunction();
             mintToFunction.To = to;
@@ -704,10 +609,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(mintWithSignatureFunction);
         }
 
-        public Task<TransactionReceipt> MintWithSignatureRequestAndWaitForReceiptAsync(
-            MintWithSignatureFunction mintWithSignatureFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> MintWithSignatureRequestAndWaitForReceiptAsync(MintWithSignatureFunction mintWithSignatureFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(mintWithSignatureFunction, cancellationToken);
         }
@@ -721,11 +623,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(mintWithSignatureFunction);
         }
 
-        public Task<TransactionReceipt> MintWithSignatureRequestAndWaitForReceiptAsync(
-            MintRequest req,
-            byte[] signature,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> MintWithSignatureRequestAndWaitForReceiptAsync(MintRequest req, byte[] signature, CancellationTokenSource cancellationToken = null)
         {
             var mintWithSignatureFunction = new MintWithSignatureFunction();
             mintWithSignatureFunction.Req = req;
@@ -739,10 +637,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(multicallFunction);
         }
 
-        public Task<TransactionReceipt> MulticallRequestAndWaitForReceiptAsync(
-            MulticallFunction multicallFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> MulticallRequestAndWaitForReceiptAsync(MulticallFunction multicallFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(multicallFunction, cancellationToken);
         }
@@ -755,10 +650,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(multicallFunction);
         }
 
-        public Task<TransactionReceipt> MulticallRequestAndWaitForReceiptAsync(
-            List<byte[]> data,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> MulticallRequestAndWaitForReceiptAsync(List<byte[]> data, CancellationTokenSource cancellationToken = null)
         {
             var multicallFunction = new MulticallFunction();
             multicallFunction.Data = data;
@@ -807,23 +699,12 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(permitFunction);
         }
 
-        public Task<TransactionReceipt> PermitRequestAndWaitForReceiptAsync(
-            PermitFunction permitFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> PermitRequestAndWaitForReceiptAsync(PermitFunction permitFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(permitFunction, cancellationToken);
         }
 
-        public Task<string> PermitRequestAsync(
-            string owner,
-            string spender,
-            BigInteger value,
-            BigInteger deadline,
-            byte v,
-            byte[] r,
-            byte[] s
-        )
+        public Task<string> PermitRequestAsync(string owner, string spender, BigInteger value, BigInteger deadline, byte v, byte[] r, byte[] s)
         {
             var permitFunction = new PermitFunction();
             permitFunction.Owner = owner;
@@ -860,10 +741,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAndWaitForReceiptAsync(permitFunction, cancellationToken);
         }
 
-        public Task<string> PrimarySaleRecipientQueryAsync(
-            PrimarySaleRecipientFunction primarySaleRecipientFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<string> PrimarySaleRecipientQueryAsync(PrimarySaleRecipientFunction primarySaleRecipientFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<PrimarySaleRecipientFunction, string>(primarySaleRecipientFunction, blockParameter);
         }
@@ -878,10 +756,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(renounceRoleFunction);
         }
 
-        public Task<TransactionReceipt> RenounceRoleRequestAndWaitForReceiptAsync(
-            RenounceRoleFunction renounceRoleFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> RenounceRoleRequestAndWaitForReceiptAsync(RenounceRoleFunction renounceRoleFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(renounceRoleFunction, cancellationToken);
         }
@@ -895,11 +770,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(renounceRoleFunction);
         }
 
-        public Task<TransactionReceipt> RenounceRoleRequestAndWaitForReceiptAsync(
-            byte[] role,
-            string account,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> RenounceRoleRequestAndWaitForReceiptAsync(byte[] role, string account, CancellationTokenSource cancellationToken = null)
         {
             var renounceRoleFunction = new RenounceRoleFunction();
             renounceRoleFunction.Role = role;
@@ -913,10 +784,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(revokeRoleFunction);
         }
 
-        public Task<TransactionReceipt> RevokeRoleRequestAndWaitForReceiptAsync(
-            RevokeRoleFunction revokeRoleFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> RevokeRoleRequestAndWaitForReceiptAsync(RevokeRoleFunction revokeRoleFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(revokeRoleFunction, cancellationToken);
         }
@@ -930,11 +798,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(revokeRoleFunction);
         }
 
-        public Task<TransactionReceipt> RevokeRoleRequestAndWaitForReceiptAsync(
-            byte[] role,
-            string account,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> RevokeRoleRequestAndWaitForReceiptAsync(byte[] role, string account, CancellationTokenSource cancellationToken = null)
         {
             var revokeRoleFunction = new RevokeRoleFunction();
             revokeRoleFunction.Role = role;
@@ -948,10 +812,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(setContractURIFunction);
         }
 
-        public Task<TransactionReceipt> SetContractURIRequestAndWaitForReceiptAsync(
-            SetContractURIFunction setContractURIFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> SetContractURIRequestAndWaitForReceiptAsync(SetContractURIFunction setContractURIFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(setContractURIFunction, cancellationToken);
         }
@@ -964,10 +825,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(setContractURIFunction);
         }
 
-        public Task<TransactionReceipt> SetContractURIRequestAndWaitForReceiptAsync(
-            string uri,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> SetContractURIRequestAndWaitForReceiptAsync(string uri, CancellationTokenSource cancellationToken = null)
         {
             var setContractURIFunction = new SetContractURIFunction();
             setContractURIFunction.Uri = uri;
@@ -980,10 +838,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(setPlatformFeeInfoFunction);
         }
 
-        public Task<TransactionReceipt> SetPlatformFeeInfoRequestAndWaitForReceiptAsync(
-            SetPlatformFeeInfoFunction setPlatformFeeInfoFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> SetPlatformFeeInfoRequestAndWaitForReceiptAsync(SetPlatformFeeInfoFunction setPlatformFeeInfoFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(setPlatformFeeInfoFunction, cancellationToken);
         }
@@ -997,11 +852,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(setPlatformFeeInfoFunction);
         }
 
-        public Task<TransactionReceipt> SetPlatformFeeInfoRequestAndWaitForReceiptAsync(
-            string platformFeeRecipient,
-            BigInteger platformFeeBps,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> SetPlatformFeeInfoRequestAndWaitForReceiptAsync(string platformFeeRecipient, BigInteger platformFeeBps, CancellationTokenSource cancellationToken = null)
         {
             var setPlatformFeeInfoFunction = new SetPlatformFeeInfoFunction();
             setPlatformFeeInfoFunction.PlatformFeeRecipient = platformFeeRecipient;
@@ -1031,10 +882,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(setPrimarySaleRecipientFunction);
         }
 
-        public Task<TransactionReceipt> SetPrimarySaleRecipientRequestAndWaitForReceiptAsync(
-            string saleRecipient,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> SetPrimarySaleRecipientRequestAndWaitForReceiptAsync(string saleRecipient, CancellationTokenSource cancellationToken = null)
         {
             var setPrimarySaleRecipientFunction = new SetPrimarySaleRecipientFunction();
             setPrimarySaleRecipientFunction.SaleRecipient = saleRecipient;
@@ -1042,10 +890,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAndWaitForReceiptAsync(setPrimarySaleRecipientFunction, cancellationToken);
         }
 
-        public Task<bool> SupportsInterfaceQueryAsync(
-            SupportsInterfaceFunction supportsInterfaceFunction,
-            BlockParameter blockParameter = null
-        )
+        public Task<bool> SupportsInterfaceQueryAsync(SupportsInterfaceFunction supportsInterfaceFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<SupportsInterfaceFunction, bool>(supportsInterfaceFunction, blockParameter);
         }
@@ -1083,10 +928,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(transferFunction);
         }
 
-        public Task<TransactionReceipt> TransferRequestAndWaitForReceiptAsync(
-            TransferFunction transferFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> TransferRequestAndWaitForReceiptAsync(TransferFunction transferFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(transferFunction, cancellationToken);
         }
@@ -1100,11 +942,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(transferFunction);
         }
 
-        public Task<TransactionReceipt> TransferRequestAndWaitForReceiptAsync(
-            string to,
-            BigInteger amount,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> TransferRequestAndWaitForReceiptAsync(string to, BigInteger amount, CancellationTokenSource cancellationToken = null)
         {
             var transferFunction = new TransferFunction();
             transferFunction.To = to;
@@ -1118,10 +956,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(transferFromFunction);
         }
 
-        public Task<TransactionReceipt> TransferFromRequestAndWaitForReceiptAsync(
-            TransferFromFunction transferFromFunction,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> TransferFromRequestAndWaitForReceiptAsync(TransferFromFunction transferFromFunction, CancellationTokenSource cancellationToken = null)
         {
             return ContractHandler.SendRequestAndWaitForReceiptAsync(transferFromFunction, cancellationToken);
         }
@@ -1136,12 +971,7 @@ namespace Thirdweb.Contracts.TokenERC20
             return ContractHandler.SendRequestAsync(transferFromFunction);
         }
 
-        public Task<TransactionReceipt> TransferFromRequestAndWaitForReceiptAsync(
-            string from,
-            string to,
-            BigInteger amount,
-            CancellationTokenSource cancellationToken = null
-        )
+        public Task<TransactionReceipt> TransferFromRequestAndWaitForReceiptAsync(string from, string to, BigInteger amount, CancellationTokenSource cancellationToken = null)
         {
             var transferFromFunction = new TransferFromFunction();
             transferFromFunction.From = from;

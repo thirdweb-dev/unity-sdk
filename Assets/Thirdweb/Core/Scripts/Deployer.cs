@@ -39,10 +39,7 @@ namespace Thirdweb
                 var deploymentMessage = new DropERC721Deployment();
                 var deploymentHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetContractDeploymentHandler<DropERC721Deployment>();
                 var deploymentReceipt = await deploymentHandler.SendRequestAndWaitForReceiptAsync(deploymentMessage);
-                DropERC721Service dropERC721Service = new DropERC721Service(
-                    ThirdwebManager.Instance.SDK.web3,
-                    deploymentReceipt.ContractAddress
-                );
+                DropERC721Service dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.web3, deploymentReceipt.ContractAddress);
                 var initializeReceipt = await dropERC721Service.InitializeRequestAndWaitForReceiptAsync(
                     defaultAdmin: await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
                     name: metadata.name,
@@ -159,10 +156,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(
-                    getRoute("deployReleasedContract"),
-                    Utils.ToJsonStringArray(releaserAddress, contractName, constructorParams)
-                );
+                return await Bridge.InvokeRoute<string>(getRoute("deployReleasedContract"), Utils.ToJsonStringArray(releaserAddress, contractName, constructorParams));
             }
             else
             {

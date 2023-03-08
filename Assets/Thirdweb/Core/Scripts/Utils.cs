@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Numerics;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace Thirdweb
 {
@@ -118,6 +119,29 @@ namespace Thirdweb
             result.receipt.transactionHash = receipt.TransactionHash;
             result.id = receipt.Status.ToString();
             return result;
+        }
+
+        public async static Task<List<NFT>> ToNFTList(this List<TokenData721> tokenDataList)
+        {
+            Contract c = ThirdwebManager.Instance.SDK.GetContract(tokenDataList[0].Contract);
+            int totalSupply = (int)await c.ERC721.TotalCount();
+
+            List<NFT> allNfts = new List<NFT>();
+            foreach (var tokenData in tokenDataList)
+            {
+                NFT nft = new NFT();
+                nft.owner = tokenData.Owner;
+                nft.type = "ERC721";
+                nft.supply = totalSupply;
+                nft.quantityOwned = 1;
+                string tokenURI = tokenData.Uri;
+                nft.metadata = await tokenURI.DownloadText<NFTMetadata>();
+                nft.metadata.image = nft.metadata.image.ReplaceIPFS();
+                nft.metadata.id = tokenData.TokenId;
+                nft.metadata.uri = tokenURI.ReplaceIPFS();
+                allNfts.Add(nft);
+            }
+            return allNfts;
         }
     }
 }

@@ -159,10 +159,7 @@ namespace Thirdweb
             }
             else
             {
-                BigInteger currentAllowance = await tokenERC20Service.AllowanceQueryAsync(
-                    await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
-                    spender
-                );
+                BigInteger currentAllowance = await tokenERC20Service.AllowanceQueryAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), spender);
                 BigInteger diff = BigInteger.Parse(amount) - currentAllowance;
                 TransactionResult result = new TransactionResult();
 
@@ -386,10 +383,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string[]>(
-                    getRoute("getClaimIneligibilityReasons"),
-                    Utils.ToJsonStringArray(quantity, addressToCheck)
-                );
+                return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(quantity, addressToCheck));
             }
             else
             {

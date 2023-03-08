@@ -129,12 +129,7 @@ namespace Thirdweb
                         P = 8
                     };
                     var ecKey = Nethereum.Signer.EthECKey.GenerateKey();
-                    var keyStore = keyStoreService.EncryptAndGenerateKeyStore(
-                        password,
-                        ecKey.GetPrivateKeyAsBytes(),
-                        ecKey.GetPublicAddress(),
-                        scryptParams
-                    );
+                    var keyStore = keyStoreService.EncryptAndGenerateKeyStore(password, ecKey.GetPrivateKeyAsBytes(), ecKey.GetPublicAddress(), scryptParams);
                     var json = keyStoreService.SerializeKeyStoreToJson(keyStore);
                     File.WriteAllText(path, json);
                     this.account = new Account(ecKey, chainId);

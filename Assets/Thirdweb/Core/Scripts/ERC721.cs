@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Numerics;
 using UnityEngine;
-using UnityEngine.Networking;
-using Newtonsoft.Json;
 using Thirdweb.Contracts.TokenERC721;
 using Thirdweb.Contracts.DropERC721;
 
@@ -96,28 +94,20 @@ namespace Thirdweb
                     end = totalSupply - 1;
                 }
 
-                List<NFT> allNfts = new List<NFT>();
-                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(
-                    tokenERC721Service.ContractHandler.ContractAddress
-                );
-                var rawNfts = await erc721.GetAllMetadataUrlsUsingIdRangeAndMultiCallAsync(start, end);
-                foreach (var rawNft in rawNfts)
+                try
                 {
-                    NFT nft = new NFT();
-                    nft.owner = rawNft.Owner;
-                    nft.type = "ERC721";
-                    nft.supply = totalSupply;
-                    nft.quantityOwned = 1;
-
-                    string tokenURI = rawNft.MetadataUrl;
-                    nft.metadata = await tokenURI.DownloadText<NFTMetadata>();
-                    nft.metadata.image = nft.metadata.image.ReplaceIPFS();
-                    nft.metadata.id = rawNft.TokenId.ToString();
-                    nft.metadata.uri = tokenURI.ReplaceIPFS();
-                    allNfts.Add(nft);
+                    var rawTokenData = await Multicall.GetAllTokenData721(tokenERC721Service.ContractHandler.ContractAddress, start, end);
+                    List<NFT> allNfts = await rawTokenData.ToNFTList();
+                    return allNfts;
                 }
-
-                return allNfts;
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"Multicall failed, attempting normal calls. Error: {e.Message}");
+                    List<NFT> allNfts = new List<NFT>();
+                    for (int i = 0; i < totalSupply; i++)
+                        allNfts.Add(await Get(i.ToString()));
+                    return allNfts;
+                }
             }
         }
 
@@ -133,17 +123,26 @@ namespace Thirdweb
             }
             else
             {
-                var erc721 = ThirdwebManager.Instance.SDK.web3.Eth.ERC721.GetContractService(
-                    tokenERC721Service.ContractHandler.ContractAddress
-                );
                 string owner = address == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : address;
-                var tokenIdsOfOwner = await erc721.GetAllTokenIdsOfOwnerUsingTokenOfOwnerByIndexAndMultiCallAsync(owner);
-                List<NFT> ownedNfts = new List<NFT>();
-                foreach (var tokenId in tokenIdsOfOwner)
+                try
                 {
-                    ownedNfts.Add(await Get(tokenId.ToString()));
+                    var rawTokenData = await Multicall.GetOwnedTokenData721(tokenERC721Service.ContractHandler.ContractAddress, owner);
+                    List<NFT> ownedNfts = await rawTokenData.ToNFTList();
+                    return ownedNfts;
                 }
-                return ownedNfts;
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"Multicall failed, likely not enumerable, attempting normal calls. Error: {e.Message}");
+
+                    var balanceOfOwner = await tokenERC721Service.BalanceOfQueryAsync(owner);
+                    List<NFT> ownedNfts = new List<NFT>();
+                    for (int i = 0; i < balanceOfOwner; i++)
+                    {
+                        var tokenId = await tokenERC721Service.TokenOfOwnerByIndexQueryAsync(owner, (BigInteger)i);
+                        ownedNfts.Add(await Get(i.ToString()));
+                    }
+                    return ownedNfts;
+                }
             }
         }
 
@@ -263,10 +262,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(
-                    getRoute("setApprovalForAll"),
-                    Utils.ToJsonStringArray(contractToApprove, approved)
-                );
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("setApprovalForAll"), Utils.ToJsonStringArray(contractToApprove, approved));
             }
             else
             {
@@ -286,11 +282,7 @@ namespace Thirdweb
             }
             else
             {
-                var result = await tokenERC721Service.TransferFromRequestAndWaitForReceiptAsync(
-                    await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
-                    to,
-                    BigInteger.Parse(tokenId)
-                );
+                var result = await tokenERC721Service.TransferFromRequestAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), to, BigInteger.Parse(tokenId));
                 return result.ToTransactionResult();
             }
         }
@@ -419,10 +411,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string[]>(
-                    getRoute("getClaimIneligibilityReasons"),
-                    Utils.ToJsonStringArray(quantity, addressToCheck)
-                );
+                return await Bridge.InvokeRoute<string[]>(getRoute("getClaimIneligibilityReasons"), Utils.ToJsonStringArray(quantity, addressToCheck));
             }
             else
             {

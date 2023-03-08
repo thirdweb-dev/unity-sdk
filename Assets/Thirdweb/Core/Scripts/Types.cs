@@ -55,12 +55,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return $"NFT:"
-                + $"\n>>>>>\n{metadata.ToString()}\n<<<<<"
-                + $"\n>owner: {owner}"
-                + $"\n>type: {type}"
-                + $"\n>supply: {supply}"
-                + $"\n>quantityOwned: {quantityOwned}";
+            return $"NFT:" + $"\n>>>>>\n{metadata.ToString()}\n<<<<<" + $"\n>owner: {owner}" + $"\n>type: {type}" + $"\n>supply: {supply}" + $"\n>quantityOwned: {quantityOwned}";
         }
     }
 
@@ -106,12 +101,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return $"CurrencyValue:"
-                + $"\n>name: {name}"
-                + $"\n>symbol: {symbol}"
-                + $"\n>decimals: {decimals}"
-                + $"\n>value: {value}"
-                + $"\n>displayValue: {displayValue}";
+            return $"CurrencyValue:" + $"\n>name: {name}" + $"\n>symbol: {symbol}" + $"\n>decimals: {decimals}" + $"\n>value: {value}" + $"\n>displayValue: {displayValue}";
         }
     }
 
@@ -155,10 +145,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return $"DirectListing:"
-                + $"\n>>>>>\n{base.ToString()}\n<<<<<"
-                + $"\n>startTimeInSeconds: {startTimeInSeconds}"
-                + $"\n>secondsUntilEnd: {secondsUntilEnd}";
+            return $"DirectListing:" + $"\n>>>>>\n{base.ToString()}\n<<<<<" + $"\n>startTimeInSeconds: {startTimeInSeconds}" + $"\n>secondsUntilEnd: {secondsUntilEnd}";
         }
     }
 
@@ -282,11 +269,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return $"MarketplaceFilter:"
-                + $"\n>>>>>\n{base.ToString()}\n<<<<<"
-                + $"\n>seller: {seller}"
-                + $"\n>tokenContract: {tokenContract}"
-                + $"\n>tokenId: {tokenId}";
+            return $"MarketplaceFilter:" + $"\n>>>>>\n{base.ToString()}\n<<<<<" + $"\n>seller: {seller}" + $"\n>tokenContract: {tokenContract}" + $"\n>tokenId: {tokenId}";
         }
     }
 
@@ -326,11 +309,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return $"SnapshotEntry:"
-                + $"\n>address: {address}"
-                + $"\n>maxClaimable: {maxClaimable}"
-                + $"\n>price: {price}"
-                + $"\n>currencyAddress: {currencyAddress}";
+            return $"SnapshotEntry:" + $"\n>address: {address}" + $"\n>maxClaimable: {maxClaimable}" + $"\n>price: {price}" + $"\n>currencyAddress: {currencyAddress}";
         }
     }
 
@@ -387,13 +366,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return $"TransactionRequest:"
-                + $"\n>from: {from}"
-                + $"\n>to: {to}"
-                + $"\n>data: {data}"
-                + $"\n>value: {value}"
-                + $"\n>gasLimit: {gasLimit}"
-                + $"\n>gasPrice: {gasPrice}";
+            return $"TransactionRequest:" + $"\n>from: {from}" + $"\n>to: {to}" + $"\n>data: {data}" + $"\n>value: {value}" + $"\n>gasLimit: {gasLimit}" + $"\n>gasPrice: {gasPrice}";
         }
     }
 
@@ -420,12 +393,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return $"LoginPayloadData:"
-                + $"\n>domain: {domain}"
-                + $"\n>address: {address}"
-                + $"\n>nonce: {nonce}"
-                + $"\n>expiration_time: {expiration_time}"
-                + $"\n>chain_id: {chain_id}";
+            return $"LoginPayloadData:" + $"\n>domain: {domain}" + $"\n>address: {address}" + $"\n>nonce: {nonce}" + $"\n>expiration_time: {expiration_time}" + $"\n>chain_id: {chain_id}";
         }
     }
 
