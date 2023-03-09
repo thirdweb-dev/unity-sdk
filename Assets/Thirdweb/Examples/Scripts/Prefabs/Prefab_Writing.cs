@@ -1,5 +1,6 @@
 using UnityEngine;
 using Thirdweb;
+using System.Collections.Generic;
 
 public class Prefab_Writing : MonoBehaviour
 {
@@ -29,24 +30,25 @@ public class Prefab_Writing : MonoBehaviour
         try
         {
             // NFT Collection Signature Minting
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x8bFD00BD1D3A2778BDA12AFddE5E65Cca95082DF");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xb076182024D78abBF7e66aFf55f21519E96CA4CD");
 
             NFTMetadata meta = new NFTMetadata()
             {
                 name = "Unity NFT",
-                description = "Minted From Unity (signature)",
-                image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc"
+                description = "Minted From Unity",
+                image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
             };
-            string connectedAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
-            ERC721MintPayload payload = new ERC721MintPayload(connectedAddress, meta);
-            ERC721SignedPayload signedPayload = await contract.ERC721.signature.Generate(payload); // Typically generated on the backend
 
-            TransactionResult transactionResult = await contract.ERC721.signature.Mint(signedPayload);
-            Debugger.Instance.Log("[Mint ERC721] Successful", transactionResult.ToString());
+            var result = await contract.ERC721.Mint(meta);
+            Debugger.Instance.Log("[Mint ERC721] Successful", result.ToString());
+
+            // string connectedAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            // ERC721MintPayload payload = new ERC721MintPayload(connectedAddress, meta);
+            // ERC721SignedPayload signedPayload = await contract.ERC721.signature.Generate(payload); // Typically generated on the backend
+            // var result = await contract.ERC721.signature.Mint(signedPayload);
 
             // NFT Drop Claiming
             // var result = await contract.ERC721.Claim(1);
-            // Debug.Log("claimed tokenId: " + result[0].id);
         }
         catch (System.Exception e)
         {

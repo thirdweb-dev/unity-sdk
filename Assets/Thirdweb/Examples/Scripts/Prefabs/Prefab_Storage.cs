@@ -6,7 +6,7 @@ public class Prefab_Storage : MonoBehaviour
 {
     public async void OnUpload()
     {
-        string fullPath = Application.persistentDataPath + "/myImage " + System.DateTime.Now.ToString("yy-MM-dd") + ".png";
+        string fullPath = Application.temporaryCachePath + "/myImage " + System.DateTime.Now.ToString("yy-MM-dd") + ".png";
         ScreenCapture.CaptureScreenshot(fullPath);
 
         // Give some time for the file to be saved if first time, try again if need be

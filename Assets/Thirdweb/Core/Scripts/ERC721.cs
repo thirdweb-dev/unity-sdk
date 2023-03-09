@@ -5,6 +5,7 @@ using System.Numerics;
 using UnityEngine;
 using Thirdweb.Contracts.TokenERC721;
 using Thirdweb.Contracts.DropERC721;
+using Newtonsoft.Json;
 
 namespace Thirdweb
 {
@@ -314,7 +315,7 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return await ClaimTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), quantity);
             }
         }
 
@@ -359,8 +360,11 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
-                var result = await tokenERC721Service.MintToRequestAndWaitForReceiptAsync(address, nft.uri);
+                var json = JsonConvert.SerializeObject(nft);
+                var path = Application.temporaryCachePath + "/nftmetadata.json";
+                await System.IO.File.WriteAllTextAsync(path, json);
+                var uploadResponse = await ThirdwebManager.Instance.SDK.storage.UploadDataFromStringHttpClient(path);
+                var result = await tokenERC721Service.MintToRequestAndWaitForReceiptAsync(address, $"ipfs://{uploadResponse.value.cid}");
                 return result.ToTransactionResult();
             }
         }
