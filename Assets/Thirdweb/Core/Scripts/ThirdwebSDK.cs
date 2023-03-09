@@ -40,6 +40,7 @@ namespace Thirdweb
         public struct StorageOptions
         {
             public string ipfsGatewayUrl; // override the default ipfs gateway, should end in /ipfs/
+            public string apiToken;
         }
 
         /// <summary>
@@ -85,6 +86,8 @@ namespace Thirdweb
         /// </summary>
         public Deployer deployer;
 
+        public Storage storage;
+
         public Web3 web3;
 
         public Account account;
@@ -102,6 +105,7 @@ namespace Thirdweb
             this.chainOrRPC = chainOrRPC;
             this.wallet = new Wallet();
             this.deployer = new Deployer();
+            this.storage = new Storage(options.storage);
             Bridge.Initialize(chainOrRPC, options);
 
             if (!Utils.IsWebGLBuild())

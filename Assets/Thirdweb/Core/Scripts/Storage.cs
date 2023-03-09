@@ -10,12 +10,42 @@ using System.Web;
 
 namespace Thirdweb
 {
-    // TODO: Add under SDK.Storage and use Thirdweb Storage implementation
-    public static class Storage
+    public class Storage
     {
-        public static async Task<T> DownloadText<T>(this string textURI)
+        private readonly string nftStorageApiUrl = "https://api.nft.storage/";
+        private readonly HttpClient nftClient = new HttpClient();
+        private readonly HttpClient ipfsClient = new HttpClient();
+
+        private string ipfsGatewayUrl = "https://gateway.ipfscdn.io/ipfs/";
+        private string apiToken = null;
+
+        public Storage(ThirdwebSDK.StorageOptions? storageOptions)
         {
-            textURI = textURI.ReplaceIPFS();
+            if (storageOptions.HasValue)
+            {
+                this.ipfsGatewayUrl = string.IsNullOrEmpty(storageOptions.Value.ipfsGatewayUrl) ? "https://gateway.ipfscdn.io/ipfs/" : storageOptions.Value.ipfsGatewayUrl;
+                this.apiToken = string.IsNullOrEmpty(storageOptions.Value.apiToken) ? null : storageOptions.Value.apiToken;
+            }
+        }
+
+        void SetupClient()
+        {
+            if (string.IsNullOrEmpty(apiToken))
+                throw new UnityException("You must provide an nft.storage API Token to call function!");
+
+            if (nftClient.DefaultRequestHeaders.Contains("Accept"))
+                nftClient.DefaultRequestHeaders.Remove("Accept");
+
+            if (nftClient.DefaultRequestHeaders.Contains("Authorization"))
+                nftClient.DefaultRequestHeaders.Remove("Authorization");
+
+            nftClient.DefaultRequestHeaders.Add("Accept", "application/json");
+            nftClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + apiToken);
+        }
+
+        public async Task<T> DownloadText<T>(string textURI)
+        {
+            textURI = textURI.ReplaceIPFS(ipfsGatewayUrl);
 
             using (UnityWebRequest req = UnityWebRequest.Get(textURI))
             {
@@ -30,9 +60,9 @@ namespace Thirdweb
             }
         }
 
-        public static async Task<Sprite> DownloadImage(this string imageURI)
+        public async Task<Sprite> DownloadImage(string imageURI)
         {
-            imageURI = imageURI.ReplaceIPFS();
+            imageURI = imageURI.ReplaceIPFS(ipfsGatewayUrl);
 
             using (UnityWebRequest req = UnityWebRequestTexture.GetTexture(imageURI))
             {
@@ -51,35 +81,11 @@ namespace Thirdweb
             }
         }
 
-        // nft.storage API endpoint
-        private static readonly string nftStorageApiUrl = "https://api.nft.storage/";
-
-        // HTTP client to communicate with nft.storage
-        private static readonly HttpClient nftClient = new HttpClient();
-
-        // http client to communicate with IPFS API
-        private static readonly HttpClient ipfsClient = new HttpClient();
-
-        static void SetupClient(string apiToken)
-        {
-            if (apiToken == null)
-                throw new UnityException("You must provide an nft.storage API Token to call this function!");
-
-            if (nftClient.DefaultRequestHeaders.Contains("Accept"))
-                nftClient.DefaultRequestHeaders.Remove("Accept");
-
-            if (nftClient.DefaultRequestHeaders.Contains("Authorization"))
-                nftClient.DefaultRequestHeaders.Remove("Authorization");
-
-            nftClient.DefaultRequestHeaders.Add("Accept", "application/json");
-            nftClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + apiToken);
-        }
-
-        private static async Task<string> SendHttpRequest(string apiToken, HttpMethod method, string uri, HttpClient requestClient = null)
+        private async Task<string> SendHttpRequest(HttpMethod method, string uri, HttpClient requestClient = null)
         {
             try
             {
-                SetupClient(apiToken);
+                SetupClient();
                 if (requestClient == null)
                 {
                     requestClient = nftClient;
@@ -97,12 +103,12 @@ namespace Thirdweb
             }
         }
 
-        private static async Task<string> Upload(string apiToken, string uri, string pathFile)
+        private async Task<string> Upload(string uri, string pathFile)
         {
             byte[] bytes = System.IO.File.ReadAllBytes(pathFile);
             try
             {
-                SetupClient(apiToken);
+                SetupClient();
                 using (var content = new ByteArrayContent(bytes))
                 {
                     content.Headers.ContentType = new MediaTypeHeaderValue("*/*");
@@ -123,7 +129,7 @@ namespace Thirdweb
             }
         }
 
-        public static async Task<NFTStorageListFilesResponse> ListFiles(string apiToken, string before = null, int limit = 10)
+        public async Task<NFTStorageListFilesResponse> ListFiles(string before = null, int limit = 10)
         {
             var query = HttpUtility.ParseQueryString(string.Empty);
             if (before != null)
@@ -131,46 +137,46 @@ namespace Thirdweb
             query["limit"] = limit.ToString();
             string queryString = query.ToString();
             string requestUri = nftStorageApiUrl + "?" + queryString;
-            string rawResponse = await SendHttpRequest(apiToken, HttpMethod.Get, requestUri);
+            string rawResponse = await SendHttpRequest(HttpMethod.Get, requestUri);
             NFTStorageListFilesResponse parsedResponse = JsonUtility.FromJson<NFTStorageListFilesResponse>(rawResponse);
             return parsedResponse;
         }
 
-        public static async Task<NFTStorageGetFileResponse> GetFile(string apiToken, string cid)
+        public async Task<NFTStorageGetFileResponse> GetFile(string cid)
         {
             string requestUri = nftStorageApiUrl + "/" + cid;
-            string rawResponse = await SendHttpRequest(apiToken, HttpMethod.Get, requestUri);
+            string rawResponse = await SendHttpRequest(HttpMethod.Get, requestUri);
             NFTStorageGetFileResponse parsedResponse = JsonUtility.FromJson<NFTStorageGetFileResponse>(rawResponse);
             return parsedResponse;
         }
 
-        public static async Task<string> GetFileData(string apiToken, string cid)
+        public async Task<string> GetFileData(string cid)
         {
             string requestUri = "https://" + cid + ".ipfs.dweb.link/";
-            string response = await SendHttpRequest(apiToken, HttpMethod.Get, requestUri, ipfsClient);
+            string response = await SendHttpRequest(HttpMethod.Get, requestUri, ipfsClient);
             return response;
         }
 
-        public static async Task<NFTStorageCheckResponse> CheckFile(string apiToken, string cid)
+        public async Task<NFTStorageCheckResponse> CheckFile(string cid)
         {
             string requestUri = nftStorageApiUrl + "/check/" + cid;
-            string rawResponse = await SendHttpRequest(apiToken, HttpMethod.Get, requestUri);
+            string rawResponse = await SendHttpRequest(HttpMethod.Get, requestUri);
             NFTStorageCheckResponse parsedResponse = JsonUtility.FromJson<NFTStorageCheckResponse>(rawResponse);
             return parsedResponse;
         }
 
-        public static async Task<NFTStorageDeleteResponse> DeleteFile(string apiToken, string cid)
+        public async Task<NFTStorageDeleteResponse> DeleteFile(string cid)
         {
             string requestUri = nftStorageApiUrl + "/" + cid;
-            string rawResponse = await SendHttpRequest(apiToken, HttpMethod.Delete, requestUri);
+            string rawResponse = await SendHttpRequest(HttpMethod.Delete, requestUri);
             NFTStorageDeleteResponse parsedResponse = JsonUtility.FromJson<NFTStorageDeleteResponse>(rawResponse);
             return parsedResponse;
         }
 
-        public static async Task<NFTStorageUploadResponse> UploadDataFromStringHttpClient(string apiToken, string path)
+        public async Task<NFTStorageUploadResponse> UploadDataFromStringHttpClient(string path)
         {
             string requestUri = nftStorageApiUrl + "/upload";
-            string rawResponse = await Upload(apiToken, requestUri, path);
+            string rawResponse = await Upload(requestUri, path);
             NFTStorageUploadResponse parsedResponse = JsonUtility.FromJson<NFTStorageUploadResponse>(rawResponse);
             return parsedResponse;
         }

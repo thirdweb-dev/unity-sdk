@@ -100,10 +100,10 @@ namespace Thirdweb
 #endif
         }
 
-        public static string ReplaceIPFS(this string uri)
+        public static string ReplaceIPFS(this string uri, string gateway = "https://gateway.ipfscdn.io/ipfs/")
         {
             if (uri.StartsWith("ipfs://"))
-                return uri.Replace("ipfs://", "https://gateway.ipfscdn.io/ipfs/");
+                return uri.Replace("ipfs://", gateway);
             else
                 return uri;
         }
@@ -123,25 +123,89 @@ namespace Thirdweb
 
         public async static Task<List<NFT>> ToNFTList(this List<TokenData721> tokenDataList)
         {
-            Contract c = ThirdwebManager.Instance.SDK.GetContract(tokenDataList[0].Contract);
-            int totalSupply = (int)await c.ERC721.TotalCount();
-
             List<NFT> allNfts = new List<NFT>();
             foreach (var tokenData in tokenDataList)
             {
+                Contract c = ThirdwebManager.Instance.SDK.GetContract(tokenData.Contract);
                 NFT nft = new NFT();
                 nft.owner = tokenData.Owner;
                 nft.type = "ERC721";
-                nft.supply = totalSupply;
+                nft.supply = (int)await c.ERC721.TotalCount();
                 nft.quantityOwned = 1;
                 string tokenURI = tokenData.Uri;
-                nft.metadata = await tokenURI.DownloadText<NFTMetadata>();
+                nft.metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI);
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
                 nft.metadata.id = tokenData.TokenId;
                 nft.metadata.uri = tokenURI.ReplaceIPFS();
                 allNfts.Add(nft);
             }
             return allNfts;
+        }
+
+        public static List<Thirdweb.Contracts.Pack.ContractDefinition.Token> ToPackTokenList(this NewPackInput packContents)
+        {
+            List<Thirdweb.Contracts.Pack.ContractDefinition.Token> tokenList = new List<Contracts.Pack.ContractDefinition.Token>();
+            // Add ERC20 Rewards
+            foreach (var erc20Reward in packContents.erc20Rewards)
+            {
+                tokenList.Add(
+                    new Thirdweb.Contracts.Pack.ContractDefinition.Token()
+                    {
+                        AssetContract = erc20Reward.contractAddress,
+                        TokenType = 0,
+                        TokenId = 0,
+                        TotalAmount = BigInteger.Parse(erc20Reward.totalRewards),
+                    }
+                );
+            }
+            // Add ERC721 Rewards
+            foreach (var erc721Reward in packContents.erc721Rewards)
+            {
+                tokenList.Add(
+                    new Thirdweb.Contracts.Pack.ContractDefinition.Token()
+                    {
+                        AssetContract = erc721Reward.contractAddress,
+                        TokenType = 1,
+                        TokenId = BigInteger.Parse(erc721Reward.tokenId),
+                        TotalAmount = 1,
+                    }
+                );
+            }
+            // Add ERC1155 Rewards
+            foreach (var erc1155Reward in packContents.erc1155Rewards)
+            {
+                tokenList.Add(
+                    new Thirdweb.Contracts.Pack.ContractDefinition.Token()
+                    {
+                        AssetContract = erc1155Reward.contractAddress,
+                        TokenType = 2,
+                        TokenId = BigInteger.Parse(erc1155Reward.tokenId),
+                        TotalAmount = BigInteger.Parse(erc1155Reward.totalRewards),
+                    }
+                );
+            }
+            return tokenList;
+        }
+
+        public static List<BigInteger> ToPackRewardUnitsList(this PackContents packContents)
+        {
+            List<BigInteger> rewardUnits = new List<BigInteger>();
+            // Add ERC20 Rewards
+            foreach (var erc20Reward in packContents.erc20Rewards)
+            {
+                rewardUnits.Add(BigInteger.Parse(erc20Reward.quantityPerReward));
+            }
+            // Add ERC721 Rewards
+            foreach (var erc721Reward in packContents.erc721Rewards)
+            {
+                rewardUnits.Add(1);
+            }
+            // Add ERC1155 Rewards
+            foreach (var erc1155Reward in packContents.erc1155Rewards)
+            {
+                rewardUnits.Add(BigInteger.Parse(erc1155Reward.quantityPerReward));
+            }
+            return rewardUnits;
         }
     }
 }

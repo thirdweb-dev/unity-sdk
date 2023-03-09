@@ -63,7 +63,7 @@ namespace Thirdweb
                 nft.supply = await TotalSupply(tokenId);
                 nft.quantityOwned = 404;
                 string tokenURI = await tokenERC1155Service.UriQueryAsync(BigInteger.Parse(tokenId));
-                nft.metadata = await tokenURI.DownloadText<NFTMetadata>();
+                nft.metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI);
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
                 nft.metadata.id = tokenId;
                 nft.metadata.uri = tokenURI.ReplaceIPFS();

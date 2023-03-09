@@ -1,10 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
+using Nethereum.Contracts;
 using Newtonsoft.Json;
 using Thirdweb.Contracts.Pack;
 using UnityEngine;
 using UnityEngine.Networking;
+using PackContract = Thirdweb.Contracts.Pack.ContractDefinition;
 
 namespace Thirdweb
 {
@@ -51,9 +54,8 @@ namespace Thirdweb
                 nft.type = "ERC1155";
                 nft.supply = await TotalSupply(tokenId);
                 nft.quantityOwned = 404;
-
                 string tokenURI = await packService.UriQueryAsync(BigInteger.Parse(tokenId));
-                nft.metadata = await tokenURI.DownloadText<NFTMetadata>();
+                nft.metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI);
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
                 nft.metadata.id = tokenId;
                 nft.metadata.uri = tokenURI.ReplaceIPFS();
@@ -279,8 +281,14 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
-                var receipt = await packService.CreatePackRequestAndWaitForReceiptAsync(null, null, pack.packMetadata.uri, 404, BigInteger.Parse(pack.rewardsPerPack), receiverAddress); // TODO: fix
+                var receipt = await packService.CreatePackRequestAndWaitForReceiptAsync(
+                    pack.ToPackTokenList(),
+                    pack.ToPackRewardUnitsList(),
+                    pack.packMetadata.uri, // TODO: Upload Metadata
+                    DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                    BigInteger.Parse(pack.rewardsPerPack),
+                    receiverAddress
+                );
                 return receipt.ToTransactionResult();
             }
         }
@@ -297,15 +305,13 @@ namespace Thirdweb
             else
             {
                 throw new UnityException("This functionality is not yet available on your current platform.");
-                var receipt = await packService.AddPackContentsRequestAndWaitForReceiptAsync(BigInteger.Parse(packId), null, null, null); // TODO: fix
-                return receipt.ToTransactionResult();
             }
         }
 
         /// <summary>
         /// Open a pack and transfer the rewards to the connected wallet
         /// </summary>
-        public async Task<PackRewards> Open(string packId, string amount = "1")
+        public async Task<PackRewards> Open(string packId, string amount = "1", int gasLimit = 500000)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -313,9 +319,45 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
-                var receipt = await packService.OpenPackRequestAndWaitForReceiptAsync(BigInteger.Parse(packId), BigInteger.Parse(amount)); // TODO: fix
-                return new PackRewards(); // TODO: Decode event and create/return PackRewards
+                var openPackFunction = new PackContract.OpenPackFunction() { PackId = BigInteger.Parse(packId), AmountToOpen = BigInteger.Parse(amount) };
+                // var gasEstimate = await packService.ContractHandler.EstimateGasAsync(openPackFunction);
+                openPackFunction.Gas = gasLimit;
+                var receipt = await packService.OpenPackRequestAndWaitForReceiptAsync(openPackFunction);
+                var packOpenedEvents = receipt.DecodeAllEvents<PackContract.PackOpenedEventDTO>();
+                List<PackContract.Token> tokensAwarded = new List<PackContract.Token>();
+                foreach (var packOpenedEvent in packOpenedEvents)
+                {
+                    tokensAwarded.AddRange(packOpenedEvent.Event.RewardUnitsDistributed);
+                }
+                PackRewards packRewards = new PackRewards()
+                {
+                    erc20Rewards = new List<ERC20Reward>(),
+                    erc721Rewards = new List<ERC721Reward>(),
+                    erc1155Rewards = new List<ERC1155Reward>()
+                };
+                foreach (var tokenAwarded in tokensAwarded)
+                {
+                    if (tokenAwarded.TokenType == 0)
+                    {
+                        packRewards.erc20Rewards.Add(new ERC20Reward() { contractAddress = tokenAwarded.AssetContract, quantityPerReward = tokenAwarded.TotalAmount.ToString() });
+                    }
+                    else if (tokenAwarded.TokenType == 1)
+                    {
+                        packRewards.erc721Rewards.Add(new ERC721Reward() { contractAddress = tokenAwarded.AssetContract, tokenId = tokenAwarded.TokenId.ToString() });
+                    }
+                    else if (tokenAwarded.TokenType == 2)
+                    {
+                        packRewards.erc1155Rewards.Add(
+                            new ERC1155Reward()
+                            {
+                                contractAddress = tokenAwarded.AssetContract,
+                                tokenId = tokenAwarded.TokenId.ToString(),
+                                quantityPerReward = tokenAwarded.TotalAmount.ToString()
+                            }
+                        );
+                    }
+                }
+                return packRewards;
             }
         }
     }

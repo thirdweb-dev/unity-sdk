@@ -99,4 +99,20 @@ public class Prefab_Writing : MonoBehaviour
             Debugger.Instance.Log("[Buy Listing] Error", e.Message);
         }
     }
+
+    public async void OpenPack()
+    {
+        try
+        {
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A");
+            Pack pack = contract.pack;
+
+            PackRewards rewards = await pack.Open("0");
+            Debugger.Instance.Log("[Open Pack] Successful", rewards.ToString());
+        }
+        catch (System.Exception e)
+        {
+            Debugger.Instance.Log("[Open Pack] Error", e.Message);
+        }
+    }
 }

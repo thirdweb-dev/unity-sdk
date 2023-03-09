@@ -4,9 +4,6 @@ using Thirdweb;
 
 public class Prefab_Storage : MonoBehaviour
 {
-    [Header("NFT.STORAGE API KEY (REQUIRED)")]
-    public string apiToken = null;
-
     public async void OnUpload()
     {
         string fullPath = Application.persistentDataPath + "/myImage " + System.DateTime.Now.ToString("yy-MM-dd") + ".png";
@@ -14,7 +11,7 @@ public class Prefab_Storage : MonoBehaviour
 
         // Give some time for the file to be saved if first time, try again if need be
 
-        var response = await Storage.UploadDataFromStringHttpClient(apiToken, fullPath);
+        var response = await ThirdwebManager.Instance.SDK.storage.UploadDataFromStringHttpClient(fullPath); // SDK must be initialized with StorageOptions apiToken
         Debugger.Instance.Log("Uploaded to IPFS Successfully!", response.ToString());
     }
 }

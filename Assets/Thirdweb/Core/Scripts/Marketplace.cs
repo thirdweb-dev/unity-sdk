@@ -171,7 +171,16 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var listing = await GetListing(listingId);
+                string buyFor = receiverAddress == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : receiverAddress;
+                var receipt = await marketplaceService.BuyRequestAndWaitForReceiptAsync(
+                    BigInteger.Parse(listingId),
+                    buyFor,
+                    quantityDesired,
+                    listing.currencyContractAddress,
+                    BigInteger.Parse(listing.buyoutPrice) * quantityDesired
+                );
+                return receipt.ToTransactionResult();
             }
         }
 
