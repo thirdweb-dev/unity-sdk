@@ -361,8 +361,7 @@ namespace Thirdweb
             }
             else
             {
-                var json = JsonConvert.SerializeObject(nft);
-                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(json);
+                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(nft));
                 var result = await tokenERC721Service.MintToRequestAndWaitForReceiptAsync(address, uri);
                 return result.ToTransactionResult();
             }

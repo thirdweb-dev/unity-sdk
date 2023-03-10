@@ -228,5 +228,10 @@ namespace Thirdweb
         {
             return hexBytes.ToHex(true);
         }
+
+        public static BigInteger GetMaxUint256()
+        {
+            return BigInteger.Parse("115792089237316195423570985008687907853269984665640564039457584007913129639935");
+        }
     }
 }

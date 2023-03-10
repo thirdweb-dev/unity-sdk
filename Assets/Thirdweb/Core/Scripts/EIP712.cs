@@ -23,12 +23,12 @@ namespace Thirdweb
             var typedData = GetTypedDefinition_TokenERC20(domainName, version, chainId, verifyingContract);
             var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
 
-            Debug.Log("Typed Data JSON: " + typedData.ToJson(mintRequest));
-            Debug.Log("Signing address: " + key.GetPublicAddress());
-            Debug.Log("Signature: " + signature);
+            // Debug.Log("Typed Data JSON: " + typedData.ToJson(mintRequest));
+            // Debug.Log("Signing address: " + key.GetPublicAddress());
+            // Debug.Log("Signature: " + signature);
 
-            var addressRecovered = signer.RecoverFromSignatureV4(mintRequest, typedData, signature);
-            Debug.Log("Recovered address from signature:" + addressRecovered);
+            // var addressRecovered = signer.RecoverFromSignatureV4(mintRequest, typedData, signature);
+            // Debug.Log("Recovered address from signature:" + addressRecovered);
 
             return signature;
         }
@@ -71,7 +71,7 @@ namespace Thirdweb
             var typedData = GetTypedDefinition_TokenERC1155(domainName, version, chainId, verifyingContract);
             var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
 
-            // Debug.Log("Typed Data JSON: " + typedData.ToJson(mintRequest));
+            Debug.Log("Typed Data JSON: " + typedData.ToJson(mintRequest));
             // Debug.Log("Signing address: " + key.GetPublicAddress());
             // Debug.Log("Signature: " + signature);
 

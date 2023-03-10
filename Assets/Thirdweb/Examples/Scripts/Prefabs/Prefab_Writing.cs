@@ -22,7 +22,7 @@ public class Prefab_Writing : MonoBehaviour
             bool isValid = await contract.ERC20.signature.Verify(signedPayload);
             if (isValid)
             {
-                Debugger.Instance.Log("Sign minting...", $"Signature: {signedPayload.signature}");
+                Debugger.Instance.Log("Sign minting ERC20...", $"Signature: {signedPayload.signature}");
                 var result = await contract.ERC20.signature.Mint(signedPayload);
                 Debugger.Instance.Log("[Mint (Signature) ERC20] Successful", result.ToString());
             }
@@ -62,7 +62,7 @@ public class Prefab_Writing : MonoBehaviour
             bool isValid = await contract.ERC721.signature.Verify(signedPayload);
             if (isValid)
             {
-                Debugger.Instance.Log("Sign minting...", $"Signature: {signedPayload.signature}");
+                Debugger.Instance.Log("Sign minting ERC721...", $"Signature: {signedPayload.signature}");
                 var result = await contract.ERC721.signature.Mint(signedPayload);
                 Debugger.Instance.Log("[Mint (Signature) ERC721] Successful", result.ToString());
             }
@@ -84,18 +84,51 @@ public class Prefab_Writing : MonoBehaviour
     {
         try
         {
-            // Edition Drop Claiming
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x86B7df0dc0A790789D8fDE4C604EF8187FF8AD2A");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x82c488a1BC64ab3b91B927380cca9Db7bF347879");
 
-            bool canClaim = await contract.ERC1155.claimConditions.CanClaim("0", 1);
-            if (!canClaim)
+            NFTMetadata meta = new NFTMetadata()
             {
-                Debugger.Instance.Log("[Mint ERC721] Cannot Claim", "Connected wallet not eligible to claim.");
-                return;
+                name = "Unity NFT",
+                description = "Minted From Unity",
+                image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
+            };
+
+            // Minting
+            // var result = await contract.ERC1155.Mint(new NFTMetadataWithSupply() { supply = 10, metadata = meta });
+            // Debugger.Instance.Log("[Mint ERC1155] Successful", result.ToString());
+            // You can use an existing token ID to mint additional supply
+            // var result = await contract.ERC1155.MintAdditionalSupply("0", 10);
+            // Debugger.Instance.Log("[Mint Additional Supply ERC1155] Successful", result.ToString());
+
+            // Signature Minting
+            var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            var payload = new ERC1155MintPayload(receiverAddress, meta);
+            var signedPayload = await contract.ERC1155.signature.Generate(payload);
+            // You can use an existing token ID to signature mint additional supply
+            // var payloadWithSupply = new ERC1155MintAdditionalPayload(receiverAddress, "0");
+            // var signedPayload = await contract.ERC1155.signature.GenerateFromTokenId(payloadWithSupply);
+            bool isValid = await contract.ERC1155.signature.Verify(signedPayload);
+            if (isValid)
+            {
+                Debugger.Instance.Log("Sign minting ERC1155...", $"Signature: {signedPayload.signature}");
+                var result = await contract.ERC1155.signature.Mint(signedPayload);
+                Debugger.Instance.Log("[Mint (Signature) ERC1155] Successful", result.ToString());
+            }
+            else
+            {
+                Debugger.Instance.Log("Signature Invalid", $"Signature: {signedPayload.signature} is invalid!");
             }
 
-            TransactionResult transactionResult = await contract.ERC1155.Claim("0", 1);
-            Debugger.Instance.Log("[Mint ERC1155] Successful", transactionResult.ToString());
+            // Edition Drop - Claiming
+            // bool canClaim = await contract.ERC1155.claimConditions.CanClaim("0", 1);
+            // if (!canClaim)
+            // {
+            //     Debugger.Instance.Log("[Mint ERC1155] Cannot Claim", "Connected wallet not eligible to claim.");
+            //     return;
+            // }
+
+            // TransactionResult transactionResult = await contract.ERC1155.Claim("0", 1);
+            // Debugger.Instance.Log("[Mint ERC1155] Successful", transactionResult.ToString());
 
             // Edition Drop - Signature minting additional supply
             // var payload = new ERC1155MintAdditionalPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", "1");
