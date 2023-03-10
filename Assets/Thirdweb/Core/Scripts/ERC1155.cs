@@ -158,7 +158,7 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return (int)await tokenERC1155Service.NextTokenIdToMintQueryAsync();
             }
         }
 
