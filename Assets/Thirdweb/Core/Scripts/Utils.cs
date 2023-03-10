@@ -4,6 +4,7 @@ using System.Text;
 using System.Numerics;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using Nethereum.Hex.HexConvertors.Extensions;
 
 namespace Thirdweb
 {
@@ -206,6 +207,26 @@ namespace Thirdweb
                 rewardUnits.Add(BigInteger.Parse(erc1155Reward.quantityPerReward));
             }
             return rewardUnits;
+        }
+
+        public static long GetUnixTimeStampNow()
+        {
+            return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
+        public static long GetUnixTimeStampIn10Years()
+        {
+            return DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 60 * 60 * 24 * 365 * 10;
+        }
+
+        public static byte[] HexStringToByteArray(this string hex)
+        {
+            return hex.HexToByteArray();
+        }
+
+        public static string ByteArrayToHexString(this byte[] hexBytes)
+        {
+            return hexBytes.ToHex(true);
         }
     }
 }

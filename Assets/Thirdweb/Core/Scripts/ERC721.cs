@@ -6,6 +6,7 @@ using UnityEngine;
 using Thirdweb.Contracts.TokenERC721;
 using Thirdweb.Contracts.DropERC721;
 using Newtonsoft.Json;
+using ERC721Contract = Thirdweb.Contracts.TokenERC721.ContractDefinition;
 
 namespace Thirdweb
 {
@@ -30,16 +31,16 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC721 compatible contract.
         /// </summary>
-        public ERC721(string parentRoute, string address)
+        public ERC721(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "erc721"))
         {
             if (!Utils.IsWebGLBuild())
             {
-                this.tokenERC721Service = new TokenERC721Service(ThirdwebManager.Instance.SDK.web3, address);
-                this.dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.web3, address);
+                this.tokenERC721Service = new TokenERC721Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
             }
 
-            this.signature = new ERC721Signature(baseRoute);
+            this.signature = new ERC721Signature(baseRoute, contractAddress);
             this.claimConditions = new ERC721ClaimConditions(baseRoute);
         }
 
@@ -361,10 +362,8 @@ namespace Thirdweb
             else
             {
                 var json = JsonConvert.SerializeObject(nft);
-                var path = Application.temporaryCachePath + "/nftmetadata.json";
-                await System.IO.File.WriteAllTextAsync(path, json);
-                var uploadResponse = await ThirdwebManager.Instance.SDK.storage.UploadDataFromStringHttpClient(path);
-                var result = await tokenERC721Service.MintToRequestAndWaitForReceiptAsync(address, $"ipfs://{uploadResponse.value.cid}");
+                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(json);
+                var result = await tokenERC721Service.MintToRequestAndWaitForReceiptAsync(address, uri);
                 return result.ToTransactionResult();
             }
         }
@@ -502,11 +501,20 @@ namespace Thirdweb
     /// </summary>
     public class ERC721Signature : Routable
     {
+#nullable enable
+        TokenERC721Service tokenERC721Service;
+
+#nullable disable
+
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC721Signature(string parentRoute)
-            : base(Routable.append(parentRoute, "signature")) { }
+        public ERC721Signature(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "signature"))
+        {
+            if (!Utils.IsWebGLBuild())
+                this.tokenERC721Service = new TokenERC721Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+        }
 
         /// <summary>
         /// Generate a signed mintable payload. Requires minting permission.
@@ -519,7 +527,49 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
+                var blockNumber = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+                var block = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
+                var startTime = block.Timestamp.Value;
+                var endTime = Utils.GetUnixTimeStampIn10Years();
+                ERC721Contract.MintRequest req = new ERC721Contract.MintRequest()
+                {
+                    To = payloadToSign.to,
+                    RoyaltyRecipient = (await tokenERC721Service.GetDefaultRoyaltyInfoQueryAsync()).ReturnValue1,
+                    RoyaltyBps = (await tokenERC721Service.GetDefaultRoyaltyInfoQueryAsync()).ReturnValue2,
+                    PrimarySaleRecipient = await tokenERC721Service.PrimarySaleRecipientQueryAsync(),
+                    Uri = uri,
+                    Price = BigInteger.Parse(payloadToSign.price),
+                    Currency = payloadToSign.currencyAddress,
+                    ValidityStartTimestamp = startTime,
+                    ValidityEndTimestamp = endTime,
+                    Uid = payloadToSign.uid.HexStringToByteArray()
+                };
+
+                string signature = Thirdweb.EIP712.GenerateSignatureForSignatureMint(
+                    ThirdwebManager.Instance.SDK.account,
+                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    tokenERC721Service.ContractHandler.ContractAddress,
+                    req
+                );
+
+                ERC721SignedPayload signedPayload = new ERC721SignedPayload();
+                signedPayload.signature = signature;
+                signedPayload.payload = new ERC721SignedPayloadOutput()
+                {
+                    to = req.To,
+                    price = req.Price.ToString(),
+                    currencyAddress = req.Currency,
+                    primarySaleRecipient = req.PrimarySaleRecipient,
+                    royaltyRecipient = req.RoyaltyRecipient,
+                    royaltyBps = (int)req.RoyaltyBps,
+                    quantity = 1,
+                    uri = req.Uri,
+                    uid = req.Uid.ByteArrayToHexString(),
+                    mintStartTime = (long)req.ValidityStartTimestamp,
+                    mintEndTime = (long)req.ValidityEndTimestamp
+                };
+                return signedPayload;
             }
         }
 
@@ -534,7 +584,21 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                ERC721Contract.MintRequest req = new ERC721Contract.MintRequest()
+                {
+                    To = signedPayload.payload.to,
+                    RoyaltyRecipient = signedPayload.payload.royaltyRecipient,
+                    RoyaltyBps = (BigInteger)signedPayload.payload.royaltyBps,
+                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
+                    Uri = signedPayload.payload.uri,
+                    Price = BigInteger.Parse(signedPayload.payload.price),
+                    Currency = signedPayload.payload.currencyAddress,
+                    ValidityStartTimestamp = signedPayload.payload.mintStartTime,
+                    ValidityEndTimestamp = signedPayload.payload.mintEndTime,
+                    Uid = signedPayload.payload.uid.HexStringToByteArray()
+                };
+                var receipt = await tokenERC721Service.VerifyQueryAsync(req, signedPayload.signature.HexStringToByteArray());
+                return receipt.ReturnValue1;
             }
         }
 
@@ -549,7 +613,21 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                ERC721Contract.MintRequest req = new ERC721Contract.MintRequest()
+                {
+                    To = signedPayload.payload.to,
+                    RoyaltyRecipient = signedPayload.payload.royaltyRecipient,
+                    RoyaltyBps = (BigInteger)signedPayload.payload.royaltyBps,
+                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
+                    Uri = signedPayload.payload.uri,
+                    Price = BigInteger.Parse(signedPayload.payload.price),
+                    Currency = signedPayload.payload.currencyAddress,
+                    ValidityStartTimestamp = signedPayload.payload.mintStartTime,
+                    ValidityEndTimestamp = signedPayload.payload.mintEndTime,
+                    Uid = signedPayload.payload.uid.HexStringToByteArray()
+                };
+                var receipt = await tokenERC721Service.MintWithSignatureRequestAndWaitForReceiptAsync(req, signedPayload.signature.HexStringToByteArray());
+                return receipt.ToTransactionResult();
             }
         }
     }

@@ -29,7 +29,7 @@ public class Prefab_Writing : MonoBehaviour
     {
         try
         {
-            // NFT Collection Signature Minting
+            // NFT Collection Signature Minting (Requires Mint Permission)
             Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xb076182024D78abBF7e66aFf55f21519E96CA4CD");
 
             NFTMetadata meta = new NFTMetadata()
@@ -39,8 +39,16 @@ public class Prefab_Writing : MonoBehaviour
                 image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
             };
 
-            var result = await contract.ERC721.Mint(meta);
-            Debugger.Instance.Log("[Mint ERC721] Successful", result.ToString());
+            // var result = await contract.ERC721.Mint(meta);
+            // Debugger.Instance.Log("[Mint ERC721] Successful", result.ToString());
+
+            var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            Debug.Log("receiver: " + receiverAddress);
+            ERC721MintPayload payload = new ERC721MintPayload(receiverAddress, meta);
+            ERC721SignedPayload signedPayload = await contract.ERC721.signature.Generate(payload);
+            Debugger.Instance.Log("Sign minting...", $"Signature: {signedPayload.signature}");
+            var result = await contract.ERC721.signature.Mint(signedPayload);
+            Debugger.Instance.Log("[Mint (Signature) ERC721] Successful", result.ToString());
 
             // string connectedAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
             // ERC721MintPayload payload = new ERC721MintPayload(connectedAddress, meta);

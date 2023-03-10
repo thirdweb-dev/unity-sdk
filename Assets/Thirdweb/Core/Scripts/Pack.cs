@@ -281,11 +281,12 @@ namespace Thirdweb
             }
             else
             {
+                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(pack.packMetadata));
                 var receipt = await packService.CreatePackRequestAndWaitForReceiptAsync(
                     pack.ToPackTokenList(),
                     pack.ToPackRewardUnitsList(),
-                    pack.packMetadata.uri, // TODO: Upload Metadata
-                    DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                    uri,
+                    Utils.GetUnixTimeStampNow(),
                     BigInteger.Parse(pack.rewardsPerPack),
                     receiverAddress
                 );

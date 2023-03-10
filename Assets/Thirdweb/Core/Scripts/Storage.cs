@@ -43,6 +43,14 @@ namespace Thirdweb
             nftClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + apiToken);
         }
 
+        public async Task<string> UploadText(string text)
+        {
+            var path = Application.temporaryCachePath + "/uploadedText.txt";
+            await System.IO.File.WriteAllTextAsync(path, text);
+            var uploadResponse = await UploadDataFromStringHttpClient(path);
+            return $"ipfs://{uploadResponse.value.cid}";
+        }
+
         public async Task<T> DownloadText<T>(string textURI)
         {
             textURI = textURI.ReplaceIPFS(ipfsGatewayUrl);
