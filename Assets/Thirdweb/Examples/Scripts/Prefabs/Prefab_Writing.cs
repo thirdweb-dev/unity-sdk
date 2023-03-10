@@ -9,15 +9,27 @@ public class Prefab_Writing : MonoBehaviour
         try
         {
             // Traditional Minting (Requires Minter Role)
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xB4870B21f80223696b68798a755478C86ce349bE");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x76Ec89310842DBD9d0AcA3B2E27858E85cdE595A");
 
-            TransactionResult transactionResult = await contract.ERC20.Mint("1.2");
-            Debugger.Instance.Log("[Mint ERC20] Successful", transactionResult.ToString());
+            // Minting
+            // var transactionResult = await contract.ERC20.Mint("1.2");
+            // Debugger.Instance.Log("[Mint ERC20] Successful", transactionResult.ToString());
 
             // Signature Minting
-            // var payload = new ERC20MintPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", "3.2");
-            // var p = await contract.ERC20.signature.Generate(payload);
-            // await contract.ERC20.signature.Mint(p);
+            var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            var payload = new ERC20MintPayload(receiverAddress, "3.2");
+            var signedPayload = await contract.ERC20.signature.Generate(payload);
+            bool isValid = await contract.ERC20.signature.Verify(signedPayload);
+            if (isValid)
+            {
+                Debugger.Instance.Log("Sign minting...", $"Signature: {signedPayload.signature}");
+                var result = await contract.ERC20.signature.Mint(signedPayload);
+                Debugger.Instance.Log("[Mint (Signature) ERC20] Successful", result.ToString());
+            }
+            else
+            {
+                Debugger.Instance.Log("Signature Invalid", $"Signature: {signedPayload.signature} is invalid!");
+            }
         }
         catch (System.Exception e)
         {
@@ -30,7 +42,7 @@ public class Prefab_Writing : MonoBehaviour
         try
         {
             // NFT Collection Signature Minting (Requires Mint Permission)
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xb076182024D78abBF7e66aFf55f21519E96CA4CD");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC");
 
             NFTMetadata meta = new NFTMetadata()
             {
@@ -39,21 +51,25 @@ public class Prefab_Writing : MonoBehaviour
                 image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
             };
 
+            // Minting
             // var result = await contract.ERC721.Mint(meta);
             // Debugger.Instance.Log("[Mint ERC721] Successful", result.ToString());
 
+            // Signature Minting
             var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
-            Debug.Log("receiver: " + receiverAddress);
-            ERC721MintPayload payload = new ERC721MintPayload(receiverAddress, meta);
-            ERC721SignedPayload signedPayload = await contract.ERC721.signature.Generate(payload);
-            Debugger.Instance.Log("Sign minting...", $"Signature: {signedPayload.signature}");
-            var result = await contract.ERC721.signature.Mint(signedPayload);
-            Debugger.Instance.Log("[Mint (Signature) ERC721] Successful", result.ToString());
-
-            // string connectedAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
-            // ERC721MintPayload payload = new ERC721MintPayload(connectedAddress, meta);
-            // ERC721SignedPayload signedPayload = await contract.ERC721.signature.Generate(payload); // Typically generated on the backend
-            // var result = await contract.ERC721.signature.Mint(signedPayload);
+            var payload = new ERC721MintPayload(receiverAddress, meta);
+            var signedPayload = await contract.ERC721.signature.Generate(payload);
+            bool isValid = await contract.ERC721.signature.Verify(signedPayload);
+            if (isValid)
+            {
+                Debugger.Instance.Log("Sign minting...", $"Signature: {signedPayload.signature}");
+                var result = await contract.ERC721.signature.Mint(signedPayload);
+                Debugger.Instance.Log("[Mint (Signature) ERC721] Successful", result.ToString());
+            }
+            else
+            {
+                Debugger.Instance.Log("Signature Invalid", $"Signature: {signedPayload.signature} is invalid!");
+            }
 
             // NFT Drop Claiming
             // var result = await contract.ERC721.Claim(1);

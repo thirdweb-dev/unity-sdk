@@ -4,6 +4,7 @@ using System.Numerics;
 using Thirdweb.Contracts.TokenERC20;
 using Thirdweb.Contracts.DropERC20;
 using UnityEngine;
+using TokenERC20Contract = Thirdweb.Contracts.TokenERC20.ContractDefinition;
 
 namespace Thirdweb
 {
@@ -28,16 +29,16 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
-        public ERC20(string parentRoute, string address)
+        public ERC20(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "erc20"))
         {
             if (!Utils.IsWebGLBuild())
             {
-                this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.web3, address);
-                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, address);
+                this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
             }
 
-            this.signature = new ERC20Signature(baseRoute);
+            this.signature = new ERC20Signature(baseRoute, contractAddress);
             this.claimConditions = new ERC20ClaimConditions(baseRoute);
         }
 
@@ -412,11 +413,20 @@ namespace Thirdweb
     /// </summary>
     public class ERC20Signature : Routable
     {
+#nullable enable
+        TokenERC20Service tokenERC20Service;
+
+#nullable disable
+
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string parentRoute)
-            : base(Routable.append(parentRoute, "signature")) { }
+        public ERC20Signature(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "signature"))
+        {
+            if (!Utils.IsWebGLBuild())
+                this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+        }
 
         /// <summary>
         /// Generate a signed mintable payload. Requires minting permission.
@@ -429,7 +439,45 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var blockNumber = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+                var block = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
+                var startTime = block.Timestamp.Value;
+                var endTime = Utils.GetUnixTimeStampIn10Years();
+                TokenERC20Contract.MintRequest req = new TokenERC20Contract.MintRequest()
+                {
+                    To = payloadToSign.to,
+                    PrimarySaleRecipient = await tokenERC20Service.PrimarySaleRecipientQueryAsync(),
+                    Quantity = BigInteger.Parse(payloadToSign.quantity.ToWei()),
+                    Price = BigInteger.Parse(payloadToSign.price),
+                    Currency = payloadToSign.currencyAddress,
+                    ValidityStartTimestamp = startTime,
+                    ValidityEndTimestamp = endTime,
+                    Uid = payloadToSign.uid.HexStringToByteArray()
+                };
+
+                string signature = Thirdweb.EIP712.GenerateSignature_TokenERC20(
+                    ThirdwebManager.Instance.SDK.account,
+                    await tokenERC20Service.NameQueryAsync(),
+                    "1",
+                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    tokenERC20Service.ContractHandler.ContractAddress,
+                    req
+                );
+
+                ERC20SignedPayload signedPayload = new ERC20SignedPayload();
+                signedPayload.signature = signature;
+                signedPayload.payload = new ERC20SignedPayloadOutput()
+                {
+                    to = req.To,
+                    price = req.Price.ToString(),
+                    currencyAddress = req.Currency,
+                    primarySaleRecipient = req.PrimarySaleRecipient,
+                    quantity = req.Quantity.ToString(),
+                    uid = req.Uid.ByteArrayToHexString(),
+                    mintStartTime = (long)req.ValidityStartTimestamp,
+                    mintEndTime = (long)req.ValidityEndTimestamp
+                };
+                return signedPayload;
             }
         }
 
@@ -444,7 +492,19 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                TokenERC20Contract.MintRequest req = new TokenERC20Contract.MintRequest()
+                {
+                    To = signedPayload.payload.to,
+                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
+                    Quantity = BigInteger.Parse(signedPayload.payload.quantity),
+                    Price = BigInteger.Parse(signedPayload.payload.price),
+                    Currency = signedPayload.payload.currencyAddress,
+                    ValidityStartTimestamp = signedPayload.payload.mintStartTime,
+                    ValidityEndTimestamp = signedPayload.payload.mintEndTime,
+                    Uid = signedPayload.payload.uid.HexStringToByteArray()
+                };
+                var receipt = await tokenERC20Service.VerifyQueryAsync(req, signedPayload.signature.HexStringToByteArray());
+                return receipt.ReturnValue1;
             }
         }
 
@@ -459,7 +519,19 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                TokenERC20Contract.MintRequest req = new TokenERC20Contract.MintRequest()
+                {
+                    To = signedPayload.payload.to,
+                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
+                    Quantity = BigInteger.Parse(signedPayload.payload.quantity),
+                    Price = BigInteger.Parse(signedPayload.payload.price),
+                    Currency = signedPayload.payload.currencyAddress,
+                    ValidityStartTimestamp = signedPayload.payload.mintStartTime,
+                    ValidityEndTimestamp = signedPayload.payload.mintEndTime,
+                    Uid = signedPayload.payload.uid.HexStringToByteArray()
+                };
+                var receipt = await tokenERC20Service.MintWithSignatureRequestAndWaitForReceiptAsync(req, signedPayload.signature.HexStringToByteArray());
+                return receipt.ToTransactionResult();
             }
         }
     }

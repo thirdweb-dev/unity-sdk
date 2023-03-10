@@ -6,7 +6,7 @@ using UnityEngine;
 using Thirdweb.Contracts.TokenERC721;
 using Thirdweb.Contracts.DropERC721;
 using Newtonsoft.Json;
-using ERC721Contract = Thirdweb.Contracts.TokenERC721.ContractDefinition;
+using TokenERC721Contract = Thirdweb.Contracts.TokenERC721.ContractDefinition;
 
 namespace Thirdweb
 {
@@ -532,7 +532,7 @@ namespace Thirdweb
                 var block = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
                 var startTime = block.Timestamp.Value;
                 var endTime = Utils.GetUnixTimeStampIn10Years();
-                ERC721Contract.MintRequest req = new ERC721Contract.MintRequest()
+                TokenERC721Contract.MintRequest req = new TokenERC721Contract.MintRequest()
                 {
                     To = payloadToSign.to,
                     RoyaltyRecipient = (await tokenERC721Service.GetDefaultRoyaltyInfoQueryAsync()).ReturnValue1,
@@ -546,8 +546,10 @@ namespace Thirdweb
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
-                string signature = Thirdweb.EIP712.GenerateSignatureForSignatureMint(
+                string signature = Thirdweb.EIP712.GenerateSignature_TokenERC721(
                     ThirdwebManager.Instance.SDK.account,
+                    "TokenERC721",
+                    "1",
                     await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
                     tokenERC721Service.ContractHandler.ContractAddress,
                     req
@@ -584,7 +586,7 @@ namespace Thirdweb
             }
             else
             {
-                ERC721Contract.MintRequest req = new ERC721Contract.MintRequest()
+                TokenERC721Contract.MintRequest req = new TokenERC721Contract.MintRequest()
                 {
                     To = signedPayload.payload.to,
                     RoyaltyRecipient = signedPayload.payload.royaltyRecipient,
@@ -613,7 +615,7 @@ namespace Thirdweb
             }
             else
             {
-                ERC721Contract.MintRequest req = new ERC721Contract.MintRequest()
+                TokenERC721Contract.MintRequest req = new TokenERC721Contract.MintRequest()
                 {
                     To = signedPayload.payload.to,
                     RoyaltyRecipient = signedPayload.payload.royaltyRecipient,
