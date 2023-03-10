@@ -559,9 +559,7 @@ namespace Thirdweb
             else
             {
                 var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
-                var blockNumber = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
-                var block = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
-                var startTime = block.Timestamp.Value;
+                var startTime = await Utils.GetCurrentBlockTimeStamp();
                 var endTime = Utils.GetUnixTimeStampIn10Years();
                 TokenERC1155Contract.MintRequest req = new TokenERC1155Contract.MintRequest()
                 {
@@ -619,9 +617,7 @@ namespace Thirdweb
             {
                 // var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
                 var uri = await tokenERC1155Service.UriQueryAsync(BigInteger.Parse(payloadToSign.tokenId));
-                var blockNumber = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
-                var block = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
-                var startTime = block.Timestamp.Value;
+                var startTime = await Utils.GetCurrentBlockTimeStamp();
                 var endTime = Utils.GetUnixTimeStampIn10Years();
                 TokenERC1155Contract.MintRequest req = new TokenERC1155Contract.MintRequest()
                 {

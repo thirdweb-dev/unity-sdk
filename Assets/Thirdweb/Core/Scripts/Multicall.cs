@@ -20,7 +20,6 @@ namespace Thirdweb
     {
         public static async Task<List<TokenData721>> GetAllTokenData721(string contractAddress, int startTokenId, int endTokenId)
         {
-            Debug.Log($"Multicall: GetAllTokenData721 - Contract: {contractAddress}, Start ID: {startTokenId}, End ID: {endTokenId}");
             var allOwnedTokens = await GetAllOwners721(contractAddress, startTokenId, endTokenId);
             var allTokenUris = await GetAllTokenUris721(contractAddress, startTokenId, endTokenId);
             for (int i = 0; i < allOwnedTokens.Count; i++)
@@ -30,7 +29,6 @@ namespace Thirdweb
 
         public static async Task<List<TokenData721>> GetOwnedTokenData721(string contractAddress, string ownerAddress)
         {
-            Debug.Log($"Multicall: GetOwnedTokenData721 - Contract: {contractAddress}, Owner: {ownerAddress}");
             var ownedTokens = await GetOwnedTokenIds721(contractAddress, ownerAddress);
             var ownedTokenUris = await GetSpecificTokenUris721(contractAddress, ownedTokens.ToArray());
             foreach (var ownedToken in ownedTokenUris)

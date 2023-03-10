@@ -233,5 +233,12 @@ namespace Thirdweb
         {
             return BigInteger.Parse("115792089237316195423570985008687907853269984665640564039457584007913129639935");
         }
+
+        public async static Task<BigInteger> GetCurrentBlockTimeStamp()
+        {
+            var blockNumber = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+            var block = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
+            return block.Timestamp.Value;
+        }
     }
 }
