@@ -79,11 +79,11 @@ public class Prefab_Reading : MonoBehaviour
     {
         try
         {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xC04104DE55dEC5d63542f7ADCf8171278942048E");
             Pack pack = contract.pack;
 
             PackContents packContents = await pack.GetPackContents("0");
-            Debugger.Instance.Log("[Fetch Pack Contents] Pack #1", packContents.ToString());
+            Debugger.Instance.Log("[Fetch Pack Contents] Pack #0", packContents.ToString());
         }
         catch (System.Exception e)
         {

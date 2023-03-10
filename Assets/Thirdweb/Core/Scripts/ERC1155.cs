@@ -452,7 +452,7 @@ namespace Thirdweb
         // public long mintStartTime;
         // public long mintEndTime;
 
-        public ERC1155MintPayload(string receiverAddress, NFTMetadata metadata)
+        public ERC1155MintPayload(string receiverAddress, NFTMetadata metadata, int quantity = 1)
         {
             this.metadata = metadata;
             this.to = receiverAddress;
@@ -461,7 +461,7 @@ namespace Thirdweb
             this.primarySaleRecipient = Utils.AddressZero;
             this.royaltyRecipient = Utils.AddressZero;
             this.royaltyBps = 0;
-            this.quantity = 1;
+            this.quantity = quantity;
             this.uid = Utils.ToBytes32HexString(Guid.NewGuid().ToByteArray());
             // TODO temporary solution
             // this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
@@ -486,7 +486,7 @@ namespace Thirdweb
         // public long mintStartTime;
         // public long mintEndTime;
 
-        public ERC1155MintAdditionalPayload(string receiverAddress, string tokenId)
+        public ERC1155MintAdditionalPayload(string receiverAddress, string tokenId, int quantity = 1)
         {
             this.tokenId = tokenId;
             this.to = receiverAddress;
@@ -495,7 +495,7 @@ namespace Thirdweb
             this.primarySaleRecipient = Utils.AddressZero;
             this.royaltyRecipient = Utils.AddressZero;
             this.royaltyBps = 0;
-            this.quantity = 1;
+            this.quantity = quantity;
             this.uid = Utils.ToBytes32HexString(Guid.NewGuid().ToByteArray());
             // TODO temporary solution
             // this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
@@ -597,7 +597,7 @@ namespace Thirdweb
                     primarySaleRecipient = req.PrimarySaleRecipient,
                     royaltyRecipient = req.RoyaltyRecipient,
                     royaltyBps = (int)req.RoyaltyBps,
-                    quantity = 1,
+                    quantity = (int)req.Quantity,
                     uri = req.Uri,
                     uid = req.Uid.ByteArrayToHexString(),
                     mintStartTime = (long)req.ValidityStartTimestamp,
@@ -655,7 +655,7 @@ namespace Thirdweb
                     primarySaleRecipient = req.PrimarySaleRecipient,
                     royaltyRecipient = req.RoyaltyRecipient,
                     royaltyBps = (int)req.RoyaltyBps,
-                    quantity = 1,
+                    quantity = (int)req.Quantity,
                     uri = req.Uri,
                     uid = req.Uid.ByteArrayToHexString(),
                     mintStartTime = (long)req.ValidityStartTimestamp,

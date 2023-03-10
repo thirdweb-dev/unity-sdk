@@ -102,10 +102,10 @@ public class Prefab_Writing : MonoBehaviour
 
             // Signature Minting
             var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
-            var payload = new ERC1155MintPayload(receiverAddress, meta);
+            var payload = new ERC1155MintPayload(receiverAddress, meta, 1000);
             var signedPayload = await contract.ERC1155.signature.Generate(payload);
             // You can use an existing token ID to signature mint additional supply
-            // var payloadWithSupply = new ERC1155MintAdditionalPayload(receiverAddress, "0");
+            // var payloadWithSupply = new ERC1155MintAdditionalPayload(receiverAddress, "0", 1000);
             // var signedPayload = await contract.ERC1155.signature.GenerateFromTokenId(payloadWithSupply);
             bool isValid = await contract.ERC1155.signature.Verify(signedPayload);
             if (isValid)
@@ -163,8 +163,46 @@ public class Prefab_Writing : MonoBehaviour
     {
         try
         {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xC04104DE55dEC5d63542f7ADCf8171278942048E");
             Pack pack = contract.pack;
+
+            var result = await pack.Create(
+                new NewPackInput()
+                {
+                    rewardsPerPack = "1",
+                    packMetadata = new NFTMetadata()
+                    {
+                        description = "Kitty Pack - Contains Kitty NFTs and Tokens!",
+                        image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
+                        name = "My Epic Kitty Pack"
+                    },
+                    erc20Rewards = new List<ERC20Contents>()
+                    {
+                        new ERC20Contents()
+                        {
+                            contractAddress = "0x76Ec89310842DBD9d0AcA3B2E27858E85cdE595A",
+                            quantityPerReward = "1",
+                            totalRewards = "100"
+                        }
+                    },
+                    erc721Rewards = new List<ERC721Contents>()
+                    {
+                        new ERC721Contents() { contractAddress = "0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC", tokenId = "0", }
+                    },
+                    erc1155Rewards = new List<ERC1155Contents>()
+                    {
+                        new ERC1155Contents()
+                        {
+                            contractAddress = "0x76Ec89310842DBD9d0AcA3B2E27858E85cdE595A",
+                            tokenId = "0",
+                            quantityPerReward = "1",
+                            totalRewards = "100"
+                        }
+                    },
+                }
+            );
+            Debugger.Instance.Log("[Create Pack] Successful", result.ToString());
+            return;
 
             PackRewards rewards = await pack.Open("0");
             Debugger.Instance.Log("[Open Pack] Successful", rewards.ToString());

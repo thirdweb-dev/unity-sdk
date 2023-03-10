@@ -286,7 +286,7 @@ namespace Thirdweb
                     pack.ToPackTokenList(),
                     pack.ToPackRewardUnitsList(),
                     uri,
-                    Utils.GetUnixTimeStampNow(),
+                    await Utils.GetCurrentBlockTimeStamp(),
                     BigInteger.Parse(pack.rewardsPerPack),
                     receiverAddress
                 );
@@ -369,6 +369,11 @@ namespace Thirdweb
         public List<ERC20Reward> erc20Rewards;
         public List<ERC721Reward> erc721Rewards;
         public List<ERC1155Reward> erc1155Rewards;
+
+        public override string ToString()
+        {
+            return "PackRewards:\n" + $"erc20Rewards: {erc20Rewards?.ToString()}\n" + $"erc721Rewards: {erc721Rewards?.ToString()}\n" + $"erc1155Rewards: {erc1155Rewards?.ToString()}\n";
+        }
     }
 
     [System.Serializable]
@@ -377,6 +382,11 @@ namespace Thirdweb
         public List<ERC20Contents> erc20Rewards;
         public List<ERC721Contents> erc721Rewards;
         public List<ERC1155Contents> erc1155Rewards;
+
+        public override string ToString()
+        {
+            return "PackContents:\n" + $"erc20Rewards: {erc20Rewards?.ToString()}\n" + $"erc721Rewards: {erc721Rewards?.ToString()}\n" + $"erc1155Rewards: {erc1155Rewards?.ToString()}\n";
+        }
     }
 
     [System.Serializable]
@@ -387,6 +397,11 @@ namespace Thirdweb
 
         /// How many rewards can be obtained by opening a single pack
         public string rewardsPerPack;
+
+        public override string ToString()
+        {
+            return "NewPackInput:\n" + $"packMetadata: {packMetadata.ToString()}\n" + $"rewardsPerPack: {rewardsPerPack.ToString()}\n";
+        }
     }
 
     [System.Serializable]
@@ -397,12 +412,22 @@ namespace Thirdweb
 
         /// How many tokens can be otained when opening a pack and receiving this reward
         public string quantityPerReward;
+
+        public override string ToString()
+        {
+            return "ERC20Reward:\n" + $"contractAddress: {contractAddress.ToString()}\n" + $"quantityPerReward: {quantityPerReward.ToString()}\n";
+        }
     }
 
     [System.Serializable]
     public class ERC20Contents : ERC20Reward
     {
         public string totalRewards;
+
+        public override string ToString()
+        {
+            return "ERC20Contents:\n" + $"totalRewards: {totalRewards.ToString()}\n" + base.ToString();
+        }
     }
 
     [System.Serializable]
@@ -413,10 +438,21 @@ namespace Thirdweb
 
         /// the tokenId of the NFT to be rewarded
         public string tokenId;
+
+        public override string ToString()
+        {
+            return "ERC721Reward:\n" + $"contractAddress: {contractAddress.ToString()}\n" + $"tokenId: {tokenId.ToString()}\n";
+        }
     }
 
     [System.Serializable]
-    public class ERC721Contents : ERC721Reward { }
+    public class ERC721Contents : ERC721Reward
+    {
+        public override string ToString()
+        {
+            return base.ToString();
+        }
+    }
 
     [System.Serializable]
     public class ERC1155Reward
@@ -429,11 +465,21 @@ namespace Thirdweb
 
         /// How many NFTs can be otained when opening a pack and receiving this reward
         public string quantityPerReward;
+
+        public override string ToString()
+        {
+            return "ERC1155Reward:\n" + $"contractAddress: {contractAddress.ToString()}\n" + $"tokenId: {tokenId.ToString()}\n" + $"contractAddress: {tokenId.ToString()}\n";
+        }
     }
 
     [System.Serializable]
     public class ERC1155Contents : ERC1155Reward
     {
         public string totalRewards;
+
+        public override string ToString()
+        {
+            return "ERC1155Contents:\n" + $"totalRewards: {totalRewards.ToString()}\n" + base.ToString();
+        }
     }
 }
