@@ -83,7 +83,24 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                int totalCount = await TotalCount();
+                int start;
+                int end;
+                if (queryParams != null)
+                {
+                    start = queryParams.start;
+                    end = queryParams.start + queryParams.count;
+                }
+                else
+                {
+                    start = 0;
+                    end = totalCount - 1;
+                }
+                // TODO: Add Multicall
+                List<NFT> allNfts = new List<NFT>();
+                for (int i = start; i < end; i++)
+                    allNfts.Add(await Get(i.ToString()));
+                return allNfts;
             }
         }
 
@@ -99,7 +116,26 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                string owner = address == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : address;
+                // TODO: Add Multicall
+                int totalCount = await TotalCount();
+                List<NFT> ownedNfts = new List<NFT>();
+                for (int i = 0; i < totalCount; i++)
+                {
+                    BigInteger ownedBalance = BigInteger.Parse(await Balance(i.ToString()));
+                    if (ownedBalance == 0)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        NFT tempNft = await Get(i.ToString());
+                        tempNft.owner = owner;
+                        tempNft.quantityOwned = (int)ownedBalance;
+                        ownedNfts.Add(tempNft);
+                    }
+                }
+                return ownedNfts;
             }
         }
 

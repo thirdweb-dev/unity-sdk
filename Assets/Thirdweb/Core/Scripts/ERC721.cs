@@ -106,7 +106,7 @@ namespace Thirdweb
                 {
                     Debug.LogWarning($"Multicall failed, attempting normal calls. Error: {e.Message}");
                     List<NFT> allNfts = new List<NFT>();
-                    for (int i = 0; i < totalSupply; i++)
+                    for (int i = start; i < end; i++)
                         allNfts.Add(await Get(i.ToString()));
                     return allNfts;
                 }
