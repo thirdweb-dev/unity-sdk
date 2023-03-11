@@ -4,11 +4,17 @@ using Thirdweb;
 
 public class Prefab_Reading : MonoBehaviour
 {
+    private const string TOKEN_ERC20_CONTRACT = "0x76Ec89310842DBD9d0AcA3B2E27858E85cdE595A";
+    private const string TOKEN_ERC721_CONTRACT = "0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC";
+    private const string TOKEN_ERC1155_CONTRACT = "0x82c488a1BC64ab3b91B927380cca9Db7bF347879";
+    private const string MARKETPLACE_CONTRACT = "0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A";
+    private const string PACK_CONTRACT = "0xC04104DE55dEC5d63542f7ADCf8171278942048E";
+
     public async void FetchERC20()
     {
         try
         {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xc70053b15F13625D40d5ae21d3624eABa702d15a");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC20_CONTRACT);
 
             Currency currencyInfo = await contract.ERC20.Get();
             Debugger.Instance.Log("[Fetch ERC20] Get", currencyInfo.ToString());
@@ -25,7 +31,7 @@ public class Prefab_Reading : MonoBehaviour
     {
         try
         {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x0Ae3359B31697f352118cf7CE1C7bea0E4e285F0");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC721_CONTRACT);
 
             NFT getResult = await contract.ERC721.Get("1");
             Debugger.Instance.Log("[Fetch ERC721] Get", getResult.ToString());
@@ -46,7 +52,7 @@ public class Prefab_Reading : MonoBehaviour
     {
         try
         {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xBA6d340e55F7cA896B6644a54f7D381f96bE98C0");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC1155_CONTRACT);
 
             NFT getResult = await contract.ERC1155.Get("1");
             Debugger.Instance.Log("[Fetch ERC1155] Get", getResult.ToString());
@@ -63,7 +69,7 @@ public class Prefab_Reading : MonoBehaviour
     {
         try
         {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
             Marketplace marketplace = contract.marketplace;
 
             List<Listing> getAllListingsResult = await marketplace.GetAllListings();
@@ -79,11 +85,10 @@ public class Prefab_Reading : MonoBehaviour
     {
         try
         {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xC04104DE55dEC5d63542f7ADCf8171278942048E");
-            Pack pack = contract.pack;
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(PACK_CONTRACT);
 
-            PackContents packContents = await pack.GetPackContents("0");
-            Debugger.Instance.Log("[Fetch Pack Contents] Pack #0", packContents.ToString());
+            PackContents packContents = await contract.pack.GetPackContents("0");
+            Debugger.Instance.Log("[Fetch Pack Contents] Pack #0", "ERC721 Contents:\n" + packContents.erc721Contents[0].ToString());
         }
         catch (System.Exception e)
         {

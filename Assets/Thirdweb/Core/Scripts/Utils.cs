@@ -147,7 +147,7 @@ namespace Thirdweb
         {
             List<Thirdweb.Contracts.Pack.ContractDefinition.Token> tokenList = new List<Contracts.Pack.ContractDefinition.Token>();
             // Add ERC20 Rewards
-            foreach (var erc20Reward in packContents.erc20Rewards)
+            foreach (var erc20Reward in packContents.erc20Contents)
             {
                 tokenList.Add(
                     new Thirdweb.Contracts.Pack.ContractDefinition.Token()
@@ -155,12 +155,12 @@ namespace Thirdweb
                         AssetContract = erc20Reward.contractAddress,
                         TokenType = 0,
                         TokenId = 0,
-                        TotalAmount = BigInteger.Parse(erc20Reward.totalRewards),
+                        TotalAmount = BigInteger.Parse(erc20Reward.totalRewards.ToWei()),
                     }
                 );
             }
             // Add ERC721 Rewards
-            foreach (var erc721Reward in packContents.erc721Rewards)
+            foreach (var erc721Reward in packContents.erc721Contents)
             {
                 tokenList.Add(
                     new Thirdweb.Contracts.Pack.ContractDefinition.Token()
@@ -173,7 +173,7 @@ namespace Thirdweb
                 );
             }
             // Add ERC1155 Rewards
-            foreach (var erc1155Reward in packContents.erc1155Rewards)
+            foreach (var erc1155Reward in packContents.erc1155Contents)
             {
                 tokenList.Add(
                     new Thirdweb.Contracts.Pack.ContractDefinition.Token()
@@ -192,19 +192,19 @@ namespace Thirdweb
         {
             List<BigInteger> rewardUnits = new List<BigInteger>();
             // Add ERC20 Rewards
-            foreach (var erc20Reward in packContents.erc20Rewards)
+            foreach (var content in packContents.erc20Contents)
             {
-                rewardUnits.Add(BigInteger.Parse(erc20Reward.quantityPerReward));
+                rewardUnits.Add(BigInteger.Parse(content.quantityPerReward.ToWei()));
             }
             // Add ERC721 Rewards
-            foreach (var erc721Reward in packContents.erc721Rewards)
+            foreach (var content in packContents.erc721Contents)
             {
                 rewardUnits.Add(1);
             }
             // Add ERC1155 Rewards
-            foreach (var erc1155Reward in packContents.erc1155Rewards)
+            foreach (var content in packContents.erc1155Contents)
             {
-                rewardUnits.Add(BigInteger.Parse(erc1155Reward.quantityPerReward));
+                rewardUnits.Add(BigInteger.Parse(content.quantityPerReward));
             }
             return rewardUnits;
         }

@@ -161,7 +161,7 @@ namespace Thirdweb
             else
             {
                 BigInteger currentAllowance = await tokenERC20Service.AllowanceQueryAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), spender);
-                BigInteger diff = BigInteger.Parse(amount) - currentAllowance;
+                BigInteger diff = BigInteger.Parse(amount.ToWei()) - currentAllowance;
                 TransactionResult result = new TransactionResult();
 
                 if (diff == 0)
@@ -194,7 +194,7 @@ namespace Thirdweb
             }
             else
             {
-                var receipt = await tokenERC20Service.TransferRequestAndWaitForReceiptAsync(to, BigInteger.Parse(amount));
+                var receipt = await tokenERC20Service.TransferRequestAndWaitForReceiptAsync(to, BigInteger.Parse(amount.ToWei()));
                 return receipt.ToTransactionResult();
             }
         }

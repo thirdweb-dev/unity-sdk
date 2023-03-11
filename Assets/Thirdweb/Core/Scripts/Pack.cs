@@ -180,38 +180,44 @@ namespace Thirdweb
             else
             {
                 var result = await packService.GetPackContentsQueryAsync(BigInteger.Parse(packId));
-                PackContents packContents = new PackContents();
-                List<ERC20Reward> erc20Rewards = new List<ERC20Reward>();
-                List<ERC721Reward> erc721Rewards = new List<ERC721Reward>();
-                List<ERC1155Reward> erc1155Rewards = new List<ERC1155Reward>();
+                var erc20R = new List<ERC20Contents>();
+                var erc721R = new List<ERC721Contents>();
+                var erc1155R = new List<ERC1155Contents>();
                 foreach (var tokenReward in result.Contents)
                 {
-                    switch (tokenReward.TokenType.ToString())
+                    switch (tokenReward.TokenType)
                     {
-                        case "ERC20":
-                            ERC20Reward tempERC20 = new ERC20Reward();
+                        case 0:
+                            var tempERC20 = new ERC20Contents();
                             tempERC20.contractAddress = tokenReward.AssetContract;
                             tempERC20.quantityPerReward = tokenReward.TotalAmount.ToString();
-                            erc20Rewards.Add(tempERC20);
+                            erc20R.Add(tempERC20);
+                            Debug.Log("Found ERC20");
                             break;
-                        case "ERC721":
-                            ERC721Reward tempERC721 = new ERC721Reward();
+                        case 1:
+                            var tempERC721 = new ERC721Contents();
                             tempERC721.contractAddress = tokenReward.AssetContract;
                             tempERC721.tokenId = tokenReward.TokenId.ToString();
-                            erc721Rewards.Add(tempERC721);
+                            erc721R.Add(tempERC721);
+                            Debug.Log("Found ERC721");
                             break;
-                        case "ERC1155":
-                            ERC1155Reward tempERC1155 = new ERC1155Reward();
+                        case 2:
+                            var tempERC1155 = new ERC1155Contents();
                             tempERC1155.contractAddress = tokenReward.AssetContract;
                             tempERC1155.tokenId = tokenReward.TokenId.ToString();
                             tempERC1155.quantityPerReward = tokenReward.TotalAmount.ToString();
-                            erc1155Rewards.Add(tempERC1155);
+                            erc1155R.Add(tempERC1155);
+                            Debug.Log("Found ERC1155");
                             break;
                         default:
                             break;
                     }
                 }
-                return packContents;
+                PackContents contents = new PackContents();
+                contents.erc20Contents = erc20R;
+                contents.erc721Contents = erc721R;
+                contents.erc1155Contents = erc1155R;
+                return contents;
             }
         }
 
@@ -364,7 +370,7 @@ namespace Thirdweb
     }
 
     [System.Serializable]
-    public struct PackRewards
+    public class PackRewards
     {
         public List<ERC20Reward> erc20Rewards;
         public List<ERC721Reward> erc721Rewards;
@@ -372,20 +378,38 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return "PackRewards:\n" + $"erc20Rewards: {erc20Rewards?.ToString()}\n" + $"erc721Rewards: {erc721Rewards?.ToString()}\n" + $"erc1155Rewards: {erc1155Rewards?.ToString()}\n";
+            string erc20str = "ERC20 Rewards:\n";
+            foreach (var reward in erc20Rewards)
+                erc20str += reward.ToString();
+            string erc721str = "ERC721 Rewards:\n";
+            foreach (var reward in erc721Rewards)
+                erc721str += reward.ToString();
+            string erc1155str = "ERC1155 Rewards:\n";
+            foreach (var reward in erc1155Rewards)
+                erc1155str += reward.ToString();
+            return "PackRewards:\n" + erc20str + erc721str + erc1155str;
         }
     }
 
     [System.Serializable]
     public class PackContents
     {
-        public List<ERC20Contents> erc20Rewards;
-        public List<ERC721Contents> erc721Rewards;
-        public List<ERC1155Contents> erc1155Rewards;
+        public List<ERC20Contents> erc20Contents;
+        public List<ERC721Contents> erc721Contents;
+        public List<ERC1155Contents> erc1155Contents;
 
         public override string ToString()
         {
-            return "PackContents:\n" + $"erc20Rewards: {erc20Rewards?.ToString()}\n" + $"erc721Rewards: {erc721Rewards?.ToString()}\n" + $"erc1155Rewards: {erc1155Rewards?.ToString()}\n";
+            string erc20str = "ERC20 Contents:\n";
+            foreach (var content in erc20Contents)
+                erc20str += content.ToString();
+            string erc721str = "ERC721 Contents:\n";
+            foreach (var content in erc721Contents)
+                erc721str += content.ToString();
+            string erc1155str = "ERC1155 Contents:\n";
+            foreach (var content in erc1155Contents)
+                erc1155str += content.ToString();
+            return "PackContents:\n" + erc20str + erc721str + erc1155str;
         }
     }
 

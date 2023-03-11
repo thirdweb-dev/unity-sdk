@@ -4,12 +4,18 @@ using System.Collections.Generic;
 
 public class Prefab_Writing : MonoBehaviour
 {
+    private const string TOKEN_ERC20_CONTRACT = "0x76Ec89310842DBD9d0AcA3B2E27858E85cdE595A";
+    private const string TOKEN_ERC721_CONTRACT = "0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC";
+    private const string TOKEN_ERC1155_CONTRACT = "0x82c488a1BC64ab3b91B927380cca9Db7bF347879";
+    private const string MARKETPLACE_CONTRACT = "0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A";
+    private const string PACK_CONTRACT = "0xC04104DE55dEC5d63542f7ADCf8171278942048E";
+
     public async void MintERC20()
     {
         try
         {
             // Traditional Minting (Requires Minter Role)
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x76Ec89310842DBD9d0AcA3B2E27858E85cdE595A");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC20_CONTRACT);
 
             // Minting
             // var transactionResult = await contract.ERC20.Mint("1.2");
@@ -42,7 +48,7 @@ public class Prefab_Writing : MonoBehaviour
         try
         {
             // NFT Collection Signature Minting (Requires Mint Permission)
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC721_CONTRACT);
 
             NFTMetadata meta = new NFTMetadata()
             {
@@ -84,7 +90,7 @@ public class Prefab_Writing : MonoBehaviour
     {
         try
         {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x82c488a1BC64ab3b91B927380cca9Db7bF347879");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC1155_CONTRACT);
 
             NFTMetadata meta = new NFTMetadata()
             {
@@ -147,10 +153,10 @@ public class Prefab_Writing : MonoBehaviour
     {
         try
         {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
             Marketplace marketplace = contract.marketplace;
 
-            TransactionResult transactionResult = await marketplace.BuyListing("0", 1);
+            var transactionResult = await marketplace.BuyListing("0", 1);
             Debugger.Instance.Log("[Buy Listing] Successful", transactionResult.ToString());
         }
         catch (System.Exception e)
@@ -163,46 +169,45 @@ public class Prefab_Writing : MonoBehaviour
     {
         try
         {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0xC04104DE55dEC5d63542f7ADCf8171278942048E");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(PACK_CONTRACT);
             Pack pack = contract.pack;
 
-            var result = await pack.Create(
-                new NewPackInput()
-                {
-                    rewardsPerPack = "1",
-                    packMetadata = new NFTMetadata()
-                    {
-                        description = "Kitty Pack - Contains Kitty NFTs and Tokens!",
-                        image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
-                        name = "My Epic Kitty Pack"
-                    },
-                    erc20Rewards = new List<ERC20Contents>()
-                    {
-                        new ERC20Contents()
-                        {
-                            contractAddress = "0x76Ec89310842DBD9d0AcA3B2E27858E85cdE595A",
-                            quantityPerReward = "1",
-                            totalRewards = "100"
-                        }
-                    },
-                    erc721Rewards = new List<ERC721Contents>()
-                    {
-                        new ERC721Contents() { contractAddress = "0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC", tokenId = "0", }
-                    },
-                    erc1155Rewards = new List<ERC1155Contents>()
-                    {
-                        new ERC1155Contents()
-                        {
-                            contractAddress = "0x76Ec89310842DBD9d0AcA3B2E27858E85cdE595A",
-                            tokenId = "0",
-                            quantityPerReward = "1",
-                            totalRewards = "100"
-                        }
-                    },
-                }
-            );
-            Debugger.Instance.Log("[Create Pack] Successful", result.ToString());
-            return;
+            // NewPackInput newPackInput = new NewPackInput()
+            // {
+            //     rewardsPerPack = "1",
+            //     packMetadata = new NFTMetadata()
+            //     {
+            //         description = "Kitty Pack - Contains Kitty NFTs and Tokens!",
+            //         image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
+            //         name = "My Epic Kitty Pack"
+            //     },
+            //     erc20Rewards = new List<ERC20Contents>()
+            //     {
+            //         new ERC20Contents()
+            //         {
+            //             contractAddress = TOKEN_ERC20_CONTRACT,
+            //             quantityPerReward = "1",
+            //             totalRewards = "100"
+            //         }
+            //     },
+            //     erc721Rewards = new List<ERC721Contents>()
+            //     {
+            //         new ERC721Contents() { contractAddress = TOKEN_ERC721_CONTRACT, tokenId = "0", }
+            //     },
+            //     erc1155Rewards = new List<ERC1155Contents>()
+            //     {
+            //         new ERC1155Contents()
+            //         {
+            //             contractAddress = TOKEN_ERC1155_CONTRACT,
+            //             tokenId = "3",
+            //             quantityPerReward = "1",
+            //             totalRewards = "100"
+            //         }
+            //     },
+            // };
+            // // Make sure you approve tokens first
+            // var result = await pack.Create(newPackInput);
+            // Debugger.Instance.Log("[Create Pack] Successful", result.ToString());
 
             PackRewards rewards = await pack.Open("0");
             Debugger.Instance.Log("[Open Pack] Successful", rewards.ToString());
