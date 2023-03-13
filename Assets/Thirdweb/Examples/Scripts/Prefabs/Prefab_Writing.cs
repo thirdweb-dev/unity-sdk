@@ -4,6 +4,7 @@ using Thirdweb;
 public class Prefab_Writing : MonoBehaviour
 {
     private const string TOKEN_ERC20_CONTRACT = "0x76Ec89310842DBD9d0AcA3B2E27858E85cdE595A";
+    private const string DROP_ERC20_CONTRACT = "0x450b943729Ddba196Ab58b589Cea545551DF71CC";
     private const string TOKEN_ERC721_CONTRACT = "0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC";
     private const string DROP_ERC721_CONTRACT = "0x8ED1C3618d70785d23E5fdE767058FA6cA6D9E43";
     private const string TOKEN_ERC1155_CONTRACT = "0x82c488a1BC64ab3b91B927380cca9Db7bF347879";
@@ -16,27 +17,32 @@ public class Prefab_Writing : MonoBehaviour
         try
         {
             // Traditional Minting (Requires Minter Role)
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC20_CONTRACT);
+            // Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC20_CONTRACT);
 
             // Minting
             // var transactionResult = await contract.ERC20.Mint("1.2");
             // Debugger.Instance.Log("[Mint ERC20] Successful", transactionResult.ToString());
 
             // Signature Minting
-            var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
-            var payload = new ERC20MintPayload(receiverAddress, "3.2");
-            var signedPayload = await contract.ERC20.signature.Generate(payload);
-            bool isValid = await contract.ERC20.signature.Verify(signedPayload);
-            if (isValid)
-            {
-                Debugger.Instance.Log("Sign minting ERC20...", $"Signature: {signedPayload.signature}");
-                var result = await contract.ERC20.signature.Mint(signedPayload);
-                Debugger.Instance.Log("[Mint (Signature) ERC20] Successful", result.ToString());
-            }
-            else
-            {
-                Debugger.Instance.Log("Signature Invalid", $"Signature: {signedPayload.signature} is invalid!");
-            }
+            // var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            // var payload = new ERC20MintPayload(receiverAddress, "3.2");
+            // var signedPayload = await contract.ERC20.signature.Generate(payload);
+            // bool isValid = await contract.ERC20.signature.Verify(signedPayload);
+            // if (isValid)
+            // {
+            //     Debugger.Instance.Log("Sign minting ERC20...", $"Signature: {signedPayload.signature}");
+            //     var result = await contract.ERC20.signature.Mint(signedPayload);
+            //     Debugger.Instance.Log("[Mint (Signature) ERC20] Successful", result.ToString());
+            // }
+            // else
+            // {
+            //     Debugger.Instance.Log("Signature Invalid", $"Signature: {signedPayload.signature} is invalid!");
+            // }
+
+            // Claiming
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC20_CONTRACT);
+            var result = await contract.ERC20.Claim("0.3");
+            Debugger.Instance.Log("[Claim ERC20] Successful", result.ToString());
         }
         catch (System.Exception e)
         {
@@ -138,7 +144,7 @@ public class Prefab_Writing : MonoBehaviour
 
             Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC1155_CONTRACT);
             TransactionResult transactionResult = await contract.ERC1155.Claim("0", 1);
-            Debugger.Instance.Log("[Mint ERC1155] Successful", transactionResult.ToString());
+            Debugger.Instance.Log("[Claim ERC1155] Successful", transactionResult.ToString());
 
             // Edition Drop - Signature minting additional supply
             // var payload = new ERC1155MintAdditionalPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", "1");

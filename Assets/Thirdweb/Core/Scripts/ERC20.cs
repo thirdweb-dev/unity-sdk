@@ -5,6 +5,7 @@ using Thirdweb.Contracts.TokenERC20;
 using Thirdweb.Contracts.DropERC20;
 using UnityEngine;
 using TokenERC20Contract = Thirdweb.Contracts.TokenERC20.ContractDefinition;
+using System.Collections.Generic;
 
 namespace Thirdweb
 {
@@ -29,8 +30,7 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
-        public ERC20(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "erc20"))
+        public ERC20(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "erc20"))
         {
             if (!Utils.IsWebGLBuild())
             {
@@ -39,7 +39,7 @@ namespace Thirdweb
             }
 
             this.signature = new ERC20Signature(baseRoute, contractAddress);
-            this.claimConditions = new ERC20ClaimConditions(baseRoute);
+            this.claimConditions = new ERC20ClaimConditions(baseRoute, contractAddress);
         }
 
         // READ FUNCTIONS
@@ -226,14 +226,14 @@ namespace Thirdweb
             }
             else
             {
-                return await ClaimTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), int.Parse(amount));
+                return await ClaimTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), amount);
             }
         }
 
         /// <summary>
         /// Claim a given amount of currency to a given destination wallet for compatible drop contracts
         /// </summary>
-        public async Task<TransactionResult> ClaimTo(string address, int amount)
+        public async Task<TransactionResult> ClaimTo(string address, string amount)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -241,19 +241,21 @@ namespace Thirdweb
             }
             else
             {
-                var claimConditionID = await dropERC20Service.ClaimConditionQueryAsync();
-                var claimConditions = await dropERC20Service.GetClaimConditionByIdQueryAsync(claimConditionID.CurrentStartId);
-                Contracts.DropERC20.ContractDefinition.AllowlistProof proof = new Contracts.DropERC20.ContractDefinition.AllowlistProof(); // TODO: Check actual process
-                byte[] data = new byte[0];
+                var claimCondition = await claimConditions.GetActive();
                 var result = await dropERC20Service.ClaimRequestAndWaitForReceiptAsync(
                     address,
-                    (BigInteger)amount,
-                    claimConditions.Condition.Currency,
-                    claimConditions.Condition.PricePerToken,
-                    proof,
-                    data
+                    BigInteger.Parse(amount.ToWei()),
+                    claimCondition.currencyAddress,
+                    BigInteger.Parse(claimCondition.currencyMetadata.value),
+                    new Contracts.DropERC20.ContractDefinition.AllowlistProof
+                    {
+                        Proof = new List<byte[]>(),
+                        Currency = claimCondition.currencyAddress,
+                        PricePerToken = BigInteger.Parse(claimCondition.currencyMetadata.value),
+                        QuantityLimitPerWallet = BigInteger.Parse(claimCondition.maxClaimablePerWallet),
+                    }, // TODO add support for allowlists
+                    new byte[] { }
                 );
-
                 return result.ToTransactionResult();
             }
         }
@@ -344,8 +346,15 @@ namespace Thirdweb
 #nullable enable
     public class ERC20ClaimConditions : Routable
     {
-        public ERC20ClaimConditions(string parentRoute)
-            : base(Routable.append(parentRoute, "claimConditions")) { }
+        private DropERC20Service dropERC20Service;
+
+        public ERC20ClaimConditions(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "claimConditions"))
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+            }
+        }
 
         /// <summary>
         /// Get the active claim condition
@@ -358,7 +367,17 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var id = await dropERC20Service.GetActiveClaimConditionIdQueryAsync();
+                var data = await dropERC20Service.GetClaimConditionByIdQueryAsync(id);
+                return new ClaimConditions()
+                {
+                    availableSupply = (data.Condition.MaxClaimableSupply - data.Condition.SupplyClaimed).ToString(),
+                    currencyAddress = data.Condition.Currency,
+                    currencyMetadata = new CurrencyValue() { value = data.Condition.PricePerToken.ToString(), },
+                    currentMintSupply = data.Condition.SupplyClaimed.ToString(),
+                    maxClaimablePerWallet = data.Condition.QuantityLimitPerWallet.ToString(),
+                    maxClaimableSupply = data.Condition.MaxClaimableSupply.ToString(),
+                };
             }
         }
 
@@ -421,8 +440,7 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "signature"))
+        public ERC20Signature(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "signature"))
         {
             if (!Utils.IsWebGLBuild())
                 this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
