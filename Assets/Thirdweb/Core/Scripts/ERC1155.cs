@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Numerics;
 using UnityEngine;
-using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Thirdweb.Contracts.TokenERC1155;
 using Thirdweb.Contracts.DropERC1155;
@@ -32,8 +31,7 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC1155 compatible contract.
         /// </summary>
-        public ERC1155(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "erc1155"))
+        public ERC1155(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "erc1155"))
         {
             if (!Utils.IsWebGLBuild())
             {
@@ -42,7 +40,7 @@ namespace Thirdweb
             }
 
             this.signature = new ERC1155Signature(baseRoute, contractAddress);
-            this.claimConditions = new ERC1155ClaimConditions(baseRoute);
+            this.claimConditions = new ERC1155ClaimConditions(baseRoute, contractAddress);
         }
 
         // READ FUNCTIONS
@@ -272,30 +270,46 @@ namespace Thirdweb
         /// <summary>
         /// Claim NFTs from a Drop contract
         /// </summary>
-        public async Task<TransactionResult> Claim(string tokenId, int amount)
+        public async Task<TransactionResult> Claim(string tokenId, int quantity)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("claim"), Utils.ToJsonStringArray(tokenId, amount));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("claim"), Utils.ToJsonStringArray(tokenId, quantity));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return await ClaimTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), tokenId, quantity);
             }
         }
 
         /// <summary>
         /// Claim NFTs from a Drop contract and send them to the given address
         /// </summary>
-        public async Task<TransactionResult> ClaimTo(string address, string tokenId, int amount)
+        public async Task<TransactionResult> ClaimTo(string address, string tokenId, int quantity)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("claimTo"), Utils.ToJsonStringArray(address, tokenId, amount));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("claimTo"), Utils.ToJsonStringArray(address, tokenId, quantity));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var claimCondition = await claimConditions.GetActive(tokenId);
+                var result = await dropERC1155Service.ClaimRequestAndWaitForReceiptAsync(
+                    address,
+                    BigInteger.Parse(tokenId),
+                    quantity,
+                    claimCondition.currencyAddress,
+                    BigInteger.Parse(claimCondition.currencyMetadata.value),
+                    new Contracts.DropERC1155.ContractDefinition.AllowlistProof
+                    {
+                        Proof = new List<byte[]>(),
+                        Currency = claimCondition.currencyAddress,
+                        PricePerToken = BigInteger.Parse(claimCondition.currencyMetadata.value),
+                        QuantityLimitPerWallet = BigInteger.Parse(claimCondition.maxClaimablePerWallet),
+                    }, // TODO add support for allowlists
+                    new byte[] { }
+                );
+                return result.ToTransactionResult();
             }
         }
 
@@ -369,8 +383,15 @@ namespace Thirdweb
     /// </summary>
     public class ERC1155ClaimConditions : Routable
     {
-        public ERC1155ClaimConditions(string parentRoute)
-            : base(Routable.append(parentRoute, "claimConditions")) { }
+        private DropERC1155Service dropERC1155Service;
+
+        public ERC1155ClaimConditions(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "claimConditions"))
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                this.dropERC1155Service = new DropERC1155Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+            }
+        }
 
         /// <summary>
         /// Get the active claim condition
@@ -383,7 +404,18 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var tokenIdParsed = BigInteger.Parse(tokenId);
+                var id = await dropERC1155Service.GetActiveClaimConditionIdQueryAsync(tokenIdParsed);
+                var data = await dropERC1155Service.GetClaimConditionByIdQueryAsync(tokenIdParsed, id);
+                return new ClaimConditions()
+                {
+                    availableSupply = (data.Condition.MaxClaimableSupply - data.Condition.SupplyClaimed).ToString(),
+                    currencyAddress = data.Condition.Currency,
+                    currencyMetadata = new CurrencyValue() { value = data.Condition.PricePerToken.ToString(), },
+                    currentMintSupply = data.Condition.SupplyClaimed.ToString(),
+                    maxClaimablePerWallet = data.Condition.QuantityLimitPerWallet.ToString(),
+                    maxClaimableSupply = data.Condition.MaxClaimableSupply.ToString(),
+                };
             }
         }
 
@@ -540,8 +572,7 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC1155Signature(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "signature"))
+        public ERC1155Signature(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "signature"))
         {
             if (!Utils.IsWebGLBuild())
                 this.tokenERC1155Service = new TokenERC1155Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
