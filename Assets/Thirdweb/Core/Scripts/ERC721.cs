@@ -31,8 +31,7 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC721 compatible contract.
         /// </summary>
-        public ERC721(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "erc721"))
+        public ERC721(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "erc721"))
         {
             if (!Utils.IsWebGLBuild())
             {
@@ -41,7 +40,7 @@ namespace Thirdweb
             }
 
             this.signature = new ERC721Signature(baseRoute, contractAddress);
-            this.claimConditions = new ERC721ClaimConditions(baseRoute);
+            this.claimConditions = new ERC721ClaimConditions(baseRoute, contractAddress);
         }
 
         // READ FUNCTIONS
@@ -331,7 +330,22 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var claimCondition = await claimConditions.GetActive();
+                var result = await dropERC721Service.ClaimRequestAndWaitForReceiptAsync(
+                    address,
+                    quantity,
+                    claimCondition.currencyAddress,
+                    BigInteger.Parse(claimCondition.currencyMetadata.value),
+                    new Contracts.DropERC721.ContractDefinition.AllowlistProof
+                    {
+                        Proof = new List<byte[]>(),
+                        Currency = claimCondition.currencyAddress,
+                        PricePerToken = BigInteger.Parse(claimCondition.currencyMetadata.value),
+                        QuantityLimitPerWallet = BigInteger.Parse(claimCondition.maxClaimablePerWallet),
+                    }, // TODO add support for allowlists
+                    new byte[] { }
+                );
+                return new TransactionResult[] { result.ToTransactionResult() };
             }
         }
 
@@ -373,8 +387,16 @@ namespace Thirdweb
     /// </summary>
     public class ERC721ClaimConditions : Routable
     {
-        public ERC721ClaimConditions(string parentRoute)
-            : base(Routable.append(parentRoute, "claimConditions")) { }
+        private DropERC721Service dropERC721Service;
+
+        public ERC721ClaimConditions(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "claimConditions"))
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                // TODO this won't work for signatureDrop
+                this.dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+            }
+        }
 
         /// <summary>
         /// Get the active claim condition
@@ -387,7 +409,17 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var id = await dropERC721Service.GetActiveClaimConditionIdQueryAsync();
+                var data = await dropERC721Service.GetClaimConditionByIdQueryAsync(id);
+                return new ClaimConditions()
+                {
+                    availableSupply = (data.Condition.MaxClaimableSupply - data.Condition.SupplyClaimed).ToString(),
+                    currencyAddress = data.Condition.Currency,
+                    currencyMetadata = new CurrencyValue() { value = data.Condition.PricePerToken.ToString(), },
+                    currentMintSupply = data.Condition.SupplyClaimed.ToString(),
+                    maxClaimablePerWallet = data.Condition.QuantityLimitPerWallet.ToString(),
+                    maxClaimableSupply = data.Condition.MaxClaimableSupply.ToString(),
+                };
             }
         }
 
@@ -508,8 +540,7 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC721Signature(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "signature"))
+        public ERC721Signature(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "signature"))
         {
             if (!Utils.IsWebGLBuild())
                 this.tokenERC721Service = new TokenERC721Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
