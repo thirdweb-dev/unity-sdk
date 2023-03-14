@@ -1856,53 +1856,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7276129279946335585, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7276129279946335585, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7276129279946335585, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7276129279946335585, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7276129279946335585, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7877806352732901850, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
       propertyPath: m_Name
       value: Prefab_ConnectWalletNative
-      objectReference: {fileID: 0}
-    - target: {fileID: 8534970399124805816, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8534970399124805816, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8534970399124805816, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8534970399124805816, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8534970399124805816, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8534970400187138540, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5970370bfc0e0d5468d98e62e7ad038d, type: 3}
