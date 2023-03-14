@@ -31,12 +31,13 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC721 compatible contract.
         /// </summary>
-        public ERC721(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "erc721"))
+        public ERC721(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "erc721"))
         {
             if (!Utils.IsWebGLBuild())
             {
-                this.tokenERC721Service = new TokenERC721Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
-                this.dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.tokenERC721Service = new TokenERC721Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
+                this.dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
             }
 
             this.signature = new ERC721Signature(baseRoute, contractAddress);
@@ -389,12 +390,13 @@ namespace Thirdweb
     {
         private DropERC721Service dropERC721Service;
 
-        public ERC721ClaimConditions(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "claimConditions"))
+        public ERC721ClaimConditions(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "claimConditions"))
         {
             if (!Utils.IsWebGLBuild())
             {
                 // TODO this won't work for signatureDrop
-                this.dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
             }
         }
 
@@ -540,10 +542,11 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC721Signature(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "signature"))
+        public ERC721Signature(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "signature"))
         {
             if (!Utils.IsWebGLBuild())
-                this.tokenERC721Service = new TokenERC721Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.tokenERC721Service = new TokenERC721Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
         }
 
         /// <summary>
@@ -575,7 +578,7 @@ namespace Thirdweb
                 };
 
                 string signature = Thirdweb.EIP712.GenerateSignature_TokenERC721(
-                    ThirdwebManager.Instance.SDK.account,
+                    ThirdwebManager.Instance.SDK.nativeSession.account,
                     "TokenERC721",
                     "1",
                     await ThirdwebManager.Instance.SDK.wallet.GetChainId(),

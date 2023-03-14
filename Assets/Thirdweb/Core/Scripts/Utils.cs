@@ -5,6 +5,10 @@ using System.Numerics;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Nethereum.Hex.HexConvertors.Extensions;
+using Nethereum.Web3.Accounts;
+using System.IO;
+using UnityEngine;
+using WalletConnectSharp.Unity;
 
 namespace Thirdweb
 {
@@ -236,9 +240,50 @@ namespace Thirdweb
 
         public async static Task<BigInteger> GetCurrentBlockTimeStamp()
         {
-            var blockNumber = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
-            var block = await ThirdwebManager.Instance.SDK.web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
+            var blockNumber = await ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+            var block = await ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
             return block.Timestamp.Value;
+        }
+
+        public static Account GenerateAccount(int chainId, string privateKey = null)
+        {
+            var path = Application.persistentDataPath + "/account.json";
+            var keyStoreService = new Nethereum.KeyStore.KeyStoreScryptService();
+            var password = SystemInfo.deviceUniqueIdentifier;
+
+            if (privateKey != null)
+            {
+                return new Account(privateKey, chainId);
+            }
+            else
+            {
+                if (File.Exists(path))
+                {
+                    var encryptedJson = File.ReadAllText(path);
+                    var key = keyStoreService.DecryptKeyStoreFromJson(password, encryptedJson);
+                    return new Account(key, chainId);
+                }
+                else
+                {
+                    var scryptParams = new Nethereum.KeyStore.Model.ScryptParams
+                    {
+                        Dklen = 32,
+                        N = 262144,
+                        R = 1,
+                        P = 8
+                    };
+                    var ecKey = Nethereum.Signer.EthECKey.GenerateKey();
+                    var keyStore = keyStoreService.EncryptAndGenerateKeyStore(password, ecKey.GetPrivateKeyAsBytes(), ecKey.GetPublicAddress(), scryptParams);
+                    var json = keyStoreService.SerializeKeyStoreToJson(keyStore);
+                    File.WriteAllText(path, json);
+                    return new Account(ecKey, chainId);
+                }
+            }
+        }
+
+        public static bool ActiveWalletConnectSession()
+        {
+            return WalletConnect.Instance != null && WalletConnect.Instance.Session != null && WalletConnect.Instance.Session.Connected;
         }
     }
 }

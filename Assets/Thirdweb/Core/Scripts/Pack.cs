@@ -32,7 +32,7 @@ namespace Thirdweb
 
             if (!Utils.IsWebGLBuild())
             {
-                this.packService = new PackService(ThirdwebManager.Instance.SDK.web3, address);
+                this.packService = new PackService(ThirdwebManager.Instance.SDK.nativeSession.web3, address);
             }
         }
 

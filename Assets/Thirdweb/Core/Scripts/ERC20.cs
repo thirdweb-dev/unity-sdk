@@ -30,12 +30,13 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
-        public ERC20(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "erc20"))
+        public ERC20(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "erc20"))
         {
             if (!Utils.IsWebGLBuild())
             {
-                this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
-                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
+                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
             }
 
             this.signature = new ERC20Signature(baseRoute, contractAddress);
@@ -55,10 +56,16 @@ namespace Thirdweb
             }
             else
             {
-                Currency c = new Currency();
-                c.decimals = (await tokenERC20Service.DecimalsQueryAsync()).ToString();
-                c.name = await tokenERC20Service.NameQueryAsync();
-                c.symbol = await tokenERC20Service.SymbolQueryAsync();
+                var fnDecimals = new TokenERC20Contract.DecimalsFunction();
+                var resDecimals = await TransactionManager.ThirdwebRead<TokenERC20Contract.DecimalsFunction, TokenERC20Contract.DecimalsOutputDTO>(tokenERC20Service.ContractHandler, fnDecimals);
+
+                var fnName = new TokenERC20Contract.NameFunction();
+                var resName = await TransactionManager.ThirdwebRead<TokenERC20Contract.NameFunction, TokenERC20Contract.NameOutputDTO>(tokenERC20Service.ContractHandler, fnName);
+
+                var fnSymbol = new TokenERC20Contract.SymbolFunction();
+                var resSymbol = await TransactionManager.ThirdwebRead<TokenERC20Contract.SymbolFunction, TokenERC20Contract.SymbolOutputDTO>(tokenERC20Service.ContractHandler, fnSymbol);
+
+                Currency c = new Currency(resDecimals.ReturnValue1.ToString(), resName.ReturnValue1, resSymbol.ReturnValue1);
                 return c;
             }
         }
@@ -286,6 +293,8 @@ namespace Thirdweb
             }
             else
             {
+                TokenERC20Contract.MintToFunction fn = new TokenERC20Contract.MintToFunction() { To = address, Amount = BigInteger.Parse(amount.ToWei()) };
+                return await TransactionManager.ThirdwebWrite(tokenERC20Service.ContractHandler, fn);
                 var receipt = await tokenERC20Service.MintToRequestAndWaitForReceiptAsync(address, BigInteger.Parse(amount.ToWei()));
                 return receipt.ToTransactionResult();
             }
@@ -348,11 +357,12 @@ namespace Thirdweb
     {
         private DropERC20Service dropERC20Service;
 
-        public ERC20ClaimConditions(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "claimConditions"))
+        public ERC20ClaimConditions(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "claimConditions"))
         {
             if (!Utils.IsWebGLBuild())
             {
-                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.dropERC20Service = new DropERC20Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
             }
         }
 
@@ -440,10 +450,11 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "signature"))
+        public ERC20Signature(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "signature"))
         {
             if (!Utils.IsWebGLBuild())
-                this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.tokenERC20Service = new TokenERC20Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
         }
 
         /// <summary>
@@ -472,7 +483,7 @@ namespace Thirdweb
                 };
 
                 string signature = Thirdweb.EIP712.GenerateSignature_TokenERC20(
-                    ThirdwebManager.Instance.SDK.account,
+                    ThirdwebManager.Instance.SDK.nativeSession.account,
                     await tokenERC20Service.NameQueryAsync(),
                     "1",
                     await ThirdwebManager.Instance.SDK.wallet.GetChainId(),

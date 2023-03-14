@@ -39,7 +39,7 @@ namespace Thirdweb
 
             if (!Utils.IsWebGLBuild())
             {
-                this.marketplaceService = new MarketplaceService(ThirdwebManager.Instance.SDK.web3, address);
+                this.marketplaceService = new MarketplaceService(ThirdwebManager.Instance.SDK.nativeSession.web3, address);
             }
         }
 

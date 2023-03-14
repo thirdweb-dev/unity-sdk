@@ -37,9 +37,9 @@ namespace Thirdweb
                 throw new UnityException("This functionality is not yet available on your current platform.");
 
                 var deploymentMessage = new DropERC721Deployment();
-                var deploymentHandler = ThirdwebManager.Instance.SDK.web3.Eth.GetContractDeploymentHandler<DropERC721Deployment>();
+                var deploymentHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContractDeploymentHandler<DropERC721Deployment>();
                 var deploymentReceipt = await deploymentHandler.SendRequestAndWaitForReceiptAsync(deploymentMessage);
-                DropERC721Service dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.web3, deploymentReceipt.ContractAddress);
+                DropERC721Service dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.nativeSession.web3, deploymentReceipt.ContractAddress);
                 var initializeReceipt = await dropERC721Service.InitializeRequestAndWaitForReceiptAsync(
                     defaultAdmin: await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
                     name: metadata.name,

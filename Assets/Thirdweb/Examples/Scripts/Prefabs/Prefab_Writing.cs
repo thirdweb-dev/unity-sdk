@@ -17,11 +17,11 @@ public class Prefab_Writing : MonoBehaviour
         try
         {
             // Traditional Minting (Requires Minter Role)
-            // Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC20_CONTRACT);
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC20_CONTRACT);
 
             // Minting
-            // var transactionResult = await contract.ERC20.Mint("1.2");
-            // Debugger.Instance.Log("[Mint ERC20] Successful", transactionResult.ToString());
+            var transactionResult = await contract.ERC20.Mint("1.2");
+            Debugger.Instance.Log("[Mint ERC20] Successful", transactionResult.ToString());
 
             // Signature Minting
             // var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
@@ -40,9 +40,9 @@ public class Prefab_Writing : MonoBehaviour
             // }
 
             // Claiming
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC20_CONTRACT);
-            var result = await contract.ERC20.Claim("0.3");
-            Debugger.Instance.Log("[Claim ERC20] Successful", result.ToString());
+            // Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC20_CONTRACT);
+            // var result = await contract.ERC20.Claim("0.3");
+            // Debugger.Instance.Log("[Claim ERC20] Successful", result.ToString());
         }
         catch (System.Exception e)
         {
@@ -55,18 +55,18 @@ public class Prefab_Writing : MonoBehaviour
         try
         {
             // NFT Collection Signature Minting (Requires Mint Permission)
-            // Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC721_CONTRACT);
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC721_CONTRACT);
 
-            // NFTMetadata meta = new NFTMetadata()
-            // {
-            //     name = "Unity NFT",
-            //     description = "Minted From Unity",
-            //     image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
-            // };
+            NFTMetadata meta = new NFTMetadata()
+            {
+                name = "Unity NFT",
+                description = "Minted From Unity",
+                image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
+            };
 
             // Minting
-            // var result = await contract.ERC721.Mint(meta);
-            // Debugger.Instance.Log("[Mint ERC721] Successful", result.ToString());
+            var result = await contract.ERC721.Mint(meta);
+            Debugger.Instance.Log("[Mint ERC721] Successful", result.ToString());
 
             // Signature Minting
             // var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
@@ -85,9 +85,9 @@ public class Prefab_Writing : MonoBehaviour
             // }
 
             // NFT Drop Claiming
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC721_CONTRACT);
-            var result = await contract.ERC721.Claim(1);
-            Debugger.Instance.Log("[Claim ERC721] Successful", result[0].ToString());
+            // Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC721_CONTRACT);
+            // var result = await contract.ERC721.Claim(1);
+            // Debugger.Instance.Log("[Claim ERC721] Successful", result[0].ToString());
         }
         catch (System.Exception e)
         {
@@ -99,18 +99,18 @@ public class Prefab_Writing : MonoBehaviour
     {
         try
         {
-            // Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC1155_CONTRACT);
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC1155_CONTRACT);
 
-            // NFTMetadata meta = new NFTMetadata()
-            // {
-            //     name = "Unity NFT",
-            //     description = "Minted From Unity",
-            //     image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
-            // };
+            NFTMetadata meta = new NFTMetadata()
+            {
+                name = "Unity NFT",
+                description = "Minted From Unity",
+                image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
+            };
 
             // Minting
-            // var result = await contract.ERC1155.Mint(new NFTMetadataWithSupply() { supply = 10, metadata = meta });
-            // Debugger.Instance.Log("[Mint ERC1155] Successful", result.ToString());
+            var result = await contract.ERC1155.Mint(new NFTMetadataWithSupply() { supply = 10, metadata = meta });
+            Debugger.Instance.Log("[Mint ERC1155] Successful", result.ToString());
             // You can use an existing token ID to mint additional supply
             // var result = await contract.ERC1155.MintAdditionalSupply("0", 10);
             // Debugger.Instance.Log("[Mint Additional Supply ERC1155] Successful", result.ToString());
@@ -142,9 +142,9 @@ public class Prefab_Writing : MonoBehaviour
             //     return;
             // }
 
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC1155_CONTRACT);
-            TransactionResult transactionResult = await contract.ERC1155.Claim("0", 1);
-            Debugger.Instance.Log("[Claim ERC1155] Successful", transactionResult.ToString());
+            // Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC1155_CONTRACT);
+            // TransactionResult transactionResult = await contract.ERC1155.Claim("0", 1);
+            // Debugger.Instance.Log("[Claim ERC1155] Successful", transactionResult.ToString());
 
             // Edition Drop - Signature minting additional supply
             // var payload = new ERC1155MintAdditionalPayload("0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", "1");

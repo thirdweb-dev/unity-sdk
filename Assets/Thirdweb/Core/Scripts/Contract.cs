@@ -69,7 +69,7 @@ namespace Thirdweb
             }
             else
             {
-                BigInteger balance = await ThirdwebManager.Instance.SDK.web3.Eth.GetBalance.SendRequestAsync(address);
+                BigInteger balance = await ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetBalance.SendRequestAsync(address);
                 CurrencyValue cv = new CurrencyValue();
                 cv.value = balance.ToString();
                 cv.displayValue = balance.ToString().ToEth();
@@ -97,7 +97,7 @@ namespace Thirdweb
                 if (this.abi == null)
                     throw new UnityException("You must pass an ABI for native platform custom calls");
 
-                var contract = ThirdwebManager.Instance.SDK.web3.Eth.GetContract(this.abi, this.address);
+                var contract = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContract(this.abi, this.address);
                 var function = contract.GetFunction(functionName);
                 return await function.CallAsync<T>(args);
             }
@@ -141,7 +141,7 @@ namespace Thirdweb
                 if (this.abi == null)
                     throw new UnityException("You must pass an ABI for native platform custom calls");
 
-                var contract = ThirdwebManager.Instance.SDK.web3.Eth.GetContract(this.abi, this.address);
+                var contract = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContract(this.abi, this.address);
                 var function = contract.GetFunction(functionName);
                 var receipt = await function.SendTransactionAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, args);
                 return receipt.ToTransactionResult();

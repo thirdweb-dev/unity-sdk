@@ -47,3 +47,5 @@ MonoBehaviour:
   chain: 5
   rpcOverride: 
   chainIdOverride: -1
+  storageIpfsGatewayUrl: https://gateway.ipfscdn.io/ipfs/
+  storageApiToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGJiOUUwMDRlNDk4NDhFOTA2NUMyREQ0NTg2NmZCZjUzNDRlYzNFREEiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2Mzk2MDk0OTkzNiwibmFtZSI6IjB4RmlyZWtlZXBlciJ9.uaM2jx0woUpTK7QXMLlUQ2It14OkJ_9M4_6bJbe7Np4

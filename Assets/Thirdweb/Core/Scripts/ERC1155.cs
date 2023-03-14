@@ -31,12 +31,13 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC1155 compatible contract.
         /// </summary>
-        public ERC1155(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "erc1155"))
+        public ERC1155(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "erc1155"))
         {
             if (!Utils.IsWebGLBuild())
             {
-                this.tokenERC1155Service = new TokenERC1155Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
-                this.dropERC1155Service = new DropERC1155Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.tokenERC1155Service = new TokenERC1155Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
+                this.dropERC1155Service = new DropERC1155Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
             }
 
             this.signature = new ERC1155Signature(baseRoute, contractAddress);
@@ -385,11 +386,12 @@ namespace Thirdweb
     {
         private DropERC1155Service dropERC1155Service;
 
-        public ERC1155ClaimConditions(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "claimConditions"))
+        public ERC1155ClaimConditions(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "claimConditions"))
         {
             if (!Utils.IsWebGLBuild())
             {
-                this.dropERC1155Service = new DropERC1155Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.dropERC1155Service = new DropERC1155Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
             }
         }
 
@@ -572,10 +574,11 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC1155Signature(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "signature"))
+        public ERC1155Signature(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "signature"))
         {
             if (!Utils.IsWebGLBuild())
-                this.tokenERC1155Service = new TokenERC1155Service(ThirdwebManager.Instance.SDK.web3, contractAddress);
+                this.tokenERC1155Service = new TokenERC1155Service(ThirdwebManager.Instance.SDK.nativeSession.web3, contractAddress);
         }
 
         /// <summary>
@@ -609,7 +612,7 @@ namespace Thirdweb
                 };
 
                 string signature = Thirdweb.EIP712.GenerateSignature_TokenERC1155(
-                    ThirdwebManager.Instance.SDK.account,
+                    ThirdwebManager.Instance.SDK.nativeSession.account,
                     "TokenERC1155",
                     "1",
                     await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
@@ -667,7 +670,7 @@ namespace Thirdweb
                 };
 
                 string signature = Thirdweb.EIP712.GenerateSignature_TokenERC1155(
-                    ThirdwebManager.Instance.SDK.account,
+                    ThirdwebManager.Instance.SDK.nativeSession.account,
                     "TokenERC1155",
                     "1",
                     await ThirdwebManager.Instance.SDK.wallet.GetChainId(),

@@ -67,9 +67,16 @@ public class ThirdwebManager : MonoBehaviour
     private void Awake()
     {
         if (Instance == null)
+        {
             Instance = this;
+            DontDestroyOnLoad(this.gameObject);
+        }
         else
+        {
+            Debug.LogWarning("Two ThirdwebManager instances were found, removing this one.");
             Destroy(this.gameObject);
+            return;
+        }
 
         if (!Utils.IsWebGLBuild() && rpcOverride.StartsWith("https://") && chainIdOverride == -1)
         {

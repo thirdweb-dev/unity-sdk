@@ -1,7 +1,18 @@
 using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Signer;
+using Nethereum.Web3;
+using Nethereum.Web3.Accounts;
 using UnityEngine;
+using System;
+using WalletConnectSharp.Core;
+using WalletConnectSharp.Core.Models;
+using WalletConnectSharp.Core.Models.Ethereum;
+using WalletConnectSharp.Unity;
+using WalletConnectSharp.NEthereum.Account;
+using WalletConnectSharp.NEthereum;
+
+//using WalletConnectSharp.NEthereum;
 
 namespace Thirdweb
 {
@@ -17,32 +28,70 @@ namespace Thirdweb
         /// Connect a user's wallet via a given wallet provider
         /// </summary>
         /// <param name="walletConnection">The wallet provider and chainId to connect to. Defaults to the injected browser extension.</param>
-        public Task<string> Connect(WalletConnection? walletConnection = null)
+        public async Task<string> Connect(WalletConnection? walletConnection = null, Account account = null, WCSessionData wcSessionData = null)
         {
             if (Utils.IsWebGLBuild())
             {
                 var connection = walletConnection ?? new WalletConnection() { provider = WalletProvider.Injected, };
                 ;
-                return Bridge.Connect(connection);
+                return await Bridge.Connect(connection);
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                ThirdwebSDK.NativeSession newNativeSession = new ThirdwebSDK.NativeSession();
+                if (account != null)
+                {
+                    newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
+                    newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
+                    newNativeSession.account = account;
+                    newNativeSession.web3 = new Web3(account, newNativeSession.lastRPC);
+                    ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
+                    return account.Address;
+                }
+                else if (wcSessionData != null)
+                {
+                    newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
+                    newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
+                    newNativeSession.account = null;
+                    newNativeSession.web3 = WalletConnect.Instance.Session.BuildWeb3(new Uri(newNativeSession.lastRPC)).AsWalletAccount(true);
+                    ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
+                    return WalletConnect.ActiveSession.Accounts[0];
+                }
+                else
+                {
+                    newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
+                    newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
+                    newNativeSession.account = Utils.GenerateAccount(newNativeSession.lastChainId, null); // TODO: Allow custom private keys/passwords
+                    Debug.Log("account" + account.Address);
+                    Debug.Log("lastrpc" + newNativeSession.lastRPC);
+                    newNativeSession.web3 = new Web3(account, newNativeSession.lastRPC);
+                    ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
+                    return account.Address;
+                }
             }
         }
 
         /// <summary>
         /// Disconnect the user's wallet
         /// </summary>
-        public Task Disconnect()
+        public async Task Disconnect()
         {
             if (Utils.IsWebGLBuild())
             {
-                return Bridge.Disconnect();
+                await Bridge.Disconnect();
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                if (Utils.ActiveWalletConnectSession())
+                {
+                    WalletConnect.Instance.DisableWalletConnect();
+                }
+                ThirdwebSDK.NativeSession newNativeSession = new ThirdwebSDK.NativeSession();
+                newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
+                newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
+                newNativeSession.account = null;
+                newNativeSession.web3 = null;
+                ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
             }
         }
 
@@ -81,8 +130,8 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var balance = await ThirdwebManager.Instance.SDK.web3.Eth.GetBalance.SendRequestAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
-                    return new CurrencyValue("Ether", "ETH", "18", balance.Value.ToString(), balance.Value.ToString().ToEth());
+                    var balance = await ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetBalance.SendRequestAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
+                    return new CurrencyValue("Ether", "ETH", "18", balance.Value.ToString(), balance.Value.ToString().ToEth()); // TODO: Get actual name/symbol
                 }
             }
         }
@@ -98,7 +147,18 @@ namespace Thirdweb
             }
             else
             {
-                return ThirdwebManager.Instance.SDK.account.Address;
+                if (Utils.ActiveWalletConnectSession())
+                {
+                    return WalletConnect.ActiveSession.Accounts[0];
+                }
+                else if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
+                {
+                    return ThirdwebManager.Instance.SDK.nativeSession.account.Address;
+                }
+                else
+                {
+                    throw new UnityException("No Account Connected!");
+                }
             }
         }
 
@@ -113,7 +173,7 @@ namespace Thirdweb
             }
             else
             {
-                return ThirdwebManager.Instance.SDK.account != null;
+                return ThirdwebManager.Instance.SDK.nativeSession.web3 != null;
             }
         }
 
@@ -128,7 +188,9 @@ namespace Thirdweb
             }
             else
             {
-                return (int)ThirdwebManager.Instance.SDK.account.ChainId;
+                int chainId = (int)(await ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.ChainId.SendRequestAsync()).Value;
+                ThirdwebManager.Instance.SDK.nativeSession.lastChainId = chainId;
+                return chainId;
             }
         }
 
@@ -165,7 +227,7 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var receipt = await ThirdwebManager.Instance.SDK.web3.Eth.GetEtherTransferService().TransferEtherAndWaitForReceiptAsync(to, decimal.Parse(amount));
+                    var receipt = await ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetEtherTransferService().TransferEtherAndWaitForReceiptAsync(to, decimal.Parse(amount));
                     return receipt.ToTransactionResult();
                 }
             }
@@ -182,9 +244,19 @@ namespace Thirdweb
             }
             else
             {
-                var signer = new EthereumMessageSigner();
-                var signature = signer.EncodeUTF8AndSign(message, new EthECKey(ThirdwebManager.Instance.SDK.account.PrivateKey));
-                return signature; // TODO: Check viability
+                if (Utils.ActiveWalletConnectSession())
+                {
+                    return await WalletConnect.Instance.PersonalSign(message);
+                }
+                else if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
+                {
+                    var signer = new EthereumMessageSigner();
+                    return signer.EncodeUTF8AndSign(message, new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey));
+                }
+                else
+                {
+                    throw new UnityException("No Account Connected!");
+                }
             }
         }
 
@@ -223,7 +295,7 @@ namespace Thirdweb
                     new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
                     new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice))
                 );
-                var receipt = await ThirdwebManager.Instance.SDK.web3.TransactionManager.SendTransactionAndWaitForReceiptAsync(input);
+                var receipt = await ThirdwebManager.Instance.SDK.nativeSession.web3.TransactionManager.SendTransactionAndWaitForReceiptAsync(input);
                 return receipt.ToTransactionResult();
             }
         }
