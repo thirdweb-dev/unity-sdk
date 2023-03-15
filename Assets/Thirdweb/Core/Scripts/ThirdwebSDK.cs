@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
@@ -110,7 +108,6 @@ namespace Thirdweb
             this.wallet = new Wallet();
             this.deployer = new Deployer();
             this.storage = new Storage(options.storage);
-            Bridge.Initialize(chainOrRPC, options);
 
             if (!Utils.IsWebGLBuild())
             {
@@ -122,6 +119,10 @@ namespace Thirdweb
                 nativeSession = new NativeSession();
                 nativeSession.lastRPC = chainOrRPC;
                 nativeSession.lastChainId = chainId;
+            }
+            else
+            {
+                Bridge.Initialize(chainOrRPC, options);
             }
         }
 

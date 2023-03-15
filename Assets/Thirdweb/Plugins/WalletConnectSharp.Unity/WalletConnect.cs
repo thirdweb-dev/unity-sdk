@@ -3,12 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Networking;
@@ -20,7 +16,6 @@ using WalletConnectSharp.Unity.Network;
 using WalletConnectSharp.Unity.Utils;
 using RotaryHeart.Lib.SerializableDictionary;
 using WalletConnectSharp.Core.Models.Ethereum;
-using UnityEngine.UI;
 using WalletConnectSharp.Core.Models.Ethereum.Types;
 
 namespace WalletConnectSharp.Unity
@@ -464,7 +459,7 @@ namespace WalletConnectSharp.Unity
 
         private async Task SaveOrDisconnect()
         {
-            if (!Session.Connected)
+            if (Session == null || !Session.Connected)
                 return;
 
             if (autoSaveAndResume)
