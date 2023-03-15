@@ -21,23 +21,20 @@ namespace Thirdweb
 {
     public class TransactionManager
     {
-        public static async Task<TWResult> ThirdwebRead<TWFunction, TWResult>(ContractHandler contractHandler, TWFunction functionMessage)
+        public static async Task<TWResult> ThirdwebRead<TWFunction, TWResult>(string contractAddress, TWFunction functionMessage)
             where TWFunction : FunctionMessage, new()
         {
-            var queryHandler = contractHandler.EthApiContractService.GetContractQueryHandler<TWFunction>();
-            return await queryHandler.QueryAsync<TWResult>(contractHandler.ContractAddress, functionMessage);
+            var queryHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContractQueryHandler<TWFunction>();
+            return await queryHandler.QueryAsync<TWResult>(contractAddress, functionMessage);
         }
 
-        public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(ContractHandler contractHandler, TWFunction functionMessage, string weiValue = "0")
+        public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(string contractAddress, TWFunction functionMessage, string weiValue = "0")
             where TWFunction : FunctionMessage, new()
         {
-            if (Utils.ActiveWalletConnectSession())
-            {
-                functionMessage.FromAddress = WalletConnect.Instance.Session.Accounts[0];
-            }
             functionMessage.AmountToSend = BigInteger.Parse(weiValue);
-            var transactionHandler = contractHandler.EthApiContractService.GetContractTransactionHandler<TWFunction>();
-            var receipt = await transactionHandler.SendRequestAndWaitForReceiptAsync(contractHandler.ContractAddress, functionMessage);
+
+            var transactionHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContractTransactionHandler<TWFunction>();
+            var receipt = await transactionHandler.SendRequestAndWaitForReceiptAsync(contractAddress, functionMessage);
             return receipt.ToTransactionResult();
         }
     }
