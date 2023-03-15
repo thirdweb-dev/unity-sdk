@@ -1,21 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Numerics;
-using UnityEngine;
-using UnityEngine.Networking;
-using Newtonsoft.Json;
-using Nethereum.ABI.FunctionEncoding.Attributes;
-using Nethereum.Hex.HexTypes;
-using Nethereum.RPC;
-using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Contracts;
-using Nethereum.ABI.Decoders;
-using Nethereum.Contracts.CQS;
-using Nethereum.Contracts.Services;
-using Nethereum.Contracts.ContractHandlers;
-using WalletConnectSharp.Unity;
-using WalletConnectSharp.Core.Models.Ethereum;
+using UnityEngine;
 
 namespace Thirdweb
 {
@@ -24,6 +10,14 @@ namespace Thirdweb
         public static async Task<TWResult> ThirdwebRead<TWFunction, TWResult>(string contractAddress, TWFunction functionMessage)
             where TWFunction : FunctionMessage, new()
         {
+            try
+            {
+                functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            }
+            catch (System.Exception)
+            {
+                Debug.Log("Sending accountless query, make sure a wallet is connected if this was not intended.");
+            }
             var queryHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContractQueryHandler<TWFunction>();
             return await queryHandler.QueryAsync<TWResult>(contractAddress, functionMessage);
         }
