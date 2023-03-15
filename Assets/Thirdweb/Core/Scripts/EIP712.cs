@@ -38,28 +38,27 @@ namespace Thirdweb
             return signature;
         }
 
-        public static string GenerateSignature_TokenERC721(
-            Account account,
-            string domainName,
-            string version,
-            BigInteger chainId,
-            string verifyingContract,
-            TokenERC721Contract.MintRequest mintRequest
-        )
+        public async static Task<string> GenerateSignature_TokenERC721(string domainName, string version, BigInteger chainId, string verifyingContract, TokenERC721Contract.MintRequest mintRequest)
         {
-            var signer = new Eip712TypedDataSigner();
-            var key = new EthECKey(account.PrivateKey);
-            var typedData = GetTypedDefinition_TokenERC721(domainName, version, chainId, verifyingContract);
-            var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
-
-            // Debug.Log("Typed Data JSON: " + typedData.ToJson(mintRequest));
-            // Debug.Log("Signing address: " + key.GetPublicAddress());
-            // Debug.Log("Signature: " + signature);
-
-            // var addressRecovered = signer.RecoverFromSignatureV4(mintRequest, typedData, signature);
-            // Debug.Log("Recovered address from signature:" + addressRecovered);
-
-            return signature;
+            if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
+            {
+                var signer = new Eip712TypedDataSigner();
+                var key = new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                var typedData = GetTypedDefinition_TokenERC721(domainName, version, chainId, verifyingContract);
+                var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
+                return signature;
+            }
+            else
+            {
+                if (Utils.ActiveWalletConnectSession())
+                {
+                    return await WalletConnect.Instance.SignTypedData(mintRequest, new EIP712Domain(domainName, version, (int)chainId, verifyingContract));
+                }
+                else
+                {
+                    throw new UnityException("No account connected!");
+                }
+            }
         }
 
         public static string GenerateSignature_TokenERC1155(
@@ -75,14 +74,6 @@ namespace Thirdweb
             var key = new EthECKey(account.PrivateKey);
             var typedData = GetTypedDefinition_TokenERC1155(domainName, version, chainId, verifyingContract);
             var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
-
-            Debug.Log("Typed Data JSON: " + typedData.ToJson(mintRequest));
-            // Debug.Log("Signing address: " + key.GetPublicAddress());
-            // Debug.Log("Signature: " + signature);
-
-            // var addressRecovered = signer.RecoverFromSignatureV4(mintRequest, typedData, signature);
-            // Debug.Log("Recovered address from signature:" + addressRecovered);
-
             return signature;
         }
 

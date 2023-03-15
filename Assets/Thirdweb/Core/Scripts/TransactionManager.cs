@@ -5,8 +5,10 @@ using UnityEngine;
 
 namespace Thirdweb
 {
-    public class TransactionManager
+    public static class TransactionManager
     {
+        private static bool warned;
+
         public static async Task<TWResult> ThirdwebRead<TWFunction, TWResult>(string contractAddress, TWFunction functionMessage)
             where TWFunction : FunctionMessage, new()
         {
@@ -16,17 +18,21 @@ namespace Thirdweb
             }
             catch (System.Exception)
             {
-                Debug.Log("Sending accountless query, make sure a wallet is connected if this was not intended.");
+                if (!warned)
+                {
+                    Debug.LogWarning("Sending accountless query, make sure a wallet is connected if this was not intended.");
+                    warned = true;
+                }
             }
             var queryHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContractQueryHandler<TWFunction>();
             return await queryHandler.QueryAsync<TWResult>(contractAddress, functionMessage);
         }
 
-        public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(string contractAddress, TWFunction functionMessage, string weiValue = "0")
+        public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null)
             where TWFunction : FunctionMessage, new()
         {
             functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
-            functionMessage.AmountToSend = BigInteger.Parse(weiValue);
+            functionMessage.AmountToSend = weiValue ?? 0;
 
             var transactionHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContractTransactionHandler<TWFunction>();
             var gas = await transactionHandler.EstimateGasAsync(contractAddress, functionMessage);

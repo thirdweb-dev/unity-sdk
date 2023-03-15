@@ -371,7 +371,8 @@ namespace Thirdweb
                                 QuantityLimitPerWallet = BigInteger.Parse(claimCondition.maxClaimablePerWallet),
                             }, // TODO add support for allowlists
                             Data = new byte[] { }
-                        }
+                        },
+                        quantity * BigInteger.Parse(claimCondition.currencyMetadata.value)
                     )
                 };
             }
@@ -612,14 +613,7 @@ namespace Thirdweb
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
-                string signature = Thirdweb.EIP712.GenerateSignature_TokenERC721(
-                    ThirdwebManager.Instance.SDK.nativeSession.account,
-                    "TokenERC721",
-                    "1",
-                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
-                    contractAddress,
-                    req
-                );
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC721("TokenERC721", "1", await ThirdwebManager.Instance.SDK.wallet.GetChainId(), contractAddress, req);
 
                 ERC721SignedPayload signedPayload = new ERC721SignedPayload();
                 signedPayload.signature = signature;
@@ -705,7 +699,8 @@ namespace Thirdweb
                             Uid = signedPayload.payload.uid.HexStringToByteArray()
                         },
                         Signature = signedPayload.signature.HexStringToByteArray()
-                    }
+                    },
+                    signedPayload.payload.quantity * BigInteger.Parse(signedPayload.payload.price)
                 );
             }
         }

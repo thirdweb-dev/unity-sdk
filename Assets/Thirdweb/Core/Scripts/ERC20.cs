@@ -245,6 +245,10 @@ namespace Thirdweb
             else
             {
                 var claimCondition = await claimConditions.GetActive();
+                var decimals = await TransactionManager.ThirdwebRead<TokenERC20Contract.DecimalsFunction, TokenERC20Contract.DecimalsOutputDTO>(
+                    contractAddress,
+                    new TokenERC20Contract.DecimalsFunction()
+                );
                 return await TransactionManager.ThirdwebWrite(
                     contractAddress,
                     new DropERC20Contract.ClaimFunction()
@@ -261,7 +265,8 @@ namespace Thirdweb
                             QuantityLimitPerWallet = BigInteger.Parse(claimCondition.maxClaimablePerWallet),
                         },
                         Data = new byte[] { }
-                    }
+                    },
+                    (BigInteger.Parse(amount.ToWei()) * BigInteger.Parse(claimCondition.currencyMetadata.value)) / BigInteger.Parse(decimals.ReturnValue1.ToString())
                 );
             }
         }
@@ -570,7 +575,8 @@ namespace Thirdweb
                             Uid = signedPayload.payload.uid.HexStringToByteArray()
                         },
                         Signature = signedPayload.signature.HexStringToByteArray()
-                    }
+                    },
+                    BigInteger.Parse(signedPayload.payload.quantity) * BigInteger.Parse(signedPayload.payload.price)
                 );
             }
         }
