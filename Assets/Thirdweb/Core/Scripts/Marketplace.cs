@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
-using Thirdweb.Contracts.Marketplace;
 using UnityEngine;
 
 namespace Thirdweb
@@ -24,23 +23,18 @@ namespace Thirdweb
         /// </summary>
         public MarketplaceAuction auction;
 
-        MarketplaceService marketplaceService;
+        private string contractAddress;
 
         /// <summary>
         /// Interact with a Marketplace contract.
         /// </summary>
-        public Marketplace(string chain, string address)
-            : base($"{address}{subSeparator}marketplace")
+        public Marketplace(string chain, string contractAddress)
+            : base($"{contractAddress}{subSeparator}marketplace")
         {
             this.chain = chain;
-            this.address = address;
+            this.contractAddress = contractAddress;
             this.direct = new MarketplaceDirect(baseRoute);
             this.auction = new MarketplaceAuction(baseRoute);
-
-            if (!Utils.IsWebGLBuild())
-            {
-                this.marketplaceService = new MarketplaceService(ThirdwebManager.Instance.SDK.nativeSession.web3, address);
-            }
         }
 
         /// READ FUNCTIONS
@@ -56,32 +50,33 @@ namespace Thirdweb
             }
             else
             {
-                Listing listing = new Listing();
-                var result = await marketplaceService.ListingsQueryAsync(BigInteger.Parse(listingId));
-                listing.id = result.ListingId.ToString();
-                listing.sellerAddress = result.TokenOwner;
-                listing.assetContractAddress = result.AssetContract;
-                listing.tokenId = result.TokenId.ToString();
-                listing.quantity = (int)result.Quantity;
-                listing.currencyContractAddress = result.Currency;
-                listing.buyoutPrice = result.BuyoutPricePerToken.ToString();
-                listing.type = result.TokenType;
+                throw new UnityException("This functionality is not yet available on your current platform.");
+                // Listing listing = new Listing();
+                // var result = await marketplaceService.ListingsQueryAsync(BigInteger.Parse(listingId));
+                // listing.id = result.ListingId.ToString();
+                // listing.sellerAddress = result.TokenOwner;
+                // listing.assetContractAddress = result.AssetContract;
+                // listing.tokenId = result.TokenId.ToString();
+                // listing.quantity = (int)result.Quantity;
+                // listing.currencyContractAddress = result.Currency;
+                // listing.buyoutPrice = result.BuyoutPricePerToken.ToString();
+                // listing.type = result.TokenType;
 
-                Contract nftContract = ThirdwebManager.Instance.SDK.GetContract(result.AssetContract);
-                NFT tempNft = await nftContract.ERC721.Get(result.TokenId.ToString());
-                listing.asset = tempNft.metadata;
+                // Contract nftContract = ThirdwebManager.Instance.SDK.GetContract(result.AssetContract);
+                // NFT tempNft = await nftContract.ERC721.Get(result.TokenId.ToString());
+                // listing.asset = tempNft.metadata;
 
-                Contract tokenContract = ThirdwebManager.Instance.SDK.GetContract(result.Currency);
-                Currency tempCurrency = await tokenContract.ERC20.Get();
-                listing.buyoutCurrencyValuePerToken = new CurrencyValue(
-                    tempCurrency.name,
-                    tempCurrency.symbol,
-                    tempCurrency.decimals,
-                    result.BuyoutPricePerToken.ToString(),
-                    result.BuyoutPricePerToken.ToString().ToEth()
-                );
+                // Contract tokenContract = ThirdwebManager.Instance.SDK.GetContract(result.Currency);
+                // Currency tempCurrency = await tokenContract.ERC20.Get();
+                // listing.buyoutCurrencyValuePerToken = new CurrencyValue(
+                //     tempCurrency.name,
+                //     tempCurrency.symbol,
+                //     tempCurrency.decimals,
+                //     result.BuyoutPricePerToken.ToString(),
+                //     result.BuyoutPricePerToken.ToString().ToEth()
+                // );
 
-                return listing;
+                // return listing;
             }
         }
 
@@ -96,35 +91,37 @@ namespace Thirdweb
             }
             else
             {
-                // TODO: Multicall
-                List<Listing> allListings = new List<Listing>();
-                int totalListingsCount = (int)await marketplaceService.TotalListingsQueryAsync();
-                for (int i = 0; i < totalListingsCount; i++)
-                    allListings.Add(await GetListing(i.ToString()));
+                throw new UnityException("This functionality is not yet available on your current platform.");
 
-                if (filter != null)
-                {
-                    List<Listing> filteredListings = new List<Listing>();
-                    int startId = filter.start;
-                    int count = filter.count == 0 ? allListings.Count : filter.count;
-                    for (int i = startId; i < count; i++)
-                    {
-                        if (!string.IsNullOrEmpty(filter.seller))
-                        {
-                            if (allListings[i].sellerAddress != filter.seller || allListings[i].assetContractAddress != filter.tokenContract || allListings[i].tokenId != filter.tokenId)
-                            {
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            filteredListings.Add(allListings[i]);
-                        }
-                    }
-                    return filteredListings;
-                }
+                // // TODO: Multicall
+                // List<Listing> allListings = new List<Listing>();
+                // int totalListingsCount = (int)await marketplaceService.TotalListingsQueryAsync();
+                // for (int i = 0; i < totalListingsCount; i++)
+                //     allListings.Add(await GetListing(i.ToString()));
 
-                return allListings;
+                // if (filter != null)
+                // {
+                //     List<Listing> filteredListings = new List<Listing>();
+                //     int startId = filter.start;
+                //     int count = filter.count == 0 ? allListings.Count : filter.count;
+                //     for (int i = startId; i < count; i++)
+                //     {
+                //         if (!string.IsNullOrEmpty(filter.seller))
+                //         {
+                //             if (allListings[i].sellerAddress != filter.seller || allListings[i].assetContractAddress != filter.tokenContract || allListings[i].tokenId != filter.tokenId)
+                //             {
+                //                 continue;
+                //             }
+                //         }
+                //         else
+                //         {
+                //             filteredListings.Add(allListings[i]);
+                //         }
+                //     }
+                //     return filteredListings;
+                // }
+
+                // return allListings;
             }
         }
 
@@ -171,16 +168,18 @@ namespace Thirdweb
             }
             else
             {
-                var listing = await GetListing(listingId);
-                string buyFor = receiverAddress == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : receiverAddress;
-                var receipt = await marketplaceService.BuyRequestAndWaitForReceiptAsync(
-                    BigInteger.Parse(listingId),
-                    buyFor,
-                    quantityDesired,
-                    listing.currencyContractAddress,
-                    BigInteger.Parse(listing.buyoutPrice) * quantityDesired
-                );
-                return receipt.ToTransactionResult();
+                throw new UnityException("This functionality is not yet available on your current platform.");
+
+                // var listing = await GetListing(listingId);
+                // string buyFor = receiverAddress == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : receiverAddress;
+                // var receipt = await marketplaceService.BuyRequestAndWaitForReceiptAsync(
+                //     BigInteger.Parse(listingId),
+                //     buyFor,
+                //     quantityDesired,
+                //     listing.currencyContractAddress,
+                //     BigInteger.Parse(listing.buyoutPrice) * quantityDesired
+                // );
+                // return receipt.ToTransactionResult();
             }
         }
 
