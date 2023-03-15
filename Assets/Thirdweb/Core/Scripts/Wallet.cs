@@ -90,7 +90,7 @@ namespace Thirdweb
                 newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
                 newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
                 newNativeSession.account = null;
-                newNativeSession.web3 = null;
+                newNativeSession.web3 = new Web3(newNativeSession.lastRPC); // fallback
                 ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
             }
         }
