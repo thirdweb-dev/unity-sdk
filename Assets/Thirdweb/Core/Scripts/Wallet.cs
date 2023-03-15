@@ -149,7 +149,7 @@ namespace Thirdweb
             {
                 if (Utils.ActiveWalletConnectSession())
                 {
-                    return WalletConnect.ActiveSession.Accounts[0];
+                    return WalletConnect.Instance.Session.Accounts[0];
                 }
                 else if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
                 {
@@ -173,7 +173,7 @@ namespace Thirdweb
             }
             else
             {
-                return ThirdwebManager.Instance.SDK.nativeSession.web3 != null;
+                return ThirdwebManager.Instance.SDK.nativeSession.account != null || Utils.ActiveWalletConnectSession();
             }
         }
 

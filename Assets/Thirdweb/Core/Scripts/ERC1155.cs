@@ -616,8 +616,7 @@ namespace Thirdweb
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
-                string signature = Thirdweb.EIP712.GenerateSignature_TokenERC1155(
-                    ThirdwebManager.Instance.SDK.nativeSession.account,
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC1155(
                     "TokenERC1155",
                     "1",
                     await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
@@ -674,8 +673,7 @@ namespace Thirdweb
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
-                string signature = Thirdweb.EIP712.GenerateSignature_TokenERC1155(
-                    ThirdwebManager.Instance.SDK.nativeSession.account,
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC1155(
                     "TokenERC1155",
                     "1",
                     await ThirdwebManager.Instance.SDK.wallet.GetChainId(),

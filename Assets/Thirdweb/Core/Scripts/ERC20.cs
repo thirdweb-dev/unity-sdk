@@ -489,14 +489,7 @@ namespace Thirdweb
                 };
 
                 var name = await TransactionManager.ThirdwebRead<TokenERC20Contract.NameFunction, TokenERC20Contract.NameOutputDTO>(contractAddress, new TokenERC20Contract.NameFunction() { });
-                string signature = Thirdweb.EIP712.GenerateSignature_TokenERC20(
-                    ThirdwebManager.Instance.SDK.nativeSession.account,
-                    name.ReturnValue1,
-                    "1",
-                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
-                    contractAddress,
-                    req
-                );
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(name.ReturnValue1, "1", await ThirdwebManager.Instance.SDK.wallet.GetChainId(), contractAddress, req);
 
                 ERC20SignedPayload signedPayload = new ERC20SignedPayload();
                 signedPayload.signature = signature;

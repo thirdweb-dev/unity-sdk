@@ -21,12 +21,27 @@ namespace Thirdweb
     {
         /// SIGNATURE GENERATION ///
 
-        public static string GenerateSignature_TokenERC20(Account account, string domainName, string version, BigInteger chainId, string verifyingContract, TokenERC20Contract.MintRequest mintRequest)
+        public async static Task<string> GenerateSignature_TokenERC20(string domainName, string version, BigInteger chainId, string verifyingContract, TokenERC20Contract.MintRequest mintRequest)
         {
-            var signer = new Eip712TypedDataSigner();
-            var key = new EthECKey(account.PrivateKey);
-            var typedData = GetTypedDefinition_TokenERC20(domainName, version, chainId, verifyingContract);
-            var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
+            if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
+            {
+                var signer = new Eip712TypedDataSigner();
+                var key = new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                var typedData = GetTypedDefinition_TokenERC20(domainName, version, chainId, verifyingContract);
+                var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
+                return signature;
+            }
+            else
+            {
+                if (Utils.ActiveWalletConnectSession())
+                {
+                    return await WalletConnect.Instance.SignTypedData(mintRequest, new EIP712Domain(domainName, version, (int)chainId, verifyingContract));
+                }
+                else
+                {
+                    throw new UnityException("No account connected!");
+                }
+            }
 
             // Debug.Log("Typed Data JSON: " + typedData.ToJson(mintRequest));
             // Debug.Log("Signing address: " + key.GetPublicAddress());
@@ -34,8 +49,6 @@ namespace Thirdweb
 
             // var addressRecovered = signer.RecoverFromSignatureV4(mintRequest, typedData, signature);
             // Debug.Log("Recovered address from signature:" + addressRecovered);
-
-            return signature;
         }
 
         public async static Task<string> GenerateSignature_TokenERC721(string domainName, string version, BigInteger chainId, string verifyingContract, TokenERC721Contract.MintRequest mintRequest)
@@ -61,20 +74,27 @@ namespace Thirdweb
             }
         }
 
-        public static string GenerateSignature_TokenERC1155(
-            Account account,
-            string domainName,
-            string version,
-            BigInteger chainId,
-            string verifyingContract,
-            TokenERC1155Contract.MintRequest mintRequest
-        )
+        public async static Task<string> GenerateSignature_TokenERC1155(string domainName, string version, BigInteger chainId, string verifyingContract, TokenERC1155Contract.MintRequest mintRequest)
         {
-            var signer = new Eip712TypedDataSigner();
-            var key = new EthECKey(account.PrivateKey);
-            var typedData = GetTypedDefinition_TokenERC1155(domainName, version, chainId, verifyingContract);
-            var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
-            return signature;
+            if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
+            {
+                var signer = new Eip712TypedDataSigner();
+                var key = new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                var typedData = GetTypedDefinition_TokenERC1155(domainName, version, chainId, verifyingContract);
+                var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
+                return signature;
+            }
+            else
+            {
+                if (Utils.ActiveWalletConnectSession())
+                {
+                    return await WalletConnect.Instance.SignTypedData(mintRequest, new EIP712Domain(domainName, version, (int)chainId, verifyingContract));
+                }
+                else
+                {
+                    throw new UnityException("No account connected!");
+                }
+            }
         }
 
         /// DOMAIN TYPES ///
