@@ -61,7 +61,7 @@ namespace Thirdweb
                 {
                     newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
                     newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
-                    newNativeSession.account = Utils.GenerateAccount(newNativeSession.lastChainId, null); // TODO: Allow custom private keys/passwords
+                    newNativeSession.account = Utils.GenerateAccount(newNativeSession.lastChainId, null, null); // TODO: Allow custom private keys/passwords
                     Debug.Log("account" + account.Address);
                     Debug.Log("lastrpc" + newNativeSession.lastRPC);
                     newNativeSession.web3 = new Web3(account, newNativeSession.lastRPC);

@@ -245,11 +245,12 @@ namespace Thirdweb
             return block.Timestamp.Value;
         }
 
-        public static Account GenerateAccount(int chainId, string privateKey = null)
+        public static Account GenerateAccount(int chainId, string password = null, string privateKey = null)
         {
+            password ??= SystemInfo.deviceUniqueIdentifier;
+
             var path = Application.persistentDataPath + "/account.json";
             var keyStoreService = new Nethereum.KeyStore.KeyStoreScryptService();
-            var password = SystemInfo.deviceUniqueIdentifier;
 
             if (privateKey != null)
             {
