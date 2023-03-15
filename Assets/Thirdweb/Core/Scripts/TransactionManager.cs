@@ -36,7 +36,7 @@ namespace Thirdweb
 
             var transactionHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContractTransactionHandler<TWFunction>();
             var gas = await transactionHandler.EstimateGasAsync(contractAddress, functionMessage);
-            functionMessage.Gas = gas;
+            functionMessage.Gas = gas.Value < 100000 ? 100000 : gas;
             var receipt = await transactionHandler.SendRequestAndWaitForReceiptAsync(contractAddress, functionMessage);
             return receipt.ToTransactionResult();
         }
