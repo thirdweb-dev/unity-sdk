@@ -118,6 +118,7 @@ namespace Thirdweb
                 nativeSession = new NativeSession();
                 nativeSession.lastRPC = chainOrRPC;
                 nativeSession.lastChainId = chainId;
+                nativeSession.web3 = new Web3(nativeSession.lastRPC);
             }
             else
             {
