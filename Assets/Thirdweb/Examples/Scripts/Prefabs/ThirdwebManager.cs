@@ -37,9 +37,6 @@ public class ThirdwebManager : MonoBehaviour
     [Tooltip("IPFS Gateway Override")]
     public string storageIpfsGatewayUrl = null;
 
-    [Tooltip("nft.storage API key, required for uploading")]
-    public string storageApiToken = null;
-
     private string API_KEY = "339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3";
 
     public Dictionary<Chain, string> chainIdentifiers = new Dictionary<Chain, string>
@@ -87,9 +84,9 @@ public class ThirdwebManager : MonoBehaviour
             string rpc = rpcOverride.StartsWith("https://") ? rpcOverride : $"https://{chainIdentifiers[chain]}.rpc.thirdweb.com/{API_KEY}";
             int chainId = chainIdOverride == -1 ? (int)chain : chainIdOverride;
             ThirdwebSDK.Options options = new ThirdwebSDK.Options();
-            if (storageIpfsGatewayUrl != null || storageApiToken != null)
+            if (storageIpfsGatewayUrl != null)
             {
-                options.storage = new ThirdwebSDK.StorageOptions() { ipfsGatewayUrl = storageIpfsGatewayUrl, apiToken = storageApiToken };
+                options.storage = new ThirdwebSDK.StorageOptions() { ipfsGatewayUrl = storageIpfsGatewayUrl };
             }
             SDK = new ThirdwebSDK(rpc, chainId, options);
         }

@@ -58,7 +58,8 @@ public class Prefab_NFTLoader : MonoBehaviour
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
 
-        LoadNFTs();
+        FindObjectOfType<Prefab_ConnectWallet>()?.OnConnectedCallback.AddListener(() => LoadNFTs());
+        FindObjectOfType<Prefab_ConnectWalletNative>()?.OnConnectedCallback.AddListener(() => LoadNFTs());
     }
 
     public async void LoadNFTs()

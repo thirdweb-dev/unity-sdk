@@ -72,7 +72,7 @@ namespace WalletConnectSharp.Unity
 
         public string ConnectURL
         {
-            get { return Protocol.URI; }
+            get { return Session.URI; }
         }
 
         public bool retryOnTimeout = true;
@@ -95,16 +95,9 @@ namespace WalletConnectSharp.Unity
 
         public WalletConnectUnitySession Session { get; private set; }
 
-        [Obsolete("Use Session instead of Protocol")]
-        public WalletConnectUnitySession Protocol
-        {
-            get { return Session; }
-            private set { Session = value; }
-        }
-
         public bool Connected
         {
-            get { return Protocol.Connected; }
+            get { return Session.Connected; }
         }
 
         [SerializeField]
@@ -586,14 +579,14 @@ namespace WalletConnectSharp.Unity
 
         public async Task<string> WalletAddEthChain(EthChainData chainData)
         {
-            var results = await WalletConnect.ActiveSession.WalletAddEthChain(chainData);
+            var results = await ActiveSession.WalletAddEthChain(chainData);
 
             return results;
         }
 
         public async Task<string> WalletSwitchEthChain(EthChainData chainData)
         {
-            var results = await WalletConnect.ActiveSession.WalletSwitchEthChain(chainData);
+            var results = await ActiveSession.WalletSwitchEthChain(chainData);
 
             return results;
         }
@@ -602,30 +595,30 @@ namespace WalletConnectSharp.Unity
         {
             var address = WalletConnect.ActiveSession.Accounts[addressIndex];
 
-            var results = await WalletConnect.ActiveSession.EthPersonalSign(address, message);
+            var results = await ActiveSession.EthPersonalSign(address, message);
 
             return results;
         }
 
         public async Task<string> SendTransaction(TransactionData transaction)
         {
-            var results = await WalletConnect.ActiveSession.EthSendTransaction(transaction);
+            var results = await ActiveSession.EthSendTransaction(transaction);
 
             return results;
         }
 
         public async Task<string> SignTransaction(TransactionData transaction)
         {
-            var results = await WalletConnect.ActiveSession.EthSignTransaction(transaction);
+            var results = await ActiveSession.EthSignTransaction(transaction);
 
             return results;
         }
 
         public async Task<string> SignTypedData<T>(T data, EIP712Domain eip712Domain, int addressIndex = 0)
         {
-            var address = WalletConnect.ActiveSession.Accounts[addressIndex];
+            var address = ActiveSession.Accounts[addressIndex];
 
-            var results = await WalletConnect.ActiveSession.EthSignTypedData(address, data, eip712Domain);
+            var results = await ActiveSession.EthSignTypedData(address, data, eip712Domain);
 
             return results;
         }

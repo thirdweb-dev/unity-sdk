@@ -291,7 +291,7 @@ namespace Thirdweb
                 var receipt = await packService.CreatePackRequestAndWaitForReceiptAsync(
                     pack.ToPackTokenList(),
                     pack.ToPackRewardUnitsList(),
-                    uri,
+                    uri.IpfsHash.cidToIpfsUrl(),
                     await Utils.GetCurrentBlockTimeStamp(),
                     BigInteger.Parse(pack.rewardsPerPack),
                     receiverAddress

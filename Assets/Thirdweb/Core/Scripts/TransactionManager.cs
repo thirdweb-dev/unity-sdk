@@ -28,13 +28,14 @@ namespace Thirdweb
             return await queryHandler.QueryAsync<TWResult>(contractHandler.ContractAddress, functionMessage);
         }
 
-        public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(ContractHandler contractHandler, TWFunction functionMessage, string abi = null)
+        public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(ContractHandler contractHandler, TWFunction functionMessage, string weiValue = "0")
             where TWFunction : FunctionMessage, new()
         {
             if (Utils.ActiveWalletConnectSession())
             {
                 functionMessage.FromAddress = WalletConnect.Instance.Session.Accounts[0];
             }
+            functionMessage.AmountToSend = BigInteger.Parse(weiValue);
             var transactionHandler = contractHandler.EthApiContractService.GetContractTransactionHandler<TWFunction>();
             var receipt = await transactionHandler.SendRequestAndWaitForReceiptAsync(contractHandler.ContractAddress, functionMessage);
             return receipt.ToTransactionResult();

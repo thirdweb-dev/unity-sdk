@@ -341,7 +341,12 @@ namespace Thirdweb
             else
             {
                 var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(nft.metadata));
-                var receipt = await tokenERC1155Service.MintToRequestAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), Utils.GetMaxUint256(), uri, nft.supply);
+                var receipt = await tokenERC1155Service.MintToRequestAndWaitForReceiptAsync(
+                    await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                    Utils.GetMaxUint256(),
+                    uri.IpfsHash.cidToIpfsUrl(),
+                    nft.supply
+                );
                 return receipt.ToTransactionResult();
             }
         }
@@ -602,7 +607,7 @@ namespace Thirdweb
                     RoyaltyBps = (await tokenERC1155Service.GetDefaultRoyaltyInfoQueryAsync()).ReturnValue2,
                     PrimarySaleRecipient = await tokenERC1155Service.PrimarySaleRecipientQueryAsync(),
                     TokenId = Utils.GetMaxUint256(),
-                    Uri = uri,
+                    Uri = uri.IpfsHash.cidToIpfsUrl(),
                     Quantity = payloadToSign.quantity,
                     PricePerToken = BigInteger.Parse(payloadToSign.price),
                     Currency = payloadToSign.currencyAddress,

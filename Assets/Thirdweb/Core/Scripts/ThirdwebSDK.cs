@@ -38,7 +38,6 @@ namespace Thirdweb
         public struct StorageOptions
         {
             public string ipfsGatewayUrl; // override the default ipfs gateway, should end in /ipfs/
-            public string apiToken;
         }
 
         /// <summary>

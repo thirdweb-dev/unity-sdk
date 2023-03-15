@@ -377,7 +377,7 @@ namespace Thirdweb
             else
             {
                 var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(nft));
-                var result = await tokenERC721Service.MintToRequestAndWaitForReceiptAsync(address, uri);
+                var result = await tokenERC721Service.MintToRequestAndWaitForReceiptAsync(address, uri.IpfsHash.cidToIpfsUrl());
                 return result.ToTransactionResult();
             }
         }
@@ -569,7 +569,7 @@ namespace Thirdweb
                     RoyaltyRecipient = (await tokenERC721Service.GetDefaultRoyaltyInfoQueryAsync()).ReturnValue1,
                     RoyaltyBps = (await tokenERC721Service.GetDefaultRoyaltyInfoQueryAsync()).ReturnValue2,
                     PrimarySaleRecipient = await tokenERC721Service.PrimarySaleRecipientQueryAsync(),
-                    Uri = uri,
+                    Uri = uri.IpfsHash.cidToIpfsUrl(),
                     Price = BigInteger.Parse(payloadToSign.price),
                     Currency = payloadToSign.currencyAddress,
                     ValidityStartTimestamp = startTime,

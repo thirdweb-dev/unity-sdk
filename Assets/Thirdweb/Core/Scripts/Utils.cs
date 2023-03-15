@@ -285,5 +285,11 @@ namespace Thirdweb
         {
             return WalletConnect.Instance != null && WalletConnect.Instance.Session != null && WalletConnect.Instance.Session.Connected;
         }
+
+        public static string cidToIpfsUrl(this string cid, bool useGateway = false)
+        {
+            string ipfsRaw = $"ipfs://{cid}";
+            return useGateway ? ipfsRaw.ReplaceIPFS() : ipfsRaw;
+        }
     }
 }
