@@ -31,9 +31,12 @@ namespace Thirdweb
         public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(string contractAddress, TWFunction functionMessage, string weiValue = "0")
             where TWFunction : FunctionMessage, new()
         {
+            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
             functionMessage.AmountToSend = BigInteger.Parse(weiValue);
 
             var transactionHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContractTransactionHandler<TWFunction>();
+            var gas = await transactionHandler.EstimateGasAsync(contractAddress, functionMessage);
+            functionMessage.Gas = gas;
             var receipt = await transactionHandler.SendRequestAndWaitForReceiptAsync(contractAddress, functionMessage);
             return receipt.ToTransactionResult();
         }

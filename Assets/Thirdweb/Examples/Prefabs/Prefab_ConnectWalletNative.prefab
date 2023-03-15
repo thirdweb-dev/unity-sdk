@@ -2053,7 +2053,7 @@ MonoBehaviour:
   balanceText: {fileID: 7276129281433858735}
   walletAddressText: {fileID: 7276129280750027413}
   walletImage: {fileID: 7276129281372997249}
-  currentNetworkText: {fileID: 3443235414262880387}
+  currentNetworkText: {fileID: 7437821355300633924}
   currentNetworkImage: {fileID: 6455197925238504093}
   chainImage: {fileID: 6455197925238504093}
   networkSprites:
