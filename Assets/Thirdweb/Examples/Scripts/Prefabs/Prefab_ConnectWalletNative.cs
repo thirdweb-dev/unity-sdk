@@ -115,6 +115,7 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
     public void OpenPasswordPanel()
     {
         passwordPanel.SetActive(true);
+        passwordButton.GetComponentInChildren<TMP_Text>().text = Utils.HasStoredAccount() ? "Unlock" : "Create";
         passwordButton.onClick.RemoveAllListeners();
         passwordButton.onClick.AddListener(() => OnConnect(WalletNative.DeviceWallet, passwordInputField.text));
     }
@@ -125,7 +126,7 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
     {
         try
         {
-            exportButton.SetActive(_wallet == WalletNative.DeviceWallet);
+            exportButton.SetActive(_wallet == WalletNative.DeviceWallet || _wallet == WalletNative.DeviceWalletNoPassword);
 
             switch (_wallet)
             {

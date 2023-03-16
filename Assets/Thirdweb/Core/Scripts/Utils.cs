@@ -245,11 +245,26 @@ namespace Thirdweb
             return block.Timestamp.Value;
         }
 
-        public static Account GenerateAccount(int chainId, string password = null, string privateKey = null)
+        public static string GetDeviceIdentifier()
         {
-            password ??= SystemInfo.deviceUniqueIdentifier;
+            return SystemInfo.deviceUniqueIdentifier;
+        }
 
-            var path = Application.persistentDataPath + "/account.json";
+        public static bool HasStoredAccount()
+        {
+            return File.Exists(GetAccountPath());
+        }
+
+        public static string GetAccountPath()
+        {
+            return Application.persistentDataPath + "/account.json";
+        }
+
+        public static Account UnlockOrGenerateAccount(int chainId, string password = null, string privateKey = null)
+        {
+            password ??= GetDeviceIdentifier();
+
+            var path = GetAccountPath();
             var keyStoreService = new Nethereum.KeyStore.KeyStoreScryptService();
 
             if (privateKey != null)
@@ -268,24 +283,7 @@ namespace Thirdweb
                     }
                     catch (System.Exception)
                     {
-                        // Backup
-                        Debug.LogWarning("This will overwrite an existing account, backing up.");
-                        var encryptedJson = File.ReadAllText(path);
-                        File.WriteAllText(Application.persistentDataPath + "/account-previous.json", encryptedJson);
-                        File.WriteAllText(Application.persistentDataPath + "/deviceUniqueIdentifier.txt", SystemInfo.deviceUniqueIdentifier);
-                        // Create new
-                        var scryptParams = new Nethereum.KeyStore.Model.ScryptParams
-                        {
-                            Dklen = 32,
-                            N = 262144,
-                            R = 1,
-                            P = 8
-                        };
-                        var ecKey = Nethereum.Signer.EthECKey.GenerateKey();
-                        var keyStore = keyStoreService.EncryptAndGenerateKeyStore(password, ecKey.GetPrivateKeyAsBytes(), ecKey.GetPublicAddress(), scryptParams);
-                        var json = keyStoreService.SerializeKeyStoreToJson(keyStore);
-                        File.WriteAllText(path, json);
-                        return new Account(ecKey, chainId);
+                        throw new UnityException("Incorrect Password!");
                     }
                 }
                 else

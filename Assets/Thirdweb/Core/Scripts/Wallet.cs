@@ -52,7 +52,7 @@ namespace Thirdweb
                 {
                     newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
                     newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
-                    newNativeSession.account = Utils.GenerateAccount(newNativeSession.lastChainId, password, null); // TODO: Allow custom private keys/passwords
+                    newNativeSession.account = Utils.UnlockOrGenerateAccount(newNativeSession.lastChainId, password, null); // TODO: Allow custom private keys/passwords
                     newNativeSession.web3 = new Web3(newNativeSession.account, newNativeSession.lastRPC);
                     ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
                     return ThirdwebManager.Instance.SDK.nativeSession.account.Address;
