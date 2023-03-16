@@ -1,25 +1,37 @@
 using UnityEngine;
 using Thirdweb;
 using System.Collections.Generic;
+using RotaryHeart.Lib.SerializableDictionary;
 
 [System.Serializable]
 public enum Chain
 {
-    Ethereum = 1,
-    Goerli = 5,
-    Polygon = 137,
-    Mumbai = 80001,
-    Fantom = 250,
-    FantomTestnet = 4002,
-    Avalanche = 43114,
-    AvalancheTestnet = 43113,
-    Optimism = 10,
-    OptimismGoerli = 420,
-    Arbitrum = 42161,
-    ArbitrumGoerli = 421613,
-    Binance = 56,
-    BinanceTestnet = 97
+    Ethereum,
+    Goerli,
+    Polygon,
+    Mumbai,
+    Fantom,
+    FantomTestnet,
+    Avalanche,
+    AvalancheTestnet,
+    Optimism,
+    OptimismGoerli,
+    Arbitrum,
+    ArbitrumGoerli,
+    Binance,
+    BinanceTestnet
 }
+
+[System.Serializable]
+public class ChainData
+{
+    public string identifier;
+    public string chainId;
+    public string rpcOverride;
+}
+
+[System.Serializable]
+public class SupportedChainData : SerializableDictionaryBase<Chain, ChainData> { }
 
 public class ThirdwebManager : MonoBehaviour
 {
@@ -27,35 +39,15 @@ public class ThirdwebManager : MonoBehaviour
     [Tooltip("The chain to initialize the SDK with")]
     public Chain chain = Chain.Goerli;
 
-    [Header("OPTIONAL SETTINGS")]
-    [Tooltip("Supported by all platforms")]
-    public string rpcOverride = "";
+    [Header("CHAIN DATA")]
+    [Tooltip("Support any chain added to the Chain enum")]
+    public SupportedChainData supportedChainData;
 
-    [Tooltip("Supported by native platforms")]
-    public int chainIdOverride = -1;
-
+    [Header("OPTIONS")]
     [Tooltip("IPFS Gateway Override")]
     public string storageIpfsGatewayUrl = null;
 
     private string API_KEY = "339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3";
-
-    public Dictionary<Chain, string> chainIdentifiers = new Dictionary<Chain, string>
-    {
-        { Chain.Ethereum, "ethereum" },
-        { Chain.Goerli, "goerli" },
-        { Chain.Polygon, "polygon" },
-        { Chain.Mumbai, "mumbai" },
-        { Chain.Fantom, "fantom" },
-        { Chain.FantomTestnet, "fantom-testnet" },
-        { Chain.Avalanche, "avalanche" },
-        { Chain.AvalancheTestnet, "avalanche-testnet" },
-        { Chain.Optimism, "optimism" },
-        { Chain.OptimismGoerli, "optimism-goerli" },
-        { Chain.Arbitrum, "arbitrum" },
-        { Chain.ArbitrumGoerli, "arbitrum-goerli" },
-        { Chain.Binance, "binance" },
-        { Chain.BinanceTestnet, "binance-testnet" },
-    };
 
     public ThirdwebSDK SDK;
 
@@ -75,20 +67,33 @@ public class ThirdwebManager : MonoBehaviour
             return;
         }
 
-        if (!Utils.IsWebGLBuild() && rpcOverride.StartsWith("https://") && chainIdOverride == -1)
+        ChainData currentChain = supportedChainData[chain];
+
+        if (!Utils.IsWebGLBuild() && string.IsNullOrEmpty(currentChain.chainId))
         {
-            throw new UnityException("To use custom RPC overrides on native platforms, please provide the corresponding Chain ID Override!");
+            throw new UnityException("You must provide a Chain ID on native platforms!");
+        }
+
+        if (string.IsNullOrEmpty(currentChain.rpcOverride))
+        {
+            if (string.IsNullOrEmpty(currentChain.identifier))
+                throw new UnityException("When not providing an RPC, you must provide a chain identifier!");
         }
         else
         {
-            string rpc = rpcOverride.StartsWith("https://") ? rpcOverride : $"https://{chainIdentifiers[chain]}.rpc.thirdweb.com/{API_KEY}";
-            int chainId = chainIdOverride == -1 ? (int)chain : chainIdOverride;
-            ThirdwebSDK.Options options = new ThirdwebSDK.Options();
-            if (storageIpfsGatewayUrl != null)
-            {
-                options.storage = new ThirdwebSDK.StorageOptions() { ipfsGatewayUrl = storageIpfsGatewayUrl };
-            }
-            SDK = new ThirdwebSDK(rpc, chainId, options);
+            if (!currentChain.rpcOverride.StartsWith("https://"))
+                throw new UnityException("RPC overrides must start with https:// !");
         }
+
+        string rpc = string.IsNullOrEmpty(currentChain.rpcOverride) ? $"https://{currentChain.identifier}.rpc.thirdweb.com/{API_KEY}" : currentChain.rpcOverride;
+        int chainId = int.Parse(currentChain.chainId);
+
+        ThirdwebSDK.Options options = new ThirdwebSDK.Options();
+        if (storageIpfsGatewayUrl != null)
+        {
+            options.storage = new ThirdwebSDK.StorageOptions() { ipfsGatewayUrl = storageIpfsGatewayUrl };
+        }
+
+        SDK = new ThirdwebSDK(rpc, chainId, options);
     }
 }

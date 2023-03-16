@@ -165,7 +165,7 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
             CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
             balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
             walletAddressText.text = address.ShortenAddress();
-            currentNetworkText.text = ThirdwebManager.Instance.chainIdentifiers[_chain];
+            currentNetworkText.text = ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].identifier;
             currentNetworkImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
             connectButton.SetActive(false);
             connectedButton.SetActive(true);

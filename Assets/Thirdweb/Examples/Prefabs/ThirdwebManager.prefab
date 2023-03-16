@@ -45,7 +45,72 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chain: 5
-  rpcOverride: 
-  chainIdOverride: -1
+  supportedChainData:
+    reorderableList:
+      canAdd: 1
+      canRemove: 1
+      draggable: 1
+      expandable: 1
+      multipleSelection: 1
+      isExpanded: 1
+      label:
+        m_Text: Keys
+        m_Image: {fileID: 0}
+        m_Tooltip: 
+      headerHeight: 18
+      footerHeight: 13
+      slideEasing: 0.15
+      verticalSpacing: 2
+      showDefaultBackground: 1
+      elementDisplayType: 0
+      elementNameProperty: 
+      elementNameOverride: 
+      elementIcon: {fileID: 0}
+    reqReferences: {fileID: 0}
+    isExpanded: 1
+    _keyValues: 01000000050000008900000081380100fa000000a20f00006aa8000069a800000a000000a4010000b1a40000ed6e06003800000061000000
+    _keys: 01000000050000008900000081380100fa000000a20f00006aa8000069a800000a000000a4010000b1a40000ed6e06003800000061000000
+    _values:
+    - identifier: ethereum
+      chainId: 1
+      rpcOverride: 
+    - identifier: goerli
+      chainId: 5
+      rpcOverride: 
+    - identifier: polygon
+      chainId: 137
+      rpcOverride: 
+    - identifier: mumbai
+      chainId: 80001
+      rpcOverride: 
+    - identifier: fantom
+      chainId: 250
+      rpcOverride: 
+    - identifier: fantom-testnet
+      chainId: 4002
+      rpcOverride: 
+    - identifier: avalanche
+      chainId: 43114
+      rpcOverride: 
+    - identifier: avalanche-testnet
+      chainId: 43113
+      rpcOverride: 
+    - identifier: optimism
+      chainId: 10
+      rpcOverride: 
+    - identifier: optimism-goerli
+      chainId: 420
+      rpcOverride: 
+    - identifier: arbitrum
+      chainId: 42161
+      rpcOverride: 
+    - identifier: arbitrum-goerli
+      chainId: 421613
+      rpcOverride: 
+    - identifier: binance
+      chainId: 56
+      rpcOverride: 
+    - identifier: binance-testnet
+      chainId: 97
+      rpcOverride: 
   storageIpfsGatewayUrl: https://gateway.ipfscdn.io/ipfs/
-  storageApiToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGJiOUUwMDRlNDk4NDhFOTA2NUMyREQ0NTg2NmZCZjUzNDRlYzNFREEiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY2Mzk2MDk0OTkzNiwibmFtZSI6IjB4RmlyZWtlZXBlciJ9.uaM2jx0woUpTK7QXMLlUQ2It14OkJ_9M4_6bJbe7Np4
