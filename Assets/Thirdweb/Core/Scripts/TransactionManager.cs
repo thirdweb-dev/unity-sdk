@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using System.Numerics;
 using Nethereum.Contracts;
 using UnityEngine;
+using Nethereum.RPC.Eth.DTOs;
 
 namespace Thirdweb
 {
@@ -39,6 +40,18 @@ namespace Thirdweb
             functionMessage.Gas = gas.Value < 100000 ? 100000 : gas;
             var receipt = await transactionHandler.SendRequestAndWaitForReceiptAsync(contractAddress, functionMessage);
             return receipt.ToTransactionResult();
+        }
+
+        public static async Task<TransactionReceipt> ThirdwebWriteRawResult<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null)
+            where TWFunction : FunctionMessage, new()
+        {
+            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            functionMessage.AmountToSend = weiValue ?? 0;
+
+            var transactionHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContractTransactionHandler<TWFunction>();
+            var gas = await transactionHandler.EstimateGasAsync(contractAddress, functionMessage);
+            functionMessage.Gas = gas.Value < 100000 ? 100000 : gas;
+            return await transactionHandler.SendRequestAndWaitForReceiptAsync(contractAddress, functionMessage);
         }
     }
 }
