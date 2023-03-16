@@ -1,5 +1,3 @@
-
-
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
@@ -16,7 +14,7 @@ public class WalletConnectEditor : Editor
 
         if (GUILayout.Button("Clear Session"))
         {
-            saver.CLearSession();
+            saver.ClearSession();
         }
     }
 }

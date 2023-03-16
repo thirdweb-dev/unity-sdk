@@ -55,7 +55,7 @@ namespace Thirdweb
                     newNativeSession.account = null;
                     newNativeSession.web3 = WalletConnect.Instance.Session.BuildWeb3(new Uri(newNativeSession.lastRPC)).AsWalletAccount(true);
                     ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
-                    return WalletConnect.ActiveSession.Accounts[0];
+                    return WalletConnect.Instance.Session.Accounts[0];
                 }
                 else
                 {

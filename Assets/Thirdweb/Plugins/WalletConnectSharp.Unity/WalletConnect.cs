@@ -58,18 +58,6 @@ namespace WalletConnectSharp.Unity
         [BindComponent]
         private NativeWebSocketTransport _transport;
 
-        private static WalletConnect _instance;
-
-        public static WalletConnect Instance
-        {
-            get { return _instance; }
-        }
-
-        public static WalletConnectUnitySession ActiveSession
-        {
-            get { return _instance.Session; }
-        }
-
         public string ConnectURL
         {
             get { return Session.URI; }
@@ -103,11 +91,13 @@ namespace WalletConnectSharp.Unity
         [SerializeField]
         public ClientMeta AppData;
 
+        public static WalletConnect Instance;
+
         protected override void Awake()
         {
             if (Instance == null)
             {
-                _instance = this;
+                Instance = this;
             }
             else
             {
@@ -321,7 +311,7 @@ namespace WalletConnectSharp.Unity
         private async void SessionOnOnSessionDisconnect(object sender, EventArgs e)
         {
             if (DisconnectedEvent != null)
-                DisconnectedEvent.Invoke(ActiveSession);
+                DisconnectedEvent.Invoke(Session);
 
             if (autoSaveAndResume && PlayerPrefs.HasKey(SessionKey))
             {
@@ -372,11 +362,7 @@ namespace WalletConnectSharp.Unity
                 {
                     yield return imageRequest.SendWebRequest();
 
-                    if (imageRequest.isNetworkError)
-                    {
-                        Debug.Log("Error Getting Wallet Icon: " + imageRequest.error);
-                    }
-                    else
+                    if (imageRequest.result == UnityWebRequest.Result.Success)
                     {
                         var texture = ((DownloadHandlerTexture)imageRequest.downloadHandler).texture;
                         var sprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100.0f);
@@ -394,6 +380,10 @@ namespace WalletConnectSharp.Unity
                             data.largeIcon = sprite;
                         }
                     }
+                    else
+                    {
+                        Debug.Log("Error Getting Wallet Icon: " + imageRequest.error);
+                    }
                 }
             }
         }
@@ -405,11 +395,7 @@ namespace WalletConnectSharp.Unity
                 // Request and wait for the desired page.
                 yield return webRequest.SendWebRequest();
 
-                if (webRequest.isNetworkError)
-                {
-                    Debug.Log("Error Getting Wallet Info: " + webRequest.error);
-                }
-                else
+                if (webRequest.result == UnityWebRequest.Result.Success)
                 {
                     var json = webRequest.downloadHandler.text;
 
@@ -422,6 +408,10 @@ namespace WalletConnectSharp.Unity
                             yield return DownloadImagesFor(id);
                         }
                     }
+                }
+                else
+                {
+                    Debug.Log("Error Getting Wallet Info: " + webRequest.error);
                 }
             }
         }
@@ -522,9 +512,9 @@ namespace WalletConnectSharp.Unity
 
         public void OpenDeepLink()
         {
-            if (!ActiveSession.ReadyForUserPrompt)
+            if (!Session.ReadyForUserPrompt)
             {
-                Debug.LogError("WalletConnectUnity.ActiveSession not ready for a user prompt" + "\nWait for ActiveSession.ReadyForUserPrompt to be true");
+                Debug.LogError("WalletConnect.Session not ready for a user prompt" + "\nWait for Session.ReadyForUserPrompt to be true");
 
                 return;
             }
@@ -561,65 +551,57 @@ namespace WalletConnectSharp.Unity
 #endif
         }
 
-        public void CLearSession()
+        public void ClearSession()
         {
             PlayerPrefs.DeleteKey(SessionKey);
         }
 
         public async void CloseSession(bool waitForNewSession = true)
         {
-            if (ActiveSession == null)
+            if (Session == null)
                 return;
 
-            await ActiveSession.Disconnect();
+            await Session.Disconnect();
 
             if (waitForNewSession)
-                await ActiveSession.Connect();
+                await Session.Connect();
         }
 
         public async Task<string> WalletAddEthChain(EthChainData chainData)
         {
-            var results = await ActiveSession.WalletAddEthChain(chainData);
-
+            var results = await Session.WalletAddEthChain(chainData);
             return results;
         }
 
         public async Task<string> WalletSwitchEthChain(EthChainData chainData)
         {
-            var results = await ActiveSession.WalletSwitchEthChain(chainData);
-
+            var results = await Session.WalletSwitchEthChain(chainData);
             return results;
         }
 
         public async Task<string> PersonalSign(string message, int addressIndex = 0)
         {
-            var address = WalletConnect.ActiveSession.Accounts[addressIndex];
-
-            var results = await ActiveSession.EthPersonalSign(address, message);
-
+            var address = Session.Accounts[addressIndex];
+            var results = await Session.EthPersonalSign(address, message);
             return results;
         }
 
         public async Task<string> SendTransaction(TransactionData transaction)
         {
-            var results = await ActiveSession.EthSendTransaction(transaction);
-
+            var results = await Session.EthSendTransaction(transaction);
             return results;
         }
 
         public async Task<string> SignTransaction(TransactionData transaction)
         {
-            var results = await ActiveSession.EthSignTransaction(transaction);
-
+            var results = await Session.EthSignTransaction(transaction);
             return results;
         }
 
         public async Task<string> SignTypedData<T>(T data, EIP712Domain eip712Domain, int addressIndex = 0)
         {
-            var address = ActiveSession.Accounts[addressIndex];
-
-            var results = await ActiveSession.EthSignTypedData(address, data, eip712Domain);
-
+            var address = Session.Accounts[addressIndex];
+            var results = await Session.EthSignTypedData(address, data, eip712Domain);
             return results;
         }
     }
