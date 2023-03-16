@@ -13,14 +13,10 @@ namespace Thirdweb
         public string image;
         public string name;
         public string external_url;
-        public object attributes;
+        public string attributes;
 
         public override string ToString()
         {
-            string propertiesStr = "";
-            if (attributes != null)
-                propertiesStr += attributes.ToString();
-
             return $"NFTMetadata:"
                 + $"\n>id: {id}"
                 + $"\n>uri: {uri}"
@@ -28,7 +24,7 @@ namespace Thirdweb
                 + $"\n>image: {image}"
                 + $"\n>name: {name}"
                 + $"\n>external_url: {external_url}"
-                + $"\n>properties: {propertiesStr}";
+                + $"\n>attributes: {attributes}";
         }
     }
 
