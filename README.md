@@ -14,9 +14,11 @@
 # Supported platforms
 
 - [x] WebGL
-- [ ] Desktop (coming soon)
-- [ ] Android (coming soon)
-- [ ] iOS (coming soon)
+- [x] Desktop
+- [x] Android
+- [x] iOS
+- [x] VR
+- [ ] Console (un-tested)
 
 # Installation
 
