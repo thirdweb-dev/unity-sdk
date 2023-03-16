@@ -389,20 +389,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   query:
     loadOneNft:
-    - contractAddress: 0x2e01763fA0e15e07294D74B63cE4b526B321E389
-      tokenID: 5
+    - contractAddress: 0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC
+      tokenID: 2
       type: 0
-    - contractAddress: 0x2e01763fA0e15e07294D74B63cE4b526B321E389
-      tokenID: 10
-      type: 0
+    - contractAddress: 0x82c488a1BC64ab3b91B927380cca9Db7bF347879
+      tokenID: 1
+      type: 1
     loadMultipleNfts:
-    - contractAddress: 0x2e01763fA0e15e07294D74B63cE4b526B321E389
+    - contractAddress: 0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC
       startID: 1
-      count: 10
+      count: 2
       type: 0
+    - contractAddress: 0x82c488a1BC64ab3b91B927380cca9Db7bF347879
+      startID: 1
+      count: 1
+      type: 1
     loadOwnedNfts:
-    - contractAddress: 0x2e01763fA0e15e07294D74B63cE4b526B321E389
-      owner: 0x2247d5d238d0f9d37184d8332ae0289d1ad9991b
+    - contractAddress: 0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC
+      owner: 0xDaaBDaaC8073A7dAbdC96F6909E8476ab4001B34
       type: 0
   contentParent: {fileID: 7702873693523111848}
   nftPrefab: {fileID: 7568917608122384971, guid: 41381d62941a9e74c92c44c6ff55ad50, type: 3}
