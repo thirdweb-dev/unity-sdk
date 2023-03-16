@@ -101,7 +101,6 @@ namespace Thirdweb
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogWarning($"Multicall failed, attempting normal calls. Error: {e.Message}");
                     List<NFT> allNfts = new List<NFT>();
                     for (int i = start; i < end; i++)
                         allNfts.Add(await Get(i.ToString()));
@@ -129,21 +128,36 @@ namespace Thirdweb
                     List<NFT> ownedNfts = await rawTokenData.ToNFTList();
                     return ownedNfts;
                 }
-                catch (System.Exception e)
+                catch (System.Exception)
                 {
-                    Debug.LogWarning($"Multicall failed, likely not enumerable, attempting normal calls. Error: {e.Message}");
-
-                    var balanceOfOwner = int.Parse(await BalanceOf(owner));
-                    List<NFT> ownedNfts = new List<NFT>();
-                    for (int i = 0; i < balanceOfOwner; i++)
+                    try
                     {
-                        var tokenId = await TransactionManager.ThirdwebRead<TokenERC721Contract.TokenOfOwnerByIndexFunction, TokenERC721Contract.TokenOfOwnerByIndexOutputDTO>(
-                            contractAddress,
-                            new TokenERC721Contract.TokenOfOwnerByIndexFunction() { Owner = owner, Index = (BigInteger)i }
-                        );
-                        ownedNfts.Add(await Get(tokenId.ReturnValue1.ToString()));
+                        var balanceOfOwner = int.Parse(await BalanceOf(owner));
+                        List<NFT> ownedNfts = new List<NFT>();
+                        for (int i = 0; i < balanceOfOwner; i++)
+                        {
+                            var tokenId = await TransactionManager.ThirdwebRead<TokenERC721Contract.TokenOfOwnerByIndexFunction, TokenERC721Contract.TokenOfOwnerByIndexOutputDTO>(
+                                contractAddress,
+                                new TokenERC721Contract.TokenOfOwnerByIndexFunction() { Owner = owner, Index = (BigInteger)i }
+                            );
+                            ownedNfts.Add(await Get(tokenId.ReturnValue1.ToString()));
+                        }
+                        return ownedNfts;
                     }
-                    return ownedNfts;
+                    catch (System.Exception)
+                    {
+                        var count = await TotalCount();
+
+                        List<NFT> ownedNfts = new List<NFT>();
+                        for (int i = 0; i < count; i++)
+                        {
+                            if (await OwnerOf(i.ToString()) == owner)
+                            {
+                                ownedNfts.Add(await Get(i.ToString()));
+                            }
+                        }
+                        return ownedNfts;
+                    }
                 }
             }
         }
@@ -159,11 +173,19 @@ namespace Thirdweb
             }
             else
             {
-                var tokenURI = await TransactionManager.ThirdwebRead<TokenERC721Contract.OwnerOfFunction, TokenERC721Contract.OwnerOfOutputDTO>(
-                    contractAddress,
-                    new TokenERC721Contract.OwnerOfFunction() { TokenId = BigInteger.Parse(tokenId) }
-                );
-                return tokenURI.ReturnValue1;
+                try
+                {
+                    var tokenURI = await TransactionManager.ThirdwebRead<TokenERC721Contract.OwnerOfFunction, TokenERC721Contract.OwnerOfOutputDTO>(
+                        contractAddress,
+                        new TokenERC721Contract.OwnerOfFunction() { TokenId = BigInteger.Parse(tokenId) }
+                    );
+                    return tokenURI.ReturnValue1;
+                }
+                catch (System.Exception)
+                {
+                    Debug.LogWarning("$Unable to find owner of {tokenId}, return address(0)");
+                    return "0x0000000000000000000000000000000000000000";
+                }
             }
         }
 

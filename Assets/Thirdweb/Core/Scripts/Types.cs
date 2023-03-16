@@ -13,7 +13,7 @@ namespace Thirdweb
         public string image;
         public string name;
         public string external_url;
-        public string attributes;
+        public object attributes;
 
         public override string ToString()
         {
@@ -24,7 +24,7 @@ namespace Thirdweb
                 + $"\n>image: {image}"
                 + $"\n>name: {name}"
                 + $"\n>external_url: {external_url}"
-                + $"\n>attributes: {attributes}";
+                + $"\n>attributes: {attributes?.ToString()}";
         }
     }
 

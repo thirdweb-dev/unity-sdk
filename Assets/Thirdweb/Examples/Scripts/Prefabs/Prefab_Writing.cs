@@ -17,11 +17,11 @@ public class Prefab_Writing : MonoBehaviour
         try
         {
             // Traditional Minting (Requires Minter Role)
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC20_CONTRACT);
+            // Contract contract = ThirdwebManager.Instance.SDK.GetContract(TOKEN_ERC20_CONTRACT);
 
             // Minting
-            var transactionResult = await contract.ERC20.Mint("1.2");
-            Debugger.Instance.Log("[Mint ERC20] Successful", transactionResult.ToString());
+            // var transactionResult = await contract.ERC20.Mint("1.2");
+            // Debugger.Instance.Log("[Mint ERC20] Successful", transactionResult.ToString());
 
             // Signature Minting
             // var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
@@ -40,9 +40,9 @@ public class Prefab_Writing : MonoBehaviour
             // }
 
             // Claiming
-            // Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC20_CONTRACT);
-            // var result = await contract.ERC20.Claim("0.3");
-            // Debugger.Instance.Log("[Claim ERC20] Successful", result.ToString());
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC20_CONTRACT);
+            var result = await contract.ERC20.Claim("0.3");
+            Debugger.Instance.Log("[Claim ERC20] Successful", result.ToString());
         }
         catch (System.Exception e)
         {
