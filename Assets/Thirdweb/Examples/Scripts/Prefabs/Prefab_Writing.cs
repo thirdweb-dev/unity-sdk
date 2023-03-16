@@ -1,5 +1,6 @@
 using UnityEngine;
 using Thirdweb;
+using System.Collections.Generic;
 
 public class Prefab_Writing : MonoBehaviour
 {
@@ -184,14 +185,14 @@ public class Prefab_Writing : MonoBehaviour
 
             // NewPackInput newPackInput = new NewPackInput()
             // {
-            //     rewardsPerPack = "1",
+            //     rewardsPerPack = "10",
             //     packMetadata = new NFTMetadata()
             //     {
             //         description = "Kitty Pack - Contains Kitty NFTs and Tokens!",
             //         image = "ipfs://QmbpciV7R5SSPb6aT9kEBAxoYoXBUsStJkMpxzymV4ZcVc",
             //         name = "My Epic Kitty Pack"
             //     },
-            //     erc20Rewards = new List<ERC20Contents>()
+            //     erc20Contents = new List<ERC20Contents>()
             //     {
             //         new ERC20Contents()
             //         {
@@ -200,11 +201,11 @@ public class Prefab_Writing : MonoBehaviour
             //             totalRewards = "100"
             //         }
             //     },
-            //     erc721Rewards = new List<ERC721Contents>()
+            //     erc721Contents = new List<ERC721Contents>()
             //     {
-            //         new ERC721Contents() { contractAddress = TOKEN_ERC721_CONTRACT, tokenId = "0", }
+            //         new ERC721Contents() { contractAddress = TOKEN_ERC721_CONTRACT, tokenId = "1", }
             //     },
-            //     erc1155Rewards = new List<ERC1155Contents>()
+            //     erc1155Contents = new List<ERC1155Contents>()
             //     {
             //         new ERC1155Contents()
             //         {
@@ -215,7 +216,7 @@ public class Prefab_Writing : MonoBehaviour
             //         }
             //     },
             // };
-            // // Make sure you approve tokens first
+            // Make sure you approve tokens first
             // var result = await pack.Create(newPackInput);
             // Debugger.Instance.Log("[Create Pack] Successful", result.ToString());
 
