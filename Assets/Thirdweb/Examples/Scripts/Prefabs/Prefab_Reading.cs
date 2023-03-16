@@ -5,8 +5,11 @@ using Thirdweb;
 public class Prefab_Reading : MonoBehaviour
 {
     private const string TOKEN_ERC20_CONTRACT = "0x76Ec89310842DBD9d0AcA3B2E27858E85cdE595A";
+    private const string DROP_ERC20_CONTRACT = "0x450b943729Ddba196Ab58b589Cea545551DF71CC";
     private const string TOKEN_ERC721_CONTRACT = "0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC";
+    private const string DROP_ERC721_CONTRACT = "0x8ED1C3618d70785d23E5fdE767058FA6cA6D9E43";
     private const string TOKEN_ERC1155_CONTRACT = "0x82c488a1BC64ab3b91B927380cca9Db7bF347879";
+    private const string DROP_ERC1155_CONTRACT = "0x408308c85D7073192deEAcC1703E234A783fFfF1";
     private const string MARKETPLACE_CONTRACT = "0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A";
     private const string PACK_CONTRACT = "0xC04104DE55dEC5d63542f7ADCf8171278942048E";
 
@@ -18,6 +21,8 @@ public class Prefab_Reading : MonoBehaviour
 
             Currency currencyInfo = await contract.ERC20.Get();
             Debugger.Instance.Log("[Fetch ERC20] Get", currencyInfo.ToString());
+
+            // CurrencyValue myBalance = await contract.ERC20.Balance();
 
             // CurrencyValue currencyValue = await contract.ERC20.TotalSupply();
         }

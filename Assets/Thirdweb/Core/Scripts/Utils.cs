@@ -260,9 +260,33 @@ namespace Thirdweb
             {
                 if (File.Exists(path))
                 {
-                    var encryptedJson = File.ReadAllText(path);
-                    var key = keyStoreService.DecryptKeyStoreFromJson(password, encryptedJson);
-                    return new Account(key, chainId);
+                    try
+                    {
+                        var encryptedJson = File.ReadAllText(path);
+                        var key = keyStoreService.DecryptKeyStoreFromJson(password, encryptedJson);
+                        return new Account(key, chainId);
+                    }
+                    catch (System.Exception)
+                    {
+                        // Backup
+                        Debug.LogWarning("This will overwrite an existing account, backing up.");
+                        var encryptedJson = File.ReadAllText(path);
+                        File.WriteAllText(Application.persistentDataPath + "/account-previous.json", encryptedJson);
+                        File.WriteAllText(Application.persistentDataPath + "/deviceUniqueIdentifier.txt", SystemInfo.deviceUniqueIdentifier);
+                        // Create new
+                        var scryptParams = new Nethereum.KeyStore.Model.ScryptParams
+                        {
+                            Dklen = 32,
+                            N = 262144,
+                            R = 1,
+                            P = 8
+                        };
+                        var ecKey = Nethereum.Signer.EthECKey.GenerateKey();
+                        var keyStore = keyStoreService.EncryptAndGenerateKeyStore(password, ecKey.GetPrivateKeyAsBytes(), ecKey.GetPublicAddress(), scryptParams);
+                        var json = keyStoreService.SerializeKeyStoreToJson(keyStore);
+                        File.WriteAllText(path, json);
+                        return new Account(ecKey, chainId);
+                    }
                 }
                 else
                 {

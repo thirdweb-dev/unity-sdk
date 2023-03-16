@@ -28,7 +28,7 @@ namespace Thirdweb
         /// Connect a user's wallet via a given wallet provider
         /// </summary>
         /// <param name="walletConnection">The wallet provider and chainId to connect to. Defaults to the injected browser extension.</param>
-        public async Task<string> Connect(WalletConnection? walletConnection = null, Account account = null, WCSessionData wcSessionData = null)
+        public async Task<string> Connect(WalletConnection? walletConnection = null, string password = null, WCSessionData wcSessionData = null)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -39,16 +39,7 @@ namespace Thirdweb
             else
             {
                 ThirdwebSDK.NativeSession newNativeSession = new ThirdwebSDK.NativeSession();
-                if (account != null)
-                {
-                    newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
-                    newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
-                    newNativeSession.account = account;
-                    newNativeSession.web3 = new Web3(account, newNativeSession.lastRPC);
-                    ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
-                    return account.Address;
-                }
-                else if (wcSessionData != null)
+                if (wcSessionData != null)
                 {
                     newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
                     newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
@@ -61,12 +52,10 @@ namespace Thirdweb
                 {
                     newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
                     newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
-                    newNativeSession.account = Utils.GenerateAccount(newNativeSession.lastChainId, null, null); // TODO: Allow custom private keys/passwords
-                    Debug.Log("account" + account.Address);
-                    Debug.Log("lastrpc" + newNativeSession.lastRPC);
-                    newNativeSession.web3 = new Web3(account, newNativeSession.lastRPC);
+                    newNativeSession.account = Utils.GenerateAccount(newNativeSession.lastChainId, password, null); // TODO: Allow custom private keys/passwords
+                    newNativeSession.web3 = new Web3(newNativeSession.account, newNativeSession.lastRPC);
                     ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
-                    return account.Address;
+                    return ThirdwebManager.Instance.SDK.nativeSession.account.Address;
                 }
             }
         }

@@ -11,6 +11,7 @@ using WalletConnectSharp.Unity;
 public enum WalletNative
 {
     DeviceWallet,
+    DeviceWalletNoPassword,
     WalletConnect,
 }
 
@@ -45,6 +46,9 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
     public GameObject connectButton;
     public GameObject connectDropdown;
     public List<WalletButtonNative> walletButtons;
+    public GameObject passwordPanel;
+    public TMP_InputField passwordInputField;
+    public Button passwordButton;
 
     // Connected
     public GameObject connectedButton;
@@ -55,6 +59,7 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
     public TMP_Text currentNetworkText;
     public Image currentNetworkImage;
     public Image chainImage;
+    public GameObject exportButton;
 
     // Networks
     public List<NetworkSpriteNative> networkSprites;
@@ -80,7 +85,15 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
             if (supportedWallets.Contains(wb.wallet))
             {
                 wb.walletButton.gameObject.SetActive(true);
-                wb.walletButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(wb.wallet));
+
+                if (wb.wallet == WalletNative.DeviceWallet)
+                {
+                    wb.walletButton.GetComponent<Button>().onClick.AddListener(() => OpenPasswordPanel());
+                }
+                else
+                {
+                    wb.walletButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(wb.wallet, null));
+                }
             }
             else
             {
@@ -95,20 +108,32 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
 
         connectDropdown.SetActive(false);
         connectedDropdown.SetActive(false);
+
+        passwordPanel.SetActive(false);
+    }
+
+    public void OpenPasswordPanel()
+    {
+        passwordPanel.SetActive(true);
+        passwordButton.onClick.RemoveAllListeners();
+        passwordButton.onClick.AddListener(() => OnConnect(WalletNative.DeviceWallet, passwordInputField.text));
     }
 
     // Connecting
 
-    public async void OnConnect(WalletNative _wallet)
+    public async void OnConnect(WalletNative _wallet, string password = null)
     {
         try
         {
-            Nethereum.Web3.Accounts.Account account = null;
+            exportButton.SetActive(_wallet == WalletNative.DeviceWallet);
+
             switch (_wallet)
             {
                 case WalletNative.DeviceWallet:
-                    account = Utils.GenerateAccount(ThirdwebManager.Instance.SDK.nativeSession.lastChainId);
-                    address = await ThirdwebManager.Instance.SDK.wallet.Connect(null, account, null);
+                    address = await ThirdwebManager.Instance.SDK.wallet.Connect(null, password, null);
+                    break;
+                case WalletNative.DeviceWalletNoPassword:
+                    address = await ThirdwebManager.Instance.SDK.wallet.Connect(null, password, null);
                     break;
                 case WalletNative.WalletConnect:
                     wcSessionData = await WalletConnect.Instance.EnableWalletConnect();
@@ -132,25 +157,26 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
 
     async void OnConnected()
     {
-        // try
-        // {
-        Chain _chain = ThirdwebManager.Instance.chain;
-        CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
-        balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
-        walletAddressText.text = address.ShortenAddress();
-        currentNetworkText.text = ThirdwebManager.Instance.chainIdentifiers[_chain];
-        currentNetworkImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
-        connectButton.SetActive(false);
-        connectedButton.SetActive(true);
-        connectDropdown.SetActive(false);
-        connectedDropdown.SetActive(false);
-        walletImage.sprite = walletButtons.Find(x => x.wallet == wallet).icon;
-        chainImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
-        // }
-        // catch (Exception e)
-        // {
-        //     print($"Error Fetching Native Balance: {e.Message}");
-        // }
+        try
+        {
+            passwordPanel.SetActive(false);
+            Chain _chain = ThirdwebManager.Instance.chain;
+            CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
+            balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
+            walletAddressText.text = address.ShortenAddress();
+            currentNetworkText.text = ThirdwebManager.Instance.chainIdentifiers[_chain];
+            currentNetworkImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
+            connectButton.SetActive(false);
+            connectedButton.SetActive(true);
+            connectDropdown.SetActive(false);
+            connectedDropdown.SetActive(false);
+            walletImage.sprite = walletButtons.Find(x => x.wallet == wallet).icon;
+            chainImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
+        }
+        catch (Exception e)
+        {
+            print($"Error Fetching Native Balance: {e.Message}");
+        }
     }
 
     // Disconnecting
@@ -178,6 +204,7 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
         connectedButton.SetActive(false);
         connectDropdown.SetActive(false);
         connectedDropdown.SetActive(false);
+        passwordPanel.SetActive(false);
     }
 
     // UI
@@ -194,5 +221,10 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
     {
         GUIUtility.systemCopyBuffer = address;
         Debugger.Instance.Log("Copied your address to your clipboard!", $"Address: {address}");
+    }
+
+    public void OnExportWallet()
+    {
+        Application.OpenURL(Application.persistentDataPath + "/account.json");
     }
 }
