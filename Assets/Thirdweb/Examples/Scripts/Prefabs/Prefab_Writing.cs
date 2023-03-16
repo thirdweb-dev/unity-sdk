@@ -185,7 +185,7 @@ public class Prefab_Writing : MonoBehaviour
 
             // NewPackInput newPackInput = new NewPackInput()
             // {
-            //     rewardsPerPack = "10",
+            //     rewardsPerPack = "1",
             //     packMetadata = new NFTMetadata()
             //     {
             //         description = "Kitty Pack - Contains Kitty NFTs and Tokens!",
@@ -203,7 +203,7 @@ public class Prefab_Writing : MonoBehaviour
             //     },
             //     erc721Contents = new List<ERC721Contents>()
             //     {
-            //         new ERC721Contents() { contractAddress = TOKEN_ERC721_CONTRACT, tokenId = "1", }
+            //         new ERC721Contents() { contractAddress = TOKEN_ERC721_CONTRACT, tokenId = "11", }
             //     },
             //     erc1155Contents = new List<ERC1155Contents>()
             //     {
@@ -216,11 +216,11 @@ public class Prefab_Writing : MonoBehaviour
             //         }
             //     },
             // };
-            // Make sure you approve tokens first
+            // // Make sure you approve tokens first
             // var result = await pack.Create(newPackInput);
             // Debugger.Instance.Log("[Create Pack] Successful", result.ToString());
 
-            PackRewards rewards = await pack.Open("0");
+            PackRewards rewards = await pack.Open("1");
             Debugger.Instance.Log("[Open Pack] Successful", rewards.ToString());
         }
         catch (System.Exception e)
