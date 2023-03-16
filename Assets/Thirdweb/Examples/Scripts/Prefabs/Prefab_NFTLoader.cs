@@ -58,69 +58,80 @@ public class Prefab_NFTLoader : MonoBehaviour
         foreach (Transform child in contentParent)
             Destroy(child.gameObject);
 
+        // FindObjectOfType<Prefab_ConnectWallet>()?.OnConnectedCallback.AddListener(() => LoadNFTs());
+        // FindObjectOfType<Prefab_ConnectWallet>()?.OnConnectedCallback.AddListener(() => LoadNFTs());
+
         LoadNFTs();
     }
 
     public async void LoadNFTs()
     {
         loadingPanel.SetActive(true);
+        List<NFT> nftsToLoad = new List<NFT>();
 
         try
         {
             // Get all the NFTs queried
 
-            List<NFT> nftsToLoad = new List<NFT>();
-
             foreach (SingleQuery singleQuery in query.loadOneNft)
             {
                 Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(singleQuery.contractAddress);
 
-                NFT tempNFT = singleQuery.type == NFTType.ERC1155 ?
-                    await tempContract.ERC1155.Get(singleQuery.tokenID) :
-                    await tempContract.ERC721.Get(singleQuery.tokenID);
+                NFT tempNFT = singleQuery.type == NFTType.ERC1155 ? await tempContract.ERC1155.Get(singleQuery.tokenID) : await tempContract.ERC721.Get(singleQuery.tokenID);
 
                 nftsToLoad.Add(tempNFT);
-            }
-
-            foreach (MultiQuery multiQuery in query.loadMultipleNfts)
-            {
-                Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(multiQuery.contractAddress);
-
-                List<NFT> tempNFTList = multiQuery.type == NFTType.ERC1155 ?
-                    await tempContract.ERC1155.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count }) :
-                    await tempContract.ERC721.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count });
-
-                nftsToLoad.AddRange(tempNFTList);
-            }
-
-            foreach (OwnedQuery ownedQuery in query.loadOwnedNfts)
-            {
-                Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(ownedQuery.contractAddress);
-
-                List<NFT> tempNFTList = ownedQuery.type == NFTType.ERC1155 ?
-                    await tempContract.ERC1155.GetOwned(ownedQuery.owner) :
-                    await tempContract.ERC721.GetOwned(ownedQuery.owner);
-
-                nftsToLoad.AddRange(tempNFTList);
-            }
-
-            // Load all NFTs into the scene
-
-            foreach (NFT nft in nftsToLoad)
-            {
-                Prefab_NFT nftPrefabScript = Instantiate(nftPrefab, contentParent);
-                nftPrefabScript.LoadNFT(nft);
-                // Potentially wait a little here if you are loading a lot without a private IPFS gateway
-                // Could also put this foreach in a separate Coroutine to avoid async object spawning
             }
         }
         catch (Exception e)
         {
-            print($"Error Loading NFTs: {e.Message}");
+            print($"Error Loading SingleQuery NFTs: {e.Message}");
         }
-        finally
+
+        try
         {
-            loadingPanel.SetActive(false);
+            foreach (MultiQuery multiQuery in query.loadMultipleNfts)
+            {
+                Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(multiQuery.contractAddress);
+
+                List<NFT> tempNFTList =
+                    multiQuery.type == NFTType.ERC1155
+                        ? await tempContract.ERC1155.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count })
+                        : await tempContract.ERC721.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count });
+
+                nftsToLoad.AddRange(tempNFTList);
+            }
         }
+        catch (Exception e)
+        {
+            print($"Error Loading MultiQuery NFTs: {e.Message}");
+        }
+
+        try
+        {
+            foreach (OwnedQuery ownedQuery in query.loadOwnedNfts)
+            {
+                Contract tempContract = ThirdwebManager.Instance.SDK.GetContract(ownedQuery.contractAddress);
+
+                List<NFT> tempNFTList = ownedQuery.type == NFTType.ERC1155 ? await tempContract.ERC1155.GetOwned(ownedQuery.owner) : await tempContract.ERC721.GetOwned(ownedQuery.owner);
+
+                nftsToLoad.AddRange(tempNFTList);
+            }
+        }
+        catch (Exception e)
+        {
+            print($"Error Loading OwnedQuery NFTs: {e.Message}");
+        }
+
+        // Load all NFTs into the scene
+
+        foreach (NFT nft in nftsToLoad)
+        {
+            Prefab_NFT nftPrefabScript = Instantiate(nftPrefab, contentParent);
+            nftPrefabScript.LoadNFT(nft);
+            // Potentially wait a little here if you are loading a lot without a private IPFS gateway
+            // Could also put this foreach in a separate Coroutine to avoid async object spawning
+        }
+
+        loadingPanel.SetActive(false);
     }
 }

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using Nethereum.Web3;
+using Nethereum.Web3.Accounts;
+using UnityEngine;
 
 namespace Thirdweb
 {
@@ -75,22 +77,53 @@ namespace Thirdweb
         /// Connect and Interact with a user's wallet
         /// </summary>
         public Wallet wallet;
+
         /// <summary>
         /// Deploy new contracts
         /// </summary>
         public Deployer deployer;
+
+        public Storage storage;
+
+        [System.Serializable]
+        public class NativeSession
+        {
+            public int lastChainId = -1;
+            public string lastRPC = null;
+            public Account account = null;
+            public Web3 web3 = null;
+        }
+
+        public NativeSession nativeSession;
 
         /// <summary>
         /// Create an instance of the thirdweb SDK. Requires a webGL browser context.
         /// </summary>
         /// <param name="chainOrRPC">The chain name or RPC url to connect to</param>
         /// <param name="options">Configuration options</param>
-        public ThirdwebSDK(string chainOrRPC, Options options = new Options())
+        public ThirdwebSDK(string chainOrRPC, int chainId = -1, Options options = new Options())
         {
             this.chainOrRPC = chainOrRPC;
             this.wallet = new Wallet();
             this.deployer = new Deployer();
-            Bridge.Initialize(chainOrRPC, options);
+            this.storage = new Storage(options.storage);
+
+            if (!Utils.IsWebGLBuild())
+            {
+                if (!chainOrRPC.StartsWith("https://"))
+                    throw new UnityException("Invalid RPC URL!");
+                if (chainId == -1)
+                    throw new UnityException("Chain ID override required for native platforms!");
+
+                nativeSession = new NativeSession();
+                nativeSession.lastRPC = chainOrRPC;
+                nativeSession.lastChainId = chainId;
+                nativeSession.web3 = new Web3(nativeSession.lastRPC);
+            }
+            else
+            {
+                Bridge.Initialize(chainOrRPC, options);
+            }
         }
 
         /// <summary>

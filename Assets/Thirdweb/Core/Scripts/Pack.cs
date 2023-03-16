@@ -1,5 +1,11 @@
+using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
+using Nethereum.Contracts;
+using Newtonsoft.Json;
+using UnityEngine;
+using PackContract = Thirdweb.Contracts.Pack.ContractDefinition;
 
 namespace Thirdweb
 {
@@ -8,16 +14,17 @@ namespace Thirdweb
     /// </summary>
     public class Pack : Routable
     {
-        public string chain;
-        public string address;
+        private string chain;
+        private string contractAddress;
 
         /// <summary>
         /// Interact with a Marketplace contract.
         /// </summary>
-        public Pack(string chain, string address) : base($"{address}{subSeparator}pack")
+        public Pack(string chain, string address)
+            : base($"{address}{subSeparator}pack")
         {
             this.chain = chain;
-            this.address = address;
+            this.contractAddress = address;
         }
 
         /// READ FUNCTIONS
@@ -27,7 +34,28 @@ namespace Thirdweb
         /// </summary>
         public async Task<NFT> Get(string tokenId)
         {
-            return await Bridge.InvokeRoute<NFT>(getRoute("get"), Utils.ToJsonStringArray(tokenId));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<NFT>(getRoute("get"), Utils.ToJsonStringArray(tokenId));
+            }
+            else
+            {
+                var tokenURI = await TransactionManager.ThirdwebRead<PackContract.UriFunction, PackContract.UriOutputDTO>(
+                    contractAddress,
+                    new PackContract.UriFunction() { TokenId = BigInteger.Parse(tokenId) }
+                );
+
+                NFT nft = new NFT();
+                nft.owner = "";
+                nft.type = "ERC1155";
+                nft.supply = await TotalSupply(tokenId);
+                nft.quantityOwned = 404;
+                nft.metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1);
+                nft.metadata.image = nft.metadata.image.ReplaceIPFS();
+                nft.metadata.id = tokenId;
+                nft.metadata.uri = tokenURI.ReturnValue1.ReplaceIPFS();
+                return nft;
+            }
         }
 
         /// <summary>
@@ -35,7 +63,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<List<NFT>> GetAll(QueryAllParams queryParams = null)
         {
-            return await Bridge.InvokeRoute<List<NFT>>(getRoute("getAll"), Utils.ToJsonStringArray(queryParams));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<List<NFT>>(getRoute("getAll"), Utils.ToJsonStringArray(queryParams));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -44,7 +79,14 @@ namespace Thirdweb
         /// <param name="address">Optional wallet address to query NFTs of</param>
         public async Task<List<NFT>> GetOwned(string address = null)
         {
-            return await Bridge.InvokeRoute<List<NFT>>(getRoute("getOwned"), Utils.ToJsonStringArray(address));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<List<NFT>>(getRoute("getOwned"), Utils.ToJsonStringArray(address));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -52,7 +94,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<string> Balance(string tokenId)
         {
-            return await Bridge.InvokeRoute<string>(getRoute("balance"), new string[] { });
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<string>(getRoute("balance"), new string[] { });
+            }
+            else
+            {
+                return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), tokenId);
+            }
         }
 
         /// <summary>
@@ -60,7 +109,18 @@ namespace Thirdweb
         /// </summary>
         public async Task<string> BalanceOf(string address, string tokenId)
         {
-            return await Bridge.InvokeRoute<string>(getRoute("balanceOf"), Utils.ToJsonStringArray(address, tokenId));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<string>(getRoute("balanceOf"), Utils.ToJsonStringArray(address, tokenId));
+            }
+            else
+            {
+                var tokenURI = await TransactionManager.ThirdwebRead<PackContract.BalanceOfFunction, PackContract.BalanceOfOutputDTO>(
+                    contractAddress,
+                    new PackContract.BalanceOfFunction() { Id = BigInteger.Parse(tokenId) }
+                );
+                return tokenURI.ReturnValue1.ToString();
+            }
         }
 
         /// <summary>
@@ -70,12 +130,30 @@ namespace Thirdweb
         /// <param name="contractAddress">The contract address to check approval for</param>
         public async Task<string> IsApprovedForAll(string address, string approvedContract)
         {
-            return await Bridge.InvokeRoute<string>(getRoute("isApproved"), Utils.ToJsonStringArray(address, approvedContract));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<string>(getRoute("isApproved"), Utils.ToJsonStringArray(address, approvedContract));
+            }
+            else
+            {
+                var isApprovedForAll = await TransactionManager.ThirdwebRead<PackContract.IsApprovedForAllFunction, PackContract.IsApprovedForAllOutputDTO>(
+                    contractAddress,
+                    new PackContract.IsApprovedForAllFunction() { Account = address, Operator = approvedContract }
+                );
+                return isApprovedForAll.ReturnValue1.ToString();
+            }
         }
 
         public async Task<int> TotalCount()
         {
-            return await Bridge.InvokeRoute<int>(getRoute("totalCount"), new string[] { });
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<int>(getRoute("totalCount"), new string[] { });
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
@@ -83,7 +161,18 @@ namespace Thirdweb
         /// </summary>
         public async Task<int> TotalSupply(string tokenId)
         {
-            return await Bridge.InvokeRoute<int>(getRoute("totalSupply"), Utils.ToJsonStringArray(tokenId));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<int>(getRoute("totalSupply"), Utils.ToJsonStringArray(tokenId));
+            }
+            else
+            {
+                var totalSupply = await TransactionManager.ThirdwebRead<PackContract.TotalSupplyFunction, PackContract.TotalSupplyOutputDTO>(
+                    contractAddress,
+                    new PackContract.TotalSupplyFunction() { ReturnValue1 = BigInteger.Parse(tokenId) }
+                );
+                return (int)totalSupply.ReturnValue1;
+            }
         }
 
         /// <summary>
@@ -91,7 +180,52 @@ namespace Thirdweb
         /// </summary>
         public async Task<PackContents> GetPackContents(string packId)
         {
-            return await Bridge.InvokeRoute<PackContents>(getRoute("getPackContents"), Utils.ToJsonStringArray(packId));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<PackContents>(getRoute("getPackContents"), Utils.ToJsonStringArray(packId));
+            }
+            else
+            {
+                var packContents = await TransactionManager.ThirdwebRead<PackContract.GetPackContentsFunction, PackContract.GetPackContentsOutputDTO>(
+                    contractAddress,
+                    new PackContract.GetPackContentsFunction() { PackId = BigInteger.Parse(packId) }
+                );
+                var erc20R = new List<ERC20Contents>();
+                var erc721R = new List<ERC721Contents>();
+                var erc1155R = new List<ERC1155Contents>();
+                foreach (var tokenReward in packContents.Contents)
+                {
+                    switch (tokenReward.TokenType)
+                    {
+                        case 0:
+                            var tempERC20 = new ERC20Contents();
+                            tempERC20.contractAddress = tokenReward.AssetContract;
+                            tempERC20.quantityPerReward = tokenReward.TotalAmount.ToString();
+                            erc20R.Add(tempERC20);
+                            break;
+                        case 1:
+                            var tempERC721 = new ERC721Contents();
+                            tempERC721.contractAddress = tokenReward.AssetContract;
+                            tempERC721.tokenId = tokenReward.TokenId.ToString();
+                            erc721R.Add(tempERC721);
+                            break;
+                        case 2:
+                            var tempERC1155 = new ERC1155Contents();
+                            tempERC1155.contractAddress = tokenReward.AssetContract;
+                            tempERC1155.tokenId = tokenReward.TokenId.ToString();
+                            tempERC1155.quantityPerReward = tokenReward.TotalAmount.ToString();
+                            erc1155R.Add(tempERC1155);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                PackContents contents = new PackContents();
+                contents.erc20Contents = erc20R;
+                contents.erc721Contents = erc721R;
+                contents.erc1155Contents = erc1155R;
+                return contents;
+            }
         }
 
         /// WRITE FUNCTIONS
@@ -101,7 +235,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> SetApprovalForAll(string contractToApprove, bool approved)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("isApproved"), Utils.ToJsonStringArray(contractToApprove, approved));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("isApproved"), Utils.ToJsonStringArray(contractToApprove, approved));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(contractAddress, new PackContract.SetApprovalForAllFunction() { Operator = contractToApprove, Approved = approved });
+            }
         }
 
         /// <summary>
@@ -109,7 +250,24 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Transfer(string to, string tokenId, int amount)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, tokenId, amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transfer"), Utils.ToJsonStringArray(to, tokenId, amount));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new PackContract.SafeTransferFromFunction()
+                    {
+                        From = await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                        To = to,
+                        Id = BigInteger.Parse(tokenId),
+                        Amount = amount,
+                        Data = new byte[0]
+                    }
+                );
+            }
         }
 
         /// <summary>
@@ -117,7 +275,14 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> Create(NewPackInput pack)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("create"), Utils.ToJsonStringArray(pack));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("create"), Utils.ToJsonStringArray(pack));
+            }
+            else
+            {
+                return await CreateTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), pack);
+            }
         }
 
         /// <summary>
@@ -125,7 +290,26 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> CreateTo(string receiverAddress, NewPackInput pack)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("createTo"), Utils.ToJsonStringArray(receiverAddress, pack));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("createTo"), Utils.ToJsonStringArray(receiverAddress, pack));
+            }
+            else
+            {
+                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(pack.packMetadata));
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new PackContract.CreatePackFunction()
+                    {
+                        Contents = pack.ToPackTokenList(),
+                        NumOfRewardUnits = pack.ToPackRewardUnitsList(),
+                        PackUri = uri.IpfsHash.cidToIpfsUrl(),
+                        OpenStartTimestamp = await Utils.GetCurrentBlockTimeStamp(),
+                        AmountDistributedPerOpen = BigInteger.Parse(pack.rewardsPerPack),
+                        Recipient = receiverAddress
+                    }
+                );
+            }
         }
 
         /// <summary>
@@ -133,32 +317,112 @@ namespace Thirdweb
         /// </summary>
         public async Task<TransactionResult> AddPackContents(string packId, PackRewards newContents)
         {
-            return await Bridge.InvokeRoute<TransactionResult>(getRoute("addPackContents"), Utils.ToJsonStringArray(packId, newContents));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("addPackContents"), Utils.ToJsonStringArray(packId, newContents));
+            }
+            else
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
         }
 
         /// <summary>
         /// Open a pack and transfer the rewards to the connected wallet
         /// </summary>
-        public async Task<PackRewards> Open(string packId, string amount = "1")
+        public async Task<PackRewards> Open(string packId, string amount = "1", int gasLimit = 500000)
         {
-            return await Bridge.InvokeRoute<PackRewards>(getRoute("open"), Utils.ToJsonStringArray(packId, amount));
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<PackRewards>(getRoute("open"), Utils.ToJsonStringArray(packId, amount));
+            }
+            else
+            {
+                var openPackFunction = new PackContract.OpenPackFunction() { PackId = BigInteger.Parse(packId), AmountToOpen = BigInteger.Parse(amount) };
+                openPackFunction.Gas = gasLimit;
+                var openPackResult = await TransactionManager.ThirdwebWriteRawResult(contractAddress, openPackFunction);
+
+                var packOpenedEvents = openPackResult.DecodeAllEvents<PackContract.PackOpenedEventDTO>();
+                List<PackContract.Token> tokensAwarded = new List<PackContract.Token>();
+                foreach (var packOpenedEvent in packOpenedEvents)
+                {
+                    tokensAwarded.AddRange(packOpenedEvent.Event.RewardUnitsDistributed);
+                }
+                PackRewards packRewards = new PackRewards()
+                {
+                    erc20Rewards = new List<ERC20Reward>(),
+                    erc721Rewards = new List<ERC721Reward>(),
+                    erc1155Rewards = new List<ERC1155Reward>()
+                };
+                foreach (var tokenAwarded in tokensAwarded)
+                {
+                    if (tokenAwarded.TokenType == 0)
+                    {
+                        packRewards.erc20Rewards.Add(new ERC20Reward() { contractAddress = tokenAwarded.AssetContract, quantityPerReward = tokenAwarded.TotalAmount.ToString() });
+                    }
+                    else if (tokenAwarded.TokenType == 1)
+                    {
+                        packRewards.erc721Rewards.Add(new ERC721Reward() { contractAddress = tokenAwarded.AssetContract, tokenId = tokenAwarded.TokenId.ToString() });
+                    }
+                    else if (tokenAwarded.TokenType == 2)
+                    {
+                        packRewards.erc1155Rewards.Add(
+                            new ERC1155Reward()
+                            {
+                                contractAddress = tokenAwarded.AssetContract,
+                                tokenId = tokenAwarded.TokenId.ToString(),
+                                quantityPerReward = tokenAwarded.TotalAmount.ToString()
+                            }
+                        );
+                    }
+                }
+                return packRewards;
+            }
         }
     }
 
     [System.Serializable]
-    public struct PackRewards
+    public class PackRewards
     {
         public List<ERC20Reward> erc20Rewards;
         public List<ERC721Reward> erc721Rewards;
         public List<ERC1155Reward> erc1155Rewards;
+
+        public override string ToString()
+        {
+            string erc20str = "ERC20 Rewards:\n";
+            foreach (var reward in erc20Rewards)
+                erc20str += reward.ToString();
+            string erc721str = "ERC721 Rewards:\n";
+            foreach (var reward in erc721Rewards)
+                erc721str += reward.ToString();
+            string erc1155str = "ERC1155 Rewards:\n";
+            foreach (var reward in erc1155Rewards)
+                erc1155str += reward.ToString();
+            return "PackRewards:\n" + erc20str + erc721str + erc1155str;
+        }
     }
 
     [System.Serializable]
     public class PackContents
     {
-        public List<ERC20Contents> erc20Rewards;
-        public List<ERC721Contents> erc721Rewards;
-        public List<ERC1155Contents> erc1155Rewards;
+        public List<ERC20Contents> erc20Contents;
+        public List<ERC721Contents> erc721Contents;
+        public List<ERC1155Contents> erc1155Contents;
+
+        public override string ToString()
+        {
+            string erc20str = "ERC20 Contents:\n";
+            foreach (var content in erc20Contents)
+                erc20str += content.ToString();
+            string erc721str = "ERC721 Contents:\n";
+            foreach (var content in erc721Contents)
+                erc721str += content.ToString();
+            string erc1155str = "ERC1155 Contents:\n";
+            foreach (var content in erc1155Contents)
+                erc1155str += content.ToString();
+            return "PackContents:\n" + erc20str + erc721str + erc1155str;
+        }
     }
 
     [System.Serializable]
@@ -166,8 +430,14 @@ namespace Thirdweb
     {
         /// The Metadata of the pack NFT itself
         public NFTMetadata packMetadata;
+
         /// How many rewards can be obtained by opening a single pack
         public string rewardsPerPack;
+
+        public override string ToString()
+        {
+            return "NewPackInput:\n" + $"packMetadata: {packMetadata.ToString()}\n" + $"rewardsPerPack: {rewardsPerPack.ToString()}\n";
+        }
     }
 
     [System.Serializable]
@@ -175,14 +445,25 @@ namespace Thirdweb
     {
         /// the Token contract address
         public string contractAddress;
+
         /// How many tokens can be otained when opening a pack and receiving this reward
         public string quantityPerReward;
+
+        public override string ToString()
+        {
+            return "ERC20Reward:\n" + $"contractAddress: {contractAddress.ToString()}\n" + $"quantityPerReward: {quantityPerReward.ToString()}\n";
+        }
     }
 
     [System.Serializable]
     public class ERC20Contents : ERC20Reward
     {
         public string totalRewards;
+
+        public override string ToString()
+        {
+            return "ERC20Contents:\n" + $"totalRewards: {totalRewards.ToString()}\n" + base.ToString();
+        }
     }
 
     [System.Serializable]
@@ -190,13 +471,23 @@ namespace Thirdweb
     {
         /// the ERC721 contract address
         public string contractAddress;
+
         /// the tokenId of the NFT to be rewarded
         public string tokenId;
+
+        public override string ToString()
+        {
+            return "ERC721Reward:\n" + $"contractAddress: {contractAddress.ToString()}\n" + $"tokenId: {tokenId.ToString()}\n";
+        }
     }
 
     [System.Serializable]
     public class ERC721Contents : ERC721Reward
     {
+        public override string ToString()
+        {
+            return base.ToString();
+        }
     }
 
     [System.Serializable]
@@ -204,15 +495,27 @@ namespace Thirdweb
     {
         /// the ERC1155 contract address
         public string contractAddress;
+
         /// the tokenId of the NFT to be rewarded
         public string tokenId;
+
         /// How many NFTs can be otained when opening a pack and receiving this reward
         public string quantityPerReward;
+
+        public override string ToString()
+        {
+            return "ERC1155Reward:\n" + $"contractAddress: {contractAddress.ToString()}\n" + $"tokenId: {tokenId.ToString()}\n" + $"contractAddress: {tokenId.ToString()}\n";
+        }
     }
 
     [System.Serializable]
     public class ERC1155Contents : ERC1155Reward
     {
         public string totalRewards;
+
+        public override string ToString()
+        {
+            return "ERC1155Contents:\n" + $"totalRewards: {totalRewards.ToString()}\n" + base.ToString();
+        }
     }
 }

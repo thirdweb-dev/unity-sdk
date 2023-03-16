@@ -12,11 +12,7 @@ public struct TransferEvent
 
     public override string ToString()
     {
-        return
-        $"TransferEvent:"
-            + $"\n>prevURI: {from}"
-            + $"\n>newURI: {to}"
-            + $"\n>tokenId: {tokenId}";
+        return $"TransferEvent:" + $"\n>prevURI: {from}" + $"\n>newURI: {to}" + $"\n>tokenId: {tokenId}";
     }
 }
 
@@ -28,7 +24,7 @@ public class Prefab_Events : MonoBehaviour
     {
         try
         {
-            Contract contract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x2e01763fA0e15e07294D74B63cE4b526B321E389");
 
             // Optional event query options
             Dictionary<string, object> filters = new Dictionary<string, object> { { "tokenId", 20 } };
@@ -49,7 +45,7 @@ public class Prefab_Events : MonoBehaviour
     {
         try
         {
-            Contract contract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x2e01763fA0e15e07294D74B63cE4b526B321E389");
 
             // Optional event query options
             EventQueryOptions options = new EventQueryOptions(null, 0, 16500000, "desc");
@@ -67,16 +63,23 @@ public class Prefab_Events : MonoBehaviour
 
     public void ListenToAllEvents()
     {
-        Contract contract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
-        contract.events.ListenToAll((ContractEvent<object> anyEvent) => OnEventTriggered(anyEvent));
-        Debugger.Instance.Log("Listening to all events!", "Try to trigger an event on the specified contract to get a callback.");
+        try
+        {
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x2e01763fA0e15e07294D74B63cE4b526B321E389");
+            contract.events.ListenToAll((ContractEvent<object> anyEvent) => OnEventTriggered(anyEvent));
+            Debugger.Instance.Log("Listening to all events!", "Try to trigger an event on the specified contract to get a callback.");
+        }
+        catch (System.Exception e)
+        {
+            Debugger.Instance.Log("[Listen To All Events] Error", e.Message);
+        }
     }
 
     public async void RemoveAllEventListeners()
     {
         try
         {
-            Contract contract = new Contract("goerli", "0x2e01763fA0e15e07294D74B63cE4b526B321E389");
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x2e01763fA0e15e07294D74B63cE4b526B321E389");
             await contract.events.RemoveAllListeners();
             Debugger.Instance.Log("Removed all event listeners!", "Events emitted will not trigger callbacks anymore.");
         }

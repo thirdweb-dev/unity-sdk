@@ -45,4 +45,39 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chain: 5
-  supportedNetworks: 01000000050000008900000081380100
+  supportedChainData:
+    reorderableList:
+      canAdd: 1
+      canRemove: 1
+      draggable: 1
+      expandable: 1
+      multipleSelection: 1
+      isExpanded: 1
+      label:
+        m_Text: Keys
+        m_Image: {fileID: 0}
+        m_Tooltip: 
+      headerHeight: 18
+      footerHeight: 13
+      slideEasing: 0.15
+      verticalSpacing: 2
+      showDefaultBackground: 1
+      elementDisplayType: 0
+      elementNameProperty: 
+      elementNameOverride: 
+      elementIcon: {fileID: 0}
+    reqReferences: {fileID: 0}
+    isExpanded: 1
+    _keyValues: 01000000050000000a000000
+    _keys: 01000000050000000a000000
+    _values:
+    - identifier: ethereum
+      chainId: 1
+      rpcOverride: 
+    - identifier: goerli
+      chainId: 5
+      rpcOverride: 
+    - identifier: optimism
+      chainId: 10
+      rpcOverride: 
+  storageIpfsGatewayUrl: https://gateway.ipfscdn.io/ipfs/

@@ -1,49 +1,53 @@
 using UnityEngine;
 using Thirdweb;
 using System.Collections.Generic;
+using RotaryHeart.Lib.SerializableDictionary;
 
 [System.Serializable]
 public enum Chain
 {
-    Ethereum = 1,
-    Goerli = 5,
-    Polygon = 137,
-    Mumbai = 80001,
-    Fantom = 250,
-    FantomTestnet = 4002,
-    Avalanche = 43114,
-    AvalancheTestnet = 43113,
-    Optimism = 10,
-    OptimismGoerli = 420,
-    Arbitrum = 42161,
-    ArbitrumGoerli = 421613,
-    Binance = 56,
-    BinanceTestnet = 97
+    Ethereum,
+    Goerli,
+    Polygon,
+    Mumbai,
+    Fantom,
+    FantomTestnet,
+    Avalanche,
+    AvalancheTestnet,
+    Optimism,
+    OptimismGoerli,
+    Arbitrum,
+    ArbitrumGoerli,
+    Binance,
+    BinanceTestnet
 }
+
+[System.Serializable]
+public class ChainData
+{
+    public string identifier;
+    public string chainId;
+    public string rpcOverride;
+}
+
+[System.Serializable]
+public class SupportedChainData : SerializableDictionaryBase<Chain, ChainData> { }
 
 public class ThirdwebManager : MonoBehaviour
 {
-    [Header("SETTINGS")]
+    [Header("REQUIRED SETTINGS")]
+    [Tooltip("The chain to initialize the SDK with")]
     public Chain chain = Chain.Goerli;
-    public List<Chain> supportedNetworks;
 
-    public Dictionary<Chain, string> chainIdentifiers = new Dictionary<Chain, string>
-    {
-        {Chain.Ethereum, "ethereum"},
-        {Chain.Goerli, "goerli"},
-        {Chain.Polygon, "polygon"},
-        {Chain.Mumbai, "mumbai"},
-        {Chain.Fantom, "fantom"},
-        {Chain.FantomTestnet, "fantom-testnet"},
-        {Chain.Avalanche, "avalanche"},
-        {Chain.AvalancheTestnet, "avalanche-testnet"},
-        {Chain.Optimism, "optimism"},
-        {Chain.OptimismGoerli, "optimism-goerli"},
-        {Chain.Arbitrum, "arbitrum"},
-        {Chain.ArbitrumGoerli, "arbitrum-goerli"},
-        {Chain.Binance, "binance"},
-        {Chain.BinanceTestnet, "binance-testnet"},
-    };
+    [Header("CHAIN DATA")]
+    [Tooltip("Support any chain added to the Chain enum")]
+    public SupportedChainData supportedChainData;
+
+    [Header("OPTIONS")]
+    [Tooltip("IPFS Gateway Override")]
+    public string storageIpfsGatewayUrl = null;
+
+    private string API_KEY = "339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3";
 
     public ThirdwebSDK SDK;
 
@@ -52,13 +56,44 @@ public class ThirdwebManager : MonoBehaviour
     private void Awake()
     {
         if (Instance == null)
+        {
             Instance = this;
+            DontDestroyOnLoad(this.gameObject);
+        }
         else
+        {
+            Debug.LogWarning("Two ThirdwebManager instances were found, removing this one.");
             Destroy(this.gameObject);
+            return;
+        }
 
-#if !UNITY_EDITOR
-        SDK = new ThirdwebSDK(chainIdentifiers[chain]);
-#endif
+        ChainData currentChain = supportedChainData[chain];
+
+        if (!Utils.IsWebGLBuild() && string.IsNullOrEmpty(currentChain.chainId))
+        {
+            throw new UnityException("You must provide a Chain ID on native platforms!");
+        }
+
+        if (string.IsNullOrEmpty(currentChain.rpcOverride))
+        {
+            if (string.IsNullOrEmpty(currentChain.identifier))
+                throw new UnityException("When not providing an RPC, you must provide a chain identifier!");
+        }
+        else
+        {
+            if (!currentChain.rpcOverride.StartsWith("https://"))
+                throw new UnityException("RPC overrides must start with https:// !");
+        }
+
+        string rpc = string.IsNullOrEmpty(currentChain.rpcOverride) ? $"https://{currentChain.identifier}.rpc.thirdweb.com/{API_KEY}" : currentChain.rpcOverride;
+        int chainId = int.Parse(currentChain.chainId);
+
+        ThirdwebSDK.Options options = new ThirdwebSDK.Options();
+        if (storageIpfsGatewayUrl != null)
+        {
+            options.storage = new ThirdwebSDK.StorageOptions() { ipfsGatewayUrl = storageIpfsGatewayUrl };
+        }
+
+        SDK = new ThirdwebSDK(rpc, chainId, options);
     }
-
 }

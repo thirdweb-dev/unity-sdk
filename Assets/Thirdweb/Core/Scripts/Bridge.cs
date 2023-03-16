@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -23,6 +22,7 @@ namespace Thirdweb
             {
                 this.arguments = arguments;
             }
+
             public string[] arguments;
         }
 
@@ -70,69 +70,79 @@ namespace Thirdweb
 
         public static void Initialize(string chainOrRPC, ThirdwebSDK.Options options)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Initializing the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Initializing the thirdweb SDK is not fully supported in the editor.");
                 return;
             }
+#if UNITY_WEBGL
             ThirdwebInitialize(chainOrRPC, Utils.ToJson(options));
+#endif
         }
 
         public static async Task<string> Connect(WalletConnection walletConnection)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Connecting wallets is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Connecting wallets is not fully supported in the editor.");
                 return Utils.AddressZero;
             }
             var task = new TaskCompletionSource<string>();
             string taskId = Guid.NewGuid().ToString();
             taskMap[taskId] = task;
+#if UNITY_WEBGL
             ThirdwebConnect(taskId, walletConnection.provider.ToString(), walletConnection.chainId, jsCallback);
+#endif
             string result = await task.Task;
             return result;
         }
 
         public static async Task Disconnect()
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Disconnecting wallets is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Disconnecting wallets is not fully supported in the editor.");
                 return;
             }
             var task = new TaskCompletionSource<string>();
             string taskId = Guid.NewGuid().ToString();
             taskMap[taskId] = task;
+#if UNITY_WEBGL
             ThirdwebDisconnect(taskId, jsCallback);
+#endif
             await task.Task;
         }
 
         public static async Task SwitchNetwork(int chainId)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Switching networks is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Switching networks is not fully supported in the editor.");
                 return;
             }
             var task = new TaskCompletionSource<string>();
             string taskId = Guid.NewGuid().ToString();
             taskMap[taskId] = task;
+#if UNITY_WEBGL
             ThirdwebSwitchNetwork(taskId, chainId, jsCallback);
+#endif
             await task.Task;
         }
 
         public static async Task<T> InvokeRoute<T>(string route, string[] body)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Interacting with the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
                 return default(T);
             }
             var msg = Utils.ToJson(new RequestMessageBody(body));
             string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
+#if UNITY_WEBGL
             ThirdwebInvoke(taskId, route, msg, jsCallback);
+#endif
             string result = await task.Task;
             // Debug.Log($"InvokeRoute Result: {result}");
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
@@ -140,34 +150,39 @@ namespace Thirdweb
 
         public static string InvokeListener<T>(string route, string[] body, Action<T> action)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Interacting with the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
                 return null;
             }
 
             string taskId = Guid.NewGuid().ToString();
             taskActionMap[taskId] = new GenericAction(typeof(T), action);
             var msg = Utils.ToJson(new RequestMessageBody(body));
+#if UNITY_WEBGL
             ThirdwebInvokeListener(taskId, route, msg, jsAction);
+#endif
             return taskId;
         }
 
         public static async Task FundWallet(FundWalletOptions payload)
         {
-            if (Application.isEditor)
+            if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Interacting with the thirdweb SDK is not supported in the editor. Please build and run the app instead.");
+                Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
                 return;
             }
             var msg = Utils.ToJson(payload);
             string taskId = Guid.NewGuid().ToString();
             var task = new TaskCompletionSource<string>();
             taskMap[taskId] = task;
+#if UNITY_WEBGL
             ThirdwebFundWallet(taskId, msg, jsCallback);
+#endif
             await task.Task;
         }
 
+#if UNITY_WEBGL
         [DllImport("__Internal")]
         private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
         [DllImport("__Internal")]
@@ -182,5 +197,6 @@ namespace Thirdweb
         private static extern string ThirdwebSwitchNetwork(string taskId, int chainId, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebFundWallet(string taskId, string payload, Action<string, string, string> cb);
+#endif
     }
 }
