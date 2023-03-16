@@ -98,6 +98,7 @@ namespace WalletConnectSharp.Unity
             if (Instance == null)
             {
                 Instance = this;
+                DontDestroyOnLoad(this.gameObject);
             }
             else
             {
