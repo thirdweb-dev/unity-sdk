@@ -60,8 +60,12 @@ namespace Thirdweb
                 string relayerUrl = ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin?.relayerUrl;
                 string relayerForwarderAddress = ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin?.relayerForwarderAddress;
 
-                ContractBuilder b = new ContractBuilder(functionMessage.GetType(), contractAddress);
-                var f = b.GetFunctionBuilder<TWFunction>();
+                functionMessage.Nonce = (
+                    await ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
+                        relayerForwarderAddress,
+                        new MinimalForwarder.GetNonceFunction() { From = functionMessage.FromAddress }
+                    )
+                ).ReturnValue1;
 
                 var request = new MinimalForwarder.ForwardRequest()
                 {
@@ -69,13 +73,8 @@ namespace Thirdweb
                     To = contractAddress,
                     Value = functionMessage.AmountToSend,
                     Gas = functionMessage.Gas.Value,
-                    Nonce = (
-                        await ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
-                            relayerForwarderAddress,
-                            new MinimalForwarder.GetNonceFunction() { From = functionMessage.FromAddress }
-                        )
-                    ).ReturnValue1,
-                    Data = f.GetData(functionMessage)
+                    Nonce = functionMessage.Nonce.Value,
+                    Data = functionMessage.GetCallData().ByteArrayToHexString()
                 };
 
                 var signature = await EIP712.GenerateSignature_MinimalForwarder("GSNv2 Forwarder", "0.0.1", ThirdwebManager.Instance.SDK.nativeSession.lastChainId, relayerForwarderAddress, request);
@@ -83,6 +82,8 @@ namespace Thirdweb
                 var postData = new RelayerRequest(request, signature, relayerForwarderAddress);
 
                 string txHash = null;
+
+                Debug.Log(JsonConvert.SerializeObject(postData));
 
                 using (UnityWebRequest req = UnityWebRequest.Post(relayerUrl, ""))
                 {
