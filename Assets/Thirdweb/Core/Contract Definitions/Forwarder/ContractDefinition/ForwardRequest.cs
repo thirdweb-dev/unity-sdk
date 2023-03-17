@@ -27,6 +27,6 @@ namespace Thirdweb.Contracts.Forwarder.ContractDefinition
         public virtual BigInteger Nonce { get; set; }
 
         [Parameter("bytes", "data", 6)]
-        public virtual byte[] Data { get; set; }
+        public virtual string Data { get; set; }
     }
 }

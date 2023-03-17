@@ -75,7 +75,7 @@ namespace Thirdweb
                             new MinimalForwarder.GetNonceFunction() { From = functionMessage.FromAddress }
                         )
                     ).ReturnValue1,
-                    Data = f.GetDataAsBytes(functionMessage)
+                    Data = f.GetData(functionMessage)
                 };
 
                 var signature = await EIP712.GenerateSignature_MinimalForwarder("GSNv2 Forwarder", "0.0.1", ThirdwebManager.Instance.SDK.nativeSession.lastChainId, relayerForwarderAddress, request);
@@ -84,21 +84,24 @@ namespace Thirdweb
 
                 string txHash = null;
 
-                var req = new UnityWebRequest(relayerUrl, "POST");
-                byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(postData));
-                req.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
-                req.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-                req.SetRequestHeader("Content-Type", "application/json");
-                await req.SendWebRequest();
-                if (req.result != UnityWebRequest.Result.Success)
+                using (UnityWebRequest req = UnityWebRequest.Post(relayerUrl, ""))
                 {
-                    throw new UnityException(
-                        $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {relayerForwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
-                    );
-                }
-                else
-                {
-                    txHash = req.downloadHandler.text;
+                    byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(postData));
+                    req.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+                    req.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+                    req.SetRequestHeader("Content-Type", "application/json");
+                    await req.SendWebRequest();
+                    if (req.result != UnityWebRequest.Result.Success)
+                    {
+                        req.Dispose();
+                        throw new UnityException(
+                            $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {relayerForwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
+                        );
+                    }
+                    else
+                    {
+                        txHash = req.downloadHandler.text;
+                    }
                 }
 
                 return await ThirdwebManager.Instance.SDK.nativeSession.web3.TransactionReceiptPolling.PollForReceiptAsync(txHash);
