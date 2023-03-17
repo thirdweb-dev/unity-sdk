@@ -96,6 +96,8 @@ namespace Thirdweb
 
         public NativeSession nativeSession;
 
+        public Options options;
+
         /// <summary>
         /// Create an instance of the thirdweb SDK. Requires a webGL browser context.
         /// </summary>
@@ -103,6 +105,8 @@ namespace Thirdweb
         /// <param name="options">Configuration options</param>
         public ThirdwebSDK(string chainOrRPC, int chainId = -1, Options options = new Options())
         {
+            this.options = options;
+
             this.chainOrRPC = chainOrRPC;
             this.wallet = new Wallet();
             this.deployer = new Deployer();

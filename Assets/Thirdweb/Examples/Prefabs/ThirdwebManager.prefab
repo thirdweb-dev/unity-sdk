@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56d9559a79e304f44b5ac4d726f1ee68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chain: 5
+  chain: 1
   supportedChainData:
     reorderableList:
       canAdd: 1
@@ -68,8 +68,8 @@ MonoBehaviour:
       elementIcon: {fileID: 0}
     reqReferences: {fileID: 0}
     isExpanded: 1
-    _keyValues: 01000000050000000a000000
-    _keys: 01000000050000000a000000
+    _keyValues: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d000000
+    _keys: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d000000
     _values:
     - identifier: ethereum
       chainId: 1
@@ -77,7 +77,42 @@ MonoBehaviour:
     - identifier: goerli
       chainId: 5
       rpcOverride: 
+    - identifier: polygon
+      chainId: 137
+      rpcOverride: 
+    - identifier: mumbai
+      chainId: 80001
+      rpcOverride: 
+    - identifier: fantom
+      chainId: 250
+      rpcOverride: 
+    - identifier: fantom-testnet
+      chainId: 4002
+      rpcOverride: 
+    - identifier: avalanche
+      chainId: 43114
+      rpcOverride: 
+    - identifier: avalanche-fuji
+      chainId: 43113
+      rpcOverride: 
     - identifier: optimism
       chainId: 10
       rpcOverride: 
+    - identifier: optimism-goerli
+      chainId: 420
+      rpcOverride: 
+    - identifier: arbitrum
+      chainId: 42161
+      rpcOverride: 
+    - identifier: arbitrum-goerli
+      chainId: 421613
+      rpcOverride: 
+    - identifier: binance
+      chainId: 56
+      rpcOverride: 
+    - identifier: binance-testnet
+      chainId: 97
+      rpcOverride: 
   storageIpfsGatewayUrl: https://gateway.ipfscdn.io/ipfs/
+  relayerUrl: 
+  relayerForwarderAddress: 

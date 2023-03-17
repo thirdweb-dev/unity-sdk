@@ -43,9 +43,14 @@ public class ThirdwebManager : MonoBehaviour
     [Tooltip("Support any chain added to the Chain enum")]
     public SupportedChainData supportedChainData;
 
-    [Header("OPTIONS")]
+    [Header("STORAGE OPTIONS")]
     [Tooltip("IPFS Gateway Override")]
     public string storageIpfsGatewayUrl = null;
+
+    [Header("OZ DEFENDER OPTIONS")]
+    [Tooltip("Gasless Transaction Support")]
+    public string relayerUrl = null;
+    public string relayerForwarderAddress = null;
 
     private string API_KEY = "339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3";
 
@@ -92,6 +97,13 @@ public class ThirdwebManager : MonoBehaviour
         if (storageIpfsGatewayUrl != null)
         {
             options.storage = new ThirdwebSDK.StorageOptions() { ipfsGatewayUrl = storageIpfsGatewayUrl };
+        }
+        if (relayerUrl != null && relayerForwarderAddress != null)
+        {
+            options.gasless = new ThirdwebSDK.GaslessOptions()
+            {
+                openzeppelin = new ThirdwebSDK.OZDefenderOptions() { relayerUrl = this.relayerUrl, relayerForwarderAddress = this.relayerForwarderAddress, }
+            };
         }
 
         SDK = new ThirdwebSDK(rpc, chainId, options);

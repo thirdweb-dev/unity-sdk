@@ -22,7 +22,7 @@ namespace Thirdweb
 
         public Storage(ThirdwebSDK.StorageOptions? storageOptions)
         {
-            if (storageOptions.HasValue)
+            if (storageOptions != null)
             {
                 this.ipfsGatewayUrl = string.IsNullOrEmpty(storageOptions.Value.ipfsGatewayUrl) ? "https://gateway.ipfscdn.io/ipfs/" : storageOptions.Value.ipfsGatewayUrl;
             }

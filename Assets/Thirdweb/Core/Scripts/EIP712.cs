@@ -10,6 +10,7 @@ using TokenERC721Contract = Thirdweb.Contracts.TokenERC721.ContractDefinition;
 using TokenERC1155Contract = Thirdweb.Contracts.TokenERC1155.ContractDefinition;
 using WalletConnectSharp.Unity;
 using WalletConnectSharp.NEthereum;
+using MinimalForwarder = Thirdweb.Contracts.Forwarder.ContractDefinition;
 
 namespace Thirdweb
 {
@@ -287,6 +288,54 @@ namespace Thirdweb
                 },
                 Types = MemberDescriptionFactory.GetTypesMemberDescription(typeof(Domain), typeof(TokenERC1155Contract.MintRequest)),
                 PrimaryType = nameof(TokenERC1155Contract.MintRequest),
+            };
+        }
+
+        /// MINIMAL FORWARDER ///
+
+        public async static Task<string> GenerateSignature_MinimalForwarder(
+            string domainName,
+            string version,
+            BigInteger chainId,
+            string verifyingContract,
+            MinimalForwarder.ForwardRequest forwardRequest
+        )
+        {
+            if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
+            {
+                var signer = new Eip712TypedDataSigner();
+                var key = new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                var typedData = GetTypedDefinition_MinimalForwarder(domainName, version, chainId, verifyingContract);
+                var signature = signer.SignTypedDataV4(forwardRequest, typedData, key);
+                return signature;
+            }
+            else
+            {
+                if (Utils.ActiveWalletConnectSession())
+                {
+                    var typedData = GetTypedDefinition_MinimalForwarder(domainName, version, chainId, verifyingContract);
+                    return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), forwardRequest, typedData);
+                }
+                else
+                {
+                    throw new UnityException("No account connected!");
+                }
+            }
+        }
+
+        public static TypedData<Domain> GetTypedDefinition_MinimalForwarder(string domainName, string version, BigInteger chainId, string verifyingContract)
+        {
+            return new TypedData<Domain>
+            {
+                Domain = new Domain
+                {
+                    Name = domainName,
+                    Version = version,
+                    ChainId = chainId,
+                    VerifyingContract = verifyingContract,
+                },
+                Types = MemberDescriptionFactory.GetTypesMemberDescription(typeof(Domain), typeof(MinimalForwarder.ForwardRequest)),
+                PrimaryType = nameof(MinimalForwarder.ForwardRequest),
             };
         }
     }

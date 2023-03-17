@@ -76,7 +76,16 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
         address = null;
 
         if (supportedWallets.Count == 1)
-            connectButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(supportedWallets[0]));
+        {
+            if (supportedWallets[0] == WalletNative.DeviceWallet)
+            {
+                connectButton.GetComponent<Button>().onClick.AddListener(() => OpenPasswordPanel());
+            }
+            else
+            {
+                connectButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(supportedWallets[0]));
+            }
+        }
         else
             connectButton.GetComponent<Button>().onClick.AddListener(() => OnClickDropdown());
 

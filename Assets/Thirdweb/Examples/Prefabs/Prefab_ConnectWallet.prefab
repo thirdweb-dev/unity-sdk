@@ -2274,7 +2274,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   supportedWallets: 010000000200000003000000
   supportSwitchingNetwork: 1
-  supportedNetworks: 0500000081380100ed6e0600a4010000
+  supportedNetworks: 00000000010000000200000003000000
   OnConnectedCallback:
     m_PersistentCalls:
       m_Calls: []
