@@ -60,6 +60,9 @@ namespace Thirdweb
                 string relayerUrl = ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin?.relayerUrl;
                 string relayerForwarderAddress = ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin?.relayerForwarderAddress;
 
+                ContractBuilder b = new ContractBuilder(functionMessage.GetType(), contractAddress);
+                var f = b.GetFunctionBuilder<TWFunction>();
+
                 var request = new MinimalForwarder.ForwardRequest()
                 {
                     From = functionMessage.FromAddress,
@@ -68,11 +71,11 @@ namespace Thirdweb
                     Gas = functionMessage.Gas.Value,
                     Nonce = (
                         await ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
-                            "0x5001A14CA6163143316a7C614e30e6041033Ac20",
+                            relayerForwarderAddress,
                             new MinimalForwarder.GetNonceFunction() { From = functionMessage.FromAddress }
                         )
                     ).ReturnValue1,
-                    Data = functionMessage.GetCallData()
+                    Data = f.GetDataAsBytes(functionMessage)
                 };
 
                 var signature = await EIP712.GenerateSignature_MinimalForwarder("GSNv2 Forwarder", "0.0.1", ThirdwebManager.Instance.SDK.nativeSession.lastChainId, relayerForwarderAddress, request);
@@ -80,20 +83,22 @@ namespace Thirdweb
                 var postData = new RelayerRequest(request, signature, relayerForwarderAddress);
 
                 string txHash = null;
-                using (UnityWebRequest req = UnityWebRequest.Post(relayerUrl, JsonConvert.SerializeObject(postData)))
-                {
-                    await req.SendWebRequest();
 
-                    if (req.result != UnityWebRequest.Result.Success)
-                    {
-                        throw new UnityException(
-                            $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {relayerForwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
-                        );
-                    }
-                    else
-                    {
-                        txHash = req.downloadHandler.text;
-                    }
+                var req = new UnityWebRequest(relayerUrl, "POST");
+                byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(postData));
+                req.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+                req.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+                req.SetRequestHeader("Content-Type", "application/json");
+                await req.SendWebRequest();
+                if (req.result != UnityWebRequest.Result.Success)
+                {
+                    throw new UnityException(
+                        $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {relayerForwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
+                    );
+                }
+                else
+                {
+                    txHash = req.downloadHandler.text;
                 }
 
                 return await ThirdwebManager.Instance.SDK.nativeSession.web3.TransactionReceiptPolling.PollForReceiptAsync(txHash);
@@ -104,6 +109,7 @@ namespace Thirdweb
             }
         }
 
+        [System.Serializable]
         public struct RelayerRequest
         {
             public MinimalForwarder.ForwardRequest request;
