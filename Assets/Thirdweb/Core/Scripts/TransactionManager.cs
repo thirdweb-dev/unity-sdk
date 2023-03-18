@@ -43,12 +43,11 @@ namespace Thirdweb
         public static async Task<TransactionReceipt> ThirdwebWriteRawResult<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null)
             where TWFunction : FunctionMessage, new()
         {
-            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
             functionMessage.AmountToSend = weiValue ?? 0;
-
-            var transactionHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContractTransactionHandler<TWFunction>();
-            var gas = await transactionHandler.EstimateGasAsync(contractAddress, functionMessage);
-            functionMessage.Gas = gas.Value < 100000 ? 100000 : gas;
+            var gasEstimator = new Nethereum.Web3.Web3(ThirdwebManager.Instance.SDK.nativeSession.lastRPC).Eth.GetContractTransactionHandler<TWFunction>();
+            var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
+            functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
+            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
 
             if (
                 ThirdwebManager.Instance.SDK.options.gasless != null
@@ -109,6 +108,7 @@ namespace Thirdweb
             }
             else
             {
+                var transactionHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContractTransactionHandler<TWFunction>();
                 return await transactionHandler.SendRequestAndWaitForReceiptAsync(contractAddress, functionMessage);
             }
         }

@@ -99,7 +99,7 @@ namespace Thirdweb
                     List<NFT> allNfts = await rawTokenData.ToNFTList();
                     return allNfts;
                 }
-                catch (System.Exception e)
+                catch (System.Exception)
                 {
                     List<NFT> allNfts = new List<NFT>();
                     for (int i = start; i < end; i++)
@@ -463,7 +463,7 @@ namespace Thirdweb
 
                 var data = await TransactionManager.ThirdwebRead<DropERC721Contract.GetClaimConditionByIdFunction, DropERC721Contract.GetClaimConditionByIdOutputDTO>(
                     contractAddress,
-                    new DropERC721Contract.GetClaimConditionByIdFunction() { }
+                    new DropERC721Contract.GetClaimConditionByIdFunction() { ConditionId = id.ReturnValue1 }
                 );
 
                 return new ClaimConditions()
