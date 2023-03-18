@@ -41,6 +41,7 @@ public class Prefab_Writing : MonoBehaviour
             // }
 
             // Claiming
+            Debugger.Instance.Log("Request Sent", "Pending confirmation...");
             Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC20_CONTRACT);
             var result = await contract.ERC20.Claim("0.3");
             Debugger.Instance.Log("[Claim ERC20] Successful", result.ToString());
@@ -86,6 +87,7 @@ public class Prefab_Writing : MonoBehaviour
             // }
 
             // NFT Drop Claiming
+            Debugger.Instance.Log("Request Sent", "Pending confirmation...");
             Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC721_CONTRACT);
             var result = await contract.ERC721.Claim(1);
             Debugger.Instance.Log("[Claim ERC721] Successful", result[0].ToString());
@@ -143,6 +145,8 @@ public class Prefab_Writing : MonoBehaviour
             //     return;
             // }
 
+            // Edition Drop Claiming
+            Debugger.Instance.Log("Request Sent", "Pending confirmation...");
             Contract contract = ThirdwebManager.Instance.SDK.GetContract(DROP_ERC1155_CONTRACT);
             TransactionResult transactionResult = await contract.ERC1155.Claim("0", 1);
             Debugger.Instance.Log("[Claim ERC1155] Successful", transactionResult.ToString());
@@ -220,6 +224,7 @@ public class Prefab_Writing : MonoBehaviour
             // var result = await pack.Create(newPackInput);
             // Debugger.Instance.Log("[Create Pack] Successful", result.ToString());
 
+            Debugger.Instance.Log("Request Sent", "Pending confirmation...");
             PackRewards rewards = await pack.Open("1");
             Debugger.Instance.Log("[Open Pack] Successful", rewards.ToString());
         }

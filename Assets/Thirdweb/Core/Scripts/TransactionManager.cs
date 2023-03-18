@@ -49,12 +49,7 @@ namespace Thirdweb
             functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
             functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
 
-            if (
-                ThirdwebManager.Instance.SDK.options.gasless != null
-                && ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin != null
-                && !string.IsNullOrEmpty(ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin.Value.relayerUrl)
-                && !string.IsNullOrEmpty(ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin.Value.relayerForwarderAddress)
-            )
+            if (ThirdwebManager.Instance.SDK.options.gasless != null && ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin != null)
             {
                 string relayerUrl = ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin?.relayerUrl;
                 string relayerForwarderAddress = ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin?.relayerForwarderAddress;
@@ -82,8 +77,6 @@ namespace Thirdweb
 
                 string txHash = null;
 
-                Debug.Log(JsonConvert.SerializeObject(postData));
-
                 using (UnityWebRequest req = UnityWebRequest.Post(relayerUrl, ""))
                 {
                     byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(postData));
@@ -93,17 +86,18 @@ namespace Thirdweb
                     await req.SendWebRequest();
                     if (req.result != UnityWebRequest.Result.Success)
                     {
-                        req.Dispose();
                         throw new UnityException(
                             $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {relayerForwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
                         );
                     }
                     else
                     {
-                        txHash = req.downloadHandler.text;
+                        var response = JsonConvert.DeserializeObject<RelayerResponse>(req.downloadHandler.text);
+                        var result = JsonConvert.DeserializeObject<RelayerResult>(response.result);
+                        txHash = result.txHash;
+                        Debug.Log(txHash);
                     }
                 }
-
                 return await ThirdwebManager.Instance.SDK.nativeSession.web3.TransactionReceiptPolling.PollForReceiptAsync(txHash);
             }
             else
@@ -114,11 +108,32 @@ namespace Thirdweb
         }
 
         [System.Serializable]
+        public struct RelayerResponse
+        {
+            [JsonProperty("result")]
+            public string result;
+        }
+
+        [System.Serializable]
+        public struct RelayerResult
+        {
+            [JsonProperty("txHash")]
+            public string txHash;
+        }
+
+        [System.Serializable]
         public struct RelayerRequest
         {
+            [JsonProperty("request")]
             public MinimalForwarder.ForwardRequest request;
+
+            [JsonProperty("signature")]
             public string signature;
+
+            [JsonProperty("forwarderAddress")]
             public string forwarderAddress;
+
+            [JsonProperty("type")]
             public string type;
 
             public RelayerRequest(ForwardRequest request, string signature, string forwarderAddress)
