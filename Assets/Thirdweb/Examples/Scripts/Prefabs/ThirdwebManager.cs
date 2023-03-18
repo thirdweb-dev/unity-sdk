@@ -94,11 +94,11 @@ public class ThirdwebManager : MonoBehaviour
         int chainId = int.Parse(currentChain.chainId);
 
         ThirdwebSDK.Options options = new ThirdwebSDK.Options();
-        if (storageIpfsGatewayUrl != null)
+        if (!string.IsNullOrEmpty(storageIpfsGatewayUrl))
         {
             options.storage = new ThirdwebSDK.StorageOptions() { ipfsGatewayUrl = storageIpfsGatewayUrl };
         }
-        if (relayerUrl != null && relayerForwarderAddress != null)
+        if (!string.IsNullOrEmpty(relayerUrl) && !string.IsNullOrEmpty(relayerForwarderAddress))
         {
             options.gasless = new ThirdwebSDK.GaslessOptions()
             {

@@ -114,5 +114,5 @@ MonoBehaviour:
       chainId: 97
       rpcOverride: 
   storageIpfsGatewayUrl: https://gateway.ipfscdn.io/ipfs/
-  relayerUrl: https://api.defender.openzeppelin.com/autotasks/7d795312-855d-4f02-900a-30c1dde211cb/runs/webhook/76da2beb-fbb1-4082-bbb8-d4429dedee81/E33wsMacq1ZDCQVHPTZVo
-  relayerForwarderAddress: 0x5001A14CA6163143316a7C614e30e6041033Ac20
+  relayerUrl: 
+  relayerForwarderAddress: 
