@@ -1659,7 +1659,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 4a851c149a30f1e4b8088ab52b81444d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: db8ba9cab203b1e459eceb66e03f1106, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -3622,10 +3622,10 @@ MonoBehaviour:
   walletButtons:
   - wallet: 0
     walletButton: {fileID: 8534970399124805823}
-    icon: {fileID: 21300000, guid: 4a851c149a30f1e4b8088ab52b81444d, type: 3}
+    icon: {fileID: 21300000, guid: db8ba9cab203b1e459eceb66e03f1106, type: 3}
   - wallet: 1
     walletButton: {fileID: 7851835104483634769}
-    icon: {fileID: 21300000, guid: 4a851c149a30f1e4b8088ab52b81444d, type: 3}
+    icon: {fileID: 21300000, guid: db8ba9cab203b1e459eceb66e03f1106, type: 3}
   - wallet: 2
     walletButton: {fileID: 7276129279946335584}
     icon: {fileID: 21300000, guid: d5a5e5db03872be4c8c6303a906b29bd, type: 3}
@@ -4399,7 +4399,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 4a851c149a30f1e4b8088ab52b81444d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: db8ba9cab203b1e459eceb66e03f1106, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1

@@ -2280,14 +2280,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4404896360829706404, guid: 379ed01658d62a14484f953196ff19db, type: 3}
-      propertyPath: relayerUrl
-      value: https://api.defender.openzeppelin.com/autotasks/7d795312-855d-4f02-900a-30c1dde211cb/runs/webhook/76da2beb-fbb1-4082-bbb8-d4429dedee81/E33wsMacq1ZDCQVHPTZVo
-      objectReference: {fileID: 0}
-    - target: {fileID: 4404896360829706404, guid: 379ed01658d62a14484f953196ff19db, type: 3}
-      propertyPath: relayerForwarderAddress
-      value: 0x5001A14CA6163143316a7C614e30e6041033Ac20
-      objectReference: {fileID: 0}
     - target: {fileID: 4404896360829706405, guid: 379ed01658d62a14484f953196ff19db, type: 3}
       propertyPath: m_RootOrder
       value: 3
