@@ -44,10 +44,10 @@ namespace Thirdweb
             where TWFunction : FunctionMessage, new()
         {
             functionMessage.AmountToSend = weiValue ?? 0;
+            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
             var gasEstimator = new Nethereum.Web3.Web3(ThirdwebManager.Instance.SDK.nativeSession.lastRPC).Eth.GetContractTransactionHandler<TWFunction>();
             var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
             functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
-            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
 
             if (ThirdwebManager.Instance.SDK.options.gasless != null && ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin != null)
             {

@@ -143,7 +143,14 @@ namespace Thirdweb
 
                 var contract = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContract(this.abi, this.address);
                 var function = contract.GetFunction(functionName);
-                var receipt = await function.SendTransactionAndWaitForReceiptAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, args);
+                var gas = await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, null, args);
+                var receipt = await function.SendTransactionAndWaitForReceiptAsync(
+                    from: await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                    gas: gas,
+                    value: new Nethereum.Hex.HexTypes.HexBigInteger(0),
+                    receiptRequestCancellationToken: null,
+                    args
+                );
                 return receipt.ToTransactionResult();
             }
         }

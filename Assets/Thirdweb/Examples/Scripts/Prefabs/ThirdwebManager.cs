@@ -52,8 +52,6 @@ public class ThirdwebManager : MonoBehaviour
     public string relayerUrl = null;
     public string relayerForwarderAddress = null;
 
-    private string API_KEY = "339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3";
-
     public ThirdwebSDK SDK;
 
     public static ThirdwebManager Instance;
@@ -90,7 +88,6 @@ public class ThirdwebManager : MonoBehaviour
                 throw new UnityException("RPC overrides must start with https:// !");
         }
 
-        string rpc = string.IsNullOrEmpty(currentChain.rpcOverride) ? $"https://{currentChain.identifier}.rpc.thirdweb.com/{API_KEY}" : currentChain.rpcOverride;
         int chainId = int.Parse(currentChain.chainId);
 
         ThirdwebSDK.Options options = new ThirdwebSDK.Options();
@@ -106,6 +103,6 @@ public class ThirdwebManager : MonoBehaviour
             };
         }
 
-        SDK = new ThirdwebSDK(rpc, chainId, options);
+        SDK = new ThirdwebSDK(currentChain.identifier, chainId, options);
     }
 }
