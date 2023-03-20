@@ -63,23 +63,13 @@ namespace WalletConnectSharp.Unity
             get { return Session.URI; }
         }
 
-        public bool retryOnTimeout = true;
-        public bool autoSaveAndResume = true;
-        public bool createNewSessionOnSessionDisconnect = true;
         public int connectSessionRetryCount = 3;
-        public string customBridgeUrl;
 
         public GameObject walletConnectCanvas;
 
         public WalletConnectEventNoSession ConnectedEvent;
 
-        public WalletConnectEventWithSessionData ConnectedEventSession;
-
         public WalletConnectEventWithSession DisconnectedEvent;
-
-        public WalletConnectEventWithSession ConnectionFailedEvent;
-        public WalletConnectEventWithSession NewSessionConnected;
-        public WalletConnectEventWithSession ResumedSessionConnected;
 
         public WalletConnectUnitySession Session { get; private set; }
 
@@ -103,6 +93,7 @@ namespace WalletConnectSharp.Unity
             else
             {
                 Destroy(this.gameObject);
+                return;
             }
 
             base.Awake();
@@ -110,18 +101,14 @@ namespace WalletConnectSharp.Unity
 
         public async Task<WCSessionData> EnableWalletConnect()
         {
-            walletConnectCanvas.SetActive(true);
             SetMode(true);
-            var sessionData = await Connect(ThirdwebManager.Instance.SDK.nativeSession.lastChainId);
-            Debug.Log("CONNECTED CHAIN ID " + sessionData.chainId);
-            return sessionData;
+            return await Connect(ThirdwebManager.Instance.SDK.nativeSession.lastChainId);
         }
 
-        public void DisableWalletConnect()
+        public async void DisableWalletConnect()
         {
-            CloseSession(false);
             SetMode(false);
-            walletConnectCanvas.SetActive(false);
+            await Session?.Disconnect();
         }
 
         public void SetMode(bool active)
@@ -133,56 +120,26 @@ namespace WalletConnectSharp.Unity
 #else
             modeUI[Mode.Standalone].SetActive(active);
 #endif
+            walletConnectCanvas.SetActive(active);
         }
 
         public async Task<WCSessionData> Connect(int chainId)
         {
-            while (true)
+            SavedSession savedSession = null;
+            if (PlayerPrefs.HasKey(SessionKey))
             {
-                try
+                var json = PlayerPrefs.GetString(SessionKey);
+                savedSession = JsonConvert.DeserializeObject<SavedSession>(json);
+            }
+
+            if (Session != null)
+            {
+                var currentKey = Session.KeyData;
+                if (savedSession != null)
                 {
-                    SavedSession savedSession = null;
-                    if (PlayerPrefs.HasKey(SessionKey))
+                    if (currentKey != savedSession.Key)
                     {
-                        var json = PlayerPrefs.GetString(SessionKey);
-                        savedSession = JsonConvert.DeserializeObject<SavedSession>(json);
-                    }
-
-                    if (string.IsNullOrWhiteSpace(customBridgeUrl))
-                    {
-                        customBridgeUrl = null;
-                    }
-
-                    if (Session != null)
-                    {
-                        var currentKey = Session.KeyData;
-                        if (savedSession != null)
-                        {
-                            if (currentKey != savedSession.Key)
-                            {
-                                if (Session.SessionConnected)
-                                {
-                                    await Session.Disconnect();
-                                }
-                                else if (Session.TransportConnected)
-                                {
-                                    await Session.Transport.Close();
-                                }
-                            }
-                            else if (!Session.Connected && !Session.Connecting)
-                            {
-                                StartCoroutine(SetupDefaultWallet());
-
-                                SetupEvents();
-
-                                return await CompleteConnect();
-                            }
-                            else
-                            {
-                                return null; //Nothing to do
-                            }
-                        }
-                        else if (Session.SessionConnected)
+                        if (Session.SessionConnected)
                         {
                             await Session.Disconnect();
                         }
@@ -190,43 +147,61 @@ namespace WalletConnectSharp.Unity
                         {
                             await Session.Transport.Close();
                         }
-                        else if (Session.Connecting)
-                        {
-                            //We are still connecting, do nothing
-                            return null;
-                        }
                     }
+                    else if (!Session.Connected && !Session.Connecting)
+                    {
+                        StartCoroutine(SetupDefaultWallet());
 
-                    //default will be set by library
-                    ICipher ciper = null;
+                        SetupEvents();
+
+                        return await CompleteConnect();
+                    }
+                    else
+                    {
+                        SetMode(false);
+                        return null; //Nothing to do
+                    }
+                }
+                else if (Session.SessionConnected)
+                {
+                    await Session.Disconnect();
+                }
+                else if (Session.TransportConnected)
+                {
+                    await Session.Transport.Close();
+                }
+                else if (Session.Connecting)
+                {
+                    //We are still connecting, do nothing
+                    SetMode(false);
+                    return null;
+                }
+            }
+
+            //default will be set by library
+            ICipher ciper = null;
 
 #if UNITY_WEBGL
             ciper = new WebGlAESCipher();
 #endif
 
-                    if (savedSession != null)
-                    {
-                        Session = new WalletConnectUnitySession(savedSession, this, _transport);
-                    }
-                    else
-                    {
-                        Session = new WalletConnectUnitySession(AppData, this, customBridgeUrl, _transport, ciper, chainId);
-
-                        if (NewSessionStarted != null)
-                            NewSessionStarted(this, EventArgs.Empty);
-                    }
-
-                    StartCoroutine(SetupDefaultWallet());
-
-                    SetupEvents();
-
-                    return await CompleteConnect();
-                }
-                catch (TimeoutException)
-                {
-                    Debug.Log("Timeout Reached, Regenerating Session");
-                }
+            if (savedSession != null)
+            {
+                Session = new WalletConnectUnitySession(savedSession, this, _transport);
             }
+            else
+            {
+                Session = new WalletConnectUnitySession(AppData, this, null, _transport, ciper, chainId);
+
+                if (NewSessionStarted != null)
+                    NewSessionStarted(this, EventArgs.Empty);
+            }
+
+            StartCoroutine(SetupDefaultWallet());
+
+            SetupEvents();
+
+            return await CompleteConnect();
         }
 
         private void SetupEvents()
@@ -239,8 +214,6 @@ namespace WalletConnectSharp.Unity
             };
 #endif
             Session.OnSessionDisconnect += SessionOnOnSessionDisconnect;
-            Session.OnSessionCreated += SessionOnOnSessionCreated;
-            Session.OnSessionResumed += SessionOnOnSessionResumed;
 
 #if UNITY_ANDROID || UNITY_IOS
             //Whenever we send a request to the Wallet, we want to open the Wallet app
@@ -251,20 +224,6 @@ namespace WalletConnectSharp.Unity
         private void TeardownEvents()
         {
             Session.OnSessionDisconnect -= SessionOnOnSessionDisconnect;
-            Session.OnSessionCreated -= SessionOnOnSessionCreated;
-            Session.OnSessionResumed -= SessionOnOnSessionResumed;
-        }
-
-        private void SessionOnOnSessionResumed(object sender, WalletConnectSession e)
-        {
-            if (this.ResumedSessionConnected != null)
-                this.ResumedSessionConnected.Invoke(e as WalletConnectUnitySession ?? Session);
-        }
-
-        private void SessionOnOnSessionCreated(object sender, WalletConnectSession e)
-        {
-            if (this.NewSessionConnected != null)
-                this.NewSessionConnected.Invoke(e as WalletConnectUnitySession ?? Session);
         }
 
         private async Task<WCSessionData> CompleteConnect()
@@ -282,7 +241,6 @@ namespace WalletConnectSharp.Unity
                 delegate(WCSessionData arg0)
                 {
                     ConnectedEvent.Invoke();
-                    ConnectedEventSession.Invoke(arg0);
                 }
             );
 
@@ -309,22 +267,17 @@ namespace WalletConnectSharp.Unity
             throw new IOException("Failed to request session connection after " + tries + " times.");
         }
 
-        private async void SessionOnOnSessionDisconnect(object sender, EventArgs e)
+        private void SessionOnOnSessionDisconnect(object sender, EventArgs e)
         {
             if (DisconnectedEvent != null)
                 DisconnectedEvent.Invoke(Session);
 
-            if (autoSaveAndResume && PlayerPrefs.HasKey(SessionKey))
+            if (PlayerPrefs.HasKey(SessionKey))
             {
                 PlayerPrefs.DeleteKey(SessionKey);
             }
 
             TeardownEvents();
-
-            if (createNewSessionOnSessionDisconnect)
-            {
-                await Connect(ThirdwebManager.Instance.SDK.nativeSession.lastChainId);
-            }
         }
 
         private string FormatWalletName(string name)
@@ -435,7 +388,7 @@ namespace WalletConnectSharp.Unity
             {
                 await SaveOrDisconnect();
             }
-            else if (PlayerPrefs.HasKey(SessionKey) && autoSaveAndResume)
+            else if (PlayerPrefs.HasKey(SessionKey))
             {
                 await Connect(ThirdwebManager.Instance.SDK.nativeSession.lastChainId);
             }
@@ -446,18 +399,11 @@ namespace WalletConnectSharp.Unity
             if (Session == null || !Session.Connected)
                 return;
 
-            if (autoSaveAndResume)
-            {
-                var session = Session.SaveSession();
-                var json = JsonConvert.SerializeObject(session);
-                PlayerPrefs.SetString(SessionKey, json);
+            var session = Session.SaveSession();
+            var json = JsonConvert.SerializeObject(session);
+            PlayerPrefs.SetString(SessionKey, json);
 
-                await Session.Transport.Close();
-            }
-            else
-            {
-                await Session.Disconnect();
-            }
+            await Session.Transport.Close();
         }
 
         public void OpenMobileWallet(AppEntry selectedWallet)
@@ -555,17 +501,6 @@ namespace WalletConnectSharp.Unity
         public void ClearSession()
         {
             PlayerPrefs.DeleteKey(SessionKey);
-        }
-
-        public async void CloseSession(bool waitForNewSession = true)
-        {
-            if (Session == null)
-                return;
-
-            await Session.Disconnect();
-
-            if (waitForNewSession)
-                await Session.Connect();
         }
 
         public async Task<string> WalletAddEthChain(EthChainData chainData)
