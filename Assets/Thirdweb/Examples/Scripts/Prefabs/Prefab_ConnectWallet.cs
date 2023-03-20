@@ -112,7 +112,9 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         try
         {
-            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection() { provider = GetWalletProvider(_wallet), chainId = (int)ThirdwebManager.Instance.chain, });
+            address = await ThirdwebManager.Instance.SDK.wallet.Connect(
+                new WalletConnection() { provider = GetWalletProvider(_wallet), chainId = int.Parse(ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].chainId), }
+            );
 
             wallet = _wallet;
             OnConnected();
