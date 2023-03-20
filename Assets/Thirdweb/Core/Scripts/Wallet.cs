@@ -11,6 +11,8 @@ using WalletConnectSharp.Core.Models.Ethereum;
 using WalletConnectSharp.Unity;
 using WalletConnectSharp.NEthereum.Account;
 using WalletConnectSharp.NEthereum;
+using Nethereum.Siwe.Core;
+using System.Collections.Generic;
 
 //using WalletConnectSharp.NEthereum;
 
@@ -96,7 +98,41 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var siwe = new Nethereum.Siwe.SiweMessageService();
+                var siweMsg = new Nethereum.Siwe.Core.SiweMessage()
+                {
+                    Resources = new List<string>(),
+                    Uri = $"https://{domain}",
+                    Statement = "Please ensure that the domain above matches the URL of the current website.",
+                    Address = await GetAddress(),
+                    Domain = domain,
+                    ChainId = (await GetChainId()).ToString(),
+                    Version = "1",
+                    Nonce = null,
+                    IssuedAt = null,
+                    ExpirationTime = null,
+                    NotBefore = null,
+                    RequestId = null,
+                };
+                siweMsg.SetIssuedAtNow();
+                siweMsg.SetExpirationTime(DateTime.UtcNow.AddSeconds(60 * 5));
+                siweMsg.SetNotBefore(DateTime.UtcNow);
+                siweMsg = siwe.AssignNewNonce(siweMsg);
+
+                var finalMsg = SiweMessageStringBuilder.BuildMessage(siweMsg);
+                var signature = await Sign(finalMsg);
+                return new LoginPayload()
+                {
+                    signature = signature,
+                    payload = new LoginPayloadData()
+                    {
+                        domain = siweMsg.Domain,
+                        address = siweMsg.Address,
+                        nonce = siweMsg.Nonce,
+                        expiration_time = siweMsg.ExpirationTime,
+                        chain_id = siweMsg.ChainId
+                    }
+                };
             }
         }
 
