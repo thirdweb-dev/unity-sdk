@@ -391,13 +391,25 @@ namespace Thirdweb
     }
 
     [System.Serializable]
-    public struct LoginPayloadData
+    public class LoginPayloadData
     {
+        public string type;
         public string domain;
         public string address;
-        public string nonce;
-        public string expiration_time;
+        public string statement;
+        public string uri;
+        public string version;
         public string chain_id;
+        public string nonce;
+        public string issued_at;
+        public string expiration_time;
+        public string invalid_before;
+        public List<string> resources;
+
+        public LoginPayloadData()
+        {
+            type = "evm";
+        }
 
         public override string ToString()
         {
