@@ -49,10 +49,10 @@ namespace Thirdweb
             var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
             functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
 
-            if (ThirdwebManager.Instance.SDK.options.gasless != null && ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin != null)
+            if (ThirdwebManager.Instance.SDK.nativeSession.options.gasless != null && ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin != null)
             {
-                string relayerUrl = ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin?.relayerUrl;
-                string relayerForwarderAddress = ThirdwebManager.Instance.SDK.options.gasless.Value.openzeppelin?.relayerForwarderAddress;
+                string relayerUrl = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.relayerUrl;
+                string relayerForwarderAddress = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.relayerForwarderAddress;
 
                 functionMessage.Nonce = (
                     await ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(

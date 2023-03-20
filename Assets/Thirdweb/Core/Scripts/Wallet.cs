@@ -44,6 +44,7 @@ namespace Thirdweb
                     newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
                     newNativeSession.account = null;
                     newNativeSession.web3 = WalletConnect.Instance.Session.BuildWeb3(new Uri(newNativeSession.lastRPC)).AsWalletAccount(true);
+                    newNativeSession.siweSession = new SiweMessageService();
                     ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
                     return WalletConnect.Instance.Session.Accounts[0];
                 }
@@ -53,6 +54,7 @@ namespace Thirdweb
                     newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
                     newNativeSession.account = Utils.UnlockOrGenerateAccount(newNativeSession.lastChainId, password, null); // TODO: Allow custom private keys/passwords
                     newNativeSession.web3 = new Web3(newNativeSession.account, newNativeSession.lastRPC);
+                    newNativeSession.siweSession = new SiweMessageService();
                     ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
                     return ThirdwebManager.Instance.SDK.nativeSession.account.Address;
                 }
@@ -79,6 +81,7 @@ namespace Thirdweb
                 newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
                 newNativeSession.account = null;
                 newNativeSession.web3 = new Web3(newNativeSession.lastRPC); // fallback
+                newNativeSession.siweSession = new SiweMessageService();
                 ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
             }
         }
@@ -107,7 +110,7 @@ namespace Thirdweb
             }
             else
             {
-                var siwe = ThirdwebManager.Instance.SDK.siweSession;
+                var siwe = ThirdwebManager.Instance.SDK.nativeSession.siweSession;
                 var siweMsg = new SiweMessage()
                 {
                     Resources = new List<string>(),
@@ -142,7 +145,7 @@ namespace Thirdweb
             }
             else
             {
-                var siwe = ThirdwebManager.Instance.SDK.siweSession;
+                var siwe = ThirdwebManager.Instance.SDK.nativeSession.siweSession;
                 var siweMessage = SiweMessageParser.Parse(payload.message);
                 var signature = payload.signature;
                 var validUser = await siwe.IsUserAddressRegistered(siweMessage);

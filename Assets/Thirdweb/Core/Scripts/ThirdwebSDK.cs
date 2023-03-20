@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Nethereum.Siwe;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
@@ -85,20 +86,17 @@ namespace Thirdweb
 
         public Storage storage;
 
-        [System.Serializable]
         public class NativeSession
         {
             public int lastChainId = -1;
             public string lastRPC = null;
             public Account account = null;
             public Web3 web3 = null;
+            public Options options;
+            public SiweMessageService siweSession;
         }
 
         public NativeSession nativeSession;
-
-        public Options options;
-
-        public Nethereum.Siwe.SiweMessageService siweSession;
 
         /// <summary>
         /// Create an instance of the thirdweb SDK. Requires a webGL browser context.
@@ -107,8 +105,6 @@ namespace Thirdweb
         /// <param name="options">Configuration options</param>
         public ThirdwebSDK(string chainOrRPC, int chainId = -1, Options options = new Options())
         {
-            this.options = options;
-
             this.chainOrRPC = chainOrRPC;
             this.wallet = new Wallet();
             this.deployer = new Deployer();
@@ -125,8 +121,8 @@ namespace Thirdweb
                 nativeSession.lastRPC = rpc;
                 nativeSession.lastChainId = chainId;
                 nativeSession.web3 = new Web3(nativeSession.lastRPC);
-
-                siweSession = new Nethereum.Siwe.SiweMessageService();
+                nativeSession.options = options;
+                nativeSession.siweSession = new Nethereum.Siwe.SiweMessageService();
             }
             else
             {
