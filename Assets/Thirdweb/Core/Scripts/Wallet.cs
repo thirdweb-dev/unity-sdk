@@ -109,7 +109,7 @@ namespace Thirdweb
                     IssuedAt = null,
                     ExpirationTime = null,
                     NotBefore = null,
-                    RequestId = null,
+                    RequestId = Guid.NewGuid().ToString()
                 };
                 siweMsg.SetIssuedAtNow();
                 siweMsg.SetExpirationTime(DateTime.UtcNow.AddSeconds(60 * 5));
