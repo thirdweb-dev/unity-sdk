@@ -114,13 +114,13 @@ namespace Thirdweb
 
             if (!Utils.IsWebGLBuild())
             {
-                if (!chainOrRPC.StartsWith("https://"))
-                    throw new UnityException("Invalid RPC URL!");
                 if (chainId == -1)
                     throw new UnityException("Chain ID override required for native platforms!");
 
+                string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3" : chainOrRPC;
+
                 nativeSession = new NativeSession();
-                nativeSession.lastRPC = chainOrRPC;
+                nativeSession.lastRPC = rpc;
                 nativeSession.lastChainId = chainId;
                 nativeSession.web3 = new Web3(nativeSession.lastRPC);
             }
