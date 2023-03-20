@@ -2,16 +2,13 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Signer;
 using Nethereum.Web3;
-using Nethereum.Web3.Accounts;
 using UnityEngine;
 using System;
-using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models;
-using WalletConnectSharp.Core.Models.Ethereum;
 using WalletConnectSharp.Unity;
-using WalletConnectSharp.NEthereum.Account;
 using WalletConnectSharp.NEthereum;
 using Nethereum.Siwe.Core;
+using Nethereum.Siwe;
 using System.Collections.Generic;
 
 //using WalletConnectSharp.NEthereum;
@@ -98,8 +95,8 @@ namespace Thirdweb
             }
             else
             {
-                var siwe = new Nethereum.Siwe.SiweMessageService();
-                var siweMsg = new Nethereum.Siwe.Core.SiweMessage()
+                var siwe = new SiweMessageService();
+                var siweMsg = new SiweMessage()
                 {
                     Resources = new List<string>(),
                     Uri = $"https://{domain}",
@@ -121,6 +118,10 @@ namespace Thirdweb
 
                 var finalMsg = SiweMessageStringBuilder.BuildMessage(siweMsg);
                 var signature = await Sign(finalMsg);
+                if (!await siwe.IsValidMessage(siweMsg, signature) || !await siwe.IsMessageSignatureValid(siweMsg, signature))
+                {
+                    throw new UnityException("Invalid message/signature!");
+                }
                 return new LoginPayload()
                 {
                     signature = signature,
@@ -174,7 +175,7 @@ namespace Thirdweb
             {
                 if (Utils.ActiveWalletConnectSession())
                 {
-                    return WalletConnect.Instance.Session.Accounts[0];
+                    return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
                 }
                 else if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
                 {
