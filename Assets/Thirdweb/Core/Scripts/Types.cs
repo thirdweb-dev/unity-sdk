@@ -379,6 +379,18 @@ namespace Thirdweb
     }
 
     [System.Serializable]
+    public struct LoginPayloadNative
+    {
+        public string message;
+        public string signature;
+
+        public override string ToString()
+        {
+            return $"LoginPayloadNative:" + $"\nmessage: {message}" + $"\n>signature: {signature}";
+        }
+    }
+
+    [System.Serializable]
     public struct LoginPayloadData
     {
         public string domain;

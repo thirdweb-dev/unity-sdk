@@ -44,8 +44,26 @@ public class Prefab_Miscellaneous : MonoBehaviour
     {
         try
         {
-            LoginPayload data = await ThirdwebManager.Instance.SDK.wallet.Authenticate("example.com");
-            Debugger.Instance.Log("[Authenticate] Successful", data.ToString());
+            if (Utils.IsWebGLBuild())
+            {
+                LoginPayload data = await ThirdwebManager.Instance.SDK.wallet.Authenticate("example.com");
+                Debugger.Instance.Log("[Authenticate] Successful", data.ToString());
+            }
+            else
+            {
+                // Generate and sign
+                LoginPayloadNative data = await ThirdwebManager.Instance.SDK.wallet.AuthenticateNative("example.com");
+                // Verify
+                string resultAddressOrError = await ThirdwebManager.Instance.SDK.wallet.VerifyNative(data);
+                if (await ThirdwebManager.Instance.SDK.wallet.GetAddress() == resultAddressOrError)
+                {
+                    Debugger.Instance.Log("[Authenticate] Successful", resultAddressOrError);
+                }
+                else
+                {
+                    Debugger.Instance.Log("[Authenticate] Invalid", resultAddressOrError);
+                }
+            }
         }
         catch (System.Exception e)
         {

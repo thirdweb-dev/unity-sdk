@@ -98,6 +98,8 @@ namespace Thirdweb
 
         public Options options;
 
+        public Nethereum.Siwe.SiweMessageService siweSession;
+
         /// <summary>
         /// Create an instance of the thirdweb SDK. Requires a webGL browser context.
         /// </summary>
@@ -123,6 +125,8 @@ namespace Thirdweb
                 nativeSession.lastRPC = rpc;
                 nativeSession.lastChainId = chainId;
                 nativeSession.web3 = new Web3(nativeSession.lastRPC);
+
+                siweSession = new Nethereum.Siwe.SiweMessageService();
             }
             else
             {

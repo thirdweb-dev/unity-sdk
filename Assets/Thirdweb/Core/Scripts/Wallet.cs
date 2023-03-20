@@ -95,7 +95,19 @@ namespace Thirdweb
             }
             else
             {
-                var siwe = new SiweMessageService();
+                throw new UnityException("This functionality is not available on your current platform.");
+            }
+        }
+
+        public async Task<LoginPayloadNative> AuthenticateNative(string domain)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                throw new UnityException("This functionality is not available on your current platform.");
+            }
+            else
+            {
+                var siwe = ThirdwebManager.Instance.SDK.siweSession;
                 var siweMsg = new SiweMessage()
                 {
                     Resources = new List<string>(),
@@ -118,22 +130,51 @@ namespace Thirdweb
 
                 var finalMsg = SiweMessageStringBuilder.BuildMessage(siweMsg);
                 var signature = await Sign(finalMsg);
-                if (!await siwe.IsValidMessage(siweMsg, signature) || !await siwe.IsMessageSignatureValid(siweMsg, signature))
+                return new LoginPayloadNative() { message = finalMsg, signature = signature };
+            }
+        }
+
+        public async Task<string> VerifyNative(LoginPayloadNative payload)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                throw new UnityException("This functionality is not available on your current platform.");
+            }
+            else
+            {
+                var siwe = ThirdwebManager.Instance.SDK.siweSession;
+                var siweMessage = SiweMessageParser.Parse(payload.message);
+                var signature = payload.signature;
+                var validUser = await siwe.IsUserAddressRegistered(siweMessage);
+                if (validUser)
                 {
-                    throw new UnityException("Invalid message/signature!");
-                }
-                return new LoginPayload()
-                {
-                    signature = signature,
-                    payload = new LoginPayloadData()
+                    if (await siwe.IsMessageSignatureValid(siweMessage, signature))
                     {
-                        domain = siweMsg.Domain,
-                        address = siweMsg.Address,
-                        nonce = siweMsg.Nonce,
-                        expiration_time = siweMsg.ExpirationTime,
-                        chain_id = siweMsg.ChainId
+                        if (siwe.IsMessageTheSameAsSessionStored(siweMessage))
+                        {
+                            if (siwe.HasMessageDateStartedAndNotExpired(siweMessage))
+                            {
+                                return siweMessage.Address;
+                            }
+                            else
+                            {
+                                return "Expired";
+                            }
+                        }
+                        else
+                        {
+                            return "Invalid Session";
+                        }
                     }
-                };
+                    else
+                    {
+                        return "Invalid Signature";
+                    }
+                }
+                else
+                {
+                    return "Invalid User";
+                }
             }
         }
 
