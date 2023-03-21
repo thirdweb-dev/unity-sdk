@@ -10,6 +10,7 @@ using WalletConnectSharp.NEthereum;
 using Nethereum.Siwe.Core;
 using Nethereum.Siwe;
 using System.Collections.Generic;
+using Nethereum.Web3.Accounts;
 
 //using WalletConnectSharp.NEthereum;
 
@@ -27,7 +28,7 @@ namespace Thirdweb
         /// Connect a user's wallet via a given wallet provider
         /// </summary>
         /// <param name="walletConnection">The wallet provider and chainId to connect to. Defaults to the injected browser extension.</param>
-        public async Task<string> Connect(WalletConnection? walletConnection = null, string password = null, WCSessionData wcSessionData = null)
+        public async Task<string> Connect(WalletConnection? walletConnection = null)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -37,26 +38,67 @@ namespace Thirdweb
             }
             else
             {
-                ThirdwebSDK.NativeSession newNativeSession = new ThirdwebSDK.NativeSession();
-                if (wcSessionData != null)
+                ThirdwebSDK.NativeSession oldSession = ThirdwebManager.Instance.SDK.nativeSession;
+
+                if (walletConnection == null)
                 {
-                    newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
-                    newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
-                    newNativeSession.account = null;
-                    newNativeSession.web3 = WalletConnect.Instance.Session.BuildWeb3(new Uri(newNativeSession.lastRPC)).AsWalletAccount(true);
-                    newNativeSession.siweSession = new SiweMessageService();
-                    ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
-                    return WalletConnect.Instance.Session.Accounts[0];
+                    Debug.Log("HERE1");
+
+                    Account noPassAcc = Utils.UnlockOrGenerateAccount(oldSession.lastChainId, null, null);
+                    ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
+                        oldSession.lastChainId,
+                        oldSession.lastRPC,
+                        noPassAcc,
+                        new Web3(noPassAcc, oldSession.lastRPC),
+                        oldSession.options,
+                        oldSession.siweSession
+                    );
+                    return noPassAcc.Address;
                 }
                 else
                 {
-                    newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
-                    newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
-                    newNativeSession.account = Utils.UnlockOrGenerateAccount(newNativeSession.lastChainId, password, null); // TODO: Allow custom private keys/passwords
-                    newNativeSession.web3 = new Web3(newNativeSession.account, newNativeSession.lastRPC);
-                    newNativeSession.siweSession = new SiweMessageService();
-                    ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
-                    return ThirdwebManager.Instance.SDK.nativeSession.account.Address;
+                    if (walletConnection?.provider?.ToString() == "walletConnect")
+                    {
+                        ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
+                            oldSession.lastChainId,
+                            oldSession.lastRPC,
+                            null,
+                            WalletConnect.Instance.Session.BuildWeb3(new Uri(oldSession.lastRPC)).AsWalletAccount(true),
+                            oldSession.options,
+                            oldSession.siweSession
+                        );
+                        return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
+                    }
+                    else if (walletConnection?.password != null)
+                    {
+                        Account acc = Utils.UnlockOrGenerateAccount(oldSession.lastChainId, walletConnection?.password, null);
+                        ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
+                            oldSession.lastChainId,
+                            oldSession.lastRPC,
+                            acc,
+                            new Web3(acc, oldSession.lastRPC),
+                            oldSession.options,
+                            oldSession.siweSession
+                        );
+                        return acc.Address;
+                    }
+                    else if (walletConnection?.privateKey != null)
+                    {
+                        Account acc = Utils.UnlockOrGenerateAccount(oldSession.lastChainId, null, walletConnection?.privateKey);
+                        ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
+                            oldSession.lastChainId,
+                            oldSession.lastRPC,
+                            acc,
+                            new Web3(acc, oldSession.lastRPC),
+                            oldSession.options,
+                            oldSession.siweSession
+                        );
+                        return acc.Address;
+                    }
+                    else
+                    {
+                        throw new UnityException("This wallet connection method is not supported on this platform!");
+                    }
                 }
             }
         }
@@ -72,17 +114,21 @@ namespace Thirdweb
             }
             else
             {
+                ThirdwebSDK.NativeSession oldSession = ThirdwebManager.Instance.SDK.nativeSession;
+
                 if (Utils.ActiveWalletConnectSession())
                 {
                     WalletConnect.Instance.DisableWalletConnect();
                 }
-                ThirdwebSDK.NativeSession newNativeSession = new ThirdwebSDK.NativeSession();
-                newNativeSession.lastRPC = ThirdwebManager.Instance.SDK.nativeSession.lastRPC;
-                newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
-                newNativeSession.account = null;
-                newNativeSession.web3 = new Web3(newNativeSession.lastRPC); // fallback
-                newNativeSession.siweSession = new SiweMessageService();
-                ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
+
+                ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
+                    oldSession.lastChainId,
+                    oldSession.lastRPC,
+                    null,
+                    new Web3(oldSession.lastRPC),
+                    oldSession.options,
+                    oldSession.siweSession
+                );
             }
         }
 
@@ -414,6 +460,8 @@ namespace Thirdweb
     {
         public WalletProvider provider;
         public int chainId;
+        public string password;
+        public string privateKey;
     }
 
     public class WalletProvider
@@ -444,6 +492,10 @@ namespace Thirdweb
         public static WalletProvider MagicAuth
         {
             get { return new WalletProvider("magicAuth"); }
+        }
+        public static WalletProvider DeviceWallet
+        {
+            get { return new WalletProvider("deviceWallet"); }
         }
 
         public override string ToString()

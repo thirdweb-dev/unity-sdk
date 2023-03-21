@@ -78,9 +78,6 @@ namespace WalletConnectSharp.Unity
             get { return Session.Connected; }
         }
 
-        [SerializeField]
-        public ClientMeta AppData;
-
         public static WalletConnect Instance;
 
         protected override void Awake()
@@ -191,7 +188,20 @@ namespace WalletConnectSharp.Unity
             }
             else
             {
-                Session = new WalletConnectUnitySession(AppData, this, null, _transport, ciper, chainId);
+                Session = new WalletConnectUnitySession(
+                    new ClientMeta()
+                    {
+                        Name = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appName,
+                        Description = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appDescription,
+                        URL = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appUrl,
+                        Icons = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appIcons,
+                    },
+                    this,
+                    null,
+                    _transport,
+                    ciper,
+                    chainId
+                );
 
                 if (NewSessionStarted != null)
                     NewSessionStarted(this, EventArgs.Empty);
