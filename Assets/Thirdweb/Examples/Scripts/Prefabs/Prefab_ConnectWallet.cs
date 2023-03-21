@@ -187,7 +187,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         try
         {
             ThirdwebManager.Instance.chain = _chain;
-            await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork((int)_chain);
+            await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(int.Parse(ThirdwebManager.Instance.supportedChainData[_chain].chainId));
             OnConnected();
             OnSwitchNetworkCallback?.Invoke();
             print($"Switched Network Successfully: {_chain}");
@@ -230,7 +230,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
             GameObject networkButton = Instantiate(networkButtonPrefab, networkDropdown.transform);
             networkButton.GetComponent<Button>().onClick.RemoveAllListeners();
             networkButton.GetComponent<Button>().onClick.AddListener(() => OnSwitchNetwork(chain));
-            networkButton.transform.Find("Text_Network").GetComponent<TMP_Text>().text = ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].identifier;
+            networkButton.transform.Find("Text_Network").GetComponent<TMP_Text>().text = ThirdwebManager.Instance.supportedChainData[chain].identifier;
             networkButton.transform.Find("Icon_Network").GetComponent<Image>().sprite = networkSprites.Find(x => x.chain == chain).sprite;
         }
     }
