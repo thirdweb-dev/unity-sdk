@@ -4,11 +4,9 @@ using Nethereum.Signer;
 using Nethereum.Web3;
 using UnityEngine;
 using System;
-using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Unity;
 using WalletConnectSharp.NEthereum;
 using Nethereum.Siwe.Core;
-using Nethereum.Siwe;
 using System.Collections.Generic;
 using Nethereum.Web3.Accounts;
 
@@ -21,8 +19,7 @@ namespace Thirdweb
     /// </summary>
     public class Wallet : Routable
     {
-        public Wallet()
-            : base($"sdk{subSeparator}wallet") { }
+        public Wallet() : base($"sdk{subSeparator}wallet") { }
 
         /// <summary>
         /// Connect a user's wallet via a given wallet provider
@@ -33,7 +30,6 @@ namespace Thirdweb
             if (Utils.IsWebGLBuild())
             {
                 var connection = walletConnection ?? new WalletConnection() { provider = WalletProvider.Injected, };
-                ;
                 return await Bridge.Connect(connection);
             }
             else
@@ -192,7 +188,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                throw new UnityException("This functionality is not available on your current platform.");
+                return await Bridge.InvokeRoute<string>($"auth{subSeparator}verify", Utils.ToJsonStringArray(payload));
             }
             else
             {

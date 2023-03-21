@@ -51,7 +51,7 @@ var plugin = {
   ThirdwebInitialize: function (chain, options) {
     window.bridge.initialize(UTF8ToString(chain), UTF8ToString(options));
   },
-  ThirdwebConnect: function (taskId, wallet, chainId, cb) {
+  ThirdwebConnect: function (taskId, wallet, chainId, password, cb) {
     // convert taskId from pointer to str and allocate it to keep in memory
     var id = UTF8ToString(taskId);
     var idSize = lengthBytesUTF8(id) + 1;
@@ -59,7 +59,7 @@ var plugin = {
     stringToUTF8(id, idPtr, idSize);
     // execute bridge call
     window.bridge
-      .connect(UTF8ToString(wallet), chainId)
+      .connect(UTF8ToString(wallet), chainId, UTF8ToString(password))
       .then((address) => {
         if (address) {
           var bufferSize = lengthBytesUTF8(address) + 1;
