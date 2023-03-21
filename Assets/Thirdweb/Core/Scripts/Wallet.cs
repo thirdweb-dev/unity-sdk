@@ -42,8 +42,6 @@ namespace Thirdweb
 
                 if (walletConnection == null)
                 {
-                    Debug.Log("HERE1");
-
                     Account noPassAcc = Utils.UnlockOrGenerateAccount(oldSession.lastChainId, null, null);
                     ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
                         oldSession.lastChainId,
