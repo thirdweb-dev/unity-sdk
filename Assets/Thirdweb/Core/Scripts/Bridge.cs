@@ -91,7 +91,7 @@ namespace Thirdweb
             string taskId = Guid.NewGuid().ToString();
             taskMap[taskId] = task;
 #if UNITY_WEBGL
-            ThirdwebConnect(taskId, walletConnection.provider.ToString(), walletConnection.chainId, walletConnection.password ?? "", jsCallback);
+            ThirdwebConnect(taskId, walletConnection.provider.ToString(), walletConnection.chainId, walletConnection.password ?? Utils.GetDeviceIdentifier(), jsCallback);
 #endif
             string result = await task.Task;
             return result;
