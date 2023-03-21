@@ -98,18 +98,6 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not available on your current platform.");
-            }
-        }
-
-        public async Task<LoginPayloadNative> AuthenticateNative(string domain)
-        {
-            if (Utils.IsWebGLBuild())
-            {
-                throw new UnityException("This functionality is not available on your current platform.");
-            }
-            else
-            {
                 var siwe = ThirdwebManager.Instance.SDK.nativeSession.siweSession;
                 var siweMsg = new SiweMessage()
                 {
@@ -124,7 +112,7 @@ namespace Thirdweb
                     IssuedAt = null,
                     ExpirationTime = null,
                     NotBefore = null,
-                    RequestId = Guid.NewGuid().ToString()
+                    RequestId = null
                 };
                 siweMsg.SetIssuedAtNow();
                 siweMsg.SetExpirationTime(DateTime.UtcNow.AddSeconds(60 * 5));
@@ -133,11 +121,28 @@ namespace Thirdweb
 
                 var finalMsg = SiweMessageStringBuilder.BuildMessage(siweMsg);
                 var signature = await Sign(finalMsg);
-                return new LoginPayloadNative() { message = finalMsg, signature = signature };
+                return new LoginPayload()
+                {
+                    signature = signature,
+                    payload = new LoginPayloadData()
+                    {
+                        domain = siweMsg.Domain,
+                        address = siweMsg.Address,
+                        statement = siweMsg.Statement,
+                        uri = siweMsg.Uri,
+                        version = siweMsg.Version,
+                        chain_id = siweMsg.ChainId,
+                        nonce = siweMsg.Nonce,
+                        issued_at = siweMsg.IssuedAt,
+                        expiration_time = siweMsg.ExpirationTime,
+                        invalid_before = siweMsg.NotBefore,
+                        resources = siweMsg.Resources,
+                    }
+                };
             }
         }
 
-        public async Task<string> VerifyNative(LoginPayloadNative payload)
+        public async Task<string> Verify(LoginPayload payload)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -146,7 +151,21 @@ namespace Thirdweb
             else
             {
                 var siwe = ThirdwebManager.Instance.SDK.nativeSession.siweSession;
-                var siweMessage = SiweMessageParser.Parse(payload.message);
+                var siweMessage = new SiweMessage()
+                {
+                    Domain = payload.payload.domain,
+                    Address = payload.payload.address,
+                    Statement = payload.payload.statement,
+                    Uri = payload.payload.uri,
+                    Version = payload.payload.version,
+                    ChainId = payload.payload.chain_id,
+                    Nonce = payload.payload.nonce,
+                    IssuedAt = payload.payload.issued_at,
+                    ExpirationTime = payload.payload.expiration_time,
+                    NotBefore = payload.payload.invalid_before,
+                    Resources = payload.payload.resources,
+                    RequestId = null
+                };
                 var signature = payload.signature;
                 var validUser = await siwe.IsUserAddressRegistered(siweMessage);
                 if (validUser)
