@@ -140,14 +140,13 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
             switch (_wallet)
             {
                 case WalletNative.DeviceWallet:
-                    address = await ThirdwebManager.Instance.SDK.wallet.Connect(null, password, null);
+                    address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection() { password = password });
                     break;
                 case WalletNative.DeviceWalletNoPassword:
                     address = await ThirdwebManager.Instance.SDK.wallet.Connect();
                     break;
                 case WalletNative.WalletConnect:
-                    wcSessionData = await WalletConnect.Instance.EnableWalletConnect();
-                    address = await ThirdwebManager.Instance.SDK.wallet.Connect(null, null, wcSessionData);
+                    address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection() { provider = WalletProvider.WalletConnect });
                     break;
                 default:
                     throw new UnityException("Unimplemented Method Of Native Wallet Connection");
@@ -230,11 +229,19 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
     public void OnCopyAddress()
     {
         GUIUtility.systemCopyBuffer = address;
-        Debugger.Instance.Log("Copied your address to your clipboard!", $"Address: {address}");
+        print($"Copied your address to your clipboard! Address: {address}");
     }
 
     public void OnExportWallet()
     {
-        Application.OpenURL(Application.persistentDataPath + "/account.json");
+        Application.OpenURL(Utils.GetAccountPath()); // Doesn't work on iOS or > Android 6
+
+        // Fallback
+        string text = System.IO.File.ReadAllText(Utils.GetAccountPath());
+        GUIUtility.systemCopyBuffer = text;
+        print(
+            "Copied your encrypted keystore to your clipboard! You may import it into an external wallet with your password.\n"
+                + "If no password was provided upon the creation of this account, the password is your device unique ID."
+        );
     }
 }

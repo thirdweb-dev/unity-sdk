@@ -13,6 +13,7 @@ public enum Wallet
     CoinbaseWallet,
     WalletConnect,
     MagicAuth,
+    DeviceWallet
 }
 
 [Serializable]
@@ -250,6 +251,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
                 return WalletProvider.WalletConnect;
             case Wallet.MagicAuth:
                 return WalletProvider.MagicAuth;
+            case Wallet.DeviceWallet:
+                return WalletProvider.DeviceWallet;
             default:
                 throw new UnityException($"Wallet Provider for wallet {_wallet} unimplemented!");
         }

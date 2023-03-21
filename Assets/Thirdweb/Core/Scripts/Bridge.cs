@@ -91,7 +91,7 @@ namespace Thirdweb
             string taskId = Guid.NewGuid().ToString();
             taskMap[taskId] = task;
 #if UNITY_WEBGL
-            ThirdwebConnect(taskId, walletConnection.provider.ToString(), walletConnection.chainId, jsCallback);
+            ThirdwebConnect(taskId, walletConnection.provider.ToString(), walletConnection.chainId, walletConnection.password ?? Utils.GetDeviceIdentifier(), jsCallback);
 #endif
             string result = await task.Task;
             return result;
@@ -190,7 +190,7 @@ namespace Thirdweb
         [DllImport("__Internal")]
         private static extern string ThirdwebInitialize(string chainOrRPC, string options);
         [DllImport("__Internal")]
-        private static extern string ThirdwebConnect(string taskId, string wallet, int chainId, Action<string, string, string> cb);
+        private static extern string ThirdwebConnect(string taskId, string wallet, int chainId, string password, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebDisconnect(string taskId, Action<string, string, string> cb);
         [DllImport("__Internal")]
