@@ -59,6 +59,8 @@ namespace Thirdweb
                 {
                     if (walletConnection?.provider?.ToString() == "walletConnect")
                     {
+                        await WalletConnect.Instance.EnableWalletConnect();
+
                         ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
                             oldSession.lastChainId,
                             oldSession.lastRPC,

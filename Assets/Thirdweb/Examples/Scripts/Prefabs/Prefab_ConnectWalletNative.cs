@@ -146,7 +146,6 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
                     address = await ThirdwebManager.Instance.SDK.wallet.Connect();
                     break;
                 case WalletNative.WalletConnect:
-                    await WalletConnect.Instance.EnableWalletConnect();
                     address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection() { provider = WalletProvider.WalletConnect });
                     break;
                 default:
