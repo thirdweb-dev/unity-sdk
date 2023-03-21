@@ -143,7 +143,7 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
                     address = await ThirdwebManager.Instance.SDK.wallet.Connect(null, password, null);
                     break;
                 case WalletNative.DeviceWalletNoPassword:
-                    address = await ThirdwebManager.Instance.SDK.wallet.Connect(null, password, null);
+                    address = await ThirdwebManager.Instance.SDK.wallet.Connect();
                     break;
                 case WalletNative.WalletConnect:
                     wcSessionData = await WalletConnect.Instance.EnableWalletConnect();

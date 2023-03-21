@@ -2,15 +2,14 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Signer;
 using Nethereum.Web3;
-using Nethereum.Web3.Accounts;
 using UnityEngine;
 using System;
-using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Models;
-using WalletConnectSharp.Core.Models.Ethereum;
 using WalletConnectSharp.Unity;
-using WalletConnectSharp.NEthereum.Account;
 using WalletConnectSharp.NEthereum;
+using Nethereum.Siwe.Core;
+using Nethereum.Siwe;
+using System.Collections.Generic;
 
 //using WalletConnectSharp.NEthereum;
 
@@ -45,6 +44,7 @@ namespace Thirdweb
                     newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
                     newNativeSession.account = null;
                     newNativeSession.web3 = WalletConnect.Instance.Session.BuildWeb3(new Uri(newNativeSession.lastRPC)).AsWalletAccount(true);
+                    newNativeSession.siweSession = new SiweMessageService();
                     ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
                     return WalletConnect.Instance.Session.Accounts[0];
                 }
@@ -54,6 +54,7 @@ namespace Thirdweb
                     newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
                     newNativeSession.account = Utils.UnlockOrGenerateAccount(newNativeSession.lastChainId, password, null); // TODO: Allow custom private keys/passwords
                     newNativeSession.web3 = new Web3(newNativeSession.account, newNativeSession.lastRPC);
+                    newNativeSession.siweSession = new SiweMessageService();
                     ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
                     return ThirdwebManager.Instance.SDK.nativeSession.account.Address;
                 }
@@ -80,6 +81,7 @@ namespace Thirdweb
                 newNativeSession.lastChainId = ThirdwebManager.Instance.SDK.nativeSession.lastChainId;
                 newNativeSession.account = null;
                 newNativeSession.web3 = new Web3(newNativeSession.lastRPC); // fallback
+                newNativeSession.siweSession = new SiweMessageService();
                 ThirdwebManager.Instance.SDK.nativeSession = newNativeSession;
             }
         }
@@ -96,7 +98,105 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var siwe = ThirdwebManager.Instance.SDK.nativeSession.siweSession;
+                var siweMsg = new SiweMessage()
+                {
+                    Resources = new List<string>(),
+                    Uri = $"https://{domain}",
+                    Statement = "Please ensure that the domain above matches the URL of the current website.",
+                    Address = await GetAddress(),
+                    Domain = domain,
+                    ChainId = (await GetChainId()).ToString(),
+                    Version = "1",
+                    Nonce = null,
+                    IssuedAt = null,
+                    ExpirationTime = null,
+                    NotBefore = null,
+                    RequestId = null
+                };
+                siweMsg.SetIssuedAtNow();
+                siweMsg.SetExpirationTime(DateTime.UtcNow.AddSeconds(60 * 5));
+                siweMsg.SetNotBefore(DateTime.UtcNow);
+                siweMsg = siwe.AssignNewNonce(siweMsg);
+
+                var finalMsg = SiweMessageStringBuilder.BuildMessage(siweMsg);
+                var signature = await Sign(finalMsg);
+                return new LoginPayload()
+                {
+                    signature = signature,
+                    payload = new LoginPayloadData()
+                    {
+                        domain = siweMsg.Domain,
+                        address = siweMsg.Address,
+                        statement = siweMsg.Statement,
+                        uri = siweMsg.Uri,
+                        version = siweMsg.Version,
+                        chain_id = siweMsg.ChainId,
+                        nonce = siweMsg.Nonce,
+                        issued_at = siweMsg.IssuedAt,
+                        expiration_time = siweMsg.ExpirationTime,
+                        invalid_before = siweMsg.NotBefore,
+                        resources = siweMsg.Resources,
+                    }
+                };
+            }
+        }
+
+        public async Task<string> Verify(LoginPayload payload)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                throw new UnityException("This functionality is not available on your current platform.");
+            }
+            else
+            {
+                var siwe = ThirdwebManager.Instance.SDK.nativeSession.siweSession;
+                var siweMessage = new SiweMessage()
+                {
+                    Domain = payload.payload.domain,
+                    Address = payload.payload.address,
+                    Statement = payload.payload.statement,
+                    Uri = payload.payload.uri,
+                    Version = payload.payload.version,
+                    ChainId = payload.payload.chain_id,
+                    Nonce = payload.payload.nonce,
+                    IssuedAt = payload.payload.issued_at,
+                    ExpirationTime = payload.payload.expiration_time,
+                    NotBefore = payload.payload.invalid_before,
+                    Resources = payload.payload.resources,
+                    RequestId = null
+                };
+                var signature = payload.signature;
+                var validUser = await siwe.IsUserAddressRegistered(siweMessage);
+                if (validUser)
+                {
+                    if (await siwe.IsMessageSignatureValid(siweMessage, signature))
+                    {
+                        if (siwe.IsMessageTheSameAsSessionStored(siweMessage))
+                        {
+                            if (siwe.HasMessageDateStartedAndNotExpired(siweMessage))
+                            {
+                                return siweMessage.Address;
+                            }
+                            else
+                            {
+                                return "Expired";
+                            }
+                        }
+                        else
+                        {
+                            return "Invalid Session";
+                        }
+                    }
+                    else
+                    {
+                        return "Invalid Signature";
+                    }
+                }
+                else
+                {
+                    return "Invalid User";
+                }
             }
         }
 
@@ -138,7 +238,7 @@ namespace Thirdweb
             {
                 if (Utils.ActiveWalletConnectSession())
                 {
-                    return WalletConnect.Instance.Session.Accounts[0];
+                    return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
                 }
                 else if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
                 {
