@@ -521,9 +521,9 @@ namespace WalletConnectSharp.Unity
             return results;
         }
 
-        public async Task<string> WalletSwitchEthChain(EthChainData chainData)
+        public async Task<string> WalletSwitchEthChain(EthChain ethChain)
         {
-            var results = await Session.WalletSwitchEthChain(chainData);
+            var results = await Session.WalletSwitchEthChain(ethChain);
             return results;
         }
 
