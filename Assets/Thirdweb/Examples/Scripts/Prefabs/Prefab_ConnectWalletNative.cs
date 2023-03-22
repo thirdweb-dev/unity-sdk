@@ -97,11 +97,11 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
 
                 if (wb.wallet == WalletNative.DeviceWallet)
                 {
-                    wb.walletButton.GetComponent<Button>().onClick.AddListener(() => OpenPasswordPanel());
+                    wb.walletButton.onClick.AddListener(() => OpenPasswordPanel());
                 }
                 else
                 {
-                    wb.walletButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(wb.wallet, null));
+                    wb.walletButton.onClick.AddListener(() => OnConnect(wb.wallet, null));
                 }
             }
             else
