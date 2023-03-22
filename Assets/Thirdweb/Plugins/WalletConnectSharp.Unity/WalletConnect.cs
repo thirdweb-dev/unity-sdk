@@ -104,8 +104,10 @@ namespace WalletConnectSharp.Unity
 
         public async void DisableWalletConnect()
         {
-            SetMode(false);
             await Session?.Disconnect();
+            await Session?.Transport?.Close();
+            Session = null;
+            SetMode(false);
         }
 
         public void SetMode(bool active)

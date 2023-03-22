@@ -314,5 +314,21 @@ namespace Thirdweb
             string ipfsRaw = $"ipfs://{cid}";
             return useGateway ? ipfsRaw.ReplaceIPFS() : ipfsRaw;
         }
+
+        public async static Task<string> GetENSName(string address)
+        {
+            if (IsWebGLBuild())
+            {
+                return null;
+            }
+            else
+            {
+                var ensService = new Nethereum.Contracts.Standards.ENS.ENSService(
+                    new Nethereum.Web3.Web3("https://ethereum.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3").Eth,
+                    "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e"
+                );
+                return await ensService.ReverseResolveAsync(address);
+            }
+        }
     }
 }

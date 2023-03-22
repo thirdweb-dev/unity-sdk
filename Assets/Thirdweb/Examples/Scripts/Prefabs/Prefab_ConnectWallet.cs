@@ -133,10 +133,17 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         try
         {
-            Chain _chain = ThirdwebManager.Instance.chain;
             CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
             balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
-            walletAddressText.text = address.ShortenAddress();
+            walletAddressText.text = await Utils.GetENSName(address) ?? address.ShortenAddress();
+        }
+        catch (Exception e)
+        {
+            print($"Error Fetching Native Balance: {e.Message}");
+        }
+        finally
+        {
+            Chain _chain = ThirdwebManager.Instance.chain;
             currentNetworkText.text = ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].identifier;
             currentNetworkImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
             connectButton.SetActive(false);
@@ -146,10 +153,6 @@ public class Prefab_ConnectWallet : MonoBehaviour
             networkDropdown.SetActive(false);
             walletImage.sprite = walletButtons.Find(x => x.wallet == wallet).icon;
             chainImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
-        }
-        catch (Exception e)
-        {
-            print($"Error Fetching Native Balance: {e.Message}");
         }
     }
 
