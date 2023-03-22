@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -20,8 +19,7 @@ namespace Thirdweb
         /// <summary>
         /// Interact with a Marketplace contract.
         /// </summary>
-        public Pack(string chain, string address)
-            : base($"{address}{subSeparator}pack")
+        public Pack(string chain, string address) : base($"{address}{subSeparator}pack")
         {
             this.chain = chain;
             this.contractAddress = address;
@@ -221,9 +219,9 @@ namespace Thirdweb
                     }
                 }
                 PackContents contents = new PackContents();
-                contents.erc20Contents = erc20R;
-                contents.erc721Contents = erc721R;
-                contents.erc1155Contents = erc1155R;
+                contents.erc20Rewards = erc20R;
+                contents.erc721Rewards = erc721R;
+                contents.erc1155Rewards = erc1155R;
                 return contents;
             }
         }
@@ -406,20 +404,20 @@ namespace Thirdweb
     [System.Serializable]
     public class PackContents
     {
-        public List<ERC20Contents> erc20Contents;
-        public List<ERC721Contents> erc721Contents;
-        public List<ERC1155Contents> erc1155Contents;
+        public List<ERC20Contents> erc20Rewards;
+        public List<ERC721Contents> erc721Rewards;
+        public List<ERC1155Contents> erc1155Rewards;
 
         public override string ToString()
         {
-            string erc20str = "ERC20 Contents:\n";
-            foreach (var content in erc20Contents)
+            string erc20str = "ERC20 Contents:\n\n";
+            foreach (var content in erc20Rewards)
                 erc20str += content.ToString();
-            string erc721str = "ERC721 Contents:\n";
-            foreach (var content in erc721Contents)
+            string erc721str = "ERC721 Contents:\n\n";
+            foreach (var content in erc721Rewards)
                 erc721str += content.ToString();
-            string erc1155str = "ERC1155 Contents:\n";
-            foreach (var content in erc1155Contents)
+            string erc1155str = "ERC1155 Contents:\n\n";
+            foreach (var content in erc1155Rewards)
                 erc1155str += content.ToString();
             return "PackContents:\n" + erc20str + erc721str + erc1155str;
         }
