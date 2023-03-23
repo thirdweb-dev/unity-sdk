@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using System.Numerics;
+using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Siwe;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
+using WalletConnectSharp.Core.Models.Ethereum;
 
 namespace Thirdweb
 {
@@ -89,6 +92,8 @@ namespace Thirdweb
 
         public Storage storage;
 
+        public EthChainData currentChainData;
+
         public class NativeSession
         {
             public int lastChainId = -1;
@@ -138,6 +143,8 @@ namespace Thirdweb
                     appIcons = options.wallet?.appIcons ?? new string[] { "https://thirdweb.com/favicon.ico" },
                     appUrl = options.wallet?.appUrl ?? "https://thirdweb.com"
                 };
+
+                FetchChainData();
             }
             else
             {
@@ -154,6 +161,72 @@ namespace Thirdweb
         public Contract GetContract(string address, string abi = null)
         {
             return new Contract(this.chainOrRPC, address, abi);
+        }
+
+        void FetchChainData()
+        {
+            var allChainsJson = (TextAsset)Resources.Load("all_chains", typeof(TextAsset));
+            // Get networks from chainidnetwork
+            List<ChainIDNetworkData> allNetworkData = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(allChainsJson.text);
+            // Get current network
+            ChainIDNetworkData currentNetwork = allNetworkData.Find(x => x.chainId == nativeSession.lastChainId.ToString());
+            // Get block explorer urls
+            List<string> explorerUrls = new List<string>();
+            foreach (var explorer in currentNetwork.explorers)
+                explorerUrls.Add(explorer.url);
+            if (explorerUrls.Count == 0)
+                explorerUrls.Add("https://etherscan.io");
+            // Add chain
+            currentChainData = new EthChainData()
+            {
+                chainId = BigInteger.Parse(currentNetwork.chainId).ToHex(false, true) ?? BigInteger.Parse(nativeSession.lastChainId.ToString()).ToHex(false, true),
+                blockExplorerUrls = explorerUrls.ToArray(),
+                chainName = currentNetwork.name ?? ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].identifier,
+                iconUrls = new string[] { "ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt" },
+                nativeCurrency = new NativeCurrency()
+                {
+                    name = currentNetwork.nativeCurrency?.name ?? "Ether",
+                    symbol = currentNetwork.nativeCurrency?.symbol ?? "ETH",
+                    decimals = int.Parse(currentNetwork.nativeCurrency?.decimals ?? "18")
+                },
+                rpcUrls = new string[] { nativeSession.lastRPC }
+            };
+        }
+
+        [System.Serializable]
+        public class ChainIDNetworkData
+        {
+            public string name;
+            public string chain;
+            public string icon;
+            public List<string> rpc;
+            public ChainIDNetworkNativeCurrency nativeCurrency;
+            public string chainId;
+            public List<ChainIDNetworkExplorer> explorers;
+        }
+
+        [System.Serializable]
+        public class ChainIDNetworkNativeCurrency
+        {
+            public string name;
+            public string symbol;
+            public string decimals;
+        }
+
+        [System.Serializable]
+        public class ChainIDNetworkExplorer
+        {
+            public string name;
+            public string url;
+            public string standard;
+        }
+
+        public struct ChaiNIDNetworkIcon
+        {
+            public string url;
+            public int width;
+            public int height;
+            public string format;
         }
     }
 }
