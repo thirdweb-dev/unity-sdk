@@ -191,14 +191,17 @@ namespace Thirdweb
                 var erc20R = new List<ERC20Contents>();
                 var erc721R = new List<ERC721Contents>();
                 var erc1155R = new List<ERC1155Contents>();
-                foreach (var tokenReward in packContents.Contents)
+                for (int i = 0; i < packContents.Contents.Count; i++)
                 {
+                    var tokenReward = packContents.Contents[i];
+                    var amount = packContents.PerUnitAmounts[i];
                     switch (tokenReward.TokenType)
                     {
                         case 0:
                             var tempERC20 = new ERC20Contents();
                             tempERC20.contractAddress = tokenReward.AssetContract;
-                            tempERC20.quantityPerReward = tokenReward.TotalAmount.ToString();
+                            tempERC20.quantityPerReward = amount.ToString().ToEth(18);
+                            tempERC20.totalRewards = (tokenReward.TotalAmount / amount).ToString().ToEth(18);
                             erc20R.Add(tempERC20);
                             break;
                         case 1:
@@ -211,7 +214,8 @@ namespace Thirdweb
                             var tempERC1155 = new ERC1155Contents();
                             tempERC1155.contractAddress = tokenReward.AssetContract;
                             tempERC1155.tokenId = tokenReward.TokenId.ToString();
-                            tempERC1155.quantityPerReward = tokenReward.TotalAmount.ToString();
+                            tempERC1155.quantityPerReward = amount.ToString();
+                            tempERC1155.totalRewards = (tokenReward.TotalAmount / amount).ToString();
                             erc1155R.Add(tempERC1155);
                             break;
                         default:
@@ -410,13 +414,13 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            string erc20str = "ERC20 Contents:\n\n";
+            string erc20str = "\n";
             foreach (var content in erc20Rewards)
                 erc20str += content.ToString();
-            string erc721str = "ERC721 Contents:\n\n";
+            string erc721str = "\n";
             foreach (var content in erc721Rewards)
                 erc721str += content.ToString();
-            string erc1155str = "ERC1155 Contents:\n\n";
+            string erc1155str = "\n";
             foreach (var content in erc1155Rewards)
                 erc1155str += content.ToString();
             return "PackContents:\n" + erc20str + erc721str + erc1155str;
@@ -460,7 +464,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return "ERC20Contents:\n" + $"totalRewards: {totalRewards.ToString()}\n" + base.ToString();
+            return base.ToString() + $"totalRewards: {totalRewards.ToString()}\n";
         }
     }
 
@@ -502,7 +506,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return "ERC1155Reward:\n" + $"contractAddress: {contractAddress.ToString()}\n" + $"tokenId: {tokenId.ToString()}\n" + $"contractAddress: {tokenId.ToString()}\n";
+            return "ERC1155Reward:\n" + $"contractAddress: {contractAddress.ToString()}\n" + $"tokenId: {tokenId.ToString()}\n" + $"quantityPerReward: {quantityPerReward.ToString()}\n";
         }
     }
 
@@ -513,7 +517,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return "ERC1155Contents:\n" + $"totalRewards: {totalRewards.ToString()}\n" + base.ToString();
+            return base.ToString() + $"totalRewards: {totalRewards.ToString()}\n";
         }
     }
 }
