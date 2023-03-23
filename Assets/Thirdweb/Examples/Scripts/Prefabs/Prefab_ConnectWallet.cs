@@ -60,6 +60,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public TMP_Text walletAddressText;
     public TMP_Text walletAddressText2;
     public Image walletImage;
+    public Image walletImage2;
     public TMP_Text currentNetworkText;
     public Image currentNetworkImage;
     public Image chainImage;
@@ -156,6 +157,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
             connectedDropdown.SetActive(false);
             networkDropdown.SetActive(false);
             walletImage.sprite = walletButtons.Find(x => x.wallet == wallet).icon;
+            walletImage2.sprite = walletImage.sprite;
             chainImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
         }
     }

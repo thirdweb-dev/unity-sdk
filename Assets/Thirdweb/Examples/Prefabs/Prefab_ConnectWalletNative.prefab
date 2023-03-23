@@ -37,7 +37,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -56.9, y: 10}
+  m_AnchoredPosition: {x: -39.999992, y: 10}
   m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &1068488477745516076
@@ -1341,7 +1341,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -5, y: 0}
+  m_AnchoredPosition: {x: -0.000015258789, y: 0}
   m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &2166967093949692966
@@ -4185,6 +4185,7 @@ MonoBehaviour:
   walletAddressText: {fileID: 7276129280750027413}
   walletAddressText2: {fileID: 7827698017969356927}
   walletImage: {fileID: 7276129281372997249}
+  walletImage2: {fileID: 8746191884919151754}
   currentNetworkText: {fileID: 7437821355300633924}
   currentNetworkImage: {fileID: 6455197925238504093}
   chainImage: {fileID: 6455197925238504093}

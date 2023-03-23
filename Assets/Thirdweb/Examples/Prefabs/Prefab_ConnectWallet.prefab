@@ -1942,6 +1942,7 @@ MonoBehaviour:
   walletAddressText: {fileID: 262581968}
   walletAddressText2: {fileID: 5148154435769378536}
   walletImage: {fileID: 1430547140}
+  walletImage2: {fileID: 6641205171930262275}
   currentNetworkText: {fileID: 270904384543002881}
   currentNetworkImage: {fileID: 1390862793022922592}
   chainImage: {fileID: 4426890310649894616}
@@ -2974,7 +2975,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -57.8, y: 10}
+  m_AnchoredPosition: {x: -45.753, y: 10}
   m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &4873572381072717923
