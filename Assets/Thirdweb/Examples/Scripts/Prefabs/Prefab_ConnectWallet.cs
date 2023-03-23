@@ -56,7 +56,9 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public GameObject connectedButton;
     public GameObject connectedDropdown;
     public TMP_Text balanceText;
+    public TMP_Text balanceText2;
     public TMP_Text walletAddressText;
+    public TMP_Text walletAddressText2;
     public Image walletImage;
     public TMP_Text currentNetworkText;
     public Image currentNetworkImage;
@@ -135,7 +137,9 @@ public class Prefab_ConnectWallet : MonoBehaviour
         {
             CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
             balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
+            balanceText2.text = balanceText.text;
             walletAddressText.text = await Utils.GetENSName(address) ?? address.ShortenAddress();
+            walletAddressText2.text = walletAddressText.text;
         }
         catch (Exception e)
         {
@@ -236,6 +240,12 @@ public class Prefab_ConnectWallet : MonoBehaviour
             networkButton.transform.Find("Text_Network").GetComponent<TMP_Text>().text = ThirdwebManager.Instance.supportedChainData[chain].identifier;
             networkButton.transform.Find("Icon_Network").GetComponent<Image>().sprite = networkSprites.Find(x => x.chain == chain).sprite;
         }
+    }
+
+    public void OnCopyAddress()
+    {
+        GUIUtility.systemCopyBuffer = address;
+        print($"Copied your address to your clipboard! Address: {address}");
     }
 
     // Utility

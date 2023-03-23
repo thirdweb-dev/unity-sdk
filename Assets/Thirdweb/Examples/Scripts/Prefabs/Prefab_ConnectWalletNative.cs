@@ -54,7 +54,9 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
     public GameObject connectedButton;
     public GameObject connectedDropdown;
     public TMP_Text balanceText;
+    public TMP_Text balanceText2;
     public TMP_Text walletAddressText;
+    public TMP_Text walletAddressText2;
     public Image walletImage;
     public TMP_Text currentNetworkText;
     public Image currentNetworkImage;
@@ -172,7 +174,9 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
             Chain _chain = ThirdwebManager.Instance.chain;
             CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
             balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
+            balanceText2.text = balanceText.text;
             walletAddressText.text = await Utils.GetENSName(address) ?? address.ShortenAddress();
+            walletAddressText2.text = walletAddressText.text;
             currentNetworkText.text = ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].identifier;
             currentNetworkImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
             connectButton.SetActive(false);
