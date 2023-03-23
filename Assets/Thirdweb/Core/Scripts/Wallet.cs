@@ -9,6 +9,9 @@ using WalletConnectSharp.NEthereum;
 using Nethereum.Siwe.Core;
 using System.Collections.Generic;
 using Nethereum.Web3.Accounts;
+using UnityEngine.Networking;
+using Nethereum.Hex.HexConvertors.Extensions;
+using WalletConnectSharp.Core.Models.Ethereum;
 
 //using WalletConnectSharp.NEthereum;
 
@@ -19,7 +22,8 @@ namespace Thirdweb
     /// </summary>
     public class Wallet : Routable
     {
-        public Wallet() : base($"sdk{subSeparator}wallet") { }
+        public Wallet()
+            : base($"sdk{subSeparator}wallet") { }
 
         /// <summary>
         /// Connect a user's wallet via a given wallet provider
@@ -63,6 +67,20 @@ namespace Thirdweb
                             oldSession.options,
                             oldSession.siweSession
                         );
+
+                        // Add chain
+                        try
+                        {
+                            await WalletConnect.Instance.WalletAddEthChain(ThirdwebManager.Instance.SDK.currentChainData);
+                        }
+                        catch (System.Exception e)
+                        {
+                            Debug.Log("Adding chain error: " + e.Message);
+                        }
+
+                        // Switch to chain
+                        await WalletConnect.Instance.WalletSwitchEthChain(new EthChain() { chainId = ThirdwebManager.Instance.SDK.currentChainData.chainId });
+
                         return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
                     }
                     else if (walletConnection?.password != null)
@@ -262,7 +280,8 @@ namespace Thirdweb
                 else
                 {
                     var balance = await ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetBalance.SendRequestAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
-                    return new CurrencyValue("Ether", "ETH", "18", balance.Value.ToString(), balance.Value.ToString().ToEth()); // TODO: Get actual name/symbol
+                    var nativeCurrency = ThirdwebManager.Instance.SDK.currentChainData.nativeCurrency;
+                    return new CurrencyValue(nativeCurrency.name, nativeCurrency.symbol, nativeCurrency.decimals.ToString(), balance.Value.ToString(), balance.Value.ToString().ToEth());
                 }
             }
         }

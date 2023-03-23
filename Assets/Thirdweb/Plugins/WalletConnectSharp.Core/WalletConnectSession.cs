@@ -315,11 +315,11 @@ namespace WalletConnectSharp.Core
             return response.Result;
         }
 
-        public virtual async Task<string> WalletSwitchEthChain(EthChainData chainData)
+        public virtual async Task<string> WalletSwitchEthChain(EthChain ethChain)
         {
             EnsureNotDisconnected();
 
-            var request = new WalletSwitchEthChain(chainData);
+            var request = new WalletSwitchEthChain(ethChain);
 
             var response = await Send<WalletSwitchEthChain, EthResponse>(request);
 
