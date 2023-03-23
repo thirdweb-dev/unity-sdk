@@ -151,7 +151,7 @@ namespace Thirdweb
         {
             List<Thirdweb.Contracts.Pack.ContractDefinition.Token> tokenList = new List<Contracts.Pack.ContractDefinition.Token>();
             // Add ERC20 Rewards
-            foreach (var erc20Reward in packContents.erc20Contents)
+            foreach (var erc20Reward in packContents.erc20Rewards)
             {
                 tokenList.Add(
                     new Thirdweb.Contracts.Pack.ContractDefinition.Token()
@@ -164,7 +164,7 @@ namespace Thirdweb
                 );
             }
             // Add ERC721 Rewards
-            foreach (var erc721Reward in packContents.erc721Contents)
+            foreach (var erc721Reward in packContents.erc721Rewards)
             {
                 tokenList.Add(
                     new Thirdweb.Contracts.Pack.ContractDefinition.Token()
@@ -177,7 +177,7 @@ namespace Thirdweb
                 );
             }
             // Add ERC1155 Rewards
-            foreach (var erc1155Reward in packContents.erc1155Contents)
+            foreach (var erc1155Reward in packContents.erc1155Rewards)
             {
                 tokenList.Add(
                     new Thirdweb.Contracts.Pack.ContractDefinition.Token()
@@ -196,17 +196,17 @@ namespace Thirdweb
         {
             List<BigInteger> rewardUnits = new List<BigInteger>();
             // Add ERC20 Rewards
-            foreach (var content in packContents.erc20Contents)
+            foreach (var content in packContents.erc20Rewards)
             {
                 rewardUnits.Add(BigInteger.Parse(content.quantityPerReward.ToWei()));
             }
             // Add ERC721 Rewards
-            foreach (var content in packContents.erc721Contents)
+            foreach (var content in packContents.erc721Rewards)
             {
                 rewardUnits.Add(1);
             }
             // Add ERC1155 Rewards
-            foreach (var content in packContents.erc1155Contents)
+            foreach (var content in packContents.erc1155Rewards)
             {
                 rewardUnits.Add(BigInteger.Parse(content.quantityPerReward));
             }
