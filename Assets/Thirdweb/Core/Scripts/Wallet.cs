@@ -103,75 +103,79 @@ namespace Thirdweb
                             oldSession.siweSession
                         );
 
-                        // // Get networks from chainidnetwork
-                        // List<ChainIDNetworkData> allNetworkData = new List<ChainIDNetworkData>();
-                        // using (UnityWebRequest req = UnityWebRequest.Get("https://chainid.network/chains.json"))
-                        // {
-                        //     await req.SendWebRequest();
-                        //     if (req.result != UnityWebRequest.Result.Success)
-                        //     {
-                        //         Debug.LogWarning($"Unable to get network | {req.result} | {req.downloadHandler.text}");
-                        //         return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
-                        //     }
-                        //     else
-                        //     {
-                        //         allNetworkData = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(req.downloadHandler.text);
-                        //     }
-                        // }
-                        // // Get current network
-                        // ChainIDNetworkData currentNetwork = allNetworkData.Find(x => x.chainId == oldSession.lastChainId.ToString());
-                        // // Get block explorer urls
-                        // List<string> explorerUrls = new List<string>();
-                        // foreach (var explorer in currentNetwork.explorers)
-                        //     explorerUrls.Add(explorer.url);
-                        // if (explorerUrls.Count == 0)
-                        // {
-                        //     // Fallback to etherscan
-                        //     explorerUrls.Add("https://etherscan.io");
-                        // }
-                        // // Get icons
-                        // List<string> iconUrls = new List<string>();
-                        // using (UnityWebRequest req = UnityWebRequest.Get($"https://raw.githubusercontent.com/ethereum-lists/chains/master/_data/icons/{currentNetwork.name}.json"))
-                        // {
-                        //     await req.SendWebRequest();
-                        //     if (req.result != UnityWebRequest.Result.Success)
-                        //     {
-                        //         Debug.LogWarning($"Unable to get icons | {req.result} | {req.downloadHandler.text}");
-                        //     }
-                        //     else
-                        //     {
-                        //         var iconsData = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChaiNIDNetworkIcon>>(req.downloadHandler.text);
-                        //         foreach (var icon in iconsData)
-                        //             iconUrls.Add(icon.url);
-                        //     }
-                        // }
-                        // if (iconUrls.Count == 0)
-                        // {
-                        //     // Fallback to ethereum's icons https://raw.githubusercontent.com/ethereum-lists/chains/master/_data/icons/ethereum.json
-                        //     iconUrls.Add("ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt");
-                        // }
+                        // Get networks from chainidnetwork
+                        List<ChainIDNetworkData> allNetworkData = new List<ChainIDNetworkData>();
+                        using (UnityWebRequest req = UnityWebRequest.Get("https://chainid.network/chains.json"))
+                        {
+                            await req.SendWebRequest();
+                            if (req.result != UnityWebRequest.Result.Success)
+                            {
+                                Debug.LogWarning($"Unable to get network | {req.result} | {req.downloadHandler.text}");
+                                return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
+                            }
+                            else
+                            {
+                                allNetworkData = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(req.downloadHandler.text);
+                            }
+                        }
+                        // Get current network
+                        ChainIDNetworkData currentNetwork = allNetworkData.Find(x => x.chainId == oldSession.lastChainId.ToString());
+                        // Get block explorer urls
+                        List<string> explorerUrls = new List<string>();
+                        foreach (var explorer in currentNetwork.explorers)
+                            explorerUrls.Add(explorer.url);
+                        if (explorerUrls.Count == 0)
+                        {
+                            // Fallback to etherscan
+                            explorerUrls.Add("https://etherscan.io");
+                        }
+                        // Get icons
+                        List<string> iconUrls = new List<string>();
+                        using (UnityWebRequest req = UnityWebRequest.Get($"https://raw.githubusercontent.com/ethereum-lists/chains/master/_data/icons/{currentNetwork.name}.json"))
+                        {
+                            await req.SendWebRequest();
+                            if (req.result != UnityWebRequest.Result.Success)
+                            {
+                                Debug.LogWarning($"Unable to get icons | {req.result} | {req.downloadHandler.text}");
+                            }
+                            else
+                            {
+                                var iconsData = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChaiNIDNetworkIcon>>(req.downloadHandler.text);
+                                foreach (var icon in iconsData)
+                                    iconUrls.Add(icon.url);
+                            }
+                        }
+                        if (iconUrls.Count == 0)
+                        {
+                            // Fallback to ethereum's icons https://raw.githubusercontent.com/ethereum-lists/chains/master/_data/icons/ethereum.json
+                            iconUrls.Add("ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt");
+                        }
 
-                        // // Add chain
-                        // var wcChainData = new WalletConnectSharp.Core.Models.Ethereum.EthChainData()
-                        // {
-                        //     chainId = BigInteger.Parse(currentNetwork.chainId).ToHex(true) ?? BigInteger.Parse(oldSession.lastChainId.ToString()).ToHex(true),
-                        //     blockExplorerUrls = explorerUrls.ToArray(),
-                        //     chainName = currentNetwork.name ?? ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].identifier,
-                        //     iconUrls = iconUrls.ToArray(),
-                        //     nativeCurrency = new WalletConnectSharp.Core.Models.Ethereum.NativeCurrency()
-                        //     {
-                        //         name = currentNetwork.nativeCurrency.name ?? "Ether",
-                        //         symbol = currentNetwork.nativeCurrency.symbol ?? "ETH",
-                        //         decimals = int.Parse(currentNetwork.nativeCurrency.decimals ?? "18")
-                        //     },
-                        //     rpcUrls = currentNetwork.rpc.ToArray() ?? new string[] { oldSession.lastRPC }
-                        // };
-                        // await WalletConnect.Instance.WalletAddEthChain(new WalletConnectSharp.Core.Models.Ethereum.EthChain() { chainId = ((BigInteger)oldSession.lastChainId).ToHex(true) });
-                        // Debug.Log("Network added");
+                        // Add chain
+                        var wcChainData = new WalletConnectSharp.Core.Models.Ethereum.EthChainData()
+                        {
+                            chainId = BigInteger.Parse(currentNetwork.chainId).ToHex(false, true) ?? BigInteger.Parse(oldSession.lastChainId.ToString()).ToHex(false, true),
+                            blockExplorerUrls = explorerUrls.ToArray(),
+                            chainName = currentNetwork.name ?? ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].identifier,
+                            iconUrls = iconUrls.ToArray(),
+                            nativeCurrency = new WalletConnectSharp.Core.Models.Ethereum.NativeCurrency()
+                            {
+                                name = currentNetwork.nativeCurrency.name ?? "Ether",
+                                symbol = currentNetwork.nativeCurrency.symbol ?? "ETH",
+                                decimals = int.Parse(currentNetwork.nativeCurrency.decimals ?? "18")
+                            },
+                            rpcUrls = new string[] { oldSession.lastRPC }
+                        };
+                        Debug.Log(Newtonsoft.Json.JsonConvert.SerializeObject(wcChainData));
+                        // Add chain
+                        await WalletConnect.Instance.WalletAddEthChain(wcChainData);
+                        Debug.Log("Network added");
 
                         // Switch to chain
                         Debug.Log("If you fail to connect here, it means you do not have the chain added to your wallet");
-                        await WalletConnect.Instance.WalletSwitchEthChain(new WalletConnectSharp.Core.Models.Ethereum.EthChain() { chainId = ((BigInteger)oldSession.lastChainId).ToHex(true) });
+                        await WalletConnect.Instance.WalletSwitchEthChain(
+                            new WalletConnectSharp.Core.Models.Ethereum.EthChain() { chainId = BigInteger.Parse(oldSession.lastChainId.ToString()).ToHex(false, true) }
+                        );
 
                         return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
                     }
