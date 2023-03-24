@@ -29,8 +29,7 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC1155 compatible contract.
         /// </summary>
-        public ERC1155(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "erc1155"))
+        public ERC1155(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "erc1155"))
         {
             this.contractAddress = contractAddress;
             this.signature = new ERC1155Signature(baseRoute, contractAddress);
@@ -142,7 +141,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("balance"), new string[] { });
+                return await Bridge.InvokeRoute<string>(getRoute("balance"), Utils.ToJsonStringArray(tokenId));
             }
             else
             {
@@ -431,8 +430,7 @@ namespace Thirdweb
     {
         private string contractAddress;
 
-        public ERC1155ClaimConditions(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "claimConditions"))
+        public ERC1155ClaimConditions(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "claimConditions"))
         {
             this.contractAddress = contractAddress;
         }
@@ -620,8 +618,7 @@ namespace Thirdweb
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC1155Signature(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "signature"))
+        public ERC1155Signature(string parentRoute, string contractAddress) : base(Routable.append(parentRoute, "signature"))
         {
             this.contractAddress = contractAddress;
         }
