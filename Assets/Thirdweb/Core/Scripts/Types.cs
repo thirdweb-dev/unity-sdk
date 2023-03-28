@@ -152,6 +152,24 @@ namespace Thirdweb
         public int? endTimeInSeconds; // The end time of the listing.
         public bool? isReservedListing; // Whether the listing is reserved to be bought from a specific set of buyers.
         public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
+
+        public override string ToString()
+        {
+            return "DirectListing:\n"
+                + $"id: {id?.ToString()}\n"
+                + $"creatorAddress: {creatorAddress?.ToString()}\n"
+                + $"assetContractAddress: {assetContractAddress?.ToString()}\n"
+                + $"tokenId: {tokenId?.ToString()}\n"
+                + $"quantity: {quantity?.ToString()}\n"
+                + $"currencyContractAddress: {currencyContractAddress?.ToString()}\n"
+                + $"currencyValuePerToken: {currencyValuePerToken?.ToString()}\n"
+                + $"pricePerToken: {pricePerToken?.ToString()}\n"
+                + $"asset: {asset?.ToString()}\n"
+                + $"startTimeInSeconds: {startTimeInSeconds?.ToString()}\n"
+                + $"endTimeInSeconds: {endTimeInSeconds?.ToString()}\n"
+                + $"isReservedListing: {isReservedListing?.ToString()}\n"
+                + $"status: {status?.ToString()}\n";
+        }
     }
 
     [System.Serializable]
