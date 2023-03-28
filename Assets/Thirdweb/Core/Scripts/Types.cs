@@ -2,6 +2,18 @@ using System.Collections.Generic;
 
 namespace Thirdweb
 {
+    [System.Serializable]
+    public class QueryAllParams
+    {
+        public int start;
+        public int count;
+
+        public override string ToString()
+        {
+            return $"QueryAllParams:" + $"\n>start: {start}" + $"\n>count: {count}";
+        }
+    }
+
     // NFTs
 
     [System.Serializable]
@@ -103,171 +115,137 @@ namespace Thirdweb
 
     // Marketplace
 
-    [System.Serializable]
-    public class Listing
-    {
-        public string id;
-        public string sellerAddress;
-        public string assetContractAddress;
-        public string tokenId;
-        public NFTMetadata asset;
-        public int quantity;
-        public string currencyContractAddress;
-        public string buyoutPrice;
-        public CurrencyValue buyoutCurrencyValuePerToken;
-        public int type;
+#nullable enable
 
-        public override string ToString()
-        {
-            return $"Listing:"
-                + $"\n>id: {id}"
-                + $"\n>sellerAddress: {sellerAddress}"
-                + $"\n>assetContractAddress: {assetContractAddress}"
-                + $"\n>tokenId: {tokenId}"
-                + $"\n>>>>>\n{asset.ToString()}\n<<<<<"
-                + $"\n>quantity: {quantity}"
-                + $"\n>currencyContractAddress: {currencyContractAddress}"
-                + $"\n>buyoutPrice: {buyoutPrice}"
-                + $"\n>>>>>\n{buyoutCurrencyValuePerToken.ToString()}\n<<<<<"
-                + $"\n>type: {type}";
-        }
+    [System.Serializable]
+    public enum MarkteplaceStatus
+    {
+        CREATED,
+        COMPLETED,
+        CANCELLED
     }
 
     [System.Serializable]
-    public class DirectListing : Listing
+    public class MarketplaceFilters
     {
-        public string startTimeInSeconds;
-        public string secondsUntilEnd;
-
-        public override string ToString()
-        {
-            return $"DirectListing:" + $"\n>>>>>\n{base.ToString()}\n<<<<<" + $"\n>startTimeInSeconds: {startTimeInSeconds}" + $"\n>secondsUntilEnd: {secondsUntilEnd}";
-        }
+        public int? count; // Number of listings to fetch
+        public string? offeror; // Has offers from this address
+        public string? seller; // Being sold by this address
+        public int? start; // Start from this index (pagination)
+        public string? tokenContract; // Only show NFTs from this collection
+        public string? tokenId; // Only show NFTs with this ID
     }
 
     [System.Serializable]
-    public class AuctionListing : Listing
+    public struct DirectListing
     {
-        public string startTimeInEpochSeconds;
-        public string endTimeInEpochSeconds;
-        public string reservePrice;
-        public CurrencyValue reservePriceCurrencyValuePerToken;
-
-        public override string ToString()
-        {
-            return $"AuctionListing:"
-                + $"\n>>>>>\n{base.ToString()}\n<<<<<"
-                + $"\n>startTimeInEpochSeconds: {startTimeInEpochSeconds}"
-                + $"\n>endTimeInEpochSeconds: {endTimeInEpochSeconds}"
-                + $"\n>reservePrice: {reservePrice}"
-                + $"\n>>>>>\n{reservePriceCurrencyValuePerToken.ToString()}\n<<<<<";
-        }
+        public string? id; // The id of the listing.
+        public string? creatorAddress; // The address of the creator of listing.
+        public string? assetContractAddress; // The address of the asset being listed.
+        public string? tokenId; // The ID of the token to list.
+        public string? quantity; //  The quantity of tokens to include in the listing (always 1 for ERC721).
+        public string? currencyContractAddress; // The address of the currency to accept for the listing.
+        public CurrencyValue? currencyValuePerToken; // The `CurrencyValue` of the listing. Useful for displaying the price information.
+        public string? pricePerToken; // The price to pay per unit of NFTs listed.
+        public NFTMetadata? asset; // The asset being listed.
+        public int? startTimeInSeconds; // The start time of the listing.
+        public int? endTimeInSeconds; // The end time of the listing.
+        public bool? isReservedListing; // Whether the listing is reserved to be bought from a specific set of buyers.
+        public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
     }
 
     [System.Serializable]
-    public abstract class NewListing
+    public struct CreateListingInput
     {
-        public string type;
-        public string assetContractAddress;
-        public string tokenId;
-        public long startTimestamp;
-        public int listingDurationInSeconds;
-        public int quantity;
-        public string currencyContractAddress;
-        public string reservePricePerToken;
-        public string buyoutPricePerToken;
-
-        public override string ToString()
-        {
-            return $"NewListing:"
-                + $"\n>type: {type}"
-                + $"\n>assetContractAddress: {assetContractAddress}"
-                + $"\n>tokenId: {tokenId}"
-                + $"\n>startTimestamp: {startTimestamp}"
-                + $"\n>listingDurationInSeconds: {listingDurationInSeconds}"
-                + $"\n>quantity: {quantity}"
-                + $"\n>currencyContractAddress: {currencyContractAddress}"
-                + $"\n>reservePricePerToken: {reservePricePerToken}"
-                + $"\n>buyoutPricePerToken: {buyoutPricePerToken}";
-        }
+        public string? assetContractAddress; // Required - smart contract address of NFT to sell
+        public string? tokenId; // Required - token ID of the NFT to sell
+        public string? pricePerToken; // Required - price of each token in the listing
+        public string? currencyContractAddress; // Optional - smart contract address of the currency to use for the listing
+        public bool? isReservedListing; // Optional - whether or not the listing is reserved (only specific wallet addresses can buy)
+        public string? quantity; // Optional - number of tokens to sell (1 for ERC721 NFTs)
+        // TODO: Implement JS Date
+        // public DateTime? startTimestamp; // Optional - when the listing should start (default is now)
+        // public DateTime? endTimestamp; // Optional - when the listing should end (default is 7 days from now)
     }
 
     [System.Serializable]
-    public class NewAuctionListing : NewListing
+    public struct Auction
     {
-        public new string reservePricePerToken;
-
-        public NewAuctionListing()
-        {
-            this.type = "NewAuctionListing";
-        }
-
-        public override string ToString()
-        {
-            return $"NewAuctionListing:" + $"\n>>>>>\n{base.ToString()}\n<<<<<" + $"\n>reservePricePerToken: {reservePricePerToken}";
-        }
+        public string? id; // The id of the auction listing
+        public string? creatorAddress; // The wallet address of the creator of auction.
+        public string? assetContractAddress; // The address of the asset being auctioned.
+        public string? tokenId; // The ID of the token being auctioned.
+        public string? quantity; // The quantity of tokens included in the auction.
+        public string? currencyContractAddress; // The address of the currency to accept for the auction.
+        public string? minimumBidAmount; // The minimum price that a bid must be in order to be accepted.
+        public CurrencyValue? minimumBidCurrencyValue; // The `CurrencyValue` of the minimum bid amount. Useful for displaying the price information.
+        public string? buyoutBidAmount; // The buyout price of the auction.
+        public CurrencyValue? buyoutCurrencyValue; //  The `CurrencyValue` of the buyout price. Useful for displaying the price information.
+        public int? timeBufferInSeconds; // This is a buffer e.g. x seconds.
+        public int? bidBufferBps; // To be considered as a new winning bid, a bid must be at least x% greater than the previous bid.
+        public int? startTimeInSeconds; // The start time of the auction.
+        public int? endTimeInSeconds; // The end time of the auction.
+        public NFTMetadata? asset; // The asset being auctioned.
+        public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
     }
 
     [System.Serializable]
-    public class NewDirectListing : NewListing
+    public struct CreateAuctionInput
     {
-        public NewDirectListing()
-        {
-            this.type = "NewDirectListing";
-        }
+        public string? assetContractAddress; // Required - smart contract address of NFT to sell
+        public string? tokenId; // Required - token ID of the NFT to sell
+        public string? buyoutBidAmount; // Required - amount to buy the NFT and close the listing
+        public string? minimumBidAmount; // Required - Minimum amount that bids must be to placed
+        public string? currencyContractAddress; // Optional - smart contract address of the currency to use for the listing
+        public string? quantity; // Optional - number of tokens to sell (1 for ERC721 NFTs)
 
-        public override string ToString()
-        {
-            return $"NewDirectListing:" + $"\n>>>>>\n{base.ToString()}\n<<<<<";
-        }
+        // TODO: Implement JS Date
+        // public DateTime? startTimestamp; // Optional - when the listing should start (default is now)
+        // public DateTime? endTimestamp; // Optional - when the listing should end (default is 7 days from now)
+        public string? bidBufferBps; // Optional - percentage the next bid must be higher than the current highest bid (default is contract-level bid buffer bps)
+        public string? timeBufferInSeconds; // Optional - time in seconds that are added to the end time when a bid is placed (default is contract-level time buffer in seconds)
     }
 
     [System.Serializable]
     public struct Offer
     {
-        public string listingId;
-        public string buyerAddress;
-        public int quantityDesired;
-        public string pricePerToken;
-        public CurrencyValue currencyValue;
-        public string currencyContractAddress;
-
-        public override string ToString()
-        {
-            return $"Offer:"
-                + $"\n>listingId: {listingId}"
-                + $"\n>buyerAddress: {buyerAddress}"
-                + $"\n>quantityDesired: {quantityDesired}"
-                + $"\n>pricePerToken: {pricePerToken}"
-                + $"\n>>>>>\n{currencyValue.ToString()}\n<<<<<"
-                + $"\n>currencyContractAddress: {currencyContractAddress}";
-        }
+        public string? id; // The id of the offer.
+        public string? offerorAddress; // The wallet address of the creator of offer.
+        public string? assetContractAddress; // The address of the asset being offered on.
+        public string? tokenId; // The ID of the token.
+        public string? quantity; // The quantity of tokens offered to buy
+        public string? currencyContractAddress; // The address of the currency offered for the NFTs.
+        public CurrencyValue? currencyValue; // The `CurrencyValue` of the offer. Useful for displaying the price information.
+        public string? totalPrice; // The total offer amount for the NFTs.
+        public NFTMetadata? asset; // Metadata of the asset
+        public int? endTimeInSeconds; // The end time of the offer.
+        public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
     }
 
     [System.Serializable]
-    public class QueryAllParams
+    public struct MakeOfferInput
     {
-        public int start;
-        public int count;
+        public string? assetContractAddress; // Required - the contract address of the NFT to offer on
+        public string? tokenId; // Required - the token ID to offer on
+        public string? totalPrice; // Required - the price to offer in the currency specified
+        public string? currencyContractAddress; // Optional - defaults to the native wrapped currency
 
-        public override string ToString()
-        {
-            return $"QueryAllParams:" + $"\n>start: {start}" + $"\n>count: {count}";
-        }
+        // TODO: Implement JS Date
+        // public DateTime? endTimestamp; // Optional - Defaults to 10 years from now
+        public string? quantity; // Optional - defaults to 1
     }
 
     [System.Serializable]
-    public class MarketplaceFilter : QueryAllParams
+    public struct Bid
     {
-        public string seller;
-        public string tokenContract;
-        public string tokenId;
-
-        public override string ToString()
-        {
-            return $"MarketplaceFilter:" + $"\n>>>>>\n{base.ToString()}\n<<<<<" + $"\n>seller: {seller}" + $"\n>tokenContract: {tokenContract}" + $"\n>tokenId: {tokenId}";
-        }
+        public string? auctionId; // The id of the auction.
+        public string? bidderAddress; // The address of the buyer who made the offer.
+        public string? currencyContractAddress; // The currency contract address of the offer token.
+        public string? bidAmount; // The amount of coins offered per token.
+        public CurrencyValue? bidAmountCurrencyValue;
     }
+
+#nullable disable
 
     // Claim conditions
 
