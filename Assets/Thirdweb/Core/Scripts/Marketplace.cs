@@ -18,19 +18,13 @@ namespace Thirdweb
         private string contractAddress;
 
         public Marketplace(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "marketplaceV3"))
+            : base(Routable.append(parentRoute, "marketplace-v3"))
         {
             this.contractAddress = contractAddress;
             this.directListings = new DirectListings(baseRoute, contractAddress);
             this.englishAuctions = new EnglishAuctions(baseRoute, contractAddress);
             this.offers = new Offers(baseRoute, contractAddress);
         }
-
-        // READ FUNCTIONS
-
-
-
-        // WRITE FUNCTIONS
     }
 
     public class DirectListings : Routable

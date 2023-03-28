@@ -166,18 +166,18 @@ public class Prefab_Writing : MonoBehaviour
 
     public async void BuyListing()
     {
-        // try
-        // {
-        //     Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-        //     Marketplace marketplace = contract.marketplace;
+        try
+        {
+            Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
+            Marketplace marketplace = contract.marketplace;
 
-        //     var transactionResult = await marketplace.BuyListing("0", 1);
-        //     Debugger.Instance.Log("[Buy Listing] Successful", transactionResult.ToString());
-        // }
-        // catch (System.Exception e)
-        // {
-        //     Debugger.Instance.Log("[Buy Listing] Error", e.Message);
-        // }
+            var transactionResult = await marketplace.directListings.BuyFromListing("0", "1", await ThirdwebManager.Instance.SDK.wallet.GetAddress());
+            Debugger.Instance.Log("[Buy Listing] Successful", transactionResult.ToString());
+        }
+        catch (System.Exception e)
+        {
+            Debugger.Instance.Log("[Buy Listing] Error", e.Message);
+        }
     }
 
     public async void OpenPack()
