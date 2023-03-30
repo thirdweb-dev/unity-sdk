@@ -103,6 +103,6 @@ public class ThirdwebManager : MonoBehaviour
             };
         }
 
-        SDK = new ThirdwebSDK(currentChain.identifier, chainId, options);
+        SDK = new ThirdwebSDK(currentChain.rpcOverride ?? currentChain.identifier, chainId, options);
     }
 }
