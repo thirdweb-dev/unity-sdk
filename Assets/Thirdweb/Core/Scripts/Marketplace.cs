@@ -244,7 +244,7 @@ namespace Thirdweb
                         Quantity = BigInteger.Parse(quantity),
                         BuyFor = walletAddress
                     },
-                    BigInteger.Parse(listing.pricePerToken) * BigInteger.Parse(quantity) // TODO: Check if Wei
+                    BigInteger.Parse(listing.pricePerToken) * BigInteger.Parse(quantity)
                 );
             }
         }
