@@ -234,6 +234,8 @@ namespace Thirdweb
             }
             else
             {
+                var listing = await GetListing(listingID);
+
                 return await TransactionManager.ThirdwebWrite(
                     contractAddress,
                     new DirectListingsContract.BuyFromListingFunction()
@@ -241,7 +243,8 @@ namespace Thirdweb
                         ListingId = BigInteger.Parse(listingID),
                         Quantity = BigInteger.Parse(quantity),
                         BuyFor = walletAddress
-                    }
+                    },
+                    BigInteger.Parse(listing.pricePerToken) * BigInteger.Parse(quantity) // TODO: Check if Wei
                 );
             }
         }
