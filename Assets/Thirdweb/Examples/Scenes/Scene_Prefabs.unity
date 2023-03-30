@@ -394,11 +394,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &601047465 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2407353625797499422, guid: 62e49a61f3b8faa488f48c2ac4becc7f, type: 3}
-  m_PrefabInstance: {fileID: 6840589607714449804}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &825054371
 GameObject:
   m_ObjectHideFlags: 0
@@ -456,8 +451,6 @@ MonoBehaviour:
     _values:
     - gameObjects:
       - {fileID: 960218562}
-      - {fileID: 2106121673}
-      - {fileID: 601047465}
     - gameObjects:
       - {fileID: 1783570060}
 --- !u!4 &825054373
@@ -1520,11 +1513,6 @@ PrefabInstance:
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5545289608879159644, guid: fe31914c79acaa6429af8b3ad98c56ee, type: 3}
   m_PrefabInstance: {fileID: 141563581511356972}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &2106121673 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4955426574052591783, guid: e42e20bd4381cd942b5a4fcc5a80d4de, type: 3}
-  m_PrefabInstance: {fileID: 1127726354214012792}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &141563581511356972
 PrefabInstance:

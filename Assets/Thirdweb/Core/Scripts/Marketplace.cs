@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 using System.Numerics;
 using UnityEngine;
 using System.Collections.Generic;
+using DirectListingsContract = Thirdweb.Contracts.DirectListingsLogic.ContractDefinition;
+using EnglishAuctionsContract = Thirdweb.Contracts.EnglishAuctionsLogic.ContractDefinition;
+using OffersContract = Thirdweb.Contracts.OffersLogic.ContractDefinition;
 
 namespace Thirdweb
 {
@@ -47,7 +50,30 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.GetAllListingsFunction, DirectListingsContract.GetAllListingsOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.GetAllListingsFunction() { StartId = start, EndId = end }
+                );
+                var allListings = result.AllListings;
+                var filteredListings = new List<DirectListing>();
+                foreach (var listing in allListings)
+                {
+                    var tempListing = await GetListing(listing.TokenId.ToString());
+
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempListing.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempListing.tokenId)
+                        continue;
+                    if (filters?.seller != null && filters?.seller != tempListing.creatorAddress)
+                        continue;
+
+                    filteredListings.Add(tempListing);
+                }
+                return filteredListings;
             }
         }
 
@@ -59,7 +85,30 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.GetAllValidListingsFunction, DirectListingsContract.GetAllValidListingsOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.GetAllValidListingsFunction() { StartId = start, EndId = end }
+                );
+                var allValidListings = result.ValidListings;
+                var filteredListings = new List<DirectListing>();
+                foreach (var listing in allValidListings)
+                {
+                    var tempListing = await GetListing(listing.TokenId.ToString());
+
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempListing.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempListing.tokenId)
+                        continue;
+                    if (filters?.seller != null && filters?.seller != tempListing.creatorAddress)
+                        continue;
+
+                    filteredListings.Add(tempListing);
+                }
+                return filteredListings;
             }
         }
 
@@ -71,7 +120,44 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.GetListingFunction, DirectListingsContract.GetListingOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.GetListingFunction() { ListingId = BigInteger.Parse(listingID) }
+                );
+
+                Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Listing.Currency).ERC20.Get();
+                NFTMetadata metadata = new NFTMetadata();
+                try
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Listing.AssetContract).ERC721.Get(result.Listing.TokenId.ToString())).metadata;
+                }
+                catch (System.Exception)
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Listing.AssetContract).ERC1155.Get(result.Listing.TokenId.ToString())).metadata;
+                }
+
+                return new DirectListing()
+                {
+                    id = result.Listing.ListingId.ToString(),
+                    creatorAddress = result.Listing.ListingCreator,
+                    assetContractAddress = result.Listing.AssetContract,
+                    tokenId = result.Listing.TokenId.ToString(),
+                    quantity = result.Listing.Quantity.ToString(),
+                    currencyContractAddress = result.Listing.Currency,
+                    currencyValuePerToken = new CurrencyValue(
+                        currency.name,
+                        currency.symbol,
+                        currency.decimals,
+                        result.Listing.PricePerToken.ToString(),
+                        result.Listing.PricePerToken.ToString().ToEth()
+                    ),
+                    pricePerToken = result.Listing.PricePerToken.ToString(),
+                    asset = metadata,
+                    startTimeInSeconds = (long)result.Listing.StartTimestamp,
+                    endTimeInSeconds = (long)result.Listing.EndTimestamp,
+                    isReservedListing = result.Listing.Reserved,
+                    status = (MarkteplaceStatus)result.Listing.Status
+                };
             }
         }
 
@@ -83,7 +169,11 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.TotalListingsFunction, DirectListingsContract.TotalListingsOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.TotalListingsFunction() { }
+                );
+                return result.ReturnValue1.ToString();
             }
         }
 
@@ -95,7 +185,11 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.IsBuyerApprovedForListingFunction, DirectListingsContract.IsBuyerApprovedForListingOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.IsBuyerApprovedForListingFunction() { ListingId = BigInteger.Parse(listingID), Buyer = buyerAddress }
+                );
+                return result.ReturnValue1;
             }
         }
 
@@ -107,21 +201,28 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.IsCurrencyApprovedForListingFunction, DirectListingsContract.IsCurrencyApprovedForListingOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.IsCurrencyApprovedForListingFunction() { ListingId = BigInteger.Parse(listingID), Currency = currencyContractAddress }
+                );
+                return result.ReturnValue1;
             }
         }
 
         // WRITE FUNCTIONS
 
-        public async Task<TransactionResult> ApproveBuyerForReservedListing(string listingID, string walletAddress)
+        public async Task<TransactionResult> ApproveBuyerForReservedListing(string listingID, string buyerAddress)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("approveBuyerForReservedListing"), Utils.ToJsonStringArray(listingID, walletAddress));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("approveBuyerForReservedListing"), Utils.ToJsonStringArray(listingID, buyerAddress));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.ApproveBuyerForListingFunction() { ListingId = BigInteger.Parse(listingID), Buyer = buyerAddress }
+                );
             }
         }
 
@@ -133,7 +234,15 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.BuyFromListingFunction()
+                    {
+                        ListingId = BigInteger.Parse(listingID),
+                        Quantity = BigInteger.Parse(quantity),
+                        BuyFor = walletAddress
+                    }
+                );
             }
         }
 
@@ -145,7 +254,7 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(contractAddress, new DirectListingsContract.CancelListingFunction() { ListingId = BigInteger.Parse(listingID), });
             }
         }
 
@@ -157,7 +266,23 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.CreateListingFunction()
+                    {
+                        Params = new DirectListingsContract.ListingParameters()
+                        {
+                            AssetContract = input.assetContractAddress,
+                            TokenId = BigInteger.Parse(input.tokenId),
+                            Quantity = BigInteger.Parse(input.quantity ?? "1"),
+                            Currency = input.currencyContractAddress ?? Utils.AddressZero,
+                            PricePerToken = BigInteger.Parse(input.pricePerToken),
+                            StartTimestamp = (BigInteger)(input.startTimestamp ?? Utils.GetUnixTimeStampNow()),
+                            EndTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
+                            Reserved = input.isReservedListing ?? false,
+                        }
+                    }
+                );
             }
         }
 
@@ -169,7 +294,15 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.ApproveBuyerForListingFunction()
+                    {
+                        ListingId = BigInteger.Parse(listingId),
+                        Buyer = buyerAddress,
+                        ToApprove = false
+                    }
+                );
             }
         }
 
@@ -181,7 +314,15 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.ApproveCurrencyForListingFunction()
+                    {
+                        ListingId = BigInteger.Parse(listingId),
+                        Currency = currencyContractAddress,
+                        PricePerTokenInCurrency = 0
+                    }
+                );
             }
         }
 
@@ -193,7 +334,26 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var oldListing = await GetListing(listingId);
+
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.UpdateListingFunction()
+                    {
+                        ListingId = BigInteger.Parse(listingId),
+                        Params = new DirectListingsContract.ListingParameters()
+                        {
+                            AssetContract = listing.assetContractAddress ?? oldListing.assetContractAddress,
+                            TokenId = BigInteger.Parse(listing.tokenId ?? oldListing.tokenId),
+                            Quantity = BigInteger.Parse(listing.quantity ?? oldListing.quantity),
+                            Currency = listing.currencyContractAddress ?? oldListing.currencyContractAddress,
+                            PricePerToken = BigInteger.Parse(listing.pricePerToken ?? oldListing.pricePerToken),
+                            StartTimestamp = (BigInteger)(listing.startTimeInSeconds ?? oldListing.startTimeInSeconds),
+                            EndTimestamp = (BigInteger)(listing.endTimeInSeconds ?? oldListing.endTimeInSeconds),
+                            Reserved = listing.isReservedListing ?? oldListing.isReservedListing ?? false,
+                        }
+                    }
+                );
             }
         }
     }
@@ -218,7 +378,30 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetAllAuctionsFunction, EnglishAuctionsContract.GetAllAuctionsOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.GetAllAuctionsFunction() { StartId = start, EndId = end }
+                );
+                var allAuctions = result.AllAuctions;
+                var filteredAuctions = new List<Auction>();
+                foreach (var auction in allAuctions)
+                {
+                    var tempAuction = await GetAuction(auction.TokenId.ToString());
+
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempAuction.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempAuction.tokenId)
+                        continue;
+                    if (filters?.seller != null && filters?.seller != tempAuction.creatorAddress)
+                        continue;
+
+                    filteredAuctions.Add(tempAuction);
+                }
+                return filteredAuctions;
             }
         }
 
@@ -230,43 +413,118 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetAllValidAuctionsFunction, EnglishAuctionsContract.GetAllValidAuctionsOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.GetAllValidAuctionsFunction() { StartId = start, EndId = end }
+                );
+                var allValidAuctions = result.ValidAuctions;
+                var filteredAuctions = new List<Auction>();
+                foreach (var auction in allValidAuctions)
+                {
+                    var tempAuction = await GetAuction(auction.TokenId.ToString());
+
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempAuction.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempAuction.tokenId)
+                        continue;
+                    if (filters?.seller != null && filters?.seller != tempAuction.creatorAddress)
+                        continue;
+
+                    filteredAuctions.Add(tempAuction);
+                }
+                return filteredAuctions;
             }
         }
 
-        public async Task<Auction> GetAuction(string listingID)
+        public async Task<Auction> GetAuction(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<Auction>(getRoute("getAuction"), Utils.ToJsonStringArray(listingID));
+                return await Bridge.InvokeRoute<Auction>(getRoute("getAuction"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetAuctionFunction, EnglishAuctionsContract.GetAuctionOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.GetAuctionFunction() { AuctionId = BigInteger.Parse(auctionId) }
+                );
+
+                Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Auction.Currency).ERC20.Get();
+                NFTMetadata metadata = new NFTMetadata();
+                try
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Auction.AssetContract).ERC721.Get(result.Auction.TokenId.ToString())).metadata;
+                }
+                catch (System.Exception)
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Auction.AssetContract).ERC1155.Get(result.Auction.TokenId.ToString())).metadata;
+                }
+
+                return new Auction()
+                {
+                    id = result.Auction.AuctionId.ToString(),
+                    creatorAddress = result.Auction.AuctionCreator,
+                    assetContractAddress = result.Auction.AssetContract,
+                    tokenId = result.Auction.TokenId.ToString(),
+                    quantity = result.Auction.Quantity.ToString(),
+                    currencyContractAddress = result.Auction.Currency,
+                    minimumBidAmount = null,
+                    minimumBidCurrencyValue = new CurrencyValue(
+                        currency.name,
+                        currency.symbol,
+                        currency.decimals,
+                        result.Auction.MinimumBidAmount.ToString(),
+                        result.Auction.MinimumBidAmount.ToString().ToEth()
+                    ),
+                    buyoutBidAmount = null,
+                    buyoutCurrencyValue = new CurrencyValue(
+                        currency.name,
+                        currency.symbol,
+                        currency.decimals,
+                        result.Auction.BuyoutBidAmount.ToString(),
+                        result.Auction.BuyoutBidAmount.ToString().ToEth()
+                    ),
+                    timeBufferInSeconds = null,
+                    bidBufferBps = null,
+                    startTimeInSeconds = (long)result.Auction.StartTimestamp,
+                    endTimeInSeconds = (long)result.Auction.EndTimestamp,
+                    asset = metadata,
+                    status = (MarkteplaceStatus)result.Auction.Status
+                };
             }
         }
 
-        public async Task<int> GetBidBufferBps(string listingID)
+        public async Task<int> GetBidBufferBps(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("getBidBufferBps"), Utils.ToJsonStringArray(listingID));
+                return await Bridge.InvokeRoute<int>(getRoute("getBidBufferBps"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var auction = await GetAuction(auctionId);
+                return auction.bidBufferBps.Value;
             }
         }
 
-        public async Task<CurrencyValue> GetMinimumNextBid(string listingID)
+        public async Task<CurrencyValue> GetMinimumNextBid(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("getMinimumNextBid"), Utils.ToJsonStringArray(listingID));
+                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("getMinimumNextBid"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var auction = await GetAuction(auctionId);
+                var winningBid = await GetWinningBid(auctionId);
+                var cv = auction.minimumBidCurrencyValue.Value;
+                cv.value = (BigInteger.Parse(cv.value) + BigInteger.Parse(winningBid.bidAmount)).ToString();
+                cv.displayValue = cv.value.ToEth();
+                return cv;
             }
         }
 
@@ -278,93 +536,123 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.TotalAuctionsFunction, EnglishAuctionsContract.TotalAuctionsOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.TotalAuctionsFunction() { }
+                );
+                return result.ReturnValue1.ToString();
             }
         }
 
-        public async Task<string> GetWinner(string listingID)
+        public async Task<string> GetWinner(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("getWinner"), Utils.ToJsonStringArray(listingID));
+                return await Bridge.InvokeRoute<string>(getRoute("getWinner"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetWinningBidFunction, EnglishAuctionsContract.GetWinningBidOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.GetWinningBidFunction() { AuctionId = BigInteger.Parse(auctionId) }
+                );
+                return result.Bidder;
             }
         }
 
-        public async Task<Bid> GetWinningBid(string listingID)
+        public async Task<Bid> GetWinningBid(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<Bid>(getRoute("getWinningBid"), Utils.ToJsonStringArray(listingID));
+                return await Bridge.InvokeRoute<Bid>(getRoute("getWinningBid"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var winningBid = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetWinningBidFunction, EnglishAuctionsContract.GetWinningBidOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.GetWinningBidFunction() { AuctionId = BigInteger.Parse(auctionId) }
+                );
+
+                var c = await ThirdwebManager.Instance.SDK.GetContract(winningBid.Currency).ERC20.Get();
+
+                return new Bid()
+                {
+                    auctionId = auctionId,
+                    bidderAddress = winningBid.Bidder,
+                    currencyContractAddress = winningBid.Currency,
+                    bidAmount = winningBid.BidAmount.ToString(),
+                    bidAmountCurrencyValue = new CurrencyValue(c.name, c.symbol, c.decimals, winningBid.BidAmount.ToString(), winningBid.BidAmount.ToString().ToEth())
+                };
             }
         }
 
-        public async Task<bool> IsWinningBid(string listingID, string bidAmount)
+        public async Task<bool> IsWinningBid(string auctionId, string bidAmount)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(getRoute("isWinningBid"), Utils.ToJsonStringArray(listingID, bidAmount));
+                return await Bridge.InvokeRoute<bool>(getRoute("isWinningBid"), Utils.ToJsonStringArray(auctionId, bidAmount));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.IsNewWinningBidFunction, EnglishAuctionsContract.IsNewWinningBidOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.IsNewWinningBidFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(bidAmount) }
+                );
+                return result.ReturnValue1;
             }
         }
 
         // WRITE FUNCTIONS
 
-        public async Task<TransactionResult> BuyoutAuction(string listingID)
+        public async Task<TransactionResult> BuyoutAuction(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("buyoutAuction"), Utils.ToJsonStringArray(listingID));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("buyoutAuction"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var auction = await GetAuction(auctionId);
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(auction.buyoutCurrencyValue?.value) }
+                );
             }
         }
 
-        public async Task<TransactionResult> CancelAuction(string listingID)
+        public async Task<TransactionResult> CancelAuction(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("cancelAuction"), Utils.ToJsonStringArray(listingID));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("cancelAuction"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CancelAuctionFunction() { AuctionId = BigInteger.Parse(auctionId) });
             }
         }
 
-        public async Task<TransactionResult> CloseAuctionForBidder(string listingID)
+        public async Task<TransactionResult> CloseAuctionForBidder(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("closeAuctionForBidder"), Utils.ToJsonStringArray(listingID));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("closeAuctionForBidder"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CollectAuctionTokensFunction() { AuctionId = BigInteger.Parse(auctionId) });
             }
         }
 
-        public async Task<TransactionResult> CloseAuctionForSeller(string listingID)
+        public async Task<TransactionResult> CloseAuctionForSeller(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("closeAuctionForSeller"), Utils.ToJsonStringArray(listingID));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("closeAuctionForSeller"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CollectAuctionPayoutFunction() { AuctionId = BigInteger.Parse(auctionId) });
             }
         }
 
@@ -376,31 +664,54 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new EnglishAuctionsContract.CreateAuctionFunction()
+                    {
+                        Params = new EnglishAuctionsContract.AuctionParameters()
+                        {
+                            AssetContract = input.assetContractAddress,
+                            TokenId = BigInteger.Parse(input.tokenId),
+                            Quantity = BigInteger.Parse(input.quantity ?? "1"),
+                            Currency = input.currencyContractAddress ?? Utils.AddressZero,
+                            MinimumBidAmount = BigInteger.Parse(input.minimumBidAmount),
+                            BuyoutBidAmount = BigInteger.Parse(input.buyoutBidAmount),
+                            TimeBufferInSeconds = ulong.Parse(input.timeBufferInSeconds ?? "900"),
+                            BidBufferBps = ulong.Parse(input.bidBufferBps ?? "500"),
+                            StartTimestamp = (ulong)(input.startTimestamp ?? Utils.GetUnixTimeStampNow()),
+                            EndTimestamp = (ulong)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
+                        }
+                    }
+                );
             }
         }
 
-        public async Task<TransactionResult> ExecuteSale(string listingID)
+        public async Task<TransactionResult> ExecuteSale(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("executeSale"), Utils.ToJsonStringArray(listingID));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("executeSale"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                // TODO: Make it a multicall
+                await CloseAuctionForSeller(auctionId);
+                return await CloseAuctionForBidder(auctionId);
             }
         }
 
-        public async Task<TransactionResult> MakeBid(string listingID, string bidAmount)
+        public async Task<TransactionResult> MakeBid(string auctionId, string bidAmount)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("makeBid"), Utils.ToJsonStringArray(listingID, bidAmount));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("makeBid"), Utils.ToJsonStringArray(auctionId, bidAmount));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(bidAmount) }
+                );
             }
         }
     }

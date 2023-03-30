@@ -148,8 +148,8 @@ namespace Thirdweb
         public CurrencyValue? currencyValuePerToken; // The `CurrencyValue` of the listing. Useful for displaying the price information.
         public string? pricePerToken; // The price to pay per unit of NFTs listed.
         public NFTMetadata? asset; // The asset being listed.
-        public int? startTimeInSeconds; // The start time of the listing.
-        public int? endTimeInSeconds; // The end time of the listing.
+        public long? startTimeInSeconds; // The start time of the listing.
+        public long? endTimeInSeconds; // The end time of the listing.
         public bool? isReservedListing; // Whether the listing is reserved to be bought from a specific set of buyers.
         public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
 
@@ -175,15 +175,14 @@ namespace Thirdweb
     [System.Serializable]
     public struct CreateListingInput
     {
-        public string? assetContractAddress; // Required - smart contract address of NFT to sell
-        public string? tokenId; // Required - token ID of the NFT to sell
-        public string? pricePerToken; // Required - price of each token in the listing
+        public string assetContractAddress; // Required - smart contract address of NFT to sell
+        public string tokenId; // Required - token ID of the NFT to sell
+        public string pricePerToken; // Required - price of each token in the listing
         public string? currencyContractAddress; // Optional - smart contract address of the currency to use for the listing
         public bool? isReservedListing; // Optional - whether or not the listing is reserved (only specific wallet addresses can buy)
         public string? quantity; // Optional - number of tokens to sell (1 for ERC721 NFTs)
-        // TODO: Implement JS Date
-        // public DateTime? startTimestamp; // Optional - when the listing should start (default is now)
-        // public DateTime? endTimestamp; // Optional - when the listing should end (default is 7 days from now)
+        public long? startTimestamp; // Optional - when the listing should start (default is now)
+        public long? endTimestamp; // Optional - when the listing should end (default is 7 days from now)
     }
 
     [System.Serializable]
@@ -201,8 +200,8 @@ namespace Thirdweb
         public CurrencyValue? buyoutCurrencyValue; //  The `CurrencyValue` of the buyout price. Useful for displaying the price information.
         public int? timeBufferInSeconds; // This is a buffer e.g. x seconds.
         public int? bidBufferBps; // To be considered as a new winning bid, a bid must be at least x% greater than the previous bid.
-        public int? startTimeInSeconds; // The start time of the auction.
-        public int? endTimeInSeconds; // The end time of the auction.
+        public long? startTimeInSeconds; // The start time of the auction.
+        public long? endTimeInSeconds; // The end time of the auction.
         public NFTMetadata? asset; // The asset being auctioned.
         public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
     }
@@ -210,16 +209,14 @@ namespace Thirdweb
     [System.Serializable]
     public struct CreateAuctionInput
     {
-        public string? assetContractAddress; // Required - smart contract address of NFT to sell
-        public string? tokenId; // Required - token ID of the NFT to sell
-        public string? buyoutBidAmount; // Required - amount to buy the NFT and close the listing
-        public string? minimumBidAmount; // Required - Minimum amount that bids must be to placed
+        public string assetContractAddress; // Required - smart contract address of NFT to sell
+        public string tokenId; // Required - token ID of the NFT to sell
+        public string buyoutBidAmount; // Required - amount to buy the NFT and close the listing
+        public string minimumBidAmount; // Required - Minimum amount that bids must be to placed
         public string? currencyContractAddress; // Optional - smart contract address of the currency to use for the listing
         public string? quantity; // Optional - number of tokens to sell (1 for ERC721 NFTs)
-
-        // TODO: Implement JS Date
-        // public DateTime? startTimestamp; // Optional - when the listing should start (default is now)
-        // public DateTime? endTimestamp; // Optional - when the listing should end (default is 7 days from now)
+        public long? startTimestamp; // Optional - when the listing should start (default is now)
+        public long? endTimestamp; // Optional - when the listing should end (default is 7 days from now)
         public string? bidBufferBps; // Optional - percentage the next bid must be higher than the current highest bid (default is contract-level bid buffer bps)
         public string? timeBufferInSeconds; // Optional - time in seconds that are added to the end time when a bid is placed (default is contract-level time buffer in seconds)
     }
@@ -243,13 +240,11 @@ namespace Thirdweb
     [System.Serializable]
     public struct MakeOfferInput
     {
-        public string? assetContractAddress; // Required - the contract address of the NFT to offer on
-        public string? tokenId; // Required - the token ID to offer on
-        public string? totalPrice; // Required - the price to offer in the currency specified
+        public string assetContractAddress; // Required - the contract address of the NFT to offer on
+        public string tokenId; // Required - the token ID to offer on
+        public string totalPrice; // Required - the price to offer in the currency specified
         public string? currencyContractAddress; // Optional - defaults to the native wrapped currency
-
-        // TODO: Implement JS Date
-        // public DateTime? endTimestamp; // Optional - Defaults to 10 years from now
+        public long? endTimestamp; // Optional - Defaults to 10 years from now
         public string? quantity; // Optional - defaults to 1
     }
 
