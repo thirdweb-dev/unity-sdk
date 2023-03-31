@@ -21,7 +21,7 @@ namespace Thirdweb
         private string contractAddress;
 
         public Marketplace(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "marketplace-v3"))
+            : base(parentRoute)
         {
             this.contractAddress = contractAddress;
             this.directListings = new DirectListings(baseRoute, contractAddress);

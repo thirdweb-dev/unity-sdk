@@ -57,7 +57,7 @@ namespace Thirdweb
             this.ERC20 = new ERC20(baseRoute, address);
             this.ERC721 = new ERC721(baseRoute, address);
             this.ERC1155 = new ERC1155(baseRoute, address);
-            this.marketplace = new Marketplace(chain, address);
+            this.marketplace = new Marketplace(baseRoute, address);
             this.pack = new Pack(chain, address);
             this.events = new Events(baseRoute);
         }
