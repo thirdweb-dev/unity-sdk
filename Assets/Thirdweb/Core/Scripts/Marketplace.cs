@@ -62,7 +62,7 @@ namespace Thirdweb
                 var filteredListings = new List<DirectListing>();
                 foreach (var listing in allListings)
                 {
-                    var tempListing = await GetListing(listing.TokenId.ToString());
+                    var tempListing = await GetListing(listing.ListingId.ToString());
 
                     if (filters?.tokenContract != null && filters?.tokenContract != tempListing.assetContractAddress)
                         continue;
@@ -97,7 +97,7 @@ namespace Thirdweb
                 var filteredListings = new List<DirectListing>();
                 foreach (var listing in allValidListings)
                 {
-                    var tempListing = await GetListing(listing.TokenId.ToString());
+                    var tempListing = await GetListing(listing.ListingId.ToString());
 
                     if (filters?.tokenContract != null && filters?.tokenContract != tempListing.assetContractAddress)
                         continue;
@@ -242,7 +242,9 @@ namespace Thirdweb
                     {
                         ListingId = BigInteger.Parse(listingID),
                         Quantity = BigInteger.Parse(quantity),
-                        BuyFor = walletAddress
+                        BuyFor = walletAddress,
+                        Currency = listing.currencyContractAddress,
+                        ExpectedTotalPrice = BigInteger.Parse(listing.pricePerToken) * BigInteger.Parse(quantity),
                     },
                     BigInteger.Parse(listing.pricePerToken) * BigInteger.Parse(quantity)
                 );
@@ -278,9 +280,9 @@ namespace Thirdweb
                             AssetContract = input.assetContractAddress,
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
-                            Currency = input.currencyContractAddress ?? Utils.AddressZero,
+                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
                             PricePerToken = BigInteger.Parse(input.pricePerToken),
-                            StartTimestamp = (BigInteger)(input.startTimestamp ?? Utils.GetUnixTimeStampNow()),
+                            StartTimestamp = (BigInteger)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp() + 60),
                             EndTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
                             Reserved = input.isReservedListing ?? false,
                         }
@@ -393,7 +395,7 @@ namespace Thirdweb
                 var filteredAuctions = new List<Auction>();
                 foreach (var auction in allAuctions)
                 {
-                    var tempAuction = await GetAuction(auction.TokenId.ToString());
+                    var tempAuction = await GetAuction(auction.AuctionId.ToString());
 
                     if (filters?.tokenContract != null && filters?.tokenContract != tempAuction.assetContractAddress)
                         continue;
@@ -428,7 +430,7 @@ namespace Thirdweb
                 var filteredAuctions = new List<Auction>();
                 foreach (var auction in allValidAuctions)
                 {
-                    var tempAuction = await GetAuction(auction.TokenId.ToString());
+                    var tempAuction = await GetAuction(auction.AuctionId.ToString());
 
                     if (filters?.tokenContract != null && filters?.tokenContract != tempAuction.assetContractAddress)
                         continue;
@@ -618,7 +620,8 @@ namespace Thirdweb
                 var auction = await GetAuction(auctionId);
                 return await TransactionManager.ThirdwebWrite(
                     contractAddress,
-                    new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(auction.buyoutCurrencyValue?.value) }
+                    new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(auction.buyoutCurrencyValue?.value) },
+                    BigInteger.Parse(auction.buyoutCurrencyValue?.value)
                 );
             }
         }
@@ -676,12 +679,12 @@ namespace Thirdweb
                             AssetContract = input.assetContractAddress,
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
-                            Currency = input.currencyContractAddress ?? Utils.AddressZero,
+                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
                             MinimumBidAmount = BigInteger.Parse(input.minimumBidAmount),
                             BuyoutBidAmount = BigInteger.Parse(input.buyoutBidAmount),
                             TimeBufferInSeconds = ulong.Parse(input.timeBufferInSeconds ?? "900"),
                             BidBufferBps = ulong.Parse(input.bidBufferBps ?? "500"),
-                            StartTimestamp = (ulong)(input.startTimestamp ?? Utils.GetUnixTimeStampNow()),
+                            StartTimestamp = (ulong)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp() + 60),
                             EndTimestamp = (ulong)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
                         }
                     }
@@ -713,7 +716,8 @@ namespace Thirdweb
             {
                 return await TransactionManager.ThirdwebWrite(
                     contractAddress,
-                    new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(bidAmount) }
+                    new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(bidAmount) },
+                    BigInteger.Parse(bidAmount)
                 );
             }
         }
@@ -739,7 +743,30 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<OffersContract.GetAllOffersFunction, OffersContract.GetAllOffersOutputDTO>(
+                    contractAddress,
+                    new OffersContract.GetAllOffersFunction() { StartId = start, EndId = end }
+                );
+                var allOffers = result.AllOffers;
+                var filteredOffers = new List<Offer>();
+                foreach (var listing in allOffers)
+                {
+                    var tempOffer = await GetOffer(listing.OfferId.ToString());
+
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempOffer.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempOffer.tokenId)
+                        continue;
+                    if (filters?.offeror != null && filters?.seller != tempOffer.offerorAddress)
+                        continue;
+
+                    filteredOffers.Add(tempOffer);
+                }
+                return filteredOffers;
             }
         }
 
@@ -751,7 +778,30 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<OffersContract.GetAllValidOffersFunction, OffersContract.GetAllValidOffersOutputDTO>(
+                    contractAddress,
+                    new OffersContract.GetAllValidOffersFunction() { StartId = start, EndId = end }
+                );
+                var allValidOffers = result.ValidOffers;
+                var filteredOffers = new List<Offer>();
+                foreach (var listing in allValidOffers)
+                {
+                    var tempOffer = await GetOffer(listing.OfferId.ToString());
+
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempOffer.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempOffer.tokenId)
+                        continue;
+                    if (filters?.offeror != null && filters?.seller != tempOffer.offerorAddress)
+                        continue;
+
+                    filteredOffers.Add(tempOffer);
+                }
+                return filteredOffers;
             }
         }
 
@@ -763,7 +813,36 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var result = await TransactionManager.ThirdwebRead<OffersContract.GetOfferFunction, OffersContract.GetOfferOutputDTO>(
+                    contractAddress,
+                    new OffersContract.GetOfferFunction() { OfferId = BigInteger.Parse(offerID) }
+                );
+
+                Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Offer.Currency).ERC20.Get();
+                NFTMetadata metadata = new NFTMetadata();
+                try
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Offer.AssetContract).ERC721.Get(result.Offer.TokenId.ToString())).metadata;
+                }
+                catch (System.Exception)
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Offer.AssetContract).ERC1155.Get(result.Offer.TokenId.ToString())).metadata;
+                }
+
+                return new Offer()
+                {
+                    id = result.Offer.OfferId.ToString(),
+                    offerorAddress = result.Offer.Offeror,
+                    assetContractAddress = result.Offer.AssetContract,
+                    tokenId = result.Offer.TokenId.ToString(),
+                    quantity = result.Offer.Quantity.ToString(),
+                    currencyContractAddress = result.Offer.Currency,
+                    currencyValue = new CurrencyValue(currency.name, currency.symbol, currency.decimals, result.Offer.TotalPrice.ToString(), result.Offer.TotalPrice.ToString().ToEth()),
+                    totalPrice = result.Offer.TotalPrice.ToString(),
+                    asset = metadata,
+                    endTimeInSeconds = (long)result.Offer.ExpirationTimestamp,
+                    status = (MarkteplaceStatus)result.Offer.Status
+                };
             }
         }
 
@@ -775,7 +854,11 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                var result = await TransactionManager.ThirdwebRead<OffersContract.TotalOffersFunction, OffersContract.TotalOffersOutputDTO>(
+                    contractAddress,
+                    new OffersContract.TotalOffersFunction() { }
+                );
+                return result.ReturnValue1.ToString();
             }
         }
 
@@ -789,7 +872,7 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(contractAddress, new OffersContract.AcceptOfferFunction() { OfferId = BigInteger.Parse(offerID) });
             }
         }
 
@@ -801,7 +884,7 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(contractAddress, new OffersContract.CancelOfferFunction() { OfferId = BigInteger.Parse(offerID) });
             }
         }
 
@@ -813,7 +896,22 @@ namespace Thirdweb
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your platform.");
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new OffersContract.MakeOfferFunction()
+                    {
+                        Params = new OffersContract.OfferParams()
+                        {
+                            AssetContract = input.assetContractAddress,
+                            TokenId = BigInteger.Parse(input.tokenId),
+                            Quantity = BigInteger.Parse(input.quantity ?? "1"),
+                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
+                            TotalPrice = BigInteger.Parse(input.totalPrice),
+                            ExpirationTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampIn10Years())
+                        }
+                    },
+                    BigInteger.Parse(input.totalPrice)
+                );
             }
         }
     }

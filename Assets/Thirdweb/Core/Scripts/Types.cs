@@ -233,7 +233,7 @@ namespace Thirdweb
         public CurrencyValue? currencyValue; // The `CurrencyValue` of the offer. Useful for displaying the price information.
         public string? totalPrice; // The total offer amount for the NFTs.
         public NFTMetadata? asset; // Metadata of the asset
-        public int? endTimeInSeconds; // The end time of the offer.
+        public long? endTimeInSeconds; // The end time of the offer.
         public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
     }
 

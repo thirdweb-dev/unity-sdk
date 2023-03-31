@@ -5,6 +5,7 @@ using System.Numerics;
 using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using Nethereum.Hex.HexTypes;
 
 namespace Thirdweb
 {
@@ -142,12 +143,26 @@ namespace Thirdweb
                     throw new UnityException("You must pass an ABI for native platform custom calls");
 
                 var contract = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContract(this.abi, this.address);
+
                 var function = contract.GetFunction(functionName);
-                var gas = await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, null, args);
+
+                var gas =
+                    transactionOverrides?.gasLimit != null
+                        ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasLimit))
+                        : await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, null, args);
+
+                var value = transactionOverrides?.value != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.value)) : new HexBigInteger(0);
+
+                var gasPrice =
+                    transactionOverrides?.gasPrice != null
+                        ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasPrice))
+                        : await ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GasPrice.SendRequestAsync();
+
                 var receipt = await function.SendTransactionAndWaitForReceiptAsync(
-                    from: await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                    from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
                     gas: gas,
-                    value: new Nethereum.Hex.HexTypes.HexBigInteger(0),
+                    gasPrice: gasPrice,
+                    value: value,
                     receiptRequestCancellationToken: null,
                     args
                 );
