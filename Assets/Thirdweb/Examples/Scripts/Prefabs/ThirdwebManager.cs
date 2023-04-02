@@ -1,6 +1,5 @@
 using UnityEngine;
 using Thirdweb;
-using System.Collections.Generic;
 using RotaryHeart.Lib.SerializableDictionary;
 
 [System.Serializable]
@@ -103,6 +102,6 @@ public class ThirdwebManager : MonoBehaviour
             };
         }
 
-        SDK = new ThirdwebSDK(currentChain.rpcOverride ?? currentChain.identifier, chainId, options);
+        SDK = new ThirdwebSDK(currentChain.rpcOverride != null && currentChain.rpcOverride.Length > 0 ? currentChain.rpcOverride : currentChain.identifier, chainId, options);
     }
 }
