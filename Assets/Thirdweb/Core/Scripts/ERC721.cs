@@ -238,7 +238,7 @@ namespace Thirdweb
             {
                 var isApprovedForAll = await TransactionManager.ThirdwebRead<TokenERC721Contract.IsApprovedForAllFunction, TokenERC721Contract.IsApprovedForAllOutputDTO>(
                     contractAddress,
-                    new TokenERC721Contract.IsApprovedForAllFunction() { Owner = address }
+                    new TokenERC721Contract.IsApprovedForAllFunction() { Owner = address, Operator = approvedContract }
                 );
                 return isApprovedForAll.ReturnValue1;
             }

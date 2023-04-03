@@ -5,6 +5,7 @@ using System.Numerics;
 using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using Nethereum.Hex.HexTypes;
 
 namespace Thirdweb
 {
@@ -56,7 +57,7 @@ namespace Thirdweb
             this.ERC20 = new ERC20(baseRoute, address);
             this.ERC721 = new ERC721(baseRoute, address);
             this.ERC1155 = new ERC1155(baseRoute, address);
-            this.marketplace = new Marketplace(chain, address);
+            this.marketplace = new Marketplace(baseRoute, address);
             this.pack = new Pack(chain, address);
             this.events = new Events(baseRoute);
         }
@@ -142,12 +143,20 @@ namespace Thirdweb
                     throw new UnityException("You must pass an ABI for native platform custom calls");
 
                 var contract = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContract(this.abi, this.address);
+
                 var function = contract.GetFunction(functionName);
-                var gas = await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, null, args);
+
+                var value = transactionOverrides?.value != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.value)) : new HexBigInteger(0);
+
+                var gas =
+                    transactionOverrides?.gasLimit != null
+                        ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasLimit))
+                        : await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, value, args);
+
                 var receipt = await function.SendTransactionAndWaitForReceiptAsync(
-                    from: await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                    from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
                     gas: gas,
-                    value: new Nethereum.Hex.HexTypes.HexBigInteger(0),
+                    value: value,
                     receiptRequestCancellationToken: null,
                     args
                 );

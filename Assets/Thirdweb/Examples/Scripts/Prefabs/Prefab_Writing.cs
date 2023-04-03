@@ -10,7 +10,7 @@ public class Prefab_Writing : MonoBehaviour
     private const string DROP_ERC721_CONTRACT = "0x8ED1C3618d70785d23E5fdE767058FA6cA6D9E43";
     private const string TOKEN_ERC1155_CONTRACT = "0x82c488a1BC64ab3b91B927380cca9Db7bF347879";
     private const string DROP_ERC1155_CONTRACT = "0x408308c85D7073192deEAcC1703E234A783fFfF1";
-    private const string MARKETPLACE_CONTRACT = "0xC7DBaD01B18403c041132C5e8c7e9a6542C4291A";
+    private const string MARKETPLACE_CONTRACT = "0x3Dd51b530e9DBdD93087C321cbD9350f435f742C";
     private const string PACK_CONTRACT = "0xC04104DE55dEC5d63542f7ADCf8171278942048E";
 
     public async void MintERC20()
@@ -171,7 +171,18 @@ public class Prefab_Writing : MonoBehaviour
             Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
             Marketplace marketplace = contract.marketplace;
 
-            var transactionResult = await marketplace.BuyListing("0", 1);
+            // var createResult = await marketplace.directListings.CreateListing(
+            //     new CreateListingInput()
+            //     {
+            //         assetContractAddress = TOKEN_ERC1155_CONTRACT,
+            //         tokenId = "4",
+            //         pricePerToken = "1", // 1 wei
+            //         quantity = "100"
+            //     }
+            // );
+            // Debugger.Instance.Log("[Create Listing] Successful", createResult.ToString());
+
+            var transactionResult = await marketplace.directListings.BuyFromListing("2", "1", await ThirdwebManager.Instance.SDK.wallet.GetAddress());
             Debugger.Instance.Log("[Buy Listing] Successful", transactionResult.ToString());
         }
         catch (System.Exception e)

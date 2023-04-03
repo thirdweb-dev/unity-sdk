@@ -1,6 +1,5 @@
 using UnityEngine;
 using Thirdweb;
-using System.Collections.Generic;
 using RotaryHeart.Lib.SerializableDictionary;
 
 [System.Serializable]
@@ -58,6 +57,8 @@ public class ThirdwebManager : MonoBehaviour
 
     private void Awake()
     {
+        // Single persistent instance at all times.
+
         if (Instance == null)
         {
             Instance = this;
@@ -70,27 +71,46 @@ public class ThirdwebManager : MonoBehaviour
             return;
         }
 
+        // Inspector chain data dictionary.
+
         ChainData currentChain = supportedChainData[chain];
 
-        if (!Utils.IsWebGLBuild() && string.IsNullOrEmpty(currentChain.chainId))
+        // Chain ID must be provided on native platforms.
+
+        int chainId = -1;
+
+        if (!Utils.IsWebGLBuild())
         {
-            throw new UnityException("You must provide a Chain ID on native platforms!");
+            if (string.IsNullOrEmpty(currentChain.chainId))
+                throw new UnityException("You must provide a Chain ID on native platforms!");
+
+            if (!int.TryParse(currentChain.chainId, out chainId))
+                throw new UnityException("The Chain ID must be a non-negative integer!");
         }
 
-        if (string.IsNullOrEmpty(currentChain.rpcOverride))
-        {
-            if (string.IsNullOrEmpty(currentChain.identifier))
-                throw new UnityException("When not providing an RPC, you must provide a chain identifier!");
-        }
-        else
+        // Must provide a proper chain identifier (https://thirdweb.com/dashboard/rpc) or RPC override.
+
+        string chainOrRPC = null;
+
+        if (!string.IsNullOrEmpty(currentChain.rpcOverride))
         {
             if (!currentChain.rpcOverride.StartsWith("https://"))
                 throw new UnityException("RPC overrides must start with https:// !");
+            else
+                chainOrRPC = currentChain.rpcOverride;
+        }
+        else
+        {
+            if (string.IsNullOrEmpty(currentChain.identifier))
+                throw new UnityException("When not providing an RPC, you must provide a chain identifier!");
+            else
+                chainOrRPC = currentChain.identifier;
         }
 
-        int chainId = int.Parse(currentChain.chainId);
+        // Set up storage and gasless options (if an)
 
-        ThirdwebSDK.Options options = new ThirdwebSDK.Options();
+        var options = new ThirdwebSDK.Options();
+
         if (!string.IsNullOrEmpty(storageIpfsGatewayUrl))
         {
             options.storage = new ThirdwebSDK.StorageOptions() { ipfsGatewayUrl = storageIpfsGatewayUrl };
@@ -103,6 +123,6 @@ public class ThirdwebManager : MonoBehaviour
             };
         }
 
-        SDK = new ThirdwebSDK(currentChain.rpcOverride ?? currentChain.identifier, chainId, options);
+        SDK = new ThirdwebSDK(chainOrRPC, chainId, options);
     }
 }

@@ -1,360 +1,917 @@
-using System.Collections.Generic;
-using System.Numerics;
+using System;
 using System.Threading.Tasks;
+using System.Numerics;
 using UnityEngine;
+using System.Collections.Generic;
+using DirectListingsContract = Thirdweb.Contracts.DirectListingsLogic.ContractDefinition;
+using EnglishAuctionsContract = Thirdweb.Contracts.EnglishAuctionsLogic.ContractDefinition;
+using OffersContract = Thirdweb.Contracts.OffersLogic.ContractDefinition;
 
 namespace Thirdweb
 {
     /// <summary>
-    /// Interact with a Marketplace contract.
+    /// Interact with any MarketplaceV3 contract.
     /// </summary>
     public class Marketplace : Routable
     {
-        public string chain;
-        public string address;
-
-        /// <summary>
-        /// Handle direct listings
-        /// </summary>
-        public MarketplaceDirect direct;
-
-        /// <summary>
-        /// Handle auctions
-        /// </summary>
-        public MarketplaceAuction auction;
+        public DirectListings directListings;
+        public EnglishAuctions englishAuctions;
+        public Offers offers;
 
         private string contractAddress;
 
-        /// <summary>
-        /// Interact with a Marketplace contract.
-        /// </summary>
-        public Marketplace(string chain, string contractAddress)
-            : base($"{contractAddress}{subSeparator}marketplace")
+        public Marketplace(string parentRoute, string contractAddress)
+            : base(parentRoute)
         {
-            this.chain = chain;
             this.contractAddress = contractAddress;
-            this.direct = new MarketplaceDirect(baseRoute);
-            this.auction = new MarketplaceAuction(baseRoute);
+            this.directListings = new DirectListings(baseRoute, contractAddress);
+            this.englishAuctions = new EnglishAuctions(baseRoute, contractAddress);
+            this.offers = new Offers(baseRoute, contractAddress);
+        }
+    }
+
+    public class DirectListings : Routable
+    {
+        private string contractAddress;
+
+        public DirectListings(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "directListings"))
+        {
+            this.contractAddress = contractAddress;
         }
 
-        /// READ FUNCTIONS
+        // READ FUNCTIONS
 
-        /// <summary>
-        /// Get a listing information
-        /// </summary>
-        public async Task<Listing> GetListing(string listingId)
+        public async Task<List<DirectListing>> GetAll(MarketplaceFilters filters = null)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<Listing>(getRoute("getListing"), Utils.ToJsonStringArray(listingId));
+                return await Bridge.InvokeRoute<List<DirectListing>>(getRoute("getAll"), filters == null ? new string[] { } : Utils.ToJsonStringArray(filters));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
-                // Listing listing = new Listing();
-                // var result = await marketplaceService.ListingsQueryAsync(BigInteger.Parse(listingId));
-                // listing.id = result.ListingId.ToString();
-                // listing.sellerAddress = result.TokenOwner;
-                // listing.assetContractAddress = result.AssetContract;
-                // listing.tokenId = result.TokenId.ToString();
-                // listing.quantity = (int)result.Quantity;
-                // listing.currencyContractAddress = result.Currency;
-                // listing.buyoutPrice = result.BuyoutPricePerToken.ToString();
-                // listing.type = result.TokenType;
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.GetAllListingsFunction, DirectListingsContract.GetAllListingsOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.GetAllListingsFunction() { StartId = start, EndId = end }
+                );
+                var allListings = result.AllListings;
+                var filteredListings = new List<DirectListing>();
+                foreach (var listing in allListings)
+                {
+                    var tempListing = await GetListing(listing.ListingId.ToString());
 
-                // Contract nftContract = ThirdwebManager.Instance.SDK.GetContract(result.AssetContract);
-                // NFT tempNft = await nftContract.ERC721.Get(result.TokenId.ToString());
-                // listing.asset = tempNft.metadata;
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempListing.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempListing.tokenId)
+                        continue;
+                    if (filters?.seller != null && filters?.seller != tempListing.creatorAddress)
+                        continue;
 
-                // Contract tokenContract = ThirdwebManager.Instance.SDK.GetContract(result.Currency);
-                // Currency tempCurrency = await tokenContract.ERC20.Get();
-                // listing.buyoutCurrencyValuePerToken = new CurrencyValue(
-                //     tempCurrency.name,
-                //     tempCurrency.symbol,
-                //     tempCurrency.decimals,
-                //     result.BuyoutPricePerToken.ToString(),
-                //     result.BuyoutPricePerToken.ToString().ToEth()
-                // );
-
-                // return listing;
+                    filteredListings.Add(tempListing);
+                }
+                return filteredListings;
             }
         }
 
-        /// <summary>
-        /// Get all listings in this marketplace (including non-buyable ones)
-        /// </summary>
-        public async Task<List<Listing>> GetAllListings(MarketplaceFilter filter = null)
+        public async Task<List<DirectListing>> GetAllValid(MarketplaceFilters filters = null)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<List<Listing>>(getRoute("getAllListings"), Utils.ToJsonStringArray(filter));
+                return await Bridge.InvokeRoute<List<DirectListing>>(getRoute("getAllValid"), filters == null ? new string[] { } : Utils.ToJsonStringArray(filters));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.GetAllValidListingsFunction, DirectListingsContract.GetAllValidListingsOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.GetAllValidListingsFunction() { StartId = start, EndId = end }
+                );
+                var allValidListings = result.ValidListings;
+                var filteredListings = new List<DirectListing>();
+                foreach (var listing in allValidListings)
+                {
+                    var tempListing = await GetListing(listing.ListingId.ToString());
 
-                // // TODO: Multicall
-                // List<Listing> allListings = new List<Listing>();
-                // int totalListingsCount = (int)await marketplaceService.TotalListingsQueryAsync();
-                // for (int i = 0; i < totalListingsCount; i++)
-                //     allListings.Add(await GetListing(i.ToString()));
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempListing.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempListing.tokenId)
+                        continue;
+                    if (filters?.seller != null && filters?.seller != tempListing.creatorAddress)
+                        continue;
 
-                // if (filter != null)
-                // {
-                //     List<Listing> filteredListings = new List<Listing>();
-                //     int startId = filter.start;
-                //     int count = filter.count == 0 ? allListings.Count : filter.count;
-                //     for (int i = startId; i < count; i++)
-                //     {
-                //         if (!string.IsNullOrEmpty(filter.seller))
-                //         {
-                //             if (allListings[i].sellerAddress != filter.seller || allListings[i].assetContractAddress != filter.tokenContract || allListings[i].tokenId != filter.tokenId)
-                //             {
-                //                 continue;
-                //             }
-                //         }
-                //         else
-                //         {
-                //             filteredListings.Add(allListings[i]);
-                //         }
-                //     }
-                //     return filteredListings;
-                // }
-
-                // return allListings;
+                    filteredListings.Add(tempListing);
+                }
+                return filteredListings;
             }
         }
 
-        /// <summary>
-        /// Get active listings in this marketplace (only ones that can be bought)
-        /// </summary>
-        public async Task<List<Listing>> GetActiveListings(MarketplaceFilter filter = null)
+        public async Task<DirectListing> GetListing(string listingID)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<List<Listing>>(getRoute("getActiveListings"), Utils.ToJsonStringArray(filter));
+                return await Bridge.InvokeRoute<DirectListing>(getRoute("getListing"), Utils.ToJsonStringArray(listingID));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.GetListingFunction, DirectListingsContract.GetListingOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.GetListingFunction() { ListingId = BigInteger.Parse(listingID) }
+                );
+
+                Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Listing.Currency).ERC20.Get();
+                NFTMetadata metadata = new NFTMetadata();
+                try
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Listing.AssetContract).ERC721.Get(result.Listing.TokenId.ToString())).metadata;
+                }
+                catch (System.Exception)
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Listing.AssetContract).ERC1155.Get(result.Listing.TokenId.ToString())).metadata;
+                }
+
+                return new DirectListing()
+                {
+                    id = result.Listing.ListingId.ToString(),
+                    creatorAddress = result.Listing.ListingCreator,
+                    assetContractAddress = result.Listing.AssetContract,
+                    tokenId = result.Listing.TokenId.ToString(),
+                    quantity = result.Listing.Quantity.ToString(),
+                    currencyContractAddress = result.Listing.Currency,
+                    currencyValuePerToken = new CurrencyValue(
+                        currency.name,
+                        currency.symbol,
+                        currency.decimals,
+                        result.Listing.PricePerToken.ToString(),
+                        result.Listing.PricePerToken.ToString().ToEth()
+                    ),
+                    pricePerToken = result.Listing.PricePerToken.ToString(),
+                    asset = metadata,
+                    startTimeInSeconds = (long)result.Listing.StartTimestamp,
+                    endTimeInSeconds = (long)result.Listing.EndTimestamp,
+                    isReservedListing = result.Listing.Reserved,
+                    status = (MarkteplaceStatus)result.Listing.Status
+                };
             }
         }
 
-        /// <summary>
-        /// Get all offers on a listing
-        /// </summary>
-        public async Task<List<Offer>> GetOffers(string listingId)
+        public async Task<string> GetTotalCount()
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<List<Offer>>(getRoute("getOffers"), Utils.ToJsonStringArray(listingId));
+                return await Bridge.InvokeRoute<string>(getRoute("getTotalCount"), new string[] { });
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.TotalListingsFunction, DirectListingsContract.TotalListingsOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.TotalListingsFunction() { }
+                );
+                return result.ReturnValue1.ToString();
             }
         }
 
-        /// WRITE FUNCTIONS
-
-        /// <summary>
-        /// Buy a listing
-        /// </summary>
-        public async Task<TransactionResult> BuyListing(string listingId, int quantityDesired, string receiverAddress = null)
+        public async Task<bool> IsBuyerApprovedForListing(string listingID, string buyerAddress)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("buyoutListing"), Utils.ToJsonStringArray(listingId, quantityDesired, receiverAddress));
+                return await Bridge.InvokeRoute<bool>(getRoute("isBuyerApprovedForListing"), Utils.ToJsonStringArray(listingID, buyerAddress));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
-
-                // var listing = await GetListing(listingId);
-                // string buyFor = receiverAddress == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : receiverAddress;
-                // var receipt = await marketplaceService.BuyRequestAndWaitForReceiptAsync(
-                //     BigInteger.Parse(listingId),
-                //     buyFor,
-                //     quantityDesired,
-                //     listing.currencyContractAddress,
-                //     BigInteger.Parse(listing.buyoutPrice) * quantityDesired
-                // );
-                // return receipt.ToTransactionResult();
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.IsBuyerApprovedForListingFunction, DirectListingsContract.IsBuyerApprovedForListingOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.IsBuyerApprovedForListingFunction() { ListingId = BigInteger.Parse(listingID), Buyer = buyerAddress }
+                );
+                return result.ReturnValue1;
             }
         }
 
-        /// <summary>
-        /// Make an offer on a listing
-        /// </summary>
-        public async Task<TransactionResult> MakeOffer(string listingId, string pricePerToken, int? quantity = null)
+        public async Task<bool> IsCurrencyApprovedForListing(string listingID, string currencyContractAddress)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("makeOffer"), Utils.ToJsonStringArray(listingId, pricePerToken, quantity));
+                return await Bridge.InvokeRoute<bool>(getRoute("isCurrencyApprovedForListing"), Utils.ToJsonStringArray(listingID, currencyContractAddress));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.IsCurrencyApprovedForListingFunction, DirectListingsContract.IsCurrencyApprovedForListingOutputDTO>(
+                    contractAddress,
+                    new DirectListingsContract.IsCurrencyApprovedForListingFunction() { ListingId = BigInteger.Parse(listingID), Currency = currencyContractAddress }
+                );
+                return result.ReturnValue1;
+            }
+        }
+
+        // WRITE FUNCTIONS
+
+        public async Task<TransactionResult> ApproveBuyerForReservedListing(string listingID, string buyerAddress)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("approveBuyerForReservedListing"), Utils.ToJsonStringArray(listingID, buyerAddress));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.ApproveBuyerForListingFunction() { ListingId = BigInteger.Parse(listingID), Buyer = buyerAddress }
+                );
+            }
+        }
+
+        public async Task<TransactionResult> BuyFromListing(string listingID, string quantity, string walletAddress)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("buyFromListing"), Utils.ToJsonStringArray(listingID, quantity, walletAddress));
+            }
+            else
+            {
+                var listing = await GetListing(listingID);
+
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.BuyFromListingFunction()
+                    {
+                        ListingId = BigInteger.Parse(listingID),
+                        Quantity = BigInteger.Parse(quantity),
+                        BuyFor = walletAddress,
+                        Currency = listing.currencyContractAddress,
+                        ExpectedTotalPrice = BigInteger.Parse(listing.pricePerToken) * BigInteger.Parse(quantity),
+                    },
+                    BigInteger.Parse(listing.pricePerToken) * BigInteger.Parse(quantity)
+                );
+            }
+        }
+
+        public async Task<TransactionResult> CancelListing(string listingID)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("cancelListing"), Utils.ToJsonStringArray(listingID));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(contractAddress, new DirectListingsContract.CancelListingFunction() { ListingId = BigInteger.Parse(listingID), });
+            }
+        }
+
+        public async Task<TransactionResult> CreateListing(CreateListingInput input)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("createListing"), Utils.ToJsonStringArray(input));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.CreateListingFunction()
+                    {
+                        Params = new DirectListingsContract.ListingParameters()
+                        {
+                            AssetContract = input.assetContractAddress,
+                            TokenId = BigInteger.Parse(input.tokenId),
+                            Quantity = BigInteger.Parse(input.quantity ?? "1"),
+                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
+                            PricePerToken = BigInteger.Parse(input.pricePerToken),
+                            StartTimestamp = (BigInteger)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp() + 60),
+                            EndTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
+                            Reserved = input.isReservedListing ?? false,
+                        }
+                    }
+                );
+            }
+        }
+
+        public async Task<TransactionResult> RevokeBuyerApprovalForReservedListing(string listingId, string buyerAddress)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("revokeBuyerApprovalForReservedListing"), Utils.ToJsonStringArray(listingId, buyerAddress));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.ApproveBuyerForListingFunction()
+                    {
+                        ListingId = BigInteger.Parse(listingId),
+                        Buyer = buyerAddress,
+                        ToApprove = false
+                    }
+                );
+            }
+        }
+
+        public async Task<TransactionResult> RevokeCurrencyApprovalForListing(string listingId, string currencyContractAddress)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("revokeCurrencyApprovalForListing"), Utils.ToJsonStringArray(listingId, currencyContractAddress));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.ApproveCurrencyForListingFunction()
+                    {
+                        ListingId = BigInteger.Parse(listingId),
+                        Currency = currencyContractAddress,
+                        PricePerTokenInCurrency = 0
+                    }
+                );
+            }
+        }
+
+        public async Task<TransactionResult> UpdateListing(string listingId, DirectListing listing)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("updateListing"), Utils.ToJsonStringArray(listingId, listing));
+            }
+            else
+            {
+                var oldListing = await GetListing(listingId);
+
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new DirectListingsContract.UpdateListingFunction()
+                    {
+                        ListingId = BigInteger.Parse(listingId),
+                        Params = new DirectListingsContract.ListingParameters()
+                        {
+                            AssetContract = listing.assetContractAddress ?? oldListing.assetContractAddress,
+                            TokenId = BigInteger.Parse(listing.tokenId ?? oldListing.tokenId),
+                            Quantity = BigInteger.Parse(listing.quantity ?? oldListing.quantity),
+                            Currency = listing.currencyContractAddress ?? oldListing.currencyContractAddress,
+                            PricePerToken = BigInteger.Parse(listing.pricePerToken ?? oldListing.pricePerToken),
+                            StartTimestamp = (BigInteger)(listing.startTimeInSeconds ?? oldListing.startTimeInSeconds),
+                            EndTimestamp = (BigInteger)(listing.endTimeInSeconds ?? oldListing.endTimeInSeconds),
+                            Reserved = listing.isReservedListing ?? oldListing.isReservedListing ?? false,
+                        }
+                    }
+                );
             }
         }
     }
 
-    // DIRECT
-
-    public class MarketplaceDirect : Routable
+    public class EnglishAuctions : Routable
     {
-        public MarketplaceDirect(string parentRoute)
-            : base(Routable.append(parentRoute, "direct")) { }
+        private string contractAddress;
 
-        public async Task<DirectListing> GetListing(string listingId)
+        public EnglishAuctions(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "auctions"))
+        {
+            this.contractAddress = contractAddress;
+        }
+
+        // READ FUNCTIONS
+
+        public async Task<List<Auction>> GetAll(MarketplaceFilters filters = null)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<DirectListing>(getRoute("getListing"), Utils.ToJsonStringArray(listingId));
+                return await Bridge.InvokeRoute<List<Auction>>(getRoute("getAll"), filters == null ? new string[] { } : Utils.ToJsonStringArray(filters));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetAllAuctionsFunction, EnglishAuctionsContract.GetAllAuctionsOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.GetAllAuctionsFunction() { StartId = start, EndId = end }
+                );
+                var allAuctions = result.AllAuctions;
+                var filteredAuctions = new List<Auction>();
+                foreach (var auction in allAuctions)
+                {
+                    var tempAuction = await GetAuction(auction.AuctionId.ToString());
+
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempAuction.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempAuction.tokenId)
+                        continue;
+                    if (filters?.seller != null && filters?.seller != tempAuction.creatorAddress)
+                        continue;
+
+                    filteredAuctions.Add(tempAuction);
+                }
+                return filteredAuctions;
             }
         }
 
-        public async Task<Offer> GetActiveOffer(string listingId, string address)
+        public async Task<List<Auction>> GetAllValid(MarketplaceFilters filters = null)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<Offer>(getRoute("getActiveOffer"), Utils.ToJsonStringArray(listingId));
+                return await Bridge.InvokeRoute<List<Auction>>(getRoute("getAllValid"), filters == null ? new string[] { } : Utils.ToJsonStringArray(filters));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetAllValidAuctionsFunction, EnglishAuctionsContract.GetAllValidAuctionsOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.GetAllValidAuctionsFunction() { StartId = start, EndId = end }
+                );
+                var allValidAuctions = result.ValidAuctions;
+                var filteredAuctions = new List<Auction>();
+                foreach (var auction in allValidAuctions)
+                {
+                    var tempAuction = await GetAuction(auction.AuctionId.ToString());
+
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempAuction.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempAuction.tokenId)
+                        continue;
+                    if (filters?.seller != null && filters?.seller != tempAuction.creatorAddress)
+                        continue;
+
+                    filteredAuctions.Add(tempAuction);
+                }
+                return filteredAuctions;
             }
         }
 
-        public async Task<TransactionResult> CreateListing(NewDirectListing listing)
+        public async Task<Auction> GetAuction(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("createListing"), Utils.ToJsonStringArray(listing));
+                return await Bridge.InvokeRoute<Auction>(getRoute("getAuction"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetAuctionFunction, EnglishAuctionsContract.GetAuctionOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.GetAuctionFunction() { AuctionId = BigInteger.Parse(auctionId) }
+                );
+
+                Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Auction.Currency).ERC20.Get();
+                NFTMetadata metadata = new NFTMetadata();
+                try
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Auction.AssetContract).ERC721.Get(result.Auction.TokenId.ToString())).metadata;
+                }
+                catch (System.Exception)
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Auction.AssetContract).ERC1155.Get(result.Auction.TokenId.ToString())).metadata;
+                }
+
+                return new Auction()
+                {
+                    id = result.Auction.AuctionId.ToString(),
+                    creatorAddress = result.Auction.AuctionCreator,
+                    assetContractAddress = result.Auction.AssetContract,
+                    tokenId = result.Auction.TokenId.ToString(),
+                    quantity = result.Auction.Quantity.ToString(),
+                    currencyContractAddress = result.Auction.Currency,
+                    minimumBidAmount = null,
+                    minimumBidCurrencyValue = new CurrencyValue(
+                        currency.name,
+                        currency.symbol,
+                        currency.decimals,
+                        result.Auction.MinimumBidAmount.ToString(),
+                        result.Auction.MinimumBidAmount.ToString().ToEth()
+                    ),
+                    buyoutBidAmount = null,
+                    buyoutCurrencyValue = new CurrencyValue(
+                        currency.name,
+                        currency.symbol,
+                        currency.decimals,
+                        result.Auction.BuyoutBidAmount.ToString(),
+                        result.Auction.BuyoutBidAmount.ToString().ToEth()
+                    ),
+                    timeBufferInSeconds = null,
+                    bidBufferBps = null,
+                    startTimeInSeconds = (long)result.Auction.StartTimestamp,
+                    endTimeInSeconds = (long)result.Auction.EndTimestamp,
+                    asset = metadata,
+                    status = (MarkteplaceStatus)result.Auction.Status
+                };
             }
         }
 
-        public async Task<TransactionResult> AcceptOffer(NewDirectListing listing, string addressOfOfferor)
+        public async Task<int> GetBidBufferBps(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("acceptOffer"), Utils.ToJsonStringArray(listing, addressOfOfferor));
+                return await Bridge.InvokeRoute<int>(getRoute("getBidBufferBps"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var auction = await GetAuction(auctionId);
+                return auction.bidBufferBps.Value;
             }
         }
 
-        public async Task<TransactionResult> CancelListing(string listingId)
+        public async Task<CurrencyValue> GetMinimumNextBid(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("cancelListing"), Utils.ToJsonStringArray(listingId));
+                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("getMinimumNextBid"), Utils.ToJsonStringArray(auctionId));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var auction = await GetAuction(auctionId);
+                var winningBid = await GetWinningBid(auctionId);
+                var cv = auction.minimumBidCurrencyValue.Value;
+                cv.value = (BigInteger.Parse(cv.value) + BigInteger.Parse(winningBid.bidAmount)).ToString();
+                cv.displayValue = cv.value.ToEth();
+                return cv;
+            }
+        }
+
+        public async Task<string> GetTotalCount()
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<string>(getRoute("getTotalCount"), new string[] { });
+            }
+            else
+            {
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.TotalAuctionsFunction, EnglishAuctionsContract.TotalAuctionsOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.TotalAuctionsFunction() { }
+                );
+                return result.ReturnValue1.ToString();
+            }
+        }
+
+        public async Task<string> GetWinner(string auctionId)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<string>(getRoute("getWinner"), Utils.ToJsonStringArray(auctionId));
+            }
+            else
+            {
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetWinningBidFunction, EnglishAuctionsContract.GetWinningBidOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.GetWinningBidFunction() { AuctionId = BigInteger.Parse(auctionId) }
+                );
+                return result.Bidder;
+            }
+        }
+
+        public async Task<Bid> GetWinningBid(string auctionId)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<Bid>(getRoute("getWinningBid"), Utils.ToJsonStringArray(auctionId));
+            }
+            else
+            {
+                var winningBid = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetWinningBidFunction, EnglishAuctionsContract.GetWinningBidOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.GetWinningBidFunction() { AuctionId = BigInteger.Parse(auctionId) }
+                );
+
+                var c = await ThirdwebManager.Instance.SDK.GetContract(winningBid.Currency).ERC20.Get();
+
+                return new Bid()
+                {
+                    auctionId = auctionId,
+                    bidderAddress = winningBid.Bidder,
+                    currencyContractAddress = winningBid.Currency,
+                    bidAmount = winningBid.BidAmount.ToString(),
+                    bidAmountCurrencyValue = new CurrencyValue(c.name, c.symbol, c.decimals, winningBid.BidAmount.ToString(), winningBid.BidAmount.ToString().ToEth())
+                };
+            }
+        }
+
+        public async Task<bool> IsWinningBid(string auctionId, string bidAmount)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<bool>(getRoute("isWinningBid"), Utils.ToJsonStringArray(auctionId, bidAmount));
+            }
+            else
+            {
+                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.IsNewWinningBidFunction, EnglishAuctionsContract.IsNewWinningBidOutputDTO>(
+                    contractAddress,
+                    new EnglishAuctionsContract.IsNewWinningBidFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(bidAmount) }
+                );
+                return result.ReturnValue1;
+            }
+        }
+
+        // WRITE FUNCTIONS
+
+        public async Task<TransactionResult> BuyoutAuction(string auctionId)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("buyoutAuction"), Utils.ToJsonStringArray(auctionId));
+            }
+            else
+            {
+                var auction = await GetAuction(auctionId);
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(auction.buyoutCurrencyValue?.value) },
+                    BigInteger.Parse(auction.buyoutCurrencyValue?.value)
+                );
+            }
+        }
+
+        public async Task<TransactionResult> CancelAuction(string auctionId)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("cancelAuction"), Utils.ToJsonStringArray(auctionId));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CancelAuctionFunction() { AuctionId = BigInteger.Parse(auctionId) });
+            }
+        }
+
+        public async Task<TransactionResult> CloseAuctionForBidder(string auctionId)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("closeAuctionForBidder"), Utils.ToJsonStringArray(auctionId));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CollectAuctionTokensFunction() { AuctionId = BigInteger.Parse(auctionId) });
+            }
+        }
+
+        public async Task<TransactionResult> CloseAuctionForSeller(string auctionId)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("closeAuctionForSeller"), Utils.ToJsonStringArray(auctionId));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CollectAuctionPayoutFunction() { AuctionId = BigInteger.Parse(auctionId) });
+            }
+        }
+
+        public async Task<TransactionResult> CreateAuction(CreateAuctionInput input)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("createAuction"), Utils.ToJsonStringArray(input));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new EnglishAuctionsContract.CreateAuctionFunction()
+                    {
+                        Params = new EnglishAuctionsContract.AuctionParameters()
+                        {
+                            AssetContract = input.assetContractAddress,
+                            TokenId = BigInteger.Parse(input.tokenId),
+                            Quantity = BigInteger.Parse(input.quantity ?? "1"),
+                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
+                            MinimumBidAmount = BigInteger.Parse(input.minimumBidAmount),
+                            BuyoutBidAmount = BigInteger.Parse(input.buyoutBidAmount),
+                            TimeBufferInSeconds = ulong.Parse(input.timeBufferInSeconds ?? "900"),
+                            BidBufferBps = ulong.Parse(input.bidBufferBps ?? "500"),
+                            StartTimestamp = (ulong)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp() + 60),
+                            EndTimestamp = (ulong)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
+                        }
+                    }
+                );
+            }
+        }
+
+        public async Task<TransactionResult> ExecuteSale(string auctionId)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("executeSale"), Utils.ToJsonStringArray(auctionId));
+            }
+            else
+            {
+                // TODO: Make it a multicall
+                await CloseAuctionForSeller(auctionId);
+                return await CloseAuctionForBidder(auctionId);
+            }
+        }
+
+        public async Task<TransactionResult> MakeBid(string auctionId, string bidAmount)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("makeBid"), Utils.ToJsonStringArray(auctionId, bidAmount));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(bidAmount) },
+                    BigInteger.Parse(bidAmount)
+                );
             }
         }
     }
 
-    // AUCTION
-
-    public class MarketplaceAuction : Routable
+    public class Offers : Routable
     {
-        public MarketplaceAuction(string parentRoute)
-            : base(Routable.append(parentRoute, "auction")) { }
+        private string contractAddress;
 
-        public async Task<AuctionListing> GetListing(string listingId)
+        public Offers(string parentRoute, string contractAddress)
+            : base(Routable.append(parentRoute, "offers"))
+        {
+            this.contractAddress = contractAddress;
+        }
+
+        // READ FUNCTIONS
+
+        public async Task<List<Offer>> GetAll(MarketplaceFilters filters = null)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<AuctionListing>(getRoute("getListing"), Utils.ToJsonStringArray(listingId));
+                return await Bridge.InvokeRoute<List<Offer>>(getRoute("getAll"), filters == null ? new string[] { } : Utils.ToJsonStringArray(filters));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<OffersContract.GetAllOffersFunction, OffersContract.GetAllOffersOutputDTO>(
+                    contractAddress,
+                    new OffersContract.GetAllOffersFunction() { StartId = start, EndId = end }
+                );
+                var allOffers = result.AllOffers;
+                var filteredOffers = new List<Offer>();
+                foreach (var listing in allOffers)
+                {
+                    var tempOffer = await GetOffer(listing.OfferId.ToString());
+
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempOffer.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempOffer.tokenId)
+                        continue;
+                    if (filters?.offeror != null && filters?.seller != tempOffer.offerorAddress)
+                        continue;
+
+                    filteredOffers.Add(tempOffer);
+                }
+                return filteredOffers;
             }
         }
 
-        public async Task<Offer> GetWinningBid(string listingId)
+        public async Task<List<Offer>> GetAllValid(MarketplaceFilters filters = null)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<Offer>(getRoute("getWinningBid"), Utils.ToJsonStringArray(listingId));
+                return await Bridge.InvokeRoute<List<Offer>>(getRoute("getAllValid"), filters == null ? new string[] { } : Utils.ToJsonStringArray(filters));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                int totalSupply = int.Parse(await GetTotalCount());
+                int start = filters?.start ?? 0;
+                int count = filters?.count ?? 0;
+                int end = count == 0 ? totalSupply - 1 : start + count;
+                var result = await TransactionManager.ThirdwebRead<OffersContract.GetAllValidOffersFunction, OffersContract.GetAllValidOffersOutputDTO>(
+                    contractAddress,
+                    new OffersContract.GetAllValidOffersFunction() { StartId = start, EndId = end }
+                );
+                var allValidOffers = result.ValidOffers;
+                var filteredOffers = new List<Offer>();
+                foreach (var listing in allValidOffers)
+                {
+                    var tempOffer = await GetOffer(listing.OfferId.ToString());
+
+                    if (filters?.tokenContract != null && filters?.tokenContract != tempOffer.assetContractAddress)
+                        continue;
+                    if (filters?.tokenId != null && filters?.tokenId != tempOffer.tokenId)
+                        continue;
+                    if (filters?.offeror != null && filters?.seller != tempOffer.offerorAddress)
+                        continue;
+
+                    filteredOffers.Add(tempOffer);
+                }
+                return filteredOffers;
             }
         }
 
-        public async Task<CurrencyValue> GetMinimumNextBid(string listingId)
+        public async Task<Offer> GetOffer(string offerID)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<CurrencyValue>(getRoute("getMinimumNextBid"), Utils.ToJsonStringArray(listingId));
+                return await Bridge.InvokeRoute<Offer>(getRoute("getOffer"), Utils.ToJsonStringArray(offerID));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var result = await TransactionManager.ThirdwebRead<OffersContract.GetOfferFunction, OffersContract.GetOfferOutputDTO>(
+                    contractAddress,
+                    new OffersContract.GetOfferFunction() { OfferId = BigInteger.Parse(offerID) }
+                );
+
+                Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Offer.Currency).ERC20.Get();
+                NFTMetadata metadata = new NFTMetadata();
+                try
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Offer.AssetContract).ERC721.Get(result.Offer.TokenId.ToString())).metadata;
+                }
+                catch (System.Exception)
+                {
+                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Offer.AssetContract).ERC1155.Get(result.Offer.TokenId.ToString())).metadata;
+                }
+
+                return new Offer()
+                {
+                    id = result.Offer.OfferId.ToString(),
+                    offerorAddress = result.Offer.Offeror,
+                    assetContractAddress = result.Offer.AssetContract,
+                    tokenId = result.Offer.TokenId.ToString(),
+                    quantity = result.Offer.Quantity.ToString(),
+                    currencyContractAddress = result.Offer.Currency,
+                    currencyValue = new CurrencyValue(currency.name, currency.symbol, currency.decimals, result.Offer.TotalPrice.ToString(), result.Offer.TotalPrice.ToString().ToEth()),
+                    totalPrice = result.Offer.TotalPrice.ToString(),
+                    asset = metadata,
+                    endTimeInSeconds = (long)result.Offer.ExpirationTimestamp,
+                    status = (MarkteplaceStatus)result.Offer.Status
+                };
             }
         }
 
-        public async Task<string> GetWinner(string listingId)
+        public async Task<string> GetTotalCount()
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("getWinner"), Utils.ToJsonStringArray(listingId));
+                return await Bridge.InvokeRoute<string>(getRoute("getTotalCount"), new string[] { });
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                var result = await TransactionManager.ThirdwebRead<OffersContract.TotalOffersFunction, OffersContract.TotalOffersOutputDTO>(
+                    contractAddress,
+                    new OffersContract.TotalOffersFunction() { }
+                );
+                return result.ReturnValue1.ToString();
             }
         }
 
-        public async Task<TransactionResult> CreateListing(NewAuctionListing listing)
+        // WRITE FUNCTIONS
+
+        public async Task<TransactionResult> AcceptOffer(string offerID)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("createListing"), Utils.ToJsonStringArray(listing));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("acceptOffer"), Utils.ToJsonStringArray(offerID));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return await TransactionManager.ThirdwebWrite(contractAddress, new OffersContract.AcceptOfferFunction() { OfferId = BigInteger.Parse(offerID) });
             }
         }
 
-        public async Task<TransactionResult> CancelListing(string listingId)
+        public async Task<TransactionResult> CancelOffer(string offerID)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("cancelListing"), Utils.ToJsonStringArray(listingId));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("cancelOffer"), Utils.ToJsonStringArray(offerID));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return await TransactionManager.ThirdwebWrite(contractAddress, new OffersContract.CancelOfferFunction() { OfferId = BigInteger.Parse(offerID) });
             }
         }
 
-        public async Task<TransactionResult> ExecuteSale(string listingId)
+        public async Task<TransactionResult> MakeOffer(MakeOfferInput input)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("executeSale"), Utils.ToJsonStringArray(listingId));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("makeOffer"), Utils.ToJsonStringArray(input));
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new OffersContract.MakeOfferFunction()
+                    {
+                        Params = new OffersContract.OfferParams()
+                        {
+                            AssetContract = input.assetContractAddress,
+                            TokenId = BigInteger.Parse(input.tokenId),
+                            Quantity = BigInteger.Parse(input.quantity ?? "1"),
+                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
+                            TotalPrice = BigInteger.Parse(input.totalPrice),
+                            ExpirationTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampIn10Years())
+                        }
+                    },
+                    BigInteger.Parse(input.totalPrice)
+                );
             }
         }
     }

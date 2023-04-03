@@ -16,6 +16,7 @@ namespace Thirdweb
     {
         public const string AddressZero = "0x0000000000000000000000000000000000000000";
         public const string NativeTokenAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+        public const string NativeTokenAddressV2 = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
         public const double DECIMALS_18 = 1000000000000000000;
 
         public static string[] ToJsonStringArray(params object[] args)
