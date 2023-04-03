@@ -146,12 +146,12 @@ namespace Thirdweb
 
                 var function = contract.GetFunction(functionName);
 
+                var value = transactionOverrides?.value != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.value)) : new HexBigInteger(0);
+
                 var gas =
                     transactionOverrides?.gasLimit != null
                         ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasLimit))
-                        : await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, null, args);
-
-                var value = transactionOverrides?.value != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.value)) : new HexBigInteger(0);
+                        : await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, value, args);
 
                 var gasPrice =
                     transactionOverrides?.gasPrice != null
