@@ -70,22 +70,6 @@ public class Prefab_Reading : MonoBehaviour
         }
     }
 
-    public async void FetchListings()
-    {
-        try
-        {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-            Marketplace marketplace = contract.marketplace;
-
-            List<DirectListing> allDirectListings = await marketplace.directListings.GetAll();
-            Debugger.Instance.Log("[Fetch Listings] Listing #1", allDirectListings[0].ToString());
-        }
-        catch (System.Exception e)
-        {
-            Debugger.Instance.Log("[Fetch Listings] Error", e.Message);
-        }
-    }
-
     public async void FetchPackContents()
     {
         try

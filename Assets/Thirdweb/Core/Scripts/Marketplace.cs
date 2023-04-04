@@ -352,7 +352,7 @@ namespace Thirdweb
                             TokenId = BigInteger.Parse(listing.tokenId ?? oldListing.tokenId),
                             Quantity = BigInteger.Parse(listing.quantity ?? oldListing.quantity),
                             Currency = listing.currencyContractAddress ?? oldListing.currencyContractAddress,
-                            PricePerToken = BigInteger.Parse(listing.pricePerToken ?? oldListing.pricePerToken),
+                            PricePerToken = BigInteger.Parse(listing.pricePerToken.ToWei() ?? oldListing.pricePerToken),
                             StartTimestamp = (BigInteger)(listing.startTimeInSeconds ?? oldListing.startTimeInSeconds),
                             EndTimestamp = (BigInteger)(listing.endTimeInSeconds ?? oldListing.endTimeInSeconds),
                             Reserved = listing.isReservedListing ?? oldListing.isReservedListing ?? false,
@@ -368,7 +368,7 @@ namespace Thirdweb
         private string contractAddress;
 
         public EnglishAuctions(string parentRoute, string contractAddress)
-            : base(Routable.append(parentRoute, "auctions"))
+            : base(Routable.append(parentRoute, "englishAuctions"))
         {
             this.contractAddress = contractAddress;
         }
@@ -477,7 +477,7 @@ namespace Thirdweb
                     tokenId = result.Auction.TokenId.ToString(),
                     quantity = result.Auction.Quantity.ToString(),
                     currencyContractAddress = result.Auction.Currency,
-                    minimumBidAmount = null,
+                    minimumBidAmount = result.Auction.MinimumBidAmount.ToString(),
                     minimumBidCurrencyValue = new CurrencyValue(
                         currency.name,
                         currency.symbol,
@@ -485,7 +485,7 @@ namespace Thirdweb
                         result.Auction.MinimumBidAmount.ToString(),
                         result.Auction.MinimumBidAmount.ToString().ToEth()
                     ),
-                    buyoutBidAmount = null,
+                    buyoutBidAmount = result.Auction.BuyoutBidAmount.ToString(),
                     buyoutCurrencyValue = new CurrencyValue(
                         currency.name,
                         currency.symbol,
@@ -493,8 +493,8 @@ namespace Thirdweb
                         result.Auction.BuyoutBidAmount.ToString(),
                         result.Auction.BuyoutBidAmount.ToString().ToEth()
                     ),
-                    timeBufferInSeconds = null,
-                    bidBufferBps = null,
+                    timeBufferInSeconds = (int)result.Auction.TimeBufferInSeconds,
+                    bidBufferBps = (int)result.Auction.BidBufferBps,
                     startTimeInSeconds = (long)result.Auction.StartTimestamp,
                     endTimeInSeconds = (long)result.Auction.EndTimestamp,
                     asset = metadata,
@@ -680,8 +680,8 @@ namespace Thirdweb
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
                             Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
-                            MinimumBidAmount = BigInteger.Parse(input.minimumBidAmount),
-                            BuyoutBidAmount = BigInteger.Parse(input.buyoutBidAmount),
+                            MinimumBidAmount = BigInteger.Parse(input.minimumBidAmount.ToWei()),
+                            BuyoutBidAmount = BigInteger.Parse(input.buyoutBidAmount.ToWei()),
                             TimeBufferInSeconds = ulong.Parse(input.timeBufferInSeconds ?? "900"),
                             BidBufferBps = ulong.Parse(input.bidBufferBps ?? "500"),
                             StartTimestamp = (ulong)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp() + 60),
@@ -716,8 +716,8 @@ namespace Thirdweb
             {
                 return await TransactionManager.ThirdwebWrite(
                     contractAddress,
-                    new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(bidAmount) },
-                    BigInteger.Parse(bidAmount)
+                    new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(bidAmount.ToWei()) },
+                    BigInteger.Parse(bidAmount.ToWei())
                 );
             }
         }
@@ -905,12 +905,11 @@ namespace Thirdweb
                             AssetContract = input.assetContractAddress,
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
-                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
-                            TotalPrice = BigInteger.Parse(input.totalPrice),
+                            Currency = input.currencyContractAddress ?? Utils.GetNativeTokenWrapper(ThirdwebManager.Instance.SDK.nativeSession.lastChainId),
+                            TotalPrice = BigInteger.Parse(input.totalPrice.ToWei()),
                             ExpirationTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampIn10Years())
                         }
-                    },
-                    BigInteger.Parse(input.totalPrice)
+                    }
                 );
             }
         }

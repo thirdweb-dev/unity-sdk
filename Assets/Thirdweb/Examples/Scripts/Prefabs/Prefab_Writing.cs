@@ -164,33 +164,6 @@ public class Prefab_Writing : MonoBehaviour
         }
     }
 
-    public async void BuyListing()
-    {
-        try
-        {
-            Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-            Marketplace marketplace = contract.marketplace;
-
-            // var createResult = await marketplace.directListings.CreateListing(
-            //     new CreateListingInput()
-            //     {
-            //         assetContractAddress = TOKEN_ERC1155_CONTRACT,
-            //         tokenId = "4",
-            //         pricePerToken = "1", // 1 wei
-            //         quantity = "100"
-            //     }
-            // );
-            // Debugger.Instance.Log("[Create Listing] Successful", createResult.ToString());
-
-            var transactionResult = await marketplace.directListings.BuyFromListing("2", "1", await ThirdwebManager.Instance.SDK.wallet.GetAddress());
-            Debugger.Instance.Log("[Buy Listing] Successful", transactionResult.ToString());
-        }
-        catch (System.Exception e)
-        {
-            Debugger.Instance.Log("[Buy Listing] Error", e.Message);
-        }
-    }
-
     public async void OpenPack()
     {
         try

@@ -204,6 +204,27 @@ namespace Thirdweb
         public long? endTimeInSeconds; // The end time of the auction.
         public NFTMetadata? asset; // The asset being auctioned.
         public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
+
+        public override string ToString()
+        {
+            return "Auction:\n"
+                + $"id: {id?.ToString()}\n"
+                + $"creatorAddress: {creatorAddress?.ToString()}\n"
+                + $"assetContractAddress: {assetContractAddress?.ToString()}\n"
+                + $"tokenId: {tokenId?.ToString()}\n"
+                + $"quantity: {quantity?.ToString()}\n"
+                + $"currencyContractAddress: {currencyContractAddress?.ToString()}\n"
+                + $"minimumBidAmount: {minimumBidAmount?.ToString()}\n"
+                + $"minimumBidCurrencyValue: {minimumBidCurrencyValue?.ToString()}\n"
+                + $"buyoutBidAmount: {buyoutBidAmount?.ToString()}\n"
+                + $"buyoutCurrencyValue: {buyoutCurrencyValue?.ToString()}\n"
+                + $"timeBufferInSeconds: {timeBufferInSeconds?.ToString()}\n"
+                + $"bidBufferBps: {bidBufferBps?.ToString()}\n"
+                + $"startTimeInSeconds: {startTimeInSeconds?.ToString()}\n"
+                + $"endTimeInSeconds: {endTimeInSeconds?.ToString()}\n"
+                + $"asset: {asset?.ToString()}\n"
+                + $"status: {status?.ToString()}\n";
+        }
     }
 
     [System.Serializable]
@@ -235,6 +256,22 @@ namespace Thirdweb
         public NFTMetadata? asset; // Metadata of the asset
         public long? endTimeInSeconds; // The end time of the offer.
         public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
+
+        public override string ToString()
+        {
+            return "Offer:\n"
+                + $"id: {id?.ToString()}\n"
+                + $"offerorAddress: {offerorAddress?.ToString()}\n"
+                + $"assetContractAddress: {assetContractAddress?.ToString()}\n"
+                + $"tokenId: {tokenId?.ToString()}\n"
+                + $"quantity: {quantity?.ToString()}\n"
+                + $"currencyContractAddress: {currencyContractAddress?.ToString()}\n"
+                + $"currencyValue: {currencyValue?.ToString()}\n"
+                + $"totalPrice: {totalPrice?.ToString()}\n"
+                + $"asset: {asset?.ToString()}\n"
+                + $"endTimeInSeconds: {endTimeInSeconds?.ToString()}\n"
+                + $"status: {status?.ToString()}\n";
+        }
     }
 
     [System.Serializable]
