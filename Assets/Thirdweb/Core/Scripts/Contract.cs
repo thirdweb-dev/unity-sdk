@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Numerics;
 using UnityEngine;
-using UnityEngine.Networking;
-using Newtonsoft.Json;
 using Nethereum.Hex.HexTypes;
 
 namespace Thirdweb
@@ -48,8 +44,7 @@ namespace Thirdweb
         /// </summary>
         public Events events;
 
-        public Contract(string chain, string address, string abi = null)
-            : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
+        public Contract(string chain, string address, string abi = null) : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
         {
             this.chain = chain;
             this.address = address;
@@ -88,10 +83,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                string[] argsEncoded = new string[args.Length + 1];
-                argsEncoded[0] = functionName;
-                Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
-                return await Bridge.InvokeRoute<T>(getRoute("call"), argsEncoded);
+                return await Bridge.InvokeRoute<T>(getRoute("call"), Utils.ToJsonStringArray(functionName, args));
             }
             else
             {
@@ -127,15 +119,7 @@ namespace Thirdweb
             if (Utils.IsWebGLBuild())
             {
                 args = args ?? new object[0];
-                var hasOverrides = transactionOverrides != null;
-                string[] argsEncoded = new string[args.Length + (hasOverrides ? 2 : 1)];
-                argsEncoded[0] = functionName;
-                Utils.ToJsonStringArray(args).CopyTo(argsEncoded, 1);
-                if (hasOverrides)
-                {
-                    argsEncoded[argsEncoded.Length - 1] = Utils.ToJson(transactionOverrides);
-                }
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), argsEncoded);
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), Utils.ToJsonStringArray(functionName, args, transactionOverrides));
             }
             else
             {
