@@ -68,18 +68,27 @@ namespace Thirdweb
                             oldSession.siweSession
                         );
 
-                        // Add chain
+                        // Switch to chain
                         try
                         {
-                            await WalletConnect.Instance.WalletAddEthChain(ThirdwebManager.Instance.SDK.currentChainData);
+                            await WalletConnect.Instance.WalletSwitchEthChain(new EthChain() { chainId = ThirdwebManager.Instance.SDK.currentChainData.chainId });
                         }
                         catch (System.Exception e)
                         {
-                            Debug.Log("Adding chain error: " + e.Message);
-                        }
+                            Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
 
-                        // Switch to chain
-                        await WalletConnect.Instance.WalletSwitchEthChain(new EthChain() { chainId = ThirdwebManager.Instance.SDK.currentChainData.chainId });
+                            // Add chain
+                            try
+                            {
+                                await WalletConnect.Instance.WalletAddEthChain(ThirdwebManager.Instance.SDK.currentChainData);
+                                await WalletConnect.Instance.WalletSwitchEthChain(new EthChain() { chainId = ThirdwebManager.Instance.SDK.currentChainData.chainId });
+                            }
+                            catch (System.Exception f)
+                            {
+                                Debug.LogWarning("Adding chain error: " + f.Message);
+                                return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
+                            }
+                        }
 
                         return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
                     }

@@ -36,12 +36,8 @@ namespace WalletConnectSharp.Unity.UI
 
                 walletImage.sprite = walletData.medimumIcon;
 
-                walletButton.onClick.AddListener(
-                    delegate
-                    {
-                        WalletConnect.OpenDeepLink(walletData);
-                    }
-                );
+                walletButton.onClick.RemoveAllListeners();
+                walletButton.onClick.AddListener(() => WalletConnect.OpenDeepLink(walletData));
             }
 
             Destroy(loadingText.gameObject);

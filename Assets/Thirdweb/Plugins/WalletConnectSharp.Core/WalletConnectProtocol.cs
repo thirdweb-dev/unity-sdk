@@ -188,11 +188,24 @@ namespace WalletConnectSharp.Core
 
             var json = await Cipher.DecryptWithKey(_keyRaw, encryptedPayload);
 
-            var payload = JsonConvert.DeserializeObject<JsonRpcResponse>(json); // Edited from JsonRpcPayload
-
-            if (payload != null)
+            try
             {
-                Events.Trigger(payload.Event, json);
+                JsonRpcResponse payload = JsonConvert.DeserializeObject<JsonRpcResponse>(json); // Edited from JsonRpcPayload
+                if (payload != null)
+                    Events.Trigger(payload.Event, json);
+            }
+            catch
+            {
+                try
+                {
+                    JsonRpcPayload payload = JsonConvert.DeserializeObject<JsonRpcPayload>(json);
+                    if (payload != null)
+                        Events.Trigger(payload.Event, json);
+                }
+                catch
+                {
+                    return;
+                }
             }
         }
 
