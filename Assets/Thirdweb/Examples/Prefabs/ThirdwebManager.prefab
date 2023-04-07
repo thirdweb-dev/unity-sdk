@@ -88,6 +88,11 @@ MonoBehaviour:
   - identifier: binance-testnet
     chainId: 97
     rpcOverride: 
+  appName: Thirdweb Game
+  appDescription: Thirdweb Game Demo
+  appIcons:
+  - https://thirdweb.com/favicon.ico
+  appUrl: https://thirdweb.com
   storageIpfsGatewayUrl: https://gateway.ipfscdn.io/ipfs/
   relayerUrl: 
   relayerForwarderAddress: 
