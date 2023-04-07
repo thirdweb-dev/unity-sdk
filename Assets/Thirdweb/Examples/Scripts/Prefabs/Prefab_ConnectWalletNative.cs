@@ -26,14 +26,14 @@ public struct WalletButtonNative
 [Serializable]
 public struct NetworkSpriteNative
 {
-    public Chain chain;
+    public string chain;
     public Sprite sprite;
 }
 
 public class Prefab_ConnectWalletNative : MonoBehaviour
 {
     [Header("SETTINGS")]
-    public List<WalletNative> supportedWallets;
+    public List<WalletNative> supportedWallets = new List<WalletNative>() { WalletNative.DeviceWallet, WalletNative.WalletConnect };
 
     [Header("CUSTOM CALLBACKS")]
     public UnityEvent OnConnectedCallback;
@@ -172,13 +172,13 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
         try
         {
             passwordPanel.SetActive(false);
-            Chain _chain = ThirdwebManager.Instance.chain;
+            string _chain = ThirdwebManager.Instance.chain;
             CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
             balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
             balanceText2.text = balanceText.text;
             walletAddressText.text = await Utils.GetENSName(address) ?? address.ShortenAddress();
             walletAddressText2.text = walletAddressText.text;
-            currentNetworkText.text = ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].identifier;
+            currentNetworkText.text = ThirdwebManager.Instance.GetCurrentChainIdentifier();
             currentNetworkImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
             connectButton.SetActive(false);
             connectedButton.SetActive(true);

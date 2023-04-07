@@ -27,16 +27,32 @@ public struct WalletButton
 [Serializable]
 public struct NetworkSprite
 {
-    public Chain chain;
+    public string chain;
     public Sprite sprite;
 }
 
 public class Prefab_ConnectWallet : MonoBehaviour
 {
     [Header("SETTINGS")]
-    public List<Wallet> supportedWallets;
-    public bool supportSwitchingNetwork;
-    public List<Chain> supportedNetworks;
+    public List<Wallet> supportedWallets = new List<Wallet>() { Wallet.MetaMask, Wallet.Injected, Wallet.CoinbaseWallet, Wallet.WalletConnect, Wallet.MagicAuth, Wallet.DeviceWallet };
+    public bool supportSwitchingNetwork = true;
+    public List<string> supportedNetworks = new List<string>()
+    {
+        "ethereum",
+        "goerli",
+        "polygon",
+        "mumbai",
+        "fantom",
+        "fantom-testnet",
+        "avalanche",
+        "avalanche-fuji",
+        "optimism",
+        "optimism-goerli",
+        "arbitrum",
+        "arbitrum-goerli",
+        "binance",
+        "binance-testnet",
+    };
 
     [Header("CUSTOM CALLBACKS")]
     public UnityEvent OnConnectedCallback;
@@ -117,7 +133,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         try
         {
             address = await ThirdwebManager.Instance.SDK.wallet.Connect(
-                new WalletConnection() { provider = GetWalletProvider(_wallet), chainId = int.Parse(ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].chainId), }
+                new WalletConnection() { provider = GetWalletProvider(_wallet), chainId = int.Parse(ThirdwebManager.Instance.GetCurrentChainData().chainId), }
             );
 
             wallet = _wallet;
@@ -148,8 +164,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
         }
         finally
         {
-            Chain _chain = ThirdwebManager.Instance.chain;
-            currentNetworkText.text = ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].identifier;
+            string _chain = ThirdwebManager.Instance.chain;
+            currentNetworkText.text = ThirdwebManager.Instance.GetCurrentChainIdentifier();
             currentNetworkImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
             connectButton.SetActive(false);
             connectedButton.SetActive(true);
@@ -191,12 +207,12 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
     // Switching Network
 
-    public async void OnSwitchNetwork(Chain _chain)
+    public async void OnSwitchNetwork(string _chain)
     {
         try
         {
             ThirdwebManager.Instance.chain = _chain;
-            await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(int.Parse(ThirdwebManager.Instance.supportedChainData[_chain].chainId));
+            await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(int.Parse(ThirdwebManager.Instance.GetCurrentChainData().chainId));
             OnConnected();
             OnSwitchNetworkCallback?.Invoke();
             print($"Switched Network Successfully: {_chain}");
@@ -231,16 +247,16 @@ public class Prefab_ConnectWallet : MonoBehaviour
         foreach (Transform child in networkDropdown.transform)
             Destroy(child.gameObject);
 
-        foreach (Chain chain in Enum.GetValues(typeof(Chain)))
+        foreach (ChainData chainData in ThirdwebManager.Instance.supportedChainData)
         {
-            if (chain == ThirdwebManager.Instance.chain || !supportedNetworks.Contains(chain))
+            if (chainData.identifier == ThirdwebManager.Instance.chain || !supportedNetworks.Contains(chainData.identifier))
                 continue;
 
             GameObject networkButton = Instantiate(networkButtonPrefab, networkDropdown.transform);
             networkButton.GetComponent<Button>().onClick.RemoveAllListeners();
-            networkButton.GetComponent<Button>().onClick.AddListener(() => OnSwitchNetwork(chain));
-            networkButton.transform.Find("Text_Network").GetComponent<TMP_Text>().text = ThirdwebManager.Instance.supportedChainData[chain].identifier;
-            networkButton.transform.Find("Icon_Network").GetComponent<Image>().sprite = networkSprites.Find(x => x.chain == chain).sprite;
+            networkButton.GetComponent<Button>().onClick.AddListener(() => OnSwitchNetwork(chainData.identifier));
+            networkButton.transform.Find("Text_Network").GetComponent<TMP_Text>().text = chainData.identifier;
+            networkButton.transform.Find("Icon_Network").GetComponent<Image>().sprite = networkSprites.Find(x => x.chain == chainData.identifier).sprite;
         }
     }
 

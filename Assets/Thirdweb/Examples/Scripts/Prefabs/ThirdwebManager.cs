@@ -1,25 +1,6 @@
 using UnityEngine;
 using Thirdweb;
-using RotaryHeart.Lib.SerializableDictionary;
-
-[System.Serializable]
-public enum Chain
-{
-    Ethereum,
-    Goerli,
-    Polygon,
-    Mumbai,
-    Fantom,
-    FantomTestnet,
-    Avalanche,
-    AvalancheTestnet,
-    Optimism,
-    OptimismGoerli,
-    Arbitrum,
-    ArbitrumGoerli,
-    Binance,
-    BinanceTestnet
-}
+using System.Collections.Generic;
 
 [System.Serializable]
 public class ChainData
@@ -27,24 +8,44 @@ public class ChainData
     public string identifier;
     public string chainId;
     public string rpcOverride;
-}
 
-[System.Serializable]
-public class SupportedChainData : SerializableDictionaryBase<Chain, ChainData> { }
+    public ChainData(string identifier, string chainId, string rpcOverride)
+    {
+        this.identifier = identifier;
+        this.chainId = chainId;
+        this.rpcOverride = rpcOverride;
+    }
+}
 
 public class ThirdwebManager : MonoBehaviour
 {
     [Header("REQUIRED SETTINGS")]
     [Tooltip("The chain to initialize the SDK with")]
-    public Chain chain = Chain.Goerli;
+    public string chain = "goerli";
 
     [Header("CHAIN DATA")]
-    [Tooltip("Support any chain added to the Chain enum")]
-    public SupportedChainData supportedChainData;
+    [Tooltip("Support any chain by adding it to this list from the inspector")]
+    public List<ChainData> supportedChainData = new List<ChainData>()
+    {
+        new ChainData("ethereum", "1", null),
+        new ChainData("goerli", "5", null),
+        new ChainData("polygon", "137", null),
+        new ChainData("mumbai", "80001", null),
+        new ChainData("fantom", "250", null),
+        new ChainData("fantom-testnet", "4002", null),
+        new ChainData("avalanche", "43114", null),
+        new ChainData("avalanche-fuji", "43113", null),
+        new ChainData("optimism", "10", null),
+        new ChainData("optimism-goerli", "420", null),
+        new ChainData("arbitrum", "42161", null),
+        new ChainData("arbitrum-goerli", "421613", null),
+        new ChainData("binance", "56", null),
+        new ChainData("binance-testnet", "97", null),
+    };
 
     [Header("STORAGE OPTIONS")]
     [Tooltip("IPFS Gateway Override")]
-    public string storageIpfsGatewayUrl = null;
+    public string storageIpfsGatewayUrl = "https://gateway.ipfscdn.io/ipfs/";
 
     [Header("OZ DEFENDER OPTIONS")]
     [Tooltip("Gasless Transaction Support")]
@@ -73,7 +74,7 @@ public class ThirdwebManager : MonoBehaviour
 
         // Inspector chain data dictionary.
 
-        ChainData currentChain = supportedChainData[chain];
+        ChainData currentChain = GetChainData(chain);
 
         // Chain ID must be provided on native platforms.
 
@@ -124,5 +125,20 @@ public class ThirdwebManager : MonoBehaviour
         }
 
         SDK = new ThirdwebSDK(chainOrRPC, chainId, options);
+    }
+
+    public ChainData GetChainData(string chainIdentifier)
+    {
+        return supportedChainData.Find(x => x.identifier == chainIdentifier);
+    }
+
+    public ChainData GetCurrentChainData()
+    {
+        return supportedChainData.Find(x => x.identifier == chain);
+    }
+
+    public string GetCurrentChainIdentifier()
+    {
+        return chain;
     }
 }

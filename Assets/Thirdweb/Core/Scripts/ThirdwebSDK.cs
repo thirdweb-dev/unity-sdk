@@ -181,7 +181,7 @@ namespace Thirdweb
             {
                 chainId = BigInteger.Parse(currentNetwork.chainId).ToHex(false, true) ?? BigInteger.Parse(nativeSession.lastChainId.ToString()).ToHex(false, true),
                 blockExplorerUrls = explorerUrls.ToArray(),
-                chainName = currentNetwork.name ?? ThirdwebManager.Instance.supportedChainData[ThirdwebManager.Instance.chain].identifier,
+                chainName = currentNetwork.name ?? ThirdwebManager.Instance.GetCurrentChainIdentifier(),
                 iconUrls = new string[] { "ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt" },
                 nativeCurrency = new NativeCurrency()
                 {

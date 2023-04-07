@@ -44,75 +44,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56d9559a79e304f44b5ac4d726f1ee68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chain: 1
+  chain: goerli
   supportedChainData:
-    reorderableList:
-      canAdd: 1
-      canRemove: 1
-      draggable: 1
-      expandable: 1
-      multipleSelection: 1
-      isExpanded: 0
-      label:
-        m_Text: Keys
-        m_Image: {fileID: 0}
-        m_Tooltip: 
-      headerHeight: 18
-      footerHeight: 13
-      slideEasing: 0.15
-      verticalSpacing: 2
-      showDefaultBackground: 1
-      elementDisplayType: 0
-      elementNameProperty: 
-      elementNameOverride: 
-      elementIcon: {fileID: 0}
-    reqReferences: {fileID: 0}
-    isExpanded: 0
-    _keyValues: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d000000
-    _keys: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d000000
-    _values:
-    - identifier: ethereum
-      chainId: 1
-      rpcOverride: 
-    - identifier: goerli
-      chainId: 5
-      rpcOverride: 
-    - identifier: polygon
-      chainId: 137
-      rpcOverride: 
-    - identifier: mumbai
-      chainId: 80001
-      rpcOverride: 
-    - identifier: fantom
-      chainId: 250
-      rpcOverride: 
-    - identifier: fantom-testnet
-      chainId: 4002
-      rpcOverride: 
-    - identifier: avalanche
-      chainId: 43114
-      rpcOverride: 
-    - identifier: avalanche-fuji
-      chainId: 43113
-      rpcOverride: 
-    - identifier: optimism
-      chainId: 10
-      rpcOverride: 
-    - identifier: optimism-goerli
-      chainId: 420
-      rpcOverride: 
-    - identifier: arbitrum
-      chainId: 42161
-      rpcOverride: 
-    - identifier: arbitrum-goerli
-      chainId: 421613
-      rpcOverride: 
-    - identifier: binance
-      chainId: 56
-      rpcOverride: 
-    - identifier: binance-testnet
-      chainId: 97
-      rpcOverride: 
+  - identifier: ethereum
+    chainId: 1
+    rpcOverride: 
+  - identifier: goerli
+    chainId: 5
+    rpcOverride: 
+  - identifier: polygon
+    chainId: 137
+    rpcOverride: 
+  - identifier: mumbai
+    chainId: 80001
+    rpcOverride: 
+  - identifier: fantom
+    chainId: 250
+    rpcOverride: 
+  - identifier: fantom-testnet
+    chainId: 4002
+    rpcOverride: 
+  - identifier: avalanche
+    chainId: 43114
+    rpcOverride: 
+  - identifier: avalanche-fuji
+    chainId: 43113
+    rpcOverride: 
+  - identifier: optimism
+    chainId: 10
+    rpcOverride: 
+  - identifier: optimism-goerli
+    chainId: 420
+    rpcOverride: 
+  - identifier: arbitrum
+    chainId: 42161
+    rpcOverride: 
+  - identifier: arbitrum-goerli
+    chainId: 421613
+    rpcOverride: 
+  - identifier: binance
+    chainId: 56
+    rpcOverride: 
+  - identifier: binance-testnet
+    chainId: 97
+    rpcOverride: 
   storageIpfsGatewayUrl: https://gateway.ipfscdn.io/ipfs/
   relayerUrl: 
   relayerForwarderAddress: 

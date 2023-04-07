@@ -4191,33 +4191,33 @@ MonoBehaviour:
   chainImage: {fileID: 6455197925238504093}
   exportButton: {fileID: 1372153983861407458}
   networkSprites:
-  - chain: 0
+  - chain: ethereum
     sprite: {fileID: 21300000, guid: bf76ffa047029554199b8d79b2306f6d, type: 3}
-  - chain: 1
+  - chain: goerli
     sprite: {fileID: 21300000, guid: bf76ffa047029554199b8d79b2306f6d, type: 3}
-  - chain: 2
+  - chain: polygon
     sprite: {fileID: 21300000, guid: a4ac9bda74166b740bf880e481d41f55, type: 3}
-  - chain: 3
+  - chain: mumbai
     sprite: {fileID: 21300000, guid: a4ac9bda74166b740bf880e481d41f55, type: 3}
-  - chain: 4
+  - chain: fantom
     sprite: {fileID: 21300000, guid: 54be2d2440a31164f8679e1bd550abf9, type: 3}
-  - chain: 5
+  - chain: fantom-testnet
     sprite: {fileID: 21300000, guid: 54be2d2440a31164f8679e1bd550abf9, type: 3}
-  - chain: 6
+  - chain: avalanche
     sprite: {fileID: 21300000, guid: 3fe24f7fb0232e844988758a3ba03773, type: 3}
-  - chain: 7
+  - chain: avalanche-fuji
     sprite: {fileID: 21300000, guid: 3fe24f7fb0232e844988758a3ba03773, type: 3}
-  - chain: 8
+  - chain: optimism
     sprite: {fileID: 21300000, guid: b5be42ae0f66ca441beff78a90fe1680, type: 3}
-  - chain: 9
+  - chain: optimism-goerli
     sprite: {fileID: 21300000, guid: b5be42ae0f66ca441beff78a90fe1680, type: 3}
-  - chain: 10
+  - chain: arbitrum
     sprite: {fileID: 21300000, guid: 44b9a8a5b27749046b8fe998a084c7cc, type: 3}
-  - chain: 11
+  - chain: arbitrum-goerli
     sprite: {fileID: 21300000, guid: 44b9a8a5b27749046b8fe998a084c7cc, type: 3}
-  - chain: 12
+  - chain: binance
     sprite: {fileID: 21300000, guid: 427f73b440444d3428c9d1101f7c0646, type: 3}
-  - chain: 13
+  - chain: binance-testnet
     sprite: {fileID: 21300000, guid: 427f73b440444d3428c9d1101f7c0646, type: 3}
 --- !u!1 &8205008986028586947
 GameObject:
