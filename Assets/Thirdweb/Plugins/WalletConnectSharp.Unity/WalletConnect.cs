@@ -47,6 +47,8 @@ namespace WalletConnectSharp.Unity
 
         [BindComponent]
         private NativeWebSocketTransport _transport;
+        private bool initialized;
+        private bool eventsSetup;
 
         public static WalletConnect Instance;
 
@@ -62,6 +64,10 @@ namespace WalletConnectSharp.Unity
                 Destroy(this.gameObject);
                 return;
             }
+
+            ClearSession();
+            if (Session != null)
+                Session = null;
 
             base.Awake();
         }
@@ -103,90 +109,85 @@ namespace WalletConnectSharp.Unity
 
         public async Task<WCSessionData> Connect(int chainId)
         {
-            while (true)
+            SavedSession savedSession = null;
+            if (PlayerPrefs.HasKey(SessionKey))
             {
-                try
+                var json = PlayerPrefs.GetString(SessionKey);
+                savedSession = JsonConvert.DeserializeObject<SavedSession>(json);
+            }
+
+            if (Session != null)
+            {
+                if (savedSession != null)
                 {
-                    SavedSession savedSession = null;
-                    if (PlayerPrefs.HasKey(SessionKey))
+                    if (Session.KeyData != savedSession.Key)
                     {
-                        var json = PlayerPrefs.GetString(SessionKey);
-                        savedSession = JsonConvert.DeserializeObject<SavedSession>(json);
-                    }
-
-                    if (Session != null)
-                    {
-                        if (savedSession != null)
-                        {
-                            if (Session.KeyData != savedSession.Key)
-                            {
-                                if (Session.SessionConnected)
-                                    await Session.Disconnect();
-                                else if (Session.TransportConnected)
-                                    await Session.Transport.Close();
-                            }
-                            else if (!Session.Connected && !Session.Connecting)
-                            {
-                                StartCoroutine(SetupDefaultWallet());
-                                SetupEvents();
-                                return await CompleteConnect();
-                            }
-                            else
-                            {
-                                Debug.LogWarning("Already Connected");
-                                return null;
-                            }
-                        }
-                        else if (Session.SessionConnected)
-                        {
+                        if (Session.SessionConnected)
                             await Session.Disconnect();
-                        }
                         else if (Session.TransportConnected)
-                        {
                             await Session.Transport.Close();
-                        }
-                        // else if (Session.Connecting)
-                        // {
-                        //     Debug.LogWarning("Session connecting...");
-                        //     return null;
-                        // }
                     }
-
-                    if (savedSession != null)
+                    else if (!Session.Connected && !Session.Connecting)
                     {
-                        Session = new WalletConnectUnitySession(savedSession, this, _transport);
+                        StartCoroutine(SetupDefaultWallet());
+                        SetupEvents();
+                        return await CompleteConnect();
                     }
                     else
                     {
-                        Session = new WalletConnectUnitySession(
-                            new ClientMeta()
-                            {
-                                Name = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appName,
-                                Description = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appDescription,
-                                URL = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appUrl,
-                                Icons = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appIcons,
-                            },
-                            this,
-                            null,
-                            _transport,
-                            null,
-                            chainId
-                        );
+                        Debug.LogWarning("Already Connected");
+                        return null;
                     }
-
-                    StartCoroutine(SetupDefaultWallet());
-                    SetupEvents();
-                    return await CompleteConnect();
                 }
-                catch (System.Exception e)
+                else if (Session.SessionConnected)
                 {
-                    Debug.LogWarning("WalletConnect.Connect Error, Regeneratinge | " + e.Message);
+                    await Session.Disconnect();
                 }
+                else if (Session.TransportConnected)
+                {
+                    await Session.Transport.Close();
+                }
+                // else if (Session.Connecting)
+                // {
+                //     Debug.LogWarning("Session connecting...");
+                //     return null;
+                // }
             }
+
+            if (savedSession != null)
+            {
+                Session = new WalletConnectUnitySession(savedSession, this, _transport);
+            }
+            else
+            {
+                Session = new WalletConnectUnitySession(
+                    new ClientMeta()
+                    {
+                        Name = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appName,
+                        Description = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appDescription,
+                        URL = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appUrl,
+                        Icons = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appIcons,
+                    },
+                    this,
+                    null,
+                    _transport,
+                    null,
+                    chainId
+                );
+            }
+
+            StartCoroutine(SetupDefaultWallet());
+            SetupEvents();
+            return await CompleteConnect();
         }
 
         private void SetupEvents()
         {
+            if (eventsSetup)
+                return;
+
+            eventsSetup = true;
+
             Session.OnSessionConnect += (sender, session) =>
             {
                 Debug.LogWarning("[WalletConnect] Session Connected");
@@ -212,8 +213,7 @@ namespace WalletConnectSharp.Unity
             {
                 try
                 {
-                    var session = await Session.SourceConnectSession();
-                    return session;
+                    return await Session.SourceConnectSession();
                 }
                 catch (IOException e)
                 {
@@ -309,18 +309,14 @@ namespace WalletConnectSharp.Unity
             }
         }
 
-        private void OnDestroy()
-        {
-            SaveSession();
-        }
-
-        private void OnApplicationQuit()
-        {
-            SaveSession();
-        }
-
         private async void OnApplicationPause(bool pauseStatus)
         {
+            if (!initialized)
+            {
+                initialized = true;
+                return;
+            }
+
             if (pauseStatus)
                 SaveSession();
             else if (PlayerPrefs.HasKey(SessionKey))
