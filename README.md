@@ -33,6 +33,7 @@ Note: The Newtonsoft DLL is included as part of the Unity Package, feel free to 
 # Build
 
 ## WebGL
+
 - Open your `Build settings`, select `WebGL` as the target platform.
 - Open `Player settings` > `Resolution and Presentation` and under `WebGLTemplate` choose `Thirdweb`.
 - Save and click `Build and Run` to test out your game in a browser.
@@ -42,11 +43,13 @@ If you're uploading your build, set `Compression Format` to `Disabled` in `Playe
 Note that in order to communicate with the SDK on WebGL, you need to `Build and run` your project so it runs in a browser context.
 
 ## Other Platforms
+
 - Requires a ThirdwebManager prefab in your scene.
 - Use IL2CPP over Mono when possible in the Player Settings.
 - Use Smaller (faster) Builds in the Build Settings.
 - Using the SDK in the editor (pressing Play) is an accurate reflection of what you can expect to see on native platforms.
 - If using prefabs, use Prefab_ConnectWalletNative instead of Prefab_ConnectWallet.
+- If building to mobile and running into RPC issues, it is best to run Force Resolve from the Assets menu > External Dependency Manager > Android Resolver > Force Resolve for example.
 
 # Usage
 
@@ -90,11 +93,13 @@ The `Examples` folder contains a demo scene using our user-friendly prefabs, che
 All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/ThirdwebManager.cs) prefab to get the SDK Instance, drag and drop it into your scene and select the networks you want to support from the Inspector.
 
 [Connect Wallet](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_ConnectWallet.cs) - All-in-one drag & drop wallet supporting multiple wallet providers, network switching, balance displaying and more!
+
 - Drag and drop it into your scene and select the wallet providers you want to support from the Inspector.
 - You may also choose whether you want to activate the Network Switching feature (leave unchecked if your app only requires one network).
 - You can add callbacks from the inspector for when the wallet is connected, disconnected, fails to connect or disconnect.
 
-[Connect Wallet Native](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_ConnectWalletNative.cs) 
+[Connect Wallet Native](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_ConnectWalletNative.cs)
+
 - All-in-one drag & drop wallet supporting WalletConnect and Device Wallets (with or without passwords)
 - Drag and drop it into your scene and select the wallet options you want to provide (recommend using only one).
 - For device wallets, exporting will open the local encrypted keystore file on Standalone platforms (Application.persistentDataPath/account.json)
@@ -104,6 +109,7 @@ All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-
 - You can add callbacks from the inspector for when the wallet is connected, disconnected, fails to connect or disconnect.
 
 [NFT Loader](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_NFTLoader.cs) - Standalone drag & drop grid/scroll view of NFTs you ask it to display!
+
 - Go to the prefab's Settings in the Inspector.
 - Load specific NFTs with token ID.
 - Load a specific range of NFTs.
@@ -112,10 +118,12 @@ All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-
 - Customize the prefab's ScrollView and Content gameobjects if you want your content to behave differently.
 
 [NFT](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_NFT.cs) - Displays an NFT by calling LoadNFT through script!
+
 - Instantiate this Prefab through script.
 - Get its Prefab_NFT component.
 - Call the LoadNFT function and pass it your NFT struct to display your fetched NFT's images automatically.
 - Customize the prefab to add text/decorations and customize LoadNFT to use your NFT's metadata if you want to populate that text.
+
 ```csharp
 NFT nft = await contract.ERC721.Get(0);
 Prefab_NFT nftPrefabScript = Instantiate(nftPrefab);
@@ -123,12 +131,14 @@ nftPrefabScript.LoadNFT(nft);
 ```
 
 [Events](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_Events.cs) - Fetch and manipulate Contract Events with a simple API!
+
 - Get specific events from any contract.
 - Get all events from any contract.
 - Event listener support with callback actions.
 - Optional query filters.
 
 [Reading](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_Reading.cs) - Reading from a contract!
+
 - Fetch ERC20 Token(s).
 - Fetch ERC721 NFT(s).
 - Fetch ERC1155 NFT(s).
@@ -136,6 +146,7 @@ nftPrefabScript.LoadNFT(nft);
 - Fetch Pack contents.
 
 [Writing](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_Writing.cs) - Writing to a contract!
+
 - Mint ERC20 Token(s).
 - Mint ERC721 NFT(s).
 - Mint ERC1155 NFT(s).
@@ -143,6 +154,7 @@ nftPrefabScript.LoadNFT(nft);
 - Buy a Pack.
 
 [Miscellaneous](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_Miscellaneous.cs) - More examples!
+
 - Get (Native) Balance.
 - Custom Contract Read/Write Calls.
 - Authentication.
