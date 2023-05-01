@@ -52,11 +52,13 @@ namespace Thirdweb
             if (ThirdwebManager.Instance.SDK.nativeSession.options.gasless != null && ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin != null)
             {
                 string relayerUrl = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.relayerUrl;
-                string relayerForwarderAddress = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.relayerForwarderAddress;
+                string forwarderAddress = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.relayerForwarderAddress;
+                string forwarderDomain = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.domainName;
+                string forwarderVersion = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.domainVersion;
 
                 functionMessage.Nonce = (
                     await ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
-                        relayerForwarderAddress,
+                        forwarderAddress,
                         new MinimalForwarder.GetNonceFunction() { From = functionMessage.FromAddress }
                     )
                 ).ReturnValue1;
@@ -71,9 +73,9 @@ namespace Thirdweb
                     Data = functionMessage.GetCallData().ByteArrayToHexString()
                 };
 
-                var signature = await EIP712.GenerateSignature_MinimalForwarder("GSNv2 Forwarder", "0.0.1", ThirdwebManager.Instance.SDK.nativeSession.lastChainId, relayerForwarderAddress, request);
+                var signature = await EIP712.GenerateSignature_MinimalForwarder(forwarderDomain, forwarderVersion, ThirdwebManager.Instance.SDK.nativeSession.lastChainId, forwarderAddress, request);
 
-                var postData = new RelayerRequest(request, signature, relayerForwarderAddress);
+                var postData = new RelayerRequest(request, signature, forwarderAddress);
 
                 string txHash = null;
 
@@ -87,7 +89,7 @@ namespace Thirdweb
                     if (req.result != UnityWebRequest.Result.Success)
                     {
                         throw new UnityException(
-                            $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {relayerForwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
+                            $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {forwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
                         );
                     }
                     else

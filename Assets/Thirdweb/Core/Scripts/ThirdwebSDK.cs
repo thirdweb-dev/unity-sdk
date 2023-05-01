@@ -66,6 +66,8 @@ namespace Thirdweb
         {
             public string relayerUrl;
             public string relayerForwarderAddress;
+            public string domainName;
+            public string domainVersion;
         }
 
         /// <summary>

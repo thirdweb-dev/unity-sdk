@@ -58,7 +58,13 @@ public class ThirdwebManager : MonoBehaviour
     public string relayerUrl = null;
 
     [Tooltip("Forwarders can be found here https://github.com/thirdweb-dev/ozdefender-autotask")]
-    public string relayerForwarderAddress = null;
+    public string forwarderAddress = null;
+
+    [Tooltip("Forwarder Domain Override (Defaults to GSNv2 Forwarder if left empty)")]
+    public string forwarderDomainOverride = null;
+
+    [Tooltip("Forwarder Version (Defaults to 0.0.1 if left empty)")]
+    public string forwaderVersionOverride = null;
 
     public ThirdwebSDK SDK;
 
@@ -124,11 +130,17 @@ public class ThirdwebManager : MonoBehaviour
         {
             options.storage = new ThirdwebSDK.StorageOptions() { ipfsGatewayUrl = storageIpfsGatewayUrl };
         }
-        if (!string.IsNullOrEmpty(relayerUrl) && !string.IsNullOrEmpty(relayerForwarderAddress))
+        if (!string.IsNullOrEmpty(relayerUrl) && !string.IsNullOrEmpty(forwarderAddress))
         {
             options.gasless = new ThirdwebSDK.GaslessOptions()
             {
-                openzeppelin = new ThirdwebSDK.OZDefenderOptions() { relayerUrl = this.relayerUrl, relayerForwarderAddress = this.relayerForwarderAddress, }
+                openzeppelin = new ThirdwebSDK.OZDefenderOptions()
+                {
+                    relayerUrl = this.relayerUrl,
+                    relayerForwarderAddress = this.forwarderAddress,
+                    domainName = string.IsNullOrEmpty(this.forwarderDomainOverride) ? "GSNv2 Forwarder" : this.forwarderDomainOverride,
+                    domainVersion = string.IsNullOrEmpty(this.forwaderVersionOverride) ? "0.0.1" : this.forwaderVersionOverride
+                }
             };
         }
 
