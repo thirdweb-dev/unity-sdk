@@ -601,7 +601,7 @@ namespace Thirdweb
         /// <summary>
         /// Generate a signed mintable payload. Requires minting permission.
         /// </summary>
-        public async Task<ERC721SignedPayload> Generate(ERC721MintPayload payloadToSign)
+        public async Task<ERC721SignedPayload> Generate(ERC721MintPayload payloadToSign, string privateKeyOverride = "")
         {
             if (Utils.IsWebGLBuild())
             {
@@ -628,14 +628,21 @@ namespace Thirdweb
                     RoyaltyBps = royaltyInfo.ReturnValue2,
                     PrimarySaleRecipient = primarySaleRecipient.ReturnValue1,
                     Uri = uri.IpfsHash.cidToIpfsUrl(),
-                    Price = BigInteger.Parse(payloadToSign.price),
+                    Price = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
                     ValidityStartTimestamp = startTime,
                     ValidityEndTimestamp = endTime,
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
-                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC721("TokenERC721", "1", await ThirdwebManager.Instance.SDK.wallet.GetChainId(), contractAddress, req);
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC721(
+                    "TokenERC721",
+                    "1",
+                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    contractAddress,
+                    req,
+                    string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
+                );
 
                 ERC721SignedPayload signedPayload = new ERC721SignedPayload();
                 signedPayload.signature = signature;

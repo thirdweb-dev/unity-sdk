@@ -18,12 +18,19 @@ namespace Thirdweb
     {
         /// SIGNATURE GENERATION ///
 
-        public async static Task<string> GenerateSignature_TokenERC20(string domainName, string version, BigInteger chainId, string verifyingContract, TokenERC20Contract.MintRequest mintRequest)
+        public async static Task<string> GenerateSignature_TokenERC20(
+            string domainName,
+            string version,
+            BigInteger chainId,
+            string verifyingContract,
+            TokenERC20Contract.MintRequest mintRequest,
+            string privateKeyOverride = null
+        )
         {
-            if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
+            if (privateKeyOverride != null || ThirdwebManager.Instance.SDK.nativeSession.account != null)
             {
                 var signer = new Eip712TypedDataSigner();
-                var key = new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
                 var typedData = GetTypedDefinition_TokenERC20(domainName, version, chainId, verifyingContract);
                 var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
                 return signature;
@@ -89,12 +96,19 @@ namespace Thirdweb
             public virtual string Uid { get; set; }
         }
 
-        public async static Task<string> GenerateSignature_TokenERC721(string domainName, string version, BigInteger chainId, string verifyingContract, TokenERC721Contract.MintRequest mintRequest)
+        public async static Task<string> GenerateSignature_TokenERC721(
+            string domainName,
+            string version,
+            BigInteger chainId,
+            string verifyingContract,
+            TokenERC721Contract.MintRequest mintRequest,
+            string privateKeyOverride = null
+        )
         {
-            if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
+            if (privateKeyOverride != null || ThirdwebManager.Instance.SDK.nativeSession.account != null)
             {
                 var signer = new Eip712TypedDataSigner();
-                var key = new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
                 var typedData = GetTypedDefinition_TokenERC721(domainName, version, chainId, verifyingContract);
                 var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
                 return signature;
@@ -161,12 +175,19 @@ namespace Thirdweb
             public virtual string Uid { get; set; }
         }
 
-        public async static Task<string> GenerateSignature_TokenERC1155(string domainName, string version, BigInteger chainId, string verifyingContract, TokenERC1155Contract.MintRequest mintRequest)
+        public async static Task<string> GenerateSignature_TokenERC1155(
+            string domainName,
+            string version,
+            BigInteger chainId,
+            string verifyingContract,
+            TokenERC1155Contract.MintRequest mintRequest,
+            string privateKeyOverride = null
+        )
         {
-            if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
+            if (privateKeyOverride != null || ThirdwebManager.Instance.SDK.nativeSession.account != null)
             {
                 var signer = new Eip712TypedDataSigner();
-                var key = new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
                 var typedData = GetTypedDefinition_TokenERC1155(domainName, version, chainId, verifyingContract);
                 var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
                 return signature;
@@ -298,13 +319,14 @@ namespace Thirdweb
             string version,
             BigInteger chainId,
             string verifyingContract,
-            MinimalForwarder.ForwardRequest forwardRequest
+            MinimalForwarder.ForwardRequest forwardRequest,
+            string privateKeyOverride = null
         )
         {
-            if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
+            if (privateKeyOverride != null || ThirdwebManager.Instance.SDK.nativeSession.account != null)
             {
                 var signer = new Eip712TypedDataSigner();
-                var key = new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
                 var typedData = GetTypedDefinition_MinimalForwarder(domainName, version, chainId, verifyingContract);
                 var signature = signer.SignTypedDataV4(forwardRequest, typedData, key);
                 return signature;

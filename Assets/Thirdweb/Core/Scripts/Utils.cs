@@ -71,18 +71,18 @@ namespace Thirdweb
             return wei.ToString();
         }
 
-        public static string ToEth(this string wei, int decimalsToDisplay = 4)
+        public static string ToEth(this string wei, int decimalsToDisplay = 4, bool addCommas = true)
         {
-            return FormatERC20(wei, decimalsToDisplay);
+            return FormatERC20(wei, decimalsToDisplay, 18, addCommas);
         }
 
-        public static string FormatERC20(this string wei, int decimalsToDisplay = 4, int decimals = 18)
+        public static string FormatERC20(this string wei, int decimalsToDisplay = 4, int decimals = 18, bool addCommas = true)
         {
             BigInteger weiBigInt = 0;
             if (!BigInteger.TryParse(wei, out weiBigInt))
                 throw new ArgumentException("Invalid wei value.");
             double eth = (double)weiBigInt / Math.Pow(10.0, decimals);
-            string format = "#,0";
+            string format = addCommas ? "#,0" : "#0";
             if (decimalsToDisplay > 0)
                 format += ".";
             for (int i = 0; i < decimalsToDisplay; i++)

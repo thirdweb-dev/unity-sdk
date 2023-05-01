@@ -629,7 +629,7 @@ namespace Thirdweb
         /// <summary>
         /// Generate a signed mintable payload. Requires minting permission.
         /// </summary>
-        public async Task<ERC1155SignedPayload> Generate(ERC1155MintPayload payloadToSign)
+        public async Task<ERC1155SignedPayload> Generate(ERC1155MintPayload payloadToSign, string privateKeyOverride = "")
         {
             if (Utils.IsWebGLBuild())
             {
@@ -658,14 +658,21 @@ namespace Thirdweb
                     TokenId = Utils.GetMaxUint256(),
                     Uri = uri.IpfsHash.cidToIpfsUrl(),
                     Quantity = payloadToSign.quantity,
-                    PricePerToken = BigInteger.Parse(payloadToSign.price),
+                    PricePerToken = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
                     ValidityStartTimestamp = startTime,
                     ValidityEndTimestamp = endTime,
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
-                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC1155("TokenERC1155", "1", await ThirdwebManager.Instance.SDK.wallet.GetChainId(), contractAddress, req);
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC1155(
+                    "TokenERC1155",
+                    "1",
+                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    contractAddress,
+                    req,
+                    string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
+                );
 
                 ERC1155SignedPayload signedPayload = new ERC1155SignedPayload();
                 signedPayload.signature = signature;

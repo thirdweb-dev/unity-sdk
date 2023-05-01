@@ -462,7 +462,7 @@ namespace Thirdweb
         /// <summary>
         /// Generate a signed mintable payload. Requires minting permission.
         /// </summary>
-        public async Task<ERC20SignedPayload> Generate(ERC20MintPayload payloadToSign)
+        public async Task<ERC20SignedPayload> Generate(ERC20MintPayload payloadToSign, string privateKeyOverride = "")
         {
             if (Utils.IsWebGLBuild())
             {
@@ -481,15 +481,21 @@ namespace Thirdweb
                     To = payloadToSign.to,
                     PrimarySaleRecipient = primarySaleRecipient.ReturnValue1,
                     Quantity = BigInteger.Parse(payloadToSign.quantity.ToWei()),
-                    Price = BigInteger.Parse(payloadToSign.price),
+                    Price = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
                     ValidityStartTimestamp = startTime,
                     ValidityEndTimestamp = endTime,
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
-                var name = await TransactionManager.ThirdwebRead<TokenERC20Contract.NameFunction, TokenERC20Contract.NameOutputDTO>(contractAddress, new TokenERC20Contract.NameFunction() { });
-                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(name.ReturnValue1, "1", await ThirdwebManager.Instance.SDK.wallet.GetChainId(), contractAddress, req);
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(
+                    "TokenERC20",
+                    "1",
+                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    contractAddress,
+                    req,
+                    string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
+                );
 
                 ERC20SignedPayload signedPayload = new ERC20SignedPayload();
                 signedPayload.signature = signature;
