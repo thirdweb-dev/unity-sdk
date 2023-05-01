@@ -9,8 +9,6 @@ using WalletConnectSharp.NEthereum;
 using Nethereum.Siwe.Core;
 using System.Collections.Generic;
 using Nethereum.Web3.Accounts;
-using UnityEngine.Networking;
-using Nethereum.Hex.HexConvertors.Extensions;
 using WalletConnectSharp.Core.Models.Ethereum;
 
 //using WalletConnectSharp.NEthereum;
@@ -22,8 +20,7 @@ namespace Thirdweb
     /// </summary>
     public class Wallet : Routable
     {
-        public Wallet()
-            : base($"sdk{subSeparator}wallet") { }
+        public Wallet() : base($"sdk{subSeparator}wallet") { }
 
         /// <summary>
         /// Connect a user's wallet via a given wallet provider
@@ -507,7 +504,7 @@ namespace Thirdweb
         }
         public static WalletProvider WalletConnect
         {
-            get { return new WalletProvider("walletConnect"); }
+            get { return new WalletProvider("walletConnectV1"); }
         }
         public static WalletProvider Injected
         {
@@ -519,7 +516,7 @@ namespace Thirdweb
         }
         public static WalletProvider DeviceWallet
         {
-            get { return new WalletProvider("deviceWallet"); }
+            get { return new WalletProvider("localWallet"); }
         }
 
         public override string ToString()
