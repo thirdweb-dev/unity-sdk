@@ -137,9 +137,9 @@ public class ThirdwebManager : MonoBehaviour
                 openzeppelin = new ThirdwebSDK.OZDefenderOptions()
                 {
                     relayerUrl = this.relayerUrl,
-                    forwarderAddress = this.forwarderAddress,
-                    forwarderDomain = string.IsNullOrEmpty(this.forwarderDomainOverride) ? "GSNv2 Forwarder" : this.forwarderDomainOverride,
-                    forwarderVersion = string.IsNullOrEmpty(this.forwaderVersionOverride) ? "0.0.1" : this.forwaderVersionOverride
+                    relayerForwarderAddress = this.forwarderAddress,
+                    domainName = string.IsNullOrEmpty(this.forwarderDomainOverride) ? "GSNv2 Forwarder" : this.forwarderDomainOverride,
+                    domainVersion = string.IsNullOrEmpty(this.forwaderVersionOverride) ? "0.0.1" : this.forwaderVersionOverride
                 }
             };
         }

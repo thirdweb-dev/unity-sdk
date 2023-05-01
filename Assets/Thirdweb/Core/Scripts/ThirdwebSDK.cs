@@ -65,9 +65,9 @@ namespace Thirdweb
         public struct OZDefenderOptions
         {
             public string relayerUrl;
-            public string forwarderAddress;
-            public string forwarderDomain;
-            public string forwarderVersion;
+            public string relayerForwarderAddress;
+            public string domainName;
+            public string domainVersion;
         }
 
         /// <summary>

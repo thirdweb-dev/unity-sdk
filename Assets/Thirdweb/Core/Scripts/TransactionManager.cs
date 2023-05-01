@@ -52,9 +52,9 @@ namespace Thirdweb
             if (ThirdwebManager.Instance.SDK.nativeSession.options.gasless != null && ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin != null)
             {
                 string relayerUrl = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.relayerUrl;
-                string forwarderAddress = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.forwarderAddress;
-                string forwarderDomain = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.forwarderDomain;
-                string forwarderVersion = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.forwarderVersion;
+                string forwarderAddress = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.relayerForwarderAddress;
+                string forwarderDomain = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.domainName;
+                string forwarderVersion = ThirdwebManager.Instance.SDK.nativeSession.options.gasless.Value.openzeppelin?.domainVersion;
 
                 functionMessage.Nonce = (
                     await ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
