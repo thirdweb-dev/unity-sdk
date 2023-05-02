@@ -20,7 +20,8 @@ namespace Thirdweb
     /// </summary>
     public class Wallet : Routable
     {
-        public Wallet() : base($"sdk{subSeparator}wallet") { }
+        public Wallet()
+            : base($"sdk{subSeparator}wallet") { }
 
         /// <summary>
         /// Connect a user's wallet via a given wallet provider
@@ -52,7 +53,7 @@ namespace Thirdweb
                 }
                 else
                 {
-                    if (walletConnection?.provider?.ToString() == "walletConnect")
+                    if (walletConnection?.provider?.ToString() == "walletConnectV1")
                     {
                         await WalletConnect.Instance.EnableWalletConnect();
 
