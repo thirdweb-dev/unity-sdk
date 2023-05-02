@@ -102,7 +102,7 @@ namespace Thirdweb
                 catch (System.Exception)
                 {
                     List<NFT> allNfts = new List<NFT>();
-                    for (int i = start; i < end; i++)
+                    for (int i = start; i <= end; i++)
                         allNfts.Add(await Get(i.ToString()));
                     return allNfts;
                 }
