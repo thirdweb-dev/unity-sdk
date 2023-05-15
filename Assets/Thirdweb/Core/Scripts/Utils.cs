@@ -261,7 +261,21 @@ namespace Thirdweb
             return Application.persistentDataPath + "/account.json";
         }
 
-        public static Account UnlockOrGenerateAccount(int chainId, string password = null, string privateKey = null)
+        public static bool DeleteLocalAccount()
+        {
+            try
+            {
+                File.Delete(GetAccountPath());
+                return true;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("Error deleting account: " + e.Message);
+                return false;
+            }
+        }
+
+        public static Account UnlockOrGenerateLocalAccount(int chainId, string password = null, string privateKey = null)
         {
             password ??= GetDeviceIdentifier();
 

@@ -8,17 +8,10 @@ using UnityEngine.Events;
 using WalletConnectSharp.Core.Models;
 using WalletConnectSharp.Unity;
 
-public enum WalletNative
-{
-    DeviceWallet,
-    DeviceWalletNoPassword,
-    WalletConnect,
-}
-
 [Serializable]
 public struct WalletButtonNative
 {
-    public WalletNative wallet;
+    public WalletProvider wallet;
     public Button walletButton;
     public Sprite icon;
 }
@@ -33,7 +26,7 @@ public struct NetworkSpriteNative
 public class Prefab_ConnectWalletNative : MonoBehaviour
 {
     [Header("SETTINGS")]
-    public List<WalletNative> supportedWallets = new List<WalletNative>() { WalletNative.DeviceWallet, WalletNative.WalletConnect };
+    public List<WalletProvider> supportedWallets = new List<WalletProvider>() { WalletProvider.LocalWallet, WalletProvider.WalletConnectV1 };
 
     [Header("CUSTOM CALLBACKS")]
     public UnityEvent OnConnectedCallback;
@@ -68,7 +61,7 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
     public List<NetworkSpriteNative> networkSprites;
 
     string address;
-    WalletNative wallet;
+    WalletProvider wallet;
     bool connecting;
     WCSessionData wcSessionData;
 
@@ -80,7 +73,7 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
 
         if (supportedWallets.Count == 1)
         {
-            if (supportedWallets[0] == WalletNative.DeviceWallet)
+            if (supportedWallets[0] == WalletProvider.LocalWallet)
             {
                 connectButton.GetComponent<Button>().onClick.AddListener(() => OpenPasswordPanel());
             }
@@ -98,7 +91,7 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
             {
                 wb.walletButton.gameObject.SetActive(true);
 
-                if (wb.wallet == WalletNative.DeviceWallet)
+                if (wb.wallet == WalletProvider.LocalWallet)
                 {
                     wb.walletButton.onClick.AddListener(() => OpenPasswordPanel());
                 }
@@ -129,31 +122,19 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
         passwordPanel.SetActive(true);
         passwordButton.GetComponentInChildren<TMP_Text>().text = Utils.HasStoredAccount() ? "Unlock" : "Create wallet";
         passwordButton.onClick.RemoveAllListeners();
-        passwordButton.onClick.AddListener(() => OnConnect(WalletNative.DeviceWallet, passwordInputField.text));
+        passwordButton.onClick.AddListener(() => OnConnect(WalletProvider.LocalWallet, passwordInputField.text));
     }
 
     // Connecting
 
-    public async void OnConnect(WalletNative _wallet, string password = null)
+    public async void OnConnect(WalletProvider _wallet, string password = null)
     {
         try
         {
-            exportButton.SetActive(_wallet == WalletNative.DeviceWallet || _wallet == WalletNative.DeviceWalletNoPassword);
+            exportButton.SetActive(_wallet == WalletProvider.LocalWallet);
 
-            switch (_wallet)
-            {
-                case WalletNative.DeviceWallet:
-                    address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection() { password = password });
-                    break;
-                case WalletNative.DeviceWalletNoPassword:
-                    address = await ThirdwebManager.Instance.SDK.wallet.Connect();
-                    break;
-                case WalletNative.WalletConnect:
-                    address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection() { provider = WalletProvider.WalletConnect });
-                    break;
-                default:
-                    throw new UnityException("Unimplemented Method Of Native Wallet Connection");
-            }
+            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(_wallet, ThirdwebManager.Instance.GetCurrentChainID(), password));
+
             wallet = _wallet;
             OnConnected();
             OnConnectedCallback?.Invoke();

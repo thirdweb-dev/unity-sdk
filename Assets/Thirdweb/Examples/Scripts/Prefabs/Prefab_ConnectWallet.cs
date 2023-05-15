@@ -6,20 +6,10 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Events;
 
-public enum Wallet
-{
-    MetaMask,
-    Injected,
-    CoinbaseWallet,
-    WalletConnect,
-    MagicAuth,
-    DeviceWallet
-}
-
 [Serializable]
 public struct WalletButton
 {
-    public Wallet wallet;
+    public WalletProvider wallet;
     public GameObject walletButton;
     public Sprite icon;
 }
@@ -34,24 +24,14 @@ public struct NetworkSprite
 public class Prefab_ConnectWallet : MonoBehaviour
 {
     [Header("SETTINGS")]
-    public List<Wallet> supportedWallets = new List<Wallet>() { Wallet.MetaMask, Wallet.Injected, Wallet.CoinbaseWallet, Wallet.WalletConnect, Wallet.MagicAuth, Wallet.DeviceWallet };
-    public bool supportSwitchingNetwork = true;
-    public List<string> supportedNetworks = new List<string>()
+    public List<WalletProvider> supportedWallets = new List<WalletProvider>()
     {
-        "ethereum",
-        "goerli",
-        "polygon",
-        "mumbai",
-        "fantom",
-        "fantom-testnet",
-        "avalanche",
-        "avalanche-fuji",
-        "optimism",
-        "optimism-goerli",
-        "arbitrum",
-        "arbitrum-goerli",
-        "binance",
-        "binance-testnet",
+        WalletProvider.MetaMask,
+        WalletProvider.Injected,
+        WalletProvider.CoinbaseWallet,
+        WalletProvider.WalletConnectV1,
+        WalletProvider.MagicAuth,
+        WalletProvider.LocalWallet
     };
 
     [Header("CUSTOM CALLBACKS")]
@@ -82,13 +62,14 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public Image chainImage;
 
     // Network Switching
-    public GameObject networkSwitchButton;
+    public Button networkSwitchButton;
+    public GameObject networkSwitchImage;
     public GameObject networkDropdown;
     public GameObject networkButtonPrefab;
     public List<NetworkSprite> networkSprites;
 
     string address;
-    Wallet wallet;
+    WalletProvider wallet;
 
     // UI Initialization
 
@@ -122,19 +103,19 @@ public class Prefab_ConnectWallet : MonoBehaviour
         connectDropdown.SetActive(false);
         connectedDropdown.SetActive(false);
 
-        networkSwitchButton.SetActive(supportSwitchingNetwork);
+        bool multipleNetworks = ThirdwebManager.Instance.supportedChains.Count > 1;
+        networkSwitchButton.GetComponent<Image>().raycastTarget = multipleNetworks;
+        networkSwitchImage.SetActive(multipleNetworks);
         networkDropdown.SetActive(false);
     }
 
     // Connecting
 
-    public async void OnConnect(Wallet _wallet)
+    public async void OnConnect(WalletProvider _wallet)
     {
         try
         {
-            address = await ThirdwebManager.Instance.SDK.wallet.Connect(
-                new WalletConnection() { provider = GetWalletProvider(_wallet), chainId = int.Parse(ThirdwebManager.Instance.GetCurrentChainData().chainId), }
-            );
+            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(_wallet, ThirdwebManager.Instance.GetCurrentChainID()));
 
             wallet = _wallet;
             OnConnected();
@@ -144,7 +125,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         catch (Exception e)
         {
             OnFailedConnectCallback?.Invoke();
-            print($"Error Connecting Wallet: {e.Message}");
+            print($"Error Connecting WalletProvider: {e.Message}");
         }
     }
 
@@ -192,7 +173,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         catch (Exception e)
         {
             OnFailedDisconnectCallback?.Invoke();
-            print($"Error Disconnecting Wallet: {e.Message}");
+            print($"Error Disconnecting WalletProvider: {e.Message}");
         }
     }
 
@@ -247,9 +228,9 @@ public class Prefab_ConnectWallet : MonoBehaviour
         foreach (Transform child in networkDropdown.transform)
             Destroy(child.gameObject);
 
-        foreach (ChainData chainData in ThirdwebManager.Instance.supportedChainData)
+        foreach (ChainData chainData in ThirdwebManager.Instance.supportedChains)
         {
-            if (chainData.identifier == ThirdwebManager.Instance.chain || !supportedNetworks.Contains(chainData.identifier))
+            if (chainData.identifier == ThirdwebManager.Instance.chain || !ThirdwebManager.Instance.supportedChains.Contains(chainData))
                 continue;
 
             GameObject networkButton = Instantiate(networkButtonPrefab, networkDropdown.transform);
@@ -264,28 +245,5 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         GUIUtility.systemCopyBuffer = address;
         print($"Copied your address to your clipboard! Address: {address}");
-    }
-
-    // Utility
-
-    WalletProvider GetWalletProvider(Wallet _wallet)
-    {
-        switch (_wallet)
-        {
-            case Wallet.MetaMask:
-                return WalletProvider.MetaMask;
-            case Wallet.Injected:
-                return WalletProvider.Injected;
-            case Wallet.CoinbaseWallet:
-                return WalletProvider.CoinbaseWallet;
-            case Wallet.WalletConnect:
-                return WalletProvider.WalletConnect;
-            case Wallet.MagicAuth:
-                return WalletProvider.MagicAuth;
-            case Wallet.DeviceWallet:
-                return WalletProvider.DeviceWallet;
-            default:
-                throw new UnityException($"Wallet Provider for wallet {_wallet} unimplemented!");
-        }
     }
 }
