@@ -126,10 +126,11 @@ public class Prefab_NFTLoader : MonoBehaviour
 
         foreach (NFT nft in nftsToLoad)
         {
+            if (!Application.isPlaying)
+                return;
+
             Prefab_NFT nftPrefabScript = Instantiate(nftPrefab, contentParent);
             nftPrefabScript.LoadNFT(nft);
-            // Potentially wait a little here if you are loading a lot without a private IPFS gateway
-            // Could also put this foreach in a separate Coroutine to avoid async object spawning
         }
 
         loadingPanel.SetActive(false);
