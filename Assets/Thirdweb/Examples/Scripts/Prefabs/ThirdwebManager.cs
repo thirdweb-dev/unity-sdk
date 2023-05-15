@@ -25,7 +25,7 @@ public class ThirdwebManager : MonoBehaviour
 
     [Header("CHAIN DATA")]
     [Tooltip("Support any chain by adding it to this list from the inspector")]
-    public List<ChainData> supportedChainData = new List<ChainData>()
+    public List<ChainData> supportedChains = new List<ChainData>()
     {
         new ChainData("ethereum", "1", null),
         new ChainData("goerli", "5", null),
@@ -68,7 +68,7 @@ public class ThirdwebManager : MonoBehaviour
 
     public ThirdwebSDK SDK;
 
-    public static ThirdwebManager Instance;
+    public static ThirdwebManager Instance { get; private set; }
 
     private void Awake()
     {
@@ -159,12 +159,17 @@ public class ThirdwebManager : MonoBehaviour
 
     public ChainData GetChainData(string chainIdentifier)
     {
-        return supportedChainData.Find(x => x.identifier == chainIdentifier);
+        return supportedChains.Find(x => x.identifier == chainIdentifier);
     }
 
     public ChainData GetCurrentChainData()
     {
-        return supportedChainData.Find(x => x.identifier == chain);
+        return supportedChains.Find(x => x.identifier == chain);
+    }
+
+    public int GetCurrentChainID()
+    {
+        return int.Parse(GetCurrentChainData().chainId);
     }
 
     public string GetCurrentChainIdentifier()
