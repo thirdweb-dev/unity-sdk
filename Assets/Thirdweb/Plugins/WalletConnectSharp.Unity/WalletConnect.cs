@@ -72,6 +72,11 @@ namespace WalletConnectSharp.Unity
             base.Awake();
         }
 
+        public void Initialize()
+        {
+            Debug.Log("WalletConnect.Initialize");
+        }
+
         public async Task<WCSessionData> EnableWalletConnect()
         {
             SetMode(true);

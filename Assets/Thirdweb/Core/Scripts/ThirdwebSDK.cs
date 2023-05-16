@@ -98,6 +98,7 @@ namespace Thirdweb
 
         public class NativeSession
         {
+            public WalletProvider provider = WalletProvider.LocalWallet;
             public int lastChainId = -1;
             public string lastRPC = null;
             public Account account = null;
@@ -105,8 +106,9 @@ namespace Thirdweb
             public Options options = new Options();
             public SiweMessageService siweSession = new SiweMessageService();
 
-            public NativeSession(int lastChainId, string lastRPC, Account account, Web3 web3, Options options, SiweMessageService siweSession)
+            public NativeSession(WalletProvider provider, int lastChainId, string lastRPC, Account account, Web3 web3, Options options, SiweMessageService siweSession)
             {
+                this.provider = provider;
                 this.lastChainId = lastChainId;
                 this.lastRPC = lastRPC;
                 this.account = account;
@@ -136,7 +138,7 @@ namespace Thirdweb
                     throw new UnityException("Chain ID override required for native platforms!");
 
                 string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3" : chainOrRPC;
-                nativeSession = new NativeSession(chainId, rpc, null, new Web3(rpc), options, new SiweMessageService());
+                nativeSession = new NativeSession(WalletProvider.LocalWallet, chainId, rpc, null, new Web3(rpc), options, new SiweMessageService());
                 // Set default WalletOptions
                 nativeSession.options.wallet = new WalletOptions()
                 {

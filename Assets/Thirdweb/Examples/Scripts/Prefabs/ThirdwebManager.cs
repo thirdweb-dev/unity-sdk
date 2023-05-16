@@ -66,6 +66,16 @@ public class ThirdwebManager : MonoBehaviour
     [Tooltip("Forwarder Version (Defaults to 0.0.1 if left empty)")]
     public string forwaderVersionOverride = null;
 
+    [Header("MAGIC LINK OPTIONS")]
+    public string magicLinkApiKey = null;
+
+    [Header("NATIVE PREFABS (DANGER ZONE)")]
+    [Tooltip("Instantiates the WalletConnect SDK for Native platforms.")]
+    public GameObject WalletConnectPrefab;
+
+    [Tooltip("Instantiates the MagicAuth SDK for Native platforms.")]
+    public GameObject MagicAuthPrefab;
+
     public ThirdwebSDK SDK;
 
     public static ThirdwebManager Instance { get; private set; }

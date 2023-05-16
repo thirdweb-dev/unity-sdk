@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chain: goerli
-  supportedChainData:
+  supportedChains:
   - identifier: ethereum
     chainId: 1
     rpcOverride: 
@@ -95,4 +95,9 @@ MonoBehaviour:
   appUrl: https://thirdweb.com
   storageIpfsGatewayUrl: https://gateway.ipfscdn.io/ipfs/
   relayerUrl: 
-  relayerForwarderAddress: 
+  forwarderAddress: 
+  forwarderDomainOverride: 
+  forwaderVersionOverride: 
+  magicLinkApiKey: 
+  WalletConnectPrefab: {fileID: 3202619366221042887, guid: aed198bf91a75b94db61c4f472ea1579, type: 3}
+  MagicAuthPrefab: {fileID: 8849381089353801716, guid: 7ae6b24134cff80428397745fe5ade7b, type: 3}
