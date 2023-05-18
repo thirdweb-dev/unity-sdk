@@ -30,7 +30,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         WalletProvider.Injected,
         WalletProvider.CoinbaseWallet,
         WalletProvider.WalletConnectV1,
-        WalletProvider.MagicAuth,
+        WalletProvider.MagicLink,
         WalletProvider.LocalWallet
     };
 
@@ -111,11 +111,11 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
     // Connecting
 
-    public async void OnConnect(WalletProvider _wallet)
+    public async void OnConnect(WalletProvider _wallet, string password = null, string email = "0xfirekeeper@gmail.com")
     {
         try
         {
-            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(_wallet, ThirdwebManager.Instance.GetCurrentChainID()));
+            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(_wallet, ThirdwebManager.Instance.GetCurrentChainID(), password, email));
 
             wallet = _wallet;
             OnConnected();

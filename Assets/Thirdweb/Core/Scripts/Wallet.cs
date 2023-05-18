@@ -42,7 +42,7 @@ namespace Thirdweb
                 switch (walletConnection.provider)
                 {
                     case WalletProvider.LocalWallet:
-                        Account acc = Utils.UnlockOrGenerateLocalAccount(oldSession.lastChainId, walletConnection.password, walletConnection.privateKey);
+                        Account acc = Utils.UnlockOrGenerateLocalAccount(oldSession.lastChainId, walletConnection.password);
                         ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
                             walletConnection.provider,
                             oldSession.lastChainId,
@@ -95,14 +95,17 @@ namespace Thirdweb
                             }
                         }
                         break;
-                    case WalletProvider.MagicAuth:
+                    case WalletProvider.MagicLink:
                         if (MagicUnity.Instance == null)
                         {
                             GameObject.Instantiate(ThirdwebManager.Instance.MagicAuthPrefab);
                             await new WaitForSeconds(1f);
                         }
 
-                        MagicUnity.Instance.Initialize(ThirdwebManager.Instance.magicLinkApiKey, new link.magic.unity.sdk.Relayer.CustomNodeConfiguration(oldSession.lastRPC, oldSession.lastChainId));
+                        MagicUnity.Instance.Initialize(
+                            ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.magicLinkApiKey,
+                            new link.magic.unity.sdk.Relayer.CustomNodeConfiguration(oldSession.lastRPC, oldSession.lastChainId)
+                        );
 
                         await MagicUnity.Instance.EnableMagicAuth(walletConnection.email);
 
@@ -142,7 +145,7 @@ namespace Thirdweb
                     case WalletProvider.WalletConnectV1:
                         WalletConnect.Instance.DisableWalletConnect();
                         break;
-                    case WalletProvider.MagicAuth:
+                    case WalletProvider.MagicLink:
                         MagicUnity.Instance.DisableMagicAuth();
                         break;
                     default:
@@ -322,7 +325,7 @@ namespace Thirdweb
                     case WalletProvider.WalletConnectV1:
                         address = WalletConnect.Instance.Session.Accounts[0];
                         break;
-                    case WalletProvider.MagicAuth:
+                    case WalletProvider.MagicLink:
                         address = await MagicUnity.Instance.GetAddress();
                         break;
                     default:
@@ -422,7 +425,7 @@ namespace Thirdweb
                         return signer.EncodeUTF8AndSign(message, new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey));
                     case WalletProvider.WalletConnectV1:
                         return await WalletConnect.Instance.PersonalSign(message);
-                    case WalletProvider.MagicAuth:
+                    case WalletProvider.MagicLink:
                         throw new UnityException("MagicAuth does not support signing messages yet.");
                     default:
                         throw new UnityException("No Account Connected!");
@@ -496,15 +499,13 @@ namespace Thirdweb
         public WalletProvider provider;
         public int chainId;
         public string password;
-        public string privateKey;
         public string email;
 
-        public WalletConnection(WalletProvider provider = WalletProvider.LocalWallet, int chainId = 1, string password = null, string privateKey = null, string email = null)
+        public WalletConnection(WalletProvider provider = WalletProvider.LocalWallet, int chainId = 1, string password = null, string email = null)
         {
             this.provider = provider;
             this.chainId = chainId;
             this.password = password;
-            this.privateKey = privateKey;
             this.email = email;
         }
     }
@@ -515,7 +516,7 @@ namespace Thirdweb
         CoinbaseWallet,
         WalletConnectV1,
         Injected,
-        MagicAuth,
+        MagicLink,
         LocalWallet,
     }
 }

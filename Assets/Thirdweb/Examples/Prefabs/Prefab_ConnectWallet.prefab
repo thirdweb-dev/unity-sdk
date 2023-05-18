@@ -1896,7 +1896,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56e0ba15cb38b4345825030a6c81d2dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  supportedWallets: 01000000020000000300000005000000
+  supportedWallets: 0100000002000000030000000500000004000000
   OnConnectedCallback:
     m_PersistentCalls:
       m_Calls: []

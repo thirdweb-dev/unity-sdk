@@ -161,7 +161,8 @@ public class ThirdwebManager : MonoBehaviour
             appName = string.IsNullOrEmpty(appName) ? "Thirdweb Game" : appName,
             appDescription = string.IsNullOrEmpty(appDescription) ? "Thirdweb Game Demo" : appDescription,
             appIcons = appIcons.Length == 0 ? new string[] { "https://thirdweb.com/favicon.ico" } : appIcons,
-            appUrl = string.IsNullOrEmpty(appUrl) ? "https://thirdweb.com" : appUrl
+            appUrl = string.IsNullOrEmpty(appUrl) ? "https://thirdweb.com" : appUrl,
+            magicLinkApiKey = string.IsNullOrEmpty(magicLinkApiKey) ? null : magicLinkApiKey
         };
 
         SDK = new ThirdwebSDK(chainOrRPC, chainId, options);

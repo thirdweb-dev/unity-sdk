@@ -51,7 +51,7 @@ namespace Thirdweb
                 var typedData = GetTypedDefinition_TokenERC20(domainName, version, chainId, verifyingContract);
                 return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
             }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicAuth)
+            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicLink)
             {
                 throw new UnityException("Magic Auth does not support EIP712 signing");
             }
@@ -132,7 +132,7 @@ namespace Thirdweb
                 var typedData = GetTypedDefinition_TokenERC721(domainName, version, chainId, verifyingContract);
                 return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
             }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicAuth)
+            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicLink)
             {
                 throw new UnityException("Magic Auth does not support EIP712 signing");
             }
@@ -214,7 +214,7 @@ namespace Thirdweb
                 var typedData = GetTypedDefinition_TokenERC1155(domainName, version, chainId, verifyingContract);
                 return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
             }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicAuth)
+            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicLink)
             {
                 throw new UnityException("Magic Auth does not support EIP712 signing");
             }
@@ -339,7 +339,7 @@ namespace Thirdweb
                 var typedData = GetTypedDefinition_MinimalForwarder(domainName, version, chainId, verifyingContract);
                 return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), forwardRequest, typedData);
             }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicAuth)
+            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicLink)
             {
                 throw new UnityException("Magic Auth does not support EIP712 signing");
             }

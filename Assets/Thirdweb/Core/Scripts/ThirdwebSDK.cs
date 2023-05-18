@@ -35,6 +35,7 @@ namespace Thirdweb
             public string appDescription;
             public string appUrl;
             public string[] appIcons;
+            public string magicLinkApiKey; // the magic link api key to use for magic link auth
             public Dictionary<string, object> extras; // extra data to pass to the wallet provider
         }
 

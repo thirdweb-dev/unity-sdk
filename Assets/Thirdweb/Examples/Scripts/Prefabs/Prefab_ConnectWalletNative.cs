@@ -133,7 +133,7 @@ public class Prefab_ConnectWalletNative : MonoBehaviour
         {
             exportButton.SetActive(_wallet == WalletProvider.LocalWallet);
 
-            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(_wallet, ThirdwebManager.Instance.GetCurrentChainID(), password, null, email));
+            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(_wallet, ThirdwebManager.Instance.GetCurrentChainID(), password, email));
 
             wallet = _wallet;
             OnConnected();
