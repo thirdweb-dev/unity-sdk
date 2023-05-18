@@ -36,6 +36,7 @@ Note: The Newtonsoft DLL is included as part of the Unity Package, feel free to 
 
 - Open your `Build settings`, select `WebGL` as the target platform.
 - Open `Player settings` > `Resolution and Presentation` and under `WebGLTemplate` choose `Thirdweb`.
+- Use `Smaller (faster) Builds` in the Build Settings.
 - Save and click `Build and Run` to test out your game in a browser.
 
 If you're uploading your build, set `Compression Format` to `Disabled` in `Player Settings` > `Publishing Settings`.
@@ -45,10 +46,9 @@ Note that in order to communicate with the SDK on WebGL, you need to `Build and 
 ## Other Platforms
 
 - Requires a ThirdwebManager prefab in your scene.
+- Multiple networks are not supported.
 - Use IL2CPP over Mono when possible in the Player Settings.
-- Use Smaller (faster) Builds in the Build Settings.
 - Using the SDK in the editor (pressing Play) is an accurate reflection of what you can expect to see on native platforms.
-- If using prefabs, use Prefab_ConnectWalletNative instead of Prefab_ConnectWallet.
 - If building to mobile and running into RPC issues, it is best to run Force Resolve from the Assets menu > External Dependency Manager > Android Resolver > Force Resolve for example.
 
 # Usage
@@ -94,19 +94,10 @@ All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-
 
 [Connect Wallet](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_ConnectWallet.cs) - All-in-one drag & drop wallet supporting multiple wallet providers, network switching, balance displaying and more!
 
-- Drag and drop it into your scene and select the wallet providers you want to support from the Inspector.
-- You may also choose whether you want to activate the Network Switching feature (leave unchecked if your app only requires one network).
-- You can add callbacks from the inspector for when the wallet is connected, disconnected, fails to connect or disconnect.
-
-[Connect Wallet Native](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_ConnectWalletNative.cs)
-
-- All-in-one drag & drop wallet supporting WalletConnect and Device Wallets (with or without passwords)
-- Drag and drop it into your scene and select the wallet options you want to provide (recommend using only one).
-- For device wallets, exporting will open the local encrypted keystore file on Standalone platforms (Application.persistentDataPath/account.json)
-- Opening a local file is not supported on iOS/Android 7+ so it also copies its contents to your clipboard.
-- You can import said keystore to Metamask or other wallet providers with the password needed to decrypt it.
-- When using DeviceWalletNoPassword, the password is your device UID.
-- You can add callbacks from the inspector for when the wallet is connected, disconnected, fails to connect or disconnect.
+- Drag and drop it into your scene.
+- Set up the networks you want to support from the ThirdwebManager prefab.
+- You can add callbacks from the inspector for when the wallet is connected, disconnected, fails to connect or disconnect, as well as callbacks when the network is switched or fails to do so.
+- For native platforms: some wallet providers may not be supported, and multiple networks in the ThirdwebManager is not supported.
 
 [NFT Loader](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_NFTLoader.cs) - Standalone drag & drop grid/scroll view of NFTs you ask it to display!
 

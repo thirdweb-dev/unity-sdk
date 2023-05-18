@@ -35,7 +35,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public UnityEvent OnFailedDisconnectCallback;
     public UnityEvent OnFailedSwitchNetworkCallback;
 
-    [Header("UI ELEMENTS (DO NOT EDIT)")]
+    [Header("UI ELEMENTS (DANGER ZONE)")]
     // Connecting
     public GameObject connectButton;
     public GameObject connectDropdown;
@@ -43,6 +43,9 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public GameObject passwordPanel;
     public TMP_InputField passwordInputField;
     public Button passwordButton;
+    public GameObject emailPanel;
+    public TMP_InputField emailInputField;
+    public Button emailButton;
 
     // Connected
     public GameObject connectedButton;
@@ -100,6 +103,10 @@ public class Prefab_ConnectWallet : MonoBehaviour
                 {
                     wb.walletButton.onClick.AddListener(() => OpenPasswordPanel());
                 }
+                else if (wb.wallet == WalletProvider.MagicLink)
+                {
+                    wb.walletButton.onClick.AddListener(() => OpenEmailPanel());
+                }
                 else
                 {
                     wb.walletButton.onClick.AddListener(() => OnConnect(wb.wallet, null));
@@ -125,6 +132,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         networkDropdown.SetActive(false);
 
         passwordPanel.SetActive(false);
+        emailPanel.SetActive(false);
     }
 
     public void OpenPasswordPanel()
@@ -135,9 +143,16 @@ public class Prefab_ConnectWallet : MonoBehaviour
         passwordButton.onClick.AddListener(() => OnConnect(WalletProvider.LocalWallet, passwordInputField.text));
     }
 
+    public void OpenEmailPanel()
+    {
+        emailPanel.SetActive(true);
+        emailButton.onClick.RemoveAllListeners();
+        emailButton.onClick.AddListener(() => OnConnect(WalletProvider.MagicLink, null, emailInputField.text));
+    }
+
     // Connecting
 
-    public async void OnConnect(WalletProvider _wallet, string password = null, string email = "0xfirekeeper@gmail.com")
+    public async void OnConnect(WalletProvider _wallet, string password = null, string email = "joe@biden.com")
     {
         try
         {
@@ -163,6 +178,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         try
         {
             passwordPanel.SetActive(false);
+            emailPanel.SetActive(false);
             string _chain = ThirdwebManager.Instance.chain;
             CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
             balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
@@ -257,6 +273,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         connectDropdown.SetActive(false);
         connectedDropdown.SetActive(false);
         passwordPanel.SetActive(false);
+        emailPanel.SetActive(false);
     }
 
     // UI
