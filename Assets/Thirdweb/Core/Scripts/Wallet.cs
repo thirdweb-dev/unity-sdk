@@ -10,6 +10,8 @@ using Nethereum.Siwe.Core;
 using System.Collections.Generic;
 using Nethereum.Web3.Accounts;
 using WalletConnectSharp.Core.Models.Ethereum;
+using link.magic.unity.sdk;
+using Nethereum.RPC;
 
 //using WalletConnectSharp.NEthereum;
 
@@ -26,11 +28,9 @@ namespace Thirdweb
         /// <summary>
         /// Connect a user's wallet via a given wallet provider
         /// </summary>
-        /// <param name="walletConnection">The wallet provider and optional parameters. Defaults to local wallet.</param>
-        public async Task<string> Connect(WalletConnection walletConnection = null)
+        /// <param name="walletConnection">The wallet provider and optional parameters.</param>
+        public async Task<string> Connect(WalletConnection walletConnection)
         {
-            walletConnection ??= new WalletConnection(WalletProvider.LocalWallet, 1);
-
             if (Utils.IsWebGLBuild())
             {
                 return await Bridge.Connect(walletConnection);
@@ -39,89 +39,91 @@ namespace Thirdweb
             {
                 ThirdwebSDK.NativeSession oldSession = ThirdwebManager.Instance.SDK.nativeSession;
 
-                if (walletConnection.provider == WalletProvider.WalletConnectV1)
+                switch (walletConnection.provider)
                 {
-                    await WalletConnect.Instance.EnableWalletConnect();
+                    case WalletProvider.LocalWallet:
+                        Account acc = Utils.UnlockOrGenerateLocalAccount(oldSession.lastChainId, walletConnection.password);
+                        ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
+                            walletConnection.provider,
+                            oldSession.lastChainId,
+                            oldSession.lastRPC,
+                            acc,
+                            new Web3(acc, oldSession.lastRPC),
+                            oldSession.options,
+                            oldSession.siweSession
+                        );
+                        break;
+                    case WalletProvider.WalletConnectV1:
+                        if (WalletConnect.Instance == null)
+                        {
+                            GameObject.Instantiate(ThirdwebManager.Instance.WalletConnectPrefab);
+                            await new WaitForSeconds(0.5f);
+                        }
 
-                    ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
-                        oldSession.lastChainId,
-                        oldSession.lastRPC,
-                        null,
-                        WalletConnect.Instance.Session.BuildWeb3(new Uri(oldSession.lastRPC)).AsWalletAccount(true),
-                        oldSession.options,
-                        oldSession.siweSession
-                    );
+                        WalletConnect.Instance.Initialize();
 
-                    // Switch to chain
-                    try
-                    {
-                        await WalletConnect.Instance.WalletSwitchEthChain(new EthChain() { chainId = ThirdwebManager.Instance.SDK.currentChainData.chainId });
-                    }
-                    catch (System.Exception e)
-                    {
-                        Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
+                        await WalletConnect.Instance.EnableWalletConnect();
 
-                        // Add chain
+                        ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
+                            walletConnection.provider,
+                            oldSession.lastChainId,
+                            oldSession.lastRPC,
+                            null,
+                            WalletConnect.Instance.Session.BuildWeb3(new Uri(oldSession.lastRPC)).AsWalletAccount(true),
+                            oldSession.options,
+                            oldSession.siweSession
+                        );
+
+                        // Switch to chain
                         try
                         {
-                            await WalletConnect.Instance.WalletAddEthChain(ThirdwebManager.Instance.SDK.currentChainData);
                             await WalletConnect.Instance.WalletSwitchEthChain(new EthChain() { chainId = ThirdwebManager.Instance.SDK.currentChainData.chainId });
                         }
-                        catch (System.Exception f)
+                        catch (System.Exception e)
                         {
-                            Debug.LogWarning("Adding chain error: " + f.Message);
-                            return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
-                        }
-                    }
+                            Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
 
-                    return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
-                }
-                else if (walletConnection.provider == WalletProvider.LocalWallet)
-                {
-                    if (walletConnection.privateKey != null)
-                    {
-                        Account acc = Utils.UnlockOrGenerateLocalAccount(oldSession.lastChainId, null, walletConnection.privateKey);
+                            // Add chain
+                            try
+                            {
+                                await WalletConnect.Instance.WalletAddEthChain(ThirdwebManager.Instance.SDK.currentChainData);
+                                await WalletConnect.Instance.WalletSwitchEthChain(new EthChain() { chainId = ThirdwebManager.Instance.SDK.currentChainData.chainId });
+                            }
+                            catch (System.Exception f)
+                            {
+                                Debug.LogWarning("Adding chain error: " + f.Message);
+                            }
+                        }
+                        break;
+                    case WalletProvider.MagicLink:
+                        if (MagicUnity.Instance == null)
+                        {
+                            GameObject.Instantiate(ThirdwebManager.Instance.MagicAuthPrefab);
+                            await new WaitForSeconds(1f);
+                        }
+
+                        MagicUnity.Instance.Initialize(
+                            ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.magicLinkApiKey,
+                            new link.magic.unity.sdk.Relayer.CustomNodeConfiguration(oldSession.lastRPC, oldSession.lastChainId)
+                        );
+
+                        await MagicUnity.Instance.EnableMagicAuth(walletConnection.email);
+
                         ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
+                            walletConnection.provider,
                             oldSession.lastChainId,
                             oldSession.lastRPC,
-                            acc,
-                            new Web3(acc, oldSession.lastRPC),
+                            null,
+                            new Web3(Magic.Instance.Provider),
                             oldSession.options,
                             oldSession.siweSession
                         );
-                        return acc.Address;
-                    }
-                    else if (walletConnection.password != null)
-                    {
-                        Account acc = Utils.UnlockOrGenerateLocalAccount(oldSession.lastChainId, walletConnection.password, null);
-                        ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
-                            oldSession.lastChainId,
-                            oldSession.lastRPC,
-                            acc,
-                            new Web3(acc, oldSession.lastRPC),
-                            oldSession.options,
-                            oldSession.siweSession
-                        );
-                        return acc.Address;
-                    }
-                    else
-                    {
-                        Account noPassAcc = Utils.UnlockOrGenerateLocalAccount(oldSession.lastChainId, null, null);
-                        ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
-                            oldSession.lastChainId,
-                            oldSession.lastRPC,
-                            noPassAcc,
-                            new Web3(noPassAcc, oldSession.lastRPC),
-                            oldSession.options,
-                            oldSession.siweSession
-                        );
-                        return noPassAcc.Address;
-                    }
+                        break;
+                    default:
+                        throw new UnityException("This wallet connection method is not supported on this platform!");
                 }
-                else
-                {
-                    throw new UnityException("This wallet connection method is not supported on this platform!");
-                }
+
+                return await GetAddress();
             }
         }
 
@@ -138,12 +140,20 @@ namespace Thirdweb
             {
                 ThirdwebSDK.NativeSession oldSession = ThirdwebManager.Instance.SDK.nativeSession;
 
-                if (Utils.ActiveWalletConnectSession())
+                switch (oldSession.provider)
                 {
-                    WalletConnect.Instance.DisableWalletConnect();
+                    case WalletProvider.WalletConnectV1:
+                        WalletConnect.Instance.DisableWalletConnect();
+                        break;
+                    case WalletProvider.MagicLink:
+                        MagicUnity.Instance.DisableMagicAuth();
+                        break;
+                    default:
+                        break;
                 }
 
                 ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
+                    WalletProvider.LocalWallet,
                     oldSession.lastChainId,
                     oldSession.lastRPC,
                     null,
@@ -305,18 +315,24 @@ namespace Thirdweb
             }
             else
             {
-                if (Utils.ActiveWalletConnectSession())
+                string address = null;
+
+                switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
                 {
-                    return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(WalletConnect.Instance.Session.Accounts[0]);
+                    case WalletProvider.LocalWallet:
+                        address = ThirdwebManager.Instance.SDK.nativeSession.account.Address;
+                        break;
+                    case WalletProvider.WalletConnectV1:
+                        address = WalletConnect.Instance.Session.Accounts[0];
+                        break;
+                    case WalletProvider.MagicLink:
+                        address = await MagicUnity.Instance.GetAddress();
+                        break;
+                    default:
+                        throw new UnityException("No Account Connected!");
                 }
-                else if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
-                {
-                    return ThirdwebManager.Instance.SDK.nativeSession.account.Address;
-                }
-                else
-                {
-                    throw new UnityException("No Account Connected!");
-                }
+
+                return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address);
             }
         }
 
@@ -331,7 +347,7 @@ namespace Thirdweb
             }
             else
             {
-                return ThirdwebManager.Instance.SDK.nativeSession.account != null || Utils.ActiveWalletConnectSession();
+                return ThirdwebManager.Instance.SDK.nativeSession.account != null || ThirdwebManager.Instance.SDK.nativeSession.provider != WalletProvider.LocalWallet;
             }
         }
 
@@ -402,18 +418,18 @@ namespace Thirdweb
             }
             else
             {
-                if (Utils.ActiveWalletConnectSession())
+                switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
                 {
-                    return await WalletConnect.Instance.PersonalSign(message);
-                }
-                else if (ThirdwebManager.Instance.SDK.nativeSession.account != null)
-                {
-                    var signer = new EthereumMessageSigner();
-                    return signer.EncodeUTF8AndSign(message, new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey));
-                }
-                else
-                {
-                    throw new UnityException("No Account Connected!");
+                    case WalletProvider.LocalWallet:
+                        var signer = new EthereumMessageSigner();
+                        return signer.EncodeUTF8AndSign(message, new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey));
+                    case WalletProvider.WalletConnectV1:
+                        return await WalletConnect.Instance.PersonalSign(message);
+                    case WalletProvider.MagicLink:
+                        var personalSign = new Nethereum.RPC.Eth.EthSign(Magic.Instance.Provider);
+                        return await personalSign.SendRequestAsync(await GetAddress(), message);
+                    default:
+                        throw new UnityException("No Account Connected!");
                 }
             }
         }
@@ -484,14 +500,14 @@ namespace Thirdweb
         public WalletProvider provider;
         public int chainId;
         public string password;
-        public string privateKey;
+        public string email;
 
-        public WalletConnection(WalletProvider provider = WalletProvider.LocalWallet, int chainId = 1, string password = null, string privateKey = null)
+        public WalletConnection(WalletProvider provider = WalletProvider.LocalWallet, int chainId = 1, string password = null, string email = null)
         {
             this.provider = provider;
             this.chainId = chainId;
             this.password = password;
-            this.privateKey = privateKey;
+            this.email = email;
         }
     }
 
@@ -501,7 +517,7 @@ namespace Thirdweb
         CoinbaseWallet,
         WalletConnectV1,
         Injected,
-        MagicAuth,
+        MagicLink,
         LocalWallet,
     }
 }

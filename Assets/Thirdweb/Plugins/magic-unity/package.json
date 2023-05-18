@@ -1,0 +1,13 @@
+{
+  "name": "link.magic.unity.sdk",
+  "displayName": "Magic Link Unity SDK",
+  "description": "The Magic Link Unity SDK provides access to Magic Key Management System and interact with Blockchain.",
+  "version": "1.1.0",
+  "unity": "2021.3",
+  "author": {
+    "name": "Magic Labs Inc."
+  },
+  "dependencies": {
+  }
+}
+

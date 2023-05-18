@@ -319,11 +319,6 @@ namespace Thirdweb
             }
         }
 
-        public static bool ActiveWalletConnectSession()
-        {
-            return WalletConnect.Instance != null && WalletConnect.Instance.Session != null && WalletConnect.Instance.Session.Connected;
-        }
-
         public static string cidToIpfsUrl(this string cid, bool useGateway = false)
         {
             string ipfsRaw = $"ipfs://{cid}";
