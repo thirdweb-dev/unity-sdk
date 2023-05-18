@@ -209,9 +209,7 @@ namespace WalletConnectSharp.Unity
             Debug.LogWarning("Waiting for Wallet connection");
 
             if (ConnectionStarted != null)
-            {
                 ConnectionStarted(this, EventArgs.Empty);
-            }
 
             int tries = 0;
             while (tries < connectSessionRetryCount)
@@ -225,6 +223,11 @@ namespace WalletConnectSharp.Unity
                     tries++;
                     if (tries >= connectSessionRetryCount)
                         throw new IOException("Failed to request session connection after " + tries + " times.", e);
+                }
+                catch (TimeoutException)
+                {
+                    if (ConnectionStarted != null)
+                        ConnectionStarted(this, EventArgs.Empty);
                 }
             }
 

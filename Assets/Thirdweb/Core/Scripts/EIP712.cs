@@ -27,45 +27,33 @@ namespace Thirdweb
             string privateKeyOverride = null
         )
         {
-            if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.LocalWallet)
-            {
-                var signer = new Eip712TypedDataSigner();
-                var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
-                var typedData = GetTypedDefinition_TokenERC20(domainName, version, chainId, verifyingContract);
-                var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
-                return signature;
-            }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.WalletConnectV1)
-            {
-                var walletConnectMintRequest = new ERC20MintRequestWalletConnect()
-                {
-                    To = mintRequest.To,
-                    PrimarySaleRecipient = mintRequest.PrimarySaleRecipient,
-                    Quantity = mintRequest.Quantity,
-                    Price = mintRequest.Price,
-                    Currency = mintRequest.Currency,
-                    ValidityStartTimestamp = mintRequest.ValidityStartTimestamp,
-                    ValidityEndTimestamp = mintRequest.ValidityEndTimestamp,
-                    Uid = mintRequest.Uid.ByteArrayToHexString()
-                };
-                var typedData = GetTypedDefinition_TokenERC20(domainName, version, chainId, verifyingContract);
-                return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
-            }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicLink)
-            {
-                throw new UnityException("Magic Auth does not support EIP712 signing");
-            }
-            else
-            {
-                throw new UnityException("No account connected!");
-            }
+            var typedData = GetTypedDefinition_TokenERC20(domainName, version, chainId, verifyingContract);
 
-            // Debug.Log("Typed Data JSON: " + typedData.ToJson(mintRequest));
-            // Debug.Log("Signing address: " + key.GetPublicAddress());
-            // Debug.Log("Signature: " + signature);
-
-            // var addressRecovered = signer.RecoverFromSignatureV4(mintRequest, typedData, signature);
-            // Debug.Log("Recovered address from signature:" + addressRecovered);
+            switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
+            {
+                case WalletProvider.LocalWallet:
+                    var signer = new Eip712TypedDataSigner();
+                    var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                    var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
+                    return signature;
+                case WalletProvider.WalletConnectV1:
+                    var walletConnectMintRequest = new ERC20MintRequestWalletConnect()
+                    {
+                        To = mintRequest.To,
+                        PrimarySaleRecipient = mintRequest.PrimarySaleRecipient,
+                        Quantity = mintRequest.Quantity,
+                        Price = mintRequest.Price,
+                        Currency = mintRequest.Currency,
+                        ValidityStartTimestamp = mintRequest.ValidityStartTimestamp,
+                        ValidityEndTimestamp = mintRequest.ValidityEndTimestamp,
+                        Uid = mintRequest.Uid.ByteArrayToHexString()
+                    };
+                    return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
+                case WalletProvider.MagicLink:
+                    throw new UnityException("Magic Auth does not support EIP712 signing");
+                default:
+                    throw new UnityException("No account connected!");
+            }
         }
 
         public partial class ERC20MintRequestWalletConnect : ERC20MintRequestBaseWalletConnect { }
@@ -106,39 +94,34 @@ namespace Thirdweb
             string privateKeyOverride = null
         )
         {
-            if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.LocalWallet)
+            var typedData = GetTypedDefinition_TokenERC721(domainName, version, chainId, verifyingContract);
+
+            switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
             {
-                var signer = new Eip712TypedDataSigner();
-                var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
-                var typedData = GetTypedDefinition_TokenERC721(domainName, version, chainId, verifyingContract);
-                var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
-                return signature;
-            }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.WalletConnectV1)
-            {
-                var walletConnectMintRequest = new ERC721MintRequestWalletConnect()
-                {
-                    To = mintRequest.To,
-                    RoyaltyRecipient = mintRequest.RoyaltyRecipient,
-                    RoyaltyBps = mintRequest.RoyaltyBps,
-                    PrimarySaleRecipient = mintRequest.PrimarySaleRecipient,
-                    Uri = mintRequest.Uri,
-                    Price = mintRequest.Price,
-                    Currency = mintRequest.Currency,
-                    ValidityStartTimestamp = mintRequest.ValidityStartTimestamp,
-                    ValidityEndTimestamp = mintRequest.ValidityEndTimestamp,
-                    Uid = mintRequest.Uid.ByteArrayToHexString()
-                };
-                var typedData = GetTypedDefinition_TokenERC721(domainName, version, chainId, verifyingContract);
-                return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
-            }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicLink)
-            {
-                throw new UnityException("Magic Auth does not support EIP712 signing");
-            }
-            else
-            {
-                throw new UnityException("No account connected!");
+                case WalletProvider.LocalWallet:
+                    var signer = new Eip712TypedDataSigner();
+                    var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                    var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
+                    return signature;
+                case WalletProvider.WalletConnectV1:
+                    var walletConnectMintRequest = new ERC721MintRequestWalletConnect()
+                    {
+                        To = mintRequest.To,
+                        RoyaltyRecipient = mintRequest.RoyaltyRecipient,
+                        RoyaltyBps = mintRequest.RoyaltyBps,
+                        PrimarySaleRecipient = mintRequest.PrimarySaleRecipient,
+                        Uri = mintRequest.Uri,
+                        Price = mintRequest.Price,
+                        Currency = mintRequest.Currency,
+                        ValidityStartTimestamp = mintRequest.ValidityStartTimestamp,
+                        ValidityEndTimestamp = mintRequest.ValidityEndTimestamp,
+                        Uid = mintRequest.Uid.ByteArrayToHexString()
+                    };
+                    return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
+                case WalletProvider.MagicLink:
+                    throw new UnityException("Magic Auth does not support EIP712 signing");
+                default:
+                    throw new UnityException("No account connected!");
             }
         }
 
@@ -186,41 +169,36 @@ namespace Thirdweb
             string privateKeyOverride = null
         )
         {
-            if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.LocalWallet)
+            var typedData = GetTypedDefinition_TokenERC1155(domainName, version, chainId, verifyingContract);
+
+            switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
             {
-                var signer = new Eip712TypedDataSigner();
-                var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
-                var typedData = GetTypedDefinition_TokenERC1155(domainName, version, chainId, verifyingContract);
-                var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
-                return signature;
-            }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.WalletConnectV1)
-            {
-                var walletConnectMintRequest = new ERC1155MintRequestWalletConnect()
-                {
-                    To = mintRequest.To,
-                    RoyaltyRecipient = mintRequest.RoyaltyRecipient,
-                    RoyaltyBps = mintRequest.RoyaltyBps,
-                    PrimarySaleRecipient = mintRequest.PrimarySaleRecipient,
-                    TokenId = mintRequest.TokenId,
-                    Uri = mintRequest.Uri,
-                    Quantity = mintRequest.Quantity,
-                    PricePerToken = mintRequest.PricePerToken,
-                    Currency = mintRequest.Currency,
-                    ValidityStartTimestamp = mintRequest.ValidityStartTimestamp,
-                    ValidityEndTimestamp = mintRequest.ValidityEndTimestamp,
-                    Uid = mintRequest.Uid.ByteArrayToHexString()
-                };
-                var typedData = GetTypedDefinition_TokenERC1155(domainName, version, chainId, verifyingContract);
-                return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
-            }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicLink)
-            {
-                throw new UnityException("Magic Auth does not support EIP712 signing");
-            }
-            else
-            {
-                throw new UnityException("No account connected!");
+                case WalletProvider.LocalWallet:
+                    var signer = new Eip712TypedDataSigner();
+                    var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                    var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
+                    return signature;
+                case WalletProvider.WalletConnectV1:
+                    var walletConnectMintRequest = new ERC1155MintRequestWalletConnect()
+                    {
+                        To = mintRequest.To,
+                        RoyaltyRecipient = mintRequest.RoyaltyRecipient,
+                        RoyaltyBps = mintRequest.RoyaltyBps,
+                        PrimarySaleRecipient = mintRequest.PrimarySaleRecipient,
+                        TokenId = mintRequest.TokenId,
+                        Uri = mintRequest.Uri,
+                        Quantity = mintRequest.Quantity,
+                        PricePerToken = mintRequest.PricePerToken,
+                        Currency = mintRequest.Currency,
+                        ValidityStartTimestamp = mintRequest.ValidityStartTimestamp,
+                        ValidityEndTimestamp = mintRequest.ValidityEndTimestamp,
+                        Uid = mintRequest.Uid.ByteArrayToHexString()
+                    };
+                    return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
+                case WalletProvider.MagicLink:
+                    throw new UnityException("Magic Auth does not support EIP712 signing");
+                default:
+                    throw new UnityException("No account connected!");
             }
         }
 
@@ -326,26 +304,20 @@ namespace Thirdweb
             string privateKeyOverride = null
         )
         {
-            if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.LocalWallet)
+            var typedData = GetTypedDefinition_MinimalForwarder(domainName, version, chainId, verifyingContract);
+
+            switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
             {
-                var signer = new Eip712TypedDataSigner();
-                var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
-                var typedData = GetTypedDefinition_MinimalForwarder(domainName, version, chainId, verifyingContract);
-                var signature = signer.SignTypedDataV4(forwardRequest, typedData, key);
-                return signature;
-            }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.WalletConnectV1)
-            {
-                var typedData = GetTypedDefinition_MinimalForwarder(domainName, version, chainId, verifyingContract);
-                return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), forwardRequest, typedData);
-            }
-            else if (ThirdwebManager.Instance.SDK.nativeSession.provider == WalletProvider.MagicLink)
-            {
-                throw new UnityException("Magic Auth does not support EIP712 signing");
-            }
-            else
-            {
-                throw new UnityException("No account connected!");
+                case WalletProvider.LocalWallet:
+                    var signer = new Eip712TypedDataSigner();
+                    var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                    return signer.SignTypedDataV4(forwardRequest, typedData, key);
+                case WalletProvider.WalletConnectV1:
+                    return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), forwardRequest, typedData);
+                case WalletProvider.MagicLink:
+                    throw new UnityException("Magic Auth does not support EIP712 signing");
+                default:
+                    throw new UnityException("No account connected!");
             }
         }
 

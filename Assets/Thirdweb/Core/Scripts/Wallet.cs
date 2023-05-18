@@ -426,7 +426,8 @@ namespace Thirdweb
                     case WalletProvider.WalletConnectV1:
                         return await WalletConnect.Instance.PersonalSign(message);
                     case WalletProvider.MagicLink:
-                        throw new UnityException("MagicAuth does not support signing messages yet.");
+                        var personalSign = new Nethereum.RPC.Eth.EthSign(Magic.Instance.Provider);
+                        return await personalSign.SendRequestAsync(await GetAddress(), message);
                     default:
                         throw new UnityException("No Account Connected!");
                 }

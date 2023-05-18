@@ -5,12 +5,13 @@ using System;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using WalletConnectSharp.Core.Models;
 
 [Serializable]
 public struct WalletButton
 {
     public WalletProvider wallet;
-    public GameObject walletButton;
+    public Button walletButton;
     public Sprite icon;
 }
 
@@ -24,15 +25,7 @@ public struct NetworkSprite
 public class Prefab_ConnectWallet : MonoBehaviour
 {
     [Header("SETTINGS")]
-    public List<WalletProvider> supportedWallets = new List<WalletProvider>()
-    {
-        WalletProvider.MetaMask,
-        WalletProvider.Injected,
-        WalletProvider.CoinbaseWallet,
-        WalletProvider.WalletConnectV1,
-        WalletProvider.MagicLink,
-        WalletProvider.LocalWallet
-    };
+    public List<WalletProvider> supportedWallets = new List<WalletProvider>() { WalletProvider.LocalWallet, WalletProvider.WalletConnectV1 };
 
     [Header("CUSTOM CALLBACKS")]
     public UnityEvent OnConnectedCallback;
@@ -47,6 +40,9 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public GameObject connectButton;
     public GameObject connectDropdown;
     public List<WalletButton> walletButtons;
+    public GameObject passwordPanel;
+    public TMP_InputField passwordInputField;
+    public Button passwordButton;
 
     // Connected
     public GameObject connectedButton;
@@ -60,8 +56,9 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public TMP_Text currentNetworkText;
     public Image currentNetworkImage;
     public Image chainImage;
+    public GameObject exportButton;
 
-    // Network Switching
+    // Networks
     public Button networkSwitchButton;
     public GameObject networkSwitchImage;
     public GameObject networkDropdown;
@@ -70,6 +67,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
     string address;
     WalletProvider wallet;
+    bool connecting;
+    WCSessionData wcSessionData;
 
     // UI Initialization
 
@@ -78,7 +77,16 @@ public class Prefab_ConnectWallet : MonoBehaviour
         address = null;
 
         if (supportedWallets.Count == 1)
-            connectButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(supportedWallets[0]));
+        {
+            if (supportedWallets[0] == WalletProvider.LocalWallet)
+            {
+                connectButton.GetComponent<Button>().onClick.AddListener(() => OpenPasswordPanel());
+            }
+            else
+            {
+                connectButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(supportedWallets[0]));
+            }
+        }
         else
             connectButton.GetComponent<Button>().onClick.AddListener(() => OnClickDropdown());
 
@@ -86,12 +94,20 @@ public class Prefab_ConnectWallet : MonoBehaviour
         {
             if (supportedWallets.Contains(wb.wallet))
             {
-                wb.walletButton.SetActive(true);
-                wb.walletButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(wb.wallet));
+                wb.walletButton.gameObject.SetActive(true);
+
+                if (wb.wallet == WalletProvider.LocalWallet)
+                {
+                    wb.walletButton.onClick.AddListener(() => OpenPasswordPanel());
+                }
+                else
+                {
+                    wb.walletButton.onClick.AddListener(() => OnConnect(wb.wallet, null));
+                }
             }
             else
             {
-                wb.walletButton.SetActive(false);
+                wb.walletButton.gameObject.SetActive(false);
             }
         }
 
@@ -107,6 +123,16 @@ public class Prefab_ConnectWallet : MonoBehaviour
         networkSwitchButton.GetComponent<Image>().raycastTarget = multipleNetworks;
         networkSwitchImage.SetActive(multipleNetworks);
         networkDropdown.SetActive(false);
+
+        passwordPanel.SetActive(false);
+    }
+
+    public void OpenPasswordPanel()
+    {
+        passwordPanel.SetActive(true);
+        passwordButton.GetComponentInChildren<TMP_Text>().text = Utils.HasStoredAccount() ? "Unlock" : "Create wallet";
+        passwordButton.onClick.RemoveAllListeners();
+        passwordButton.onClick.AddListener(() => OnConnect(WalletProvider.LocalWallet, passwordInputField.text));
     }
 
     // Connecting
@@ -115,17 +141,20 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         try
         {
+            exportButton.SetActive(_wallet == WalletProvider.LocalWallet);
+
             address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(_wallet, ThirdwebManager.Instance.GetCurrentChainID(), password, email));
 
             wallet = _wallet;
             OnConnected();
             OnConnectedCallback?.Invoke();
-            print($"Connected successfully to: {address}");
+            Debug.Log($"Connected successfully to: {address}");
         }
         catch (Exception e)
         {
+            OnDisconnect();
             OnFailedConnectCallback?.Invoke();
-            print($"Error Connecting WalletProvider: {e.Message}");
+            Debug.LogWarning($"Error Connecting Wallet: {e.Message}");
         }
     }
 
@@ -133,19 +162,13 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         try
         {
+            passwordPanel.SetActive(false);
+            string _chain = ThirdwebManager.Instance.chain;
             CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
             balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
             balanceText2.text = balanceText.text;
             walletAddressText.text = await Utils.GetENSName(address) ?? address.ShortenAddress();
             walletAddressText2.text = walletAddressText.text;
-        }
-        catch (Exception e)
-        {
-            print($"Error Fetching Native Balance: {e.Message}");
-        }
-        finally
-        {
-            string _chain = ThirdwebManager.Instance.chain;
             currentNetworkText.text = ThirdwebManager.Instance.GetCurrentChainIdentifier();
             currentNetworkImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
             connectButton.SetActive(false);
@@ -157,33 +180,10 @@ public class Prefab_ConnectWallet : MonoBehaviour
             walletImage2.sprite = walletImage.sprite;
             chainImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
         }
-    }
-
-    // Disconnecting
-
-    public async void OnDisconnect()
-    {
-        try
-        {
-            await ThirdwebManager.Instance.SDK.wallet.Disconnect();
-            OnDisconnected();
-            OnDisconnectedCallback?.Invoke();
-            print($"Disconnected successfully.");
-        }
         catch (Exception e)
         {
-            OnFailedDisconnectCallback?.Invoke();
-            print($"Error Disconnecting WalletProvider: {e.Message}");
+            Debug.LogWarning($"Error Fetching Native Balance: {e.Message}");
         }
-    }
-
-    void OnDisconnected()
-    {
-        address = null;
-        connectButton.SetActive(true);
-        connectedButton.SetActive(false);
-        connectDropdown.SetActive(false);
-        connectedDropdown.SetActive(false);
     }
 
     // Switching Network
@@ -196,23 +196,13 @@ public class Prefab_ConnectWallet : MonoBehaviour
             await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(int.Parse(ThirdwebManager.Instance.GetCurrentChainData().chainId));
             OnConnected();
             OnSwitchNetworkCallback?.Invoke();
-            print($"Switched Network Successfully: {_chain}");
+            Debug.Log($"Switched Network Successfully: {_chain}");
         }
         catch (Exception e)
         {
             OnFailedSwitchNetworkCallback?.Invoke();
-            print($"Error Switching Network: {e.Message}");
+            Debug.LogWarning($"Error Switching Network: {e.Message}");
         }
-    }
-
-    // UI
-
-    public void OnClickDropdown()
-    {
-        if (String.IsNullOrEmpty(address))
-            connectDropdown.SetActive(!connectDropdown.activeInHierarchy);
-        else
-            connectedDropdown.SetActive(!connectedDropdown.activeInHierarchy);
     }
 
     public void OnClickNetworkSwitch()
@@ -241,9 +231,60 @@ public class Prefab_ConnectWallet : MonoBehaviour
         }
     }
 
+    // Disconnecting
+
+    public async void OnDisconnect()
+    {
+        try
+        {
+            await ThirdwebManager.Instance.SDK.wallet.Disconnect();
+            OnDisconnected();
+            OnDisconnectedCallback?.Invoke();
+            Debug.Log($"Disconnected successfully.");
+        }
+        catch (Exception e)
+        {
+            OnFailedDisconnectCallback?.Invoke();
+            Debug.LogWarning($"Error Disconnecting Wallet: {e.Message}");
+        }
+    }
+
+    void OnDisconnected()
+    {
+        address = null;
+        connectButton.SetActive(true);
+        connectedButton.SetActive(false);
+        connectDropdown.SetActive(false);
+        connectedDropdown.SetActive(false);
+        passwordPanel.SetActive(false);
+    }
+
+    // UI
+
+    public void OnClickDropdown()
+    {
+        if (String.IsNullOrEmpty(address))
+            connectDropdown.SetActive(!connectDropdown.activeInHierarchy);
+        else
+            connectedDropdown.SetActive(!connectedDropdown.activeInHierarchy);
+    }
+
     public void OnCopyAddress()
     {
         GUIUtility.systemCopyBuffer = address;
-        print($"Copied your address to your clipboard! Address: {address}");
+        Debug.LogWarning($"Copied your address to your clipboard! Address: {address}");
+    }
+
+    public void OnExportWallet()
+    {
+        Application.OpenURL(Utils.GetAccountPath()); // Doesn't work on iOS or > Android 6
+
+        // Fallback
+        string text = System.IO.File.ReadAllText(Utils.GetAccountPath());
+        GUIUtility.systemCopyBuffer = text;
+        Debug.LogWarning(
+            "Copied your encrypted keystore to your clipboard! You may import it into an external wallet with your password.\n"
+                + "If no password was provided upon the creation of this account, the password is your device unique ID."
+        );
     }
 }
