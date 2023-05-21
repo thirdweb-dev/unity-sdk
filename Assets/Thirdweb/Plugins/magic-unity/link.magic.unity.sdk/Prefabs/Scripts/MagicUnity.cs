@@ -63,7 +63,8 @@ public class MagicUnity : MonoBehaviour
         return await personalSign.SendRequestAsync(await GetAddress(), message);
     }
 
-    public async Task<string> SignTypedDataV4<T>(T data, TypedData<Domain> typedData)
+    public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
+        where TDomain : IDomain
     {
         throw new NotImplementedException("Magic does not support EIP712");
     }

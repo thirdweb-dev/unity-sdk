@@ -479,7 +479,8 @@ namespace Thirdweb
             }
         }
 
-        public async Task<string> SignTypedDataV4<T>(T data, TypedData<Domain> typedData)
+        public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
+            where TDomain : IDomain
         {
             switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
             {

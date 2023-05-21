@@ -469,7 +469,7 @@ namespace WalletConnectSharp.Unity
             where TDomain : IDomain
         {
             var address = Session.Accounts[0];
-            return await WalletConnectNEthereumExtensions.EthSignTypedData(Session, address, data, typedData);
+            return await Session.EthSignTypedData(address, data, typedData);
         }
     }
 }

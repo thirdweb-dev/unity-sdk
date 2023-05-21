@@ -251,7 +251,8 @@ namespace MetaMask.Unity
             return result.GetString();
         }
 
-        public async Task<string> SignTypedDataV4<T>(T data, TypedData<Domain> typedData)
+        public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
+            where TDomain : IDomain
         {
             var request = new MetaMaskEthereumRequest { Method = "eth_signTypedData_v4", Parameters = new string[] { Wallet.SelectedAddress, typedData.ToJson(data) } };
             var result = await MetaMaskUnity.Instance.Wallet.Request(request);
