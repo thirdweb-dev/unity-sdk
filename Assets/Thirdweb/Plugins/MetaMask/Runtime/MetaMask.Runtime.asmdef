@@ -1,0 +1,17 @@
+{
+    "name": "MetaMask.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GUID:b4068fb41615e7c4fb5e9a0c2adaac1b",
+        "GUID:e7572cb3e5742db48b782bd36d48f029"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

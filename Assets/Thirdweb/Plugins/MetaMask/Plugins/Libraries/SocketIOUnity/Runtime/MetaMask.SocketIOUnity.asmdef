@@ -1,0 +1,16 @@
+{
+    "name": "MetaMask.SocketIOUnity",
+    "rootNamespace": "",
+    "references": [
+        "GUID:40fb40088c3407847838f67335ef7387"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

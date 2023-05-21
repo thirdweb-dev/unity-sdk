@@ -12,6 +12,10 @@ using Nethereum.Web3.Accounts;
 using WalletConnectSharp.Core.Models.Ethereum;
 using link.magic.unity.sdk;
 using Nethereum.RPC;
+using MetaMask.Unity;
+using MetaMask.NEthereum;
+using Nethereum.Hex.HexConvertors.Extensions;
+using Nethereum.Hex.HexTypes;
 
 //using WalletConnectSharp.NEthereum;
 
@@ -99,7 +103,7 @@ namespace Thirdweb
                         if (MagicUnity.Instance == null)
                         {
                             GameObject.Instantiate(ThirdwebManager.Instance.MagicAuthPrefab);
-                            await new WaitForSeconds(1f);
+                            await new WaitForSeconds(0.5f);
                         }
 
                         MagicUnity.Instance.Initialize(
@@ -118,6 +122,34 @@ namespace Thirdweb
                             oldSession.options,
                             oldSession.siweSession
                         );
+                        break;
+                    case WalletProvider.MetaMask:
+                        if (MetaMaskUnity.Instance == null)
+                        {
+                            GameObject.Instantiate(ThirdwebManager.Instance.MetamaskPrefab);
+                            MetaMaskUnity.Instance.Initialize();
+                            await new WaitForSeconds(1f);
+                        }
+
+                        MetaMaskUnity.Instance.Connect();
+
+                        bool connected = false;
+                        MetaMaskUnity.Instance.Wallet.WalletAuthorized += (sender, e) =>
+                        {
+                            ThirdwebManager.Instance.SDK.nativeSession = new ThirdwebSDK.NativeSession(
+                                walletConnection.provider,
+                                oldSession.lastChainId,
+                                oldSession.lastRPC,
+                                null,
+                                MetaMaskUnity.Instance.Wallet.CreateWeb3(),
+                                oldSession.options,
+                                oldSession.siweSession
+                            );
+                            connected = true;
+                        };
+
+                        await new WaitUntil(() => connected || !Application.isPlaying);
+
                         break;
                     default:
                         throw new UnityException("This wallet connection method is not supported on this platform!");
@@ -147,6 +179,9 @@ namespace Thirdweb
                         break;
                     case WalletProvider.MagicLink:
                         MagicUnity.Instance.DisableMagicAuth();
+                        break;
+                    case WalletProvider.MetaMask:
+                        MetaMaskUnity.Instance.Wallet.Disconnect();
                         break;
                     default:
                         break;
@@ -290,6 +325,9 @@ namespace Thirdweb
             }
             else
             {
+                if (!await IsConnected())
+                    throw new Exception("No account connected!");
+
                 if (currencyAddress != Utils.NativeTokenAddress)
                 {
                     Contract contract = ThirdwebManager.Instance.SDK.GetContract(currencyAddress);
@@ -327,6 +365,9 @@ namespace Thirdweb
                         break;
                     case WalletProvider.MagicLink:
                         address = await MagicUnity.Instance.GetAddress();
+                        break;
+                    case WalletProvider.MetaMask:
+                        address = MetaMaskUnity.Instance.Wallet.SelectedAddress;
                         break;
                     default:
                         throw new UnityException("No Account Connected!");
@@ -428,6 +469,10 @@ namespace Thirdweb
                     case WalletProvider.MagicLink:
                         var personalSign = new Nethereum.RPC.Eth.EthSign(Magic.Instance.Provider);
                         return await personalSign.SendRequestAsync(await GetAddress(), message);
+                    case WalletProvider.MetaMask:
+                        var request = new MetaMask.Models.MetaMaskEthereumRequest { Method = "personal_sign", Parameters = new string[] { message, await GetAddress() } };
+                        var result = await MetaMaskUnity.Instance.Wallet.Request(request);
+                        return result.GetString();
                     default:
                         throw new UnityException("No Account Connected!");
                 }
