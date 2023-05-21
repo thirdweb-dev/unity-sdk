@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using link.magic.unity.sdk;
 using link.magic.unity.sdk.Relayer;
+using Nethereum.ABI.EIP712;
 using Nethereum.JsonRpc.Client;
+using Thirdweb.Contracts.Forwarder.ContractDefinition;
 using UnityEngine;
 
 public class MagicUnity : MonoBehaviour
@@ -53,5 +55,16 @@ public class MagicUnity : MonoBehaviour
     public async void DisableMagicAuth()
     {
         await _magic.User.Logout();
+    }
+
+    public async Task<string> PersonalSign(string message)
+    {
+        var personalSign = new Nethereum.RPC.Eth.EthSign(_magic.Provider);
+        return await personalSign.SendRequestAsync(await GetAddress(), message);
+    }
+
+    public async Task<string> SignTypedDataV4<T>(T data, TypedData<Domain> typedData)
+    {
+        throw new NotImplementedException("Magic does not support EIP712");
     }
 }

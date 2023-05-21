@@ -11,12 +11,37 @@ using TokenERC1155Contract = Thirdweb.Contracts.TokenERC1155.ContractDefinition;
 using WalletConnectSharp.Unity;
 using WalletConnectSharp.NEthereum;
 using MinimalForwarder = Thirdweb.Contracts.Forwarder.ContractDefinition;
+using MetaMask.Unity;
 
 namespace Thirdweb
 {
     public static class EIP712
     {
         /// SIGNATURE GENERATION ///
+
+        public async static Task<string> GenerateSignature_MinimalForwarder(
+            string domainName,
+            string version,
+            BigInteger chainId,
+            string verifyingContract,
+            MinimalForwarder.ForwardRequest forwardRequest,
+            string privateKeyOverride = null
+        )
+        {
+            var typedData = GetTypedDefinition_MinimalForwarder(domainName, version, chainId, verifyingContract);
+
+            if (privateKeyOverride != null)
+            {
+                var signer = new Eip712TypedDataSigner();
+                var key = new EthECKey(privateKeyOverride);
+                var signature = signer.SignTypedDataV4(forwardRequest, typedData, key);
+                return signature;
+            }
+            else
+            {
+                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(forwardRequest, typedData);
+            }
+        }
 
         public async static Task<string> GenerateSignature_TokenERC20(
             string domainName,
@@ -29,60 +54,17 @@ namespace Thirdweb
         {
             var typedData = GetTypedDefinition_TokenERC20(domainName, version, chainId, verifyingContract);
 
-            switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
+            if (privateKeyOverride != null)
             {
-                case WalletProvider.LocalWallet:
-                    var signer = new Eip712TypedDataSigner();
-                    var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
-                    var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
-                    return signature;
-                case WalletProvider.WalletConnectV1:
-                    var walletConnectMintRequest = new ERC20MintRequestWalletConnect()
-                    {
-                        To = mintRequest.To,
-                        PrimarySaleRecipient = mintRequest.PrimarySaleRecipient,
-                        Quantity = mintRequest.Quantity,
-                        Price = mintRequest.Price,
-                        Currency = mintRequest.Currency,
-                        ValidityStartTimestamp = mintRequest.ValidityStartTimestamp,
-                        ValidityEndTimestamp = mintRequest.ValidityEndTimestamp,
-                        Uid = mintRequest.Uid.ByteArrayToHexString()
-                    };
-                    return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
-                case WalletProvider.MagicLink:
-                    throw new UnityException("Magic Auth does not support EIP712 signing");
-                default:
-                    throw new UnityException("No account connected!");
+                var signer = new Eip712TypedDataSigner();
+                var key = new EthECKey(privateKeyOverride);
+                var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
+                return signature;
             }
-        }
-
-        public partial class ERC20MintRequestWalletConnect : ERC20MintRequestBaseWalletConnect { }
-
-        public class ERC20MintRequestBaseWalletConnect
-        {
-            [Parameter("address", "to", 1)]
-            public virtual string To { get; set; }
-
-            [Parameter("address", "primarySaleRecipient", 2)]
-            public virtual string PrimarySaleRecipient { get; set; }
-
-            [Parameter("uint256", "quantity", 3)]
-            public virtual BigInteger Quantity { get; set; }
-
-            [Parameter("uint256", "price", 4)]
-            public virtual BigInteger Price { get; set; }
-
-            [Parameter("address", "currency", 5)]
-            public virtual string Currency { get; set; }
-
-            [Parameter("uint128", "validityStartTimestamp", 6)]
-            public virtual BigInteger ValidityStartTimestamp { get; set; }
-
-            [Parameter("uint128", "validityEndTimestamp", 7)]
-            public virtual BigInteger ValidityEndTimestamp { get; set; }
-
-            [Parameter("bytes32", "uid", 8)]
-            public virtual string Uid { get; set; }
+            else
+            {
+                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(mintRequest, typedData);
+            }
         }
 
         public async static Task<string> GenerateSignature_TokenERC721(
@@ -96,68 +78,17 @@ namespace Thirdweb
         {
             var typedData = GetTypedDefinition_TokenERC721(domainName, version, chainId, verifyingContract);
 
-            switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
+            if (privateKeyOverride != null)
             {
-                case WalletProvider.LocalWallet:
-                    var signer = new Eip712TypedDataSigner();
-                    var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
-                    var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
-                    return signature;
-                case WalletProvider.WalletConnectV1:
-                    var walletConnectMintRequest = new ERC721MintRequestWalletConnect()
-                    {
-                        To = mintRequest.To,
-                        RoyaltyRecipient = mintRequest.RoyaltyRecipient,
-                        RoyaltyBps = mintRequest.RoyaltyBps,
-                        PrimarySaleRecipient = mintRequest.PrimarySaleRecipient,
-                        Uri = mintRequest.Uri,
-                        Price = mintRequest.Price,
-                        Currency = mintRequest.Currency,
-                        ValidityStartTimestamp = mintRequest.ValidityStartTimestamp,
-                        ValidityEndTimestamp = mintRequest.ValidityEndTimestamp,
-                        Uid = mintRequest.Uid.ByteArrayToHexString()
-                    };
-                    return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
-                case WalletProvider.MagicLink:
-                    throw new UnityException("Magic Auth does not support EIP712 signing");
-                default:
-                    throw new UnityException("No account connected!");
+                var signer = new Eip712TypedDataSigner();
+                var key = new EthECKey(privateKeyOverride);
+                var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
+                return signature;
             }
-        }
-
-        public partial class ERC721MintRequestWalletConnect : ERC721MintRequestBaseWalletConnect { }
-
-        public class ERC721MintRequestBaseWalletConnect
-        {
-            [Parameter("address", "to", 1)]
-            public virtual string To { get; set; }
-
-            [Parameter("address", "royaltyRecipient", 2)]
-            public virtual string RoyaltyRecipient { get; set; }
-
-            [Parameter("uint256", "royaltyBps", 3)]
-            public virtual BigInteger RoyaltyBps { get; set; }
-
-            [Parameter("address", "primarySaleRecipient", 4)]
-            public virtual string PrimarySaleRecipient { get; set; }
-
-            [Parameter("string", "uri", 5)]
-            public virtual string Uri { get; set; }
-
-            [Parameter("uint256", "price", 6)]
-            public virtual BigInteger Price { get; set; }
-
-            [Parameter("address", "currency", 7)]
-            public virtual string Currency { get; set; }
-
-            [Parameter("uint128", "validityStartTimestamp", 8)]
-            public virtual BigInteger ValidityStartTimestamp { get; set; }
-
-            [Parameter("uint128", "validityEndTimestamp", 9)]
-            public virtual BigInteger ValidityEndTimestamp { get; set; }
-
-            [Parameter("bytes32", "uid", 10)]
-            public virtual string Uid { get; set; }
+            else
+            {
+                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(mintRequest, typedData);
+            }
         }
 
         public async static Task<string> GenerateSignature_TokenERC1155(
@@ -171,79 +102,20 @@ namespace Thirdweb
         {
             var typedData = GetTypedDefinition_TokenERC1155(domainName, version, chainId, verifyingContract);
 
-            switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
+            if (privateKeyOverride != null)
             {
-                case WalletProvider.LocalWallet:
-                    var signer = new Eip712TypedDataSigner();
-                    var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
-                    var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
-                    return signature;
-                case WalletProvider.WalletConnectV1:
-                    var walletConnectMintRequest = new ERC1155MintRequestWalletConnect()
-                    {
-                        To = mintRequest.To,
-                        RoyaltyRecipient = mintRequest.RoyaltyRecipient,
-                        RoyaltyBps = mintRequest.RoyaltyBps,
-                        PrimarySaleRecipient = mintRequest.PrimarySaleRecipient,
-                        TokenId = mintRequest.TokenId,
-                        Uri = mintRequest.Uri,
-                        Quantity = mintRequest.Quantity,
-                        PricePerToken = mintRequest.PricePerToken,
-                        Currency = mintRequest.Currency,
-                        ValidityStartTimestamp = mintRequest.ValidityStartTimestamp,
-                        ValidityEndTimestamp = mintRequest.ValidityEndTimestamp,
-                        Uid = mintRequest.Uid.ByteArrayToHexString()
-                    };
-                    return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), walletConnectMintRequest, typedData);
-                case WalletProvider.MagicLink:
-                    throw new UnityException("Magic Auth does not support EIP712 signing");
-                default:
-                    throw new UnityException("No account connected!");
+                var signer = new Eip712TypedDataSigner();
+                var key = new EthECKey(privateKeyOverride);
+                var signature = signer.SignTypedDataV4(mintRequest, typedData, key);
+                return signature;
+            }
+            else
+            {
+                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(mintRequest, typedData);
             }
         }
 
-        public partial class ERC1155MintRequestWalletConnect : ERC1155MintRequestBaseWalletConnect { }
-
-        public class ERC1155MintRequestBaseWalletConnect
-        {
-            [Parameter("address", "to", 1)]
-            public virtual string To { get; set; }
-
-            [Parameter("address", "royaltyRecipient", 2)]
-            public virtual string RoyaltyRecipient { get; set; }
-
-            [Parameter("uint256", "royaltyBps", 3)]
-            public virtual BigInteger RoyaltyBps { get; set; }
-
-            [Parameter("address", "primarySaleRecipient", 4)]
-            public virtual string PrimarySaleRecipient { get; set; }
-
-            [Parameter("uint256", "tokenId", 5)]
-            public virtual BigInteger TokenId { get; set; }
-
-            [Parameter("string", "uri", 6)]
-            public virtual string Uri { get; set; }
-
-            [Parameter("uint256", "quantity", 7)]
-            public virtual BigInteger Quantity { get; set; }
-
-            [Parameter("uint256", "pricePerToken", 8)]
-            public virtual BigInteger PricePerToken { get; set; }
-
-            [Parameter("address", "currency", 9)]
-            public virtual string Currency { get; set; }
-
-            [Parameter("uint128", "validityStartTimestamp", 10)]
-            public virtual BigInteger ValidityStartTimestamp { get; set; }
-
-            [Parameter("uint128", "validityEndTimestamp", 11)]
-            public virtual BigInteger ValidityEndTimestamp { get; set; }
-
-            [Parameter("bytes32", "uid", 12)]
-            public virtual string Uid { get; set; }
-        }
-
-        /// DOMAIN TYPES ///
+        #region Typed Data Definitions
 
         public static TypedData<Domain> GetTypedDefinition_TokenERC20(string domainName, string version, BigInteger chainId, string verifyingContract)
         {
@@ -293,34 +165,6 @@ namespace Thirdweb
             };
         }
 
-        /// MINIMAL FORWARDER ///
-
-        public async static Task<string> GenerateSignature_MinimalForwarder(
-            string domainName,
-            string version,
-            BigInteger chainId,
-            string verifyingContract,
-            MinimalForwarder.ForwardRequest forwardRequest,
-            string privateKeyOverride = null
-        )
-        {
-            var typedData = GetTypedDefinition_MinimalForwarder(domainName, version, chainId, verifyingContract);
-
-            switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
-            {
-                case WalletProvider.LocalWallet:
-                    var signer = new Eip712TypedDataSigner();
-                    var key = new EthECKey(privateKeyOverride ?? ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
-                    return signer.SignTypedDataV4(forwardRequest, typedData, key);
-                case WalletProvider.WalletConnectV1:
-                    return await WalletConnect.Instance.Session.EthSignTypedData(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), forwardRequest, typedData);
-                case WalletProvider.MagicLink:
-                    throw new UnityException("Magic Auth does not support EIP712 signing");
-                default:
-                    throw new UnityException("No account connected!");
-            }
-        }
-
         public static TypedData<Domain> GetTypedDefinition_MinimalForwarder(string domainName, string version, BigInteger chainId, string verifyingContract)
         {
             return new TypedData<Domain>
@@ -336,5 +180,7 @@ namespace Thirdweb
                 PrimaryType = nameof(MinimalForwarder.ForwardRequest),
             };
         }
+
+        #endregion
     }
 }

@@ -12,6 +12,6 @@ namespace WalletConnectSharp.NEthereum.Model
         where TDomain : IDomain
     {
         public NEthSignTypedData(string address, T data, TypedData<TDomain> typedData)
-            : base(ValidJsonRpcRequestMethods.EthSignTypedData, address, typedData.ToJson(data)) { }
+            : base(ValidJsonRpcRequestMethods.EthSignTypedDataV4, address, typedData.ToJson(data)) { }
     }
 }

@@ -16,6 +16,8 @@ using MetaMask.Unity;
 using MetaMask.NEthereum;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Hex.HexTypes;
+using Nethereum.ABI.EIP712;
+using Nethereum.Signer.EIP712;
 
 //using WalletConnectSharp.NEthereum;
 
@@ -234,6 +236,7 @@ namespace Thirdweb
 
                 var finalMsg = SiweMessageStringBuilder.BuildMessage(siweMsg);
                 var signature = await Sign(finalMsg);
+
                 return new LoginPayload()
                 {
                     signature = signature,
@@ -467,15 +470,31 @@ namespace Thirdweb
                     case WalletProvider.WalletConnectV1:
                         return await WalletConnect.Instance.PersonalSign(message);
                     case WalletProvider.MagicLink:
-                        var personalSign = new Nethereum.RPC.Eth.EthSign(Magic.Instance.Provider);
-                        return await personalSign.SendRequestAsync(await GetAddress(), message);
+                        return await MagicUnity.Instance.PersonalSign(message);
                     case WalletProvider.MetaMask:
-                        var request = new MetaMask.Models.MetaMaskEthereumRequest { Method = "personal_sign", Parameters = new string[] { message, await GetAddress() } };
-                        var result = await MetaMaskUnity.Instance.Wallet.Request(request);
-                        return result.GetString();
+                        return await MetaMaskUnity.Instance.PersonalSign(message);
                     default:
-                        throw new UnityException("No Account Connected!");
+                        throw new UnityException("Invalid Wallet Provider!");
                 }
+            }
+        }
+
+        public async Task<string> SignTypedDataV4<T>(T data, TypedData<Domain> typedData)
+        {
+            switch (ThirdwebManager.Instance.SDK.nativeSession.provider)
+            {
+                case WalletProvider.LocalWallet:
+                    var signer = new Eip712TypedDataSigner();
+                    var key = new EthECKey(ThirdwebManager.Instance.SDK.nativeSession.account.PrivateKey);
+                    return signer.SignTypedDataV4(data, typedData, key);
+                case WalletProvider.WalletConnectV1:
+                    return await WalletConnect.Instance.SignTypedDataV4(data, typedData);
+                case WalletProvider.MagicLink:
+                    return await MagicUnity.Instance.SignTypedDataV4(data, typedData);
+                case WalletProvider.MetaMask:
+                    return await MetaMaskUnity.Instance.SignTypedDataV4(data, typedData);
+                default:
+                    throw new UnityException("Invalid Wallet Provider!");
             }
         }
 

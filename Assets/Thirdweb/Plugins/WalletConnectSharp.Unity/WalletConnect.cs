@@ -18,6 +18,8 @@ using RotaryHeart.Lib.SerializableDictionary;
 using WalletConnectSharp.Core.Models.Ethereum;
 using WalletConnectSharp.Core.Models.Ethereum.Types;
 using System.Threading;
+using Nethereum.ABI.EIP712;
+using WalletConnectSharp.NEthereum;
 
 namespace WalletConnectSharp.Unity
 {
@@ -450,9 +452,9 @@ namespace WalletConnectSharp.Unity
             return results;
         }
 
-        public async Task<string> PersonalSign(string message, int addressIndex = 0)
+        public async Task<string> PersonalSign(string message)
         {
-            var address = Session.Accounts[addressIndex];
+            var address = Session.Accounts[0];
             var results = await Session.EthPersonalSign(address, message);
             return results;
         }
@@ -463,17 +465,11 @@ namespace WalletConnectSharp.Unity
             return results;
         }
 
-        public async Task<string> SignTransaction(TransactionData transaction)
+        public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
+            where TDomain : IDomain
         {
-            var results = await Session.EthSignTransaction(transaction);
-            return results;
-        }
-
-        public async Task<string> SignTypedData<T>(T data, EIP712Domain eip712Domain, int addressIndex = 0)
-        {
-            var address = Session.Accounts[addressIndex];
-            var results = await Session.EthSignTypedData(address, data, eip712Domain);
-            return results;
+            var address = Session.Accounts[0];
+            return await WalletConnectNEthereumExtensions.EthSignTypedData(Session, address, data, typedData);
         }
     }
 }

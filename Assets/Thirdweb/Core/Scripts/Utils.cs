@@ -117,13 +117,18 @@ namespace Thirdweb
         public static TransactionResult ToTransactionResult(this Nethereum.RPC.Eth.DTOs.TransactionReceipt receipt)
         {
             TransactionResult result = new TransactionResult();
-            result.receipt.from = receipt.From;
-            result.receipt.to = receipt.To;
-            result.receipt.transactionIndex = int.Parse(receipt.TransactionIndex.ToString());
-            result.receipt.gasUsed = receipt.GasUsed.ToString();
-            result.receipt.blockHash = receipt.BlockHash;
-            result.receipt.transactionHash = receipt.TransactionHash;
-            result.id = receipt.Status.ToString();
+
+            if (receipt != null)
+            {
+                result.receipt.from = receipt.From;
+                result.receipt.to = receipt.To;
+                result.receipt.transactionIndex = receipt.TransactionIndex != null ? int.Parse(receipt.TransactionIndex.ToString()) : -1;
+                result.receipt.gasUsed = receipt.GasUsed != null ? receipt.GasUsed.ToString() : "-1";
+                result.receipt.blockHash = receipt.BlockHash;
+                result.receipt.transactionHash = receipt.TransactionHash;
+                result.id = receipt.Status != null ? receipt.Status.ToString() : "-1";
+            }
+
             return result;
         }
 

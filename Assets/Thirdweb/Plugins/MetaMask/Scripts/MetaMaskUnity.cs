@@ -1,5 +1,5 @@
 using System;
-
+using System.Threading.Tasks;
 using MetaMask.Cryptography;
 using MetaMask.IO;
 using MetaMask.Logging;
@@ -7,7 +7,7 @@ using MetaMask.Models;
 using MetaMask.Sockets;
 using MetaMask.Transports;
 using MetaMask.Transports.Unity.UI;
-
+using Nethereum.ABI.EIP712;
 using UnityEngine;
 
 namespace MetaMask.Unity
@@ -240,6 +240,22 @@ namespace MetaMask.Unity
         protected void Release()
         {
             this.wallet.Dispose();
+        }
+
+        // Utils
+
+        public async Task<string> PersonalSign(string message)
+        {
+            var request = new MetaMaskEthereumRequest { Method = "personal_sign", Parameters = new string[] { Wallet.SelectedAddress, message } };
+            var result = await MetaMaskUnity.Instance.Wallet.Request(request);
+            return result.GetString();
+        }
+
+        public async Task<string> SignTypedDataV4<T>(T data, TypedData<Domain> typedData)
+        {
+            var request = new MetaMaskEthereumRequest { Method = "eth_signTypedDataV4", Parameters = new string[] { Wallet.SelectedAddress, typedData.ToJson(data) } };
+            var result = await MetaMaskUnity.Instance.Wallet.Request(request);
+            return result.GetString();
         }
 
         #endregion
