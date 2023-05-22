@@ -49,7 +49,8 @@ Note that in order to communicate with the SDK on WebGL, you need to `Build and 
 - Multiple networks are not supported.
 - Use IL2CPP over Mono when possible in the Player Settings.
 - Using the SDK in the editor (pressing Play) is an accurate reflection of what you can expect to see on native platforms.
-- If building to mobile and running into RPC issues, it is best to run Force Resolve from the Assets menu > External Dependency Manager > Android Resolver > Force Resolve for example.
+- If building to mobile and running into RPC issues, it is best to run Force Resolve from the `Assets` menu > `External Dependency Manager` > `Android Resolver` > `Force Resolve` for example.
+- In some cases, setting `Managed Stripping Level` to minimal when using IL2CPP is also helpful - you can find it under `Player Settings` > `Other Settings` > `Optimization`
 
 # Usage
 
@@ -90,7 +91,7 @@ var address = await sdk.deployer.DeployNFTCollection(new NFTContractDeployMetada
 
 The `Examples` folder contains a demo scene using our user-friendly prefabs, check it out!
 
-All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/ThirdwebManager.cs) prefab to get the SDK Instance, drag and drop it into your scene and select the networks you want to support from the Inspector.
+All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Core/Scripts/ThirdwebManager.cs) prefab to get the SDK Instance, drag and drop it into your scene and select the networks you want to support from the Inspector.
 
 [Connect Wallet](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_ConnectWallet.cs) - All-in-one drag & drop wallet supporting multiple wallet providers, network switching, balance displaying and more!
 
