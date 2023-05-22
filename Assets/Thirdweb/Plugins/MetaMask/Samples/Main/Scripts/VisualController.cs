@@ -30,8 +30,7 @@ namespace MetaMask.Unity.Samples
             MetaMaskUnity.Instance.OnDisconnectionAttempted += HideUI;
 
             await new WaitForSecondsRealtime(4f);
-            if (Application.isPlaying)
-                ConnectButton.interactable = true;
+            ConnectButton.interactable = true;
         }
 
         // Start is called before the first frame update

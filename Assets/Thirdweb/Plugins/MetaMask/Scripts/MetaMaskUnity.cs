@@ -226,6 +226,14 @@ namespace MetaMask.Unity
             OnDisconnectionAttempted.Invoke(this, EventArgs.Empty);
         }
 
+        public void OpenDeepLink()
+        {
+            if (MetaMask.Transports.Unity.UI.MetaMaskUnityUITransport.DefaultInstance != null)
+            {
+                MetaMask.Transports.Unity.UI.MetaMaskUnityUITransport.DefaultInstance.OpenDeepLink();
+            }
+        }
+
         /// <summary>Makes a request to the users connected wallet.</summary>
         /// <param name="request">The ethereum request to send to the user wallet.</param>
         public void Request(MetaMaskEthereumRequest request)

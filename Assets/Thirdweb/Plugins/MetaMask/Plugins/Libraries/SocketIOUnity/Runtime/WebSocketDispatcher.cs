@@ -14,7 +14,7 @@ namespace MetaMask.SocketIOClient
         {
             get
             {
-                if (instance == null && Application.isPlaying)
+                if (instance == null)
                 {
                     instance = new GameObject("WebSocket Dispatcher").AddComponent<WebSocketDispatcher>();
                 }

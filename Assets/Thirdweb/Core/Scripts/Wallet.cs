@@ -148,7 +148,7 @@ namespace Thirdweb
                             connected = true;
                         };
 
-                        await new WaitUntil(() => connected || !Application.isPlaying);
+                        await new WaitUntil(() => connected);
 
                         try
                         {
