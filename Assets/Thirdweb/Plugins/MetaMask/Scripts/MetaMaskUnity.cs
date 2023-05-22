@@ -9,6 +9,7 @@ using MetaMask.Transports;
 using MetaMask.Transports.Unity.UI;
 using Nethereum.ABI.EIP712;
 using UnityEngine;
+using Newtonsoft.Json;
 
 namespace MetaMask.Unity
 {
@@ -255,6 +256,20 @@ namespace MetaMask.Unity
             where TDomain : IDomain
         {
             var request = new MetaMaskEthereumRequest { Method = "eth_signTypedData_v4", Parameters = new string[] { Wallet.SelectedAddress, typedData.ToJson(data) } };
+            var result = await MetaMaskUnity.Instance.Wallet.Request(request);
+            return result.GetString();
+        }
+
+        public async Task<string> WalletAddEthChain(object ethChainData)
+        {
+            var request = new MetaMaskEthereumRequest { Method = "wallet_addEthereumChain", Parameters = new object[] { ethChainData } };
+            var result = await MetaMaskUnity.Instance.Wallet.Request(request);
+            return result.GetString();
+        }
+
+        public async Task<string> WalletSwitchEthChain(object ethChain)
+        {
+            var request = new MetaMaskEthereumRequest { Method = "wallet_switchEthereumChain", Parameters = new object[] { ethChain } };
             var result = await MetaMaskUnity.Instance.Wallet.Request(request);
             return result.GetString();
         }

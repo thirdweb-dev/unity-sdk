@@ -18,6 +18,7 @@ using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Hex.HexTypes;
 using Nethereum.ABI.EIP712;
 using Nethereum.Signer.EIP712;
+using Newtonsoft.Json;
 
 //using WalletConnectSharp.NEthereum;
 
@@ -80,7 +81,6 @@ namespace Thirdweb
                             oldSession.siweSession
                         );
 
-                        // Switch to chain
                         try
                         {
                             await WalletConnect.Instance.WalletSwitchEthChain(new EthChain() { chainId = ThirdwebManager.Instance.SDK.currentChainData.chainId });
@@ -88,8 +88,6 @@ namespace Thirdweb
                         catch (System.Exception e)
                         {
                             Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
-
-                            // Add chain
                             try
                             {
                                 await WalletConnect.Instance.WalletAddEthChain(ThirdwebManager.Instance.SDK.currentChainData);
@@ -151,6 +149,24 @@ namespace Thirdweb
                         };
 
                         await new WaitUntil(() => connected || !Application.isPlaying);
+
+                        try
+                        {
+                            await MetaMaskUnity.Instance.WalletSwitchEthChain(new EthChain() { chainId = ThirdwebManager.Instance.SDK.currentChainData.chainId });
+                        }
+                        catch (System.Exception e)
+                        {
+                            Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
+                            try
+                            {
+                                await MetaMaskUnity.Instance.WalletAddEthChain(ThirdwebManager.Instance.SDK.currentChainData);
+                                await MetaMaskUnity.Instance.WalletSwitchEthChain(new EthChain() { chainId = ThirdwebManager.Instance.SDK.currentChainData.chainId });
+                            }
+                            catch (System.Exception f)
+                            {
+                                Debug.LogWarning("Adding chain error: " + f.Message);
+                            }
+                        }
 
                         break;
                     default:
