@@ -1,12 +1,7 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using link.magic.unity.sdk;
 using link.magic.unity.sdk.Relayer;
 using Nethereum.ABI.EIP712;
-using Nethereum.JsonRpc.Client;
-using Thirdweb.Contracts.Forwarder.ContractDefinition;
 using UnityEngine;
 
 public class MagicUnity : MonoBehaviour
@@ -66,6 +61,8 @@ public class MagicUnity : MonoBehaviour
     public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
         where TDomain : IDomain
     {
-        throw new NotImplementedException("Magic does not support EIP712");
+        Debug.LogWarning("SignTypedDataV4 may not be implemented as part of Magic's Unity SDK.");
+        var signTypedData = new Nethereum.RPC.AccountSigning.EthSignTypedDataV4(_magic.Provider);
+        return await signTypedData.SendRequestAsync(typedData.ToJson(data));
     }
 }

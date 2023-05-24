@@ -146,7 +146,8 @@ namespace Thirdweb
                     appName = options.wallet?.appName ?? "Thirdweb Game",
                     appDescription = options.wallet?.appDescription ?? "Thirdweb Game Demo",
                     appIcons = options.wallet?.appIcons ?? new string[] { "https://thirdweb.com/favicon.ico" },
-                    appUrl = options.wallet?.appUrl ?? "https://thirdweb.com"
+                    appUrl = options.wallet?.appUrl ?? "https://thirdweb.com",
+                    magicLinkApiKey = options.wallet?.magicLinkApiKey,
                 };
 
                 FetchChainData();

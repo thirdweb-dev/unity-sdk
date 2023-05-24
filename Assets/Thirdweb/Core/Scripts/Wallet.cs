@@ -106,6 +106,9 @@ namespace Thirdweb
                             await new WaitForSeconds(0.5f);
                         }
 
+                        if (ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.magicLinkApiKey == null)
+                            throw new UnityException("MagicLink API Key is not set!");
+
                         MagicUnity.Instance.Initialize(
                             ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.magicLinkApiKey,
                             new link.magic.unity.sdk.Relayer.CustomNodeConfiguration(oldSession.lastRPC, oldSession.lastChainId)
@@ -528,7 +531,7 @@ namespace Thirdweb
             {
                 var signer = new EthereumMessageSigner();
                 var addressRecovered = signer.EncodeUTF8AndEcRecover(message, signature);
-                return addressRecovered; // TODO: Check viability
+                return addressRecovered;
             }
         }
 
