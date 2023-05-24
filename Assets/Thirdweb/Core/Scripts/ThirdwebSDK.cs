@@ -23,6 +23,7 @@ namespace Thirdweb
             public GaslessOptions? gasless;
             public StorageOptions? storage;
             public WalletOptions? wallet;
+            public SmartWalletConfig? smartWalletConfig;
         }
 
         /// <summary>
@@ -37,6 +38,18 @@ namespace Thirdweb
             public string[] appIcons;
             public string magicLinkApiKey; // the magic link api key to use for magic link auth
             public Dictionary<string, object> extras; // extra data to pass to the wallet provider
+        }
+
+        [System.Serializable]
+        public struct SmartWalletConfig
+        {
+            public string factoryAddress;
+            public string thirdwebApiKey;
+            public bool gasless;
+            public string bundlerUrl;
+            public string paymasterUrl;
+            public string paymasterAPI;
+            public string entryPointAddress;
         }
 
         /// <summary>

@@ -67,7 +67,30 @@ public class ThirdwebManager : MonoBehaviour
     public string forwaderVersionOverride = null;
 
     [Header("MAGIC LINK OPTIONS")]
+    [Tooltip("Magic Link API Key (https://dashboard.magic.link)")]
     public string magicLinkApiKey = null;
+
+    [Header("SMART WALLET OPTIONS")]
+    [Tooltip("Factory Contract Address")]
+    public string factoryAddress;
+
+    [Tooltip("Thirdweb API Key (https://thirdweb.com/dashboard/api-keys)")]
+    public string thirdwebApiKey;
+
+    [Tooltip("Whether it should use a paymaster for gasless transactions or not")]
+    public bool gasless;
+
+    [Tooltip("Optional - If you want to use a custom relayer, you can provide the URL here")]
+    public string bundlerUrl;
+
+    [Tooltip("Optional - If you want to use a custom paymaster, you can provide the URL here")]
+    public string paymasterUrl;
+
+    [Tooltip("Optional - If you want to use a custom paymaster, you can provide the API key here")]
+    public string paymasterAPI;
+
+    [Tooltip("Optional - If you want to use a custom entry point, you can provide the contract address here")]
+    public string entryPointAddress;
 
     [Header("NATIVE PREFABS (DANGER ZONE)")]
     [Tooltip("Instantiates the WalletConnect SDK for Native platforms.")]
@@ -157,16 +180,29 @@ public class ThirdwebManager : MonoBehaviour
             };
         }
 
-        // Set up app metadata
-
+        // Set up wallet data
         options.wallet = new ThirdwebSDK.WalletOptions()
         {
             appName = string.IsNullOrEmpty(appName) ? "Thirdweb Game" : appName,
             appDescription = string.IsNullOrEmpty(appDescription) ? "Thirdweb Game Demo" : appDescription,
             appIcons = appIcons.Length == 0 ? new string[] { "https://thirdweb.com/favicon.ico" } : appIcons,
             appUrl = string.IsNullOrEmpty(appUrl) ? "https://thirdweb.com" : appUrl,
-            magicLinkApiKey = string.IsNullOrEmpty(magicLinkApiKey) ? null : magicLinkApiKey
+            magicLinkApiKey = string.IsNullOrEmpty(magicLinkApiKey) ? null : magicLinkApiKey,
         };
+
+        options.smartWalletConfig =
+            string.IsNullOrEmpty(factoryAddress) || string.IsNullOrEmpty(thirdwebApiKey)
+                ? null
+                : new ThirdwebSDK.SmartWalletConfig()
+                {
+                    factoryAddress = factoryAddress,
+                    thirdwebApiKey = thirdwebApiKey,
+                    gasless = gasless,
+                    bundlerUrl = bundlerUrl,
+                    paymasterUrl = paymasterUrl,
+                    paymasterAPI = paymasterAPI,
+                    entryPointAddress = entryPointAddress
+                };
 
         SDK = new ThirdwebSDK(chainOrRPC, chainId, options);
     }

@@ -603,5 +603,6 @@ namespace Thirdweb
         Injected,
         MagicLink,
         LocalWallet,
+        SmartWallet
     }
 }
