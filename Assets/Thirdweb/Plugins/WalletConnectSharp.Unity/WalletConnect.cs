@@ -184,8 +184,9 @@ namespace WalletConnectSharp.Unity
             }
 
             StartCoroutine(SetupDefaultWallet());
+            var data = await CompleteConnect();
             SetupEvents();
-            return await CompleteConnect();
+            return data;
         }
 
         private void SetupEvents()

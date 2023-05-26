@@ -91,21 +91,25 @@ namespace Thirdweb
             Interceptor = new ThirdwebInterceptor(this);
             Web3.Client.OverridingRequestInterceptor = Interceptor;
 
-            try
+            var connectedChainId = await ThirdwebManager.Instance.SDK.wallet.GetChainId();
+            if (connectedChainId != ChainId)
             {
-                await SwitchNetwork(new ThirdwebChain() { chainId = CurrentChainData.chainId });
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
                 try
                 {
-                    await AddNetwork(CurrentChainData);
                     await SwitchNetwork(new ThirdwebChain() { chainId = CurrentChainData.chainId });
                 }
-                catch (System.Exception f)
+                catch (System.Exception e)
                 {
-                    Debug.LogWarning("Adding chain error: " + f.Message);
+                    Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
+                    try
+                    {
+                        await AddNetwork(CurrentChainData);
+                        await SwitchNetwork(new ThirdwebChain() { chainId = CurrentChainData.chainId });
+                    }
+                    catch (System.Exception f)
+                    {
+                        Debug.LogWarning("Adding chain error: " + f.Message);
+                    }
                 }
             }
 

@@ -445,6 +445,9 @@ namespace WalletConnectSharp.Core
 
             if (OnSend != null)
             {
+                if (forcePushNotification.HasValue && forcePushNotification.Value == false)
+                    return;
+
                 OnSend(this, this);
             }
         }
