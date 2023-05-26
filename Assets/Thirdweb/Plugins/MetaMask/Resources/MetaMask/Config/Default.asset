@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77f59ac8818a0fe45a3283d7576eead3, type: 3}
   m_Name: Default
   m_EditorClassIdentifier: 
-  log: 1
+  log: 0
   appName: Thirdweb Demo Game
   appUrl: thirdweb.com
   encrypt: 1

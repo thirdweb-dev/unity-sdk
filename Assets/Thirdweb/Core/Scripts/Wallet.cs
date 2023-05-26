@@ -220,8 +220,7 @@ namespace Thirdweb
             }
             else
             {
-                var req = new RpcRequest(new Guid().ToString(), "eth_accounts", null);
-                return await ThirdwebManager.Instance.SDK.session.Web3.Client.SendRequestAsync<string>(req);
+                return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_accounts");
             }
         }
 
@@ -251,7 +250,8 @@ namespace Thirdweb
             }
             else
             {
-                return ThirdwebManager.Instance.SDK.session.ChainId;
+                var hexChainId = await ThirdwebManager.Instance.SDK.session.Request<string>("eth_chainId");
+                return (int)hexChainId.HexToBigInteger(false);
             }
         }
 
@@ -312,8 +312,7 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var request = new RpcRequest(new Guid().ToString(), "personal_sign", await GetAddress(), message);
-                    return await ThirdwebManager.Instance.SDK.session.Web3.Client.SendRequestAsync<string>(request);
+                    return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", await GetAddress(), message);
                 }
             }
         }
@@ -346,8 +345,7 @@ namespace Thirdweb
                     property.Value = property.Value.ToString();
 
                 string safeJson = jsonObject.ToString();
-                var request = new RpcRequest(new Guid().ToString(), "eth_signTypedData_v4", await GetAddress(), safeJson);
-                return await ThirdwebManager.Instance.SDK.session.Web3.Client.SendRequestAsync<string>(request);
+                return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTypedData_v4", await GetAddress(), safeJson);
             }
         }
 
@@ -387,7 +385,7 @@ namespace Thirdweb
                     new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
                     new Nethereum.Hex.HexTypes.HexBigInteger(transactionRequest.value)
                 );
-                var receipt = await ThirdwebManager.Instance.SDK.session.Web3.TransactionManager.SendTransactionAndWaitForReceiptAsync(input);
+                var receipt = await ThirdwebManager.Instance.SDK.session.Web3.Eth.TransactionManager.SendTransactionAndWaitForReceiptAsync(input);
                 return receipt.ToTransactionResult();
             }
         }

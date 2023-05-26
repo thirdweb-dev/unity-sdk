@@ -388,6 +388,16 @@ namespace Thirdweb
         public string gasLimit;
         public string gasPrice;
 
+        public TransactionRequest(string from, string to, string data, string value, string gasLimit, string gasPrice)
+        {
+            this.from = from;
+            this.to = to;
+            this.data = data;
+            this.value = value;
+            this.gasLimit = gasLimit;
+            this.gasPrice = gasPrice;
+        }
+
         public override string ToString()
         {
             return $"TransactionRequest:" + $"\n>from: {from}" + $"\n>to: {to}" + $"\n>data: {data}" + $"\n>value: {value}" + $"\n>gasLimit: {gasLimit}" + $"\n>gasPrice: {gasPrice}";

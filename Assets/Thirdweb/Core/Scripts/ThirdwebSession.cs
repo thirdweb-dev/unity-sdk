@@ -157,23 +157,26 @@ namespace Thirdweb
             return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address);
         }
 
+        public async Task<T> Request<T>(string method, params object[] parameters)
+        {
+            var request = new RpcRequest(new Guid().ToString(), method, parameters);
+            return await Web3.Client.SendRequestAsync<T>(request);
+        }
+
         #endregion
 
         #region Private Methods
 
         private async Task SwitchNetwork(ThirdwebChain newChain)
         {
-            Debug.Log("Switching to chain: " + newChain.chainId);
-            var request = new RpcRequest(new Guid().ToString(), "wallet_switchEthereumChain", new object[] { newChain });
+            await Request<object>("wallet_switchEthereumChain", new object[] { newChain });
             CurrentChainData.chainId = newChain.chainId;
-            await Web3.Client.SendRequestAsync(request);
         }
 
         private async Task AddNetwork(ThirdwebChainData newChainData)
         {
-            var request = new RpcRequest(new Guid().ToString(), "wallet_addEthereumChain", new object[] { newChainData });
+            await Request<object>("wallet_addEthereumChain", new object[] { newChainData });
             CurrentChainData = newChainData;
-            await Web3.Client.SendRequestAsync(request);
         }
 
         private void InitializeLocalWallet(string password)
