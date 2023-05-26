@@ -44,7 +44,8 @@ namespace Thirdweb
         /// </summary>
         public Events events;
 
-        public Contract(string chain, string address, string abi = null) : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
+        public Contract(string chain, string address, string abi = null)
+            : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
         {
             this.chain = chain;
             this.address = address;
@@ -65,7 +66,7 @@ namespace Thirdweb
             }
             else
             {
-                BigInteger balance = await ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetBalance.SendRequestAsync(address);
+                BigInteger balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
                 CurrencyValue cv = new CurrencyValue();
                 cv.value = balance.ToString();
                 cv.displayValue = balance.ToString().ToEth();
@@ -90,7 +91,7 @@ namespace Thirdweb
                 if (this.abi == null)
                     throw new UnityException("You must pass an ABI for native platform custom calls");
 
-                var contract = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContract(this.abi, this.address);
+                var contract = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetContract(this.abi, this.address);
                 var function = contract.GetFunction(functionName);
                 return await function.CallAsync<T>(args);
             }
@@ -126,7 +127,7 @@ namespace Thirdweb
                 if (this.abi == null)
                     throw new UnityException("You must pass an ABI for native platform custom calls");
 
-                var contract = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetContract(this.abi, this.address);
+                var contract = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetContract(this.abi, this.address);
 
                 var function = contract.GetFunction(functionName);
 

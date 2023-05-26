@@ -905,7 +905,7 @@ namespace Thirdweb
                             AssetContract = input.assetContractAddress,
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
-                            Currency = input.currencyContractAddress ?? Utils.GetNativeTokenWrapper(ThirdwebManager.Instance.SDK.nativeSession.lastChainId),
+                            Currency = input.currencyContractAddress ?? Utils.GetNativeTokenWrapper(ThirdwebManager.Instance.SDK.session.ChainId),
                             TotalPrice = BigInteger.Parse(input.totalPrice.ToWei()),
                             ExpirationTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampIn10Years())
                         }

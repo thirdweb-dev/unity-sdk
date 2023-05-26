@@ -488,8 +488,10 @@ namespace Thirdweb
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
+                var name = await TransactionManager.ThirdwebRead<TokenERC20Contract.NameFunction, TokenERC20Contract.NameOutputDTO>(contractAddress, new TokenERC20Contract.NameFunction() { });
+
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(
-                    "TokenERC20",
+                    name.ReturnValue1,
                     "1",
                     await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
                     contractAddress,

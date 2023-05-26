@@ -234,11 +234,9 @@ namespace MetaMask.Unity
             }
         }
 
-        /// <summary>Makes a request to the users connected wallet.</summary>
-        /// <param name="request">The ethereum request to send to the user wallet.</param>
-        public void Request(MetaMaskEthereumRequest request)
+        public async Task<System.Text.Json.JsonElement> Request(Nethereum.JsonRpc.Client.RpcRequest request)
         {
-            this.wallet.Request(request);
+            return await this.wallet.Request(new MetaMaskEthereumRequest() { Method = request.Method, Parameters = request.RawParameters });
         }
 
         #endregion
@@ -249,37 +247,6 @@ namespace MetaMask.Unity
         protected void Release()
         {
             this.wallet.Dispose();
-        }
-
-        // Utils
-
-        public async Task<string> PersonalSign(string message)
-        {
-            var request = new MetaMaskEthereumRequest { Method = "personal_sign", Parameters = new string[] { Wallet.SelectedAddress, message } };
-            var result = await MetaMaskUnity.Instance.Wallet.Request(request);
-            return result.GetString();
-        }
-
-        public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
-            where TDomain : IDomain
-        {
-            var request = new MetaMaskEthereumRequest { Method = "eth_signTypedData_v4", Parameters = new string[] { Wallet.SelectedAddress, typedData.ToJson(data) } };
-            var result = await MetaMaskUnity.Instance.Wallet.Request(request);
-            return result.GetString();
-        }
-
-        public async Task<string> WalletAddEthChain(object ethChainData)
-        {
-            var request = new MetaMaskEthereumRequest { Method = "wallet_addEthereumChain", Parameters = new object[] { ethChainData } };
-            var result = await MetaMaskUnity.Instance.Wallet.Request(request);
-            return result.GetString();
-        }
-
-        public async Task<string> WalletSwitchEthChain(object ethChain)
-        {
-            var request = new MetaMaskEthereumRequest { Method = "wallet_switchEthereumChain", Parameters = new object[] { ethChain } };
-            var result = await MetaMaskUnity.Instance.Wallet.Request(request);
-            return result.GetString();
         }
 
         #endregion

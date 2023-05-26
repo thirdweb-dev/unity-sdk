@@ -12,33 +12,40 @@ using Newtonsoft.Json;
 
 namespace MetaMask
 {
-
     /// <summary>
     /// The main interface to interact with the MetaMask wallet.
     /// </summary>
     public class MetaMaskWallet : IDisposable
     {
-
         #region Events
 
         /// <summary>Raised when the wallet is ready.</summary>
         public event EventHandler WalletReady;
+
         /// <summary>Raised when the wallet is paused.</summary>
         public event EventHandler WalletPaused;
+
         /// <summary>Occurs when a wallet is connected.</summary>
         public event EventHandler WalletConnected;
+
         /// <summary>Occurs when a wallet is disconnected.</summary>
         public event EventHandler WalletDisconnected;
+
         /// <summary>Occurs when the chain ID is changed.</summary>
         public event EventHandler ChainIdChanged;
+
         /// <summary>Occurs when the account is changed.</summary>
         public event EventHandler AccountChanged;
+
         /// <summary>Occurs when the wallet connection is authorized by the user.</summary>
         public event EventHandler WalletAuthorized;
+
         /// <summary>Occurs when the wallet connection is unauthorized by the user.</summary>
         public event EventHandler WalletUnauthorized;
+
         /// <summary>Occurs when the Ethereum request's response received.</summary>
         public event EventHandler<MetaMaskEthereumRequestResultEventArgs> EthereumRequestResultReceived;
+
         /// <summary>Occurs when the Ethereum request has failed.</summary>
         public event EventHandler<MetaMaskEthereumRequestFailedEventArgs> EthereumRequestFailed;
 
@@ -54,14 +61,19 @@ namespace MetaMask
 
         /// <summary>The name of the event that is fired when a message is received.</summary>
         protected const string MessageEventName = "message";
-        /// <summary>The name of the event that is raised when a user joins a channel.</summary>       
+
+        /// <summary>The name of the event that is raised when a user joins a channel.</summary>
         protected const string JoinChannelEventName = "join_channel";
-        /// <summary>The name of the event that is fired when the user leaves a channel.</summary>       
+
+        /// <summary>The name of the event that is fired when the user leaves a channel.</summary>
         protected const string LeaveChannelEventName = "leave_channel";
+
         /// <summary>The name of the event that is fired when a client connects.</summary>
         protected const string ClientsConnectedEventName = "clients_connected";
+
         /// <summary>The name of the event that is raised when clients are disconnected.</summary>
         protected const string ClientsDisconnectedEventName = "clients_disconnected";
+
         /// <summary>The name of the event that is raised when clients are waiting to join.</summary>
         protected const string ClientsWaitingToJoinEventName = "clients_waiting_to_join";
 
@@ -73,7 +85,8 @@ namespace MetaMask
 
         #region Fields
         /// <summary>List of methods that should be redirected.</summary>
-        protected static List<string> MethodsToRedirect = new List<string>() {
+        protected static List<string> MethodsToRedirect = new List<string>()
+        {
             "eth_sendTransaction",
             "eth_signTransaction",
             "eth_sign",
@@ -85,28 +98,36 @@ namespace MetaMask
             "wallet_addEthereumChain",
             "wallet_switchEthereumChain"
         };
+
         /// <summary>The users wallet session.</summary>
         protected MetaMaskSession session;
+
         /// <summary>The transport used in the wallet session.</summary>
         protected IMetaMaskTransport transport;
+
         /// <summary>The socket connection used in the user wallet session.</summary>
         protected IMetaMaskSocketWrapper socket;
+
         /// <summary>The socket connection url.</summary>
         protected string socketUrl;
 
         /// <summary>Indicates whether the keys have been exchanged.</summary>
         /// <returns>True if the keys have been exchanged; otherwise, false.</returns>
         protected bool keysExchanged = false;
+
         /// <summary>The public key of the wallet.</summary>
         protected string walletPublicKey = string.Empty;
+
         /// <summary>Gets or sets the selected address.</summary>
         protected string selectedAddress = string.Empty;
+
         /// <summary>The ID of the chain that is currently selected.</summary>
         protected string selectedChainId = string.Empty;
 
         /// <summary>Indicates whether the application is connected to the Internet.</summary>
         /// <returns>True if the application is connected to the Internet; otherwise, false.</returns>
         protected bool connected = false;
+
         /// <summary>Gets or sets a value indicating whether the application is paused.</summary>
         /// <value>true if the application is paused; otherwise, false.</value>
         protected bool paused = false;
@@ -171,14 +192,8 @@ namespace MetaMask
         /// <summary>Gets or sets the analytics platform.</summary>
         public string AnalyticsPlatform
         {
-            get
-            {
-                return this.analyticsPlatform;
-            }
-            set
-            {
-                this.analyticsPlatform = value;
-            }
+            get { return this.analyticsPlatform; }
+            set { this.analyticsPlatform = value; }
         }
 
         #endregion
@@ -235,7 +250,11 @@ namespace MetaMask
             string jsonString = JsonConvert.SerializeObject(analyticsInfo);
             MetaMaskDebug.Log("Sending Analytics: " + jsonString);
 
-            var response = await this.socket.SendWebRequest(this.socketUrl.EndsWith("/") ? this.socketUrl + "debug" : this.socketUrl + "/debug", jsonString, new Dictionary<string, string> { { "Content-Type", "application/json" } });
+            var response = await this.socket.SendWebRequest(
+                this.socketUrl.EndsWith("/") ? this.socketUrl + "debug" : this.socketUrl + "/debug",
+                jsonString,
+                new Dictionary<string, string> { { "Content-Type", "application/json" } }
+            );
             if (response.IsSuccessful)
             {
                 MetaMaskDebug.Log("Analytics sent successfully!");
@@ -257,11 +276,7 @@ namespace MetaMask
                 Url = this.session.Data.AppUrl,
                 Platform = this.analyticsPlatform
             };
-            var requestInfo = new MetaMaskRequestInfo
-            {
-                Type = "originator_info",
-                OriginatorInfo = originatorInfo
-            };
+            var requestInfo = new MetaMaskRequestInfo { Type = "originator_info", OriginatorInfo = originatorInfo };
             SendMessage(requestInfo, true);
 
             var analyticsInfo = new MetaMaskAnalyticsInfo
@@ -293,18 +308,10 @@ namespace MetaMask
             InitializeState();
 
             this.connectionTcs = new TaskCompletionSource<JsonElement>();
-            var request = new MetaMaskEthereumRequest
-            {
-                Method = "eth_requestAccounts",
-                Parameters = new string[] { }
-            };
+            var request = new MetaMaskEthereumRequest { Method = "eth_requestAccounts", Parameters = new string[] { } };
             string id = Guid.NewGuid().ToString();
 
-            var submittedRequest = new MetaMaskSubmittedRequest
-            {
-                Method = request.Method,
-                Promise = this.connectionTcs
-            };
+            var submittedRequest = new MetaMaskSubmittedRequest { Method = request.Method, Promise = this.connectionTcs };
 
             this.submittedRequests.Add(id, submittedRequest);
             SendEthereumRequest(id, request, false);
@@ -322,18 +329,10 @@ namespace MetaMask
             InitializeState();
 
             this.connectionTcs = new TaskCompletionSource<JsonElement>();
-            var request = new MetaMaskEthereumRequest
-            {
-                Method = "eth_requestAccounts",
-                Parameters = new string[] { }
-            };
+            var request = new MetaMaskEthereumRequest { Method = "eth_requestAccounts", Parameters = new string[] { } };
             string id = Guid.NewGuid().ToString();
 
-            var submittedRequest = new MetaMaskSubmittedRequest
-            {
-                Method = request.Method,
-                Promise = this.connectionTcs
-            };
+            var submittedRequest = new MetaMaskSubmittedRequest { Method = request.Method, Promise = this.connectionTcs };
 
             this.submittedRequests.Add(id, submittedRequest);
             SendEthereumRequest(id, request, false);
@@ -344,11 +343,7 @@ namespace MetaMask
         /// <summary>Initialize the wallet state.</summary>
         protected void InitializeState()
         {
-            var request = new MetaMaskEthereumRequest
-            {
-                Method = "metamask_getProviderState",
-                Parameters = new string[] { }
-            };
+            var request = new MetaMaskEthereumRequest { Method = "metamask_getProviderState", Parameters = new string[] { } };
             Request(request);
         }
 
@@ -371,9 +366,7 @@ namespace MetaMask
             JoinChannel(channelId);
         }
 
-        private void OnSocketDisconnected(object sender, EventArgs e)
-        {
-        }
+        private void OnSocketDisconnected(object sender, EventArgs e) { }
 
         protected void JoinChannel(string channelId)
         {
@@ -561,7 +554,6 @@ namespace MetaMask
                 request.Promise.SetException(ex);
                 EthereumRequestFailed?.Invoke(this, new MetaMaskEthereumRequestFailedEventArgs(request, error));
             }
-
             // The request has been successful
             else if (data.TryGetProperty("result", out var result))
             {
@@ -660,7 +652,6 @@ namespace MetaMask
         /// <returns>true if the method should open the MetaMask app; otherwise, false.</returns>
         protected bool ShouldOpenMM(string method)
         {
-
             // Only open the wallet for requesting accounts when the address is not already provided.
             if (method == "eth_requestAccounts" && string.IsNullOrEmpty(this.selectedAddress))
             {
@@ -695,11 +686,7 @@ namespace MetaMask
             {
                 var tcs = new TaskCompletionSource<JsonElement>();
                 var id = Guid.NewGuid().ToString();
-                var submittedRequest = new MetaMaskSubmittedRequest()
-                {
-                    Method = request.Method,
-                    Promise = tcs
-                };
+                var submittedRequest = new MetaMaskSubmittedRequest() { Method = request.Method, Promise = tcs };
                 this.submittedRequests.Add(id, submittedRequest);
                 SendEthereumRequest(id, request, ShouldOpenMM(request.Method));
                 return tcs.Task;
@@ -713,13 +700,7 @@ namespace MetaMask
             this.connectionTcs = new TaskCompletionSource<JsonElement>();
 
             // Initialize the socket
-            this.socket.Initialize(this.socketUrl, new MetaMaskSocketOptions()
-            {
-                ExtraHeaders = new Dictionary<string, string>
-                {
-                    {"User-Agent", this.transport.UserAgent}
-                }
-            });
+            this.socket.Initialize(this.socketUrl, new MetaMaskSocketOptions() { ExtraHeaders = new Dictionary<string, string> { { "User-Agent", this.transport.UserAgent } } });
             this.socket.ConnectAsync();
 
             this.session.Data.ChannelId = Guid.NewGuid().ToString();
@@ -772,7 +753,6 @@ namespace MetaMask
         }
 
         #endregion
-
     }
 
     public class MetaMaskEthereumRequestResultEventArgs : EventArgs
@@ -804,7 +784,6 @@ namespace MetaMask
         {
             this.Request = request;
             this.Error = error;
-
         }
     }
 }

@@ -82,7 +82,7 @@ namespace WalletConnectSharp.Unity
         public async Task<WCSessionData> EnableWalletConnect()
         {
             SetMode(true);
-            var sessionData = await Connect(ThirdwebManager.Instance.SDK.nativeSession.lastChainId);
+            var sessionData = await Connect(ThirdwebManager.Instance.SDK.session.ChainId);
             SetMode(false);
             return sessionData;
         }
@@ -170,10 +170,10 @@ namespace WalletConnectSharp.Unity
                 Session = new WalletConnectUnitySession(
                     new ClientMeta()
                     {
-                        Name = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appName,
-                        Description = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appDescription,
-                        URL = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appUrl,
-                        Icons = ThirdwebManager.Instance.SDK.nativeSession.options.wallet?.appIcons,
+                        Name = ThirdwebManager.Instance.SDK.session.Options.wallet?.appName,
+                        Description = ThirdwebManager.Instance.SDK.session.Options.wallet?.appDescription,
+                        URL = ThirdwebManager.Instance.SDK.session.Options.wallet?.appUrl,
+                        Icons = ThirdwebManager.Instance.SDK.session.Options.wallet?.appIcons,
                     },
                     this,
                     null,
@@ -330,7 +330,7 @@ namespace WalletConnectSharp.Unity
             if (pauseStatus)
                 SaveSession();
             else if (PlayerPrefs.HasKey(SessionKey))
-                await Connect(ThirdwebManager.Instance.SDK.nativeSession.lastChainId);
+                await Connect(ThirdwebManager.Instance.SDK.session.ChainId);
         }
 
         private void SaveSession()
@@ -436,40 +436,6 @@ namespace WalletConnectSharp.Unity
         {
             if (PlayerPrefs.HasKey(SessionKey))
                 PlayerPrefs.DeleteKey(SessionKey);
-        }
-
-        // Utility
-
-        public async Task<string> WalletAddEthChain(EthChainData chainData)
-        {
-            var results = await Session.WalletAddEthChain(chainData);
-            return results;
-        }
-
-        public async Task<string> WalletSwitchEthChain(EthChain ethChain)
-        {
-            var results = await Session.WalletSwitchEthChain(ethChain);
-            return results;
-        }
-
-        public async Task<string> PersonalSign(string message)
-        {
-            var address = Session.Accounts[0];
-            var results = await Session.EthPersonalSign(address, message);
-            return results;
-        }
-
-        public async Task<string> SendTransaction(TransactionData transaction)
-        {
-            var results = await Session.EthSendTransaction(transaction);
-            return results;
-        }
-
-        public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
-            where TDomain : IDomain
-        {
-            var address = Session.Accounts[0];
-            return await Session.EthSignTypedData(address, data, typedData);
         }
     }
 }
