@@ -232,11 +232,6 @@ namespace MetaMask.Unity
             }
         }
 
-        public async Task<System.Text.Json.JsonElement> Request(Nethereum.JsonRpc.Client.RpcRequest request)
-        {
-            return await this.wallet.Request(new MetaMaskEthereumRequest() { Method = request.Method, Parameters = request.RawParameters });
-        }
-
         #endregion
 
         #region Protected Methods

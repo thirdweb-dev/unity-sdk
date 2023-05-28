@@ -48,12 +48,13 @@ namespace Thirdweb
         {
             string txHash = null;
 
+            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            functionMessage.AmountToSend = weiValue ?? 0;
+
             var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionHandler<TWFunction>();
             var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
 
             functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
-            functionMessage.AmountToSend = weiValue ?? 0;
-            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
 
             bool isGasless = ThirdwebManager.Instance.SDK.session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin.HasValue;
 
@@ -62,7 +63,8 @@ namespace Thirdweb
                 if (ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.LocalWallet)
                 {
                     var transactionHandler = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetContractTransactionHandler<TWFunction>();
-                    txHash = await transactionHandler.SendRequestAsync(contractAddress, functionMessage);
+                    // txHash = await transactionHandler.SendRequestAsync(contractAddress, functionMessage);
+                    return await transactionHandler.SendRequestAndWaitForReceiptAsync(contractAddress, functionMessage);
                 }
                 else
                 {

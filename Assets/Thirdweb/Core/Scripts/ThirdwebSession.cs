@@ -38,17 +38,7 @@ namespace Thirdweb
             get { return LocalAccount != null || ThirdwebManager.Instance.SDK.session.WalletProvider != WalletProvider.LocalWallet; }
         }
 
-        private static readonly System.Random rng = new System.Random();
-        private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        private static int nonce = 0;
-
-        public static int GenerateRequestId()
-        {
-            var date = (int)((DateTime.UtcNow - UnixEpoch).TotalSeconds);
-            var extra = rng.Next(0, 999);
-            nonce = (nonce + 1) % 1000;
-            return date * 1000000 + extra * 1000 + nonce;
-        }
+        private static int Nonce = 0;
 
         #endregion
 
@@ -89,7 +79,7 @@ namespace Thirdweb
                 case WalletProvider.MagicLink:
                     await InitializeMagicLink();
                     break;
-                case WalletProvider.MetaMask:
+                case WalletProvider.Metamask:
                     await InitializeMetaMask();
                     break;
                 default:
@@ -134,7 +124,7 @@ namespace Thirdweb
                 case WalletProvider.MagicLink:
                     MagicUnity.Instance.DisableMagicAuth();
                     break;
-                case WalletProvider.MetaMask:
+                case WalletProvider.Metamask:
                     MetaMaskUnity.Instance.Disconnect();
                     break;
                 default:
@@ -160,7 +150,7 @@ namespace Thirdweb
                 case WalletProvider.MagicLink:
                     address = await MagicUnity.Instance.GetAddress();
                     break;
-                case WalletProvider.MetaMask:
+                case WalletProvider.Metamask:
                     address = MetaMaskUnity.Instance.Wallet.SelectedAddress;
                     break;
                 default:
@@ -171,7 +161,8 @@ namespace Thirdweb
 
         public async Task<T> Request<T>(string method, params object[] parameters)
         {
-            var request = new RpcRequest(GenerateRequestId(), method, parameters);
+            var request = new RpcRequest(Nonce, method, parameters);
+            Nonce++;
             return await Web3.Client.SendRequestAsync<T>(request);
         }
 

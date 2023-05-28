@@ -428,8 +428,8 @@ namespace Thirdweb
 
     public enum WalletProvider
     {
-        MetaMask,
-        CoinbaseWallet,
+        Metamask,
+        Coinbase,
         WalletConnectV1,
         Injected,
         MagicLink,
