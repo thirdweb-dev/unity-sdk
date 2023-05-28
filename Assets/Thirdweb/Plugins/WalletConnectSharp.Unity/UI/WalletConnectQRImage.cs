@@ -13,23 +13,23 @@ using QRCoder.Unity;
 public class WalletConnectQRImage : BindableMonoBehavior
 {
     public GameObject loader;
-    
+
     /// <summary>
     /// The WalletConnect instance we'll work with to generate the QR code.
     /// </summary>
     public WalletConnect walletConnect;
-    
+
     /// <summary>
     /// The image component we'll place the QR code texture into.
     /// </summary>
     [BindComponent]
     private Image _image;
-    
+
     /// <summary>
-    /// Flag to avoid adding additional OnConnectionStarted event handlers every time we disconnect & reconnect to the wallet (i.e. Disable/Enable this component). 
+    /// Flag to avoid adding additional OnConnectionStarted event handlers every time we disconnect & reconnect to the wallet (i.e. Disable/Enable this component).
     /// </summary>
     private bool registeredOnConnectionStartEvent = false;
-    
+
     /// <summary>
     /// Unity OnEnable hook.
     /// </summary>
@@ -41,7 +41,7 @@ public class WalletConnectQRImage : BindableMonoBehavior
             enabled = false;
             return;
         }
-        
+
         // Only register the WalletConnectOnConnectionStarted handler once
         if (!registeredOnConnectionStartEvent)
         {
@@ -49,7 +49,7 @@ public class WalletConnectQRImage : BindableMonoBehavior
             walletConnect.ConnectionStarted += WalletConnectOnConnectionStarted;
         }
     }
-    
+
     /// <summary>
     /// Event handler method to connect to a WalletConnect session and generate a QR code.
     /// </summary>
@@ -57,14 +57,14 @@ public class WalletConnectQRImage : BindableMonoBehavior
     /// <param name="e">Event arguments</param>
     private void WalletConnectOnConnectionStarted(object sender, EventArgs e)
     {
-        if (loader == null) {
+        if (loader == null)
+        {
             GenerateQrCode();
         }
         else
         {
             StartCoroutine(ShowLoader());
         }
-        
     }
 
     private IEnumerator ShowLoader()
@@ -77,6 +77,7 @@ public class WalletConnectQRImage : BindableMonoBehavior
         _image.enabled = true;
         loader.SetActive(false);
     }
+
     private void GenerateQrCode()
     {
         // Grab the WC URL and generate a QR code for it. Note: The ECCLevel is the "Error Correction Code" level which
@@ -87,24 +88,23 @@ public class WalletConnectQRImage : BindableMonoBehavior
         var url = walletConnect.Session.URI;
         Debug.Log("Connecting to: " + url);
         QRCodeGenerator qrGenerator = new QRCodeGenerator();
-        QRCodeData qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
+        QRCodeData qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.M);
         UnityQRCode qrCode = new UnityQRCode(qrCodeData);
 
         // Copy the URL to the clipboard to allow for manual connection in wallet apps that support it
         GUIUtility.systemCopyBuffer = url;
-        
+
         // Create the QR code as a Texture2D. Note: "pixelsPerModule" means the size of each black-or-white block in the
         // QR code image. For example, a size of 2 will give us a 138x138 image (too small!), while 20 will give us a
         // 1380x1380 image (too big!). Here we'll use a value of 10 which gives us a 690x690 pixel image.
-        Texture2D qrCodeAsTexture2D = qrCode.GetGraphic(pixelsPerModule:10);
+        Texture2D qrCodeAsTexture2D = qrCode.GetGraphic(pixelsPerModule: 10);
 
         // Change the filtering mode to point (i.e. nearest) rather than the default of linear - we want sharp edges on
         // the blocks, not blurry interpolated edges!
         qrCodeAsTexture2D.filterMode = FilterMode.Point;
 
         // Convert the texture into a sprite and assign it to our QR code image
-        var qrCodeSprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height),
-            new Vector2(0.5f, 0.5f), 100f);
+        var qrCodeSprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new Vector2(0.5f, 0.5f), 100f);
         _image.sprite = qrCodeSprite;
     }
 }

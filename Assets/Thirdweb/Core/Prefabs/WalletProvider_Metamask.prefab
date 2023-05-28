@@ -2989,7 +2989,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4036888909731852399}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &3503421935344847224
 Camera:
@@ -5102,6 +5102,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3503421935870801902}
   - component: {fileID: 2433011551695929986}
+  - component: {fileID: 4559418603046196302}
   m_Layer: 0
   m_Name: WalletProvider_Metamask
   m_TagString: Untagged
@@ -5139,6 +5140,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 6cbb8289bcfbdba43817188b3b4f15e0, type: 2}
+--- !u!114 &4559418603046196302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3503421935870801903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9088d607e1d7b3478fcc73da2791fec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MetamaskCanvas: {fileID: 8744985464267693835}
+  ConnectButton: {fileID: 3503421936221029119}
+  welcomeScreen: {fileID: 3503421936027490483}
+  mainScreen: {fileID: 3503421936428190661}
+  DeeplinkButton: {fileID: 3503421936066145370}
+  HeaderText: {fileID: 3503421936426239605}
+  DescriptionText: {fileID: 3503421935881847325}
+  loadingSprite: {fileID: 21300000, guid: 717e217158e3e694eb447a4a5910fbbd, type: 3}
+  QRCodeImage: {fileID: 32878201333017964}
 --- !u!1 &3503421935881847323
 GameObject:
   m_ObjectHideFlags: 0
@@ -6522,7 +6544,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4036888909731852399}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3503421936118848201
 MonoBehaviour:
@@ -6737,19 +6759,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2433011551695929986}
-        m_TargetAssemblyTypeName: MetaMask.Unity.MetaMaskUnity, MetaMaskUnity.Runtime
-        m_MethodName: Connect
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 3503421936427613058}
+      - m_Target: {fileID: 4559418603046196302}
         m_TargetAssemblyTypeName: MetaMask.Unity.Samples.VisualController, Assembly-CSharp
         m_MethodName: OpenMainScreen
         m_Mode: 1
@@ -7964,59 +7974,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!1 &3503421936427613057
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3503421936427613059}
-  - component: {fileID: 3503421936427613058}
-  m_Layer: 0
-  m_Name: Controller
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3503421936427613059
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3503421936427613057}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4036888909731852399}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3503421936427613058
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3503421936427613057}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9088d607e1d7b3478fcc73da2791fec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  MetamaskCanvas: {fileID: 8744985464267693835}
-  ConnectButton: {fileID: 3503421936221029119}
-  welcomeScreen: {fileID: 3503421936027490483}
-  mainScreen: {fileID: 3503421936428190661}
-  DeeplinkButton: {fileID: 3503421936066145370}
-  HeaderText: {fileID: 3503421936426239605}
-  DescriptionText: {fileID: 3503421935881847325}
-  loadingSprite: {fileID: 21300000, guid: 717e217158e3e694eb447a4a5910fbbd, type: 3}
-  QRCodeImage: {fileID: 32878201333017964}
 --- !u!1 &3503421936427620979
 GameObject:
   m_ObjectHideFlags: 0
@@ -9547,7 +9504,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3503421936374056257}
-  - {fileID: 3503421936427613059}
   - {fileID: 3503421935344847227}
   - {fileID: 3503421936118848200}
   m_Father: {fileID: 3503421935870801902}

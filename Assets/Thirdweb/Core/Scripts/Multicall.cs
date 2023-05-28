@@ -38,7 +38,7 @@ namespace Thirdweb
 
         public static async Task<List<TokenData721>> GetAllOwners721(string contractAddress, int startTokenId, int endTokenId)
         {
-            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetMultiQueryHandler();
+            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetMultiQueryHandler();
             var calls = new List<MulticallInputOutput<TokenERC721.OwnerOfFunction, TokenERC721.OwnerOfOutputDTO>>();
             for (int i = startTokenId; i <= endTokenId; i++)
             {
@@ -61,7 +61,7 @@ namespace Thirdweb
 
         public static async Task<List<TokenData721>> GetSpecificOwners721(string contractAddress, int[] tokenIds)
         {
-            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetMultiQueryHandler();
+            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetMultiQueryHandler();
             var calls = new List<MulticallInputOutput<TokenERC721.OwnerOfFunction, TokenERC721.OwnerOfOutputDTO>>();
             for (int i = 0; i < tokenIds.Length; i++)
             {
@@ -84,7 +84,7 @@ namespace Thirdweb
 
         public static async Task<List<TokenData721>> GetAllTokenUris721(string contractAddress, int startTokenId, int endTokenId)
         {
-            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetMultiQueryHandler();
+            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetMultiQueryHandler();
             var calls = new List<MulticallInputOutput<TokenERC721.TokenURIFunction, TokenERC721.TokenURIOutputDTO>>();
             for (int i = startTokenId; i <= endTokenId; i++)
             {
@@ -107,7 +107,7 @@ namespace Thirdweb
 
         public static async Task<List<TokenData721>> GetSpecificTokenUris721(string contractAddress, int[] tokenIds)
         {
-            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetMultiQueryHandler();
+            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetMultiQueryHandler();
             var calls = new List<MulticallInputOutput<TokenERC721.TokenURIFunction, TokenERC721.TokenURIOutputDTO>>();
             for (int i = 0; i < tokenIds.Length; i++)
             {
@@ -130,7 +130,7 @@ namespace Thirdweb
 
         public static async Task<List<int>> GetOwnedTokenIds721(string contractAddress, string ownerAddress)
         {
-            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.GetMultiQueryHandler();
+            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetMultiQueryHandler();
             var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
             var balance = BigInteger.Parse(await contract.ERC721.BalanceOf(ownerAddress));
             var calls = new List<MulticallInputOutput<TokenERC721.TokenOfOwnerByIndexFunction, TokenERC721.TokenOfOwnerByIndexOutputDTO>>();

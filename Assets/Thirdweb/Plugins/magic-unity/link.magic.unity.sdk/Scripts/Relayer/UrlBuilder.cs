@@ -10,7 +10,7 @@ namespace link.magic.unity.sdk.Relayer
         internal static UrlBuilder Instance;
 
         public static readonly string Host = "https://box.magic.link";
-
+        
         internal readonly string EncodedParams;
         public string apikey;
 
@@ -25,10 +25,10 @@ namespace link.magic.unity.sdk.Relayer
             EncodedParams = MagicUtility.BtoA(optionsJsonString);
         }
 
-        internal UrlBuilder(string apikey, string ethNetwork, string locale)
+        internal UrlBuilder(string apikey, EthNetwork ethNetwork, string locale)
         {
             var options = new EthNetworkOptions();
-            options.ETH_NETWORK = ethNetwork.ToLower();
+            options.ETH_NETWORK = ethNetwork.ToString().ToLower();
             options.locale = locale;
             options.API_KEY = apikey;
             options.bundleId = Application.identifier;
@@ -52,12 +52,8 @@ namespace link.magic.unity.sdk.Relayer
     [Serializable]
     public class CustomNodeConfiguration
     {
-        [SerializeField]
-        [CanBeNull]
-        internal int? chainId;
-
-        [SerializeField]
-        internal string rpcUrl;
+        [SerializeField] [CanBeNull] internal int? chainId; 
+        [SerializeField] internal string rpcUrl;
 
         public CustomNodeConfiguration(string rpcUrl, int? chainId)
         {
@@ -65,7 +61,7 @@ namespace link.magic.unity.sdk.Relayer
             this.chainId = chainId;
         }
     }
-
+    
     [Serializable]
     public class BaseOptions
     {

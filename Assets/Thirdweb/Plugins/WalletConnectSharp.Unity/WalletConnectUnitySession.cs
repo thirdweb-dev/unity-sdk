@@ -54,7 +54,7 @@ namespace WalletConnectSharp.Unity
 
         public override async Task<WCSessionData> ConnectSession()
         {
-            return await unityObjectSource.Connect(ThirdwebManager.Instance.SDK.nativeSession.lastChainId);
+            return await unityObjectSource.Connect(ThirdwebManager.Instance.SDK.session.ChainId);
         }
     }
 }

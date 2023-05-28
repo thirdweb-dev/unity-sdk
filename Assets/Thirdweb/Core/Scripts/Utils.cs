@@ -8,7 +8,6 @@ using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Web3.Accounts;
 using System.IO;
 using UnityEngine;
-using WalletConnectSharp.Unity;
 
 namespace Thirdweb
 {
@@ -246,8 +245,8 @@ namespace Thirdweb
 
         public async static Task<BigInteger> GetCurrentBlockTimeStamp()
         {
-            var blockNumber = await ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
-            var block = await ThirdwebManager.Instance.SDK.nativeSession.web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
+            var blockNumber = await ThirdwebManager.Instance.SDK.session.Web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+            var block = await ThirdwebManager.Instance.SDK.session.Web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
             return block.Timestamp.Value;
         }
 
@@ -315,13 +314,29 @@ namespace Thirdweb
                         R = 1,
                         P = 8
                     };
-                    var ecKey = Nethereum.Signer.EthECKey.GenerateKey();
+                    byte[] seed = new byte[32];
+                    using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
+                    {
+                        rng.GetBytes(seed);
+                    }
+                    var ecKey = Nethereum.Signer.EthECKey.GenerateKey(seed);
                     var keyStore = keyStoreService.EncryptAndGenerateKeyStore(password, ecKey.GetPrivateKeyAsBytes(), ecKey.GetPublicAddress(), scryptParams);
                     var json = keyStoreService.SerializeKeyStoreToJson(keyStore);
                     File.WriteAllText(path, json);
                     return new Account(ecKey, chainId);
                 }
             }
+        }
+
+        public static Account GenerateRandomAccount(int chainId)
+        {
+            byte[] seed = new byte[32];
+            using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
+            {
+                rng.GetBytes(seed);
+            }
+            var ecKey = Nethereum.Signer.EthECKey.GenerateKey(seed);
+            return new Account(ecKey, chainId);
         }
 
         public static string cidToIpfsUrl(this string cid, bool useGateway = false)

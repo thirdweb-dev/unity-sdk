@@ -11,6 +11,20 @@ namespace WalletConnectSharp.NEthereum.Client
     {
         public WalletConnectSession Session { get; }
 
+        protected static List<string> MethodsToRedirect = new List<string>()
+        {
+            "eth_sendTransaction",
+            "eth_signTransaction",
+            "eth_sign",
+            "personal_sign",
+            "eth_signTypedData",
+            "eth_signTypedData_v3",
+            "eth_signTypedData_v4",
+            "wallet_watchAsset",
+            "wallet_addEthereumChain",
+            "wallet_switchEthereumChain"
+        };
+
         public WalletConnectClient(WalletConnectSession provider)
         {
             this.Session = provider;
@@ -40,7 +54,7 @@ namespace WalletConnectSharp.NEthereum.Client
                 }
             );
 
-            await Session.SendRequest(rpcRequestMessage);
+            await Session.SendRequest(rpcRequestMessage, null, MethodsToRedirect.Contains(message.Method));
 
             return await eventCompleted.Task;
         }

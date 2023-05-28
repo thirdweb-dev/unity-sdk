@@ -16,6 +16,9 @@ namespace UnityAsyncAwaitUtil
             {
                 if (_instance == null)
                 {
+                    if (Application.isEditor && !Application.isPlaying)
+                        return null;
+
                     _instance = new GameObject("AsyncCoroutineRunner").AddComponent<AsyncCoroutineRunner>();
                 }
 
