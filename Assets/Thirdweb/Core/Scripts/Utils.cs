@@ -8,7 +8,6 @@ using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Web3.Accounts;
 using System.IO;
 using UnityEngine;
-using WalletConnectSharp.Unity;
 
 namespace Thirdweb
 {

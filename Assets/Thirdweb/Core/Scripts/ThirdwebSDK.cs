@@ -1,11 +1,5 @@
 using System.Collections.Generic;
-using System.Numerics;
-using Nethereum.Hex.HexConvertors.Extensions;
-using Nethereum.Siwe;
-using Nethereum.Web3;
-using Nethereum.Web3.Accounts;
 using UnityEngine;
-using WalletConnectSharp.Core.Models.Ethereum;
 
 namespace Thirdweb
 {

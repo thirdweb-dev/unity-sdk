@@ -7,9 +7,7 @@ using MetaMask.Models;
 using MetaMask.Sockets;
 using MetaMask.Transports;
 using MetaMask.Transports.Unity.UI;
-using Nethereum.ABI.EIP712;
 using UnityEngine;
-using Newtonsoft.Json;
 
 namespace MetaMask.Unity
 {

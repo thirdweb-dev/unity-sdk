@@ -59,7 +59,8 @@ namespace MetaMask.SocketIOClient
 
         private void OnApplicationQuit()
         {
-            Destroy(this.gameObject);
+            if (Application.isEditor && !Application.isPlaying)
+                Destroy(this.gameObject);
         }
     }
 }

@@ -1,26 +1,17 @@
 using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Signer;
-using Nethereum.Web3;
 using UnityEngine;
 using System;
-using WalletConnectSharp.Unity;
-using WalletConnectSharp.NEthereum;
 using Nethereum.Siwe.Core;
 using System.Collections.Generic;
-using Nethereum.Web3.Accounts;
-using WalletConnectSharp.Core.Models.Ethereum;
-using link.magic.unity.sdk;
-using Nethereum.RPC;
-using MetaMask.Unity;
-using MetaMask.NEthereum;
 using Nethereum.Hex.HexConvertors.Extensions;
-using Nethereum.Hex.HexTypes;
 using Nethereum.ABI.EIP712;
 using Nethereum.Signer.EIP712;
-using Newtonsoft.Json;
-using Nethereum.JsonRpc.Client;
 using Newtonsoft.Json.Linq;
+using Nethereum.RPC.Eth.Transactions;
+using Nethereum.RPC.Eth.DTOs;
+using Nethereum.Hex.HexTypes;
 
 //using WalletConnectSharp.NEthereum;
 
@@ -46,7 +37,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection.provider, walletConnection.email, walletConnection.password);
+                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection.provider, walletConnection.password, walletConnection.email);
             }
         }
 
@@ -312,7 +303,15 @@ namespace Thirdweb
                 }
                 else
                 {
-                    return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", await GetAddress(), message);
+                    try
+                    {
+                        return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", await GetAddress(), message);
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning(e.Message);
+                        return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_sign", await GetAddress(), message);
+                    }
                 }
             }
         }

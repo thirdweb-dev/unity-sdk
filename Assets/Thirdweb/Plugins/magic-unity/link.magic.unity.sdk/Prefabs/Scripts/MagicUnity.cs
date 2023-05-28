@@ -32,7 +32,7 @@ public class MagicUnity : MonoBehaviour
 
     public async Task<string> EnableMagicAuth(string email)
     {
-        return await _magic.Auth.LoginWithMagicLink(email);
+        return await _magic.Auth.LoginWithEmailOtp(email);
     }
 
     public async Task<string> GetAddress()

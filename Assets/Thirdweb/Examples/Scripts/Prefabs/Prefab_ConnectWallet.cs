@@ -85,6 +85,10 @@ public class Prefab_ConnectWallet : MonoBehaviour
             {
                 connectButton.GetComponent<Button>().onClick.AddListener(() => OpenPasswordPanel());
             }
+            else if (supportedWallets[0] == WalletProvider.MagicLink)
+            {
+                connectButton.GetComponent<Button>().onClick.AddListener(() => OpenEmailPanel());
+            }
             else
             {
                 connectButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(supportedWallets[0]));

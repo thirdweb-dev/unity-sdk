@@ -6,16 +6,12 @@ using link.magic.unity.sdk;
 using MetaMask.NEthereum;
 using MetaMask.Unity;
 using Nethereum.Hex.HexConvertors.Extensions;
-using Nethereum.Hex.HexTypes;
 using Nethereum.JsonRpc.Client;
-using Nethereum.RPC.Eth;
 using Nethereum.Siwe;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
-using Newtonsoft.Json;
 using UnityEngine;
 using WalletConnectSharp.Core.Models.Ethereum;
-using WalletConnectSharp.NEthereum;
 using WalletConnectSharp.NEthereum.Client;
 using WalletConnectSharp.Unity;
 
@@ -42,6 +38,18 @@ namespace Thirdweb
             get { return LocalAccount != null || ThirdwebManager.Instance.SDK.session.WalletProvider != WalletProvider.LocalWallet; }
         }
 
+        private static readonly System.Random rng = new System.Random();
+        private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static int nonce = 0;
+
+        public static int GenerateRequestId()
+        {
+            var date = (int)((DateTime.UtcNow - UnixEpoch).TotalSeconds);
+            var extra = rng.Next(0, 999);
+            nonce = (nonce + 1) % 1000;
+            return date * 1000000 + extra * 1000 + nonce;
+        }
+
         #endregion
 
         #region Constructors
@@ -65,7 +73,7 @@ namespace Thirdweb
 
         #region Public Methods
 
-        public async Task<string> Connect(WalletProvider walletProvider, string email = null, string password = null)
+        public async Task<string> Connect(WalletProvider walletProvider, string password = null, string email = null)
         {
             WalletProvider = walletProvider;
             Email = email;
@@ -127,7 +135,7 @@ namespace Thirdweb
                     MagicUnity.Instance.DisableMagicAuth();
                     break;
                 case WalletProvider.MetaMask:
-                    MetaMaskUnity.Instance.Wallet.Disconnect();
+                    MetaMaskUnity.Instance.Disconnect();
                     break;
                 default:
                     break;
@@ -163,7 +171,7 @@ namespace Thirdweb
 
         public async Task<T> Request<T>(string method, params object[] parameters)
         {
-            var request = new RpcRequest(new Guid().ToString(), method, parameters);
+            var request = new RpcRequest(GenerateRequestId(), method, parameters);
             return await Web3.Client.SendRequestAsync<T>(request);
         }
 
@@ -196,9 +204,9 @@ namespace Thirdweb
             {
                 GameObject.Instantiate(ThirdwebManager.Instance.WalletConnectPrefab);
                 await new WaitForSeconds(0.5f);
+                WalletConnect.Instance.Initialize();
             }
 
-            WalletConnect.Instance.Initialize();
             await WalletConnect.Instance.EnableWalletConnect();
             Web3 = new Web3(new WalletConnectClient(WalletConnect.Instance.Session));
             LocalAccount = null;
@@ -211,12 +219,11 @@ namespace Thirdweb
             {
                 GameObject.Instantiate(ThirdwebManager.Instance.MagicAuthPrefab);
                 await new WaitForSeconds(0.5f);
+                if (Options.wallet?.magicLinkApiKey == null)
+                    throw new UnityException("MagicLink API Key is not set!");
+                MagicUnity.Instance.Initialize(Options.wallet?.magicLinkApiKey, new link.magic.unity.sdk.Relayer.CustomNodeConfiguration(RPC, ChainId));
             }
 
-            if (Options.wallet?.magicLinkApiKey == null)
-                throw new UnityException("MagicLink API Key is not set!");
-
-            MagicUnity.Instance.Initialize(Options.wallet?.magicLinkApiKey, new link.magic.unity.sdk.Relayer.CustomNodeConfiguration(RPC, ChainId));
             await MagicUnity.Instance.EnableMagicAuth(Email);
             Web3 = new Web3(Magic.Instance.Provider);
             LocalAccount = null;
@@ -228,8 +235,8 @@ namespace Thirdweb
             if (MetaMaskUnity.Instance == null)
             {
                 GameObject.Instantiate(ThirdwebManager.Instance.MetamaskPrefab);
+                await new WaitForSeconds(0.5f);
                 MetaMaskUnity.Instance.Initialize();
-                await new WaitForSeconds(1f);
             }
 
             MetaMaskUnity.Instance.Connect();

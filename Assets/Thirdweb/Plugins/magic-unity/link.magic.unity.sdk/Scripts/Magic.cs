@@ -15,7 +15,7 @@ namespace link.magic.unity.sdk
         public readonly UserModule User;
 
         //Constructor
-        public Magic(string apikey, string network = "goerli", string locale = "en-US")
+        public Magic(string apikey, EthNetwork network = EthNetwork.Mainnet, string locale = "en-US")
         {
             var urlBuilder = new UrlBuilder(apikey, network, locale);
             UrlBuilder.Instance = urlBuilder;
@@ -34,5 +34,11 @@ namespace link.magic.unity.sdk
             User = new UserModule(Provider);
             Auth = new AuthModule(Provider);
         }
+    }
+
+    public enum EthNetwork
+    {
+        Mainnet,
+        Goerli,
     }
 }
