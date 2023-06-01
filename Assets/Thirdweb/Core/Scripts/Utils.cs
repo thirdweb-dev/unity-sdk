@@ -281,7 +281,7 @@ namespace Thirdweb
 
         public static Account UnlockOrGenerateLocalAccount(int chainId, string password = null, string privateKey = null)
         {
-            password ??= GetDeviceIdentifier();
+            password = string.IsNullOrEmpty(password) ? GetDeviceIdentifier() : password;
 
             var path = GetAccountPath();
             var keyStoreService = new Nethereum.KeyStore.KeyStoreScryptService();
