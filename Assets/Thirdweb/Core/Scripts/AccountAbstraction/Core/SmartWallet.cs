@@ -165,30 +165,37 @@ namespace Thirdweb.AccountAbstraction
 
             if (Config.gasless)
             {
-                var gasEstimatesRequest = new RpcRequestMessage(requestMessage.Id, "pm_sponsorUserOperation", new object[] { invalidUserOpHexified, entryPoint });
-                var gasEstimatesResult = await InnerRpcRequest(gasEstimatesRequest, paymasterUrl);
-                if (gasEstimatesResult.Result == null)
-                    throw new Exception("Failed to estimate gas: " + gasEstimatesResult.Error.Message);
-                var gasEstimates = JsonConvert.DeserializeObject<PMSponsorOperationResponse>(gasEstimatesResult.Result.ToString());
+                var pmSponsorRequest = new RpcRequestMessage(
+                    requestMessage.Id,
+                    "pm_sponsorUserOperation",
+                    new object[]
+                    {
+                        invalidUserOpHexified,
+                        new EntryPointWrapper() { entryPoint = entryPoint }
+                    }
+                );
+                var pmSponsorResult = await InnerRpcRequest(pmSponsorRequest, paymasterUrl);
+                if (pmSponsorResult.Result == null)
+                    throw new Exception("Failed to estimate gas: " + pmSponsorResult.Error.Message);
+                Debug.Log("Gas estimates: " + JsonConvert.SerializeObject(pmSponsorResult.Result));
+                var pmSponsor = JsonConvert.DeserializeObject<PMSponsorOperationResponse>(pmSponsorResult.Result.ToString());
 
-                invalidUserOp.CallGasLimit = new HexBigInteger(gasEstimates.callGasLimit).Value;
-                invalidUserOp.VerificationGasLimit = new HexBigInteger(gasEstimates.verificationGas).Value;
-                invalidUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.preVerificationGas).Value;
-                invalidUserOp.PaymasterAndData = gasEstimates.paymasterAndData.HexStringToByteArray();
+                invalidUserOp.PaymasterAndData = pmSponsor.paymasterAndData.HexStringToByteArray();
             }
             else
             {
-                var gasEstimatesRequest = new RpcRequestMessage(requestMessage.Id, "eth_estimateUserOperationGas", new object[] { invalidUserOpHexified, entryPoint });
-                var gasEstimatesResult = await InnerRpcRequest(gasEstimatesRequest, bundlerUrl);
-                if (gasEstimatesResult.Result == null)
-                    throw new Exception("Failed to estimate gas: " + gasEstimatesResult.Error.Message);
-                var gasEstimates = JsonConvert.DeserializeObject<UserOperationGasEstimateResponse>(gasEstimatesResult.Result.ToString());
-
-                invalidUserOp.CallGasLimit = new HexBigInteger(gasEstimates.CallGasLimit).Value;
-                invalidUserOp.VerificationGasLimit = new HexBigInteger(gasEstimates.VerificationGas).Value;
-                invalidUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value;
                 invalidUserOp.PaymasterAndData = new byte[] { };
             }
+
+            var gasEstimatesRequest = new RpcRequestMessage(requestMessage.Id, "eth_estimateUserOperationGas", new object[] { invalidUserOpHexified, entryPoint });
+            var gasEstimatesResult = await InnerRpcRequest(gasEstimatesRequest, bundlerUrl);
+            if (gasEstimatesResult.Result == null)
+                throw new Exception("Failed to estimate gas: " + gasEstimatesResult.Error.Message);
+            var gasEstimates = JsonConvert.DeserializeObject<UserOperationGasEstimateResponse>(gasEstimatesResult.Result.ToString());
+
+            invalidUserOp.CallGasLimit = new HexBigInteger(gasEstimates.CallGasLimit).Value;
+            invalidUserOp.VerificationGasLimit = new HexBigInteger(gasEstimates.VerificationGas).Value;
+            invalidUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value;
 
             Debug.Log("Hash and sign partial UserOp");
 
@@ -322,9 +329,6 @@ namespace Thirdweb.AccountAbstraction
         public class PMSponsorOperationResponse
         {
             public string paymasterAndData { get; set; }
-            public string preVerificationGas { get; set; }
-            public string verificationGas { get; set; }
-            public string callGasLimit { get; set; }
         }
 
         public class UserOperationGasEstimateResponse
@@ -340,6 +344,11 @@ namespace Thirdweb.AccountAbstraction
             public string transactionHash { get; set; }
             public string blockHash { get; set; }
             public string blockNumber { get; set; }
+        }
+
+        public class EntryPointWrapper
+        {
+            public string entryPoint { get; set; }
         }
     }
 }
