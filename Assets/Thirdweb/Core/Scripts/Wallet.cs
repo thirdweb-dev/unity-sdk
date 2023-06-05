@@ -435,7 +435,7 @@ namespace Thirdweb
         public string password;
         public string email;
 
-        public WalletConnection(WalletProvider provider = WalletProvider.LocalWallet, int chainId = 1, string password = null, string email = null)
+        public WalletConnection(WalletProvider provider, int chainId = 1, string password = null, string email = null)
         {
             this.provider = provider;
             this.chainId = chainId;
