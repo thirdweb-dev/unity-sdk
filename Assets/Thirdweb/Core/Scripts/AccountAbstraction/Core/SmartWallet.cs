@@ -138,7 +138,7 @@ namespace Thirdweb.AccountAbstraction
                 PreVerificationGas = 100000,
                 MaxFeePerGas = latestBlock.BaseFeePerGas.Value + 1000000000,
                 MaxPriorityFeePerGas = 1000000000,
-                PaymasterAndData = Config.gasless ? DUMMY_PAYMASTER_AND_DATA_HEX.HexStringToByteArray() : new byte[] { },
+                PaymasterAndData = DUMMY_PAYMASTER_AND_DATA_HEX.HexStringToByteArray(),
                 Signature = dummySig,
             };
 
@@ -263,14 +263,14 @@ namespace Thirdweb.AccountAbstraction
             return new UserOperationHexified()
             {
                 sender = userOperation.Sender,
-                nonce = userOperation.Nonce,
+                nonce = userOperation.Nonce.ToHexBigInteger().HexValue,
                 initCode = userOperation.InitCode.ByteArrayToHexString(),
                 callData = userOperation.CallData.ByteArrayToHexString(),
-                callGasLimit = userOperation.CallGasLimit,
-                verificationGasLimit = userOperation.VerificationGasLimit,
-                preVerificationGas = userOperation.PreVerificationGas,
-                maxFeePerGas = userOperation.MaxFeePerGas,
-                maxPriorityFeePerGas = userOperation.MaxPriorityFeePerGas,
+                callGasLimit = userOperation.CallGasLimit.ToHexBigInteger().HexValue,
+                verificationGasLimit = userOperation.VerificationGasLimit.ToHexBigInteger().HexValue,
+                preVerificationGas = userOperation.PreVerificationGas.ToHexBigInteger().HexValue,
+                maxFeePerGas = userOperation.MaxFeePerGas.ToHexBigInteger().HexValue,
+                maxPriorityFeePerGas = userOperation.MaxPriorityFeePerGas.ToHexBigInteger().HexValue,
                 paymasterAndData = userOperation.PaymasterAndData.ByteArrayToHexString(),
                 signature = userOperation.Signature.ByteArrayToHexString()
             };
@@ -279,14 +279,14 @@ namespace Thirdweb.AccountAbstraction
         public class UserOperationHexified
         {
             public string sender { get; set; }
-            public BigInteger nonce { get; set; }
+            public string nonce { get; set; }
             public string initCode { get; set; }
             public string callData { get; set; }
-            public BigInteger callGasLimit { get; set; }
-            public BigInteger verificationGasLimit { get; set; }
-            public BigInteger preVerificationGas { get; set; }
-            public BigInteger maxFeePerGas { get; set; }
-            public BigInteger maxPriorityFeePerGas { get; set; }
+            public string callGasLimit { get; set; }
+            public string verificationGasLimit { get; set; }
+            public string preVerificationGas { get; set; }
+            public string maxFeePerGas { get; set; }
+            public string maxPriorityFeePerGas { get; set; }
             public string paymasterAndData { get; set; }
             public string signature { get; set; }
         }
