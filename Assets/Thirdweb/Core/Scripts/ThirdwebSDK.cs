@@ -42,7 +42,6 @@ namespace Thirdweb
             public bool gasless;
             public string bundlerUrl;
             public string paymasterUrl;
-            public string paymasterAPI;
             public string entryPointAddress;
         }
 

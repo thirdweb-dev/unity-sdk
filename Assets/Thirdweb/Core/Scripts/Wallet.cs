@@ -58,6 +58,23 @@ namespace Thirdweb
         }
 
         /// <summary>
+        /// Encrypt and export local wallet as password-protected json keystore
+        /// </summary>
+        public async Task<string> Export(string password)
+        {
+            password = string.IsNullOrEmpty(password) ? SystemInfo.deviceUniqueIdentifier : password;
+
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.ExportWallet(password);
+            }
+            else
+            {
+                return Utils.EncryptAndGenerateKeyStore(new EthECKey(ThirdwebManager.Instance.SDK.session.LocalAccount.PrivateKey), password);
+            }
+        }
+
+        /// <summary>
         /// Authenticate the user by signing a payload that can be used to securely identify users. See https://portal.thirdweb.com/auth
         /// </summary>
         /// <param name="domain">The domain to authenticate to</param>

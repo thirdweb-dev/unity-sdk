@@ -160,7 +160,16 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         try
         {
-            exportButton.SetActive(_wallet == WalletProvider.LocalWallet);
+            if (_wallet == WalletProvider.LocalWallet || _wallet == WalletProvider.SmartWallet)
+            {
+                exportButton.SetActive(true);
+                exportButton.GetComponent<Button>().onClick.RemoveAllListeners();
+                exportButton.GetComponent<Button>().onClick.AddListener(() => OnExportWallet(password));
+            }
+            else
+            {
+                exportButton.SetActive(false);
+            }
 
             address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(_wallet, ThirdwebManager.Instance.GetCurrentChainID(), password, email));
 
@@ -292,20 +301,14 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
     public void OnCopyAddress()
     {
+        Debugger.Instance.Log("Copied Address", $"Connected Address: {address}");
         GUIUtility.systemCopyBuffer = address;
-        Debug.LogWarning($"Copied your address to your clipboard! Address: {address}");
     }
 
-    public void OnExportWallet()
+    public async void OnExportWallet(string password)
     {
-        Application.OpenURL(Utils.GetAccountPath()); // Doesn't work on iOS or > Android 6
-
-        // Fallback
-        string text = System.IO.File.ReadAllText(Utils.GetAccountPath());
+        string text = await ThirdwebManager.Instance.SDK.wallet.Export(password);
+        Debugger.Instance.Log("Exported Wallet", text);
         GUIUtility.systemCopyBuffer = text;
-        Debug.LogWarning(
-            "Copied your encrypted keystore to your clipboard! You may import it into an external wallet with your password.\n"
-                + "If no password was provided upon the creation of this account, the password is your device unique ID."
-        );
     }
 }

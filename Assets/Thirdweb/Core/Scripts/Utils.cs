@@ -8,6 +8,7 @@ using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Web3.Accounts;
 using System.IO;
 using UnityEngine;
+using Nethereum.Signer;
 
 namespace Thirdweb
 {
@@ -307,25 +308,30 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var scryptParams = new Nethereum.KeyStore.Model.ScryptParams
-                    {
-                        Dklen = 32,
-                        N = 262144,
-                        R = 1,
-                        P = 8
-                    };
                     byte[] seed = new byte[32];
                     using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
                     {
                         rng.GetBytes(seed);
                     }
                     var ecKey = Nethereum.Signer.EthECKey.GenerateKey(seed);
-                    var keyStore = keyStoreService.EncryptAndGenerateKeyStore(password, ecKey.GetPrivateKeyAsBytes(), ecKey.GetPublicAddress(), scryptParams);
-                    var json = keyStoreService.SerializeKeyStoreToJson(keyStore);
-                    File.WriteAllText(path, json);
+                    File.WriteAllText(path, EncryptAndGenerateKeyStore(ecKey, password));
                     return new Account(ecKey, chainId);
                 }
             }
+        }
+
+        public static string EncryptAndGenerateKeyStore(EthECKey ecKey, string password)
+        {
+            var keyStoreService = new Nethereum.KeyStore.KeyStoreScryptService();
+            var scryptParams = new Nethereum.KeyStore.Model.ScryptParams
+            {
+                Dklen = 32,
+                N = 262144,
+                R = 1,
+                P = 8
+            };
+            var keyStore = keyStoreService.EncryptAndGenerateKeyStore(password, ecKey.GetPrivateKeyAsBytes(), ecKey.GetPublicAddress(), scryptParams);
+            return keyStoreService.SerializeKeyStoreToJson(keyStore);
         }
 
         public static Account GenerateRandomAccount(int chainId)

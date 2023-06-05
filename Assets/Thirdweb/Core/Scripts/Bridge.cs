@@ -91,7 +91,13 @@ namespace Thirdweb
             string taskId = Guid.NewGuid().ToString();
             taskMap[taskId] = task;
 #if UNITY_WEBGL
-            ThirdwebConnect(taskId, walletConnection.provider.ToString().Substring(0,1).ToLower() + walletConnection.provider.ToString().Substring(1), walletConnection.chainId, walletConnection.password ?? Utils.GetDeviceIdentifier(), walletConnection.email, jsCallback);
+            ThirdwebConnect(
+                taskId, 
+                walletConnection.provider.ToString().Substring(0,1).ToLower() + walletConnection.provider.ToString().Substring(1), 
+                walletConnection.chainId, string.IsNullOrEmpty(walletConnection.password) ? Utils.GetDeviceIdentifier() : walletConnection.password, 
+                walletConnection.email, 
+                jsCallback
+            );
 #endif
             string result = await task.Task;
             return result;
@@ -182,6 +188,23 @@ namespace Thirdweb
             await task.Task;
         }
 
+        public static async Task<string> ExportWallet(string password)
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return null;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebExportWallet(taskId, password, jsCallback);
+#endif
+            string result = await task.Task;
+            return result;
+        }
+
 #if UNITY_WEBGL
         [DllImport("__Internal")]
         private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
@@ -197,6 +220,8 @@ namespace Thirdweb
         private static extern string ThirdwebSwitchNetwork(string taskId, int chainId, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebFundWallet(string taskId, string payload, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebExportWallet(string taskId, string password, Action<string, string, string> cb);
 #endif
     }
 }
