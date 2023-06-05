@@ -20,6 +20,8 @@ using Thirdweb.Contracts.Account.ContractDefinition;
 using Thirdweb.Contracts.AccountFactory.ContractDefinition;
 using static Thirdweb.ThirdwebSDK;
 using UnityEngine;
+using Nethereum.ABI.FunctionEncoding.Attributes;
+using Nethereum.Contracts;
 
 namespace Thirdweb.AccountAbstraction
 {
@@ -33,6 +35,10 @@ namespace Thirdweb.AccountAbstraction
         private bool _deployed;
         private Web3 _personalWeb3;
         private HttpClient _httpClient;
+
+        private readonly string DEFAULT_ENTRYPOINT_ADDRESS = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"; // v0.6
+        private readonly string DUMMY_PAYMASTER_AND_DATA_HEX =
+            "0x0101010101010101010101010101010101010101000000000000000000000000000000000000000000000000000001010101010100000000000000000000000000000000000000000000000000000000000000000101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101";
 
         public SmartWallet(Account personalAccount, SmartWalletConfig config)
         {
@@ -51,71 +57,33 @@ namespace Thirdweb.AccountAbstraction
                 Debug.Log("Already initialized.");
                 return;
             }
-
             Debug.Log("Initializing... Factory: " + Config.factoryAddress + ", Admin: " + PersonalAccount.Address);
-
             var predictedAccount = await TransactionManager.ThirdwebRead<GetAddressFunction, GetAddressOutputDTO>(
                 Config.factoryAddress,
                 new GetAddressFunction() { AdminSigner = PersonalAccount.Address }
             );
             Accounts = new List<string>() { predictedAccount.ReturnValue1 };
             Debug.Log("Predicted account: " + Accounts[0]);
-
-            bool isSigner = false;
-            bool isAdmin = false;
-
-            // TODO: Query eth_getCode w/ _personalWeb3
-
-            var signers = await TransactionManager.ThirdwebRead<GetAccountsOfSignerFunction, GetAccountsOfSignerOutputDTO>(
-                Config.factoryAddress,
-                new GetAccountsOfSignerFunction() { Signer = PersonalAccount.Address }
-            );
-            isSigner = signers.Accounts.Count != 0 && !string.IsNullOrEmpty(signers.Accounts[0]) && signers.Accounts.Contains(Accounts[0]);
-
-            if (!isSigner)
-            {
-                try
-                {
-                    var adminRoleOutput = await TransactionManager.ThirdwebRead<HasRoleFunction, HasRoleOutputDTO>(
-                        Accounts[0],
-                        new HasRoleFunction() { Role = Utils.AddressZero.HexToByteArray(), Account = PersonalAccount.Address }
-                    );
-                    isAdmin = adminRoleOutput.ReturnValue1;
-                }
-                catch (System.Exception e)
-                {
-                    Debug.Log("Could not check admin role, may not be deployed: " + e.Message + "\n" + e.StackTrace);
-                }
-            }
-
-            _deployed = isSigner || isAdmin;
-
-            Debug.Log("Initialized. " + (_deployed ? "Deployed." : "Not Deployed.") + " Is Signer: " + isSigner + ", Is Admin: " + isAdmin);
+            var bytecode = await _personalWeb3.Eth.GetCode.SendRequestAsync(Accounts[0]);
+            _deployed = bytecode != "0x";
+            Debug.Log("Initialized. " + (_deployed ? "Deployed." : "Not Deployed."));
             _initialized = true;
         }
 
-        internal async Task Deploy()
+        internal async Task<byte[]> GetInitCode()
         {
-            Debug.Log("Deploying...");
-
             if (_deployed)
             {
                 Debug.Log("Already deployed.");
-                return;
+                return new byte[] { };
             }
 
             var fn = new CreateAccountFunction() { Admin = PersonalAccount.Address, Data = new byte[] { } };
             fn.FromAddress = PersonalAccount.Address;
             var deployHandler = _personalWeb3.Eth.GetContractTransactionHandler<CreateAccountFunction>();
-            await deployHandler.SendRequestAndWaitForReceiptAsync(Config.factoryAddress, fn);
-
-            var accounts = await TransactionManager.ThirdwebRead<GetAccountsOfSignerFunction, GetAccountsOfSignerOutputDTO>(
-                Config.factoryAddress,
-                new GetAccountsOfSignerFunction() { Signer = PersonalAccount.Address }
-            );
-            Accounts = accounts.Accounts;
-            _deployed = true;
-            Debug.Log("Deployed.");
+            var txInput = await deployHandler.CreateTransactionInputEstimatingGasAsync(Config.factoryAddress, fn);
+            var data = txInput.Data;
+            return data.HexStringToByteArray();
         }
 
         internal async Task<RpcResponseMessage> Request(RpcRequestMessage requestMessage)
@@ -129,13 +97,6 @@ namespace Thirdweb.AccountAbstraction
             }
             else if (requestMessage.Method == "eth_sendTransaction")
             {
-                if (!_deployed)
-                {
-                    Debug.Log("Smart wallet not deployed, deploying...");
-                    await Deploy();
-                    Debug.Log("Smart wallet deployed.");
-                }
-
                 return await CreateUserOpAndSend(requestMessage);
             }
             else
@@ -151,31 +112,36 @@ namespace Thirdweb.AccountAbstraction
             var paramList = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(requestMessage.RawParameters));
             var transactionInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(paramList[0]));
             string bundlerUrl = string.IsNullOrEmpty(Config.bundlerUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : Config.bundlerUrl;
-            // Check deploy here
+            string paymasterUrl = string.IsNullOrEmpty(Config.paymasterUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : Config.paymasterUrl;
+            string entryPoint = string.IsNullOrEmpty(Config.entryPointAddress) ? DEFAULT_ENTRYPOINT_ADDRESS : Config.entryPointAddress;
             var nonce = await TransactionManager.ThirdwebRead<GetNonceFunction, GetNonceOutputDTO>(Accounts[0], new GetNonceFunction() { });
             var signer = new EthereumMessageSigner();
             var signerKey = new EthECKey(PersonalAccount.PrivateKey);
+            Block latestBlock = await Utils.GetBlockByNumber(await Utils.GetLatestBlockNumber());
+            var dummySig = new byte[65];
+            for (int i = 0; i < dummySig.Length; i++)
+                dummySig[i] = 0x01;
 
             Debug.Log("Creating invalid user op for gas estimation");
 
             var invalidUserOp = new Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperation()
             {
-                Sender = transactionInput.From,
+                Sender = Accounts[0],
                 Nonce = nonce.ReturnValue1,
-                InitCode = new byte[] { }, // TODO: change this to callData of CreateAccount fn
-                CallData = transactionInput.Data.HexToByteArray(),
+                InitCode = await GetInitCode(),
+                CallData = transactionInput.Data.HexStringToByteArray(),
                 CallGasLimit = transactionInput.Gas.Value,
                 VerificationGasLimit = 100000,
                 PreVerificationGas = 100000,
-                MaxFeePerGas = 21, // TODO: Get from last block or check nethereum basic rpc
-                MaxPriorityFeePerGas = 1, // TODO: Get from last block or check nethereum basic rpc
-                PaymasterAndData = new byte[] { },
-                Signature = new byte[] { }, // TODO: Make this 65 bytes if no paymaster, 1s not 0s
+                MaxFeePerGas = latestBlock.BaseFeePerGas,
+                MaxPriorityFeePerGas = 2,
+                PaymasterAndData = Config.gasless ? DUMMY_PAYMASTER_AND_DATA_HEX.HexStringToByteArray() : new byte[] { },
+                Signature = dummySig,
             };
             var invalidUserOpHash = await TransactionManager.ThirdwebRead<
                 Thirdweb.Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction,
                 Thirdweb.Contracts.EntryPoint.ContractDefinition.GetUserOpHashOutputDTO
-            >(Config.entryPointAddress, new Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction() { UserOp = invalidUserOp });
+            >(entryPoint, new Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction() { UserOp = invalidUserOp });
             var invalidUserUpSignature = signer.Sign(invalidUserOpHash.ReturnValue1, signerKey);
             invalidUserOp.Signature = invalidUserUpSignature.HexStringToByteArray();
             var invalidUserOpHexified = EncodeUserOperation(
@@ -197,75 +163,110 @@ namespace Thirdweb.AccountAbstraction
 
             Debug.Log("Estimate gas with invalid UserOp");
 
-            var gasEstimatesRequest = new RpcRequestMessage(requestMessage.Id, "eth_estimateUserOperationGas", new object[] { invalidUserOpHexified, Config.entryPointAddress });
-            var gasEstimatesResult = await BundlerRequest(gasEstimatesRequest, bundlerUrl);
-            var gasEstimates = JsonConvert.DeserializeObject<UserOperationGasEstimateResponse>(gasEstimatesResult.Result.ToString());
+            if (Config.gasless)
+            {
+                var gasEstimatesRequest = new RpcRequestMessage(requestMessage.Id, "pm_sponsorUserOperation", new object[] { invalidUserOpHexified, entryPoint });
+                var gasEstimatesResult = await InnerRpcRequest(gasEstimatesRequest, paymasterUrl);
+                if (gasEstimatesResult.Result == null)
+                    throw new Exception("Failed to estimate gas: " + gasEstimatesResult.Error.Message);
+                var gasEstimates = JsonConvert.DeserializeObject<PMSponsorOperationResponse>(gasEstimatesResult.Result.ToString());
+
+                invalidUserOp.CallGasLimit = new HexBigInteger(gasEstimates.callGasLimit).Value;
+                invalidUserOp.VerificationGasLimit = new HexBigInteger(gasEstimates.verificationGas).Value;
+                invalidUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.preVerificationGas).Value;
+                invalidUserOp.PaymasterAndData = gasEstimates.paymasterAndData.HexStringToByteArray();
+            }
+            else
+            {
+                var gasEstimatesRequest = new RpcRequestMessage(requestMessage.Id, "eth_estimateUserOperationGas", new object[] { invalidUserOpHexified, entryPoint });
+                var gasEstimatesResult = await InnerRpcRequest(gasEstimatesRequest, bundlerUrl);
+                if (gasEstimatesResult.Result == null)
+                    throw new Exception("Failed to estimate gas: " + gasEstimatesResult.Error.Message);
+                var gasEstimates = JsonConvert.DeserializeObject<UserOperationGasEstimateResponse>(gasEstimatesResult.Result.ToString());
+
+                invalidUserOp.CallGasLimit = new HexBigInteger(gasEstimates.CallGasLimit).Value;
+                invalidUserOp.VerificationGasLimit = new HexBigInteger(gasEstimates.VerificationGas).Value;
+                invalidUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value;
+                invalidUserOp.PaymasterAndData = new byte[] { };
+            }
 
             Debug.Log("Hash and sign partial UserOp");
 
-            var partialUserOp = new Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperation()
+            var unsignedValidUserOp = new Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperation()
             {
                 Sender = invalidUserOp.Sender,
                 Nonce = invalidUserOp.Nonce,
                 InitCode = invalidUserOp.InitCode,
                 CallData = invalidUserOp.CallData,
-                CallGasLimit = new HexBigInteger(gasEstimates.CallGasLimit).Value,
-                VerificationGasLimit = new HexBigInteger(gasEstimates.VerificationGas).Value,
-                PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value,
+                CallGasLimit = invalidUserOp.CallGasLimit,
+                VerificationGasLimit = invalidUserOp.VerificationGasLimit,
+                PreVerificationGas = invalidUserOp.PreVerificationGas,
                 MaxFeePerGas = invalidUserOp.MaxFeePerGas,
                 MaxPriorityFeePerGas = invalidUserOp.MaxPriorityFeePerGas,
                 PaymasterAndData = invalidUserOp.PaymasterAndData,
-                Signature = new byte[] { },
+                Signature = invalidUserOp.Signature,
             };
             var partialUserOpHash = await TransactionManager.ThirdwebRead<
                 Thirdweb.Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction,
                 Thirdweb.Contracts.EntryPoint.ContractDefinition.GetUserOpHashOutputDTO
-            >(Config.entryPointAddress, new Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction() { UserOp = partialUserOp });
+            >(entryPoint, new Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction() { UserOp = unsignedValidUserOp });
             var partialUserOpHashSignature = signer.Sign(partialUserOpHash.ReturnValue1, signerKey);
-            partialUserOp.Signature = partialUserOpHashSignature.HexStringToByteArray();
+            unsignedValidUserOp.Signature = partialUserOpHashSignature.HexStringToByteArray();
 
             Debug.Log("Encode and send valid UserOp to bundler");
 
             var validUserOperation = new UserOperation
             {
-                Sender = partialUserOp.Sender,
-                Nonce = partialUserOp.Nonce,
-                InitCode = partialUserOp.InitCode,
-                CallData = partialUserOp.CallData,
-                CallGasLimit = partialUserOp.CallGasLimit,
-                VerificationGasLimit = partialUserOp.VerificationGasLimit,
-                PreVerificationGas = partialUserOp.PreVerificationGas,
-                MaxFeePerGas = partialUserOp.MaxFeePerGas,
-                MaxPriorityFeePerGas = partialUserOp.MaxPriorityFeePerGas,
-                PaymasterAndData = partialUserOp.PaymasterAndData,
-                Signature = partialUserOp.Signature,
+                Sender = unsignedValidUserOp.Sender,
+                Nonce = unsignedValidUserOp.Nonce,
+                InitCode = unsignedValidUserOp.InitCode,
+                CallData = unsignedValidUserOp.CallData,
+                CallGasLimit = unsignedValidUserOp.CallGasLimit,
+                VerificationGasLimit = unsignedValidUserOp.VerificationGasLimit,
+                PreVerificationGas = unsignedValidUserOp.PreVerificationGas,
+                MaxFeePerGas = unsignedValidUserOp.MaxFeePerGas,
+                MaxPriorityFeePerGas = unsignedValidUserOp.MaxPriorityFeePerGas,
+                PaymasterAndData = unsignedValidUserOp.PaymasterAndData,
+                Signature = unsignedValidUserOp.Signature,
             };
             Debug.Log("Valid UserOp: " + JsonConvert.SerializeObject(validUserOperation));
             var encodedValidUserOperation = EncodeUserOperation(validUserOperation);
             Debug.Log("Encoded UserOp: " + JsonConvert.SerializeObject(encodedValidUserOperation));
-            var sendUserOpRequest = new RpcRequestMessage(requestMessage.Id, "eth_sendUserOperation", new object[] { encodedValidUserOperation, Config.entryPointAddress });
-            var sendUserOpResult = await BundlerRequest(sendUserOpRequest, bundlerUrl);
+            var sendUserOpRequest = new RpcRequestMessage(requestMessage.Id, "eth_sendUserOperation", new object[] { encodedValidUserOperation, entryPoint });
+            var sendUserOpResult = await InnerRpcRequest(sendUserOpRequest, bundlerUrl);
+            if (sendUserOpResult.Result == null)
+                throw new Exception("Failed to send UserOp: " + sendUserOpResult.Error.Message);
             var userOpHash = sendUserOpResult.Result.ToString();
+
+            _deployed = true;
 
             string txHash = null;
 
             while (txHash == null && Application.isPlaying)
             {
                 Debug.Log("Get transaction hash from UserOp hash: " + userOpHash);
-                var userOpReceiptRequest = new RpcRequestMessage(requestMessage.Id, "eth_getUserOperationByHash", new object[] { userOpHash });
-                var userOpReceiptResult = await BundlerRequest(userOpReceiptRequest, bundlerUrl);
-                Debug.Log("UserOp receipt Raw: " + userOpReceiptResult.Result.ToString());
-                var userOpReceipt = JsonConvert.DeserializeObject<UserOperationReceiptResponse>(userOpReceiptResult.Result.ToString());
-                Debug.Log("UserOp receipt result list: " + JsonConvert.SerializeObject(userOpReceipt));
-                txHash = userOpReceipt?.TransactionHash;
+                var getUserOpRequest = new RpcRequestMessage(requestMessage.Id, "eth_getUserOperationByHash", new object[] { userOpHash });
+                var getUserOpResult = await InnerRpcRequest(getUserOpRequest, bundlerUrl);
+                var getUserOpResponse = JsonConvert.DeserializeObject<GetUserOperationResponse>(getUserOpResult.Result.ToString());
+                txHash = getUserOpResponse?.transactionHash;
                 Debug.Log("Transaction hash: " + txHash);
                 await new WaitForSecondsRealtime(2f);
+            }
+
+            Debug.Log("Checking if success...");
+            var receipt = await _personalWeb3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txHash);
+            var decodedEvents = receipt.DecodeAllEvents<Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperationEventEventDTO>();
+            if (decodedEvents[0].Event.Success == false)
+            {
+                Debug.Log("Transaction not successful, checking reason...");
+                var reason = await _personalWeb3.Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
+                throw new Exception($"Transaction {txHash} reverted with reason: {reason}");
             }
 
             return new RpcResponseMessage(requestMessage.Id, txHash);
         }
 
-        private async Task<RpcResponseMessage> BundlerRequest(RpcRequestMessage requestMessage, string bundlerUrl)
+        private async Task<RpcResponseMessage> InnerRpcRequest(RpcRequestMessage requestMessage, string bundlerUrl)
         {
             string requestMessageJson = JsonConvert.SerializeObject(requestMessage);
 
@@ -289,83 +290,56 @@ namespace Thirdweb.AccountAbstraction
         {
             return new UserOperationHexified()
             {
-                Sender = userOperation.Sender,
-                Nonce = userOperation.Nonce,
-                InitCode = userOperation.InitCode.ByteArrayToHexString(),
-                CallData = userOperation.CallData.ByteArrayToHexString(),
-                CallGasLimit = userOperation.CallGasLimit,
-                VerificationGasLimit = userOperation.VerificationGasLimit,
-                PreVerificationGas = userOperation.PreVerificationGas,
-                MaxFeePerGas = userOperation.MaxFeePerGas,
-                MaxPriorityFeePerGas = userOperation.MaxPriorityFeePerGas,
-                PaymasterAndData = userOperation.PaymasterAndData.ByteArrayToHexString(),
-                Signature = userOperation.Signature.ByteArrayToHexString()
+                sender = userOperation.Sender,
+                nonce = userOperation.Nonce,
+                initCode = userOperation.InitCode.ByteArrayToHexString(),
+                callData = userOperation.CallData.ByteArrayToHexString(),
+                callGasLimit = userOperation.CallGasLimit,
+                verificationGasLimit = userOperation.VerificationGasLimit,
+                preVerificationGas = userOperation.PreVerificationGas,
+                maxFeePerGas = userOperation.MaxFeePerGas,
+                maxPriorityFeePerGas = userOperation.MaxPriorityFeePerGas,
+                paymasterAndData = userOperation.PaymasterAndData.ByteArrayToHexString(),
+                signature = userOperation.Signature.ByteArrayToHexString()
             };
         }
 
-        [JsonObject]
         public class UserOperationHexified
         {
-            [JsonProperty("sender")]
-            public virtual string Sender { get; set; }
-
-            [JsonProperty("nonce")]
-            public virtual BigInteger Nonce { get; set; }
-
-            [JsonProperty("initCode")]
-            public virtual string InitCode { get; set; }
-
-            [JsonProperty("callData")]
-            public virtual string CallData { get; set; }
-
-            [JsonProperty("callGasLimit")]
-            public virtual BigInteger CallGasLimit { get; set; }
-
-            [JsonProperty("verificationGasLimit")]
-            public virtual BigInteger VerificationGasLimit { get; set; }
-
-            [JsonProperty("preVerificationGas")]
-            public virtual BigInteger PreVerificationGas { get; set; }
-
-            [JsonProperty("maxFeePerGas")]
-            public virtual BigInteger MaxFeePerGas { get; set; }
-
-            [JsonProperty("maxPriorityFeePerGas")]
-            public virtual BigInteger MaxPriorityFeePerGas { get; set; }
-
-            [JsonProperty("paymasterAndData")]
-            public virtual string PaymasterAndData { get; set; }
-
-            [JsonProperty("signature")]
-            public virtual string Signature { get; set; }
+            public string sender { get; set; }
+            public BigInteger nonce { get; set; }
+            public string initCode { get; set; }
+            public string callData { get; set; }
+            public BigInteger callGasLimit { get; set; }
+            public BigInteger verificationGasLimit { get; set; }
+            public BigInteger preVerificationGas { get; set; }
+            public BigInteger maxFeePerGas { get; set; }
+            public BigInteger maxPriorityFeePerGas { get; set; }
+            public string paymasterAndData { get; set; }
+            public string signature { get; set; }
         }
 
-        [JsonObject]
+        public class PMSponsorOperationResponse
+        {
+            public string paymasterAndData { get; set; }
+            public string preVerificationGas { get; set; }
+            public string verificationGas { get; set; }
+            public string callGasLimit { get; set; }
+        }
+
         public class UserOperationGasEstimateResponse
         {
-            [JsonProperty("PreVerificationGas")]
-            public virtual string PreVerificationGas { get; set; }
-
-            [JsonProperty("VerificationGas")]
-            public virtual string VerificationGas { get; set; }
-
-            [JsonProperty("CallGasLimit")]
-            public virtual string CallGasLimit { get; set; }
+            public string PreVerificationGas { get; set; }
+            public string VerificationGas { get; set; }
+            public string CallGasLimit { get; set; }
         }
 
-        public class UserOperationReceiptResponse
+        public class GetUserOperationResponse
         {
-            [JsonProperty("entryPoint")]
-            public string EntryPoint { get; set; }
-
-            [JsonProperty("transactionHash")]
-            public string TransactionHash { get; set; }
-
-            [JsonProperty("blockHash")]
-            public string BlockHash { get; set; }
-
-            [JsonProperty("blockNumber")]
-            public string BlockNumber { get; set; }
+            public string entryPoint { get; set; }
+            public string transactionHash { get; set; }
+            public string blockHash { get; set; }
+            public string blockNumber { get; set; }
         }
     }
 }

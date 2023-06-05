@@ -9,6 +9,7 @@ using Nethereum.Web3.Accounts;
 using System.IO;
 using UnityEngine;
 using Nethereum.Signer;
+using Nethereum.Web3;
 
 namespace Thirdweb
 {
@@ -246,9 +247,20 @@ namespace Thirdweb
 
         public async static Task<BigInteger> GetCurrentBlockTimeStamp()
         {
-            var blockNumber = await ThirdwebManager.Instance.SDK.session.Web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
-            var block = await ThirdwebManager.Instance.SDK.session.Web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
+            var blockNumber = await GetLatestBlockNumber();
+            var block = await GetBlockByNumber(blockNumber);
             return block.Timestamp.Value;
+        }
+
+        public async static Task<BigInteger> GetLatestBlockNumber()
+        {
+            var hex = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Blocks.GetBlockNumber.SendRequestAsync();
+            return hex.Value;
+        }
+
+        public async static Task<Nethereum.RPC.Eth.DTOs.BlockWithTransactionHashes> GetBlockByNumber(BigInteger blockNumber)
+        {
+            return await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Blocks.GetBlockWithTransactionsHashesByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
         }
 
         public static string GetDeviceIdentifier()
