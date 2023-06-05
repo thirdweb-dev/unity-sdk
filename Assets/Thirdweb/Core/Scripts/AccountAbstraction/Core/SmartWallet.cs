@@ -112,6 +112,8 @@ namespace Thirdweb.AccountAbstraction
         {
             Debug.Log("Deserialize the transaction input from the request message");
 
+            // Deserialize the transaction input from the request message
+
             var paramList = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(requestMessage.RawParameters));
             var transactionInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(paramList[0]));
             string bundlerUrl = string.IsNullOrEmpty(Config.bundlerUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : Config.bundlerUrl;
@@ -125,7 +127,7 @@ namespace Thirdweb.AccountAbstraction
             for (int i = 0; i < dummySig.Length; i++)
                 dummySig[i] = 0x01;
 
-            Debug.Log("Creating invalid user op for gas estimation");
+            // Create the user operation and its safe (hexified) version
 
             var partialUserOp = new Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperation()
             {
@@ -134,15 +136,16 @@ namespace Thirdweb.AccountAbstraction
                 InitCode = await GetInitCode(),
                 CallData = transactionInput.Data.HexStringToByteArray(),
                 CallGasLimit = transactionInput.Gas.Value,
-                VerificationGasLimit = 100000,
-                PreVerificationGas = 100000,
+                VerificationGasLimit = 150000,
+                PreVerificationGas = 50000,
                 MaxFeePerGas = latestBlock.BaseFeePerGas.Value + 1000000000,
                 MaxPriorityFeePerGas = 1000000000,
                 PaymasterAndData = DUMMY_PAYMASTER_AND_DATA_HEX.HexStringToByteArray(),
                 Signature = dummySig,
             };
-
             var partialUserOpHexified = EncodeUserOperation(partialUserOp);
+
+            // Update paymaster data if any
 
             if (Config.gasless)
             {
@@ -157,10 +160,8 @@ namespace Thirdweb.AccountAbstraction
                 );
                 var pmSponsorResult = await InnerRpcRequest(pmSponsorRequest, paymasterUrl);
                 if (pmSponsorResult.Result == null)
-                    throw new Exception("Failed to estimate gas: " + pmSponsorResult.Error.Message);
-                Debug.Log("Gas estimates: " + JsonConvert.SerializeObject(pmSponsorResult.Result));
+                    throw new Exception("Failed to fetch paymaster: " + pmSponsorResult.Error.Message);
                 var pmSponsor = JsonConvert.DeserializeObject<PMSponsorOperationResponse>(pmSponsorResult.Result.ToString());
-
                 partialUserOp.PaymasterAndData = pmSponsor.paymasterAndData.HexStringToByteArray();
             }
             else
@@ -168,42 +169,54 @@ namespace Thirdweb.AccountAbstraction
                 partialUserOp.PaymasterAndData = new byte[] { };
             }
 
-            var partialUserOpHashPreEstimates = await TransactionManager.ThirdwebRead<
-                Thirdweb.Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction,
-                Thirdweb.Contracts.EntryPoint.ContractDefinition.GetUserOpHashOutputDTO
-            >(entryPoint, new Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction() { UserOp = partialUserOp });
-            var partialUserOpHashPreEstimatesSignature = signer.Sign(partialUserOpHashPreEstimates.ReturnValue1, signerKey);
-            partialUserOp.Signature = partialUserOpHashPreEstimatesSignature.HexStringToByteArray();
-
-            Debug.Log("Estimate gas with partial UserOp");
-
+            partialUserOp.Signature = await HashAndSignUserOp(partialUserOp, signer, signerKey, entryPoint);
             partialUserOpHexified = EncodeUserOperation(partialUserOp);
+
+            // Estimate gas with updated paymaster data
 
             var gasEstimatesRequest = new RpcRequestMessage(requestMessage.Id, "eth_estimateUserOperationGas", new object[] { partialUserOpHexified, entryPoint });
             var gasEstimatesResult = await InnerRpcRequest(gasEstimatesRequest, bundlerUrl);
             if (gasEstimatesResult.Result == null)
                 throw new Exception("Failed to estimate gas: " + gasEstimatesResult.Error.Message);
             var gasEstimates = JsonConvert.DeserializeObject<UserOperationGasEstimateResponse>(gasEstimatesResult.Result.ToString());
-
             partialUserOp.CallGasLimit = new HexBigInteger(gasEstimates.CallGasLimit).Value;
             partialUserOp.VerificationGasLimit = new HexBigInteger(gasEstimates.VerificationGas).Value;
             partialUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value;
 
-            Debug.Log("Hash and sign partial UserOp");
-
-            var partialUserOpHashPostEstimates = await TransactionManager.ThirdwebRead<
-                Thirdweb.Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction,
-                Thirdweb.Contracts.EntryPoint.ContractDefinition.GetUserOpHashOutputDTO
-            >(entryPoint, new Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction() { UserOp = partialUserOp });
-            var partialUserOpHashSignature = signer.Sign(partialUserOpHashPostEstimates.ReturnValue1, signerKey);
-            partialUserOp.Signature = partialUserOpHashSignature.HexStringToByteArray();
-
-            Debug.Log("Encode and send valid UserOp to bundler");
-
+            partialUserOp.Signature = await HashAndSignUserOp(partialUserOp, signer, signerKey, entryPoint);
             partialUserOpHexified = EncodeUserOperation(partialUserOp);
 
+            // Update paymaster data post estimates again
+
+            if (Config.gasless)
+            {
+                var pmSponsorRequest = new RpcRequestMessage(
+                    requestMessage.Id,
+                    "pm_sponsorUserOperation",
+                    new object[]
+                    {
+                        partialUserOpHexified,
+                        new EntryPointWrapper() { entryPoint = entryPoint }
+                    }
+                );
+                var pmSponsorResult = await InnerRpcRequest(pmSponsorRequest, paymasterUrl);
+                if (pmSponsorResult.Result == null)
+                    throw new Exception("Failed to fetch paymaster: " + pmSponsorResult.Error.Message);
+                var pmSponsor = JsonConvert.DeserializeObject<PMSponsorOperationResponse>(pmSponsorResult.Result.ToString());
+                partialUserOp.PaymasterAndData = pmSponsor.paymasterAndData.HexStringToByteArray();
+            }
+            else
+            {
+                partialUserOp.PaymasterAndData = new byte[] { };
+            }
+
+            partialUserOp.Signature = await HashAndSignUserOp(partialUserOp, signer, signerKey, entryPoint);
+            partialUserOpHexified = EncodeUserOperation(partialUserOp);
+
+            // Send the user operation
+
             Debug.Log("Valid UserOp: " + JsonConvert.SerializeObject(partialUserOp));
-            Debug.Log("Encoded UserOp: " + JsonConvert.SerializeObject(partialUserOpHexified));
+            Debug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(partialUserOpHexified));
             var sendUserOpRequest = new RpcRequestMessage(requestMessage.Id, "eth_sendUserOperation", new object[] { partialUserOpHexified, entryPoint });
             var sendUserOpResult = await InnerRpcRequest(sendUserOpRequest, bundlerUrl);
             if (sendUserOpResult.Result == null)
@@ -212,20 +225,22 @@ namespace Thirdweb.AccountAbstraction
 
             _deployed = true;
 
-            string txHash = null;
+            // Wait for the transaction to be mined
 
+            string txHash = null;
             while (txHash == null && Application.isPlaying)
             {
-                Debug.Log("Get transaction hash from UserOp hash: " + userOpHash);
                 var getUserOpRequest = new RpcRequestMessage(requestMessage.Id, "eth_getUserOperationByHash", new object[] { userOpHash });
                 var getUserOpResult = await InnerRpcRequest(getUserOpRequest, bundlerUrl);
                 var getUserOpResponse = JsonConvert.DeserializeObject<GetUserOperationResponse>(getUserOpResult.Result.ToString());
                 txHash = getUserOpResponse?.transactionHash;
-                Debug.Log("Transaction hash: " + txHash);
                 await new WaitForSecondsRealtime(2f);
             }
 
-            Debug.Log("Checking if success...");
+            // Check if successful
+
+            Debug.Log("Tx hash for userOpHash " + userOpHash + " is " + txHash);
+
             var receipt = await _personalWeb3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txHash);
             var decodedEvents = receipt.DecodeAllEvents<Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperationEventEventDTO>();
             if (decodedEvents[0].Event.Success == false)
@@ -236,6 +251,16 @@ namespace Thirdweb.AccountAbstraction
             }
 
             return new RpcResponseMessage(requestMessage.Id, txHash);
+        }
+
+        private async Task<byte[]> HashAndSignUserOp(Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperation userOp, EthereumMessageSigner signer, EthECKey signerKey, string entryPoint)
+        {
+            var partialUserOpHashPostEstimates = await TransactionManager.ThirdwebRead<
+                Thirdweb.Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction,
+                Thirdweb.Contracts.EntryPoint.ContractDefinition.GetUserOpHashOutputDTO
+            >(entryPoint, new Contracts.EntryPoint.ContractDefinition.GetUserOpHashFunction() { UserOp = userOp });
+            var partialUserOpHashSignature = signer.Sign(partialUserOpHashPostEstimates.ReturnValue1, signerKey);
+            return partialUserOpHashSignature.HexStringToByteArray();
         }
 
         private async Task<RpcResponseMessage> InnerRpcRequest(RpcRequestMessage requestMessage, string bundlerUrl)
