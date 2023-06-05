@@ -56,6 +56,16 @@ namespace Thirdweb.Contracts.AccountFactory
             ContractHandler = web3.Eth.GetContractHandler(contractAddress);
         }
 
+        public Task<byte[]> DefaultAdminRoleQueryAsync(DefaultAdminRoleFunction defaultAdminRoleFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<DefaultAdminRoleFunction, byte[]>(defaultAdminRoleFunction, blockParameter);
+        }
+
+        public Task<byte[]> DefaultAdminRoleQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<DefaultAdminRoleFunction, byte[]>(null, blockParameter);
+        }
+
         public Task<string> AccountImplementationQueryAsync(AccountImplementationFunction accountImplementationFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<AccountImplementationFunction, string>(accountImplementationFunction, blockParameter);
@@ -64,6 +74,16 @@ namespace Thirdweb.Contracts.AccountFactory
         public Task<string> AccountImplementationQueryAsync(BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<AccountImplementationFunction, string>(null, blockParameter);
+        }
+
+        public Task<string> ContractURIQueryAsync(ContractURIFunction contractURIFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<ContractURIFunction, string>(contractURIFunction, blockParameter);
+        }
+
+        public Task<string> ContractURIQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<ContractURIFunction, string>(null, blockParameter);
         }
 
         public Task<string> CreateAccountRequestAsync(CreateAccountFunction createAccountFunction)
@@ -80,7 +100,7 @@ namespace Thirdweb.Contracts.AccountFactory
         {
             var createAccountFunction = new CreateAccountFunction();
             createAccountFunction.Admin = admin;
-            // createAccountFunction.Data = data;
+            createAccountFunction.Data = data;
 
             return ContractHandler.SendRequestAsync(createAccountFunction);
         }
@@ -89,7 +109,7 @@ namespace Thirdweb.Contracts.AccountFactory
         {
             var createAccountFunction = new CreateAccountFunction();
             createAccountFunction.Admin = admin;
-            // createAccountFunction.Data = data;
+            createAccountFunction.Data = data;
 
             return ContractHandler.SendRequestAndWaitForReceiptAsync(createAccountFunction, cancellationToken);
         }
@@ -116,9 +136,49 @@ namespace Thirdweb.Contracts.AccountFactory
         {
             var getAddressFunction = new GetAddressFunction();
             getAddressFunction.AdminSigner = adminSigner;
-            // getAddressFunction.Data = data;
+            getAddressFunction.Data = data;
 
             return ContractHandler.QueryAsync<GetAddressFunction, string>(getAddressFunction, blockParameter);
+        }
+
+        public Task<byte[]> GetRoleAdminQueryAsync(GetRoleAdminFunction getRoleAdminFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<GetRoleAdminFunction, byte[]>(getRoleAdminFunction, blockParameter);
+        }
+
+        public Task<byte[]> GetRoleAdminQueryAsync(byte[] role, BlockParameter blockParameter = null)
+        {
+            var getRoleAdminFunction = new GetRoleAdminFunction();
+            getRoleAdminFunction.Role = role;
+
+            return ContractHandler.QueryAsync<GetRoleAdminFunction, byte[]>(getRoleAdminFunction, blockParameter);
+        }
+
+        public Task<string> GetRoleMemberQueryAsync(GetRoleMemberFunction getRoleMemberFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<GetRoleMemberFunction, string>(getRoleMemberFunction, blockParameter);
+        }
+
+        public Task<string> GetRoleMemberQueryAsync(byte[] role, BigInteger index, BlockParameter blockParameter = null)
+        {
+            var getRoleMemberFunction = new GetRoleMemberFunction();
+            getRoleMemberFunction.Role = role;
+            getRoleMemberFunction.Index = index;
+
+            return ContractHandler.QueryAsync<GetRoleMemberFunction, string>(getRoleMemberFunction, blockParameter);
+        }
+
+        public Task<BigInteger> GetRoleMemberCountQueryAsync(GetRoleMemberCountFunction getRoleMemberCountFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(getRoleMemberCountFunction, blockParameter);
+        }
+
+        public Task<BigInteger> GetRoleMemberCountQueryAsync(byte[] role, BlockParameter blockParameter = null)
+        {
+            var getRoleMemberCountFunction = new GetRoleMemberCountFunction();
+            getRoleMemberCountFunction.Role = role;
+
+            return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(getRoleMemberCountFunction, blockParameter);
         }
 
         public Task<List<string>> GetSignersOfAccountQueryAsync(GetSignersOfAccountFunction getSignersOfAccountFunction, BlockParameter blockParameter = null)
@@ -132,6 +192,62 @@ namespace Thirdweb.Contracts.AccountFactory
             getSignersOfAccountFunction.Account = account;
 
             return ContractHandler.QueryAsync<GetSignersOfAccountFunction, List<string>>(getSignersOfAccountFunction, blockParameter);
+        }
+
+        public Task<string> GrantRoleRequestAsync(GrantRoleFunction grantRoleFunction)
+        {
+            return ContractHandler.SendRequestAsync(grantRoleFunction);
+        }
+
+        public Task<TransactionReceipt> GrantRoleRequestAndWaitForReceiptAsync(GrantRoleFunction grantRoleFunction, CancellationTokenSource cancellationToken = null)
+        {
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(grantRoleFunction, cancellationToken);
+        }
+
+        public Task<string> GrantRoleRequestAsync(byte[] role, string account)
+        {
+            var grantRoleFunction = new GrantRoleFunction();
+            grantRoleFunction.Role = role;
+            grantRoleFunction.Account = account;
+
+            return ContractHandler.SendRequestAsync(grantRoleFunction);
+        }
+
+        public Task<TransactionReceipt> GrantRoleRequestAndWaitForReceiptAsync(byte[] role, string account, CancellationTokenSource cancellationToken = null)
+        {
+            var grantRoleFunction = new GrantRoleFunction();
+            grantRoleFunction.Role = role;
+            grantRoleFunction.Account = account;
+
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(grantRoleFunction, cancellationToken);
+        }
+
+        public Task<bool> HasRoleQueryAsync(HasRoleFunction hasRoleFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<HasRoleFunction, bool>(hasRoleFunction, blockParameter);
+        }
+
+        public Task<bool> HasRoleQueryAsync(byte[] role, string account, BlockParameter blockParameter = null)
+        {
+            var hasRoleFunction = new HasRoleFunction();
+            hasRoleFunction.Role = role;
+            hasRoleFunction.Account = account;
+
+            return ContractHandler.QueryAsync<HasRoleFunction, bool>(hasRoleFunction, blockParameter);
+        }
+
+        public Task<bool> HasRoleWithSwitchQueryAsync(HasRoleWithSwitchFunction hasRoleWithSwitchFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<HasRoleWithSwitchFunction, bool>(hasRoleWithSwitchFunction, blockParameter);
+        }
+
+        public Task<bool> HasRoleWithSwitchQueryAsync(byte[] role, string account, BlockParameter blockParameter = null)
+        {
+            var hasRoleWithSwitchFunction = new HasRoleWithSwitchFunction();
+            hasRoleWithSwitchFunction.Role = role;
+            hasRoleWithSwitchFunction.Account = account;
+
+            return ContractHandler.QueryAsync<HasRoleWithSwitchFunction, bool>(hasRoleWithSwitchFunction, blockParameter);
         }
 
         public Task<string> MulticallRequestAsync(MulticallFunction multicallFunction)
@@ -210,6 +326,88 @@ namespace Thirdweb.Contracts.AccountFactory
             onSignerRemovedFunction.Signer = signer;
 
             return ContractHandler.SendRequestAndWaitForReceiptAsync(onSignerRemovedFunction, cancellationToken);
+        }
+
+        public Task<string> RenounceRoleRequestAsync(RenounceRoleFunction renounceRoleFunction)
+        {
+            return ContractHandler.SendRequestAsync(renounceRoleFunction);
+        }
+
+        public Task<TransactionReceipt> RenounceRoleRequestAndWaitForReceiptAsync(RenounceRoleFunction renounceRoleFunction, CancellationTokenSource cancellationToken = null)
+        {
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(renounceRoleFunction, cancellationToken);
+        }
+
+        public Task<string> RenounceRoleRequestAsync(byte[] role, string account)
+        {
+            var renounceRoleFunction = new RenounceRoleFunction();
+            renounceRoleFunction.Role = role;
+            renounceRoleFunction.Account = account;
+
+            return ContractHandler.SendRequestAsync(renounceRoleFunction);
+        }
+
+        public Task<TransactionReceipt> RenounceRoleRequestAndWaitForReceiptAsync(byte[] role, string account, CancellationTokenSource cancellationToken = null)
+        {
+            var renounceRoleFunction = new RenounceRoleFunction();
+            renounceRoleFunction.Role = role;
+            renounceRoleFunction.Account = account;
+
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(renounceRoleFunction, cancellationToken);
+        }
+
+        public Task<string> RevokeRoleRequestAsync(RevokeRoleFunction revokeRoleFunction)
+        {
+            return ContractHandler.SendRequestAsync(revokeRoleFunction);
+        }
+
+        public Task<TransactionReceipt> RevokeRoleRequestAndWaitForReceiptAsync(RevokeRoleFunction revokeRoleFunction, CancellationTokenSource cancellationToken = null)
+        {
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(revokeRoleFunction, cancellationToken);
+        }
+
+        public Task<string> RevokeRoleRequestAsync(byte[] role, string account)
+        {
+            var revokeRoleFunction = new RevokeRoleFunction();
+            revokeRoleFunction.Role = role;
+            revokeRoleFunction.Account = account;
+
+            return ContractHandler.SendRequestAsync(revokeRoleFunction);
+        }
+
+        public Task<TransactionReceipt> RevokeRoleRequestAndWaitForReceiptAsync(byte[] role, string account, CancellationTokenSource cancellationToken = null)
+        {
+            var revokeRoleFunction = new RevokeRoleFunction();
+            revokeRoleFunction.Role = role;
+            revokeRoleFunction.Account = account;
+
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(revokeRoleFunction, cancellationToken);
+        }
+
+        public Task<string> SetContractURIRequestAsync(SetContractURIFunction setContractURIFunction)
+        {
+            return ContractHandler.SendRequestAsync(setContractURIFunction);
+        }
+
+        public Task<TransactionReceipt> SetContractURIRequestAndWaitForReceiptAsync(SetContractURIFunction setContractURIFunction, CancellationTokenSource cancellationToken = null)
+        {
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(setContractURIFunction, cancellationToken);
+        }
+
+        public Task<string> SetContractURIRequestAsync(string uri)
+        {
+            var setContractURIFunction = new SetContractURIFunction();
+            setContractURIFunction.Uri = uri;
+
+            return ContractHandler.SendRequestAsync(setContractURIFunction);
+        }
+
+        public Task<TransactionReceipt> SetContractURIRequestAndWaitForReceiptAsync(string uri, CancellationTokenSource cancellationToken = null)
+        {
+            var setContractURIFunction = new SetContractURIFunction();
+            setContractURIFunction.Uri = uri;
+
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(setContractURIFunction, cancellationToken);
         }
     }
 }

@@ -235,6 +235,18 @@ namespace Thirdweb
             return hex.HexToByteArray();
         }
 
+        public static string HexConcat(params byte[][] arrays)
+        {
+            StringBuilder hex = new StringBuilder("0x");
+
+            foreach (var array in arrays)
+            {
+                hex.Append(BitConverter.ToString(array).Replace("-", "").ToLower());
+            }
+
+            return hex.ToString();
+        }
+
         public static string ByteArrayToHexString(this byte[] hexBytes)
         {
             return hexBytes.ToHex(true);
