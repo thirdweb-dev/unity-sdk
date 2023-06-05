@@ -92,7 +92,7 @@ namespace Thirdweb
                     Resources = new List<string>(),
                     Uri = $"https://{domain}",
                     Statement = "Please ensure that the domain above matches the URL of the current website.",
-                    Address = await GetAddress(),
+                    Address = await GetSignerAddress(),
                     Domain = domain,
                     ChainId = (await GetChainId()).ToString(),
                     Version = "1",
@@ -230,6 +230,24 @@ namespace Thirdweb
             else
             {
                 return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_accounts");
+            }
+        }
+
+        public async Task<string> GetSignerAddress()
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await GetAddress();
+            }
+            else
+            {
+                switch (ThirdwebManager.Instance.SDK.session.WalletProvider)
+                {
+                    case WalletProvider.SmartWallet:
+                        return ThirdwebManager.Instance.SDK.session.LocalAccount.Address;
+                    default:
+                        return await GetAddress();
+                }
             }
         }
 
