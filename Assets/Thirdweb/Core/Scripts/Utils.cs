@@ -133,27 +133,6 @@ namespace Thirdweb
             return result;
         }
 
-        public async static Task<List<NFT>> ToNFTList(this List<TokenData721> tokenDataList)
-        {
-            List<NFT> allNfts = new List<NFT>();
-            foreach (var tokenData in tokenDataList)
-            {
-                Contract c = ThirdwebManager.Instance.SDK.GetContract(tokenData.Contract);
-                NFT nft = new NFT();
-                nft.owner = tokenData.Owner;
-                nft.type = "ERC721";
-                nft.supply = (int)await c.ERC721.TotalCount();
-                nft.quantityOwned = 1;
-                string tokenURI = tokenData.Uri;
-                nft.metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI);
-                nft.metadata.image = nft.metadata.image.ReplaceIPFS();
-                nft.metadata.id = tokenData.TokenId;
-                nft.metadata.uri = tokenURI.ReplaceIPFS();
-                allNfts.Add(nft);
-            }
-            return allNfts;
-        }
-
         public static List<Thirdweb.Contracts.Pack.ContractDefinition.Token> ToPackTokenList(this NewPackInput packContents)
         {
             List<Thirdweb.Contracts.Pack.ContractDefinition.Token> tokenList = new List<Contracts.Pack.ContractDefinition.Token>();
