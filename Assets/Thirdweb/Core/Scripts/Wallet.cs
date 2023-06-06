@@ -229,6 +229,9 @@ namespace Thirdweb
             }
             else
             {
+                if (!await IsConnected())
+                    throw new Exception("No account connected!");
+
                 return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_accounts");
             }
         }
@@ -241,6 +244,9 @@ namespace Thirdweb
             }
             else
             {
+                if (!await IsConnected())
+                    throw new Exception("No account connected!");
+
                 switch (ThirdwebManager.Instance.SDK.session.WalletProvider)
                 {
                     case WalletProvider.SmartWallet:
