@@ -32,7 +32,6 @@ namespace Thirdweb
         public SmartWallet SmartWallet { get; private set; }
         public string Email { get; private set; }
         public ThirdwebChainData CurrentChainData { get; private set; }
-        public ThirdwebInterceptor Interceptor { get; private set; }
 
         public bool IsConnected
         {
@@ -56,7 +55,6 @@ namespace Thirdweb
             LocalAccount = null;
             SmartWallet = null;
             Email = null;
-            Interceptor = null;
             CurrentChainData = FetchChainData();
         }
 
@@ -64,11 +62,8 @@ namespace Thirdweb
 
         #region Public Methods
 
-        public async Task<string> Connect(WalletProvider walletProvider, string password = null, string email = null)
+        public async Task<string> Connect(WalletProvider walletProvider, string password = null, string email = null, WalletProvider personalWallet = WalletProvider.LocalWallet)
         {
-            WalletProvider = walletProvider;
-            Email = email;
-
             switch (walletProvider)
             {
                 case WalletProvider.LocalWallet:
@@ -84,17 +79,17 @@ namespace Thirdweb
                     await InitializeMetaMask();
                     break;
                 case WalletProvider.SmartWallet:
-                    await InitializeSmartWallet(password);
+                    await InitializeSmartWallet(personalWallet, password, email);
                     break;
                 default:
                     throw new UnityException("This wallet connection method is not supported on this platform!");
             }
 
-            Interceptor = new ThirdwebInterceptor(this);
-            Web3.Client.OverridingRequestInterceptor = Interceptor;
+            WalletProvider = walletProvider;
+            Email = email;
+            Web3.Client.OverridingRequestInterceptor = new ThirdwebInterceptor(this);
 
             var connectedChainId = await ThirdwebManager.Instance.SDK.wallet.GetChainId();
-            Debug.Log("Connected to chain id: " + connectedChainId);
             if (connectedChainId != ChainId)
             {
                 try
@@ -115,6 +110,8 @@ namespace Thirdweb
                     }
                 }
             }
+
+            Debug.Log($"Connected wallet {walletProvider} with address {await GetAddress()} on chain {ChainId} with RPC {RPC}");
 
             return await GetAddress();
         }
@@ -143,30 +140,13 @@ namespace Thirdweb
 
         public async Task<string> GetAddress()
         {
-            string address = null;
-            switch (WalletProvider)
-            {
-                case WalletProvider.LocalWallet:
-                    if (LocalAccount == null)
-                        throw new UnityException("No Account Connected!");
-                    address = LocalAccount.Address;
-                    break;
-                case WalletProvider.WalletConnectV1:
-                    address = WalletConnect.Instance.Session.Accounts[0];
-                    break;
-                case WalletProvider.MagicLink:
-                    address = await MagicUnity.Instance.GetAddress();
-                    break;
-                case WalletProvider.Metamask:
-                    address = MetaMaskUnity.Instance.Wallet.SelectedAddress;
-                    break;
-                case WalletProvider.SmartWallet:
-                    address = SmartWallet.Accounts[0];
-                    break;
-                default:
-                    throw new UnityException("No Account Connected!");
-            }
-            return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address);
+            var accounts = await Request<string[]>("eth_accounts");
+            return accounts[0];
+        }
+
+        public async Task<string> GetPersonalAddress()
+        {
+            return await SmartWallet.GetPersonalAddress();
         }
 
         public async Task<T> Request<T>(string method, params object[] parameters)
@@ -252,12 +232,11 @@ namespace Thirdweb
             await new WaitUntil(() => connected);
         }
 
-        private async Task InitializeSmartWallet(string password)
+        private async Task InitializeSmartWallet(WalletProvider personalWallet, string password, string email)
         {
-            if (LocalAccount == null)
-                LocalAccount = Utils.UnlockOrGenerateLocalAccount(ChainId, password);
+            await Connect(personalWallet, password, email);
 
-            SmartWallet = new SmartWallet(LocalAccount, Options.smartWalletConfig.Value);
+            SmartWallet = new SmartWallet(Web3, personalWallet, Options.smartWalletConfig.Value);
             await SmartWallet.Initialize();
             Web3 = SmartWallet.CreateWeb3();
         }

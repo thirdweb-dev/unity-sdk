@@ -15,6 +15,7 @@ using EntryPointContract = Thirdweb.Contracts.EntryPoint.ContractDefinition;
 using FactoryContract = Thirdweb.Contracts.AccountFactory.ContractDefinition;
 using UnityEngine;
 using Nethereum.Contracts;
+using Nethereum.Hex.HexConvertors.Extensions;
 
 namespace Thirdweb.AccountAbstraction
 {
@@ -36,16 +37,18 @@ namespace Thirdweb.AccountAbstraction
     public class SmartWallet
     {
         public List<string> Accounts { get; internal set; }
-        public Account PersonalAccount { get; internal set; }
+        public string PersonalAddress { get; internal set; }
+        public Web3 PersonalWeb3 { get; internal set; }
+        public WalletProvider PersonalWalletProvider { get; internal set; }
         public ThirdwebSDK.SmartWalletConfig Config { get; internal set; }
 
         private bool _initialized;
         private bool _deployed;
-        private Web3 _personalWeb3;
 
-        public SmartWallet(Account personalAccount, ThirdwebSDK.SmartWalletConfig config)
+        public SmartWallet(Web3 personalWeb3, WalletProvider personalWalletProvider, ThirdwebSDK.SmartWalletConfig config)
         {
-            PersonalAccount = personalAccount;
+            PersonalWalletProvider = personalWalletProvider;
+            PersonalWeb3 = personalWeb3;
             Config = new ThirdwebSDK.SmartWalletConfig()
             {
                 factoryAddress = config.factoryAddress,
@@ -58,7 +61,12 @@ namespace Thirdweb.AccountAbstraction
 
             _deployed = false;
             _initialized = false;
-            _personalWeb3 = new Web3(PersonalAccount, ThirdwebManager.Instance.SDK.session.RPC);
+        }
+
+        internal async Task<string> GetPersonalAddress()
+        {
+            var accounts = await PersonalWeb3.Eth.Accounts.SendRequestAsync();
+            return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(accounts[0]);
         }
 
         internal async Task Initialize()
@@ -66,9 +74,11 @@ namespace Thirdweb.AccountAbstraction
             if (_initialized)
                 return;
 
+            PersonalAddress = await GetPersonalAddress();
+
             var predictedAccount = await TransactionManager.ThirdwebRead<FactoryContract.GetAddressFunction, FactoryContract.GetAddressOutputDTO>(
                 Config.factoryAddress,
-                new FactoryContract.GetAddressFunction() { AdminSigner = PersonalAccount.Address, Data = new byte[] { } }
+                new FactoryContract.GetAddressFunction() { AdminSigner = PersonalAddress, Data = new byte[] { } }
             );
 
             Accounts = new List<string>() { predictedAccount.ReturnValue1 };
@@ -77,12 +87,12 @@ namespace Thirdweb.AccountAbstraction
 
             _initialized = true;
 
-            Debug.Log($"Initialized with Factory: {Config.factoryAddress}, AdminSigner: {PersonalAccount.Address}, Predicted Account: {Accounts[0]}, Deployed: {_deployed}");
+            Debug.Log($"Initialized with Factory: {Config.factoryAddress}, AdminSigner: {PersonalAddress}, Predicted Account: {Accounts[0]}, Deployed: {_deployed}");
         }
 
         internal async Task UpdateDeploymentStatus()
         {
-            var bytecode = await _personalWeb3.Eth.GetCode.SendRequestAsync(Accounts[0]);
+            var bytecode = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetCode.SendRequestAsync(Accounts[0]);
             _deployed = bytecode != "0x";
         }
 
@@ -91,8 +101,8 @@ namespace Thirdweb.AccountAbstraction
             if (_deployed)
                 return (new byte[] { }, 0);
 
-            var fn = new FactoryContract.CreateAccountFunction() { Admin = PersonalAccount.Address, Data = new byte[] { } };
-            var deployHandler = _personalWeb3.Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
+            var fn = new FactoryContract.CreateAccountFunction() { Admin = PersonalAddress, Data = new byte[] { } };
+            var deployHandler = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
             var txInput = await deployHandler.CreateTransactionInputEstimatingGasAsync(Config.factoryAddress, fn);
             var data = Utils.HexConcat(Config.factoryAddress, txInput.Data);
             return (data.HexStringToByteArray(), txInput.Gas.Value);
@@ -104,8 +114,8 @@ namespace Thirdweb.AccountAbstraction
 
             if (requestMessage.Method == "eth_chainId")
             {
-                var response = JToken.FromObject(new HexBigInteger(PersonalAccount.ChainId.Value).HexValue);
-                return new RpcResponseMessage(requestMessage.Id, response);
+                var chainId = await PersonalWeb3.Eth.ChainId.SendRequestAsync();
+                return new RpcResponseMessage(requestMessage.Id, chainId.HexValue);
             }
             else if (requestMessage.Method == "eth_sendTransaction")
             {
@@ -120,6 +130,7 @@ namespace Thirdweb.AccountAbstraction
         private async Task<RpcResponseMessage> CreateUserOpAndSend(RpcRequestMessage requestMessage)
         {
             // Deserialize the transaction input from the request message
+            Debug.Log("Creating UserOp...");
 
             var paramList = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(requestMessage.RawParameters));
             var transactionInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(paramList[0]));
@@ -132,6 +143,7 @@ namespace Thirdweb.AccountAbstraction
             var initData = await GetInitCode();
 
             // Create the user operation and its safe (hexified) version
+            Debug.Log("Create the user operation and its safe (hexified) version...");
 
             var partialUserOp = new EntryPointContract.UserOperation()
             {
@@ -150,29 +162,33 @@ namespace Thirdweb.AccountAbstraction
             var partialUserOpHexified = partialUserOp.EncodeUserOperation();
 
             // Update paymaster data if any
+            Debug.Log("Update paymaster data if any...");
 
             partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestMessage.Id, partialUserOpHexified);
 
-            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(PersonalAccount.PrivateKey, Config.entryPointAddress);
+            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(Config.entryPointAddress);
             partialUserOpHexified = partialUserOp.EncodeUserOperation();
 
             // Estimate gas with updated paymaster data
+            Debug.Log("Estimate gas with updated paymaster data...");
 
             var gasEstimates = await BundlerClient.EthEstimateUserOperationGas(Config.bundlerUrl, Config.thirdwebApiKey, requestMessage.Id, partialUserOpHexified, Config.entryPointAddress);
             partialUserOp.CallGasLimit = new HexBigInteger(gasEstimates.CallGasLimit).Value;
             partialUserOp.VerificationGasLimit = new HexBigInteger(gasEstimates.VerificationGas).Value;
             partialUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value;
 
-            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(PersonalAccount.PrivateKey, Config.entryPointAddress);
+            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(Config.entryPointAddress);
             partialUserOpHexified = partialUserOp.EncodeUserOperation();
 
             // Update paymaster data post estimates again
+            Debug.Log("Update paymaster data post estimates again...");
 
             partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestMessage.Id, partialUserOpHexified);
-            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(PersonalAccount.PrivateKey, Config.entryPointAddress);
+            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(Config.entryPointAddress);
             partialUserOpHexified = partialUserOp.EncodeUserOperation();
 
             // Send the user operation
+            Debug.Log("Send the user operation...");
 
             Debug.Log("Valid UserOp: " + JsonConvert.SerializeObject(partialUserOp));
             Debug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(partialUserOpHexified));
@@ -180,6 +196,7 @@ namespace Thirdweb.AccountAbstraction
             Debug.Log("UserOp Hash: " + userOpHash);
 
             // Wait for the transaction to be mined
+            Debug.Log("Wait for the transaction to be mined...");
 
             string txHash = null;
             while (txHash == null && Application.isPlaying)
@@ -191,13 +208,14 @@ namespace Thirdweb.AccountAbstraction
             Debug.Log("Tx Hash: " + txHash);
 
             // Check if successful
+            Debug.Log("Check if successful...");
 
-            var receipt = await _personalWeb3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txHash);
+            var receipt = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txHash);
             var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
             if (decodedEvents[0].Event.Success == false)
             {
                 Debug.Log("Transaction not successful, checking reason...");
-                var reason = await _personalWeb3.Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
+                var reason = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
                 throw new Exception($"Transaction {txHash} reverted with reason: {reason}");
             }
             else

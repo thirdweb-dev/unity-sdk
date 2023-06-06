@@ -17,11 +17,6 @@ namespace Thirdweb.AccountAbstraction
             get { return _wallet.Accounts[0]; }
         }
 
-        public string PersonalAddress
-        {
-            get { return _wallet.PersonalAccount.Address; }
-        }
-
         public ITransactionManager TransactionManager { get; }
         public INonceService NonceService { get; set; }
         public IAccountSigningService AccountSigningService { get; }

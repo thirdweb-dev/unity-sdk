@@ -30,7 +30,7 @@ namespace Thirdweb
         /// Connect a user's wallet via a given wallet provider
         /// </summary>
         /// <param name="walletConnection">The wallet provider and optional parameters.</param>
-        public async Task<string> Connect(WalletConnection walletConnection)
+        public async Task<string> Connect(WalletConnection walletConnection, WalletProvider personalWallet = WalletProvider.LocalWallet)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -38,7 +38,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection.provider, walletConnection.password, walletConnection.email);
+                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection.provider, walletConnection.password, walletConnection.email, personalWallet);
             }
         }
 
@@ -232,7 +232,7 @@ namespace Thirdweb
                 if (!await IsConnected())
                     throw new Exception("No account connected!");
 
-                return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_accounts");
+                return await ThirdwebManager.Instance.SDK.session.GetAddress();
             }
         }
 
@@ -250,7 +250,7 @@ namespace Thirdweb
                 switch (ThirdwebManager.Instance.SDK.session.WalletProvider)
                 {
                     case WalletProvider.SmartWallet:
-                        return ThirdwebManager.Instance.SDK.session.LocalAccount.Address;
+                        return await ThirdwebManager.Instance.SDK.session.GetPersonalAddress();
                     default:
                         return await GetAddress();
                 }
@@ -338,34 +338,22 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.LocalWallet || ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.SmartWallet)
-                {
-                    var signer = new EthereumMessageSigner();
-                    return signer.EncodeUTF8AndSign(message, new EthECKey(ThirdwebManager.Instance.SDK.session.LocalAccount.PrivateKey));
-                }
-                else
-                {
-                    try
-                    {
-                        return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", await GetAddress(), message);
-                    }
-                    catch (System.Exception e)
-                    {
-                        Debug.LogWarning(e.Message);
-                        return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_sign", await GetAddress(), message);
-                    }
-                }
+                return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
             }
         }
 
         public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
             where TDomain : IDomain
         {
-            if (ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.LocalWallet || ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.SmartWallet)
+            if (ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.LocalWallet)
             {
                 var signer = new Eip712TypedDataSigner();
                 var key = new EthECKey(ThirdwebManager.Instance.SDK.session.LocalAccount.PrivateKey);
                 return signer.SignTypedDataV4(data, typedData, key);
+            }
+            else if (ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.SmartWallet)
+            {
+                throw new Exception("SmartWallet does not support EIP712 signing");
             }
             else
             {
@@ -386,7 +374,7 @@ namespace Thirdweb
                     property.Value = property.Value.ToString();
 
                 string safeJson = jsonObject.ToString();
-                return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTypedData_v4", await GetAddress(), safeJson);
+                return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTypedData_v4", await GetSignerAddress(), safeJson);
             }
         }
 

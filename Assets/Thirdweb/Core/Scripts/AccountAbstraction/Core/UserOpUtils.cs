@@ -1,20 +1,28 @@
 using System.Threading.Tasks;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Signer;
+using Nethereum.Web3;
 using EntryPointContract = Thirdweb.Contracts.EntryPoint.ContractDefinition;
 
 namespace Thirdweb.AccountAbstraction
 {
     public static class UserOpUtils
     {
-        public static async Task<byte[]> HashAndSignUserOp(this EntryPointContract.UserOperation userOp, string signerKey, string entryPoint)
+        public static async Task<byte[]> HashAndSignUserOp(this EntryPointContract.UserOperation userOp, string entryPoint)
         {
-            var partialUserOpHashPostEstimates = await TransactionManager.ThirdwebRead<EntryPointContract.GetUserOpHashFunction, EntryPointContract.GetUserOpHashOutputDTO>(
+            var userOpHash = await TransactionManager.ThirdwebRead<EntryPointContract.GetUserOpHashFunction, EntryPointContract.GetUserOpHashOutputDTO>(
                 entryPoint,
                 new EntryPointContract.GetUserOpHashFunction() { UserOp = userOp }
             );
-            var partialUserOpHashSignature = new EthereumMessageSigner().Sign(partialUserOpHashPostEstimates.ReturnValue1, new EthECKey(signerKey));
-            return partialUserOpHashSignature.HexStringToByteArray();
+            if (ThirdwebManager.Instance.SDK.session.SmartWallet.PersonalWalletProvider == WalletProvider.LocalWallet)
+            {
+                return new EthereumMessageSigner().Sign(userOpHash.ReturnValue1, new EthECKey(ThirdwebManager.Instance.SDK.session.LocalAccount.PrivateKey)).HexStringToByteArray();
+            }
+            else
+            {
+                var sig = await ThirdwebManager.Instance.SDK.wallet.Sign(userOpHash.ReturnValue1.ByteArrayToHexString());
+                return sig.HexStringToByteArray();
+            }
         }
 
         public static UserOperationHexified EncodeUserOperation(this EntryPointContract.UserOperation userOperation)
