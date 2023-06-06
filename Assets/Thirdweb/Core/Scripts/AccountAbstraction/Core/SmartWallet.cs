@@ -70,23 +70,22 @@ namespace Thirdweb.AccountAbstraction
             _initialized = true;
         }
 
-        internal async Task<byte[]> GetInitCode()
+        internal async Task<(byte[] initCode, BigInteger gas)> GetInitCode()
         {
             if (_deployed)
             {
                 Debug.Log("Already deployed.");
-                return new byte[] { };
+                return (new byte[] { }, 0);
             }
 
             var fn = new CreateAccountFunction() { Admin = PersonalAccount.Address, Data = new byte[] { } };
-            fn.FromAddress = PersonalAccount.Address;
             var deployHandler = _personalWeb3.Eth.GetContractTransactionHandler<CreateAccountFunction>();
-            // var txInput = await deployHandler.CreateTransactionInputEstimatingGasAsync(Config.factoryAddress, fn);
-            // var data = Utils.HexConcat(Config.factoryAddress.HexStringToByteArray(), txInput.Data.HexStringToByteArray());
-            // Debug.Log("initCode: " + data);
-            // return data.HexStringToByteArray();
-            await deployHandler.SendRequestAndWaitForReceiptAsync(Config.factoryAddress, fn); // TODO: Replace when initCode fixed
-            return new byte[] { };
+            var txInput = await deployHandler.CreateTransactionInputEstimatingGasAsync(Config.factoryAddress, fn);
+            Debug.Log("Factory address: " + Config.factoryAddress);
+            Debug.Log("txInput.Data: " + txInput.Data);
+            var data = Utils.HexConcat(Config.factoryAddress, txInput.Data);
+            Debug.Log("initCode: " + data);
+            return (data.HexStringToByteArray(), txInput.Gas.Value);
         }
 
         internal async Task<RpcResponseMessage> Request(RpcRequestMessage requestMessage)
@@ -110,9 +109,8 @@ namespace Thirdweb.AccountAbstraction
 
         private async Task<RpcResponseMessage> CreateUserOpAndSend(RpcRequestMessage requestMessage)
         {
-            Debug.Log("Deserialize the transaction input from the request message");
-
             // Deserialize the transaction input from the request message
+            Debug.Log("Deserialize the transaction input from the request message");
 
             var paramList = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(requestMessage.RawParameters));
             var transactionInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(paramList[0]));
@@ -128,15 +126,20 @@ namespace Thirdweb.AccountAbstraction
                 dummySig[i] = 0x01;
 
             // Create the user operation and its safe (hexified) version
+            Debug.Log("Create the user operation and its safe (hexified) version");
+
+            var initData = await GetInitCode();
+            Debug.Log("initData: " + initData.initCode.ToHex());
+            Debug.Log("initData.gas: " + initData.gas);
 
             var partialUserOp = new Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperation()
             {
                 Sender = Accounts[0],
                 Nonce = nonce.ReturnValue1,
-                InitCode = await GetInitCode(),
+                InitCode = initData.initCode,
                 CallData = transactionInput.Data.HexStringToByteArray(),
                 CallGasLimit = transactionInput.Gas.Value,
-                VerificationGasLimit = 150000,
+                VerificationGasLimit = 150000 + initData.gas,
                 PreVerificationGas = 50000,
                 MaxFeePerGas = latestBlock.BaseFeePerGas.Value + 1000000000,
                 MaxPriorityFeePerGas = 1000000000,
@@ -146,6 +149,7 @@ namespace Thirdweb.AccountAbstraction
             var partialUserOpHexified = EncodeUserOperation(partialUserOp);
 
             // Update paymaster data if any
+            Debug.Log("Update paymaster data if any");
 
             if (Config.gasless)
             {
@@ -173,6 +177,7 @@ namespace Thirdweb.AccountAbstraction
             partialUserOpHexified = EncodeUserOperation(partialUserOp);
 
             // Estimate gas with updated paymaster data
+            Debug.Log("Estimate gas with updated paymaster data");
 
             var gasEstimatesRequest = new RpcRequestMessage(requestMessage.Id, "eth_estimateUserOperationGas", new object[] { partialUserOpHexified, entryPoint });
             var gasEstimatesResult = await InnerRpcRequest(gasEstimatesRequest, bundlerUrl);
@@ -187,6 +192,7 @@ namespace Thirdweb.AccountAbstraction
             partialUserOpHexified = EncodeUserOperation(partialUserOp);
 
             // Update paymaster data post estimates again
+            Debug.Log("Update paymaster data post estimates again");
 
             if (Config.gasless)
             {
@@ -214,6 +220,7 @@ namespace Thirdweb.AccountAbstraction
             partialUserOpHexified = EncodeUserOperation(partialUserOp);
 
             // Send the user operation
+            Debug.Log("Send the user operation");
 
             Debug.Log("Valid UserOp: " + JsonConvert.SerializeObject(partialUserOp));
             Debug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(partialUserOpHexified));
@@ -226,6 +233,7 @@ namespace Thirdweb.AccountAbstraction
             _deployed = true;
 
             // Wait for the transaction to be mined
+            Debug.Log("Wait for the transaction to be mined");
 
             string txHash = null;
             while (txHash == null && Application.isPlaying)
@@ -238,6 +246,7 @@ namespace Thirdweb.AccountAbstraction
             }
 
             // Check if successful
+            Debug.Log("Check if successful");
 
             Debug.Log("Tx hash for userOpHash " + userOpHash + " is " + txHash);
 

@@ -214,14 +214,12 @@ namespace Thirdweb
             return hex.HexToByteArray();
         }
 
-        public static string HexConcat(params byte[][] arrays)
+        public static string HexConcat(params string[] hexStrings)
         {
             StringBuilder hex = new StringBuilder("0x");
 
-            foreach (var array in arrays)
-            {
-                hex.Append(BitConverter.ToString(array).Replace("-", "").ToLower());
-            }
+            foreach (var hexStr in hexStrings)
+                hex.Append(hexStr.Substring(2));
 
             return hex.ToString();
         }
