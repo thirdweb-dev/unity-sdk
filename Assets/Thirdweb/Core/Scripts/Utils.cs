@@ -10,6 +10,7 @@ using System.IO;
 using UnityEngine;
 using Nethereum.Signer;
 using Nethereum.Web3;
+using Newtonsoft.Json.Linq;
 
 namespace Thirdweb
 {
@@ -222,6 +223,12 @@ namespace Thirdweb
                 hex.Append(hexStr.Substring(2));
 
             return hex.ToString();
+        }
+
+        public static async Task<JToken> ToJToken(this object obj)
+        {
+            string json = JsonConvert.SerializeObject(obj);
+            return await Task.FromResult(JToken.Parse(json));
         }
 
         public static string ByteArrayToHexString(this byte[] hexBytes)
