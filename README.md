@@ -13,12 +13,7 @@
 
 # Supported platforms
 
-- [x] WebGL
-- [x] Desktop
-- [x] Android
-- [x] iOS
-- [x] VR
-- [ ] Console (un-tested)
+![supported_platforms](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/7200bf8a-8779-49fa-bda1-9e2051b210ec)
 
 # Installation
 
