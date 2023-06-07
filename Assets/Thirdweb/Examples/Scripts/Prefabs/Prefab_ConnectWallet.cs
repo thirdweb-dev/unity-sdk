@@ -160,7 +160,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         try
         {
-            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(wallet, ThirdwebManager.Instance.GetCurrentChainID(), password, email), personalWallet);
+            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(wallet, ThirdwebManager.Instance.GetCurrentChainID(), password, email, personalWallet));
 
             if (wallet == WalletProvider.LocalWallet || (wallet == WalletProvider.SmartWallet && personalWallet == WalletProvider.LocalWallet))
             {

@@ -30,7 +30,7 @@ namespace Thirdweb
         /// Connect a user's wallet via a given wallet provider
         /// </summary>
         /// <param name="walletConnection">The wallet provider and optional parameters.</param>
-        public async Task<string> Connect(WalletConnection walletConnection, WalletProvider personalWallet = WalletProvider.LocalWallet)
+        public async Task<string> Connect(WalletConnection walletConnection)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -38,7 +38,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection.provider, walletConnection.password, walletConnection.email, personalWallet);
+                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection.provider, walletConnection.password, walletConnection.email, walletConnection.personalWallet);
             }
         }
 
@@ -446,13 +446,15 @@ namespace Thirdweb
         public int chainId;
         public string password;
         public string email;
+        public WalletProvider personalWallet;
 
-        public WalletConnection(WalletProvider provider, int chainId = 1, string password = null, string email = null)
+        public WalletConnection(WalletProvider provider, int chainId = 1, string password = null, string email = null, WalletProvider personalWallet = WalletProvider.LocalWallet)
         {
             this.provider = provider;
             this.chainId = chainId;
             this.password = password;
             this.email = email;
+            this.personalWallet = personalWallet;
         }
     }
 
