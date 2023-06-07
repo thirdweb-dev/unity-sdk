@@ -154,8 +154,8 @@ namespace Thirdweb.AccountAbstraction
                 CallGasLimit = transactionInput.Gas.Value,
                 VerificationGasLimit = 150000 + initData.gas,
                 PreVerificationGas = 50000,
-                MaxFeePerGas = latestBlock.BaseFeePerGas.Value + 1000000000,
-                MaxPriorityFeePerGas = 1000000000,
+                MaxFeePerGas = latestBlock.BaseFeePerGas.Value + 2,
+                MaxPriorityFeePerGas = 2,
                 PaymasterAndData = Constants.DUMMY_PAYMASTER_AND_DATA_HEX.HexStringToByteArray(),
                 Signature = dummySig,
             };
