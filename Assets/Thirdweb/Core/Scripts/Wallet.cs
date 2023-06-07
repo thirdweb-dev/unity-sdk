@@ -345,15 +345,17 @@ namespace Thirdweb
         public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
             where TDomain : IDomain
         {
-            if (ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.LocalWallet)
+            if (
+                ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.LocalWallet
+                || (
+                    ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.SmartWallet
+                    && ThirdwebManager.Instance.SDK.session.SmartWallet.PersonalWalletProvider == WalletProvider.LocalWallet
+                )
+            )
             {
                 var signer = new Eip712TypedDataSigner();
                 var key = new EthECKey(ThirdwebManager.Instance.SDK.session.LocalAccount.PrivateKey);
                 return signer.SignTypedDataV4(data, typedData, key);
-            }
-            else if (ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.SmartWallet)
-            {
-                throw new Exception("SmartWallet does not support EIP712 signing");
             }
             else
             {

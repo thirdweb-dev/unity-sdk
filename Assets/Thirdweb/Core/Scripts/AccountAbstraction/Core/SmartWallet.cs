@@ -212,7 +212,7 @@ namespace Thirdweb.AccountAbstraction
             {
                 var getUserOpResponse = await BundlerClient.EthGetUserOperationByHash(Config.bundlerUrl, Config.thirdwebApiKey, requestMessage.Id, userOpHash);
                 txHash = getUserOpResponse?.transactionHash;
-                await new WaitForSecondsRealtime(2f);
+                await new WaitForSecondsRealtime(5f);
             }
             Debug.Log("Tx Hash: " + txHash);
 

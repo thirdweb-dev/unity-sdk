@@ -24,7 +24,6 @@ namespace Thirdweb
 
         public override async Task<object> InterceptSendRequestAsync<T>(Func<RpcRequest, string, Task<T>> interceptedSendRequestAsync, RpcRequest request, string route = null)
         {
-            UnityEngine.Debug.Log("Wallet: " + _walletProvider + "InterceptSendRequestAsync: " + request.Method + " " + string.Join(", ", request.RawParameters));
             if (request.Method == "eth_accounts")
             {
                 string address = "";
@@ -62,6 +61,14 @@ namespace Thirdweb
                 else if (_walletProvider == WalletProvider.SmartWallet)
                     return await _smartWallet.PersonalWeb3.Client.SendRequestAsync<T>("personal_sign", null, message, address);
             }
+            else if (request.Method == "eth_signTypedData_v4")
+            {
+                // Should only happen with non Local Wallet personal wallet
+                if (_walletProvider == WalletProvider.SmartWallet)
+                {
+                    return await _smartWallet.PersonalWeb3.Client.SendRequestAsync<T>("eth_signTypedData_v4", null, request.RawParameters[0], request.RawParameters[1]);
+                }
+            }
 
             return await interceptedSendRequestAsync(request, route);
         }
@@ -73,7 +80,6 @@ namespace Thirdweb
             params object[] paramList
         )
         {
-            UnityEngine.Debug.Log("Wallet: " + _walletProvider + "InterceptSendRequestAsync: " + method + " " + string.Join(", ", paramList));
             if (method == "eth_accounts")
             {
                 string address = "";
@@ -110,6 +116,14 @@ namespace Thirdweb
                     return new EthereumMessageSigner().EncodeUTF8AndSign(message, new EthECKey(_localAccount.PrivateKey));
                 else if (_walletProvider == WalletProvider.SmartWallet)
                     return await _smartWallet.PersonalWeb3.Client.SendRequestAsync<T>("personal_sign", null, message, address);
+            }
+            else if (method == "eth_signTypedData_v4")
+            {
+                // Should only happen with non Local Wallet personal wallet
+                if (_walletProvider == WalletProvider.SmartWallet)
+                {
+                    return await _smartWallet.PersonalWeb3.Client.SendRequestAsync<T>("eth_signTypedData_v4", null, paramList[0], paramList[1]);
+                }
             }
 
             return await interceptedSendRequestAsync(method, route, paramList);
