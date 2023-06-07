@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using System.Numerics;
 using UnityEngine;
 using Nethereum.Hex.HexTypes;
+using Nethereum.Web3;
 
 namespace Thirdweb
 {
@@ -91,7 +92,7 @@ namespace Thirdweb
                 if (this.abi == null)
                     throw new UnityException("You must pass an ABI for native platform custom calls");
 
-                var contract = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetContract(this.abi, this.address);
+                var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
                 var function = contract.GetFunction(functionName);
                 return await function.CallAsync<T>(args);
             }

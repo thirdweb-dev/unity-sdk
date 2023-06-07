@@ -86,9 +86,6 @@ public class ThirdwebManager : MonoBehaviour
     [Tooltip("Optional - If you want to use a custom paymaster, you can provide the URL here")]
     public string paymasterUrl;
 
-    [Tooltip("Optional - If you want to use a custom paymaster, you can provide the API key here")]
-    public string paymasterAPI;
-
     [Tooltip("Optional - If you want to use a custom entry point, you can provide the contract address here")]
     public string entryPointAddress;
 
@@ -200,7 +197,6 @@ public class ThirdwebManager : MonoBehaviour
                     gasless = gasless,
                     bundlerUrl = bundlerUrl,
                     paymasterUrl = paymasterUrl,
-                    paymasterAPI = paymasterAPI,
                     entryPointAddress = entryPointAddress
                 };
 

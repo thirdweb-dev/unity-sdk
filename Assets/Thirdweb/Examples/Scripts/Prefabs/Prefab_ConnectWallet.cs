@@ -69,7 +69,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public List<NetworkSprite> networkSprites;
 
     string address;
-    WalletProvider wallet;
+    WalletProvider _wallet;
     bool connecting;
     WCSessionData wcSessionData;
 
@@ -156,15 +156,24 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
     // Connecting
 
-    public async void OnConnect(WalletProvider _wallet, string password = null, string email = "joe@biden.com")
+    public async void OnConnect(WalletProvider wallet, string password = null, string email = "joe@biden.com", WalletProvider personalWallet = WalletProvider.LocalWallet)
     {
         try
         {
-            exportButton.SetActive(_wallet == WalletProvider.LocalWallet);
+            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(wallet, ThirdwebManager.Instance.GetCurrentChainID(), password, email, personalWallet));
 
-            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(_wallet, ThirdwebManager.Instance.GetCurrentChainID(), password, email));
+            if (wallet == WalletProvider.LocalWallet || (wallet == WalletProvider.SmartWallet && personalWallet == WalletProvider.LocalWallet))
+            {
+                exportButton.SetActive(true);
+                exportButton.GetComponent<Button>().onClick.RemoveAllListeners();
+                exportButton.GetComponent<Button>().onClick.AddListener(() => OnExportWallet(password));
+            }
+            else
+            {
+                exportButton.SetActive(false);
+            }
 
-            wallet = _wallet;
+            _wallet = wallet;
             OnConnected();
             OnConnectedCallback?.Invoke();
             Debug.Log($"Connected successfully to: {address}");
@@ -173,7 +182,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         {
             OnDisconnect();
             OnFailedConnectCallback?.Invoke();
-            Debug.LogWarning($"Error Connecting Wallet: {e.Message}");
+            Debug.LogWarning($"Error Connecting Wallet: {e}");
         }
     }
 
@@ -196,7 +205,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
             connectDropdown.SetActive(false);
             connectedDropdown.SetActive(false);
             networkDropdown.SetActive(false);
-            walletImage.sprite = walletButtons.Find(x => x.wallet == wallet).icon;
+            walletImage.sprite = walletButtons.Find(x => x.wallet == _wallet).icon;
             walletImage2.sprite = walletImage.sprite;
             chainImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
         }
@@ -292,20 +301,14 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
     public void OnCopyAddress()
     {
+        Debugger.Instance.Log("Copied Address", $"Connected Address: {address}");
         GUIUtility.systemCopyBuffer = address;
-        Debug.LogWarning($"Copied your address to your clipboard! Address: {address}");
     }
 
-    public void OnExportWallet()
+    public async void OnExportWallet(string password)
     {
-        Application.OpenURL(Utils.GetAccountPath()); // Doesn't work on iOS or > Android 6
-
-        // Fallback
-        string text = System.IO.File.ReadAllText(Utils.GetAccountPath());
+        string text = await ThirdwebManager.Instance.SDK.wallet.Export(password);
+        Debugger.Instance.Log("Exported Wallet", text);
         GUIUtility.systemCopyBuffer = text;
-        Debug.LogWarning(
-            "Copied your encrypted keystore to your clipboard! You may import it into an external wallet with your password.\n"
-                + "If no password was provided upon the creation of this account, the password is your device unique ID."
-        );
     }
 }

@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using Nethereum.RPC.Eth.Transactions;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Hex.HexTypes;
+using Nethereum.Web3;
 
 //using WalletConnectSharp.NEthereum;
 
@@ -37,7 +38,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection.provider, walletConnection.password, walletConnection.email);
+                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection.provider, walletConnection.password, walletConnection.email, walletConnection.personalWallet);
             }
         }
 
@@ -53,6 +54,23 @@ namespace Thirdweb
             else
             {
                 ThirdwebManager.Instance.SDK.session.Disconnect();
+            }
+        }
+
+        /// <summary>
+        /// Encrypt and export local wallet as password-protected json keystore
+        /// </summary>
+        public async Task<string> Export(string password)
+        {
+            password = string.IsNullOrEmpty(password) ? SystemInfo.deviceUniqueIdentifier : password;
+
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.ExportWallet(password);
+            }
+            else
+            {
+                return Utils.EncryptAndGenerateKeyStore(new EthECKey(ThirdwebManager.Instance.SDK.session.LocalAccount.PrivateKey), password);
             }
         }
 
@@ -74,7 +92,7 @@ namespace Thirdweb
                     Resources = new List<string>(),
                     Uri = $"https://{domain}",
                     Statement = "Please ensure that the domain above matches the URL of the current website.",
-                    Address = await GetAddress(),
+                    Address = await GetSignerAddress(),
                     Domain = domain,
                     ChainId = (await GetChainId()).ToString(),
                     Version = "1",
@@ -193,7 +211,7 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(await GetAddress());
+                    var balance = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetBalance.SendRequestAsync(await GetAddress());
                     var nativeCurrency = ThirdwebManager.Instance.SDK.session.CurrentChainData.nativeCurrency;
                     return new CurrencyValue(nativeCurrency.name, nativeCurrency.symbol, nativeCurrency.decimals.ToString(), balance.Value.ToString(), balance.Value.ToString().ToEth());
                 }
@@ -211,7 +229,31 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_accounts");
+                if (!await IsConnected())
+                    throw new Exception("No account connected!");
+
+                return await ThirdwebManager.Instance.SDK.session.GetAddress();
+            }
+        }
+
+        public async Task<string> GetSignerAddress()
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await GetAddress();
+            }
+            else
+            {
+                if (!await IsConnected())
+                    throw new Exception("No account connected!");
+
+                switch (ThirdwebManager.Instance.SDK.session.WalletProvider)
+                {
+                    case WalletProvider.SmartWallet:
+                        return await ThirdwebManager.Instance.SDK.session.GetPersonalAddress();
+                    default:
+                        return await GetAddress();
+                }
             }
         }
 
@@ -296,30 +338,20 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.LocalWallet)
-                {
-                    var signer = new EthereumMessageSigner();
-                    return signer.EncodeUTF8AndSign(message, new EthECKey(ThirdwebManager.Instance.SDK.session.LocalAccount.PrivateKey));
-                }
-                else
-                {
-                    try
-                    {
-                        return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", await GetAddress(), message);
-                    }
-                    catch (System.Exception e)
-                    {
-                        Debug.LogWarning(e.Message);
-                        return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_sign", await GetAddress(), message);
-                    }
-                }
+                return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
             }
         }
 
         public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
             where TDomain : IDomain
         {
-            if (ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.LocalWallet)
+            if (
+                ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.LocalWallet
+                || (
+                    ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.SmartWallet
+                    && ThirdwebManager.Instance.SDK.session.SmartWallet.PersonalWalletProvider == WalletProvider.LocalWallet
+                )
+            )
             {
                 var signer = new Eip712TypedDataSigner();
                 var key = new EthECKey(ThirdwebManager.Instance.SDK.session.LocalAccount.PrivateKey);
@@ -344,7 +376,7 @@ namespace Thirdweb
                     property.Value = property.Value.ToString();
 
                 string safeJson = jsonObject.ToString();
-                return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTypedData_v4", await GetAddress(), safeJson);
+                return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTypedData_v4", await GetSignerAddress(), safeJson);
             }
         }
 
@@ -416,13 +448,15 @@ namespace Thirdweb
         public int chainId;
         public string password;
         public string email;
+        public WalletProvider personalWallet;
 
-        public WalletConnection(WalletProvider provider = WalletProvider.LocalWallet, int chainId = 1, string password = null, string email = null)
+        public WalletConnection(WalletProvider provider, int chainId = 1, string password = null, string email = null, WalletProvider personalWallet = WalletProvider.LocalWallet)
         {
             this.provider = provider;
             this.chainId = chainId;
             this.password = password;
             this.email = email;
+            this.personalWallet = personalWallet;
         }
     }
 
