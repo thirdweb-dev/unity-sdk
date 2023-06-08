@@ -58,16 +58,16 @@ namespace Thirdweb
             }
             else
             {
-                var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionHandler<TWFunction>();
-                functionMessage.Gas = 100000;
                 try
                 {
+                    var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionHandler<TWFunction>();
                     var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
                     functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
                 }
                 catch (System.InvalidOperationException e)
                 {
                     Debug.LogWarning($"Failed to estimate gas for transaction, proceeding with 100k gas: {e}");
+                    functionMessage.Gas = 100000;
                 }
             }
 
@@ -130,11 +130,15 @@ namespace Thirdweb
                     }
                     else
                     {
-                        Debug.Log("Relayer Response: " + req.downloadHandler.text);
                         var response = JsonConvert.DeserializeObject<RelayerResponse>(req.downloadHandler.text);
+                        if (response.status != "success")
+                        {
+                            throw new UnityException(
+                                $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {forwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
+                            );
+                        }
                         var result = JsonConvert.DeserializeObject<RelayerResult>(response.result);
                         txHash = result.txHash;
-                        Debug.Log(txHash);
                     }
                 }
             }
@@ -146,6 +150,9 @@ namespace Thirdweb
         [System.Serializable]
         public struct RelayerResponse
         {
+            [JsonProperty("status")]
+            public string status;
+
             [JsonProperty("result")]
             public string result;
         }
