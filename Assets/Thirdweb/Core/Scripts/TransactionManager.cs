@@ -59,8 +59,16 @@ namespace Thirdweb
             else
             {
                 var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionHandler<TWFunction>();
-                var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
-                functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
+                functionMessage.Gas = 100000;
+                try
+                {
+                    var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
+                    functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"Failed to estimate gas for transaction, proceeding with 100k gas: {e.Message}");
+                }
             }
 
             bool isGasless = ThirdwebManager.Instance.SDK.session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin.HasValue;
