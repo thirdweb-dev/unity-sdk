@@ -65,9 +65,9 @@ namespace Thirdweb
                     var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
                     functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
                 }
-                catch (System.Exception e)
+                catch (System.InvalidOperationException e)
                 {
-                    Debug.LogWarning($"Failed to estimate gas for transaction, proceeding with 100k gas: {e.Message}");
+                    Debug.LogWarning($"Failed to estimate gas for transaction, proceeding with 100k gas: {e}");
                 }
             }
 
@@ -130,6 +130,7 @@ namespace Thirdweb
                     }
                     else
                     {
+                        Debug.Log("Relayer Response: " + req.downloadHandler.text);
                         var response = JsonConvert.DeserializeObject<RelayerResponse>(req.downloadHandler.text);
                         var result = JsonConvert.DeserializeObject<RelayerResult>(response.result);
                         txHash = result.txHash;
