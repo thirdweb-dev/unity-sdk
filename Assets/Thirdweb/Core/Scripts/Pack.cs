@@ -19,7 +19,8 @@ namespace Thirdweb
         /// <summary>
         /// Interact with a Marketplace contract.
         /// </summary>
-        public Pack(string chain, string address) : base($"{address}{subSeparator}pack")
+        public Pack(string chain, string address)
+            : base($"{address}{subSeparator}pack")
         {
             this.chain = chain;
             this.contractAddress = address;
@@ -341,8 +342,7 @@ namespace Thirdweb
             else
             {
                 var openPackFunction = new PackContract.OpenPackFunction() { PackId = BigInteger.Parse(packId), AmountToOpen = BigInteger.Parse(amount) };
-                openPackFunction.Gas = gasLimit;
-                var openPackResult = await TransactionManager.ThirdwebWriteRawResult(contractAddress, openPackFunction);
+                var openPackResult = await TransactionManager.ThirdwebWriteRawResult(contractAddress, openPackFunction, null, gasLimit);
 
                 var packOpenedEvents = openPackResult.DecodeAllEvents<PackContract.PackOpenedEventDTO>();
                 List<PackContract.Token> tokensAwarded = new List<PackContract.Token>();
