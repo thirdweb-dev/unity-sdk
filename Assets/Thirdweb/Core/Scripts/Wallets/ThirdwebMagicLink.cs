@@ -3,7 +3,6 @@ using link.magic.unity.sdk;
 using link.magic.unity.sdk.Relayer;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
-using UnityEngine;
 
 namespace Thirdweb.Wallets
 {
@@ -13,6 +12,7 @@ namespace Thirdweb.Wallets
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
         private string _magicLinkApiKey;
+        private Magic _magic;
 
         public ThirdwebMagicLink(string magicLinkApiKey)
         {
@@ -20,26 +20,22 @@ namespace Thirdweb.Wallets
             _provider = WalletProvider.MagicLink;
             _signerProvider = WalletProvider.MagicLink;
             _magicLinkApiKey = magicLinkApiKey;
+            _magic = null;
         }
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
         {
-            if (MagicUnity.Instance == null)
-            {
-                GameObject.Instantiate(ThirdwebManager.Instance.MagicAuthPrefab);
-                await new WaitForSeconds(0.5f);
-                MagicUnity.Instance.Initialize(_magicLinkApiKey, new CustomNodeConfiguration(rpc, walletConnection.chainId));
-            }
+            _magic = new Magic(_magicLinkApiKey, new CustomNodeConfiguration(rpc, walletConnection.chainId));
 
-            await MagicUnity.Instance.EnableMagicAuth(walletConnection.email);
-            _web3 = new Web3(Magic.Instance.Provider);
+            await _magic.Auth.LoginWithEmailOtp(walletConnection.email);
+            _web3 = new Web3(_magic.Provider);
 
             return await GetAddress();
         }
 
         public async Task Disconnect()
         {
-            await MagicUnity.Instance.DisableMagicAuth();
+            await _magic.User.Logout();
             _web3 = null;
         }
 
@@ -50,7 +46,8 @@ namespace Thirdweb.Wallets
 
         public async Task<string> GetAddress()
         {
-            var addy = await MagicUnity.Instance.GetAddress();
+            var metadata = await _magic.User.GetMetadata();
+            var addy = metadata.publicAddress;
             if (addy != null)
                 addy = addy.ToChecksumAddress();
             return addy;

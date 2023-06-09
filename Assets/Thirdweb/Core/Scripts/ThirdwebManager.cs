@@ -93,9 +93,6 @@ public class ThirdwebManager : MonoBehaviour
     [Tooltip("Instantiates the WalletConnect SDK for Native platforms.")]
     public GameObject WalletConnectPrefab;
 
-    [Tooltip("Instantiates the MagicAuth SDK for Native platforms.")]
-    public GameObject MagicAuthPrefab;
-
     [Tooltip("Instantiates the Metamask SDK for Native platforms.")]
     public GameObject MetamaskPrefab;
 
