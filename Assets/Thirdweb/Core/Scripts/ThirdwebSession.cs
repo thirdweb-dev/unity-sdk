@@ -15,6 +15,7 @@ using WalletConnectSharp.Core.Models.Ethereum;
 using WalletConnectSharp.NEthereum.Client;
 using WalletConnectSharp.Unity;
 using Thirdweb.AccountAbstraction;
+using Thirdweb.Wallets;
 
 namespace Thirdweb
 {
@@ -22,21 +23,15 @@ namespace Thirdweb
     {
         #region Properties
 
+
         public ThirdwebSDK.Options Options { get; private set; }
         public int ChainId { get; private set; }
         public string RPC { get; private set; }
         public SiweMessageService SiweSession { get; private set; }
         public Web3 Web3 { get; private set; }
-        public WalletProvider WalletProvider { get; private set; }
-        public Account LocalAccount { get; private set; }
-        public SmartWallet SmartWallet { get; private set; }
-        public string Email { get; private set; }
         public ThirdwebChainData CurrentChainData { get; private set; }
 
-        public bool IsConnected
-        {
-            get { return LocalAccount != null || ThirdwebManager.Instance.SDK.session.WalletProvider != WalletProvider.LocalWallet; }
-        }
+        public IThirdwebWallet ActiveWallet { get; private set; }
 
         public static int Nonce = 0;
 
@@ -51,10 +46,6 @@ namespace Thirdweb
             RPC = rpcUrl;
             SiweSession = new SiweMessageService();
             Web3 = new Web3(rpcUrl);
-            WalletProvider = WalletProvider.LocalWallet;
-            LocalAccount = null;
-            SmartWallet = null;
-            Email = null;
             CurrentChainData = FetchChainData();
         }
 
@@ -62,34 +53,69 @@ namespace Thirdweb
 
         #region Public Methods
 
-        public async Task<string> Connect(WalletProvider walletProvider, string password = null, string email = null, WalletProvider personalWallet = WalletProvider.LocalWallet)
+        public async Task<string> Connect(WalletConnection walletConnection)
         {
-            switch (walletProvider)
+            switch (walletConnection.provider)
             {
                 case WalletProvider.LocalWallet:
-                    InitializeLocalWallet(password);
+                    ActiveWallet = new ThirdwebLocalWallet();
                     break;
                 case WalletProvider.WalletConnectV1:
-                    await InitializeWalletConnect();
+                    ActiveWallet = new ThirdwebWalletConnect();
                     break;
                 case WalletProvider.MagicLink:
-                    await InitializeMagicLink();
+                    if (Options.wallet == null || string.IsNullOrEmpty(Options.wallet?.magicLinkApiKey))
+                        throw new UnityException("Magic link api key is required for magic link connection method!");
+                    ActiveWallet = new ThirdwebMagicLink(Options.wallet?.magicLinkApiKey);
                     break;
                 case WalletProvider.Metamask:
-                    await InitializeMetaMask();
+                    ActiveWallet = new ThirdwebMetamask();
                     break;
                 case WalletProvider.SmartWallet:
-                    await InitializeSmartWallet(personalWallet, password, email);
+                    await Connect(new WalletConnection(walletConnection.personalWallet, walletConnection.chainId, walletConnection.password, walletConnection.email));
+                    if (Options.smartWalletConfig == null)
+                        throw new UnityException("Smart wallet config is required for smart wallet connection method!");
+                    ActiveWallet = new ThirdwebSmartWallet(ActiveWallet, Options.smartWalletConfig.Value);
                     break;
                 default:
                     throw new UnityException("This wallet connection method is not supported on this platform!");
             }
 
-            WalletProvider = walletProvider;
-            Email = email;
-            Web3.Client.OverridingRequestInterceptor = new ThirdwebInterceptor(this);
+            await ActiveWallet.Connect(walletConnection, RPC);
 
-            var connectedChainId = await ThirdwebManager.Instance.SDK.wallet.GetChainId();
+            Web3 = await ActiveWallet.GetWeb3();
+            Web3.Client.OverridingRequestInterceptor = new ThirdwebInterceptor(ActiveWallet);
+
+            await EnsureCorrectNetwork();
+
+            var addy = await ActiveWallet.GetAddress();
+
+            Debug.Log($"Connected wallet {walletConnection.provider} with address {addy} on chain {ChainId} with RPC {RPC}");
+
+            return addy;
+        }
+
+        public async Task Disconnect()
+        {
+            await ActiveWallet.Disconnect();
+            ThirdwebManager.Instance.SDK.session = new ThirdwebSession(Options, ChainId, RPC);
+        }
+
+        public async Task<T> Request<T>(string method, params object[] parameters)
+        {
+            var request = new RpcRequest(Nonce, method, parameters);
+            Nonce++;
+            return await Web3.Client.SendRequestAsync<T>(request);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private async Task EnsureCorrectNetwork()
+        {
+            var hexChainId = await Request<string>("eth_chainId");
+            var connectedChainId = (int)hexChainId.HexToBigInteger(false);
             if (connectedChainId != ChainId)
             {
                 try
@@ -110,55 +136,7 @@ namespace Thirdweb
                     }
                 }
             }
-
-            Debug.Log($"Connected wallet {walletProvider} with address {await GetAddress()} on chain {ChainId} with RPC {RPC}");
-
-            return await GetAddress();
         }
-
-        public void Disconnect()
-        {
-            switch (WalletProvider)
-            {
-                case WalletProvider.WalletConnectV1:
-                    WalletConnect.Instance.DisableWalletConnect();
-                    break;
-                case WalletProvider.MagicLink:
-                    MagicUnity.Instance.DisableMagicAuth();
-                    break;
-                case WalletProvider.Metamask:
-                    MetaMaskUnity.Instance.Disconnect();
-                    break;
-                case WalletProvider.SmartWallet:
-                    break;
-                default:
-                    break;
-            }
-
-            ThirdwebManager.Instance.SDK.session = new ThirdwebSession(Options, ChainId, RPC);
-        }
-
-        public async Task<string> GetAddress()
-        {
-            var accounts = await Request<string[]>("eth_accounts");
-            return accounts[0];
-        }
-
-        public async Task<string> GetPersonalAddress()
-        {
-            return await SmartWallet.GetPersonalAddress();
-        }
-
-        public async Task<T> Request<T>(string method, params object[] parameters)
-        {
-            var request = new RpcRequest(Nonce, method, parameters);
-            Nonce++;
-            return await Web3.Client.SendRequestAsync<T>(request);
-        }
-
-        #endregion
-
-        #region Private Methods
 
         private async Task SwitchNetwork(ThirdwebChain newChain)
         {
@@ -170,75 +148,6 @@ namespace Thirdweb
         {
             await Request<object>("wallet_addEthereumChain", new object[] { newChainData });
             CurrentChainData = newChainData;
-        }
-
-        private void InitializeLocalWallet(string password)
-        {
-            LocalAccount = Utils.UnlockOrGenerateLocalAccount(ChainId, password);
-            Web3 = new Web3(LocalAccount, RPC);
-            SmartWallet = null;
-        }
-
-        private async Task InitializeWalletConnect()
-        {
-            if (WalletConnect.Instance == null)
-            {
-                GameObject.Instantiate(ThirdwebManager.Instance.WalletConnectPrefab);
-                await new WaitForSeconds(0.5f);
-                WalletConnect.Instance.Initialize();
-            }
-
-            await WalletConnect.Instance.EnableWalletConnect();
-            Web3 = new Web3(new WalletConnectClient(WalletConnect.Instance.Session));
-            LocalAccount = null;
-            SmartWallet = null;
-        }
-
-        private async Task InitializeMagicLink()
-        {
-            if (MagicUnity.Instance == null)
-            {
-                GameObject.Instantiate(ThirdwebManager.Instance.MagicAuthPrefab);
-                await new WaitForSeconds(0.5f);
-                if (Options.wallet?.magicLinkApiKey == null)
-                    throw new UnityException("MagicLink API Key is not set!");
-                MagicUnity.Instance.Initialize(Options.wallet?.magicLinkApiKey, new link.magic.unity.sdk.Relayer.CustomNodeConfiguration(RPC, ChainId));
-            }
-
-            await MagicUnity.Instance.EnableMagicAuth(Email);
-            Web3 = new Web3(Magic.Instance.Provider);
-            LocalAccount = null;
-            SmartWallet = null;
-        }
-
-        private async Task InitializeMetaMask()
-        {
-            if (MetaMaskUnity.Instance == null)
-            {
-                GameObject.Instantiate(ThirdwebManager.Instance.MetamaskPrefab);
-                await new WaitForSeconds(0.5f);
-                MetaMaskUnity.Instance.Initialize();
-            }
-
-            MetaMaskUnity.Instance.Connect();
-            bool connected = false;
-            MetaMaskUnity.Instance.Wallet.WalletAuthorized += (sender, e) =>
-            {
-                Web3 = MetaMaskUnity.Instance.Wallet.CreateWeb3();
-                LocalAccount = null;
-                SmartWallet = null;
-                connected = true;
-            };
-            await new WaitUntil(() => connected);
-        }
-
-        private async Task InitializeSmartWallet(WalletProvider personalWallet, string password, string email)
-        {
-            await Connect(personalWallet, password, email);
-
-            SmartWallet = new SmartWallet(Web3, personalWallet, Options.smartWalletConfig.Value);
-            await SmartWallet.Initialize();
-            Web3 = SmartWallet.CreateWeb3();
         }
 
         private ThirdwebChainData FetchChainData()

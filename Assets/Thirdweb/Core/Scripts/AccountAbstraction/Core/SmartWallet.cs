@@ -39,15 +39,13 @@ namespace Thirdweb.AccountAbstraction
         public List<string> Accounts { get; internal set; }
         public string PersonalAddress { get; internal set; }
         public Web3 PersonalWeb3 { get; internal set; }
-        public WalletProvider PersonalWalletProvider { get; internal set; }
         public ThirdwebSDK.SmartWalletConfig Config { get; internal set; }
 
         private bool _initialized;
         private bool _deployed;
 
-        public SmartWallet(Web3 personalWeb3, WalletProvider personalWalletProvider, ThirdwebSDK.SmartWalletConfig config)
+        public SmartWallet(Web3 personalWeb3, ThirdwebSDK.SmartWalletConfig config)
         {
-            PersonalWalletProvider = personalWalletProvider;
             PersonalWeb3 = personalWeb3;
             Config = new ThirdwebSDK.SmartWalletConfig()
             {

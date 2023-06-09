@@ -375,6 +375,11 @@ namespace Thirdweb
             }
         }
 
+        public static string ToChecksumAddress(this string address)
+        {
+            return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address);
+        }
+
         public static string GetNativeTokenWrapper(int chainId)
         {
             switch (chainId)

@@ -47,7 +47,7 @@ public class MagicUnity : MonoBehaviour
         return metadata.email;
     }
 
-    public async void DisableMagicAuth()
+    public async Task DisableMagicAuth()
     {
         await _magic.User.Logout();
     }

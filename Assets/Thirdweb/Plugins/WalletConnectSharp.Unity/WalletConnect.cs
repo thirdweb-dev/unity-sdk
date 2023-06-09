@@ -87,7 +87,7 @@ namespace WalletConnectSharp.Unity
             return sessionData;
         }
 
-        public async void DisableWalletConnect()
+        public async Task DisableWalletConnect()
         {
             try
             {

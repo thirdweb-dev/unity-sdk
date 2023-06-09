@@ -1,72 +1,57 @@
 using System;
 using System.Threading.Tasks;
-using MetaMask.Unity;
 using Nethereum.JsonRpc.Client;
 using Nethereum.Signer;
-using Nethereum.Web3.Accounts;
-using Thirdweb.AccountAbstraction;
-using WalletConnectSharp.Unity;
+using Newtonsoft.Json;
+using Thirdweb.Wallets;
 
 namespace Thirdweb
 {
     public class ThirdwebInterceptor : RequestInterceptor
     {
-        private readonly WalletProvider _walletProvider;
-        private readonly Account _localAccount;
-        private readonly SmartWallet _smartWallet;
+        private readonly IThirdwebWallet _thirdwebWallet;
 
-        public ThirdwebInterceptor(ThirdwebSession thirdwebSession)
+        public ThirdwebInterceptor(IThirdwebWallet thirdwebWallet)
         {
-            _walletProvider = thirdwebSession.WalletProvider;
-            _localAccount = thirdwebSession.LocalAccount;
-            _smartWallet = thirdwebSession.SmartWallet;
+            _thirdwebWallet = thirdwebWallet;
         }
 
         public override async Task<object> InterceptSendRequestAsync<T>(Func<RpcRequest, string, Task<T>> interceptedSendRequestAsync, RpcRequest request, string route = null)
         {
+            UnityEngine.Debug.Log($"{request.Method} Request Intercepted: {JsonConvert.SerializeObject(request.RawParameters)}");
+
             if (request.Method == "eth_accounts")
             {
-                string address = "";
-                switch (_walletProvider)
-                {
-                    case WalletProvider.LocalWallet:
-                        if (_localAccount == null)
-                            throw new Exception("No Account Connected!");
-                        address = _localAccount.Address;
-                        break;
-                    case WalletProvider.WalletConnectV1:
-                        address = WalletConnect.Instance.Session.Accounts[0];
-                        break;
-                    case WalletProvider.MagicLink:
-                        address = await MagicUnity.Instance.GetAddress();
-                        break;
-                    case WalletProvider.Metamask:
-                        address = MetaMaskUnity.Instance.Wallet.SelectedAddress;
-                        break;
-                    case WalletProvider.SmartWallet:
-                        address = _smartWallet.Accounts[0];
-                        break;
-                    default:
-                        throw new Exception("No Account Connected!");
-                }
-                return new string[] { Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address) };
+                var addy = await _thirdwebWallet.GetAddress();
+                return new string[] { addy };
             }
             else if (request.Method == "personal_sign")
             {
-                var message = request.RawParameters[0].ToString();
-                var address = request.RawParameters[1].ToString();
+                var signerWeb3 = await _thirdwebWallet.GetSignerWeb3();
 
-                if (_walletProvider == WalletProvider.LocalWallet)
-                    return new EthereumMessageSigner().EncodeUTF8AndSign(message, new EthECKey(_localAccount.PrivateKey));
-                else if (_walletProvider == WalletProvider.SmartWallet)
-                    return await _smartWallet.PersonalWeb3.Client.SendRequestAsync<T>("personal_sign", null, message, address);
+                switch (_thirdwebWallet.GetProvider())
+                {
+                    case WalletProvider.LocalWallet:
+                        var message = request.RawParameters[0].ToString();
+                        return new EthereumMessageSigner().EncodeUTF8AndSign(message, new EthECKey(_thirdwebWallet.GetLocalAccount().PrivateKey));
+                    case WalletProvider.SmartWallet:
+                        return await signerWeb3.Client.SendRequestAsync<T>("personal_sign", null, request.RawParameters);
+                    default:
+                        break;
+                }
             }
             else if (request.Method == "eth_signTypedData_v4")
             {
-                // Should only happen with non Local Wallet personal wallet
-                if (_walletProvider == WalletProvider.SmartWallet)
+                var signerWeb3 = await _thirdwebWallet.GetSignerWeb3();
+
+                switch (_thirdwebWallet.GetProvider())
                 {
-                    return await _smartWallet.PersonalWeb3.Client.SendRequestAsync<T>("eth_signTypedData_v4", null, request.RawParameters[0], request.RawParameters[1]);
+                    case WalletProvider.LocalWallet:
+                        throw new Exception("Please use Wallet.SignTypedDataV4 instead when using Local Wallet as the signer.");
+                    case WalletProvider.SmartWallet:
+                        return await signerWeb3.Client.SendRequestAsync<T>("eth_signTypedData_v4", null, request.RawParameters);
+                    default:
+                        break;
                 }
             }
 
@@ -80,49 +65,40 @@ namespace Thirdweb
             params object[] paramList
         )
         {
+            UnityEngine.Debug.Log($"{method} Request Intercepted: {JsonConvert.SerializeObject(paramList)}");
+
             if (method == "eth_accounts")
             {
-                string address = "";
-                switch (_walletProvider)
-                {
-                    case WalletProvider.LocalWallet:
-                        if (_localAccount == null)
-                            throw new Exception("No Account Connected!");
-                        address = _localAccount.Address;
-                        break;
-                    case WalletProvider.WalletConnectV1:
-                        address = WalletConnect.Instance.Session.Accounts[0];
-                        break;
-                    case WalletProvider.MagicLink:
-                        address = await MagicUnity.Instance.GetAddress();
-                        break;
-                    case WalletProvider.Metamask:
-                        address = MetaMaskUnity.Instance.Wallet.SelectedAddress;
-                        break;
-                    case WalletProvider.SmartWallet:
-                        address = _smartWallet.Accounts[0];
-                        break;
-                    default:
-                        throw new Exception("No Account Connected!");
-                }
-                return new string[] { Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address) };
+                var addy = await _thirdwebWallet.GetAddress();
+                return new string[] { addy };
             }
             else if (method == "personal_sign")
             {
-                var message = paramList[0].ToString();
-                var address = paramList[1].ToString();
+                var signerWeb3 = await _thirdwebWallet.GetSignerWeb3();
 
-                if (_walletProvider == WalletProvider.LocalWallet)
-                    return new EthereumMessageSigner().EncodeUTF8AndSign(message, new EthECKey(_localAccount.PrivateKey));
-                else if (_walletProvider == WalletProvider.SmartWallet)
-                    return await _smartWallet.PersonalWeb3.Client.SendRequestAsync<T>("personal_sign", null, message, address);
+                switch (_thirdwebWallet.GetProvider())
+                {
+                    case WalletProvider.LocalWallet:
+                        var message = paramList[0].ToString();
+                        return new EthereumMessageSigner().EncodeUTF8AndSign(message, new EthECKey(_thirdwebWallet.GetLocalAccount().PrivateKey));
+                    case WalletProvider.SmartWallet:
+                        return await signerWeb3.Client.SendRequestAsync<T>("personal_sign", null, paramList);
+                    default:
+                        break;
+                }
             }
             else if (method == "eth_signTypedData_v4")
             {
-                // Should only happen with non Local Wallet personal wallet
-                if (_walletProvider == WalletProvider.SmartWallet)
+                var signerWeb3 = await _thirdwebWallet.GetSignerWeb3();
+
+                switch (_thirdwebWallet.GetProvider())
                 {
-                    return await _smartWallet.PersonalWeb3.Client.SendRequestAsync<T>("eth_signTypedData_v4", null, paramList[0], paramList[1]);
+                    case WalletProvider.LocalWallet:
+                        throw new Exception("Please use Wallet.SignTypedDataV4 instead when using Local Wallet as the signer.");
+                    case WalletProvider.SmartWallet:
+                        return await signerWeb3.Client.SendRequestAsync<T>("eth_signTypedData_v4", null, paramList);
+                    default:
+                        break;
                 }
             }
 

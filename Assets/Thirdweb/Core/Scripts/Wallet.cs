@@ -38,7 +38,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection.provider, walletConnection.password, walletConnection.email, walletConnection.personalWallet);
+                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection);
             }
         }
 
@@ -53,7 +53,7 @@ namespace Thirdweb
             }
             else
             {
-                ThirdwebManager.Instance.SDK.session.Disconnect();
+                await ThirdwebManager.Instance.SDK.session.Disconnect();
             }
         }
 
@@ -70,7 +70,10 @@ namespace Thirdweb
             }
             else
             {
-                return Utils.EncryptAndGenerateKeyStore(new EthECKey(ThirdwebManager.Instance.SDK.session.LocalAccount.PrivateKey), password);
+                var localAccount = ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount();
+                if (localAccount == null)
+                    throw new Exception("No local account found");
+                return Utils.EncryptAndGenerateKeyStore(new EthECKey(localAccount.PrivateKey), password);
             }
         }
 
@@ -232,7 +235,7 @@ namespace Thirdweb
                 if (!await IsConnected())
                     throw new Exception("No account connected!");
 
-                return await ThirdwebManager.Instance.SDK.session.GetAddress();
+                return await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetAddress();
             }
         }
 
@@ -247,13 +250,7 @@ namespace Thirdweb
                 if (!await IsConnected())
                     throw new Exception("No account connected!");
 
-                switch (ThirdwebManager.Instance.SDK.session.WalletProvider)
-                {
-                    case WalletProvider.SmartWallet:
-                        return await ThirdwebManager.Instance.SDK.session.GetPersonalAddress();
-                    default:
-                        return await GetAddress();
-                }
+                return await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerAddress();
             }
         }
 
@@ -268,7 +265,7 @@ namespace Thirdweb
             }
             else
             {
-                return ThirdwebManager.Instance.SDK.session.IsConnected;
+                return await ThirdwebManager.Instance.SDK.session.ActiveWallet.IsConnected();
             }
         }
 
@@ -345,16 +342,10 @@ namespace Thirdweb
         public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
             where TDomain : IDomain
         {
-            if (
-                ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.LocalWallet
-                || (
-                    ThirdwebManager.Instance.SDK.session.WalletProvider == WalletProvider.SmartWallet
-                    && ThirdwebManager.Instance.SDK.session.SmartWallet.PersonalWalletProvider == WalletProvider.LocalWallet
-                )
-            )
+            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet)
             {
                 var signer = new Eip712TypedDataSigner();
-                var key = new EthECKey(ThirdwebManager.Instance.SDK.session.LocalAccount.PrivateKey);
+                var key = new EthECKey(ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount().PrivateKey);
                 return signer.SignTypedDataV4(data, typedData, key);
             }
             else

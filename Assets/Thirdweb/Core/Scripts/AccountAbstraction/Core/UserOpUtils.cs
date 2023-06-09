@@ -14,9 +14,12 @@ namespace Thirdweb.AccountAbstraction
                 entryPoint,
                 new EntryPointContract.GetUserOpHashFunction() { UserOp = userOp }
             );
-            if (ThirdwebManager.Instance.SDK.session.SmartWallet.PersonalWalletProvider == WalletProvider.LocalWallet)
+
+            var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet;
+            if (smartWallet.GetSignerProvider() == WalletProvider.LocalWallet)
             {
-                return new EthereumMessageSigner().Sign(userOpHash.ReturnValue1, new EthECKey(ThirdwebManager.Instance.SDK.session.LocalAccount.PrivateKey)).HexStringToByteArray();
+                var localWallet = smartWallet.GetLocalAccount();
+                return new EthereumMessageSigner().Sign(userOpHash.ReturnValue1, new EthECKey(localWallet.PrivateKey)).HexStringToByteArray();
             }
             else
             {
