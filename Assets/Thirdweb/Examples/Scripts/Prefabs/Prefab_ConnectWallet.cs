@@ -211,7 +211,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogWarning($"Error Fetching Native Balance: {e.Message}");
+            Debug.LogWarning($"Error Fetching Native Balance: {e}");
         }
     }
 

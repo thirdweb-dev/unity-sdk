@@ -214,7 +214,16 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var balance = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetBalance.SendRequestAsync(await GetAddress());
+                    HexBigInteger balance = null;
+                    string address = await GetAddress();
+                    try
+                    {
+                        balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
+                    }
+                    catch
+                    {
+                        balance = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetBalance.SendRequestAsync(address);
+                    }
                     var nativeCurrency = ThirdwebManager.Instance.SDK.session.CurrentChainData.nativeCurrency;
                     return new CurrencyValue(nativeCurrency.name, nativeCurrency.symbol, nativeCurrency.decimals.ToString(), balance.Value.ToString(), balance.Value.ToString().ToEth());
                 }
