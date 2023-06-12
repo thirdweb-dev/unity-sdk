@@ -8,7 +8,6 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Thirdweb.Contracts.Forwarder.ContractDefinition;
 using Nethereum.RPC.Eth.Transactions;
-using Nethereum.Hex.HexTypes;
 using Nethereum.Web3;
 
 namespace Thirdweb

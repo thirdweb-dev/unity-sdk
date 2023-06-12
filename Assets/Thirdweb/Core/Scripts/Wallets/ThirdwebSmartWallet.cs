@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using Nethereum.Web3;
 using Thirdweb.AccountAbstraction;
-using Nethereum.JsonRpc.Client.RpcMessages;
 using Nethereum.Web3.Accounts;
 
 namespace Thirdweb.Wallets

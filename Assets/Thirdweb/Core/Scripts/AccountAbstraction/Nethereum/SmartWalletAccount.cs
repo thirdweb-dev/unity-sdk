@@ -3,7 +3,6 @@ using Nethereum.RPC.Accounts;
 using Nethereum.RPC.AccountSigning;
 using Nethereum.RPC.NonceServices;
 using Nethereum.RPC.TransactionManagers;
-using Nethereum.Signer.EIP712;
 
 namespace Thirdweb.AccountAbstraction
 {

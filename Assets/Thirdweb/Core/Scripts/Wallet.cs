@@ -9,12 +9,8 @@ using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.ABI.EIP712;
 using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
-using Nethereum.RPC.Eth.Transactions;
-using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Web3;
-
-//using WalletConnectSharp.NEthereum;
 
 namespace Thirdweb
 {

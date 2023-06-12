@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Signer;
-using Nethereum.Web3;
 using EntryPointContract = Thirdweb.Contracts.EntryPoint.ContractDefinition;
 
 namespace Thirdweb.AccountAbstraction

@@ -1,6 +1,4 @@
-﻿using Nethereum.RPC.TransactionManagers;
-
-namespace Thirdweb.AccountAbstraction
+﻿namespace Thirdweb.AccountAbstraction
 {
     public class SmartWalletTransactionManager : Nethereum.RPC.TransactionManagers.TransactionManager
     {

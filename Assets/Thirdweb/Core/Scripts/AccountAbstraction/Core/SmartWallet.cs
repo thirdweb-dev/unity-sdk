@@ -5,17 +5,13 @@ using System.Threading.Tasks;
 using Nethereum.Hex.HexTypes;
 using Nethereum.JsonRpc.Client.RpcMessages;
 using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Signer;
 using Nethereum.Web3;
-using Nethereum.Web3.Accounts;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using AccountContract = Thirdweb.Contracts.Account.ContractDefinition;
 using EntryPointContract = Thirdweb.Contracts.EntryPoint.ContractDefinition;
 using FactoryContract = Thirdweb.Contracts.AccountFactory.ContractDefinition;
 using UnityEngine;
 using Nethereum.Contracts;
-using Nethereum.Hex.HexConvertors.Extensions;
 
 namespace Thirdweb.AccountAbstraction
 {

@@ -1,5 +1,4 @@
-﻿using MetaMask.Unity;
-using Nethereum.Web3;
+﻿using Nethereum.Web3;
 
 namespace Thirdweb.AccountAbstraction
 {

@@ -1,20 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
-using link.magic.unity.sdk;
-using MetaMask.NEthereum;
-using MetaMask.Unity;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.JsonRpc.Client;
 using Nethereum.Siwe;
 using Nethereum.Web3;
-using Nethereum.Web3.Accounts;
 using UnityEngine;
-using WalletConnectSharp.Core.Models.Ethereum;
-using WalletConnectSharp.NEthereum.Client;
-using WalletConnectSharp.Unity;
-using Thirdweb.AccountAbstraction;
 using Thirdweb.Wallets;
 
 namespace Thirdweb
@@ -170,7 +161,7 @@ namespace Thirdweb
                 blockExplorerUrls = explorerUrls.ToArray(),
                 chainName = currentNetwork.name ?? ThirdwebManager.Instance.GetCurrentChainIdentifier(),
                 iconUrls = new string[] { "ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt" },
-                nativeCurrency = new NativeCurrency()
+                nativeCurrency = new ThirdwebNativeCurrency()
                 {
                     name = currentNetwork.nativeCurrency?.name ?? "Ether",
                     symbol = currentNetwork.nativeCurrency?.symbol ?? "ETH",
@@ -189,13 +180,20 @@ namespace Thirdweb
             public string[] blockExplorerUrls;
             public string chainName;
             public string[] iconUrls;
-            public NativeCurrency nativeCurrency;
+            public ThirdwebNativeCurrency nativeCurrency;
             public string[] rpcUrls;
         }
 
         public class ThirdwebChain
         {
             public string chainId;
+        }
+
+        public class ThirdwebNativeCurrency
+        {
+            public string name;
+            public string symbol;
+            public int decimals;
         }
 
         [System.Serializable]
