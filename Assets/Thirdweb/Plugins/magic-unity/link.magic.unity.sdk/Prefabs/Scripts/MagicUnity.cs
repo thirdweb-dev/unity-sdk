@@ -49,6 +49,11 @@ public class MagicUnity : MonoBehaviour
 
     public async Task DisableMagicAuth()
     {
+        if (_magic == null)
+        {
+            Debug.LogWarning("Failed to Disable MagicLink Auth because it was not properly initialized.");
+            return;
+        }
         await _magic.User.Logout();
     }
 }
