@@ -124,7 +124,6 @@ namespace Thirdweb.AccountAbstraction
         private async Task<RpcResponseMessage> CreateUserOpAndSend(RpcRequestMessage requestMessage)
         {
             // Deserialize the transaction input from the request message
-            Debug.Log("Creating UserOp...");
 
             var paramList = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(requestMessage.RawParameters));
             var transactionInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(paramList[0]));
@@ -146,7 +145,6 @@ namespace Thirdweb.AccountAbstraction
             var executeInput = executeFn.CreateTransactionInput(Accounts[0]);
 
             // Create the user operation and its safe (hexified) version
-            Debug.Log("Create the user operation and its safe (hexified) version...");
 
             var partialUserOp = new EntryPointContract.UserOperation()
             {
@@ -155,43 +153,26 @@ namespace Thirdweb.AccountAbstraction
                 InitCode = initData.initCode,
                 CallData = executeInput.Data.HexStringToByteArray(),
                 CallGasLimit = transactionInput.Gas.Value,
-                VerificationGasLimit = 150000 + initData.gas,
-                PreVerificationGas = 50000,
-                MaxFeePerGas = latestBlock.BaseFeePerGas.Value + 2,
-                MaxPriorityFeePerGas = 2,
+                VerificationGasLimit = 100000 + initData.gas,
+                PreVerificationGas = 21000,
+                MaxFeePerGas = latestBlock.BaseFeePerGas.Value * 2 + BigInteger.Parse("1500000000"),
+                MaxPriorityFeePerGas = BigInteger.Parse("1500000000"),
                 PaymasterAndData = Constants.DUMMY_PAYMASTER_AND_DATA_HEX.HexStringToByteArray(),
                 Signature = dummySig,
             };
+            partialUserOp.PreVerificationGas = partialUserOp.CalcPreVerificationGas();
             var partialUserOpHexified = partialUserOp.EncodeUserOperation();
 
             // Update paymaster data if any
-            Debug.Log("Update paymaster data if any...");
 
             partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestMessage.Id, partialUserOpHexified);
 
-            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(Config.entryPointAddress);
-            partialUserOpHexified = partialUserOp.EncodeUserOperation();
+            // Hash, sign and encode the user operation
 
-            // Estimate gas with updated paymaster data
-            Debug.Log("Estimate gas with updated paymaster data...");
-
-            var gasEstimates = await BundlerClient.EthEstimateUserOperationGas(Config.bundlerUrl, Config.thirdwebApiKey, requestMessage.Id, partialUserOpHexified, Config.entryPointAddress);
-            partialUserOp.CallGasLimit = new HexBigInteger(gasEstimates.CallGasLimit).Value;
-            partialUserOp.VerificationGasLimit = new HexBigInteger(gasEstimates.VerificationGas).Value;
-            partialUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value;
-
-            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(Config.entryPointAddress);
-            partialUserOpHexified = partialUserOp.EncodeUserOperation();
-
-            // Update paymaster data post estimates again
-            Debug.Log("Update paymaster data post estimates again...");
-
-            partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestMessage.Id, partialUserOpHexified);
             partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(Config.entryPointAddress);
             partialUserOpHexified = partialUserOp.EncodeUserOperation();
 
             // Send the user operation
-            Debug.Log("Send the user operation...");
 
             Debug.Log("Valid UserOp: " + JsonConvert.SerializeObject(partialUserOp));
             Debug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(partialUserOpHexified));
@@ -199,7 +180,6 @@ namespace Thirdweb.AccountAbstraction
             Debug.Log("UserOp Hash: " + userOpHash);
 
             // Wait for the transaction to be mined
-            Debug.Log("Wait for the transaction to be mined...");
 
             string txHash = null;
             while (txHash == null && Application.isPlaying)
@@ -211,7 +191,6 @@ namespace Thirdweb.AccountAbstraction
             Debug.Log("Tx Hash: " + txHash);
 
             // Check if successful
-            Debug.Log("Check if successful...");
 
             var receipt = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txHash);
             var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
