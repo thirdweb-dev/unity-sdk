@@ -3,6 +3,12 @@ using System.Numerics;
 using UnityEngine;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Web3;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using Nethereum.ABI.FunctionEncoding;
+using System.Linq;
+using System;
+using System.Collections;
 
 namespace Thirdweb
 {
@@ -76,29 +82,6 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Read data from a contract
-        /// </summary>
-        /// <param name="functionName">The contract function name to call</param>
-        /// <param name="args">Optional function arguments. Structs and Lists will get serialized automatically</param>
-        /// <returns>The data deserialized to the given typed</returns>
-        public async Task<T> Read<T>(string functionName, params object[] args)
-        {
-            if (Utils.IsWebGLBuild())
-            {
-                return await Bridge.InvokeRoute<T>(getRoute("call"), Utils.ToJsonStringArray(functionName, args));
-            }
-            else
-            {
-                if (this.abi == null)
-                    throw new UnityException("You must pass an ABI for native platform custom calls");
-
-                var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
-                var function = contract.GetFunction(functionName);
-                return await function.CallAsync<T>(args);
-            }
-        }
-
-        /// <summary>
         /// Execute a write transaction on a contract
         /// </summary>
         /// <param name="functionName">The contract function name to call</param>
@@ -148,6 +131,125 @@ namespace Thirdweb
                 );
                 return receipt.ToTransactionResult();
             }
+        }
+
+        /// <summary>
+        /// Read data from a contract
+        /// </summary>
+        /// <param name="functionName">The contract function name to call</param>
+        /// <param name="args">Optional function arguments. Structs and Lists will get serialized automatically</param>
+        /// <returns>The data deserialized to the given typed</returns>
+        public async Task<T> Read<T>(string functionName, params object[] args)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<T>(getRoute("call"), Utils.ToJsonStringArray(functionName, args));
+            }
+
+            if (this.abi == null)
+                throw new UnityException("You must pass an ABI for native platform custom calls");
+
+            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+            var function = contract.GetFunction(functionName);
+            var result = await function.CallDecodingToDefaultAsync(args);
+
+            var rawResults = new List<object>();
+
+            if (result[0].Result is List<ParameterOutput> parameterOutputs)
+                rawResults.AddRange(parameterOutputs.Select(item => item.Result));
+            else
+                rawResults.AddRange(result.Select(item => item.Result));
+
+            Debug.Log("Raw Result: " + JsonConvert.SerializeObject(rawResults));
+
+            // Single
+            if (rawResults.Count == 1)
+            {
+                return ConvertValue<T>(rawResults[0]);
+            }
+
+            // List or array
+            if ((typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(List<>)) || (typeof(T).IsArray))
+            {
+                return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(rawResults));
+            }
+
+            // Class or struct
+            if (typeof(T).IsClass || typeof(T).IsValueType)
+            {
+                var targetType = typeof(T);
+                var properties = targetType.GetProperties();
+                var fields = targetType.GetFields();
+
+                if (rawResults.Count == properties.Length)
+                {
+                    var instance = Activator.CreateInstance<T>();
+
+                    for (int i = 0; i < properties.Length; i++)
+                    {
+                        try
+                        {
+                            properties[i].SetValue(instance, rawResults[i]);
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            throw new UnityException(
+                                $"Type mismatch assigning value to property {properties[i].Name}: expected {rawResults[i].GetType().Name}, got {properties[i].PropertyType.Name}",
+                                ex
+                            );
+                        }
+                    }
+
+                    return instance;
+                }
+                else if (rawResults.Count == fields.Length)
+                {
+                    var instance = Activator.CreateInstance<T>();
+
+                    for (int i = 0; i < fields.Length; i++)
+                    {
+                        try
+                        {
+                            fields[i].SetValue(instance, rawResults[i]);
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            throw new UnityException($"Type mismatch assigning value to field {fields[i].Name}: expected {rawResults[i].GetType().Name}, got {fields[i].FieldType.Name}", ex);
+                        }
+                    }
+
+                    return instance;
+                }
+                else
+                {
+                    throw new UnityException(
+                        $"The number of properties or fields in the target type do not match the number of results: expected {rawResults.Count}, got {properties.Length} properties and {fields.Length} fields"
+                    );
+                }
+            }
+
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(rawResults));
+        }
+
+        private T ConvertValue<T>(object value)
+        {
+            if (value is T result)
+            {
+                return result;
+            }
+
+            if (value == null)
+            {
+                return default;
+            }
+
+            var targetType = typeof(T);
+            if (targetType.IsValueType && System.Nullable.GetUnderlyingType(targetType) == null)
+            {
+                return (T)System.Convert.ChangeType(value, targetType);
+            }
+
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value));
         }
     }
 }
