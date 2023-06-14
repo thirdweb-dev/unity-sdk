@@ -73,6 +73,14 @@ public class Prefab_ConnectWallet : MonoBehaviour
     bool connecting;
     WCSessionData wcSessionData;
 
+    public string Address
+    {
+        get
+        {
+            return address;
+        }
+    }
+
     // UI Initialization
 
     private void Start()
