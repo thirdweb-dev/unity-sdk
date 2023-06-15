@@ -61,6 +61,8 @@ namespace Thirdweb
         public struct GaslessOptions
         {
             public OZDefenderOptions? openzeppelin;
+
+            [System.Obsolete("Biconomy is not fully supported and will be removed soon. Use OpenZeppelin Defender instead.")]
             public BiconomyOptions? biconomy;
             public bool experimentalChainlessSupport;
         }

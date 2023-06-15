@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using Nethereum.ABI.FunctionEncoding;
 using System.Linq;
 using System;
-using System.Collections;
 
 namespace Thirdweb
 {
@@ -79,6 +78,34 @@ namespace Thirdweb
                 cv.displayValue = balance.ToString().ToEth();
                 return cv;
             }
+        }
+
+        public async Task<Transaction> Prepare(string functionName, params object[] args)
+        {
+            return await Prepare(functionName, null, args);
+        }
+
+        public async Task<Transaction> Prepare(string functionName, string from = null, params object[] args)
+        {
+            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+            var function = contract.GetFunction(functionName);
+            var fromAddress = from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            var txInput = function.CreateTransactionInput(fromAddress, args);
+            return new Transaction(this, txInput);
+        }
+
+        public string Encode(string functionName, params object[] args)
+        {
+            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+            var function = contract.GetFunction(functionName);
+            return function.GetData(args);
+        }
+
+        public List<ParameterOutput> Decode(string functionName, string encodedArgs)
+        {
+            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+            var function = contract.GetFunction(functionName);
+            return function.DecodeInput(encodedArgs);
         }
 
         /// <summary>
