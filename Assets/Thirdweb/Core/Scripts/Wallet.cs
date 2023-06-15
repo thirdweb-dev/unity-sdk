@@ -15,7 +15,7 @@ using Nethereum.Web3;
 namespace Thirdweb
 {
     /// <summary>
-    /// Connect and Interact with a Wallet.
+    /// Connects and interacts with a wallet.
     /// </summary>
     public class Wallet : Routable
     {
@@ -23,9 +23,10 @@ namespace Thirdweb
             : base($"sdk{subSeparator}wallet") { }
 
         /// <summary>
-        /// Connect a user's wallet via a given wallet provider
+        /// Connects a user's wallet via a given wallet provider.
         /// </summary>
         /// <param name="walletConnection">The wallet provider and optional parameters.</param>
+        /// <returns>A task representing the connection result.</returns>
         public async Task<string> Connect(WalletConnection walletConnection)
         {
             if (Utils.IsWebGLBuild())
@@ -39,8 +40,9 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Disconnect the user's wallet
+        /// Disconnects the user's wallet.
         /// </summary>
+        /// <returns>A task representing the disconnection process.</returns>
         public async Task Disconnect()
         {
             if (Utils.IsWebGLBuild())
@@ -54,8 +56,10 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Encrypt and export local wallet as password-protected json keystore
+        /// Encrypts and exports the local wallet as a password-protected JSON keystore.
         /// </summary>
+        /// <param name="password">The password used to encrypt the keystore (optional).</param>
+        /// <returns>The exported JSON keystore as a string.</returns>
         public async Task<string> Export(string password)
         {
             password = string.IsNullOrEmpty(password) ? SystemInfo.deviceUniqueIdentifier : password;
@@ -74,9 +78,10 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Authenticate the user by signing a payload that can be used to securely identify users. See https://portal.thirdweb.com/auth
+        /// Authenticates the user by signing a payload that can be used to securely identify users. See https://portal.thirdweb.com/auth.
         /// </summary>
-        /// <param name="domain">The domain to authenticate to</param>
+        /// <param name="domain">The domain to authenticate to.</param>
+        /// <returns>A task representing the authentication result.</returns>
         public async Task<LoginPayload> Authenticate(string domain)
         {
             if (Utils.IsWebGLBuild())
@@ -130,6 +135,11 @@ namespace Thirdweb
             }
         }
 
+        /// <summary>
+        /// Verifies the authenticity of a login payload.
+        /// </summary>
+        /// <param name="payload">The login payload to verify.</param>
+        /// <returns>The verification result as a string.</returns>
         public async Task<string> Verify(LoginPayload payload)
         {
             if (Utils.IsWebGLBuild())
@@ -189,9 +199,10 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Get the balance of the connected wallet
+        /// Gets the balance of the connected wallet.
         /// </summary>
-        /// <param name="currencyAddress">Optional address of the currency to check balance of</param>
+        /// <param name="currencyAddress">Optional address of the currency to check balance of.</param>
+        /// <returns>The balance of the wallet as a CurrencyValue object.</returns>
         public async Task<CurrencyValue> GetBalance(string currencyAddress = Utils.NativeTokenAddress)
         {
             if (Utils.IsWebGLBuild())
@@ -227,8 +238,9 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Get the connected wallet address
+        /// Gets the connected wallet address.
         /// </summary>
+        /// <returns>The address of the connected wallet as a string.</returns>
         public async Task<string> GetAddress()
         {
             if (Utils.IsWebGLBuild())
@@ -244,6 +256,10 @@ namespace Thirdweb
             }
         }
 
+        /// <summary>
+        /// Gets the address of the signer associated with the connected wallet.
+        /// </summary>
+        /// <returns>The address of the signer as a string.</returns>
         public async Task<string> GetSignerAddress()
         {
             if (Utils.IsWebGLBuild())
@@ -260,8 +276,9 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Check if a wallet is connected
+        /// Checks if a wallet is connected.
         /// </summary>
+        /// <returns>True if a wallet is connected, false otherwise.</returns>
         public async Task<bool> IsConnected()
         {
             if (Utils.IsWebGLBuild())
@@ -282,8 +299,9 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Get the connected chainId
+        /// Gets the connected chainId.
         /// </summary>
+        /// <returns>The connected chainId as an integer.</returns>
         public async Task<int> GetChainId()
         {
             if (Utils.IsWebGLBuild())
@@ -298,8 +316,10 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Prompt the connected wallet to switch to the giiven chainId
+        /// Prompts the connected wallet to switch to the given chainId.
         /// </summary>
+        /// <param name="chainId">The chainId to switch to.</param>
+        /// <returns>A task representing the switching process.</returns>
         public async Task SwitchNetwork(int chainId)
         {
             if (Utils.IsWebGLBuild())
@@ -313,8 +333,12 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Transfer currency to a given address
+        /// Transfers currency to a given address.
         /// </summary>
+        /// <param name="to">The address to transfer the currency to.</param>
+        /// <param name="amount">The amount of currency to transfer.</param>
+        /// <param name="currencyAddress">Optional address of the currency to transfer (defaults to native token address).</param>
+        /// <returns>The result of the transfer as a TransactionResult object.</returns>
         public async Task<TransactionResult> Transfer(string to, string amount, string currencyAddress = Utils.NativeTokenAddress)
         {
             if (Utils.IsWebGLBuild())
@@ -337,8 +361,10 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Prompt the connected wallet to sign the given message
+        /// Prompts the connected wallet to sign the given message.
         /// </summary>
+        /// <param name="message">The message to sign.</param>
+        /// <returns>The signature of the message as a string.</returns>
         public async Task<string> Sign(string message)
         {
             if (Utils.IsWebGLBuild())
@@ -351,6 +377,14 @@ namespace Thirdweb
             }
         }
 
+        /// <summary>
+        /// Signs a typed data object using EIP-712 signature.
+        /// </summary>
+        /// <typeparam name="T">The type of the data to sign.</typeparam>
+        /// <typeparam name="TDomain">The type of the domain object.</typeparam>
+        /// <param name="data">The data object to sign.</param>
+        /// <param name="typedData">The typed data object that defines the domain and message schema.</param>
+        /// <returns>The signature of the typed data as a string.</returns>
         public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
             where TDomain : IDomain
         {
@@ -384,8 +418,11 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Recover the original wallet address that signed a message
+        /// Recovers the original wallet address that signed a message.
         /// </summary>
+        /// <param name="message">The message that was signed.</param>
+        /// <param name="signature">The signature of the message.</param>
+        /// <returns>The recovered wallet address as a string.</returns>
         public async Task<string> RecoverAddress(string message, string signature)
         {
             if (Utils.IsWebGLBuild())
@@ -401,8 +438,10 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Send a raw transaction from the connected wallet
+        /// Sends a raw transaction from the connected wallet.
         /// </summary>
+        /// <param name="transactionRequest">The transaction request object containing transaction details.</param>
+        /// <returns>The result of the transaction as a TransactionResult object.</returns>
         public async Task<TransactionResult> SendRawTransaction(TransactionRequest transactionRequest)
         {
             if (Utils.IsWebGLBuild())
@@ -425,9 +464,10 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Prompt the user to fund their wallet using one of the thirdweb pay providers (defaults to Coinbase Pay).
+        /// Prompts the user to fund their wallet using one of the Thirdweb pay providers (defaults to Coinbase Pay).
         /// </summary>
-        /// <param name="options">The options like wallet address to fund, on which chain, etc</param>
+        /// <param name="options">The options for funding the wallet.</param>
+        /// <returns>A task representing the funding process.</returns>
         public async Task FundWallet(FundWalletOptions options)
         {
             if (Utils.IsWebGLBuild())
@@ -445,14 +485,29 @@ namespace Thirdweb
         }
     }
 
+    /// <summary>
+    /// Represents the connection details for a wallet.
+    /// </summary>
     public class WalletConnection
     {
         public WalletProvider provider;
+
         public int chainId;
+
         public string password;
+
         public string email;
+
         public WalletProvider personalWallet;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WalletConnection"/> class with the specified parameters.
+        /// </summary>
+        /// <param name="provider">The wallet provider to connect to.</param>
+        /// <param name="chainId">The chain ID.</param>
+        /// <param name="password">The wallet password if using local wallets.</param>
+        /// <param name="email">The email to login with if using email based providers.</param>
+        /// <param name="personalWallet">The personal wallet provider if using smart wallets.</param>
         public WalletConnection(WalletProvider provider, int chainId = 1, string password = null, string email = null, WalletProvider personalWallet = WalletProvider.LocalWallet)
         {
             this.provider = provider;
@@ -463,6 +518,9 @@ namespace Thirdweb
         }
     }
 
+    /// <summary>
+    /// Represents the available wallet providers.
+    /// </summary>
     public enum WalletProvider
     {
         Metamask,

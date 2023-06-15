@@ -12,6 +12,9 @@ using UnityEngine.Networking;
 
 namespace Thirdweb
 {
+    /// <summary>
+    /// Represents the type of transaction.
+    /// </summary>
     public enum TransactionType
     {
         LegacyTransaction = -1,
@@ -20,95 +23,173 @@ namespace Thirdweb
         EIP1559 = 2
     }
 
+    /// <summary>
+    /// Represents the gas costs for a transaction.
+    /// </summary>
     public struct GasCosts
     {
         public string ether;
         public BigInteger wei;
     }
 
+    /// <summary>
+    /// Represents an Ethereum transaction.
+    /// </summary>
     public class Transaction
     {
         private readonly Contract contract;
 
+        /// <summary>
+        /// Gets the transaction input.
+        /// </summary>
         public TransactionInput Input { get; private set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Transaction"/> class.
+        /// </summary>
+        /// <param name="contract">The contract associated with the transaction.</param>
+        /// <param name="txInput">The transaction input.</param>
         public Transaction(Contract contract, TransactionInput txInput)
         {
             this.contract = contract;
             this.Input = txInput;
         }
 
+        /// <summary>
+        /// Returns a JSON string representation of the transaction input.
+        /// </summary>
+        /// <returns>The JSON string representation of the transaction input.</returns>
         public override string ToString()
         {
             return JsonConvert.SerializeObject(Input);
         }
 
+        /// <summary>
+        /// Sets the max priority fee per gas for the transaction.
+        /// </summary>
+        /// <param name="maxPriorityFeePerGas">The max priority fee per gas to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetMaxPriorityFeePerGas(string maxPriorityFeePerGas)
         {
             Input.MaxPriorityFeePerGas = BigInteger.Parse(maxPriorityFeePerGas).ToHexBigInteger();
             return this;
         }
 
+        /// <summary>
+        /// Sets the max fee per gas for the transaction.
+        /// </summary>
+        /// <param name="maxFeePerGas">The max fee per gas to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetMaxFeePerGas(string maxFeePerGas)
         {
             Input.MaxFeePerGas = BigInteger.Parse(maxFeePerGas).ToHexBigInteger();
             return this;
         }
 
+        /// <summary>
+        /// Sets the data for the transaction.
+        /// </summary>
+        /// <param name="data">The data to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetData(string data)
         {
             Input.Data = data;
             return this;
         }
 
+        /// <summary>
+        /// Sets the value (in Ether) to be sent with the transaction.
+        /// </summary>
+        /// <param name="ethValue">The value in Ether to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetValue(string ethValue)
         {
             Input.Value = BigInteger.Parse(ethValue.ToWei()).ToHexBigInteger();
             return this;
         }
 
+        /// <summary>
+        /// Sets the sender address for the transaction.
+        /// </summary>
+        /// <param name="from">The sender address to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetFrom(string from)
         {
             Input.From = from;
             return this;
         }
 
+        /// <summary>
+        /// Sets the gas limit for the transaction.
+        /// </summary>
+        /// <param name="gas">The gas limit to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetGasLimit(string gas)
         {
             Input.Gas = BigInteger.Parse(gas).ToHexBigInteger();
             return this;
         }
 
+        /// <summary>
+        /// Sets the recipient address for the transaction.
+        /// </summary>
+        /// <param name="to">The recipient address to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetTo(string to)
         {
             Input.To = to;
             return this;
         }
 
+        /// <summary>
+        /// Sets the type of the transaction.
+        /// </summary>
+        /// <param name="type">The transaction type to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetType(TransactionType type)
         {
             Input.Type = new HexBigInteger((int)type);
             return this;
         }
 
+        /// <summary>
+        /// Sets the gas price for the transaction.
+        /// </summary>
+        /// <param name="gasPrice">The gas price to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetGasPrice(string gasPrice)
         {
             Input.GasPrice = BigInteger.Parse(gasPrice).ToHexBigInteger();
             return this;
         }
 
+        /// <summary>
+        /// Sets the chain ID for the transaction.
+        /// </summary>
+        /// <param name="chainId">The chain ID to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetChainId(string chainId)
         {
             Input.ChainId = BigInteger.Parse(chainId).ToHexBigInteger();
             return this;
         }
 
+        /// <summary>
+        /// Sets the nonce for the transaction.
+        /// </summary>
+        /// <param name="nonce">The nonce to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetNonce(string nonce)
         {
             Input.Nonce = BigInteger.Parse(nonce).ToHexBigInteger();
             return this;
         }
 
+        /// <summary>
+        /// Sets the arguments for the transaction.
+        /// </summary>
+        /// <param name="args">The arguments to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetArgs(params object[] args)
         {
             var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
@@ -117,6 +198,10 @@ namespace Thirdweb
             return this;
         }
 
+        /// <summary>
+        /// Gets the gas price for the transaction asynchronously.
+        /// </summary>
+        /// <returns>The gas price for the transaction as a <see cref="BigInteger"/>.</returns>
         public async Task<BigInteger> GetGasPrice()
         {
             var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
@@ -127,6 +212,10 @@ namespace Thirdweb
             return txGasPrice > maxGasPrice ? maxGasPrice : txGasPrice;
         }
 
+        /// <summary>
+        /// Estimates the gas limit for the transaction asynchronously.
+        /// </summary>
+        /// <returns>The estimated gas limit for the transaction as a <see cref="BigInteger"/>.</returns>
         public async Task<BigInteger> EstimateGasLimit()
         {
             var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
@@ -134,6 +223,10 @@ namespace Thirdweb
             return gas.Value;
         }
 
+        /// <summary>
+        /// Estimates the gas costs for the transaction asynchronously.
+        /// </summary>
+        /// <returns>The estimated gas costs for the transaction as a <see cref="GasCosts"/> struct.</returns>
         public async Task<GasCosts> EstimateGasCosts()
         {
             var gasLimit = await EstimateGasLimit();
@@ -143,6 +236,11 @@ namespace Thirdweb
             return new GasCosts { ether = gasPrice.ToString().ToEth(18, false), wei = gasCost };
         }
 
+        /// <summary>
+        /// Estimates and sets the gas limit for the transaction asynchronously.
+        /// </summary>
+        /// <param name="minimumGas">The minimum gas limit to be set.</param>
+        /// <returns>The modified <see cref="Transaction"/> object with the updated gas limit.</returns>
         public async Task<Transaction> EstimateAndSetGasLimitAsync(string minimumGas = "100000")
         {
             var gasBigInt = await EstimateGasLimit();
@@ -151,12 +249,21 @@ namespace Thirdweb
             return this;
         }
 
+        /// <summary>
+        /// Simulates the transaction asynchronously.
+        /// </summary>
+        /// <returns>The result of the transaction simulation as a string.</returns>
         public async Task<string> Simulate()
         {
             var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
             return await web3.Eth.Transactions.Call.SendRequestAsync(Input);
         }
 
+        /// <summary>
+        /// Sends the transaction asynchronously.
+        /// </summary>
+        /// <param name="gasless">Specifies whether to send the transaction as a gasless transaction. Default is null (uses gasless if set up).</param>
+        /// <returns>The transaction hash as a string.</returns>
         public async Task<string> Send(bool? gasless = null)
         {
             if (Input.Gas == null)
@@ -176,12 +283,22 @@ namespace Thirdweb
                 return await Send();
         }
 
+        /// <summary>
+        /// Sends the transaction and waits for the transaction result asynchronously.
+        /// </summary>
+        /// <param name="gasless">Specifies whether to send the transaction as a gasless transaction. Default is null.</param>
+        /// <returns>The transaction result as a <see cref="TransactionResult"/> object.</returns>
         public async Task<TransactionResult> SendAndWaitForTransactionResult(bool? gasless = null)
         {
             var txHash = await Send(gasless);
             return await WaitForTransactionResult(txHash);
         }
 
+        /// <summary>
+        /// Waits for the transaction result asynchronously.
+        /// </summary>
+        /// <param name="txHash">The transaction hash to wait for.</param>
+        /// <returns>The transaction result as a <see cref="TransactionResult"/> object.</returns>
         public static async Task<TransactionResult> WaitForTransactionResult(string txHash)
         {
             var receiptPoller = new Web3(ThirdwebManager.Instance.SDK.session.RPC);

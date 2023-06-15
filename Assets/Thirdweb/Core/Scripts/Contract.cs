@@ -50,6 +50,12 @@ namespace Thirdweb
         /// </summary>
         public Events events;
 
+        /// <summary>
+        /// Convenient wrapper to interact with any EVM contract
+        /// </summary>
+        /// <param name="chain">The chain identifier.</param>
+        /// <param name="address">The contract address.</param>
+        /// <param name="abi">The contract ABI.</param>
         public Contract(string chain, string address, string abi = null)
             : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
         {
@@ -64,6 +70,10 @@ namespace Thirdweb
             this.events = new Events(baseRoute);
         }
 
+        /// <summary>
+        /// Get the balance of the contract.
+        /// </summary>
+        /// <returns>The balance of the contract as a <see cref="CurrencyValue"/> object.</returns>
         public async Task<CurrencyValue> GetBalance()
         {
             if (Utils.IsWebGLBuild())
@@ -80,11 +90,24 @@ namespace Thirdweb
             }
         }
 
+        /// <summary>
+        /// Prepare a transaction by creating a <see cref="Transaction"/> object.
+        /// </summary>
+        /// <param name="functionName">The name of the contract function.</param>
+        /// <param name="args">Optional function arguments.</param>
+        /// <returns>A <see cref="Transaction"/> object representing the prepared transaction.</returns>
         public async Task<Transaction> Prepare(string functionName, params object[] args)
         {
             return await Prepare(functionName, null, args);
         }
 
+        /// <summary>
+        /// Prepare a transaction by creating a <see cref="Transaction"/> object.
+        /// </summary>
+        /// <param name="functionName">The name of the contract function.</param>
+        /// <param name="from">The address to send the transaction from.</param>
+        /// <param name="args">Optional function arguments.</param>
+        /// <returns>A <see cref="Transaction"/> object representing the prepared transaction.</returns>
         public async Task<Transaction> Prepare(string functionName, string from = null, params object[] args)
         {
             var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
@@ -94,6 +117,12 @@ namespace Thirdweb
             return new Transaction(this, txInput);
         }
 
+        /// <summary>
+        /// Encode the function call with the given arguments.
+        /// </summary>
+        /// <param name="functionName">The name of the contract function.</param>
+        /// <param name="args">The function arguments.</param>
+        /// <returns>The encoded function call as a string.</returns>
         public string Encode(string functionName, params object[] args)
         {
             var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
@@ -101,6 +130,12 @@ namespace Thirdweb
             return function.GetData(args);
         }
 
+        /// <summary>
+        /// Decode the encoded arguments of a function call.
+        /// </summary>
+        /// <param name="functionName">The name of the contract function.</param>
+        /// <param name="encodedArgs">The encoded arguments as a string.</param>
+        /// <returns>A list of <see cref="ParameterOutput"/> objects representing the decoded arguments.</returns>
         public List<ParameterOutput> Decode(string functionName, string encodedArgs)
         {
             var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
@@ -109,23 +144,23 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Execute a write transaction on a contract
+        /// Execute a write transaction on a contract.
         /// </summary>
-        /// <param name="functionName">The contract function name to call</param>
-        /// <param name="args">Optional function arguments. Structs and Lists will get serialized automatically</param>
-        /// <returns>The transaction receipt</returns>
+        /// <param name="functionName">The name of the contract function to call.</param>
+        /// <param name="args">Optional function arguments.</param>
+        /// <returns>The transaction receipt as a <see cref="TransactionResult"/> object.</returns>
         public Task<TransactionResult> Write(string functionName, params object[] args)
         {
             return Write(functionName, null, args);
         }
 
         /// <summary>
-        /// Execute a write transaction on a contract
+        /// Execute a write transaction on a contract.
         /// </summary>
-        /// <param name="functionName">The contract function name to call</param>
-        /// <param name="transactionOverrides">Overrides to pass with the transaction</param>
-        /// <param name="args">Optional function arguments. Structs and Lists will get serialized automatically</param>
-        /// <returns>The transaction receipt</returns>
+        /// <param name="functionName">The name of the contract function to call.</param>
+        /// <param name="transactionOverrides">Overrides to pass with the transaction.</param>
+        /// <param name="args">Optional function arguments.</param>
+        /// <returns>The transaction receipt as a <see cref="TransactionResult"/> object.</returns>
         public async Task<TransactionResult> Write(string functionName, TransactionRequest? transactionOverrides, params object[] args)
         {
             if (Utils.IsWebGLBuild())
@@ -161,11 +196,12 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Read data from a contract
+        /// Read data from a contract.
         /// </summary>
-        /// <param name="functionName">The contract function name to call</param>
-        /// <param name="args">Optional function arguments. Structs and Lists will get serialized automatically</param>
-        /// <returns>The data deserialized to the given typed</returns>
+        /// <typeparam name="T">The type to deserialize the data into.</typeparam>
+        /// <param name="functionName">The name of the contract function to call.</param>
+        /// <param name="args">Optional function arguments.</param>
+        /// <returns>The deserialized data of type <typeparamref name="T"/>.</returns>
         public async Task<T> Read<T>(string functionName, params object[] args)
         {
             if (Utils.IsWebGLBuild())
