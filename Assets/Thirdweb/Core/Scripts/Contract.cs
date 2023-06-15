@@ -122,7 +122,7 @@ namespace Thirdweb
         /// </summary>
         /// <param name="functionName">The name of the contract function.</param>
         /// <param name="args">The function arguments.</param>
-        /// <returns>The encoded function call as a string.</returns>
+        /// <returns>The encoded function data as a string.</returns>
         public string Encode(string functionName, params object[] args)
         {
             var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
