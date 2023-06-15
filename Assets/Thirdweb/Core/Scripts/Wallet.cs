@@ -270,7 +270,14 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.session.ActiveWallet.IsConnected();
+                try
+                {
+                    return await ThirdwebManager.Instance.SDK.session.ActiveWallet.IsConnected();
+                }
+                catch
+                {
+                    return false;
+                }
             }
         }
 

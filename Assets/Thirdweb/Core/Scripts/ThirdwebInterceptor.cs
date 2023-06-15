@@ -18,8 +18,6 @@ namespace Thirdweb
 
         public override async Task<object> InterceptSendRequestAsync<T>(Func<RpcRequest, string, Task<T>> interceptedSendRequestAsync, RpcRequest request, string route = null)
         {
-            UnityEngine.Debug.Log($"{request.Method} Request Intercepted: {JsonConvert.SerializeObject(request.RawParameters)}");
-
             if (request.Method == "eth_accounts")
             {
                 var addy = await _thirdwebWallet.GetAddress();
@@ -65,8 +63,6 @@ namespace Thirdweb
             params object[] paramList
         )
         {
-            UnityEngine.Debug.Log($"{method} Request Intercepted: {JsonConvert.SerializeObject(paramList)}");
-
             if (method == "eth_accounts")
             {
                 var addy = await _thirdwebWallet.GetAddress();

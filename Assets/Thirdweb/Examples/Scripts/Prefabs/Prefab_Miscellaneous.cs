@@ -22,13 +22,41 @@ public class Prefab_Miscellaneous : MonoBehaviour
         {
             Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x62Cf5485B6C24b707E47C5E0FB2EAe7EbE18EC4c", MY_CUSTOM_CONTRACT_ABI);
 
-            string uri = await contract.Read<string>("uri", 0);
-            Debugger.Instance.Log("[Custom Call] Read Custom URI Successful", uri);
+            // Contract.Prepare
+            string connectedAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            Transaction transaction = await contract.Prepare(functionName: "claim", from: connectedAddress, connectedAddress, 0, 1);
+            Debugger.Instance.Log("[Custom Call] Prepare Successful", transaction.ToString());
+            // transaction.SetValue("0.00000000001");
+            // transaction.SetGasLimit("100000");
+            try
+            {
+                var data = await transaction.Simulate();
+                Debugger.Instance.Log("[Custom Call] Simulate Successful", "Data: " + data.ToString() + " \nSending Transaction...");
+            }
+            catch (System.Exception e)
+            {
+                Debugger.Instance.Log("[Custom Call] Simulate Error", e.Message);
+                return;
+            }
 
+            try
+            {
+                TransactionResult transactionResult = await transaction.SendAndWaitForTransactionResult();
+                Debugger.Instance.Log("[Custom Call] Send Successful", transactionResult.ToString());
+            }
+            catch (System.Exception e)
+            {
+                Debugger.Instance.Log("[Custom Call] Send Error", e.ToString());
+            }
+
+            // Contract.Read
+            // string uri = await contract.Read<string>("uri", 0);
+            // Debugger.Instance.Log("[Custom Call] Read Custom URI Successful", uri);
+
+            // Contract.Write
             // TransactionResult transactionResult = await contract.Write("claimKitten");
             // Debugger.Instance.Log("[Custom Call] Write Successful", transactionResult.ToString());
-
-            // With Transaction Overrides:
+            // // With Transaction Overrides:
             // await contract.Write("claim", new TransactionRequest
             // {
             //     value = "0.05".ToWei() // 0.05 ETH

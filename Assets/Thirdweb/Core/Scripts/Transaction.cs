@@ -38,6 +38,11 @@ namespace Thirdweb
             this.Input = txInput;
         }
 
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(Input);
+        }
+
         public Transaction SetMaxPriorityFeePerGas(string maxPriorityFeePerGas)
         {
             Input.MaxPriorityFeePerGas = BigInteger.Parse(maxPriorityFeePerGas).ToHexBigInteger();
@@ -68,7 +73,7 @@ namespace Thirdweb
             return this;
         }
 
-        public Transaction SetGas(string gas)
+        public Transaction SetGasLimit(string gas)
         {
             Input.Gas = BigInteger.Parse(gas).ToHexBigInteger();
             return this;
@@ -126,8 +131,7 @@ namespace Thirdweb
         {
             var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
             var gas = await gasEstimator.Eth.Transactions.EstimateGas.SendRequestAsync(Input);
-            var defaultGas = BigInteger.Parse("100000");
-            return gas.Value < defaultGas ? defaultGas : gas;
+            return gas.Value;
         }
 
         public async Task<GasCosts> EstimateGasCosts()
@@ -139,15 +143,28 @@ namespace Thirdweb
             return new GasCosts { ether = gasPrice.ToString().ToEth(18, false), wei = gasCost };
         }
 
-        public async Task<Transaction> EstimateAndSetGasAsync()
+        public async Task<Transaction> EstimateAndSetGasLimitAsync(string minimumGas = "100000")
         {
             var gasBigInt = await EstimateGasLimit();
-            Input.Gas = gasBigInt.ToHexBigInteger();
+            var minGasBigInt = BigInteger.Parse(minimumGas);
+            Input.Gas = gasBigInt > minGasBigInt ? gasBigInt.ToHexBigInteger() : minGasBigInt.ToHexBigInteger();
             return this;
+        }
+
+        public async Task<string> Simulate()
+        {
+            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            return await web3.Eth.Transactions.Call.SendRequestAsync(Input);
         }
 
         public async Task<string> Send(bool? gasless = null)
         {
+            if (Input.Gas == null)
+                await EstimateAndSetGasLimitAsync();
+
+            if (Input.Value == null)
+                Input.Value = new HexBigInteger(0);
+
             bool isGaslessSetup = ThirdwebManager.Instance.SDK.session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin.HasValue;
             if (gasless != null && gasless.Value && !isGaslessSetup)
                 throw new UnityException("Gasless transactions are not enabled. Please enable them in the SDK options.");
@@ -183,8 +200,15 @@ namespace Thirdweb
             }
             else
             {
-                var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.session.Web3.Client);
-                return await ethSendTx.SendRequestAsync(Input);
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.LocalWallet)
+                {
+                    return await ThirdwebManager.Instance.SDK.session.Web3.Eth.TransactionManager.SendTransactionAsync(Input);
+                }
+                else
+                {
+                    var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.session.Web3.Client);
+                    return await ethSendTx.SendRequestAsync(Input);
+                }
             }
         }
 
@@ -218,7 +242,13 @@ namespace Thirdweb
                     Data = Input.Data
                 };
 
-                var signature = await EIP712.GenerateSignature_MinimalForwarder(forwarderDomain, forwarderVersion, Input.ChainId, forwarderAddress, request);
+                var signature = await EIP712.GenerateSignature_MinimalForwarder(
+                    forwarderDomain,
+                    forwarderVersion,
+                    Input.ChainId?.Value ?? await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    forwarderAddress,
+                    request
+                );
 
                 var postData = new RelayerRequest(request, signature, forwarderAddress);
 
