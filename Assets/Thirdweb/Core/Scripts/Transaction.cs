@@ -152,25 +152,11 @@ namespace Thirdweb
             if (gasless != null && gasless.Value && !isGaslessSetup)
                 throw new UnityException("Gasless transactions are not enabled. Please enable them in the SDK options.");
 
-            if (Utils.IsWebGLBuild())
-            {
-                throw new UnityException("This functionality is not yet available on your current platform.");
-                // string route = contract.abi != null ? $"{contract.address}{Routable.subSeparator}{contract.abi}" : contract.address;
-                // string sendRoute = $"{route}{Routable.separator}send";
-                // return await Bridge.InvokeRoute<string>(sendRoute, new string[] { JsonConvert.SerializeObject(Input) });
-            }
+            bool sendGaslessly = gasless == null ? isGaslessSetup : gasless.Value;
+            if (sendGaslessly)
+                return await SendGasless();
             else
-            {
-                if (gasless == null || !gasless.Value)
-                {
-                    var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.session.Web3.Client);
-                    return await ethSendTx.SendRequestAsync(Input);
-                }
-                else
-                {
-                    return await SendGasless();
-                }
-            }
+                return await Send();
         }
 
         public async Task<TransactionResult> SendAndWaitForTransactionResult(bool? gasless = null)
@@ -184,6 +170,22 @@ namespace Thirdweb
             var receiptPoller = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
             var receipt = await receiptPoller.TransactionReceiptPolling.PollForReceiptAsync(txHash);
             return receipt.ToTransactionResult();
+        }
+
+        private async Task<string> Send()
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+                // string route = contract.abi != null ? $"{contract.address}{Routable.subSeparator}{contract.abi}" : contract.address;
+                // string sendRoute = $"{route}{Routable.separator}send";
+                // return await Bridge.InvokeRoute<string>(sendRoute, new string[] { JsonConvert.SerializeObject(Input) });
+            }
+            else
+            {
+                var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.session.Web3.Client);
+                return await ethSendTx.SendRequestAsync(Input);
+            }
         }
 
         private async Task<string> SendGasless()
