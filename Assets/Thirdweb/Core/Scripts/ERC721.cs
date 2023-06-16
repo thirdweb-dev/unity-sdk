@@ -113,12 +113,12 @@ namespace Thirdweb
             else
             {
                 string owner = address == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : address;
+                var balanceOfOwner = int.Parse(await BalanceOf(owner));
+                List<NFT> ownedNfts = new List<NFT>();
 
                 try
                 {
                     // ERC721Enumerable
-                    var balanceOfOwner = int.Parse(await BalanceOf(owner));
-                    List<NFT> ownedNfts = new List<NFT>();
                     for (int i = 0; i < balanceOfOwner; i++)
                     {
                         var tokenId = await TransactionManager.ThirdwebRead<TokenERC721Contract.TokenOfOwnerByIndexFunction, TokenERC721Contract.TokenOfOwnerByIndexOutputDTO>(
@@ -129,16 +129,17 @@ namespace Thirdweb
                     }
                     return ownedNfts;
                 }
-                catch (System.Exception)
+                catch
                 {
                     // ERC721 totalSupply
                     var count = await TotalCount();
-                    List<NFT> ownedNfts = new List<NFT>();
                     for (int i = 0; i < count; i++)
                     {
                         if (await OwnerOf(i.ToString()) == owner)
                         {
                             ownedNfts.Add(await Get(i.ToString()));
+                            if (ownedNfts.Count == balanceOfOwner)
+                                break;
                         }
                     }
                     return ownedNfts;
