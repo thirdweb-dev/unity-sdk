@@ -19,11 +19,9 @@ public class ChainData
 
 public class ThirdwebManager : MonoBehaviour
 {
-    [Header("REQUIRED SETTINGS")]
     [Tooltip("The chain to initialize the SDK with")]
     public string chain = "goerli";
 
-    [Header("CHAIN DATA")]
     [Tooltip("Support any chain by adding it to this list from the inspector")]
     public List<ChainData> supportedChains = new List<ChainData>()
     {
@@ -43,17 +41,21 @@ public class ThirdwebManager : MonoBehaviour
         new ChainData("binance-testnet", "97", null),
     };
 
-    [Header("APP METADATA")]
+    [Tooltip("The name of your app")]
     public string appName = "Thirdweb Game";
+
+    [Tooltip("The description of your app")]
     public string appDescription = "Thirdweb Game Demo";
+
+    [Tooltip("Favicons for your app")]
     public string[] appIcons = new string[] { "https://thirdweb.com/favicon.ico" };
+
+    [Tooltip("The url of your app")]
     public string appUrl = "https://thirdweb.com";
 
-    [Header("STORAGE OPTIONS")]
     [Tooltip("IPFS Gateway Override")]
     public string storageIpfsGatewayUrl = "https://gateway.ipfscdn.io/ipfs/";
 
-    [Header("OZ DEFENDER OPTIONS")]
     [Tooltip("Autotask URL")]
     public string relayerUrl = null;
 
@@ -66,11 +68,9 @@ public class ThirdwebManager : MonoBehaviour
     [Tooltip("Forwarder Version (Defaults to 0.0.1 if left empty)")]
     public string forwaderVersionOverride = null;
 
-    [Header("MAGIC LINK OPTIONS")]
     [Tooltip("Magic Link API Key (https://dashboard.magic.link)")]
     public string magicLinkApiKey = null;
 
-    [Header("SMART WALLET OPTIONS")]
     [Tooltip("Factory Contract Address")]
     public string factoryAddress;
 
@@ -89,7 +89,6 @@ public class ThirdwebManager : MonoBehaviour
     [Tooltip("Optional - If you want to use a custom entry point, you can provide the contract address here")]
     public string entryPointAddress;
 
-    [Header("NATIVE PREFABS (DANGER ZONE)")]
     [Tooltip("Instantiates the WalletConnect SDK for Native platforms.")]
     public GameObject WalletConnectPrefab;
 
