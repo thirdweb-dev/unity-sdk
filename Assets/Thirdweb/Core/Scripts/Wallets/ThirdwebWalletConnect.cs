@@ -17,8 +17,8 @@ namespace Thirdweb.Wallets
         public ThirdwebWalletConnect()
         {
             _web3 = null;
-            _provider = WalletProvider.WalletConnectV1;
-            _signerProvider = WalletProvider.WalletConnectV1;
+            _provider = WalletProvider.WalletConnect;
+            _signerProvider = WalletProvider.WalletConnect;
         }
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)

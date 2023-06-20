@@ -51,7 +51,7 @@ namespace Thirdweb
                 case WalletProvider.LocalWallet:
                     ActiveWallet = new ThirdwebLocalWallet();
                     break;
-                case WalletProvider.WalletConnectV1:
+                case WalletProvider.WalletConnect:
                     ActiveWallet = new ThirdwebWalletConnect();
                     break;
                 case WalletProvider.MagicLink:
