@@ -45,13 +45,13 @@ public class WalletConnectV2 : MonoBehaviour
 
         _dappOptions = new SignClientOptions()
         {
-            ProjectId = "39f3dc0a2c604ec9885799f9fc5feb7c",
+            ProjectId = ThirdwebManager.Instance.SDK.session.Options.wallet?.walletConnectProjectId,
             Metadata = new Metadata()
             {
-                Description = "An example dapp to showcase WalletConnectSharpv2",
-                Icons = new[] { "https://walletconnect.com/meta/favicon.ico" },
-                Name = "WalletConnectSharpv2 Dapp Example",
-                Url = "https://walletconnect.com"
+                Description = ThirdwebManager.Instance.SDK.session.Options.wallet?.appDescription,
+                Icons = ThirdwebManager.Instance.SDK.session.Options.wallet?.appIcons,
+                Name = ThirdwebManager.Instance.SDK.session.Options.wallet?.appName,
+                Url = ThirdwebManager.Instance.SDK.session.Options.wallet?.appUrl
             },
             Storage = new InMemoryStorage()
         };

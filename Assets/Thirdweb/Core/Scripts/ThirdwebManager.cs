@@ -42,16 +42,16 @@ public class ThirdwebManager : MonoBehaviour
     };
 
     [Tooltip("The name of your app")]
-    public string appName = "Thirdweb Game";
+    public string appName = null;
 
     [Tooltip("The description of your app")]
-    public string appDescription = "Thirdweb Game Demo";
+    public string appDescription = null;
 
     [Tooltip("Favicons for your app")]
-    public string[] appIcons = new string[] { "https://thirdweb.com/favicon.ico" };
+    public string[] appIcons = new string[] { };
 
     [Tooltip("The url of your app")]
-    public string appUrl = "https://thirdweb.com";
+    public string appUrl = null;
 
     [Tooltip("IPFS Gateway Override")]
     public string storageIpfsGatewayUrl = "https://gateway.ipfscdn.io/ipfs/";
@@ -70,6 +70,9 @@ public class ThirdwebManager : MonoBehaviour
 
     [Tooltip("Magic Link API Key (https://dashboard.magic.link)")]
     public string magicLinkApiKey = null;
+
+    [Tooltip("WalletConnect Project ID (https://cloud.walletconnect.com/app)")]
+    public string walletConnectProjectId = null;
 
     [Tooltip("Factory Contract Address")]
     public string factoryAddress;
@@ -174,13 +177,15 @@ public class ThirdwebManager : MonoBehaviour
         }
 
         // Set up wallet data
+
         options.wallet = new ThirdwebSDK.WalletOptions()
         {
-            appName = string.IsNullOrEmpty(appName) ? "Thirdweb Game" : appName,
-            appDescription = string.IsNullOrEmpty(appDescription) ? "Thirdweb Game Demo" : appDescription,
+            appName = string.IsNullOrEmpty(appName) ? "thirdweb powered dApp" : appName,
+            appDescription = string.IsNullOrEmpty(appDescription) ? "thirdweb powered dApp" : appDescription,
             appIcons = appIcons.Length == 0 ? new string[] { "https://thirdweb.com/favicon.ico" } : appIcons,
             appUrl = string.IsNullOrEmpty(appUrl) ? "https://thirdweb.com" : appUrl,
             magicLinkApiKey = string.IsNullOrEmpty(magicLinkApiKey) ? null : magicLinkApiKey,
+            walletConnectProjectId = string.IsNullOrEmpty(walletConnectProjectId) ? "145769e410f16970a79ff77b2d89a1e0" : walletConnectProjectId
         };
 
         options.smartWalletConfig =

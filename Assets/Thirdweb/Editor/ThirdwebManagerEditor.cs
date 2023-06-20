@@ -17,6 +17,7 @@ public class ThirdwebManagerEditor : Editor
     private SerializedProperty forwarderDomainOverrideProperty;
     private SerializedProperty forwaderVersionOverrideProperty;
     private SerializedProperty magicLinkApiKeyProperty;
+    private SerializedProperty walletConnectProjectId;
     private SerializedProperty factoryAddressProperty;
     private SerializedProperty thirdwebApiKeyProperty;
     private SerializedProperty gaslessProperty;
@@ -49,6 +50,7 @@ public class ThirdwebManagerEditor : Editor
         forwarderDomainOverrideProperty = serializedObject.FindProperty("forwarderDomainOverride");
         forwaderVersionOverrideProperty = serializedObject.FindProperty("forwaderVersionOverride");
         magicLinkApiKeyProperty = serializedObject.FindProperty("magicLinkApiKey");
+        walletConnectProjectId = serializedObject.FindProperty("walletConnectProjectId");
         factoryAddressProperty = serializedObject.FindProperty("factoryAddress");
         thirdwebApiKeyProperty = serializedObject.FindProperty("thirdwebApiKey");
         gaslessProperty = serializedObject.FindProperty("gasless");
@@ -104,7 +106,7 @@ public class ThirdwebManagerEditor : Editor
         warningIcon = EditorGUIUtility.IconContent("console.warnicon.sml");
         bannerImage = Resources.Load<Texture2D>("EditorBanner");
 
-        sectionExpanded = new bool[6];
+        sectionExpanded = new bool[7];
         sectionExpanded[0] = true;
     }
 
@@ -227,10 +229,24 @@ public class ThirdwebManagerEditor : Editor
 
         EditorGUILayout.Space();
 
-        // Smart Wallet Options
+        // Wallet Connect Options
         sectionExpanded[5] = DrawSectionWithExpand(
-            "Smart Wallet Options",
+            "Wallet Connect Options",
             sectionExpanded[5],
+            () =>
+            {
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.PropertyField(walletConnectProjectId);
+                EditorGUILayout.EndVertical();
+            }
+        );
+
+        EditorGUILayout.Space();
+
+        // Smart Wallet Options
+        sectionExpanded[6] = DrawSectionWithExpand(
+            "Smart Wallet Options",
+            sectionExpanded[6],
             () =>
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
