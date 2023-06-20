@@ -99,6 +99,11 @@ MonoBehaviour:
   forwarderDomainOverride: 
   forwaderVersionOverride: 
   magicLinkApiKey: 
-  WalletConnectPrefab: {fileID: 3202619366221042887, guid: aed198bf91a75b94db61c4f472ea1579, type: 3}
-  MagicAuthPrefab: {fileID: 8849381089353801716, guid: 7ae6b24134cff80428397745fe5ade7b, type: 3}
+  factoryAddress: 
+  thirdwebApiKey: 
+  gasless: 0
+  bundlerUrl: 
+  paymasterUrl: 
+  entryPointAddress: 
+  WalletConnectPrefab: {fileID: 3202619366221042887, guid: c8c0099339b6ef54f87b1f049c5eb74f, type: 3}
   MetamaskPrefab: {fileID: 3503421935870801903, guid: f09c6d17b08bed346bec9906a7f17092, type: 3}

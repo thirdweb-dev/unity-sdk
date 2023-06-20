@@ -5,7 +5,6 @@ using System;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Events;
-using WalletConnectSharp.Core.Models;
 
 [Serializable]
 public struct WalletButton
@@ -71,14 +70,10 @@ public class Prefab_ConnectWallet : MonoBehaviour
     string address;
     WalletProvider _wallet;
     bool connecting;
-    WCSessionData wcSessionData;
 
     public string Address
     {
-        get
-        {
-            return address;
-        }
+        get { return address; }
     }
 
     // UI Initialization

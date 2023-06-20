@@ -8,8 +8,6 @@ using UnityEngine;
 using TokenERC20Contract = Thirdweb.Contracts.TokenERC20.ContractDefinition;
 using TokenERC721Contract = Thirdweb.Contracts.TokenERC721.ContractDefinition;
 using TokenERC1155Contract = Thirdweb.Contracts.TokenERC1155.ContractDefinition;
-using WalletConnectSharp.Unity;
-using WalletConnectSharp.NEthereum;
 using MinimalForwarder = Thirdweb.Contracts.Forwarder.ContractDefinition;
 using MetaMask.Unity;
 

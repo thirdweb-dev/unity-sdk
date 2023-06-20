@@ -2,8 +2,8 @@ using System.Threading.Tasks;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
-using WalletConnectSharp.NEthereum.Client;
-using WalletConnectSharp.Unity;
+using WalletConnectSharp.Sign;
+using WalletConnectSharp.Network.Models;
 
 namespace Thirdweb.Wallets
 {
@@ -12,6 +12,7 @@ namespace Thirdweb.Wallets
         private Web3 _web3;
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
+        private WalletConnectSignClient _dappClient;
 
         public ThirdwebWalletConnect()
         {
@@ -22,21 +23,29 @@ namespace Thirdweb.Wallets
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
         {
-            if (WalletConnect.Instance == null)
+            if (WalletConnectV2.Instance == null)
             {
                 GameObject.Instantiate(ThirdwebManager.Instance.WalletConnectPrefab);
                 await new WaitForSeconds(0.5f);
-                WalletConnect.Instance.Initialize();
             }
 
-            await WalletConnect.Instance.EnableWalletConnect();
-            _web3 = new Web3(new WalletConnectClient(WalletConnect.Instance.Session));
-            return await GetAddress();
+            var address = await WalletConnectV2.Instance.Connect();
+
+            // _web3 = new Web3(new WalletConnectClient(WalletConnect.Instance.Session));
+            return address;
         }
 
         public async Task Disconnect()
         {
-            await WalletConnect.Instance.DisableWalletConnect();
+            await _dappClient.Disconnect(
+                "User disconnected",
+                new ErrorResponse()
+                {
+                    Code = 0,
+                    Message = "User disconnected",
+                    Data = null
+                }
+            );
             _web3 = null;
         }
 
@@ -45,12 +54,13 @@ namespace Thirdweb.Wallets
             return null;
         }
 
-        public Task<string> GetAddress()
+        public async Task<string> GetAddress()
         {
-            var addy = WalletConnect.Instance?.Session?.Accounts[0];
+            var ethAccs = await _dappClient.Request<object[], string[]>("eth_accounts", new object[] { });
+            var addy = ethAccs[0];
             if (addy != null)
                 addy = addy.ToChecksumAddress();
-            return Task.FromResult(addy);
+            return addy;
         }
 
         public async Task<string> GetSignerAddress()
