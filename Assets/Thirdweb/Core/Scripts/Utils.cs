@@ -110,7 +110,7 @@ namespace Thirdweb
 
         public static string ReplaceIPFS(this string uri, string gateway = "https://gateway.ipfscdn.io/ipfs/")
         {
-            if (uri.StartsWith("ipfs://"))
+            if (!string.IsNullOrEmpty(uri) && uri.StartsWith("ipfs://"))
                 return uri.Replace("ipfs://", gateway);
             else
                 return uri;
