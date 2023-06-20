@@ -116,7 +116,7 @@ namespace Thirdweb
                 List<NFT> ownedNfts = new List<NFT>();
                 for (int i = 0; i < totalCount; i++)
                 {
-                    BigInteger ownedBalance = BigInteger.Parse(await Balance(i.ToString()));
+                    BigInteger ownedBalance = BigInteger.Parse(await Balanceof(owner, i.ToString()));
                     if (ownedBalance == 0)
                     {
                         continue;
