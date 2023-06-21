@@ -188,7 +188,7 @@ namespace Thirdweb.Contracts.DropERC20.ContractDefinition
         public virtual string Delegatee { get; set; }
 
         [Parameter("uint256", "nonce", 2)]
-        public virtual BigInteger Nonce { get; set; }
+        public new virtual BigInteger Nonce { get; set; }
 
         [Parameter("uint256", "expiry", 3)]
         public virtual BigInteger Expiry { get; set; }
