@@ -36,23 +36,23 @@ namespace Thirdweb
             {
                 throw new UnityException("This functionality is not yet available on your current platform.");
 
-                var deploymentMessage = new DropERC721Deployment();
-                var deploymentHandler = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetContractDeploymentHandler<DropERC721Deployment>();
-                var deploymentReceipt = await deploymentHandler.SendRequestAndWaitForReceiptAsync(deploymentMessage);
-                DropERC721Service dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.session.Web3, deploymentReceipt.ContractAddress);
-                var initializeReceipt = await dropERC721Service.InitializeRequestAndWaitForReceiptAsync(
-                    defaultAdmin: await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
-                    name: metadata.name,
-                    symbol: metadata.symbol,
-                    contractURI: null,
-                    trustedForwarders: metadata.trusted_forwarders.ToList(),
-                    saleRecipient: metadata.fee_recipient,
-                    royaltyRecipient: metadata.primary_sale_recipient,
-                    royaltyBps: metadata.seller_fee_basis_points,
-                    platformFeeBps: metadata.platform_fee_basis_points,
-                    platformFeeRecipient: metadata.platform_fee_recipient
-                );
-                return deploymentReceipt.ContractAddress;
+                // var deploymentMessage = new DropERC721Deployment();
+                // var deploymentHandler = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetContractDeploymentHandler<DropERC721Deployment>();
+                // var deploymentReceipt = await deploymentHandler.SendRequestAndWaitForReceiptAsync(deploymentMessage);
+                // DropERC721Service dropERC721Service = new DropERC721Service(ThirdwebManager.Instance.SDK.session.Web3, deploymentReceipt.ContractAddress);
+                // var initializeReceipt = await dropERC721Service.InitializeRequestAndWaitForReceiptAsync(
+                //     defaultAdmin: await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                //     name: metadata.name,
+                //     symbol: metadata.symbol,
+                //     contractURI: null,
+                //     trustedForwarders: metadata.trusted_forwarders.ToList(),
+                //     saleRecipient: metadata.fee_recipient,
+                //     royaltyRecipient: metadata.primary_sale_recipient,
+                //     royaltyBps: metadata.seller_fee_basis_points,
+                //     platformFeeBps: metadata.platform_fee_basis_points,
+                //     platformFeeRecipient: metadata.platform_fee_recipient
+                // );
+                // return deploymentReceipt.ContractAddress;
             }
         }
 
