@@ -5,6 +5,7 @@ using System;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using System.Numerics;
 
 [Serializable]
 public struct WalletButton
