@@ -38,6 +38,8 @@ public class ThirdwebManagerEditor : Editor
     private GUIContent warningIcon;
     private Texture2D bannerImage;
 
+    private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState";
+
     private void OnEnable()
     {
         chainProperty = serializedObject.FindProperty("chain");
@@ -110,8 +112,12 @@ public class ThirdwebManagerEditor : Editor
         warningIcon = EditorGUIUtility.IconContent("console.warnicon.sml");
         bannerImage = Resources.Load<Texture2D>("EditorBanner");
 
-        sectionExpanded = new bool[8];
-        sectionExpanded[0] = true;
+        sectionExpanded = GetExpandedState();
+    }
+
+    private void OnDisable()
+    {
+        SetExpandedState(sectionExpanded);
     }
 
     public override void OnInspectorGUI()
@@ -334,23 +340,6 @@ public class ThirdwebManagerEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
-    private void DrawResetButton(System.Action resetAction)
-    {
-        GUIStyle buttonStyle = new GUIStyle(EditorStyles.miniButtonRight);
-        const float buttonWidth = 60f;
-
-        GUILayout.Space(5);
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-
-        if (GUILayout.Button("Reset", buttonStyle, GUILayout.Width(buttonWidth)))
-        {
-            resetAction?.Invoke();
-        }
-
-        GUILayout.EndHorizontal();
-    }
-
     private void DrawSectionWithoutExpand(string title, System.Action drawContent)
     {
         GUIStyle sectionTitleStyle = new GUIStyle(EditorStyles.label)
@@ -399,5 +388,32 @@ public class ThirdwebManagerEditor : Editor
         EditorGUILayout.EndVertical();
 
         return expanded;
+    }
+
+    private bool[] GetExpandedState()
+    {
+        string expandedState = EditorPrefs.GetString(ExpandedStateKey, string.Empty);
+        if (!string.IsNullOrEmpty(expandedState))
+        {
+            string[] stateArray = expandedState.Split(',');
+            bool[] expanded = new bool[stateArray.Length];
+            for (int i = 0; i < stateArray.Length; i++)
+            {
+                bool.TryParse(stateArray[i], out expanded[i]);
+            }
+            return expanded;
+        }
+        else
+        {
+            var states = new bool[8];
+            states[0] = true;
+            return states;
+        }
+    }
+
+    private void SetExpandedState(bool[] expandedState)
+    {
+        string stateString = string.Join(",", expandedState);
+        EditorPrefs.SetString(ExpandedStateKey, stateString);
     }
 }
