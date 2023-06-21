@@ -529,6 +529,7 @@ namespace Thirdweb
         Injected,
         MagicLink,
         LocalWallet,
-        SmartWallet
+        SmartWallet,
+        Paper
     }
 }

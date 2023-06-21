@@ -39,13 +39,13 @@ public class WalletConnectV2 : MonoBehaviour
         }
     }
 
-    public async Task<string> Connect()
+    public async Task<string> Connect(string walletConnectProjectId)
     {
         WalletConnectCanvas.SetActive(true);
 
         _dappOptions = new SignClientOptions()
         {
-            ProjectId = ThirdwebManager.Instance.SDK.session.Options.wallet?.walletConnectProjectId,
+            ProjectId = walletConnectProjectId,
             Metadata = new Metadata()
             {
                 Description = ThirdwebManager.Instance.SDK.session.Options.wallet?.appDescription,

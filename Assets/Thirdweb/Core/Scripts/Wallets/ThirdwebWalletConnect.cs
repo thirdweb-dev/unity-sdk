@@ -13,12 +13,14 @@ namespace Thirdweb.Wallets
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
         private WalletConnectSignClient _dappClient;
+        private string _walletConnectProjectId;
 
-        public ThirdwebWalletConnect()
+        public ThirdwebWalletConnect(string walletConnectProjectId)
         {
             _web3 = null;
             _provider = WalletProvider.WalletConnect;
             _signerProvider = WalletProvider.WalletConnect;
+            _walletConnectProjectId = walletConnectProjectId;
         }
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
@@ -29,7 +31,7 @@ namespace Thirdweb.Wallets
                 await new WaitForSeconds(0.5f);
             }
 
-            var address = await WalletConnectV2.Instance.Connect();
+            var address = await WalletConnectV2.Instance.Connect(_walletConnectProjectId);
 
             // _web3 = new Web3(new WalletConnectClient(WalletConnect.Instance.Session));
             return address;

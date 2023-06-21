@@ -52,12 +52,19 @@ namespace Thirdweb
                     ActiveWallet = new ThirdwebLocalWallet();
                     break;
                 case WalletProvider.WalletConnect:
-                    ActiveWallet = new ThirdwebWalletConnect();
+                    if (Options.wallet == null || string.IsNullOrEmpty(Options.wallet?.walletConnectProjectId))
+                        throw new UnityException("Wallet connect project id is required for wallet connect connection method!");
+                    ActiveWallet = new ThirdwebWalletConnect(Options.wallet?.walletConnectProjectId);
                     break;
                 case WalletProvider.MagicLink:
                     if (Options.wallet == null || string.IsNullOrEmpty(Options.wallet?.magicLinkApiKey))
                         throw new UnityException("Magic link api key is required for magic link connection method!");
                     ActiveWallet = new ThirdwebMagicLink(Options.wallet?.magicLinkApiKey);
+                    break;
+                case WalletProvider.Paper:
+                    if (Options.wallet == null || string.IsNullOrEmpty(Options.wallet?.paperClientId))
+                        throw new UnityException("Paper client id is required for paper connection method!");
+                    ActiveWallet = new ThirdwebPaper(Options.wallet?.paperClientId);
                     break;
                 case WalletProvider.Metamask:
                     ActiveWallet = new ThirdwebMetamask();

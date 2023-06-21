@@ -75,6 +75,9 @@ public class ThirdwebManager : MonoBehaviour
     [Tooltip("WalletConnect Project ID (https://cloud.walletconnect.com/app)")]
     public string walletConnectProjectId = null;
 
+    [Tooltip("Paper Client ID (https://withpaper.com/dashboard)")]
+    public string paperClientId = null;
+
     [Tooltip("Factory Contract Address")]
     public string factoryAddress;
 
@@ -98,6 +101,9 @@ public class ThirdwebManager : MonoBehaviour
 
     [Tooltip("Instantiates the Metamask SDK for Native platforms.")]
     public GameObject MetamaskPrefab;
+
+    [Tooltip("Instantiates the Paper SDK for Native platforms.")]
+    public GameObject PaperPrefab;
 
     public ThirdwebSDK SDK;
 
@@ -186,7 +192,8 @@ public class ThirdwebManager : MonoBehaviour
             appIcons = appIcons.Length == 0 ? new string[] { "https://thirdweb.com/favicon.ico" } : appIcons,
             appUrl = string.IsNullOrEmpty(appUrl) ? "https://thirdweb.com" : appUrl,
             magicLinkApiKey = string.IsNullOrEmpty(magicLinkApiKey) ? null : magicLinkApiKey,
-            walletConnectProjectId = string.IsNullOrEmpty(walletConnectProjectId) ? "145769e410f16970a79ff77b2d89a1e0" : walletConnectProjectId
+            walletConnectProjectId = string.IsNullOrEmpty(walletConnectProjectId) ? "145769e410f16970a79ff77b2d89a1e0" : walletConnectProjectId,
+            paperClientId = string.IsNullOrEmpty(paperClientId) ? null : paperClientId,
         };
 
         options.smartWalletConfig =

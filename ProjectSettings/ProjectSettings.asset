@@ -834,7 +834,7 @@ PlayerSettings:
   gcWBarrierValidation: 0
   apiCompatibilityLevelPerPlatform:
     Server: 6
-    Standalone: 6
+    Standalone: 3
     WebGL: 6
   m_RenderingPath: 1
   m_MobileRenderingPath: 1

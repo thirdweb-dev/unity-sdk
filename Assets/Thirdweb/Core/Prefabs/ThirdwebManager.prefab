@@ -100,6 +100,7 @@ MonoBehaviour:
   forwaderVersionOverride: 
   magicLinkApiKey: 
   walletConnectProjectId: 
+  paperClientId: 
   factoryAddress: 
   thirdwebApiKey: 
   gasless: 0
@@ -108,3 +109,4 @@ MonoBehaviour:
   entryPointAddress: 
   WalletConnectPrefab: {fileID: 3202619366221042887, guid: c8c0099339b6ef54f87b1f049c5eb74f, type: 3}
   MetamaskPrefab: {fileID: 3503421935870801903, guid: f09c6d17b08bed346bec9906a7f17092, type: 3}
+  PaperPrefab: {fileID: 3202619366221042887, guid: e7531d4af8ba7a246bfd6b63c9a1e2a3, type: 3}

@@ -17,7 +17,8 @@ public class ThirdwebManagerEditor : Editor
     private SerializedProperty forwarderDomainOverrideProperty;
     private SerializedProperty forwaderVersionOverrideProperty;
     private SerializedProperty magicLinkApiKeyProperty;
-    private SerializedProperty walletConnectProjectId;
+    private SerializedProperty walletConnectProjectIdProperty;
+    private SerializedProperty paperClientIdProperty;
     private SerializedProperty factoryAddressProperty;
     private SerializedProperty thirdwebApiKeyProperty;
     private SerializedProperty gaslessProperty;
@@ -26,6 +27,7 @@ public class ThirdwebManagerEditor : Editor
     private SerializedProperty entryPointAddressProperty;
     private SerializedProperty WalletConnectPrefabProperty;
     private SerializedProperty MetamaskPrefabProperty;
+    private SerializedProperty PaperPrefabProperty;
 
     private ReorderableList supportedChainsList;
     private bool[] sectionExpanded;
@@ -50,7 +52,8 @@ public class ThirdwebManagerEditor : Editor
         forwarderDomainOverrideProperty = serializedObject.FindProperty("forwarderDomainOverride");
         forwaderVersionOverrideProperty = serializedObject.FindProperty("forwaderVersionOverride");
         magicLinkApiKeyProperty = serializedObject.FindProperty("magicLinkApiKey");
-        walletConnectProjectId = serializedObject.FindProperty("walletConnectProjectId");
+        walletConnectProjectIdProperty = serializedObject.FindProperty("walletConnectProjectId");
+        paperClientIdProperty = serializedObject.FindProperty("paperClientId");
         factoryAddressProperty = serializedObject.FindProperty("factoryAddress");
         thirdwebApiKeyProperty = serializedObject.FindProperty("thirdwebApiKey");
         gaslessProperty = serializedObject.FindProperty("gasless");
@@ -59,6 +62,7 @@ public class ThirdwebManagerEditor : Editor
         entryPointAddressProperty = serializedObject.FindProperty("entryPointAddress");
         WalletConnectPrefabProperty = serializedObject.FindProperty("WalletConnectPrefab");
         MetamaskPrefabProperty = serializedObject.FindProperty("MetamaskPrefab");
+        PaperPrefabProperty = serializedObject.FindProperty("PaperPrefab");
 
         supportedChainsList = new ReorderableList(serializedObject, supportedChainsProperty, true, true, true, true);
         supportedChainsList.drawHeaderCallback = rect =>
@@ -106,7 +110,7 @@ public class ThirdwebManagerEditor : Editor
         warningIcon = EditorGUIUtility.IconContent("console.warnicon.sml");
         bannerImage = Resources.Load<Texture2D>("EditorBanner");
 
-        sectionExpanded = new bool[7];
+        sectionExpanded = new bool[8];
         sectionExpanded[0] = true;
     }
 
@@ -236,7 +240,21 @@ public class ThirdwebManagerEditor : Editor
             () =>
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                EditorGUILayout.PropertyField(walletConnectProjectId);
+                EditorGUILayout.PropertyField(walletConnectProjectIdProperty);
+                EditorGUILayout.EndVertical();
+            }
+        );
+
+        EditorGUILayout.Space();
+
+        // Paper Options
+        sectionExpanded[6] = DrawSectionWithExpand(
+            "Paper Options",
+            sectionExpanded[6],
+            () =>
+            {
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.PropertyField(paperClientIdProperty);
                 EditorGUILayout.EndVertical();
             }
         );
@@ -244,9 +262,9 @@ public class ThirdwebManagerEditor : Editor
         EditorGUILayout.Space();
 
         // Smart Wallet Options
-        sectionExpanded[6] = DrawSectionWithExpand(
+        sectionExpanded[7] = DrawSectionWithExpand(
             "Smart Wallet Options",
-            sectionExpanded[6],
+            sectionExpanded[7],
             () =>
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -306,6 +324,7 @@ public class ThirdwebManagerEditor : Editor
                 {
                     EditorGUILayout.PropertyField(WalletConnectPrefabProperty);
                     EditorGUILayout.PropertyField(MetamaskPrefabProperty);
+                    EditorGUILayout.PropertyField(PaperPrefabProperty);
                 }
 
                 EditorGUILayout.EndVertical();
