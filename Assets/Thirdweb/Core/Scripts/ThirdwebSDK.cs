@@ -120,15 +120,16 @@ namespace Thirdweb
             this.deployer = new Deployer();
             this.storage = new Storage(options.storage);
 
+            string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3" : chainOrRPC;
+
             if (Utils.IsWebGLBuild())
             {
-                Bridge.Initialize(chainOrRPC, options);
+                Bridge.Initialize(rpc, options);
             }
             else
             {
                 if (chainId == null)
                     throw new UnityException("Chain ID override required for native platforms!");
-                string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3" : chainOrRPC;
                 this.session = new ThirdwebSession(options, chainId.Value, rpc);
             }
         }
