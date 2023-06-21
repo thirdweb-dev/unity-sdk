@@ -25,7 +25,7 @@ namespace Thirdweb.Wallets
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
         {
-            _magic = new Magic(_magicLinkApiKey, new CustomNodeConfiguration(rpc, walletConnection.chainId));
+            _magic = new Magic(_magicLinkApiKey, new CustomNodeConfiguration(rpc, (int)walletConnection.chainId));
 
             await _magic.Auth.LoginWithEmailOtp(walletConnection.email);
             _web3 = new Web3(_magic.Provider);

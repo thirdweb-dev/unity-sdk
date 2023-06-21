@@ -94,7 +94,7 @@ namespace Thirdweb
             ThirdwebConnect(
                 taskId, 
                 walletConnection.provider.ToString().Substring(0,1).ToLower() + walletConnection.provider.ToString().Substring(1), 
-                walletConnection.chainId, string.IsNullOrEmpty(walletConnection.password) ? Utils.GetDeviceIdentifier() : walletConnection.password, 
+                (int)walletConnection.chainId, string.IsNullOrEmpty(walletConnection.password) ? Utils.GetDeviceIdentifier() : walletConnection.password, 
                 walletConnection.email, 
                 walletConnection.personalWallet.ToString().Substring(0,1).ToLower() + walletConnection.personalWallet.ToString().Substring(1), 
                 jsCallback

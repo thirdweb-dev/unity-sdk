@@ -288,7 +288,7 @@ namespace Thirdweb
             }
         }
 
-        public static Account UnlockOrGenerateLocalAccount(int chainId, string password = null, string privateKey = null)
+        public static Account UnlockOrGenerateLocalAccount(BigInteger chainId, string password = null, string privateKey = null)
         {
             password = string.IsNullOrEmpty(password) ? GetDeviceIdentifier() : password;
 
@@ -380,43 +380,44 @@ namespace Thirdweb
             return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address);
         }
 
-        public static string GetNativeTokenWrapper(int chainId)
+        public static string GetNativeTokenWrapper(BigInteger chainId)
         {
-            switch (chainId)
+            string id = chainId.ToString();
+            switch (id)
             {
-                case 1:
+                case "1":
                     return "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
-                case 4:
+                case "4":
                     return "0xc778417E063141139Fce010982780140Aa0cD5Ab"; // rinkeby
-                case 5:
+                case "5":
                     return "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"; // goerli
-                case 137:
+                case "137":
                     return "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
-                case 80001:
+                case "80001":
                     return "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889";
-                case 43114:
+                case "43114":
                     return "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7";
-                case 43113:
+                case "43113":
                     return "0xd00ae08403B9bbb9124bB305C09058E32C39A48c";
-                case 250:
+                case "250":
                     return "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83";
-                case 4002:
+                case "4002":
                     return "0xf1277d1Ed8AD466beddF92ef448A132661956621";
-                case 10:
+                case "10":
                     return "0x4200000000000000000000000000000000000006"; // optimism
-                case 69:
+                case "69":
                     return "0xbC6F6b680bc61e30dB47721c6D1c5cde19C1300d"; // optimism kovan
-                case 420:
+                case "420":
                     return "0x4200000000000000000000000000000000000006"; // optimism goerli
-                case 42161:
+                case "42161":
                     return "0x82af49447d8a07e3bd95bd0d56f35241523fbab1"; // arbitrum
-                case 421611:
+                case "421611":
                     return "0xEBbc3452Cc911591e4F18f3b36727Df45d6bd1f9"; // arbitrum rinkeby
-                case 421613:
+                case "421613":
                     return "0xe39Ab88f8A4777030A534146A9Ca3B52bd5D43A3"; // arbitrum goerli
-                case 56:
+                case "56":
                     return "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"; // binance mainnet
-                case 97:
+                case "97":
                     return "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"; // binance testnet
                 default:
                     throw new UnityException("Native Token Wrapper Unavailable For This Chain!");

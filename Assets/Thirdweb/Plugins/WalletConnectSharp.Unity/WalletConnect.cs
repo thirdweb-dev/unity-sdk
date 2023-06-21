@@ -82,7 +82,7 @@ namespace WalletConnectSharp.Unity
         public async Task<WCSessionData> EnableWalletConnect()
         {
             SetMode(true);
-            var sessionData = await Connect(ThirdwebManager.Instance.SDK.session.ChainId);
+            var sessionData = await Connect((int)ThirdwebManager.Instance.SDK.session.ChainId);
             SetMode(false);
             return sessionData;
         }
@@ -336,7 +336,7 @@ namespace WalletConnectSharp.Unity
             if (pauseStatus)
                 SaveSession();
             else if (PlayerPrefs.HasKey(SessionKey))
-                await Connect(ThirdwebManager.Instance.SDK.session.ChainId);
+                await Connect((int)ThirdwebManager.Instance.SDK.session.ChainId);
         }
 
         private void SaveSession()
