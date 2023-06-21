@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
 
 namespace Thirdweb
@@ -111,7 +112,7 @@ namespace Thirdweb
         /// </summary>
         /// <param name="chainOrRPC">The chain name or RPC url to connect to</param>
         /// <param name="options">Configuration options</param>
-        public ThirdwebSDK(string chainOrRPC, int chainId = -1, Options options = new Options())
+        public ThirdwebSDK(string chainOrRPC, BigInteger? chainId = null, Options options = new Options())
         {
             this.chainOrRPC = chainOrRPC;
             this.wallet = new Wallet();
@@ -124,10 +125,10 @@ namespace Thirdweb
             }
             else
             {
-                if (chainId == -1)
+                if (chainId == null)
                     throw new UnityException("Chain ID override required for native platforms!");
                 string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3" : chainOrRPC;
-                this.session = new ThirdwebSession(options, chainId, rpc);
+                this.session = new ThirdwebSession(options, chainId.Value, rpc);
             }
         }
 

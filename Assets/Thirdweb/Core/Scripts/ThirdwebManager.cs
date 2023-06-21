@@ -1,6 +1,7 @@
 using UnityEngine;
 using Thirdweb;
 using System.Collections.Generic;
+using System.Numerics;
 
 [System.Serializable]
 public class ChainData
@@ -120,18 +121,18 @@ public class ThirdwebManager : MonoBehaviour
 
         // Inspector chain data dictionary.
 
-        ChainData currentChain = GetChainData(chain);
+        ChainData currentChain = supportedChains.Find(x => x.identifier == chain);
 
         // Chain ID must be provided on native platforms.
 
-        int chainId = -1;
+        BigInteger chainId = -1;
 
         if (!Utils.IsWebGLBuild())
         {
             if (string.IsNullOrEmpty(currentChain.chainId))
                 throw new UnityException("You must provide a Chain ID on native platforms!");
 
-            if (!int.TryParse(currentChain.chainId, out chainId))
+            if (!BigInteger.TryParse(currentChain.chainId, out chainId))
                 throw new UnityException("The Chain ID must be a non-negative integer!");
         }
 
@@ -202,25 +203,5 @@ public class ThirdwebManager : MonoBehaviour
                 };
 
         SDK = new ThirdwebSDK(chainOrRPC, chainId, options);
-    }
-
-    public ChainData GetChainData(string chainIdentifier)
-    {
-        return supportedChains.Find(x => x.identifier == chainIdentifier);
-    }
-
-    public ChainData GetCurrentChainData()
-    {
-        return supportedChains.Find(x => x.identifier == chain);
-    }
-
-    public int GetCurrentChainID()
-    {
-        return int.Parse(GetCurrentChainData().chainId);
-    }
-
-    public string GetCurrentChainIdentifier()
-    {
-        return chain;
     }
 }

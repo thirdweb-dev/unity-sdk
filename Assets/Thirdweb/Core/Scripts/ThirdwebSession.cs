@@ -16,7 +16,7 @@ namespace Thirdweb
 
 
         public ThirdwebSDK.Options Options { get; private set; }
-        public int ChainId { get; private set; }
+        public BigInteger ChainId { get; private set; }
         public string RPC { get; private set; }
         public SiweMessageService SiweSession { get; private set; }
         public Web3 Web3 { get; private set; }
@@ -30,7 +30,7 @@ namespace Thirdweb
 
         #region Constructors
 
-        public ThirdwebSession(ThirdwebSDK.Options options, int chainId, string rpcUrl)
+        public ThirdwebSession(ThirdwebSDK.Options options, BigInteger chainId, string rpcUrl)
         {
             Options = options;
             ChainId = chainId;
@@ -159,7 +159,7 @@ namespace Thirdweb
             {
                 chainId = BigInteger.Parse(currentNetwork.chainId).ToHex(false, true) ?? BigInteger.Parse(ChainId.ToString()).ToHex(false, true),
                 blockExplorerUrls = explorerUrls.ToArray(),
-                chainName = currentNetwork.name ?? ThirdwebManager.Instance.GetCurrentChainIdentifier(),
+                chainName = currentNetwork.name ?? ThirdwebManager.Instance.chain,
                 iconUrls = new string[] { "ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt" },
                 nativeCurrency = new ThirdwebNativeCurrency()
                 {

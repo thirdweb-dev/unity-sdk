@@ -163,7 +163,9 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         try
         {
-            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(wallet, ThirdwebManager.Instance.GetCurrentChainID(), password, email, personalWallet));
+            ChainData currentChain = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.chain);
+
+            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(wallet, BigInteger.Parse(currentChain.chainId), password, email, personalWallet));
 
             if (wallet == WalletProvider.LocalWallet || (wallet == WalletProvider.SmartWallet && personalWallet == WalletProvider.LocalWallet))
             {
@@ -201,7 +203,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
             balanceText2.text = balanceText.text;
             walletAddressText.text = await Utils.GetENSName(address) ?? address.ShortenAddress();
             walletAddressText2.text = walletAddressText.text;
-            currentNetworkText.text = ThirdwebManager.Instance.GetCurrentChainIdentifier();
+            currentNetworkText.text = ThirdwebManager.Instance.chain;
             currentNetworkImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
             connectButton.SetActive(false);
             connectedButton.SetActive(true);
@@ -225,7 +227,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
         try
         {
             ThirdwebManager.Instance.chain = _chain;
-            await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(int.Parse(ThirdwebManager.Instance.GetCurrentChainData().chainId));
+            ChainData currentChain = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.chain);
+            await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(int.Parse(currentChain.chainId));
             OnConnected();
             OnSwitchNetworkCallback?.Invoke();
             Debug.Log($"Switched Network Successfully: {_chain}");
