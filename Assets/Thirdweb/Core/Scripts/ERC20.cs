@@ -14,6 +14,11 @@ namespace Thirdweb
     public class ERC20 : Routable
     {
         /// <summary>
+        ///   The SDK that created this contract interface.
+        /// </summary>
+        public ThirdwebSDK SDK;
+        
+        /// <summary>
         /// Handle signature minting functionality
         /// </summary>
         public ERC20Signature signature;
@@ -28,11 +33,12 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
-        public ERC20(string parentRoute, string contractAddress)
+        public ERC20(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "erc20"))
         {
+            this.SDK = sdk;
             this.contractAddress = contractAddress;
-            this.signature = new ERC20Signature(baseRoute, contractAddress);
+            this.signature = new ERC20Signature(sdk, baseRoute, contractAddress);
             this.claimConditions = new ERC20ClaimConditions(baseRoute, contractAddress);
         }
 
@@ -74,7 +80,7 @@ namespace Thirdweb
             }
             else
             {
-                return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
+                return await BalanceOf(await SDK.wallet.GetAddress());
             }
         }
 
@@ -109,7 +115,7 @@ namespace Thirdweb
             }
             else
             {
-                return await AllowanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), spender);
+                return await AllowanceOf(await SDK.wallet.GetAddress(), spender);
             }
         }
 
@@ -229,7 +235,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ClaimTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), amount);
+                return await ClaimTo(await SDK.wallet.GetAddress(), amount);
             }
         }
 
@@ -282,7 +288,7 @@ namespace Thirdweb
             }
             else
             {
-                return await MintTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), amount);
+                return await MintTo(await SDK.wallet.GetAddress(), amount);
             }
         }
 
@@ -451,11 +457,17 @@ namespace Thirdweb
         private string contractAddress;
 
         /// <summary>
+        ///   The SDK this signature was created with.
+        /// </summary>
+        public ThirdwebSDK SDK { get; private set; }
+        
+        /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string parentRoute, string contractAddress)
+        public ERC20Signature(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "signature"))
         {
+            this.SDK = sdk;
             this.contractAddress = contractAddress;
         }
 
@@ -493,7 +505,7 @@ namespace Thirdweb
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(
                     name.ReturnValue1,
                     "1",
-                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    await SDK.wallet.GetChainId(),
                     contractAddress,
                     req,
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride

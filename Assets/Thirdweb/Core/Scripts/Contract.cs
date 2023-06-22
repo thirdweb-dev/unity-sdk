@@ -69,7 +69,7 @@ namespace Thirdweb
             this.chain = chain;
             this.address = address;
             this.abi = abi;
-            this.ERC20 = new ERC20(baseRoute, address);
+            this.ERC20 = new ERC20(SDK, baseRoute, address);
             this.ERC721 = new ERC721(SDK, baseRoute, address);
             this.ERC1155 = new ERC1155(SDK, baseRoute, address);
             this.marketplace = new Marketplace(baseRoute, address);
