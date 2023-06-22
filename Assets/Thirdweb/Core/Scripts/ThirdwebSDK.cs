@@ -114,7 +114,7 @@ namespace Thirdweb
         public ThirdwebSDK(string chainOrRPC, BigInteger? chainId = null, Options options = new Options())
         {
             this.chainOrRPC = chainOrRPC;
-            this.wallet = new Wallet();
+            this.wallet = new Wallet(this);
             this.deployer = new Deployer();
             this.storage = new Storage(options.storage);
 

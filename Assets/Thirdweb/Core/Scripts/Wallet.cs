@@ -19,8 +19,13 @@ namespace Thirdweb
     /// </summary>
     public class Wallet : Routable
     {
-        public Wallet()
-            : base($"sdk{subSeparator}wallet") { }
+        private ThirdwebSDK sdk;
+
+        public Wallet(ThirdwebSDK sdk)
+            : base($"sdk{subSeparator}wallet")
+        {
+            this.sdk = sdk;
+        }
 
         /// <summary>
         /// Connects a user's wallet via a given wallet provider.
@@ -35,7 +40,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection);
+                return await sdk.session.Connect(walletConnection);
             }
         }
 
@@ -51,7 +56,7 @@ namespace Thirdweb
             }
             else
             {
-                await ThirdwebManager.Instance.SDK.session.Disconnect();
+                await sdk.session.Disconnect();
             }
         }
 
@@ -70,7 +75,7 @@ namespace Thirdweb
             }
             else
             {
-                var localAccount = ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount();
+                var localAccount = sdk.session.ActiveWallet.GetLocalAccount();
                 if (localAccount == null)
                     throw new Exception("No local account found");
                 return Utils.EncryptAndGenerateKeyStore(new EthECKey(localAccount.PrivateKey), password);
@@ -90,7 +95,7 @@ namespace Thirdweb
             }
             else
             {
-                var siwe = ThirdwebManager.Instance.SDK.session.SiweSession;
+                var siwe = sdk.session.SiweSession;
                 var siweMsg = new SiweMessage()
                 {
                     Resources = new List<string>(),
@@ -148,7 +153,7 @@ namespace Thirdweb
             }
             else
             {
-                var siwe = ThirdwebManager.Instance.SDK.session.SiweSession;
+                var siwe = sdk.session.SiweSession;
                 var siweMessage = new SiweMessage()
                 {
                     Domain = payload.payload.domain,
@@ -216,7 +221,7 @@ namespace Thirdweb
 
                 if (currencyAddress != Utils.NativeTokenAddress)
                 {
-                    Contract contract = ThirdwebManager.Instance.SDK.GetContract(currencyAddress);
+                    Contract contract = sdk.GetContract(currencyAddress);
                     return await contract.ERC20.Balance();
                 }
                 else
@@ -225,13 +230,13 @@ namespace Thirdweb
                     string address = await GetAddress();
                     try
                     {
-                        balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
+                        balance = await sdk.session.Web3.Eth.GetBalance.SendRequestAsync(address);
                     }
                     catch
                     {
-                        balance = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetBalance.SendRequestAsync(address);
+                        balance = await new Web3(sdk.session.RPC).Eth.GetBalance.SendRequestAsync(address);
                     }
-                    var nativeCurrency = ThirdwebManager.Instance.SDK.session.CurrentChainData.nativeCurrency;
+                    var nativeCurrency = sdk.session.CurrentChainData.nativeCurrency;
                     return new CurrencyValue(nativeCurrency.name, nativeCurrency.symbol, nativeCurrency.decimals.ToString(), balance.Value.ToString(), balance.Value.ToString().ToEth());
                 }
             }
@@ -252,7 +257,7 @@ namespace Thirdweb
                 if (!await IsConnected())
                     throw new Exception("No account connected!");
 
-                return await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetAddress();
+                return await sdk.session.ActiveWallet.GetAddress();
             }
         }
 
@@ -271,7 +276,7 @@ namespace Thirdweb
                 if (!await IsConnected())
                     throw new Exception("No account connected!");
 
-                return await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerAddress();
+                return await sdk.session.ActiveWallet.GetSignerAddress();
             }
         }
 
@@ -289,7 +294,7 @@ namespace Thirdweb
             {
                 try
                 {
-                    return await ThirdwebManager.Instance.SDK.session.ActiveWallet.IsConnected();
+                    return await sdk.session.ActiveWallet.IsConnected();
                 }
                 catch
                 {
@@ -310,7 +315,7 @@ namespace Thirdweb
             }
             else
             {
-                var hexChainId = await ThirdwebManager.Instance.SDK.session.Request<string>("eth_chainId");
+                var hexChainId = await sdk.session.Request<string>("eth_chainId");
                 return (int)hexChainId.HexToBigInteger(false);
             }
         }
@@ -349,12 +354,12 @@ namespace Thirdweb
             {
                 if (currencyAddress != Utils.NativeTokenAddress)
                 {
-                    Contract contract = ThirdwebManager.Instance.SDK.GetContract(currencyAddress);
+                    Contract contract = sdk.GetContract(currencyAddress);
                     return await contract.ERC20.Transfer(to, amount);
                 }
                 else
                 {
-                    var receipt = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetEtherTransferService().TransferEtherAndWaitForReceiptAsync(to, decimal.Parse(amount));
+                    var receipt = await sdk.session.Web3.Eth.GetEtherTransferService().TransferEtherAndWaitForReceiptAsync(to, decimal.Parse(amount));
                     return receipt.ToTransactionResult();
                 }
             }
@@ -373,7 +378,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
+                return await sdk.session.Request<string>("personal_sign", message, await GetSignerAddress());
             }
         }
 
@@ -388,10 +393,10 @@ namespace Thirdweb
         public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
             where TDomain : IDomain
         {
-            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet)
+            if (sdk.session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet)
             {
                 var signer = new Eip712TypedDataSigner();
-                var key = new EthECKey(ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount().PrivateKey);
+                var key = new EthECKey(sdk.session.ActiveWallet.GetLocalAccount().PrivateKey);
                 return signer.SignTypedDataV4(data, typedData, key);
             }
             else
@@ -413,7 +418,7 @@ namespace Thirdweb
                     property.Value = property.Value.ToString();
 
                 string safeJson = jsonObject.ToString();
-                return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTypedData_v4", await GetSignerAddress(), safeJson);
+                return await sdk.session.Request<string>("eth_signTypedData_v4", await GetSignerAddress(), safeJson);
             }
         }
 
@@ -458,7 +463,7 @@ namespace Thirdweb
                     new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
                     new Nethereum.Hex.HexTypes.HexBigInteger(transactionRequest.value)
                 );
-                var receipt = await ThirdwebManager.Instance.SDK.session.Web3.Eth.TransactionManager.SendTransactionAndWaitForReceiptAsync(input);
+                var receipt = await sdk.session.Web3.Eth.TransactionManager.SendTransactionAndWaitForReceiptAsync(input);
                 return receipt.ToTransactionResult();
             }
         }
