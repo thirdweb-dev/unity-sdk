@@ -105,6 +105,8 @@ namespace Thirdweb
         public Storage storage;
 
         public ThirdwebSession session;
+        
+        public TransactionManager manager { get; private set; }
 
         /// <summary>
         /// Create an instance of the thirdweb SDK. Requires a webGL browser context.
@@ -115,8 +117,9 @@ namespace Thirdweb
         {
             this.chainOrRPC = chainOrRPC;
             this.wallet = new Wallet(this);
-            this.deployer = new Deployer();
+            this.deployer = new Deployer(this);
             this.storage = new Storage(options.storage);
+            this.manager = new TransactionManager(this);
 
             if (Utils.IsWebGLBuild())
             {

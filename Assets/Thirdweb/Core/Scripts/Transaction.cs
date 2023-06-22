@@ -192,7 +192,7 @@ namespace Thirdweb
         /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetArgs(params object[] args)
         {
-            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            var web3 = new Web3(contract.SDK.session.RPC);
             var function = web3.Eth.GetContract(contract.abi, contract.address).GetFunction(Input.To);
             Input.Data = function.GetData(args);
             return this;
@@ -204,7 +204,7 @@ namespace Thirdweb
         /// <returns>The gas price for the transaction as a <see cref="BigInteger"/>.</returns>
         public async Task<BigInteger> GetGasPrice()
         {
-            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            var web3 = new Web3(contract.SDK.session.RPC);
             var gasPrice = await web3.Eth.GasPrice.SendRequestAsync();
             var maxGasPrice = BigInteger.Parse("300000000000"); // 300 Gwei in Wei
             var extraTip = gasPrice.Value / 10; // +10%
@@ -218,7 +218,7 @@ namespace Thirdweb
         /// <returns>The estimated gas limit for the transaction as a <see cref="BigInteger"/>.</returns>
         public async Task<BigInteger> EstimateGasLimit()
         {
-            var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            var gasEstimator = new Web3(contract.SDK.session.RPC);
             var gas = await gasEstimator.Eth.Transactions.EstimateGas.SendRequestAsync(Input);
             return gas.Value;
         }
@@ -255,7 +255,7 @@ namespace Thirdweb
         /// <returns>The result of the transaction simulation as a string.</returns>
         public async Task<string> Simulate()
         {
-            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            var web3 = new Web3(contract.SDK.session.RPC);
             return await web3.Eth.Transactions.Call.SendRequestAsync(Input);
         }
 
@@ -272,7 +272,7 @@ namespace Thirdweb
             if (Input.Value == null)
                 Input.Value = new HexBigInteger(0);
 
-            bool isGaslessSetup = ThirdwebManager.Instance.SDK.session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin.HasValue;
+            bool isGaslessSetup = contract.SDK.session.Options.gasless.HasValue && contract.SDK.session.Options.gasless.Value.openzeppelin.HasValue;
             if (gasless != null && gasless.Value && !isGaslessSetup)
                 throw new UnityException("Gasless transactions are not enabled. Please enable them in the SDK options.");
 
@@ -291,7 +291,7 @@ namespace Thirdweb
         public async Task<TransactionResult> SendAndWaitForTransactionResult(bool? gasless = null)
         {
             var txHash = await Send(gasless);
-            return await WaitForTransactionResult(txHash);
+            return await WaitForTransactionResult(contract, txHash);
         }
 
         /// <summary>
@@ -299,9 +299,9 @@ namespace Thirdweb
         /// </summary>
         /// <param name="txHash">The transaction hash to wait for.</param>
         /// <returns>The transaction result as a <see cref="TransactionResult"/> object.</returns>
-        public static async Task<TransactionResult> WaitForTransactionResult(string txHash)
+        public static async Task<TransactionResult> WaitForTransactionResult(Contract contract, string txHash)
         {
-            var receiptPoller = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            var receiptPoller = new Web3(contract.SDK.session.RPC);
             var receipt = await receiptPoller.TransactionReceiptPolling.PollForReceiptAsync(txHash);
             return receipt.ToTransactionResult();
         }
@@ -317,13 +317,13 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.LocalWallet)
+                if (contract.SDK.session.ActiveWallet.GetProvider() == WalletProvider.LocalWallet)
                 {
-                    return await ThirdwebManager.Instance.SDK.session.Web3.Eth.TransactionManager.SendTransactionAsync(Input);
+                    return await contract.SDK.session.Web3.Eth.TransactionManager.SendTransactionAsync(Input);
                 }
                 else
                 {
-                    var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.session.Web3.Client);
+                    var ethSendTx = new EthSendTransaction(contract.SDK.session.Web3.Client);
                     return await ethSendTx.SendRequestAsync(Input);
                 }
             }
@@ -337,13 +337,13 @@ namespace Thirdweb
             }
             else
             {
-                string relayerUrl = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.relayerUrl;
-                string forwarderAddress = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.relayerForwarderAddress;
-                string forwarderDomain = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.domainName;
-                string forwarderVersion = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.domainVersion;
+                string relayerUrl = contract.SDK.session.Options.gasless.Value.openzeppelin?.relayerUrl;
+                string forwarderAddress = contract.SDK.session.Options.gasless.Value.openzeppelin?.relayerForwarderAddress;
+                string forwarderDomain = contract.SDK.session.Options.gasless.Value.openzeppelin?.domainName;
+                string forwarderVersion = contract.SDK.session.Options.gasless.Value.openzeppelin?.domainVersion;
 
                 Input.Nonce = (
-                    await TransactionManager.ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
+                    await contract.SDK.manager.ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
                         forwarderAddress,
                         new MinimalForwarder.GetNonceFunction() { From = Input.From }
                     )
@@ -360,9 +360,10 @@ namespace Thirdweb
                 };
 
                 var signature = await EIP712.GenerateSignature_MinimalForwarder(
+                    contract.SDK,
                     forwarderDomain,
                     forwarderVersion,
-                    Input.ChainId?.Value ?? await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    Input.ChainId?.Value ?? await contract.SDK.wallet.GetChainId(),
                     forwarderAddress,
                     request
                 );

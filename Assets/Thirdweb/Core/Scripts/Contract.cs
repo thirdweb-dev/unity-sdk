@@ -72,8 +72,8 @@ namespace Thirdweb
             this.ERC20 = new ERC20(SDK, baseRoute, address);
             this.ERC721 = new ERC721(SDK, baseRoute, address);
             this.ERC1155 = new ERC1155(SDK, baseRoute, address);
-            this.marketplace = new Marketplace(baseRoute, address);
-            this.pack = new Pack(chain, address);
+            this.marketplace = new Marketplace(SDK, baseRoute, address);
+            this.pack = new Pack(SDK, chain, address);
             this.events = new Events(baseRoute);
         }
 
@@ -219,7 +219,7 @@ namespace Thirdweb
             if (this.abi == null)
                 throw new UnityException("You must pass an ABI for native platform custom calls");
 
-            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+            var contract = new Web3(SDK.session.RPC).Eth.GetContract(this.abi, this.address);
             var function = contract.GetFunction(functionName);
             var result = await function.CallDecodingToDefaultAsync(args);
 

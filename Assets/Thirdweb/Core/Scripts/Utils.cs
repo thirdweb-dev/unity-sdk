@@ -241,14 +241,14 @@ namespace Thirdweb
             return BigInteger.Parse("115792089237316195423570985008687907853269984665640564039457584007913129639935");
         }
 
-        public async static Task<BigInteger> GetCurrentBlockTimeStamp()
+        public async static Task<BigInteger> GetCurrentBlockTimeStamp(ThirdwebSDK sdk)
         {
-            var blockNumber = await GetLatestBlockNumber();
+            var blockNumber = await GetLatestBlockNumber(sdk);
             var block = await GetBlockByNumber(blockNumber);
             return block.Timestamp.Value;
         }
 
-        public async static Task<BigInteger> GetLatestBlockNumber()
+        public async static Task<BigInteger> GetLatestBlockNumber(ThirdwebSDK sdk)
         {
             var hex = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Blocks.GetBlockNumber.SendRequestAsync();
             return hex.Value;

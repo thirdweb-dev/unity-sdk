@@ -12,16 +12,26 @@ using Nethereum.Web3;
 
 namespace Thirdweb
 {
-    public static class TransactionManager
+    public class TransactionManager
     {
         private static bool warned;
 
-        public static async Task<TWResult> ThirdwebRead<TWFunction, TWResult>(string contractAddress, TWFunction functionMessage)
+        /// <summary>
+        ///   The SDK for this transaction manager.
+        /// </summary>
+        public ThirdwebSDK SDK { get; private set; }
+
+        public TransactionManager(ThirdwebSDK sdk)
+        {
+            this.SDK = sdk;
+        }
+
+        public async Task<TWResult> ThirdwebRead<TWFunction, TWResult>(string contractAddress, TWFunction functionMessage)
             where TWFunction : FunctionMessage, new()
         {
             try
             {
-                functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+                functionMessage.FromAddress = await SDK.wallet.GetAddress();
             }
             catch (System.Exception)
             {
@@ -32,23 +42,23 @@ namespace Thirdweb
                 }
             }
 
-            var queryHandler = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractQueryHandler<TWFunction>();
+            var queryHandler = new Web3(SDK.session.RPC).Eth.GetContractQueryHandler<TWFunction>();
             return await queryHandler.QueryAsync<TWResult>(contractAddress, functionMessage);
         }
 
-        public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null, BigInteger? gasOverride = null)
+        public async Task<TransactionResult> ThirdwebWrite<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null, BigInteger? gasOverride = null)
             where TWFunction : FunctionMessage, new()
         {
             var receipt = await ThirdwebWriteRawResult(contractAddress, functionMessage, weiValue, gasOverride);
             return receipt.ToTransactionResult();
         }
 
-        public static async Task<TransactionReceipt> ThirdwebWriteRawResult<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null, BigInteger? gasOverride = null)
+        public async Task<TransactionReceipt> ThirdwebWriteRawResult<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null, BigInteger? gasOverride = null)
             where TWFunction : FunctionMessage, new()
         {
             string txHash = null;
 
-            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            functionMessage.FromAddress = await SDK.wallet.GetAddress();
             functionMessage.AmountToSend = weiValue ?? 0;
 
             if (gasOverride.HasValue)
@@ -59,7 +69,7 @@ namespace Thirdweb
             {
                 try
                 {
-                    var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionHandler<TWFunction>();
+                    var gasEstimator = new Web3(SDK.session.RPC).Eth.GetContractTransactionHandler<TWFunction>();
                     var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
                     functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
                 }
@@ -70,28 +80,28 @@ namespace Thirdweb
                 }
             }
 
-            bool isGasless = ThirdwebManager.Instance.SDK.session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin.HasValue;
+            bool isGasless = SDK.session.Options.gasless.HasValue && SDK.session.Options.gasless.Value.openzeppelin.HasValue;
 
             if (!isGasless)
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.LocalWallet)
+                if (SDK.session.ActiveWallet.GetProvider() == WalletProvider.LocalWallet)
                 {
-                    var transactionHandler = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetContractTransactionHandler<TWFunction>();
+                    var transactionHandler = SDK.session.Web3.Eth.GetContractTransactionHandler<TWFunction>();
                     txHash = await transactionHandler.SendRequestAsync(contractAddress, functionMessage);
                 }
                 else
                 {
-                    var transaction = new EthSendTransaction(ThirdwebManager.Instance.SDK.session.Web3.Client);
+                    var transaction = new EthSendTransaction(SDK.session.Web3.Client);
                     var transactionInput = functionMessage.CreateTransactionInput(contractAddress);
                     txHash = await transaction.SendRequestAsync(transactionInput);
                 }
             }
             else
             {
-                string relayerUrl = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.relayerUrl;
-                string forwarderAddress = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.relayerForwarderAddress;
-                string forwarderDomain = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.domainName;
-                string forwarderVersion = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.domainVersion;
+                string relayerUrl = SDK.session.Options.gasless.Value.openzeppelin?.relayerUrl;
+                string forwarderAddress = SDK.session.Options.gasless.Value.openzeppelin?.relayerForwarderAddress;
+                string forwarderDomain = SDK.session.Options.gasless.Value.openzeppelin?.domainName;
+                string forwarderVersion = SDK.session.Options.gasless.Value.openzeppelin?.domainVersion;
 
                 functionMessage.Nonce = (
                     await ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
@@ -110,7 +120,7 @@ namespace Thirdweb
                     Data = functionMessage.GetCallData().ByteArrayToHexString()
                 };
 
-                var signature = await EIP712.GenerateSignature_MinimalForwarder(forwarderDomain, forwarderVersion, ThirdwebManager.Instance.SDK.session.ChainId, forwarderAddress, request);
+                var signature = await EIP712.GenerateSignature_MinimalForwarder(SDK, forwarderDomain, forwarderVersion, SDK.session.ChainId, forwarderAddress, request);
 
                 var postData = new RelayerRequest(request, signature, forwarderAddress);
 
@@ -142,7 +152,7 @@ namespace Thirdweb
                 }
             }
             Debug.Log("txHash: " + txHash);
-            var receiptPoller = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            var receiptPoller = new Web3(SDK.session.RPC);
             return await receiptPoller.TransactionReceiptPolling.PollForReceiptAsync(txHash);
         }
     }

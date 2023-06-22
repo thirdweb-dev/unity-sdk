@@ -13,9 +13,12 @@ namespace Thirdweb.Wallets
         private IThirdwebWallet _personalWallet;
         private SmartWallet _smartWallet;
         private ThirdwebSDK.SmartWalletConfig _config;
+        
+        public ThirdwebSDK SDK { get; private set; }
 
-        public ThirdwebSmartWallet(IThirdwebWallet personalWallet, ThirdwebSDK.SmartWalletConfig config)
+        public ThirdwebSmartWallet(ThirdwebSDK sdk, IThirdwebWallet personalWallet, ThirdwebSDK.SmartWalletConfig config)
         {
+            SDK = sdk;
             _web3 = null;
             _provider = WalletProvider.SmartWallet;
             _signerProvider = personalWallet.GetProvider();
@@ -25,7 +28,7 @@ namespace Thirdweb.Wallets
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
         {
-            _smartWallet = new SmartWallet(await _personalWallet.GetWeb3(), _config);
+            _smartWallet = new SmartWallet(SDK, await _personalWallet.GetWeb3(), _config);
             await _smartWallet.Initialize();
             _web3 = _smartWallet.CreateWeb3();
             return await GetAddress();

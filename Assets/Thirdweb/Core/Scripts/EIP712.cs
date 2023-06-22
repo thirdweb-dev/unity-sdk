@@ -20,6 +20,7 @@ namespace Thirdweb
         /// SIGNATURE GENERATION ///
 
         public async static Task<string> GenerateSignature_MinimalForwarder(
+            ThirdwebSDK sdk,
             string domainName,
             string version,
             BigInteger chainId,
@@ -39,11 +40,12 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(forwardRequest, typedData);
+                return await sdk.wallet.SignTypedDataV4(forwardRequest, typedData);
             }
         }
 
         public async static Task<string> GenerateSignature_TokenERC20(
+            ThirdwebSDK sdk,
             string domainName,
             string version,
             BigInteger chainId,
@@ -63,11 +65,12 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(mintRequest, typedData);
+                return await sdk.wallet.SignTypedDataV4(mintRequest, typedData);
             }
         }
 
         public async static Task<string> GenerateSignature_TokenERC721(
+            ThirdwebSDK sdk,
             string domainName,
             string version,
             BigInteger chainId,
@@ -87,11 +90,12 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(mintRequest, typedData);
+                return await sdk.wallet.SignTypedDataV4(mintRequest, typedData);
             }
         }
 
         public async static Task<string> GenerateSignature_TokenERC1155(
+            ThirdwebSDK sdk,
             string domainName,
             string version,
             BigInteger chainId,
@@ -111,7 +115,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(mintRequest, typedData);
+                return await sdk.wallet.SignTypedDataV4(mintRequest, typedData);
             }
         }
 

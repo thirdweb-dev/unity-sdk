@@ -7,14 +7,14 @@ namespace Thirdweb.AccountAbstraction
 {
     public static class UserOpUtils
     {
-        public static async Task<byte[]> HashAndSignUserOp(this EntryPointContract.UserOperation userOp, string entryPoint)
+        public static async Task<byte[]> HashAndSignUserOp(this EntryPointContract.UserOperation userOp, ThirdwebSDK sdk, string entryPoint)
         {
-            var userOpHash = await TransactionManager.ThirdwebRead<EntryPointContract.GetUserOpHashFunction, EntryPointContract.GetUserOpHashOutputDTO>(
+            var userOpHash = await sdk.manager.ThirdwebRead<EntryPointContract.GetUserOpHashFunction, EntryPointContract.GetUserOpHashOutputDTO>(
                 entryPoint,
                 new EntryPointContract.GetUserOpHashFunction() { UserOp = userOp }
             );
 
-            var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet;
+            var smartWallet = sdk.session.ActiveWallet;
             if (smartWallet.GetSignerProvider() == WalletProvider.LocalWallet)
             {
                 var localWallet = smartWallet.GetLocalAccount();
@@ -22,7 +22,7 @@ namespace Thirdweb.AccountAbstraction
             }
             else
             {
-                var sig = await ThirdwebManager.Instance.SDK.wallet.Sign(userOpHash.ReturnValue1.ByteArrayToHexString());
+                var sig = await sdk.wallet.Sign(userOpHash.ReturnValue1.ByteArrayToHexString());
                 return sig.HexStringToByteArray();
             }
         }

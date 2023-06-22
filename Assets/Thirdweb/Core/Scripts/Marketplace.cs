@@ -19,14 +19,17 @@ namespace Thirdweb
         public Offers offers;
 
         private string contractAddress;
+        
+        public ThirdwebSDK SDK { get; private set; }
 
-        public Marketplace(string parentRoute, string contractAddress)
+        public Marketplace(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(parentRoute)
         {
             this.contractAddress = contractAddress;
-            this.directListings = new DirectListings(baseRoute, contractAddress);
-            this.englishAuctions = new EnglishAuctions(baseRoute, contractAddress);
-            this.offers = new Offers(baseRoute, contractAddress);
+            this.SDK = sdk;
+            this.directListings = new DirectListings(sdk, baseRoute, contractAddress);
+            this.englishAuctions = new EnglishAuctions(sdk, baseRoute, contractAddress);
+            this.offers = new Offers(sdk, baseRoute, contractAddress);
         }
     }
 
@@ -34,9 +37,12 @@ namespace Thirdweb
     {
         private string contractAddress;
 
-        public DirectListings(string parentRoute, string contractAddress)
+        public ThirdwebSDK SDK { get; private set; }
+
+        public DirectListings(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "directListings"))
         {
+            this.SDK = sdk;
             this.contractAddress = contractAddress;
         }
 
@@ -54,7 +60,7 @@ namespace Thirdweb
                 int start = filters?.start ?? 0;
                 int count = filters?.count ?? 0;
                 int end = count == 0 ? totalSupply - 1 : start + count;
-                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.GetAllListingsFunction, DirectListingsContract.GetAllListingsOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<DirectListingsContract.GetAllListingsFunction, DirectListingsContract.GetAllListingsOutputDTO>(
                     contractAddress,
                     new DirectListingsContract.GetAllListingsFunction() { StartId = start, EndId = end }
                 );
@@ -89,7 +95,7 @@ namespace Thirdweb
                 int start = filters?.start ?? 0;
                 int count = filters?.count ?? 0;
                 int end = count == 0 ? totalSupply - 1 : start + count;
-                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.GetAllValidListingsFunction, DirectListingsContract.GetAllValidListingsOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<DirectListingsContract.GetAllValidListingsFunction, DirectListingsContract.GetAllValidListingsOutputDTO>(
                     contractAddress,
                     new DirectListingsContract.GetAllValidListingsFunction() { StartId = start, EndId = end }
                 );
@@ -120,20 +126,20 @@ namespace Thirdweb
             }
             else
             {
-                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.GetListingFunction, DirectListingsContract.GetListingOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<DirectListingsContract.GetListingFunction, DirectListingsContract.GetListingOutputDTO>(
                     contractAddress,
                     new DirectListingsContract.GetListingFunction() { ListingId = BigInteger.Parse(listingID) }
                 );
 
-                Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Listing.Currency).ERC20.Get();
+                Currency currency = await SDK.GetContract(result.Listing.Currency).ERC20.Get();
                 NFTMetadata metadata = new NFTMetadata();
                 try
                 {
-                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Listing.AssetContract).ERC721.Get(result.Listing.TokenId.ToString())).metadata;
+                    metadata = (await SDK.GetContract(result.Listing.AssetContract).ERC721.Get(result.Listing.TokenId.ToString())).metadata;
                 }
                 catch (System.Exception)
                 {
-                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Listing.AssetContract).ERC1155.Get(result.Listing.TokenId.ToString())).metadata;
+                    metadata = (await SDK.GetContract(result.Listing.AssetContract).ERC1155.Get(result.Listing.TokenId.ToString())).metadata;
                 }
 
                 return new DirectListing()
@@ -169,7 +175,7 @@ namespace Thirdweb
             }
             else
             {
-                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.TotalListingsFunction, DirectListingsContract.TotalListingsOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<DirectListingsContract.TotalListingsFunction, DirectListingsContract.TotalListingsOutputDTO>(
                     contractAddress,
                     new DirectListingsContract.TotalListingsFunction() { }
                 );
@@ -185,7 +191,7 @@ namespace Thirdweb
             }
             else
             {
-                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.IsBuyerApprovedForListingFunction, DirectListingsContract.IsBuyerApprovedForListingOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<DirectListingsContract.IsBuyerApprovedForListingFunction, DirectListingsContract.IsBuyerApprovedForListingOutputDTO>(
                     contractAddress,
                     new DirectListingsContract.IsBuyerApprovedForListingFunction() { ListingId = BigInteger.Parse(listingID), Buyer = buyerAddress }
                 );
@@ -201,7 +207,7 @@ namespace Thirdweb
             }
             else
             {
-                var result = await TransactionManager.ThirdwebRead<DirectListingsContract.IsCurrencyApprovedForListingFunction, DirectListingsContract.IsCurrencyApprovedForListingOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<DirectListingsContract.IsCurrencyApprovedForListingFunction, DirectListingsContract.IsCurrencyApprovedForListingOutputDTO>(
                     contractAddress,
                     new DirectListingsContract.IsCurrencyApprovedForListingFunction() { ListingId = BigInteger.Parse(listingID), Currency = currencyContractAddress }
                 );
@@ -219,7 +225,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new DirectListingsContract.ApproveBuyerForListingFunction() { ListingId = BigInteger.Parse(listingID), Buyer = buyerAddress }
                 );
@@ -236,7 +242,7 @@ namespace Thirdweb
             {
                 var listing = await GetListing(listingID);
 
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new DirectListingsContract.BuyFromListingFunction()
                     {
@@ -259,7 +265,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new DirectListingsContract.CancelListingFunction() { ListingId = BigInteger.Parse(listingID), });
+                return await SDK.manager.ThirdwebWrite(contractAddress, new DirectListingsContract.CancelListingFunction() { ListingId = BigInteger.Parse(listingID), });
             }
         }
 
@@ -271,7 +277,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new DirectListingsContract.CreateListingFunction()
                     {
@@ -282,7 +288,7 @@ namespace Thirdweb
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
                             Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
                             PricePerToken = BigInteger.Parse(input.pricePerToken),
-                            StartTimestamp = (BigInteger)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp() + 60),
+                            StartTimestamp = (BigInteger)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp(SDK) + 60),
                             EndTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
                             Reserved = input.isReservedListing ?? false,
                         }
@@ -299,7 +305,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new DirectListingsContract.ApproveBuyerForListingFunction()
                     {
@@ -319,7 +325,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new DirectListingsContract.ApproveCurrencyForListingFunction()
                     {
@@ -341,7 +347,7 @@ namespace Thirdweb
             {
                 var oldListing = await GetListing(listingId);
 
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new DirectListingsContract.UpdateListingFunction()
                     {
@@ -366,10 +372,13 @@ namespace Thirdweb
     public class EnglishAuctions : Routable
     {
         private string contractAddress;
+        
+        public ThirdwebSDK SDK { get; private set; }
 
-        public EnglishAuctions(string parentRoute, string contractAddress)
+        public EnglishAuctions(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "englishAuctions"))
         {
+            this.SDK = sdk;
             this.contractAddress = contractAddress;
         }
 
@@ -387,7 +396,7 @@ namespace Thirdweb
                 int start = filters?.start ?? 0;
                 int count = filters?.count ?? 0;
                 int end = count == 0 ? totalSupply - 1 : start + count;
-                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetAllAuctionsFunction, EnglishAuctionsContract.GetAllAuctionsOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<EnglishAuctionsContract.GetAllAuctionsFunction, EnglishAuctionsContract.GetAllAuctionsOutputDTO>(
                     contractAddress,
                     new EnglishAuctionsContract.GetAllAuctionsFunction() { StartId = start, EndId = end }
                 );
@@ -422,7 +431,7 @@ namespace Thirdweb
                 int start = filters?.start ?? 0;
                 int count = filters?.count ?? 0;
                 int end = count == 0 ? totalSupply - 1 : start + count;
-                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetAllValidAuctionsFunction, EnglishAuctionsContract.GetAllValidAuctionsOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<EnglishAuctionsContract.GetAllValidAuctionsFunction, EnglishAuctionsContract.GetAllValidAuctionsOutputDTO>(
                     contractAddress,
                     new EnglishAuctionsContract.GetAllValidAuctionsFunction() { StartId = start, EndId = end }
                 );
@@ -453,20 +462,20 @@ namespace Thirdweb
             }
             else
             {
-                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetAuctionFunction, EnglishAuctionsContract.GetAuctionOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<EnglishAuctionsContract.GetAuctionFunction, EnglishAuctionsContract.GetAuctionOutputDTO>(
                     contractAddress,
                     new EnglishAuctionsContract.GetAuctionFunction() { AuctionId = BigInteger.Parse(auctionId) }
                 );
 
-                Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Auction.Currency).ERC20.Get();
+                Currency currency = await SDK.GetContract(result.Auction.Currency).ERC20.Get();
                 NFTMetadata metadata = new NFTMetadata();
                 try
                 {
-                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Auction.AssetContract).ERC721.Get(result.Auction.TokenId.ToString())).metadata;
+                    metadata = (await SDK.GetContract(result.Auction.AssetContract).ERC721.Get(result.Auction.TokenId.ToString())).metadata;
                 }
                 catch (System.Exception)
                 {
-                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Auction.AssetContract).ERC1155.Get(result.Auction.TokenId.ToString())).metadata;
+                    metadata = (await SDK.GetContract(result.Auction.AssetContract).ERC1155.Get(result.Auction.TokenId.ToString())).metadata;
                 }
 
                 return new Auction()
@@ -541,7 +550,7 @@ namespace Thirdweb
             }
             else
             {
-                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.TotalAuctionsFunction, EnglishAuctionsContract.TotalAuctionsOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<EnglishAuctionsContract.TotalAuctionsFunction, EnglishAuctionsContract.TotalAuctionsOutputDTO>(
                     contractAddress,
                     new EnglishAuctionsContract.TotalAuctionsFunction() { }
                 );
@@ -557,7 +566,7 @@ namespace Thirdweb
             }
             else
             {
-                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetWinningBidFunction, EnglishAuctionsContract.GetWinningBidOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<EnglishAuctionsContract.GetWinningBidFunction, EnglishAuctionsContract.GetWinningBidOutputDTO>(
                     contractAddress,
                     new EnglishAuctionsContract.GetWinningBidFunction() { AuctionId = BigInteger.Parse(auctionId) }
                 );
@@ -573,12 +582,12 @@ namespace Thirdweb
             }
             else
             {
-                var winningBid = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.GetWinningBidFunction, EnglishAuctionsContract.GetWinningBidOutputDTO>(
+                var winningBid = await SDK.manager.ThirdwebRead<EnglishAuctionsContract.GetWinningBidFunction, EnglishAuctionsContract.GetWinningBidOutputDTO>(
                     contractAddress,
                     new EnglishAuctionsContract.GetWinningBidFunction() { AuctionId = BigInteger.Parse(auctionId) }
                 );
 
-                var c = await ThirdwebManager.Instance.SDK.GetContract(winningBid.Currency).ERC20.Get();
+                var c = await SDK.GetContract(winningBid.Currency).ERC20.Get();
 
                 return new Bid()
                 {
@@ -599,7 +608,7 @@ namespace Thirdweb
             }
             else
             {
-                var result = await TransactionManager.ThirdwebRead<EnglishAuctionsContract.IsNewWinningBidFunction, EnglishAuctionsContract.IsNewWinningBidOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<EnglishAuctionsContract.IsNewWinningBidFunction, EnglishAuctionsContract.IsNewWinningBidOutputDTO>(
                     contractAddress,
                     new EnglishAuctionsContract.IsNewWinningBidFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(bidAmount) }
                 );
@@ -618,7 +627,7 @@ namespace Thirdweb
             else
             {
                 var auction = await GetAuction(auctionId);
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(auction.buyoutCurrencyValue?.value) },
                     BigInteger.Parse(auction.buyoutCurrencyValue?.value)
@@ -634,7 +643,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CancelAuctionFunction() { AuctionId = BigInteger.Parse(auctionId) });
+                return await SDK.manager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CancelAuctionFunction() { AuctionId = BigInteger.Parse(auctionId) });
             }
         }
 
@@ -646,7 +655,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CollectAuctionTokensFunction() { AuctionId = BigInteger.Parse(auctionId) });
+                return await SDK.manager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CollectAuctionTokensFunction() { AuctionId = BigInteger.Parse(auctionId) });
             }
         }
 
@@ -658,7 +667,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CollectAuctionPayoutFunction() { AuctionId = BigInteger.Parse(auctionId) });
+                return await SDK.manager.ThirdwebWrite(contractAddress, new EnglishAuctionsContract.CollectAuctionPayoutFunction() { AuctionId = BigInteger.Parse(auctionId) });
             }
         }
 
@@ -670,7 +679,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new EnglishAuctionsContract.CreateAuctionFunction()
                     {
@@ -684,7 +693,7 @@ namespace Thirdweb
                             BuyoutBidAmount = BigInteger.Parse(input.buyoutBidAmount.ToWei()),
                             TimeBufferInSeconds = ulong.Parse(input.timeBufferInSeconds ?? "900"),
                             BidBufferBps = ulong.Parse(input.bidBufferBps ?? "500"),
-                            StartTimestamp = (ulong)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp() + 60),
+                            StartTimestamp = (ulong)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp(SDK) + 60),
                             EndTimestamp = (ulong)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
                         }
                     }
@@ -714,7 +723,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new EnglishAuctionsContract.BidInAuctionFunction() { AuctionId = BigInteger.Parse(auctionId), BidAmount = BigInteger.Parse(bidAmount.ToWei()) },
                     BigInteger.Parse(bidAmount.ToWei())
@@ -727,9 +736,12 @@ namespace Thirdweb
     {
         private string contractAddress;
 
-        public Offers(string parentRoute, string contractAddress)
+        public ThirdwebSDK SDK;
+
+        public Offers(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "offers"))
         {
+            this.SDK = sdk;
             this.contractAddress = contractAddress;
         }
 
@@ -747,7 +759,7 @@ namespace Thirdweb
                 int start = filters?.start ?? 0;
                 int count = filters?.count ?? 0;
                 int end = count == 0 ? totalSupply - 1 : start + count;
-                var result = await TransactionManager.ThirdwebRead<OffersContract.GetAllOffersFunction, OffersContract.GetAllOffersOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<OffersContract.GetAllOffersFunction, OffersContract.GetAllOffersOutputDTO>(
                     contractAddress,
                     new OffersContract.GetAllOffersFunction() { StartId = start, EndId = end }
                 );
@@ -782,7 +794,7 @@ namespace Thirdweb
                 int start = filters?.start ?? 0;
                 int count = filters?.count ?? 0;
                 int end = count == 0 ? totalSupply - 1 : start + count;
-                var result = await TransactionManager.ThirdwebRead<OffersContract.GetAllValidOffersFunction, OffersContract.GetAllValidOffersOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<OffersContract.GetAllValidOffersFunction, OffersContract.GetAllValidOffersOutputDTO>(
                     contractAddress,
                     new OffersContract.GetAllValidOffersFunction() { StartId = start, EndId = end }
                 );
@@ -813,20 +825,20 @@ namespace Thirdweb
             }
             else
             {
-                var result = await TransactionManager.ThirdwebRead<OffersContract.GetOfferFunction, OffersContract.GetOfferOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<OffersContract.GetOfferFunction, OffersContract.GetOfferOutputDTO>(
                     contractAddress,
                     new OffersContract.GetOfferFunction() { OfferId = BigInteger.Parse(offerID) }
                 );
 
-                Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Offer.Currency).ERC20.Get();
+                Currency currency = await SDK.GetContract(result.Offer.Currency).ERC20.Get();
                 NFTMetadata metadata = new NFTMetadata();
                 try
                 {
-                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Offer.AssetContract).ERC721.Get(result.Offer.TokenId.ToString())).metadata;
+                    metadata = (await SDK.GetContract(result.Offer.AssetContract).ERC721.Get(result.Offer.TokenId.ToString())).metadata;
                 }
                 catch (System.Exception)
                 {
-                    metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Offer.AssetContract).ERC1155.Get(result.Offer.TokenId.ToString())).metadata;
+                    metadata = (await SDK.GetContract(result.Offer.AssetContract).ERC1155.Get(result.Offer.TokenId.ToString())).metadata;
                 }
 
                 return new Offer()
@@ -854,7 +866,7 @@ namespace Thirdweb
             }
             else
             {
-                var result = await TransactionManager.ThirdwebRead<OffersContract.TotalOffersFunction, OffersContract.TotalOffersOutputDTO>(
+                var result = await SDK.manager.ThirdwebRead<OffersContract.TotalOffersFunction, OffersContract.TotalOffersOutputDTO>(
                     contractAddress,
                     new OffersContract.TotalOffersFunction() { }
                 );
@@ -872,7 +884,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new OffersContract.AcceptOfferFunction() { OfferId = BigInteger.Parse(offerID) });
+                return await SDK.manager.ThirdwebWrite(contractAddress, new OffersContract.AcceptOfferFunction() { OfferId = BigInteger.Parse(offerID) });
             }
         }
 
@@ -884,7 +896,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new OffersContract.CancelOfferFunction() { OfferId = BigInteger.Parse(offerID) });
+                return await SDK.manager.ThirdwebWrite(contractAddress, new OffersContract.CancelOfferFunction() { OfferId = BigInteger.Parse(offerID) });
             }
         }
 
@@ -896,7 +908,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new OffersContract.MakeOfferFunction()
                     {
@@ -905,7 +917,7 @@ namespace Thirdweb
                             AssetContract = input.assetContractAddress,
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
-                            Currency = input.currencyContractAddress ?? Utils.GetNativeTokenWrapper(ThirdwebManager.Instance.SDK.session.ChainId),
+                            Currency = input.currencyContractAddress ?? Utils.GetNativeTokenWrapper(SDK.session.ChainId),
                             TotalPrice = BigInteger.Parse(input.totalPrice.ToWei()),
                             ExpirationTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampIn10Years())
                         }

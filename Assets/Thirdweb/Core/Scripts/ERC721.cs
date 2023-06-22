@@ -40,7 +40,7 @@ namespace Thirdweb
             this.SDK = sdk;
             this.contractAddress = contractAddress;
             this.signature = new ERC721Signature(sdk, baseRoute, contractAddress);
-            this.claimConditions = new ERC721ClaimConditions(baseRoute, contractAddress);
+            this.claimConditions = new ERC721ClaimConditions(sdk, baseRoute, contractAddress);
         }
 
         // READ FUNCTIONS
@@ -56,7 +56,7 @@ namespace Thirdweb
             }
             else
             {
-                var tokenURI = await TransactionManager.ThirdwebRead<TokenERC721Contract.TokenURIFunction, TokenERC721Contract.TokenURIOutputDTO>(
+                var tokenURI = await SDK.manager.ThirdwebRead<TokenERC721Contract.TokenURIFunction, TokenERC721Contract.TokenURIOutputDTO>(
                     contractAddress,
                     new TokenERC721Contract.TokenURIFunction() { TokenId = BigInteger.Parse(tokenId) }
                 );
@@ -127,7 +127,7 @@ namespace Thirdweb
                     // ERC721Enumerable
                     for (int i = 0; i < balanceOfOwner; i++)
                     {
-                        var tokenId = await TransactionManager.ThirdwebRead<TokenERC721Contract.TokenOfOwnerByIndexFunction, TokenERC721Contract.TokenOfOwnerByIndexOutputDTO>(
+                        var tokenId = await SDK.manager.ThirdwebRead<TokenERC721Contract.TokenOfOwnerByIndexFunction, TokenERC721Contract.TokenOfOwnerByIndexOutputDTO>(
                             contractAddress,
                             new TokenERC721Contract.TokenOfOwnerByIndexFunction() { Owner = owner, Index = (BigInteger)i }
                         );
@@ -166,7 +166,7 @@ namespace Thirdweb
             {
                 try
                 {
-                    var tokenURI = await TransactionManager.ThirdwebRead<TokenERC721Contract.OwnerOfFunction, TokenERC721Contract.OwnerOfOutputDTO>(
+                    var tokenURI = await SDK.manager.ThirdwebRead<TokenERC721Contract.OwnerOfFunction, TokenERC721Contract.OwnerOfOutputDTO>(
                         contractAddress,
                         new TokenERC721Contract.OwnerOfFunction() { TokenId = BigInteger.Parse(tokenId) }
                     );
@@ -206,7 +206,7 @@ namespace Thirdweb
             }
             else
             {
-                var balance = await TransactionManager.ThirdwebRead<TokenERC721Contract.BalanceOfFunction, TokenERC721Contract.BalanceOfOutputDTO>(
+                var balance = await SDK.manager.ThirdwebRead<TokenERC721Contract.BalanceOfFunction, TokenERC721Contract.BalanceOfOutputDTO>(
                     contractAddress,
                     new TokenERC721Contract.BalanceOfFunction() { Owner = address }
                 );
@@ -227,7 +227,7 @@ namespace Thirdweb
             }
             else
             {
-                var isApprovedForAll = await TransactionManager.ThirdwebRead<TokenERC721Contract.IsApprovedForAllFunction, TokenERC721Contract.IsApprovedForAllOutputDTO>(
+                var isApprovedForAll = await SDK.manager.ThirdwebRead<TokenERC721Contract.IsApprovedForAllFunction, TokenERC721Contract.IsApprovedForAllOutputDTO>(
                     contractAddress,
                     new TokenERC721Contract.IsApprovedForAllFunction() { Owner = address, Operator = approvedContract }
                 );
@@ -246,7 +246,7 @@ namespace Thirdweb
             }
             else
             {
-                var totalCount = await TransactionManager.ThirdwebRead<TokenERC721Contract.TotalSupplyFunction, TokenERC721Contract.TotalSupplyOutputDTO>(
+                var totalCount = await SDK.manager.ThirdwebRead<TokenERC721Contract.TotalSupplyFunction, TokenERC721Contract.TotalSupplyOutputDTO>(
                     contractAddress,
                     new TokenERC721Contract.TotalSupplyFunction() { }
                 );
@@ -297,7 +297,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC721Contract.SetApprovalForAllFunction() { Operator = contractToApprove, Approved = approved });
+                return await SDK.manager.ThirdwebWrite(contractAddress, new TokenERC721Contract.SetApprovalForAllFunction() { Operator = contractToApprove, Approved = approved });
             }
         }
 
@@ -312,7 +312,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new TokenERC721Contract.TransferFromFunction()
                     {
@@ -335,7 +335,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC721Contract.BurnFunction() { TokenId = BigInteger.Parse(tokenId) });
+                return await SDK.manager.ThirdwebWrite(contractAddress, new TokenERC721Contract.BurnFunction() { TokenId = BigInteger.Parse(tokenId) });
             }
         }
 
@@ -368,7 +368,7 @@ namespace Thirdweb
                 var claimCondition = await claimConditions.GetActive();
                 return new TransactionResult[]
                 {
-                    await TransactionManager.ThirdwebWrite(
+                    await SDK.manager.ThirdwebWrite(
                         contractAddress,
                         new DropERC721Contract.ClaimFunction()
                         {
@@ -418,7 +418,7 @@ namespace Thirdweb
             else
             {
                 var uri = await SDK.storage.UploadText(JsonConvert.SerializeObject(nft));
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC721Contract.MintToFunction() { To = address, Uri = uri.IpfsHash.cidToIpfsUrl() });
+                return await SDK.manager.ThirdwebWrite(contractAddress, new TokenERC721Contract.MintToFunction() { To = address, Uri = uri.IpfsHash.cidToIpfsUrl() });
             }
         }
     }
@@ -430,9 +430,15 @@ namespace Thirdweb
     {
         private string contractAddress;
 
-        public ERC721ClaimConditions(string parentRoute, string contractAddress)
+        /// <summary>
+        ///   The SDK these claim conditions were created with.
+        /// </summary>
+        public ThirdwebSDK SDK { get; private set; }
+
+        public ERC721ClaimConditions(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "claimConditions"))
         {
+            this.SDK = sdk;
             this.contractAddress = contractAddress;
         }
 
@@ -447,12 +453,12 @@ namespace Thirdweb
             }
             else
             {
-                var id = await TransactionManager.ThirdwebRead<DropERC721Contract.GetActiveClaimConditionIdFunction, DropERC721Contract.GetActiveClaimConditionIdOutputDTO>(
+                var id = await SDK.manager.ThirdwebRead<DropERC721Contract.GetActiveClaimConditionIdFunction, DropERC721Contract.GetActiveClaimConditionIdOutputDTO>(
                     contractAddress,
                     new DropERC721Contract.GetActiveClaimConditionIdFunction() { }
                 );
 
-                var data = await TransactionManager.ThirdwebRead<DropERC721Contract.GetClaimConditionByIdFunction, DropERC721Contract.GetClaimConditionByIdOutputDTO>(
+                var data = await SDK.manager.ThirdwebRead<DropERC721Contract.GetClaimConditionByIdFunction, DropERC721Contract.GetClaimConditionByIdOutputDTO>(
                     contractAddress,
                     new DropERC721Contract.GetClaimConditionByIdFunction() { ConditionId = id.ReturnValue1 }
                 );
@@ -607,13 +613,13 @@ namespace Thirdweb
             else
             {
                 var uri = await SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
-                var startTime = await Utils.GetCurrentBlockTimeStamp();
+                var startTime = await Utils.GetCurrentBlockTimeStamp(SDK);
                 var endTime = Utils.GetUnixTimeStampIn10Years();
-                var royaltyInfo = await TransactionManager.ThirdwebRead<TokenERC721Contract.GetDefaultRoyaltyInfoFunction, TokenERC721Contract.GetDefaultRoyaltyInfoOutputDTO>(
+                var royaltyInfo = await SDK.manager.ThirdwebRead<TokenERC721Contract.GetDefaultRoyaltyInfoFunction, TokenERC721Contract.GetDefaultRoyaltyInfoOutputDTO>(
                     contractAddress,
                     new TokenERC721Contract.GetDefaultRoyaltyInfoFunction() { }
                 );
-                var primarySaleRecipient = await TransactionManager.ThirdwebRead<TokenERC721Contract.PrimarySaleRecipientFunction, TokenERC721Contract.PrimarySaleRecipientOutputDTO>(
+                var primarySaleRecipient = await SDK.manager.ThirdwebRead<TokenERC721Contract.PrimarySaleRecipientFunction, TokenERC721Contract.PrimarySaleRecipientOutputDTO>(
                     contractAddress,
                     new TokenERC721Contract.PrimarySaleRecipientFunction() { }
                 );
@@ -633,6 +639,7 @@ namespace Thirdweb
                 };
 
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC721(
+                    SDK,
                     "TokenERC721",
                     "1",
                     await SDK.wallet.GetChainId(),
@@ -672,7 +679,7 @@ namespace Thirdweb
             }
             else
             {
-                var verify = await TransactionManager.ThirdwebRead<TokenERC721Contract.VerifyFunction, TokenERC721Contract.VerifyOutputDTO>(
+                var verify = await SDK.manager.ThirdwebRead<TokenERC721Contract.VerifyFunction, TokenERC721Contract.VerifyOutputDTO>(
                     contractAddress,
                     new TokenERC721Contract.VerifyFunction()
                     {
@@ -707,7 +714,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(
+                return await SDK.manager.ThirdwebWrite(
                     contractAddress,
                     new TokenERC721Contract.MintWithSignatureFunction()
                     {

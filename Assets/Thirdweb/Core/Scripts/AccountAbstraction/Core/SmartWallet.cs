@@ -36,20 +36,23 @@ namespace Thirdweb.AccountAbstraction
         public string PersonalAddress { get; internal set; }
         public Web3 PersonalWeb3 { get; internal set; }
         public ThirdwebSDK.SmartWalletConfig Config { get; internal set; }
+        
+        public ThirdwebSDK SDK { get; private set; }
 
         private bool _initialized;
         private bool _deployed;
 
-        public SmartWallet(Web3 personalWeb3, ThirdwebSDK.SmartWalletConfig config)
+        public SmartWallet(ThirdwebSDK sdk, Web3 personalWeb3, ThirdwebSDK.SmartWalletConfig config)
         {
+            this.SDK = sdk;
             PersonalWeb3 = personalWeb3;
             Config = new ThirdwebSDK.SmartWalletConfig()
             {
                 factoryAddress = config.factoryAddress,
                 thirdwebApiKey = config.thirdwebApiKey,
                 gasless = config.gasless,
-                bundlerUrl = string.IsNullOrEmpty(config.bundlerUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.bundlerUrl,
-                paymasterUrl = string.IsNullOrEmpty(config.paymasterUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.paymasterUrl,
+                bundlerUrl = string.IsNullOrEmpty(config.bundlerUrl) ? $"https://{SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.bundlerUrl,
+                paymasterUrl = string.IsNullOrEmpty(config.paymasterUrl) ? $"https://{SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.paymasterUrl,
                 entryPointAddress = string.IsNullOrEmpty(config.entryPointAddress) ? Constants.DEFAULT_ENTRYPOINT_ADDRESS : config.entryPointAddress,
             };
 
@@ -70,7 +73,7 @@ namespace Thirdweb.AccountAbstraction
 
             PersonalAddress = await GetPersonalAddress();
 
-            var predictedAccount = await TransactionManager.ThirdwebRead<FactoryContract.GetAddressFunction, FactoryContract.GetAddressOutputDTO>(
+            var predictedAccount = await SDK.manager.ThirdwebRead<FactoryContract.GetAddressFunction, FactoryContract.GetAddressOutputDTO>(
                 Config.factoryAddress,
                 new FactoryContract.GetAddressFunction() { AdminSigner = PersonalAddress, Data = new byte[] { } }
             );
@@ -86,7 +89,7 @@ namespace Thirdweb.AccountAbstraction
 
         internal async Task UpdateDeploymentStatus()
         {
-            var bytecode = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetCode.SendRequestAsync(Accounts[0]);
+            var bytecode = await new Web3(SDK.session.RPC).Eth.GetCode.SendRequestAsync(Accounts[0]);
             _deployed = bytecode != "0x";
         }
 
@@ -96,7 +99,7 @@ namespace Thirdweb.AccountAbstraction
                 return (new byte[] { }, 0);
 
             var fn = new FactoryContract.CreateAccountFunction() { Admin = PersonalAddress, Data = new byte[] { } };
-            var deployHandler = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
+            var deployHandler = new Web3(SDK.session.RPC).Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
             var txInput = await deployHandler.CreateTransactionInputEstimatingGasAsync(Config.factoryAddress, fn);
             var data = Utils.HexConcat(Config.factoryAddress, txInput.Data);
             return (data.HexStringToByteArray(), txInput.Gas.Value);
@@ -127,7 +130,7 @@ namespace Thirdweb.AccountAbstraction
 
             var paramList = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(requestMessage.RawParameters));
             var transactionInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(paramList[0]));
-            var latestBlock = await Utils.GetBlockByNumber(await Utils.GetLatestBlockNumber());
+            var latestBlock = await Utils.GetBlockByNumber(await Utils.GetLatestBlockNumber(SDK));
             var dummySig = new byte[Constants.DUMMY_SIG_LENGTH];
             for (int i = 0; i < Constants.DUMMY_SIG_LENGTH; i++)
                 dummySig[i] = 0x01;
@@ -169,7 +172,7 @@ namespace Thirdweb.AccountAbstraction
 
             // Hash, sign and encode the user operation
 
-            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(Config.entryPointAddress);
+            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(SDK, Config.entryPointAddress);
             partialUserOpHexified = partialUserOp.EncodeUserOperation();
 
             // Send the user operation
@@ -192,12 +195,12 @@ namespace Thirdweb.AccountAbstraction
 
             // Check if successful
 
-            var receipt = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txHash);
+            var receipt = await new Web3(SDK.session.RPC).Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txHash);
             var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
             if (decodedEvents[0].Event.Success == false)
             {
                 Debug.Log("Transaction not successful, checking reason...");
-                var reason = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
+                var reason = await new Web3(SDK.session.RPC).Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
                 throw new Exception($"Transaction {txHash} reverted with reason: {reason}");
             }
             else
@@ -211,7 +214,7 @@ namespace Thirdweb.AccountAbstraction
 
         private async Task<BigInteger> GetNonce()
         {
-            var nonce = await TransactionManager.ThirdwebRead<AccountContract.GetNonceFunction, AccountContract.GetNonceOutputDTO>(Accounts[0], new AccountContract.GetNonceFunction() { });
+            var nonce = await SDK.manager.ThirdwebRead<AccountContract.GetNonceFunction, AccountContract.GetNonceOutputDTO>(Accounts[0], new AccountContract.GetNonceFunction() { });
             return nonce.ReturnValue1;
         }
 

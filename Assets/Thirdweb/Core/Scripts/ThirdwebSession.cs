@@ -67,7 +67,7 @@ namespace Thirdweb
                     await Connect(new WalletConnection(walletConnection.personalWallet, walletConnection.chainId, walletConnection.password, walletConnection.email));
                     if (Options.smartWalletConfig == null)
                         throw new UnityException("Smart wallet config is required for smart wallet connection method!");
-                    ActiveWallet = new ThirdwebSmartWallet(ActiveWallet, Options.smartWalletConfig.Value);
+                    ActiveWallet = new ThirdwebSmartWallet(sdk, ActiveWallet, Options.smartWalletConfig.Value);
                     break;
                 default:
                     throw new UnityException("This wallet connection method is not supported on this platform!");
