@@ -13,7 +13,7 @@ namespace Thirdweb
     public class ThirdwebSession
     {
         #region Properties
-
+        private ThirdwebSDK sdk;
 
         public ThirdwebSDK.Options Options { get; private set; }
         public BigInteger ChainId { get; private set; }
@@ -30,8 +30,9 @@ namespace Thirdweb
 
         #region Constructors
 
-        public ThirdwebSession(ThirdwebSDK.Options options, BigInteger chainId, string rpcUrl)
+        public ThirdwebSession(ThirdwebSDK sdk, ThirdwebSDK.Options options, BigInteger chainId, string rpcUrl)
         {
+            this.sdk = sdk;
             Options = options;
             ChainId = chainId;
             RPC = rpcUrl;
@@ -89,7 +90,7 @@ namespace Thirdweb
         public async Task Disconnect()
         {
             await ActiveWallet.Disconnect();
-            ThirdwebManager.Instance.SDK.session = new ThirdwebSession(Options, ChainId, RPC);
+            sdk.session = new ThirdwebSession(sdk, Options, ChainId, RPC);
         }
 
         public async Task<T> Request<T>(string method, params object[] parameters)
@@ -159,7 +160,7 @@ namespace Thirdweb
             {
                 chainId = BigInteger.Parse(currentNetwork.chainId).ToHex(false, true) ?? BigInteger.Parse(ChainId.ToString()).ToHex(false, true),
                 blockExplorerUrls = explorerUrls.ToArray(),
-                chainName = currentNetwork.name ?? ThirdwebManager.Instance.chain,
+                chainName = currentNetwork.name,
                 iconUrls = new string[] { "ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt" },
                 nativeCurrency = new ThirdwebNativeCurrency()
                 {
