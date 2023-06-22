@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77f59ac8818a0fe45a3283d7576eead3, type: 3}
   m_Name: Default
   m_EditorClassIdentifier: 
-  log: 0
-  appName: Thirdweb Demo Game
-  appUrl: thirdweb.com
+  log: 1
+  appName: thirdweb powered dApp
+  appUrl: https://thirdweb.com
   encrypt: 1
   encryptionPassword: UnityUGUITransport/1.0.0
   sessionIdentifier: metamask.session.data

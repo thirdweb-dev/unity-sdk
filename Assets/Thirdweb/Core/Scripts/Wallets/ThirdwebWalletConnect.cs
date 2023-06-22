@@ -2,8 +2,9 @@ using System.Threading.Tasks;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
-using WalletConnectSharp.Sign;
-using WalletConnectSharp.Network.Models;
+
+// using WalletConnectSharp.Sign;
+// using WalletConnectSharp.Network.Models;
 
 namespace Thirdweb.Wallets
 {
@@ -12,7 +13,8 @@ namespace Thirdweb.Wallets
         private Web3 _web3;
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
-        private WalletConnectSignClient _dappClient;
+
+        // private WalletConnectSignClient _dappClient;
         private string _walletConnectProjectId;
 
         public ThirdwebWalletConnect(string walletConnectProjectId)
@@ -25,13 +27,13 @@ namespace Thirdweb.Wallets
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
         {
-            if (WalletConnectV2.Instance == null)
+            if (WalletConnectUI.Instance == null)
             {
                 GameObject.Instantiate(ThirdwebManager.Instance.WalletConnectPrefab);
                 await new WaitForSeconds(0.5f);
             }
 
-            var address = await WalletConnectV2.Instance.Connect(_walletConnectProjectId);
+            var address = await WalletConnectUI.Instance.Connect(_walletConnectProjectId);
 
             // _web3 = new Web3(new WalletConnectClient(WalletConnect.Instance.Session));
             return address;
@@ -39,15 +41,15 @@ namespace Thirdweb.Wallets
 
         public async Task Disconnect()
         {
-            await _dappClient.Disconnect(
-                "User disconnected",
-                new ErrorResponse()
-                {
-                    Code = 0,
-                    Message = "User disconnected",
-                    Data = null
-                }
-            );
+            // await _dappClient.Disconnect(
+            //     "User disconnected",
+            //     new ErrorResponse()
+            //     {
+            //         Code = 0,
+            //         Message = "User disconnected",
+            //         Data = null
+            //     }
+            // );
             _web3 = null;
         }
 
@@ -58,11 +60,12 @@ namespace Thirdweb.Wallets
 
         public async Task<string> GetAddress()
         {
-            var ethAccs = await _dappClient.Request<object[], string[]>("eth_accounts", new object[] { });
-            var addy = ethAccs[0];
-            if (addy != null)
-                addy = addy.ToChecksumAddress();
-            return addy;
+            // var ethAccs = await _dappClient.Request<object[], string[]>("eth_accounts", new object[] { });
+            // var addy = ethAccs[0];
+            // if (addy != null)
+            // addy = addy.ToChecksumAddress();
+            // return addy;
+            return null;
         }
 
         public async Task<string> GetSignerAddress()

@@ -19,32 +19,31 @@ namespace MetaMask.Unity.Samples
 
         /// <summary>The Normal Button Color.</summary>
         public Color NormalColor;
-
         /// <summary>The Hover Button Color.</summary>
         public Color HoverColor;
-
         /// <summary>The Click Button Color.</summary>
         public Color ClickColor;
-
         /// <summary>The target scale of the button.</summary>
         public float targetScale;
-
-        /// <summary>The time it takes to lerp between two values.</summary>
+        /// <summary>The time it takes to lerp between two values.</summary>       
         public float timeToLerp = 0.25f;
-
         /// <summary>Gets or sets the value of the reverseValue field.</summary>
         /// <value>The value of the reverseValue field.</value>
         public float reverseValue;
-
         /// <summary>The particle systems to play.</summary>
         public ParticleSystem[] particle;
-
         /// <summary>The state of the button.</summary>
         public ButtonState buttonState;
-
         /// <summary>The button that displays the image.</summary>
         private Button image;
-
+        /// <summary>The audio source for the button object.</summary>
+        private AudioSource audioSource;
+        /// <summary>The sound played when the mouse hovers over a button.</summary>
+        public AudioClip hoverSound;
+        /// <summary>The sound played when a button is clicked.</summary>
+        public AudioClip clickSound;
+        /// <summary>The sound to play when the user clicks on a negative button.</summary>
+        public AudioClip clickSoundNegative;
         /// <summary>Gets or sets a value indicating whether animations are disabled.</summary>
         /// <value>true if animations are disabled; otherwise, false.</value>
         public bool DisableAnimation;
@@ -58,6 +57,7 @@ namespace MetaMask.Unity.Samples
         {
             this.image = GetComponent<Button>();
             StartCoroutine(LerpFunction(1, 1f, new Vector3(1f, 1f, 1f), 0));
+            this.audioSource = GetComponent<AudioSource>();
         }
 
         /// <summary>Updates the button's visual state.</summary>
@@ -129,6 +129,7 @@ namespace MetaMask.Unity.Samples
             colors.normalColor = this.HoverColor;
             colors.selectedColor = this.HoverColor;
             this.image.colors = colors;
+            this.audioSource.PlayOneShot(this.hoverSound);
         }
 
         /// <summary>Called when the pointer exits the button.</summary>
@@ -166,8 +167,12 @@ namespace MetaMask.Unity.Samples
                 colors.normalColor = this.ClickColor;
                 colors.selectedColor = this.ClickColor;
                 this.image.colors = colors;
+                this.audioSource.PlayOneShot(this.clickSound);
             }
-            else { }
+            else
+            {
+                this.audioSource.PlayOneShot(this.clickSoundNegative);
+            }
         }
 
         #endregion

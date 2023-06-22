@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace MetaMask.Models
 {
@@ -18,6 +19,10 @@ namespace MetaMask.Models
         [JsonProperty("platform")]
         [JsonPropertyName("platform")]
         public string Platform { get; set; }
+
+        [JsonProperty("apiVersion")]
+        [JsonPropertyName("apiVersion")]
+        public string ApiVersion { get; set; } = Application.version;
 
     }
 }
