@@ -15,6 +15,11 @@ namespace Thirdweb
     public class ERC721 : Routable
     {
         /// <summary>
+        ///   The SDK that created this contract interface.
+        /// </summary>
+        public ThirdwebSDK SDK;
+
+        /// <summary>
         /// Handle signature minting functionality
         /// </summary>
         public ERC721Signature signature;
@@ -29,11 +34,12 @@ namespace Thirdweb
         /// <summary>
         /// Interact with any ERC721 compatible contract.
         /// </summary>
-        public ERC721(string parentRoute, string contractAddress)
+        public ERC721(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "erc721"))
         {
+            this.SDK = sdk;
             this.contractAddress = contractAddress;
-            this.signature = new ERC721Signature(baseRoute, contractAddress);
+            this.signature = new ERC721Signature(sdk, baseRoute, contractAddress);
             this.claimConditions = new ERC721ClaimConditions(baseRoute, contractAddress);
         }
 
@@ -60,7 +66,7 @@ namespace Thirdweb
                 nft.type = "ERC721";
                 nft.supply = await TotalCount();
                 nft.quantityOwned = 1;
-                nft.metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1);
+                nft.metadata = await SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1);
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
                 nft.metadata.id = tokenId;
                 nft.metadata.uri = tokenURI.ReturnValue1.ReplaceIPFS();
@@ -112,7 +118,7 @@ namespace Thirdweb
             }
             else
             {
-                string owner = address == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : address;
+                string owner = address == null ? await SDK.wallet.GetAddress() : address;
                 var balanceOfOwner = int.Parse(await BalanceOf(owner));
                 List<NFT> ownedNfts = new List<NFT>();
 
@@ -185,7 +191,7 @@ namespace Thirdweb
             }
             else
             {
-                return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
+                return await BalanceOf(await SDK.wallet.GetAddress());
             }
         }
 
@@ -310,7 +316,7 @@ namespace Thirdweb
                     contractAddress,
                     new TokenERC721Contract.TransferFromFunction()
                     {
-                        From = await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                        From = await SDK.wallet.GetAddress(),
                         To = to,
                         TokenId = BigInteger.Parse(tokenId)
                     }
@@ -344,7 +350,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ClaimTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), quantity);
+                return await ClaimTo(await SDK.wallet.GetAddress(), quantity);
             }
         }
 
@@ -396,7 +402,7 @@ namespace Thirdweb
             }
             else
             {
-                return await MintTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), nft);
+                return await MintTo(await SDK.wallet.GetAddress(), nft);
             }
         }
 
@@ -411,7 +417,7 @@ namespace Thirdweb
             }
             else
             {
-                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(nft));
+                var uri = await SDK.storage.UploadText(JsonConvert.SerializeObject(nft));
                 return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC721Contract.MintToFunction() { To = address, Uri = uri.IpfsHash.cidToIpfsUrl() });
             }
         }
@@ -575,11 +581,17 @@ namespace Thirdweb
         private string contractAddress;
 
         /// <summary>
+        ///   The SDK this signature was created with.
+        /// </summary>
+        public ThirdwebSDK SDK { get; private set; }
+        
+        /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC721Signature(string parentRoute, string contractAddress)
+        public ERC721Signature(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "signature"))
         {
+            this.SDK = sdk;
             this.contractAddress = contractAddress;
         }
 
@@ -594,7 +606,7 @@ namespace Thirdweb
             }
             else
             {
-                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
+                var uri = await SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
                 var startTime = await Utils.GetCurrentBlockTimeStamp();
                 var endTime = Utils.GetUnixTimeStampIn10Years();
                 var royaltyInfo = await TransactionManager.ThirdwebRead<TokenERC721Contract.GetDefaultRoyaltyInfoFunction, TokenERC721Contract.GetDefaultRoyaltyInfoOutputDTO>(
@@ -623,7 +635,7 @@ namespace Thirdweb
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC721(
                     "TokenERC721",
                     "1",
-                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    await SDK.wallet.GetChainId(),
                     contractAddress,
                     req,
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
