@@ -21,6 +21,11 @@ namespace Thirdweb
         public string abi;
 
         /// <summary>
+        ///   The SDK that created this contract.
+        /// </summary>
+        public ThirdwebSDK SDK { get; private set; }
+
+        /// <summary>
         /// Call any ERC20 supported functions
         /// </summary>
         public ERC20 ERC20;
@@ -53,12 +58,14 @@ namespace Thirdweb
         /// <summary>
         /// Convenient wrapper to interact with any EVM contract
         /// </summary>
+        /// <param name="sdk">The sdk that created this contract.</param>
         /// <param name="chain">The chain identifier.</param>
         /// <param name="address">The contract address.</param>
         /// <param name="abi">The contract ABI.</param>
-        public Contract(string chain, string address, string abi = null)
+        public Contract(ThirdwebSDK sdk, string chain, string address, string abi = null)
             : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
         {
+            this.SDK = sdk;
             this.chain = chain;
             this.address = address;
             this.abi = abi;
@@ -82,7 +89,7 @@ namespace Thirdweb
             }
             else
             {
-                BigInteger balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
+                BigInteger balance = await SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
                 CurrencyValue cv = new CurrencyValue();
                 cv.value = balance.ToString();
                 cv.displayValue = balance.ToString().ToEth();
@@ -110,9 +117,9 @@ namespace Thirdweb
         /// <returns>A <see cref="Transaction"/> object representing the prepared transaction.</returns>
         public async Task<Transaction> Prepare(string functionName, string from = null, params object[] args)
         {
-            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+            var contract = new Web3(SDK.session.RPC).Eth.GetContract(this.abi, this.address);
             var function = contract.GetFunction(functionName);
-            var fromAddress = from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            var fromAddress = from ?? await SDK.wallet.GetAddress();
             var txInput = function.CreateTransactionInput(fromAddress, args);
             return new Transaction(this, txInput);
         }
@@ -125,7 +132,7 @@ namespace Thirdweb
         /// <returns>The encoded function data as a string.</returns>
         public string Encode(string functionName, params object[] args)
         {
-            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+            var contract = new Web3(SDK.session.RPC).Eth.GetContract(this.abi, this.address);
             var function = contract.GetFunction(functionName);
             return function.GetData(args);
         }
@@ -138,7 +145,7 @@ namespace Thirdweb
         /// <returns>A list of <see cref="ParameterOutput"/> objects representing the decoded arguments.</returns>
         public List<ParameterOutput> Decode(string functionName, string encodedArgs)
         {
-            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+            var contract = new Web3(SDK.session.RPC).Eth.GetContract(this.abi, this.address);
             var function = contract.GetFunction(functionName);
             return function.DecodeInput(encodedArgs);
         }
@@ -173,7 +180,7 @@ namespace Thirdweb
                 if (this.abi == null)
                     throw new UnityException("You must pass an ABI for native platform custom calls");
 
-                var contract = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetContract(this.abi, this.address);
+                var contract = SDK.session.Web3.Eth.GetContract(this.abi, this.address);
 
                 var function = contract.GetFunction(functionName);
 
@@ -182,10 +189,10 @@ namespace Thirdweb
                 var gas =
                     transactionOverrides?.gasLimit != null
                         ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasLimit))
-                        : await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, value, args);
+                        : await function.EstimateGasAsync(await SDK.wallet.GetAddress(), null, value, args);
 
                 var receipt = await function.SendTransactionAndWaitForReceiptAsync(
-                    from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                    from: transactionOverrides?.from ?? await SDK.wallet.GetAddress(),
                     gas: gas,
                     value: value,
                     receiptRequestCancellationToken: null,

@@ -127,7 +127,7 @@ namespace Thirdweb
                 if (chainId == null)
                     throw new UnityException("Chain ID override required for native platforms!");
                 string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3" : chainOrRPC;
-                this.session = new ThirdwebSession(options, chainId.Value, rpc);
+                this.session = new ThirdwebSession(this, options, chainId.Value, rpc);
             }
         }
 
@@ -139,7 +139,7 @@ namespace Thirdweb
         /// <returns>A contract instance</returns>
         public Contract GetContract(string address, string abi = null)
         {
-            return new Contract(this.chainOrRPC, address, abi);
+            return new Contract(this, this.chainOrRPC, address, abi);
         }
     }
 }
