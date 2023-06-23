@@ -49,25 +49,24 @@ public class MetamaskUI : MonoBehaviour, IMetaMaskUnityTransportListener
 
         MetamaskCanvas.SetActive(true);
 
-        var wallet = MetaMaskUnity.Instance.Wallet;
-        wallet.Connect();
+        MetaMaskUnity.Instance.Wallet.Connect();
 
-        wallet.WalletConnected += OnWalletConnected;
-        wallet.WalletAuthorized += OnWalletAuthorized;
+        MetaMaskUnity.Instance.Wallet.WalletConnected += OnWalletConnected;
+        MetaMaskUnity.Instance.Wallet.WalletAuthorized += OnWalletAuthorized;
 
         MetaMaskUnity.Instance.Connect();
 
         await new WaitUntil(() => (_connected && _authorized) || _exception != null);
 
-        wallet.WalletConnected -= OnWalletConnected;
-        wallet.WalletAuthorized -= OnWalletAuthorized;
+        MetaMaskUnity.Instance.Wallet.WalletConnected -= OnWalletConnected;
+        MetaMaskUnity.Instance.Wallet.WalletAuthorized -= OnWalletAuthorized;
 
         MetamaskCanvas.SetActive(false);
 
         if (_exception != null)
             throw _exception;
 
-        return wallet.SelectedAddress;
+        return MetaMaskUnity.Instance.Wallet.SelectedAddress;
     }
 
     public void ShowQR(string url)

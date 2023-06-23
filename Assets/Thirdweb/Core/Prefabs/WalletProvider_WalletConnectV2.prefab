@@ -479,7 +479,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3202619366221042887}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7cc295a8811d7b54fba28cb238f79999, type: 3}
+  m_Script: {fileID: 11500000, guid: 13586f7257ca83d49b023e59549c6a31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   WalletConnectCanvas: {fileID: 3040857394524813045}
