@@ -25,11 +25,11 @@ namespace Thirdweb.Wallets
             if (MetamaskUI.Instance == null)
             {
                 GameObject.Instantiate(ThirdwebManager.Instance.MetamaskPrefab);
-                MetamaskUI.Instance.Initialize();
                 await new WaitForSeconds(1f);
             }
+            await MetamaskUI.Instance.Connect();
             _web3 = MetaMaskUnity.Instance.CreateWeb3();
-            return await MetamaskUI.Instance.Connect();
+            return await GetAddress();
         }
 
         public Task Disconnect()

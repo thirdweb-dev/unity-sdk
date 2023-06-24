@@ -428,7 +428,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 6cbb8289bcfbdba43817188b3b4f15e0, type: 2}
-  initializeOnStart: 0
+  initializeOnStart: 1
 --- !u!1 &5441896019397439076
 GameObject:
   m_ObjectHideFlags: 0

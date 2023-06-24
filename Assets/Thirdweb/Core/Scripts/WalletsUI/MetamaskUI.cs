@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MetaMask.Models;
+using MetaMask.Transports;
 using MetaMask.Transports.Unity;
 using MetaMask.Unity;
 using UnityEngine;
@@ -36,11 +37,6 @@ public class MetamaskUI : MonoBehaviour, IMetaMaskUnityTransportListener
         }
     }
 
-    public void Initialize()
-    {
-        MetaMaskUnity.Instance.Initialize();
-    }
-
     public async Task<string> Connect()
     {
         _connected = false;
@@ -48,8 +44,6 @@ public class MetamaskUI : MonoBehaviour, IMetaMaskUnityTransportListener
         _exception = null;
 
         MetamaskCanvas.SetActive(true);
-
-        MetaMaskUnity.Instance.Wallet.Connect();
 
         MetaMaskUnity.Instance.Wallet.WalletConnected += OnWalletConnected;
         MetaMaskUnity.Instance.Wallet.WalletAuthorized += OnWalletAuthorized;
