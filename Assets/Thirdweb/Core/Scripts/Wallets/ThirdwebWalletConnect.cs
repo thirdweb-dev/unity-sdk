@@ -2,9 +2,8 @@ using System.Threading.Tasks;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
-
-// using WalletConnectSharp.Sign;
-// using WalletConnectSharp.Network.Models;
+using WalletConnectSharp.Sign;
+using WalletConnectSharp.Network.Models;
 
 namespace Thirdweb.Wallets
 {
@@ -14,7 +13,7 @@ namespace Thirdweb.Wallets
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
 
-        // private WalletConnectSignClient _dappClient;
+        private WalletConnectSignClient _dappClient;
         private string _walletConnectProjectId;
 
         public ThirdwebWalletConnect(string walletConnectProjectId)
@@ -41,15 +40,15 @@ namespace Thirdweb.Wallets
 
         public async Task Disconnect()
         {
-            // await _dappClient.Disconnect(
-            //     "User disconnected",
-            //     new ErrorResponse()
-            //     {
-            //         Code = 0,
-            //         Message = "User disconnected",
-            //         Data = null
-            //     }
-            // );
+            await _dappClient.Disconnect(
+                "User disconnected",
+                new ErrorResponse()
+                {
+                    Code = 0,
+                    Message = "User disconnected",
+                    Data = null
+                }
+            );
             _web3 = null;
         }
 
@@ -60,12 +59,11 @@ namespace Thirdweb.Wallets
 
         public async Task<string> GetAddress()
         {
-            // var ethAccs = await _dappClient.Request<object[], string[]>("eth_accounts", new object[] { });
-            // var addy = ethAccs[0];
-            // if (addy != null)
-            // addy = addy.ToChecksumAddress();
-            // return addy;
-            return null;
+            var ethAccs = await _dappClient.Request<object[], string[]>("eth_accounts", new object[] { });
+            var addy = ethAccs[0];
+            if (addy != null)
+                addy = addy.ToChecksumAddress();
+            return addy;
         }
 
         public async Task<string> GetSignerAddress()
