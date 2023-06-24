@@ -244,19 +244,19 @@ namespace Thirdweb
         public async static Task<BigInteger> GetCurrentBlockTimeStamp(ThirdwebSDK sdk)
         {
             var blockNumber = await GetLatestBlockNumber(sdk);
-            var block = await GetBlockByNumber(blockNumber);
+            var block = await GetBlockByNumber(sdk, blockNumber);
             return block.Timestamp.Value;
         }
 
         public async static Task<BigInteger> GetLatestBlockNumber(ThirdwebSDK sdk)
         {
-            var hex = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Blocks.GetBlockNumber.SendRequestAsync();
+            var hex = await new Web3(sdk.session.RPC).Eth.Blocks.GetBlockNumber.SendRequestAsync();
             return hex.Value;
         }
 
-        public async static Task<Nethereum.RPC.Eth.DTOs.BlockWithTransactionHashes> GetBlockByNumber(BigInteger blockNumber)
+        public async static Task<Nethereum.RPC.Eth.DTOs.BlockWithTransactionHashes> GetBlockByNumber(ThirdwebSDK sdk, BigInteger blockNumber)
         {
-            return await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Blocks.GetBlockWithTransactionsHashesByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
+            return await new Web3(sdk.session.RPC).Eth.Blocks.GetBlockWithTransactionsHashesByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
         }
 
         public static string GetDeviceIdentifier()
