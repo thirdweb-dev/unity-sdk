@@ -6,86 +6,89 @@ using System.Threading.Tasks;
 using UnityEngine.UI;
 using TMPro;
 
-public class PaperUI : MonoBehaviour
+namespace Thirdweb.Wallets
 {
-    public GameObject PaperCanvas;
-    public TMP_InputField OTPInput;
-    public TMP_InputField RecoveryInput;
-    public Button SubmitButton;
-
-    public static PaperUI Instance { get; private set; }
-
-    private PaperEmbeddedWalletSdk _paper;
-    private string _email;
-    private User _user;
-    private System.Exception _exception;
-
-    private void Awake()
+    public class PaperUI : MonoBehaviour
     {
-        if (Instance == null)
+        public GameObject PaperCanvas;
+        public TMP_InputField OTPInput;
+        public TMP_InputField RecoveryInput;
+        public Button SubmitButton;
+
+        public static PaperUI Instance { get; private set; }
+
+        private PaperEmbeddedWalletSdk _paper;
+        private string _email;
+        private User _user;
+        private System.Exception _exception;
+
+        private void Awake()
         {
-            Instance = this;
-            DontDestroyOnLoad(this.gameObject);
+            if (Instance == null)
+            {
+                Instance = this;
+                DontDestroyOnLoad(this.gameObject);
+            }
+            else
+            {
+                Destroy(this.gameObject);
+                return;
+            }
         }
-        else
+
+        public async Task<User> Connect(PaperEmbeddedWalletSdk paper, string email)
         {
-            Destroy(this.gameObject);
-            return;
+            _paper = paper;
+            _email = email;
+            _user = null;
+            _exception = null;
+            OTPInput.text = "";
+            RecoveryInput.text = "";
+            RecoveryInput.interactable = false;
+            SubmitButton.onClick.RemoveAllListeners();
+            SubmitButton.onClick.AddListener(OnSubmitOTP);
+
+            await OnSendOTP();
+
+            PaperCanvas.SetActive(true);
+
+            await new WaitUntil(() => _user != null || _exception != null);
+
+            PaperCanvas.SetActive(false);
+
+            if (_exception != null)
+                throw _exception;
+
+            return _user;
         }
-    }
 
-    public async Task<User> Connect(PaperEmbeddedWalletSdk paper, string email)
-    {
-        _paper = paper;
-        _email = email;
-        _user = null;
-        _exception = null;
-        OTPInput.text = "";
-        RecoveryInput.text = "";
-        RecoveryInput.interactable = false;
-        SubmitButton.onClick.RemoveAllListeners();
-        SubmitButton.onClick.AddListener(OnSubmitOTP);
-
-        await OnSendOTP();
-
-        PaperCanvas.SetActive(true);
-
-        await new WaitUntil(() => _user != null || _exception != null);
-
-        PaperCanvas.SetActive(false);
-
-        if (_exception != null)
-            throw _exception;
-
-        return _user;
-    }
-
-    public async Task OnSendOTP()
-    {
-        try
+        public async Task OnSendOTP()
         {
-            (bool isNewUser, bool isNewDevice) = await _paper.SendPaperEmailLoginOtp(_email);
-            RecoveryInput.interactable = !isNewUser && isNewDevice;
-            Debug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
+            try
+            {
+                (bool isNewUser, bool isNewDevice) = await _paper.SendPaperEmailLoginOtp(_email);
+                RecoveryInput.interactable = !isNewUser && isNewDevice;
+                Debug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
+            }
+            catch (System.Exception e)
+            {
+                _exception = e;
+            }
         }
-        catch (System.Exception e)
-        {
-            _exception = e;
-        }
-    }
 
-    public async void OnSubmitOTP()
-    {
-        try
+        public async void OnSubmitOTP()
         {
-            string recoveryCode = string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text;
-            string otp = OTPInput.text;
-            _user = await _paper.VerifyPaperEmailLoginOtp(_email, otp, recoveryCode);
-            Debug.Log($"finished validating OTP:  EmailAddress {_user.EmailAddress}, Address {_user.Account.Address}");
-        }
-        catch (System.Exception e)
-        {
-            _exception = e;
+            try
+            {
+                string recoveryCode = string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text;
+                string otp = OTPInput.text;
+                _user = await _paper.VerifyPaperEmailLoginOtp(_email, otp, recoveryCode);
+                Debug.Log($"finished validating OTP:  EmailAddress {_user.EmailAddress}, Address {_user.Account.Address}");
+            }
+            catch (System.Exception e)
+            {
+                _exception = e;
+            }
         }
     }
 }

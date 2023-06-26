@@ -32,7 +32,7 @@ namespace Thirdweb.Wallets
                 await new WaitForSeconds(0.5f);
             }
 
-            var address = await WalletConnectUI.Instance.Connect(_walletConnectProjectId);
+            var address = await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
 
             // _web3 = new Web3(new WalletConnectClient(WalletConnect.Instance.Session));
             return address;
@@ -42,7 +42,7 @@ namespace Thirdweb.Wallets
         {
             await _dappClient.Disconnect(
                 "User disconnected",
-                new ErrorResponse()
+                new Error()
                 {
                     Code = 0,
                     Message = "User disconnected",
