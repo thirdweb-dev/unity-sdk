@@ -65,7 +65,7 @@ public class PaperUI : MonoBehaviour
         try
         {
             (bool isNewUser, bool isNewDevice) = await _paper.SendPaperEmailLoginOtp(_email);
-            RecoveryInput.interactable = !isNewUser || isNewDevice;
+            RecoveryInput.interactable = !isNewUser && isNewDevice;
             Debug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
         }
         catch (System.Exception e)
