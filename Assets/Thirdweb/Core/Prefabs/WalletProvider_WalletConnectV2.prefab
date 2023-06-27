@@ -447,6 +447,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3202619366221042882}
   - component: {fileID: 5668056388525694654}
+  - component: {fileID: 7451019203659222339}
+  - component: {fileID: 3041905247137340966}
   m_Layer: 0
   m_Name: WalletProvider_WalletConnectV2
   m_TagString: Untagged
@@ -485,6 +487,41 @@ MonoBehaviour:
   WalletConnectCanvas: {fileID: 3040857394524813045}
   QRCodeImage: {fileID: 4173661967735120711}
   DeepLinkButton: {fileID: 1670754136118778672}
+--- !u!114 &7451019203659222339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3202619366221042887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13d0c40e82fdb41b086626cca383a72e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ProjectName: 
+  ProjectId: 
+  ClientMetadata:
+    Name: 
+    Description: 
+    Url: 
+    Icons: []
+    VerifyUrl: 
+  ConnectOnAwake: 0
+  ConnectOnStart: 0
+  BaseContext: unity-game
+--- !u!114 &3041905247137340966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3202619366221042887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4852243708c24a4089f2ed6baf110a87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8183618418573995823
 GameObject:
   m_ObjectHideFlags: 0

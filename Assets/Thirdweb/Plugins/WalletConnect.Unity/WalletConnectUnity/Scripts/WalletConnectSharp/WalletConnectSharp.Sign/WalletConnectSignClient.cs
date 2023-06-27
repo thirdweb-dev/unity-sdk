@@ -178,7 +178,7 @@ namespace WalletConnectSharp.Sign
             // Setup storage
             if (options.Storage == null)
             {
-                var storage = new FileSystemStorage();
+                var storage = options.Core?.Storage ?? new InMemoryStorage();
                 options.Storage = storage;
 
                 // If keychain is also not set, use the same storage instance

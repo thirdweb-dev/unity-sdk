@@ -26,68 +26,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal static readonly char[] s_base64Table =
         {
-            'A',
-            'B',
-            'C',
-            'D',
-            'E',
-            'F',
-            'G',
-            'H',
-            'I',
-            'J',
-            'K',
-            'L',
-            'M',
-            'N',
-            'O',
-            'P',
-            'Q',
-            'R',
-            'S',
-            'T',
-            'U',
-            'V',
-            'W',
-            'X',
-            'Y',
-            'Z',
-            'a',
-            'b',
-            'c',
-            'd',
-            'e',
-            'f',
-            'g',
-            'h',
-            'i',
-            'j',
-            'k',
-            'l',
-            'm',
-            'n',
-            'o',
-            'p',
-            'q',
-            'r',
-            's',
-            't',
-            'u',
-            'v',
-            'w',
-            'x',
-            'y',
-            'z',
-            '0',
-            '1',
-            '2',
-            '3',
-            '4',
-            '5',
-            '6',
-            '7',
-            '8',
-            '9',
+            'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+            'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+            '0','1','2','3','4','5','6','7','8','9',
             base64UrlCharacter62,
             base64UrlCharacter63
         };
@@ -122,34 +63,38 @@ namespace Microsoft.IdentityModel.Tokens
             _ = inArray ?? throw new ArgumentNullException(nameof(inArray));
 
             if (offset < 0)
-                throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, "IDX10716: '{0}' must be greater than 0, was: '{1}'", nameof(offset), offset));
+                throw new ArgumentOutOfRangeException(
+                    string.Format(CultureInfo.InvariantCulture,
+                        "IDX10716: '{0}' must be greater than 0, was: '{1}'",
+                        nameof(offset),
+                        offset));
 
             if (length == 0)
                 return string.Empty;
 
             if (length < 0)
-                throw new ArgumentOutOfRangeException(string.Format(CultureInfo.InvariantCulture, "IDX10716: '{0}' must be greater than 0, was: '{1}'", nameof(length), length));
+                throw new ArgumentOutOfRangeException(
+                    string.Format(CultureInfo.InvariantCulture,
+                        "IDX10716: '{0}' must be greater than 0, was: '{1}'",
+                        nameof(length),
+                        length));
 
             if (inArray.Length < offset + length)
                 throw new ArgumentOutOfRangeException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
+                    string.Format(CultureInfo.InvariantCulture,
                         "IDX10717: '{0} + {1}' must not be greater than {2}, '{3} + {4} > {5}'.",
                         nameof(offset),
                         nameof(length),
                         nameof(inArray),
                         offset,
                         length,
-                        inArray.Length
-                    )
-                );
+                        inArray.Length));
 
             int lengthmod3 = length % 3;
             int limit = offset + (length - lengthmod3);
             char[] output = new char[(length + 2) / 3 * 4];
             char[] table = s_base64Table;
-            int i,
-                j = 0;
+            int i, j = 0;
 
             // takes 3 bytes from inArray and insert 4 bytes into output
             for (i = offset; i < limit; i += 3)
@@ -171,7 +116,6 @@ namespace Microsoft.IdentityModel.Tokens
             switch (lengthmod3)
             {
                 case 2:
-
                     {
                         byte d0 = inArray[i];
                         byte d1 = inArray[i + 1];
@@ -184,7 +128,6 @@ namespace Microsoft.IdentityModel.Tokens
                     break;
 
                 case 1:
-
                     {
                         byte d0 = inArray[i];
 
@@ -332,10 +275,10 @@ namespace Microsoft.IdentityModel.Tokens
             int mod = str.Length % 4;
             if (mod == 1)
                 throw new FormatException(string.Format(CultureInfo.InvariantCulture, "IDX10400: Unable to decode: '{0}' as Base64url encoded string.", str));
-            //throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, str)));
+                //throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, str)));
 
             bool needReplace = false;
-            // the decoded length
+            // the decoded length 
             int decodedLength = str.Length + (4 - mod) % 4;
 
             for (int i = 0; i < str.Length; i++)

@@ -800,6 +800,7 @@ PlayerSettings:
     Android: RH_SerializedDictionary
     Standalone: RH_SerializedDictionary
     WebGL: RH_SerializedDictionary
+    iPhone: RH_SerializedDictionary
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

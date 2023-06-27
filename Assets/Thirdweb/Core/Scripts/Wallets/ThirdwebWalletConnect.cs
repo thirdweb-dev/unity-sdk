@@ -5,6 +5,7 @@ using UnityEngine;
 using WalletConnectSharp.Sign;
 using WalletConnectSharp.Network.Models;
 using Nethereum.JsonRpc.Client;
+using WalletConnect;
 
 namespace Thirdweb.Wallets
 {
@@ -14,7 +15,6 @@ namespace Thirdweb.Wallets
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
 
-        private WalletConnectSignClient _dappClient;
         private string _walletConnectProjectId;
 
         public ThirdwebWalletConnect(string walletConnectProjectId)
@@ -33,17 +33,17 @@ namespace Thirdweb.Wallets
                 await new WaitForSeconds(0.5f);
             }
 
-            _dappClient = await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
+            var address = await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
 
-            var wcProtocol = _dappClient.Protocol;
+            var wcProtocol = WCSignClient.Instance.SignClient.Protocol;
             var client = new RpcClient(new System.Uri(wcProtocol));
             _web3 = new Web3(client);
-            return await GetAddress();
+            return address;
         }
 
         public async Task Disconnect()
         {
-            await _dappClient.Disconnect(
+            await WCSignClient.Instance.SignClient.Disconnect(
                 "User disconnected",
                 new Error()
                 {

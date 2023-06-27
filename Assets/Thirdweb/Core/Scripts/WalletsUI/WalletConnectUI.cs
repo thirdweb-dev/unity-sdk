@@ -9,6 +9,7 @@ using WalletConnectSharp.Storage;
 using WalletConnectSharp.Core;
 using ZXing;
 using ZXing.QrCode;
+using WalletConnect;
 
 namespace Thirdweb.Wallets
 {
@@ -34,24 +35,22 @@ namespace Thirdweb.Wallets
             }
         }
 
-        public async Task<WalletConnectSignClient> Connect(string walletConnectProjectId, System.Numerics.BigInteger chainId)
+        public async Task<string> Connect(string walletConnectProjectId, System.Numerics.BigInteger chainId)
         {
             WalletConnectCanvas.SetActive(true);
 
-            var dappOptions = new SignClientOptions()
+            WalletConnectUnity.Instance.ProjectName = ThirdwebManager.Instance.SDK.session.Options.wallet?.appName;
+            WalletConnectUnity.Instance.ProjectId = walletConnectProjectId;
+            WalletConnectUnity.Instance.ClientMetadata = new Metadata()
             {
-                ProjectId = walletConnectProjectId,
-                Metadata = new Metadata()
-                {
-                    Description = ThirdwebManager.Instance.SDK.session.Options.wallet?.appDescription,
-                    Icons = ThirdwebManager.Instance.SDK.session.Options.wallet?.appIcons,
-                    Name = ThirdwebManager.Instance.SDK.session.Options.wallet?.appName,
-                    Url = ThirdwebManager.Instance.SDK.session.Options.wallet?.appUrl
-                },
-                // Storage = new InMemoryStorage()
+                Description = ThirdwebManager.Instance.SDK.session.Options.wallet?.appDescription,
+                Icons = ThirdwebManager.Instance.SDK.session.Options.wallet?.appIcons,
+                Name = ThirdwebManager.Instance.SDK.session.Options.wallet?.appName,
+                Url = ThirdwebManager.Instance.SDK.session.Options.wallet?.appUrl
             };
+            WalletConnectUnity.Instance.BaseContext = "unity-game";
 
-            WalletConnectSignClient dappClient = await WalletConnectSignClient.Init(dappOptions);
+            await WCSignClient.Instance.InitSignClient();
 
             var dappConnectOptions = new ConnectOptions()
             {
@@ -64,12 +63,12 @@ namespace Thirdweb.Wallets
                             Methods = new[]
                             {
                                 "eth_sendTransaction",
-                                // "eth_sendRawTransaction",
+                                "eth_sendRawTransaction",
                                 "personal_sign",
                                 "eth_signTypedData_v4",
-                                "eth_accounts",
-                                "eth_chainId",
-                                "eth_getBalance"
+                                // "eth_accounts",
+                                // "eth_chainId",
+                                // "eth_getBalance"
                             },
                             Chains = new[] { $"eip155:{chainId}" },
                             Events = new[] { "chainChanged", "accountsChanged", }
@@ -78,20 +77,20 @@ namespace Thirdweb.Wallets
                 }
             };
 
-            var connectData = await dappClient.Connect(dappConnectOptions);
+            var connectedData = await WCSignClient.Instance.SignClient.Connect(dappConnectOptions);
 
-            Debug.Log($"URI: {connectData.Uri}");
+            Debug.Log($"URI: {connectedData.Uri}");
 
-            var qrCodeAsTexture2D = GenerateQRTexture(connectData.Uri);
+            var qrCodeAsTexture2D = GenerateQRTexture(connectedData.Uri);
             QRCodeImage.sprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new Vector2(0.5f, 0.5f));
             DeepLinkButton.onClick.RemoveAllListeners();
-            DeepLinkButton.onClick.AddListener(() => Application.OpenURL(connectData.Uri));
+            DeepLinkButton.onClick.AddListener(() => Application.OpenURL(connectedData.Uri));
 
-            await connectData.Approval;
+            await connectedData.Approval;
 
             WalletConnectCanvas.SetActive(false);
 
-            return dappClient;
+            return null;
         }
 
         private static Texture2D GenerateQRTexture(string text)
