@@ -4,6 +4,7 @@ using Nethereum.Web3.Accounts;
 using UnityEngine;
 using WalletConnectSharp.Sign;
 using WalletConnectSharp.Network.Models;
+using Nethereum.JsonRpc.Client;
 
 namespace Thirdweb.Wallets
 {
@@ -32,10 +33,12 @@ namespace Thirdweb.Wallets
                 await new WaitForSeconds(0.5f);
             }
 
-            var address = await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
+            _dappClient = await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
 
-            // _web3 = new Web3(new WalletConnectClient(WalletConnect.Instance.Session));
-            return address;
+            var wcProtocol = _dappClient.Protocol;
+            var client = new RpcClient(new System.Uri(wcProtocol));
+            _web3 = new Web3(client);
+            return await GetAddress();
         }
 
         public async Task Disconnect()
@@ -59,7 +62,7 @@ namespace Thirdweb.Wallets
 
         public async Task<string> GetAddress()
         {
-            var ethAccs = await _dappClient.Request<object[], string[]>("eth_accounts", new object[] { });
+            var ethAccs = await _web3.Eth.Accounts.SendRequestAsync();
             var addy = ethAccs[0];
             if (addy != null)
                 addy = addy.ToChecksumAddress();
