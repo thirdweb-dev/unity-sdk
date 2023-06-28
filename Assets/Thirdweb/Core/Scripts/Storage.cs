@@ -11,6 +11,11 @@ namespace Thirdweb
         public string IpfsHash;
         public string PinSize;
         public string Timestamp;
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
     }
 
     public class Storage

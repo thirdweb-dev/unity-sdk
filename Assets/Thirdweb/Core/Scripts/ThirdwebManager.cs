@@ -43,16 +43,16 @@ public class ThirdwebManager : MonoBehaviour
     };
 
     [Tooltip("The name of your app")]
-    public string appName = "Thirdweb Game";
+    public string appName = null;
 
     [Tooltip("The description of your app")]
-    public string appDescription = "Thirdweb Game Demo";
+    public string appDescription = null;
 
     [Tooltip("Favicons for your app")]
-    public string[] appIcons = new string[] { "https://thirdweb.com/favicon.ico" };
+    public string[] appIcons = new string[] { };
 
     [Tooltip("The url of your app")]
-    public string appUrl = "https://thirdweb.com";
+    public string appUrl = null;
 
     [Tooltip("IPFS Gateway Override")]
     public string storageIpfsGatewayUrl = "https://gateway.ipfscdn.io/ipfs/";
@@ -71,6 +71,12 @@ public class ThirdwebManager : MonoBehaviour
 
     [Tooltip("Magic Link API Key (https://dashboard.magic.link)")]
     public string magicLinkApiKey = null;
+
+    [Tooltip("WalletConnect Project ID (https://cloud.walletconnect.com/app)")]
+    public string walletConnectProjectId = null;
+
+    [Tooltip("Paper Client ID (https://withpaper.com/dashboard)")]
+    public string paperClientId = null;
 
     [Tooltip("Factory Contract Address")]
     public string factoryAddress;
@@ -95,6 +101,9 @@ public class ThirdwebManager : MonoBehaviour
 
     [Tooltip("Instantiates the Metamask SDK for Native platforms.")]
     public GameObject MetamaskPrefab;
+
+    [Tooltip("Instantiates the Paper SDK for Native platforms.")]
+    public GameObject PaperPrefab;
 
     public ThirdwebSDK SDK;
 
@@ -175,13 +184,16 @@ public class ThirdwebManager : MonoBehaviour
         }
 
         // Set up wallet data
+
         options.wallet = new ThirdwebSDK.WalletOptions()
         {
-            appName = string.IsNullOrEmpty(appName) ? "Thirdweb Game" : appName,
-            appDescription = string.IsNullOrEmpty(appDescription) ? "Thirdweb Game Demo" : appDescription,
-            appIcons = appIcons.Length == 0 ? new string[] { "https://thirdweb.com/favicon.ico" } : appIcons,
+            appName = string.IsNullOrEmpty(appName) ? "thirdweb powered dApp" : appName,
+            appDescription = string.IsNullOrEmpty(appDescription) ? "thirdweb powered dApp" : appDescription,
+            appIcons = string.IsNullOrEmpty(appIcons[0]) ? new string[] { "https://thirdweb.com/favicon.ico" } : appIcons,
             appUrl = string.IsNullOrEmpty(appUrl) ? "https://thirdweb.com" : appUrl,
             magicLinkApiKey = string.IsNullOrEmpty(magicLinkApiKey) ? null : magicLinkApiKey,
+            walletConnectProjectId = string.IsNullOrEmpty(walletConnectProjectId) ? "145769e410f16970a79ff77b2d89a1e0" : walletConnectProjectId,
+            paperClientId = string.IsNullOrEmpty(paperClientId) ? null : paperClientId,
         };
 
         options.smartWalletConfig =
@@ -192,9 +204,9 @@ public class ThirdwebManager : MonoBehaviour
                     factoryAddress = factoryAddress,
                     thirdwebApiKey = thirdwebApiKey,
                     gasless = gasless,
-                    bundlerUrl = bundlerUrl,
-                    paymasterUrl = paymasterUrl,
-                    entryPointAddress = entryPointAddress
+                    bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{currentChain.identifier}.bundler.thirdweb.com" : bundlerUrl,
+                    paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{currentChain.identifier}.bundler.thirdweb.com" : paymasterUrl,
+                    entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
                 };
 
         SDK = new ThirdwebSDK(chainOrRPC, chainId, options);

@@ -168,7 +168,7 @@ namespace Thirdweb
                 }
                 catch (System.Exception)
                 {
-                    Debug.LogWarning("$Unable to find owner of {tokenId}, return address(0)");
+                    Debug.LogWarning($"Unable to find owner of {tokenId}, return address(0)");
                     return "0x0000000000000000000000000000000000000000";
                 }
             }

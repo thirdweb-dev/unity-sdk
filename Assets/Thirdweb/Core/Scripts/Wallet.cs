@@ -525,10 +525,11 @@ namespace Thirdweb
     {
         Metamask,
         Coinbase,
-        WalletConnectV1,
+        WalletConnect,
         Injected,
         MagicLink,
         LocalWallet,
-        SmartWallet
+        SmartWallet,
+        Paper
     }
 }

@@ -5,7 +5,6 @@ using System;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Events;
-using WalletConnectSharp.Core.Models;
 using System.Numerics;
 
 [Serializable]
@@ -26,7 +25,7 @@ public struct NetworkSprite
 public class Prefab_ConnectWallet : MonoBehaviour
 {
     [Header("SETTINGS")]
-    public List<WalletProvider> supportedWallets = new List<WalletProvider>() { WalletProvider.LocalWallet, WalletProvider.WalletConnectV1 };
+    public List<WalletProvider> supportedWallets = new List<WalletProvider>() { WalletProvider.LocalWallet, WalletProvider.WalletConnect };
 
     [Header("CUSTOM CALLBACKS")]
     public UnityEvent OnConnectedCallback;
@@ -45,6 +44,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public TMP_InputField passwordInputField;
     public Button passwordButton;
     public GameObject emailPanel;
+    public Image emailPanelImage;
     public TMP_InputField emailInputField;
     public Button emailButton;
 
@@ -72,7 +72,6 @@ public class Prefab_ConnectWallet : MonoBehaviour
     string address;
     WalletProvider _wallet;
     bool connecting;
-    WCSessionData wcSessionData;
 
     public string Address
     {
@@ -93,7 +92,11 @@ public class Prefab_ConnectWallet : MonoBehaviour
             }
             else if (supportedWallets[0] == WalletProvider.MagicLink)
             {
-                connectButton.GetComponent<Button>().onClick.AddListener(() => OpenEmailPanel());
+                connectButton.GetComponent<Button>().onClick.AddListener(() => OpenEmailPanel(WalletProvider.MagicLink));
+            }
+            else if (supportedWallets[0] == WalletProvider.Paper)
+            {
+                connectButton.GetComponent<Button>().onClick.AddListener(() => OpenEmailPanel(WalletProvider.Paper));
             }
             else
             {
@@ -115,7 +118,11 @@ public class Prefab_ConnectWallet : MonoBehaviour
                 }
                 else if (wb.wallet == WalletProvider.MagicLink)
                 {
-                    wb.walletButton.onClick.AddListener(() => OpenEmailPanel());
+                    wb.walletButton.onClick.AddListener(() => OpenEmailPanel(WalletProvider.MagicLink));
+                }
+                else if (wb.wallet == WalletProvider.Paper)
+                {
+                    wb.walletButton.onClick.AddListener(() => OpenEmailPanel(WalletProvider.Paper));
                 }
                 else
                 {
@@ -153,11 +160,12 @@ public class Prefab_ConnectWallet : MonoBehaviour
         passwordButton.onClick.AddListener(() => OnConnect(WalletProvider.LocalWallet, passwordInputField.text));
     }
 
-    public void OpenEmailPanel()
+    public void OpenEmailPanel(WalletProvider wallet)
     {
         emailPanel.SetActive(true);
+        emailPanelImage.sprite = walletButtons.Find(x => x.wallet == wallet).icon;
         emailButton.onClick.RemoveAllListeners();
-        emailButton.onClick.AddListener(() => OnConnect(WalletProvider.MagicLink, null, emailInputField.text));
+        emailButton.onClick.AddListener(() => OnConnect(wallet, null, emailInputField.text));
     }
 
     // Connecting

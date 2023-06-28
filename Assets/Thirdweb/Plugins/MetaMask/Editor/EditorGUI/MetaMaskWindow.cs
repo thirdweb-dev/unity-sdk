@@ -131,7 +131,7 @@ namespace MetaMask.Unity
             GUILayout.Box(Resources.Load<Texture>(_metamaskLogoImagePath), _metamaskLogoStyle);
             GUILayout.Box("Welcome Back!", _higherTextStyle);
             GUILayout.Box(
-                "Welcome to the MetaMask SDK Installer Window, Below you will our documentation as well as a section to modify the SDK configuration!",
+                "Welcome to the MetaMask SDK Installer Window, Below you will find our documentation as well as a section to modify the SDK configuration!",
                 _bodyTextStyle);
             GUILayout.BeginArea(new Rect((EditorGUIUtility.currentViewWidth / 2) - 85, _lastYPosition + 100, 165, 100));
             if (GUILayout.Button("Documentation", _buttonStyle))

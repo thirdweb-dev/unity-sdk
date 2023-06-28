@@ -1,1 +1,0 @@
-An NEthereum extension to access the WalletConnect protocol through a Web3 Provider. A lightweight C# implementation of the WalletConnect protocol that can be used to connect to external wallets or connect a wallet to an external Dapp

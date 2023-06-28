@@ -1,17 +1,12 @@
 using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.ABI.EIP712;
-using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.Signer;
 using Nethereum.Signer.EIP712;
-using UnityEngine;
 using TokenERC20Contract = Thirdweb.Contracts.TokenERC20.ContractDefinition;
 using TokenERC721Contract = Thirdweb.Contracts.TokenERC721.ContractDefinition;
 using TokenERC1155Contract = Thirdweb.Contracts.TokenERC1155.ContractDefinition;
-using WalletConnectSharp.Unity;
-using WalletConnectSharp.NEthereum;
 using MinimalForwarder = Thirdweb.Contracts.Forwarder.ContractDefinition;
-using MetaMask.Unity;
 
 namespace Thirdweb
 {

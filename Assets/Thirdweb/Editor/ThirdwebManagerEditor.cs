@@ -17,6 +17,8 @@ public class ThirdwebManagerEditor : Editor
     private SerializedProperty forwarderDomainOverrideProperty;
     private SerializedProperty forwaderVersionOverrideProperty;
     private SerializedProperty magicLinkApiKeyProperty;
+    private SerializedProperty walletConnectProjectIdProperty;
+    private SerializedProperty paperClientIdProperty;
     private SerializedProperty factoryAddressProperty;
     private SerializedProperty thirdwebApiKeyProperty;
     private SerializedProperty gaslessProperty;
@@ -25,6 +27,7 @@ public class ThirdwebManagerEditor : Editor
     private SerializedProperty entryPointAddressProperty;
     private SerializedProperty WalletConnectPrefabProperty;
     private SerializedProperty MetamaskPrefabProperty;
+    private SerializedProperty PaperPrefabProperty;
 
     private ReorderableList supportedChainsList;
     private bool[] sectionExpanded;
@@ -34,6 +37,8 @@ public class ThirdwebManagerEditor : Editor
     private GUIStyle dangerZoneStyle;
     private GUIContent warningIcon;
     private Texture2D bannerImage;
+
+    private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState";
 
     private void OnEnable()
     {
@@ -49,6 +54,8 @@ public class ThirdwebManagerEditor : Editor
         forwarderDomainOverrideProperty = serializedObject.FindProperty("forwarderDomainOverride");
         forwaderVersionOverrideProperty = serializedObject.FindProperty("forwaderVersionOverride");
         magicLinkApiKeyProperty = serializedObject.FindProperty("magicLinkApiKey");
+        walletConnectProjectIdProperty = serializedObject.FindProperty("walletConnectProjectId");
+        paperClientIdProperty = serializedObject.FindProperty("paperClientId");
         factoryAddressProperty = serializedObject.FindProperty("factoryAddress");
         thirdwebApiKeyProperty = serializedObject.FindProperty("thirdwebApiKey");
         gaslessProperty = serializedObject.FindProperty("gasless");
@@ -57,6 +64,7 @@ public class ThirdwebManagerEditor : Editor
         entryPointAddressProperty = serializedObject.FindProperty("entryPointAddress");
         WalletConnectPrefabProperty = serializedObject.FindProperty("WalletConnectPrefab");
         MetamaskPrefabProperty = serializedObject.FindProperty("MetamaskPrefab");
+        PaperPrefabProperty = serializedObject.FindProperty("PaperPrefab");
 
         supportedChainsList = new ReorderableList(serializedObject, supportedChainsProperty, true, true, true, true);
         supportedChainsList.drawHeaderCallback = rect =>
@@ -104,8 +112,12 @@ public class ThirdwebManagerEditor : Editor
         warningIcon = EditorGUIUtility.IconContent("console.warnicon.sml");
         bannerImage = Resources.Load<Texture2D>("EditorBanner");
 
-        sectionExpanded = new bool[6];
-        sectionExpanded[0] = true;
+        sectionExpanded = GetExpandedState();
+    }
+
+    private void OnDisable()
+    {
+        SetExpandedState(sectionExpanded);
     }
 
     public override void OnInspectorGUI()
@@ -227,10 +239,38 @@ public class ThirdwebManagerEditor : Editor
 
         EditorGUILayout.Space();
 
-        // Smart Wallet Options
+        // Wallet Connect Options
         sectionExpanded[5] = DrawSectionWithExpand(
-            "Smart Wallet Options",
+            "Wallet Connect Options",
             sectionExpanded[5],
+            () =>
+            {
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.PropertyField(walletConnectProjectIdProperty);
+                EditorGUILayout.EndVertical();
+            }
+        );
+
+        EditorGUILayout.Space();
+
+        // Paper Options
+        sectionExpanded[6] = DrawSectionWithExpand(
+            "Paper Options",
+            sectionExpanded[6],
+            () =>
+            {
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.PropertyField(paperClientIdProperty);
+                EditorGUILayout.EndVertical();
+            }
+        );
+
+        EditorGUILayout.Space();
+
+        // Smart Wallet Options
+        sectionExpanded[7] = DrawSectionWithExpand(
+            "Smart Wallet Options",
+            sectionExpanded[7],
             () =>
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -290,6 +330,7 @@ public class ThirdwebManagerEditor : Editor
                 {
                     EditorGUILayout.PropertyField(WalletConnectPrefabProperty);
                     EditorGUILayout.PropertyField(MetamaskPrefabProperty);
+                    EditorGUILayout.PropertyField(PaperPrefabProperty);
                 }
 
                 EditorGUILayout.EndVertical();
@@ -297,23 +338,6 @@ public class ThirdwebManagerEditor : Editor
         );
 
         serializedObject.ApplyModifiedProperties();
-    }
-
-    private void DrawResetButton(System.Action resetAction)
-    {
-        GUIStyle buttonStyle = new GUIStyle(EditorStyles.miniButtonRight);
-        const float buttonWidth = 60f;
-
-        GUILayout.Space(5);
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-
-        if (GUILayout.Button("Reset", buttonStyle, GUILayout.Width(buttonWidth)))
-        {
-            resetAction?.Invoke();
-        }
-
-        GUILayout.EndHorizontal();
     }
 
     private void DrawSectionWithoutExpand(string title, System.Action drawContent)
@@ -364,5 +388,32 @@ public class ThirdwebManagerEditor : Editor
         EditorGUILayout.EndVertical();
 
         return expanded;
+    }
+
+    private bool[] GetExpandedState()
+    {
+        string expandedState = EditorPrefs.GetString(ExpandedStateKey, string.Empty);
+        if (!string.IsNullOrEmpty(expandedState))
+        {
+            string[] stateArray = expandedState.Split(',');
+            bool[] expanded = new bool[stateArray.Length];
+            for (int i = 0; i < stateArray.Length; i++)
+            {
+                bool.TryParse(stateArray[i], out expanded[i]);
+            }
+            return expanded;
+        }
+        else
+        {
+            var states = new bool[8];
+            states[0] = true;
+            return states;
+        }
+    }
+
+    private void SetExpandedState(bool[] expandedState)
+    {
+        string stateString = string.Join(",", expandedState);
+        EditorPrefs.SetString(ExpandedStateKey, stateString);
     }
 }

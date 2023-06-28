@@ -35,6 +35,8 @@ namespace MetaMask
         /// </summary>
         public string PublicKey => this.publicKey;
 
+        private readonly string _privateKey;
+
         #endregion
 
         #region Constructors
@@ -50,13 +52,10 @@ namespace MetaMask
             this.data = data;
 
             // Generate a new private key if there is none
-            if (string.IsNullOrEmpty(data.PrivateKey))
-            {
-                data.PrivateKey = this.ecies.GeneratePrivateKey();
-            }
+            _privateKey = this.ecies.GeneratePrivateKey();
 
             // Derive the public key from the private key
-            this.publicKey = this.ecies.GetPublicKey(data.PrivateKey);
+            this.publicKey = this.ecies.GetPublicKey(_privateKey);
         }
 
         #endregion
@@ -104,7 +103,7 @@ namespace MetaMask
         /// <returns>Returns the decrypted message</returns>
         public string DecryptMessage(string message)
         {
-            return this.ecies.Decrypt(message, this.data.PrivateKey);
+            return this.ecies.Decrypt(message, _privateKey);
         }
 
         #endregion
@@ -133,14 +132,14 @@ namespace MetaMask
         /// Gets or sets the Channel ID used for communication between MetaMask and the client.
         /// </summary>
         [JsonProperty("channel_id")]
-        [JsonIgnore]
         public string ChannelId { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
         /// Gets or sets the Private Key of the client.
         /// </summary>
-        [JsonProperty("private_key")]
-        public string PrivateKey { get; set; }
+        // NOTE: Not needed, will be recreated each resume
+        //[JsonProperty("private_key")]
+        // public string PrivateKey { get; set; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="MetaMaskSessionData"/>.
@@ -154,9 +153,16 @@ namespace MetaMask
         /// <param name="appUrl">The client's application URL</param>
         public MetaMaskSessionData(string appName, string appUrl)
         {
+            if (string.IsNullOrWhiteSpace(appName))
+                throw new ArgumentException(
+                    "MetaMask app name cannot be null, please update app name in Window > MetaMask > Setup Window under Credentials");
+            
+            if (string.IsNullOrWhiteSpace(appUrl))
+                throw new ArgumentException(
+                    "MetaMask app url cannot be null, please update app name in Window > MetaMask > Setup Window under Credentials");
+
             AppName = appName;
             AppUrl = appUrl;
         }
-
     }
 }

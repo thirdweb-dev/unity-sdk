@@ -7,7 +7,10 @@ namespace MetaMask.Models
 
     public class MetaMaskEthereumRequest
     {
-
+        [JsonProperty("jsonrpc")]
+        [JsonPropertyName("jsonrpc")]
+        public string JsonRpc { get; private set; } = "2.0";
+        
         [JsonProperty("id")]
         [JsonPropertyName("id")]
         public string Id { get; set; }

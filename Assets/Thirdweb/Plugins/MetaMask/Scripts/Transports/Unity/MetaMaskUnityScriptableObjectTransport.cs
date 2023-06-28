@@ -1,7 +1,8 @@
 using System;
-
+#if UNITY_WEBGL
+using System.Runtime.InteropServices;
+#endif
 using MetaMask.Models;
-
 using UnityEngine;
 
 namespace MetaMask.Transports.Unity
@@ -9,6 +10,18 @@ namespace MetaMask.Transports.Unity
 
     public abstract class MetaMaskUnityScriptableObjectTransport : ScriptableObject, IMetaMaskTransport
     {
+        public bool isWebGL
+        {
+            get
+            {
+#if UNITY_WEBGL
+                return true;
+#else
+                return false;
+
+#endif
+            }
+        }
 
         public abstract event EventHandler<MetaMaskUnityConnectEventArgs> Connecting;
         public abstract event EventHandler<MetaMaskUnityRequestEventArgs> Requesting;
@@ -28,6 +41,35 @@ namespace MetaMask.Transports.Unity
         public abstract void OnSessionRequest(MetaMaskSessionData session);
 
         public abstract void OnSuccess();
+        
+#if UNITY_WEBGL
+        [DllImport("__Internal")]
+        public static extern void OpenMetaMaskDeeplink(string url);
+        
+        [DllImport("__Internal")]
+        public static extern bool WebGLIsMobile();
+#endif
+
+        public bool IsMobile
+        {
+            get
+            {
+                #if UNITY_WEBGL
+                    return WebGLIsMobile();
+                #else
+                    return Application.isMobilePlatform;
+                #endif
+            }
+        }
+
+        public void OpenDeeplinkURL(string url)
+        {
+#if UNITY_WEBGL
+            OpenMetaMaskDeeplink(url);
+#else
+            Application.OpenURL(url);
+#endif
+        }
 
     }
 

@@ -1,5 +1,5 @@
 using System;
-using System.Threading.Tasks;
+
 using MetaMask.Cryptography;
 using MetaMask.IO;
 using MetaMask.Logging;
@@ -7,12 +7,16 @@ using MetaMask.Models;
 using MetaMask.Sockets;
 using MetaMask.Transports;
 using MetaMask.Transports.Unity.UI;
+
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace MetaMask.Unity
 {
+
     public class MetaMaskUnity : MonoBehaviour
     {
+
         #region Fields
 
         protected static MetaMaskUnity instance;
@@ -20,25 +24,25 @@ namespace MetaMask.Unity
         /// <summary>The configuration for the MetaMask client.</summary>
         [SerializeField]
         protected MetaMaskConfig config;
+        /// <summary>Whether or not to initialize the wallet on start.</summary>
+        /// <remarks>This is useful for testing.</remarks>
+        [SerializeField]
+        protected bool initializeOnStart = true;
+
 
         /// <summary>Initializes the MetaMask Wallet Plugin.</summary>
         protected bool initialized = false;
 
         /// <param name="transport">The transport to use for communication with the MetaMask backend.</param>
         protected IMetaMaskTransport transport;
-
         /// <param name="socket">The socket wrapper to use for communication with the MetaMask backend.</param>
         protected IMetaMaskSocketWrapper socket;
-
         /// <param name="dataManager">The data manager to use for storing data.</param>
         protected MetaMaskDataManager dataManager;
-
         /// <param name="session">The session to use for storing data.</param>
         protected MetaMaskSession session;
-
         /// <param name="sessionData">The session data to use for storing data.</param>
         protected MetaMaskSessionData sessionData;
-
         /// <param name="wallet">The wallet to use for storing data.</param>
         protected MetaMaskWallet wallet;
 
@@ -50,7 +54,27 @@ namespace MetaMask.Unity
         /// <returns>The singleton instance of the <see cref="MetaMaskUnity"/> class.</returns>
         public static MetaMaskUnity Instance
         {
-            get { return instance; }
+            get
+            {
+                if (instance == null)
+                {
+                    var instances = FindObjectsOfType<MetaMaskUnity>();
+                    if (instances.Length > 1)
+                    {
+                        Debug.LogError("There are more than 1 instances of " + nameof(MetaMaskUnity) + " inside the scene, there should be only one.");
+                        instance = instances[0];
+                    }
+                    else if (instances.Length == 1)
+                    {
+                        instance = instances[0];
+                    }
+                    else
+                    {
+                        instance = CreateNewInstance();
+                    }
+                }
+                return instance;
+            }
         }
 
         /// <summary>Gets the configuration for the MetaMask client.</summary>
@@ -87,14 +111,18 @@ namespace MetaMask.Unity
             if (instance == null)
             {
                 instance = this;
-                DontDestroyOnLoad(this.gameObject);
             }
             else if (instance != this)
             {
                 Debug.LogError("There are more than 1 instances of " + nameof(MetaMaskUnity) + " inside the scene, there should be only one.");
                 Destroy(gameObject);
             }
+            if (this.initializeOnStart)
+            {
+                Initialize(Config);
+            }
         }
+
 
         /// <summary>Saves the current session.</summary>
         protected void OnApplicationQuit()
@@ -154,6 +182,7 @@ namespace MetaMask.Unity
 
             try
             {
+
                 // Initialize the transport
                 transport.Initialize();
 
@@ -185,6 +214,14 @@ namespace MetaMask.Unity
         /// <summary>Loads the session.</summary>
         public void LoadSession()
         {
+            if (Config.AppName == "example" || Config.AppUrl == "example.com")
+            {
+                if (SceneManager.GetActiveScene().name.ToLower() != "metamask main (sample)")
+                    throw new ArgumentException(
+                        "Cannot use example App name or App URL, please update app info in Window > MetaMask > Setup Window under Credentials");
+
+            }
+            
             if (this.sessionData == null)
             {
                 if (this.session != null && this.session.Data != null)
@@ -207,34 +244,37 @@ namespace MetaMask.Unity
 
         #region Wallet API
 
-        public EventHandler OnConnectionAttempted;
-        public EventHandler OnDisconnectionAttempted;
-
         /// <summary>Connects to the wallet.</summary>
         public void Connect()
         {
             this.wallet.Connect();
-            OnConnectionAttempted.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>Disconnects the wallet.</summary>
         public void Disconnect()
         {
             this.wallet.Disconnect();
-            OnDisconnectionAttempted.Invoke(this, EventArgs.Empty);
         }
 
-        public void OpenDeepLink()
+        /// <summary>Makes a request to the users connected wallet.</summary>
+        /// <param name="request">The ethereum request to send to the user wallet.</param>
+        public void Request(MetaMaskEthereumRequest request)
         {
-            if (MetaMask.Transports.Unity.UI.MetaMaskUnityUITransport.DefaultInstance != null)
-            {
-                MetaMask.Transports.Unity.UI.MetaMaskUnityUITransport.DefaultInstance.OpenDeepLink();
-            }
+            this.wallet.Request(request);
         }
 
         #endregion
 
         #region Protected Methods
+
+        /// <summary>Creates a new instance of the <see cref="MetaMaskUnity"/> class.</summary>
+        /// <returns>A new instance of the <see cref="MetaMaskUnity"/> class.</returns>
+        protected static MetaMaskUnity CreateNewInstance()
+        {
+            var go = new GameObject(nameof(MetaMaskUnity));
+            DontDestroyOnLoad(go);
+            return go.AddComponent<MetaMaskUnity>();
+        }
 
         /// <summary>Releases all resources used by the object.</summary>
         protected void Release()
@@ -243,5 +283,7 @@ namespace MetaMask.Unity
         }
 
         #endregion
+
     }
+
 }
