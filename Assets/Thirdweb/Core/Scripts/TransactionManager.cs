@@ -74,7 +74,10 @@ namespace Thirdweb
 
             if (!isGasless)
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet)
+                if (
+                    ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
+                    && ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
+                )
                 {
                     var web3 = await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerWeb3();
                     var transactionHandler = web3.Eth.GetContractTransactionHandler<TWFunction>();

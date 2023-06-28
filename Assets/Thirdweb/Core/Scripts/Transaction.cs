@@ -317,7 +317,10 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.LocalWallet)
+                if (
+                    ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
+                    && ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
+                )
                 {
                     return await ThirdwebManager.Instance.SDK.session.Web3.Eth.TransactionManager.SendTransactionAsync(Input);
                 }
