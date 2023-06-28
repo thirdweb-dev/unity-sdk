@@ -44,6 +44,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public TMP_InputField passwordInputField;
     public Button passwordButton;
     public GameObject emailPanel;
+    public Image emailPanelImage;
     public TMP_InputField emailInputField;
     public Button emailButton;
 
@@ -162,6 +163,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public void OpenEmailPanel(WalletProvider wallet)
     {
         emailPanel.SetActive(true);
+        emailPanelImage.sprite = walletButtons.Find(x => x.wallet == wallet).icon;
         emailButton.onClick.RemoveAllListeners();
         emailButton.onClick.AddListener(() => OnConnect(wallet, null, emailInputField.text));
     }
