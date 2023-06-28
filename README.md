@@ -9,7 +9,7 @@
 
 </p>
 <p align="center"><strong>Best in class Web3 SDK for Unity games</strong></p>
-<p align="center"><strong><a href="https://ipfs-2.thirdwebcdn.com/ipfs/QmPbZxiEvGqXeEoWYXXvPkRLnDF33g4mratih53mi1Abxm">Live Demo</a></strong></p>
+<p align="center"><strong><a href="https://bafybeihlzllg4ifsptwenccbuko326jkq2tkjayjtu4a5i7efnxddiqjeq.ipfs-public.thirdwebcdn.com/">Live Demo</a></strong></p>
 <br />
 
 # Supported platforms
