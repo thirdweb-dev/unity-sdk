@@ -292,8 +292,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 400}
-  m_SizeDelta: {x: 200, y: 200}
+  m_AnchoredPosition: {x: -0.000033379, y: 406}
+  m_SizeDelta: {x: 169.4689, y: 169.4689}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3040857393694579318
 CanvasRenderer:
@@ -446,9 +446,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3202619366221042882}
-  - component: {fileID: 5668056388525694654}
-  - component: {fileID: 7451019203659222339}
-  - component: {fileID: 3041905247137340966}
   m_Layer: 0
   m_Name: WalletProvider_WalletConnect
   m_TagString: Untagged
@@ -472,56 +469,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5668056388525694654
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3202619366221042887}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13586f7257ca83d49b023e59549c6a31, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WalletConnectCanvas: {fileID: 3040857394524813045}
-  QRCodeImage: {fileID: 4173661967735120711}
-  DeepLinkButton: {fileID: 1670754136118778672}
---- !u!114 &7451019203659222339
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3202619366221042887}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13d0c40e82fdb41b086626cca383a72e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ProjectName: 
-  ProjectId: 
-  ClientMetadata:
-    Name: 
-    Description: 
-    Url: 
-    Icons: []
-    VerifyUrl: 
-  ConnectOnAwake: 0
-  ConnectOnStart: 0
-  BaseContext: unity-game
---- !u!114 &3041905247137340966
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3202619366221042887}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4852243708c24a4089f2ed6baf110a87, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8183618418573995823
 GameObject:
   m_ObjectHideFlags: 0
