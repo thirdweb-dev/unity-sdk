@@ -204,9 +204,9 @@ public class ThirdwebManager : MonoBehaviour
                     factoryAddress = factoryAddress,
                     thirdwebApiKey = thirdwebApiKey,
                     gasless = gasless,
-                    bundlerUrl = bundlerUrl,
-                    paymasterUrl = paymasterUrl,
-                    entryPointAddress = entryPointAddress
+                    bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{currentChain.identifier}.bundler.thirdweb.com" : bundlerUrl,
+                    paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{currentChain.identifier}.bundler.thirdweb.com" : paymasterUrl,
+                    entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
                 };
 
         SDK = new ThirdwebSDK(chainOrRPC, chainId, options);
