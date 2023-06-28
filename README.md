@@ -14,7 +14,7 @@
 
 # Supported platforms
 
-![supported_platforms](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/7200bf8a-8779-49fa-bda1-9e2051b210ec)
+![providers-unity](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/8bac2226-a67a-4709-8a5d-49fadd58160c)
 
 # Installation
 
