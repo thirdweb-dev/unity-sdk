@@ -60,9 +60,17 @@ namespace Thirdweb.Wallets
             MetamaskCanvas.SetActive(false);
 
             if (_exception != null)
+            {
+                MetaMaskUnity.Instance.Disconnect();
                 throw _exception;
+            }
 
             return MetaMaskUnity.Instance.Wallet.SelectedAddress;
+        }
+
+        public void Cancel()
+        {
+            _exception = new UnityException("User cancelled");
         }
 
         public void ShowQR(string url)

@@ -450,7 +450,7 @@ GameObject:
   - component: {fileID: 7451019203659222339}
   - component: {fileID: 3041905247137340966}
   m_Layer: 0
-  m_Name: WalletProvider_WalletConnectV2
+  m_Name: WalletProvider_WalletConnect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

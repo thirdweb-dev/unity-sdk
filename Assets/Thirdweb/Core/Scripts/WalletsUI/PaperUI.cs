@@ -62,6 +62,11 @@ namespace Thirdweb.Wallets
             return _user;
         }
 
+        public void Cancel()
+        {
+            _exception = new UnityException("User cancelled");
+        }
+
         public async Task OnSendOTP()
         {
             try

@@ -63,7 +63,7 @@ namespace Thirdweb.Wallets
                             Methods = new[]
                             {
                                 "eth_sendTransaction",
-                                "eth_sendRawTransaction",
+                                // "eth_sendRawTransaction",
                                 "personal_sign",
                                 "eth_signTypedData_v4",
                                 // "eth_accounts",
