@@ -14,7 +14,6 @@ public class WalletProviderUI
     public GameObject objectToShow;
     public Button connectButton;
     public TMP_InputField emailInput;
-    public TMP_InputField passwordInput;
     public Sprite sprite;
 }
 
@@ -83,6 +82,16 @@ public class Prefab_ConnectWallet : MonoBehaviour
     public Transform SwitchNetworkContent;
     public GameObject SwitchNetworkButtonPrefab;
 
+    [Header("Custom LocalWallet UI")]
+    public GameObject LocalWalletUISaved;
+    public TMP_InputField LocalWalletSavedPasswordInput;
+    public Button LocalWalletSavedConnectButton;
+    public Button LocalWalletSavedCreateNewButton;
+    public GameObject LocalWalletSavedPasswordWrong;
+    public GameObject LocalWalletUINew;
+    public TMP_InputField LocalWalletNewPasswordInput;
+    public Button LocalWalletNewConnectButton;
+
     private ChainData _currentChainData;
     private WalletProvider _walletProvider;
     private WalletProvider _personalWalletProvider;
@@ -97,6 +106,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
         ConnectedButton.gameObject.SetActive(false);
         ConnectedDropdownPanel.SetActive(false);
         SwitchNetworkPanel.SetActive(false);
+        LocalWalletUISaved.SetActive(false);
+        LocalWalletUINew.SetActive(false);
 
         ConnectButton.onClick.RemoveAllListeners();
         ConnectButton.onClick.AddListener(() => ToggleConnectPanel(true));
@@ -132,6 +143,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         Debug.Log("ShowSecondaryPanel: " + walletProvider);
 
+        ConnectPanel.SetActive(false);
+
         string email = null;
         string password = null;
         WalletProvider personalWallet = WalletProvider.LocalWallet;
@@ -152,14 +165,62 @@ public class Prefab_ConnectWallet : MonoBehaviour
                     break;
                 }
             case WalletProvider.LocalWallet:
-                if (SupportedWalletsUI[walletProvider].passwordInput != null)
-                {
-                    password = string.IsNullOrEmpty(SupportedWalletsUI[walletProvider].passwordInput.text) ? null : SupportedWalletsUI[walletProvider].passwordInput.text;
-                }
-                break;
+                if (Utils.HasStoredAccount())
+                    ToggleLocalWalletUISaved(true);
+                else
+                    ToggleLocalWalletUINew(false);
+                return;
         }
 
         ConnectWallet(walletProvider, password, email, personalWallet);
+    }
+
+    public void ToggleLocalWalletUISaved(bool active)
+    {
+        LocalWalletUISaved.SetActive(active);
+        LocalWalletSavedConnectButton.onClick.RemoveAllListeners();
+        LocalWalletSavedConnectButton.onClick.AddListener(() =>
+        {
+            string password = string.IsNullOrEmpty(LocalWalletSavedPasswordInput.text) ? null : LocalWalletSavedPasswordInput.text;
+            try
+            {
+                Utils.UnlockOrGenerateLocalAccount(BigInteger.Parse(_currentChainData.chainId), password);
+            }
+            catch (UnityException)
+            {
+                LocalWalletSavedPasswordWrong.SetActive(true);
+                return;
+            }
+            ConnectWallet(WalletProvider.LocalWallet, password, null, WalletProvider.LocalWallet);
+            LocalWalletUISaved.SetActive(false);
+        });
+
+        LocalWalletSavedCreateNewButton.onClick.AddListener(() =>
+        {
+            LocalWalletUISaved.SetActive(false);
+            ToggleLocalWalletUINew(true);
+        });
+
+        if (!active)
+            ToggleConnectPanel(true);
+    }
+
+    public void ToggleLocalWalletUINew(bool active)
+    {
+        LocalWalletUINew.SetActive(active);
+        LocalWalletNewConnectButton.onClick.RemoveAllListeners();
+        LocalWalletNewConnectButton.onClick.AddListener(() =>
+        {
+            if (Utils.HasStoredAccount())
+                Utils.DeleteLocalAccount();
+
+            string password = string.IsNullOrEmpty(LocalWalletNewPasswordInput.text) ? null : LocalWalletNewPasswordInput.text;
+            ConnectWallet(WalletProvider.LocalWallet, password, null, WalletProvider.LocalWallet);
+            LocalWalletUINew.SetActive(false);
+        });
+
+        if (!active)
+            ToggleConnectPanel(true);
     }
 
     private async void ConnectWallet(WalletProvider walletProvider, string password, string email, WalletProvider personalWallet)
@@ -178,6 +239,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
         {
             Debug.LogWarning($"Could not connect to Wallet Provider: {walletProvider}! {e}");
             ConnectPanel.SetActive(false);
+            LocalWalletUISaved.SetActive(false);
+            LocalWalletUINew.SetActive(false);
             OnConnectFailed?.Invoke();
         }
     }
