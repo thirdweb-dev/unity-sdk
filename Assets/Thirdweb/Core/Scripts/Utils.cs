@@ -96,7 +96,7 @@ namespace Thirdweb
         {
             if (address.Length != 42)
                 throw new ArgumentException("Invalid Address Length.");
-            return $"{address.Substring(0, 5)}...{address.Substring(39)}";
+            return $"{address.Substring(0, 6)}...{address.Substring(38)}";
         }
 
         public static bool IsWebGLBuild()
