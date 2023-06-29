@@ -521,6 +521,7 @@ namespace Thirdweb
     /// <summary>
     /// Represents the available wallet providers.
     /// </summary>
+    [System.Serializable]
     public enum WalletProvider
     {
         Metamask,
