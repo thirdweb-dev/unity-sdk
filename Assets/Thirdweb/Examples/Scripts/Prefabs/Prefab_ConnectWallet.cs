@@ -165,10 +165,10 @@ public class Prefab_ConnectWallet : MonoBehaviour
                     break;
                 }
             case WalletProvider.LocalWallet:
-                if (Utils.HasStoredAccount())
+                if (!Utils.IsWebGLBuild() && Utils.HasStoredAccount())
                     ToggleLocalWalletUISaved(true);
                 else
-                    ToggleLocalWalletUINew(false);
+                    ToggleLocalWalletUINew(true);
                 return;
         }
 
@@ -211,7 +211,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         LocalWalletNewConnectButton.onClick.RemoveAllListeners();
         LocalWalletNewConnectButton.onClick.AddListener(() =>
         {
-            if (Utils.HasStoredAccount())
+            if (!Utils.IsWebGLBuild() && Utils.HasStoredAccount())
                 Utils.DeleteLocalAccount();
 
             string password = string.IsNullOrEmpty(LocalWalletNewPasswordInput.text) ? null : LocalWalletNewPasswordInput.text;
