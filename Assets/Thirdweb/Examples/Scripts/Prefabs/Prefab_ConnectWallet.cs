@@ -1,331 +1,383 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Thirdweb;
-using System;
-using TMPro;
 using UnityEngine.UI;
-using UnityEngine.Events;
+using RotaryHeart.Lib.SerializableDictionary;
+using Thirdweb;
+using TMPro;
 using System.Numerics;
+using UnityEngine.Events;
 
-[Serializable]
-public struct WalletButton
+[System.Serializable]
+public class WalletProviderUI
 {
-    public WalletProvider wallet;
-    public Button walletButton;
-    public Sprite icon;
+    public GameObject objectToShow;
+    public Button connectButton;
+    public TMP_InputField emailInput;
+    public Sprite sprite;
 }
 
-[Serializable]
-public struct NetworkSprite
+[System.Serializable]
+public class NetworkIcon
 {
     public string chain;
     public Sprite sprite;
 }
 
+[System.Serializable]
+public class WalletProviderUIDictionary : SerializableDictionaryBase<WalletProvider, WalletProviderUI> { }
+
 public class Prefab_ConnectWallet : MonoBehaviour
 {
-    [Header("SETTINGS")]
-    public List<WalletProvider> supportedWallets = new List<WalletProvider>() { WalletProvider.LocalWallet, WalletProvider.WalletConnect };
+    [Header("SETUP")]
+    [Header("Wallets you want to support")]
+    public List<WalletProvider> SupportedWallets = new List<WalletProvider>()
+    {
+        WalletProvider.Paper,
+        WalletProvider.Injected,
+        WalletProvider.Metamask,
+        WalletProvider.Coinbase,
+        WalletProvider.WalletConnect,
+        WalletProvider.SmartWallet,
+        WalletProvider.LocalWallet,
+    };
 
-    [Header("CUSTOM CALLBACKS")]
-    public UnityEvent OnConnectedCallback;
-    public UnityEvent OnDisconnectedCallback;
-    public UnityEvent OnSwitchNetworkCallback;
-    public UnityEvent OnFailedConnectCallback;
-    public UnityEvent OnFailedDisconnectCallback;
-    public UnityEvent OnFailedSwitchNetworkCallback;
+    [Header("Additional event callbacks")]
+    public UnityEvent OnConnect;
+    public UnityEvent OnDisconnect;
+    public UnityEvent OnSwitchNetwork;
+    public UnityEvent OnConnectFailed;
+    public UnityEvent OnDisconnectFailed;
+    public UnityEvent OnSwitchNetworkFailed;
 
     [Header("UI ELEMENTS (DANGER ZONE)")]
-    // Connecting
-    public GameObject connectButton;
-    public GameObject connectDropdown;
-    public List<WalletButton> walletButtons;
-    public GameObject passwordPanel;
-    public TMP_InputField passwordInputField;
-    public Button passwordButton;
-    public GameObject emailPanel;
-    public Image emailPanelImage;
-    public TMP_InputField emailInputField;
-    public Button emailButton;
+    [Header("Connecting State")]
+    public Button ConnectButton;
+    public GameObject ConnectPanel;
+    public GameObject OrGameObject;
+    public WalletProviderUIDictionary SupportedWalletsUI;
 
-    // Connected
-    public GameObject connectedButton;
-    public GameObject connectedDropdown;
-    public TMP_Text balanceText;
-    public TMP_Text balanceText2;
-    public TMP_Text walletAddressText;
-    public TMP_Text walletAddressText2;
-    public Image walletImage;
-    public Image walletImage2;
-    public TMP_Text currentNetworkText;
-    public Image currentNetworkImage;
-    public Image chainImage;
-    public GameObject exportButton;
+    [Header("Connected State")]
+    public List<NetworkIcon> NetworkIcons;
+    public Button ConnectedButton;
+    public Image ConnectedButtonNetworkImage;
+    public TMP_Text ConnectedButtonBalanceText;
+    public TMP_Text ConnectedButtonAddressText;
+    public Image ConnectedButtonWalletIcon;
 
-    // Networks
-    public Button networkSwitchButton;
-    public GameObject networkSwitchImage;
-    public GameObject networkDropdown;
-    public GameObject networkButtonPrefab;
-    public List<NetworkSprite> networkSprites;
+    [Header("Connected State Dropdown")]
+    public GameObject ConnectedDropdownPanel;
+    public Button ConnectedDropdownCopy;
+    public Button ConnectedDropdownDisconnect;
+    public Image ConnectedDropdownNetworkImage;
+    public TMP_Text ConnectedDropdownNetworkText;
+    public TMP_Text ConnectedDropdownBalanceText;
+    public TMP_Text ConnectedDropdownAddressText;
+    public Image ConnectedDropdownWalletIcon;
+    public Button ConnectedDropdownSwitchWalletButton;
+    public Button ConnectedDropdownExportButton;
 
-    string address;
-    WalletProvider _wallet;
-    bool connecting;
+    [Header("Switch Network Panel")]
+    public GameObject SwitchNetworkPanel;
+    public Transform SwitchNetworkContent;
+    public GameObject SwitchNetworkButtonPrefab;
 
-    public string Address
-    {
-        get { return address; }
-    }
+    [Header("Custom LocalWallet UI")]
+    public GameObject LocalWalletUISaved;
+    public TMP_InputField LocalWalletSavedPasswordInput;
+    public Button LocalWalletSavedConnectButton;
+    public Button LocalWalletSavedCreateNewButton;
+    public GameObject LocalWalletSavedPasswordWrong;
+    public GameObject LocalWalletUINew;
+    public TMP_InputField LocalWalletNewPasswordInput;
+    public Button LocalWalletNewConnectButton;
 
-    // UI Initialization
+    private ChainData _currentChainData;
+    private WalletProvider _walletProvider;
+    private WalletProvider _personalWalletProvider;
+    private string _address;
 
     private void Start()
     {
-        address = null;
+        ConnectPanel.SetActive(false);
 
-        if (supportedWallets.Count == 1)
+        ConnectButton.gameObject.SetActive(true);
+        ConnectPanel.SetActive(false);
+        ConnectedButton.gameObject.SetActive(false);
+        ConnectedDropdownPanel.SetActive(false);
+        SwitchNetworkPanel.SetActive(false);
+        LocalWalletUISaved.SetActive(false);
+        LocalWalletUINew.SetActive(false);
+
+        ConnectButton.onClick.RemoveAllListeners();
+        ConnectButton.onClick.AddListener(() => ToggleConnectPanel(true));
+
+        if (SupportedWallets == null || SupportedWalletsUI.Count == 0)
+            throw new UnityException("Please add at least one supported wallet!");
+
+        foreach (var walletUI in SupportedWalletsUI)
         {
-            if (supportedWallets[0] == WalletProvider.LocalWallet)
-            {
-                connectButton.GetComponent<Button>().onClick.AddListener(() => OpenPasswordPanel());
-            }
-            else if (supportedWallets[0] == WalletProvider.MagicLink)
-            {
-                connectButton.GetComponent<Button>().onClick.AddListener(() => OpenEmailPanel(WalletProvider.MagicLink));
-            }
-            else if (supportedWallets[0] == WalletProvider.Paper)
-            {
-                connectButton.GetComponent<Button>().onClick.AddListener(() => OpenEmailPanel(WalletProvider.Paper));
-            }
-            else
-            {
-                connectButton.GetComponent<Button>().onClick.AddListener(() => OnConnect(supportedWallets[0]));
-            }
+            walletUI.Value.objectToShow.SetActive(SupportedWallets.Contains(walletUI.Key));
+            walletUI.Value.connectButton.onClick.AddListener(() => ValidateConnection(walletUI.Key));
         }
-        else
-            connectButton.GetComponent<Button>().onClick.AddListener(() => OnClickDropdown());
 
-        foreach (WalletButton wb in walletButtons)
+        bool usingEmailWallet = SupportedWallets.Contains(WalletProvider.MagicLink) || SupportedWallets.Contains(WalletProvider.Paper);
+        bool usingNormalWallet =
+            SupportedWallets.Contains(WalletProvider.Metamask)
+            || SupportedWallets.Contains(WalletProvider.Coinbase)
+            || SupportedWallets.Contains(WalletProvider.WalletConnect)
+            || SupportedWallets.Contains(WalletProvider.Injected)
+            || SupportedWallets.Contains(WalletProvider.SmartWallet);
+
+        OrGameObject.SetActive(usingEmailWallet && usingNormalWallet);
+
+        _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.chain);
+    }
+
+    public void ToggleConnectPanel(bool active)
+    {
+        ConnectPanel.SetActive(active);
+    }
+
+    private void ValidateConnection(WalletProvider walletProvider)
+    {
+        Debug.Log("ShowSecondaryPanel: " + walletProvider);
+
+        ConnectPanel.SetActive(false);
+
+        string email = null;
+        string password = null;
+        WalletProvider personalWallet = WalletProvider.LocalWallet;
+
+        switch (walletProvider)
         {
-            if (supportedWallets.Contains(wb.wallet))
-            {
-                wb.walletButton.gameObject.SetActive(true);
-
-                if (wb.wallet == WalletProvider.LocalWallet)
+            case WalletProvider.Paper:
+            case WalletProvider.MagicLink:
+                if (SupportedWalletsUI[walletProvider].emailInput == null || string.IsNullOrEmpty(SupportedWalletsUI[walletProvider].emailInput.text))
                 {
-                    wb.walletButton.onClick.AddListener(() => OpenPasswordPanel());
-                }
-                else if (wb.wallet == WalletProvider.MagicLink)
-                {
-                    wb.walletButton.onClick.AddListener(() => OpenEmailPanel(WalletProvider.MagicLink));
-                }
-                else if (wb.wallet == WalletProvider.Paper)
-                {
-                    wb.walletButton.onClick.AddListener(() => OpenEmailPanel(WalletProvider.Paper));
+                    Debug.LogWarning("Could not connect, no email provided!");
+                    ConnectPanel.SetActive(false);
+                    return;
                 }
                 else
                 {
-                    wb.walletButton.onClick.AddListener(() => OnConnect(wb.wallet, null));
+                    email = SupportedWalletsUI[walletProvider].emailInput.text;
+                    break;
                 }
-            }
-            else
-            {
-                wb.walletButton.gameObject.SetActive(false);
-            }
+            case WalletProvider.LocalWallet:
+                if (!Utils.IsWebGLBuild() && Utils.HasStoredAccount())
+                    ToggleLocalWalletUISaved(true);
+                else
+                    ToggleLocalWalletUINew(true);
+                return;
         }
 
-        connectedButton.GetComponent<Button>().onClick.AddListener(() => OnClickDropdown());
-
-        connectButton.SetActive(true);
-        connectedButton.SetActive(false);
-
-        connectDropdown.SetActive(false);
-        connectedDropdown.SetActive(false);
-
-        bool multipleNetworks = ThirdwebManager.Instance.supportedChains.Count > 1;
-        networkSwitchButton.GetComponent<Image>().raycastTarget = multipleNetworks;
-        networkSwitchImage.SetActive(multipleNetworks);
-        networkDropdown.SetActive(false);
-
-        passwordPanel.SetActive(false);
-        emailPanel.SetActive(false);
+        ConnectWallet(walletProvider, password, email, personalWallet);
     }
 
-    public void OpenPasswordPanel()
+    public void ToggleLocalWalletUISaved(bool active)
     {
-        passwordPanel.SetActive(true);
-        passwordButton.GetComponentInChildren<TMP_Text>().text = Utils.HasStoredAccount() ? "Unlock" : "Create wallet";
-        passwordButton.onClick.RemoveAllListeners();
-        passwordButton.onClick.AddListener(() => OnConnect(WalletProvider.LocalWallet, passwordInputField.text));
+        LocalWalletUISaved.SetActive(active);
+        LocalWalletSavedConnectButton.onClick.RemoveAllListeners();
+        LocalWalletSavedConnectButton.onClick.AddListener(() =>
+        {
+            string password = string.IsNullOrEmpty(LocalWalletSavedPasswordInput.text) ? null : LocalWalletSavedPasswordInput.text;
+            try
+            {
+                Utils.UnlockOrGenerateLocalAccount(BigInteger.Parse(_currentChainData.chainId), password);
+            }
+            catch (UnityException)
+            {
+                LocalWalletSavedPasswordWrong.SetActive(true);
+                return;
+            }
+            ConnectWallet(WalletProvider.LocalWallet, password, null, WalletProvider.LocalWallet);
+            LocalWalletUISaved.SetActive(false);
+        });
+
+        LocalWalletSavedCreateNewButton.onClick.AddListener(() =>
+        {
+            LocalWalletUISaved.SetActive(false);
+            ToggleLocalWalletUINew(true);
+        });
+
+        if (!active)
+            ToggleConnectPanel(true);
     }
 
-    public void OpenEmailPanel(WalletProvider wallet)
+    public void ToggleLocalWalletUINew(bool active)
     {
-        emailPanel.SetActive(true);
-        emailPanelImage.sprite = walletButtons.Find(x => x.wallet == wallet).icon;
-        emailButton.onClick.RemoveAllListeners();
-        emailButton.onClick.AddListener(() => OnConnect(wallet, null, emailInputField.text));
+        LocalWalletUINew.SetActive(active);
+        LocalWalletNewConnectButton.onClick.RemoveAllListeners();
+        LocalWalletNewConnectButton.onClick.AddListener(() =>
+        {
+            if (!Utils.IsWebGLBuild() && Utils.HasStoredAccount())
+                Utils.DeleteLocalAccount();
+
+            string password = string.IsNullOrEmpty(LocalWalletNewPasswordInput.text) ? null : LocalWalletNewPasswordInput.text;
+            ConnectWallet(WalletProvider.LocalWallet, password, null, WalletProvider.LocalWallet);
+            LocalWalletUINew.SetActive(false);
+        });
+
+        if (!active)
+            ToggleConnectPanel(true);
     }
 
-    // Connecting
-
-    public async void OnConnect(WalletProvider wallet, string password = null, string email = "joe@biden.com", WalletProvider personalWallet = WalletProvider.LocalWallet)
+    private async void ConnectWallet(WalletProvider walletProvider, string password, string email, WalletProvider personalWallet)
     {
+        Debug.Log($"Connecting to Wallet Provider: {walletProvider}...");
+
         try
         {
-            ChainData currentChain = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.chain);
-
-            address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(wallet, BigInteger.Parse(currentChain.chainId), password, email, personalWallet));
-
-            if (wallet == WalletProvider.LocalWallet || (wallet == WalletProvider.SmartWallet && personalWallet == WalletProvider.LocalWallet))
-            {
-                exportButton.SetActive(true);
-                exportButton.GetComponent<Button>().onClick.RemoveAllListeners();
-                exportButton.GetComponent<Button>().onClick.AddListener(() => OnExportWallet(password));
-            }
-            else
-            {
-                exportButton.SetActive(false);
-            }
-
-            _wallet = wallet;
-            OnConnected();
-            OnConnectedCallback?.Invoke();
-            Debug.Log($"Connected successfully to: {address}");
+            _walletProvider = walletProvider;
+            _personalWalletProvider = personalWallet;
+            _address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(walletProvider, BigInteger.Parse(_currentChainData.chainId), password, email, personalWallet));
+            ShowConnectedState();
+            OnConnect?.Invoke();
         }
-        catch (Exception e)
+        catch (System.Exception e)
         {
-            OnDisconnect();
-            OnFailedConnectCallback?.Invoke();
-            Debug.LogWarning($"Error Connecting Wallet: {e}");
+            Debug.LogWarning($"Could not connect to Wallet Provider: {walletProvider}! {e}");
+            ConnectPanel.SetActive(false);
+            LocalWalletUISaved.SetActive(false);
+            LocalWalletUINew.SetActive(false);
+            OnConnectFailed?.Invoke();
         }
     }
 
-    async void OnConnected()
+    private async void ShowConnectedState()
     {
-        try
-        {
-            passwordPanel.SetActive(false);
-            emailPanel.SetActive(false);
-            string _chain = ThirdwebManager.Instance.chain;
-            CurrencyValue nativeBalance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
-            balanceText.text = $"{nativeBalance.value.ToEth()} {nativeBalance.symbol}";
-            balanceText2.text = balanceText.text;
-            walletAddressText.text = await Utils.GetENSName(address) ?? address.ShortenAddress();
-            walletAddressText2.text = walletAddressText.text;
-            currentNetworkText.text = ThirdwebManager.Instance.chain;
-            currentNetworkImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
-            connectButton.SetActive(false);
-            connectedButton.SetActive(true);
-            connectDropdown.SetActive(false);
-            connectedDropdown.SetActive(false);
-            networkDropdown.SetActive(false);
-            walletImage.sprite = walletButtons.Find(x => x.wallet == _wallet).icon;
-            walletImage2.sprite = walletImage.sprite;
-            chainImage.sprite = networkSprites.Find(x => x.chain == _chain).sprite;
-        }
-        catch (Exception e)
-        {
-            Debug.LogWarning($"Error Fetching Native Balance: {e}");
-        }
+        Debug.Log($"Connected to: {_address}");
+
+        var chainSprite = NetworkIcons.Find(x => x.chain == _currentChainData.identifier).sprite;
+        var walletSprite = SupportedWalletsUI[_walletProvider].sprite;
+        var balance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
+
+        ConnectPanel.SetActive(false);
+        ConnectButton.gameObject.SetActive(false);
+        ConnectedDropdownPanel.SetActive(false);
+        ConnectedButton.gameObject.SetActive(true);
+
+        ConnectedButtonNetworkImage.sprite = chainSprite;
+        ConnectedButtonBalanceText.text = $"{balance.value.ToEth()} {balance.symbol}";
+        ConnectedButtonAddressText.text = _address.ShortenAddress();
+        ConnectedButtonWalletIcon.sprite = walletSprite;
+
+        ConnectedButton.onClick.RemoveAllListeners();
+        ConnectedButton.onClick.AddListener(() => ToggleConnectedDropdown(true));
     }
 
-    // Switching Network
-
-    public async void OnSwitchNetwork(string _chain)
+    private void ToggleConnectedDropdown(bool active)
     {
-        try
-        {
-            ThirdwebManager.Instance.chain = _chain;
-            ChainData currentChain = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.chain);
-            await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(int.Parse(currentChain.chainId));
-            OnConnected();
-            OnSwitchNetworkCallback?.Invoke();
-            Debug.Log($"Switched Network Successfully: {_chain}");
-        }
-        catch (Exception e)
-        {
-            OnFailedSwitchNetworkCallback?.Invoke();
-            Debug.LogWarning($"Error Switching Network: {e.Message}");
-        }
+        ConnectedDropdownPanel.SetActive(active);
+
+        ConnectedButton.onClick.RemoveAllListeners();
+        ConnectedButton.onClick.AddListener(() => ToggleConnectedDropdown(!active));
+
+        ConnectedDropdownNetworkImage.sprite = ConnectedButtonNetworkImage.sprite;
+        ConnectedDropdownNetworkText.text = PrettifyNetwork(_currentChainData.identifier);
+        ConnectedDropdownBalanceText.text = ConnectedButtonBalanceText.text;
+        ConnectedDropdownAddressText.text = ConnectedButtonAddressText.text;
+        ConnectedDropdownWalletIcon.sprite = ConnectedButtonWalletIcon.sprite;
+
+        ConnectedDropdownCopy.onClick.RemoveAllListeners();
+        ConnectedDropdownCopy.onClick.AddListener(() => CopyAddress());
+
+        ConnectedDropdownDisconnect.onClick.RemoveAllListeners();
+        ConnectedDropdownDisconnect.onClick.AddListener(() => DisconnectWallet());
+
+        ConnectedDropdownSwitchWalletButton.onClick.RemoveAllListeners();
+        ConnectedDropdownSwitchWalletButton.onClick.AddListener(() => ToggleSwitchNetworkPanel(true));
+
+        ConnectedDropdownExportButton.onClick.RemoveAllListeners();
+        ConnectedDropdownExportButton.onClick.AddListener(() => ExportWallet());
+
+        ConnectedDropdownSwitchWalletButton.gameObject.SetActive(ThirdwebManager.Instance.supportedChains.Count > 1);
+        ConnectedDropdownExportButton.gameObject.SetActive(
+            _walletProvider == WalletProvider.LocalWallet || (_walletProvider == WalletProvider.SmartWallet && _personalWalletProvider == WalletProvider.LocalWallet)
+        );
     }
 
-    public void OnClickNetworkSwitch()
+    public void ToggleSwitchNetworkPanel(bool active)
     {
-        if (networkDropdown.activeInHierarchy)
+        Debug.Log("ToggleSwitchNetworkPanel: " + active);
+        SwitchNetworkPanel.SetActive(active);
+
+        foreach (Transform item in SwitchNetworkContent)
+            Destroy(item.gameObject);
+
+        foreach (var chain in ThirdwebManager.Instance.supportedChains)
         {
-            networkDropdown.SetActive(false);
-            return;
-        }
-
-        networkDropdown.SetActive(true);
-
-        foreach (Transform child in networkDropdown.transform)
-            Destroy(child.gameObject);
-
-        foreach (ChainData chainData in ThirdwebManager.Instance.supportedChains)
-        {
-            if (chainData.identifier == ThirdwebManager.Instance.chain || !ThirdwebManager.Instance.supportedChains.Contains(chainData))
+            if (chain.identifier == _currentChainData.identifier)
                 continue;
 
-            GameObject networkButton = Instantiate(networkButtonPrefab, networkDropdown.transform);
-            networkButton.GetComponent<Button>().onClick.RemoveAllListeners();
-            networkButton.GetComponent<Button>().onClick.AddListener(() => OnSwitchNetwork(chainData.identifier));
-            networkButton.transform.Find("Text_Network").GetComponent<TMP_Text>().text = chainData.identifier;
-            networkButton.transform.Find("Icon_Network").GetComponent<Image>().sprite = networkSprites.Find(x => x.chain == chainData.identifier).sprite;
+            var chainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == chain.identifier);
+            var chainButton = Instantiate(SwitchNetworkButtonPrefab, SwitchNetworkContent);
+            var chainButtonImage = chainButton.transform.Find("Image_Network");
+            var chainButtonText = chainButton.transform.Find("Text_Network");
+            chainButtonText.GetComponentInChildren<TMP_Text>().text = PrettifyNetwork(chain.identifier);
+            chainButtonImage.GetComponentInChildren<Image>().sprite = NetworkIcons.Find(x => x.chain == chain.identifier).sprite;
+            chainButton.GetComponent<Button>().onClick.RemoveAllListeners();
+            chainButton.GetComponent<Button>().onClick.AddListener(() => SwitchNetwork(chainData));
         }
     }
 
-    // Disconnecting
-
-    public async void OnDisconnect()
+    private async void SwitchNetwork(ChainData chainData)
     {
+        Debug.Log($"Switching to network: {chainData.identifier}...");
+        try
+        {
+            await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(int.Parse(chainData.chainId));
+            _currentChainData = chainData;
+            SwitchNetworkPanel.SetActive(false);
+            ShowConnectedState();
+            OnSwitchNetwork?.Invoke();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"Could not switch network! {e}");
+            SwitchNetworkPanel.SetActive(false);
+            OnSwitchNetworkFailed?.Invoke();
+        }
+    }
+
+    private async void CopyAddress()
+    {
+        string address = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+        GUIUtility.systemCopyBuffer = address;
+        Debug.Log($"Copied address to clipboard: {address}");
+    }
+
+    private async void DisconnectWallet()
+    {
+        Debug.Log("Disconnecting wallet...");
         try
         {
             await ThirdwebManager.Instance.SDK.wallet.Disconnect();
-            OnDisconnected();
-            OnDisconnectedCallback?.Invoke();
-            Debug.Log($"Disconnected successfully.");
+            ConnectButton.gameObject.SetActive(true);
+            ConnectedButton.gameObject.SetActive(false);
+            ConnectedDropdownPanel.SetActive(false);
+            OnDisconnect?.Invoke();
         }
-        catch (Exception e)
+        catch (System.Exception e)
         {
-            OnFailedDisconnectCallback?.Invoke();
-            Debug.LogWarning($"Error Disconnecting Wallet: {e.Message}");
+            Debug.LogWarning($"Could not disconnect wallet! {e}");
+            ConnectedDropdownPanel.SetActive(false);
+            OnDisconnectFailed?.Invoke();
         }
     }
 
-    void OnDisconnected()
+    private async void ExportWallet()
     {
-        address = null;
-        connectButton.SetActive(true);
-        connectedButton.SetActive(false);
-        connectDropdown.SetActive(false);
-        connectedDropdown.SetActive(false);
-        passwordPanel.SetActive(false);
-        emailPanel.SetActive(false);
+        Debug.Log("Exporting wallet...");
+        string json = await ThirdwebManager.Instance.SDK.wallet.Export(null);
+        GUIUtility.systemCopyBuffer = json;
+        Debug.Log($"Copied wallet to clipboard: {json}");
     }
 
-    // UI
-
-    public void OnClickDropdown()
+    private string PrettifyNetwork(string networkIdentifier)
     {
-        if (String.IsNullOrEmpty(address))
-            connectDropdown.SetActive(!connectDropdown.activeInHierarchy);
-        else
-            connectedDropdown.SetActive(!connectedDropdown.activeInHierarchy);
-    }
-
-    public void OnCopyAddress()
-    {
-        Debugger.Instance.Log("Copied Address", $"Connected Address: {address}");
-        GUIUtility.systemCopyBuffer = address;
-    }
-
-    public async void OnExportWallet(string password)
-    {
-        string text = await ThirdwebManager.Instance.SDK.wallet.Export(password);
-        Debugger.Instance.Log("Exported Wallet", text);
-        GUIUtility.systemCopyBuffer = text;
+        var replaced = networkIdentifier.Replace("-", " ");
+        return replaced.Substring(0, 1).ToUpper() + replaced.Substring(1);
     }
 }
