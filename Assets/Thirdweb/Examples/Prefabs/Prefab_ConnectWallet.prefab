@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8888652}
   - component: {fileID: 8888655}
   - component: {fileID: 8888654}
+  - component: {fileID: 619290397077982986}
   - component: {fileID: 8888653}
   m_Layer: 5
   m_Name: Paper
@@ -79,6 +80,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &619290397077982986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8888651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32ca59800987fe44fa42be53d579103c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SubmitButton: {fileID: 532628331}
 --- !u!114 &8888653
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3697,6 +3711,7 @@ GameObject:
   - component: {fileID: 6988891834069932528}
   - component: {fileID: 6678982185155266248}
   - component: {fileID: 1433957169962531239}
+  - component: {fileID: 7017107297305538067}
   - component: {fileID: 198949841403930757}
   m_Layer: 5
   m_Name: Magic
@@ -3765,6 +3780,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7017107297305538067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 224917454210222876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32ca59800987fe44fa42be53d579103c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SubmitButton: {fileID: 633805264326123060}
 --- !u!114 &198949841403930757
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5774,6 +5802,7 @@ GameObject:
   - component: {fileID: 7294444128811309656}
   - component: {fileID: 3130267272257233055}
   - component: {fileID: 8356581189935462380}
+  - component: {fileID: 4054945082858376686}
   - component: {fileID: 2163843009639280647}
   m_Layer: 5
   m_Name: InputField_Pass
@@ -5841,6 +5870,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4054945082858376686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3324741828117718515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32ca59800987fe44fa42be53d579103c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SubmitButton: {fileID: 5749344126228413427}
 --- !u!114 &2163843009639280647
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6954,6 +6996,7 @@ GameObject:
   - component: {fileID: 9051433357451272252}
   - component: {fileID: 7754752833378713226}
   - component: {fileID: 450661493412975113}
+  - component: {fileID: 2395334295989635851}
   - component: {fileID: 901151537231146552}
   m_Layer: 5
   m_Name: InputField_Pass
@@ -7021,6 +7064,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &2395334295989635851
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3753907484491103207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32ca59800987fe44fa42be53d579103c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SubmitButton: {fileID: 7400601774203186329}
 --- !u!114 &901151537231146552
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11017,7 +11073,7 @@ RectTransform:
   m_GameObject: {fileID: 8018670653178584746}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.1, y: 1.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 321745765606490412}
