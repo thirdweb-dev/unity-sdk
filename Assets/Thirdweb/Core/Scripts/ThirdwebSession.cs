@@ -76,6 +76,9 @@ namespace Thirdweb
                         throw new UnityException("Smart wallet config is required for smart wallet connection method!");
                     ActiveWallet = new ThirdwebSmartWallet(ActiveWallet, Options.smartWalletConfig.Value);
                     break;
+                case WalletProvider.Hyperplay:
+                    ActiveWallet = new ThirdwebHyperplay(ChainId.ToString());
+                    break;
                 default:
                     throw new UnityException("This wallet connection method is not supported on this platform!");
             }

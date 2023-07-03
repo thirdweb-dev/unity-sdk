@@ -531,6 +531,7 @@ namespace Thirdweb
         MagicLink,
         LocalWallet,
         SmartWallet,
-        Paper
+        Paper,
+        Hyperplay
     }
 }
