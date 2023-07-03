@@ -1,11 +1,9 @@
-using System;
 using System.Threading.Tasks;
 using Nethereum.JsonRpc.Client.RpcMessages;
 using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Collections;
 
 namespace Thirdweb.Hyperplay
 {
@@ -29,20 +27,6 @@ namespace Thirdweb.Hyperplay
         {
             HyperplayRequest hyperplayRequest = new HyperplayRequest() { Method = message.Method, Params = message.RawParameters };
             string jsonString = JsonConvert.SerializeObject(hyperplayRequest);
-
-            // switch (message.Method)
-            // {
-            //     case "eth_accounts":
-            //         jsonString = "{\"request\":{\"method\":\"eth_accounts\"},\"chain\":{\"chainId\":\"" + ChainId + "\"}}";
-            //         break;
-            //     case "eth_getBalance":
-            //         string address = JsonConvert.DeserializeObject<string[]>(message.RawParameters.ToString())[0];
-            //         jsonString = "{ \"request\":{ \"method\": \"eth_getBalance\", \"params\": [\"" + address + "\", \"latest\"] }, \"chain\":{ \"" + ChainId + "\":\"5\" } }";
-            //         break;
-            //     default:
-            //         throw new UnityException("Unsupported RPC method: " + message.Method);
-            // }
-
             byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(jsonString);
             using (var request = new UnityWebRequest("localhost:9680/rpcRaw", "POST"))
             {
