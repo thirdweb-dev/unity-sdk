@@ -55,7 +55,6 @@ namespace Thirdweb.Hyperplay
                     Debug.LogError(request.error);
                     throw new UnityException("RPC request failed: " + request.error);
                 }
-                Debug.Log("Response: " + request.downloadHandler.text);
                 var hyperplayResult = JsonConvert.DeserializeObject<HyperplayResult>(request.downloadHandler.text);
                 try
                 {
