@@ -55,6 +55,8 @@ namespace Thirdweb
                     new TokenERC721Contract.TokenURIFunction() { TokenId = BigInteger.Parse(tokenId) }
                 );
 
+                tokenURI.ReturnValue1 = tokenURI.ReturnValue1.Contains("0x{id}") ? tokenURI.ReturnValue1.Replace("0x{id}", tokenId) : tokenURI.ReturnValue1;
+
                 NFT nft = new NFT();
                 nft.owner = await OwnerOf(tokenId);
                 nft.type = "ERC721";

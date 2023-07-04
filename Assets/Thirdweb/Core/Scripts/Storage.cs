@@ -87,7 +87,7 @@ namespace Thirdweb
                 await req.SendWebRequest();
                 if (req.result != UnityWebRequest.Result.Success)
                 {
-                    Debug.LogWarning($"Unable to fetch text uri {textURI} data!");
+                    Debug.LogWarning($"Unable to fetch text uri {textURI} data! {req.error}");
                     return default(T);
                 }
                 string json = req.downloadHandler.text;
