@@ -23,14 +23,14 @@ namespace Thirdweb
         private readonly string BEARER_TOKEN_URI = "https://upload.nftlabs.co/grant";
         private readonly string PIN_URI = "https://api.pinata.cloud/pinning/pinFileToIPFS";
 
-        private string ipfsGatewayUrl = "https://gateway.ipfscdn.io/ipfs/";
+        public string IPFSGateway { get; private set; }
 
         public Storage(ThirdwebSDK.StorageOptions? storageOptions)
         {
             if (storageOptions != null)
-            {
-                this.ipfsGatewayUrl = string.IsNullOrEmpty(storageOptions.Value.ipfsGatewayUrl) ? "https://gateway.ipfscdn.io/ipfs/" : storageOptions.Value.ipfsGatewayUrl;
-            }
+                this.IPFSGateway = string.IsNullOrEmpty(storageOptions.Value.ipfsGatewayUrl) ? "https://ipfs.thirdwebstorage.com/ipfs/" : storageOptions.Value.ipfsGatewayUrl;
+            else
+                this.IPFSGateway = "https://ipfs.thirdwebstorage.com/ipfs/";
         }
 
         public async Task<IPFSUploadResult> UploadText(string text)
@@ -80,7 +80,7 @@ namespace Thirdweb
 
         public async Task<T> DownloadText<T>(string textURI)
         {
-            textURI = textURI.ReplaceIPFS(ipfsGatewayUrl);
+            textURI = textURI.ReplaceIPFS();
 
             using (UnityWebRequest req = UnityWebRequest.Get(textURI))
             {
@@ -97,7 +97,7 @@ namespace Thirdweb
 
         public async Task<Sprite> DownloadImage(string imageURI)
         {
-            imageURI = imageURI.ReplaceIPFS(ipfsGatewayUrl);
+            imageURI = imageURI.ReplaceIPFS();
 
             using (UnityWebRequest req = UnityWebRequestTexture.GetTexture(imageURI))
             {

@@ -108,8 +108,9 @@ namespace Thirdweb
 #endif
         }
 
-        public static string ReplaceIPFS(this string uri, string gateway = "https://gateway.ipfscdn.io/ipfs/")
+        public static string ReplaceIPFS(this string uri)
         {
+            string gateway = ThirdwebManager.Instance.SDK.storage.IPFSGateway;
             if (!string.IsNullOrEmpty(uri) && uri.StartsWith("ipfs://"))
                 return uri.Replace("ipfs://", gateway);
             else

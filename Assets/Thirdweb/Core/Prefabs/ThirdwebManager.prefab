@@ -93,7 +93,7 @@ MonoBehaviour:
   appIcons:
   - 
   appUrl: 
-  storageIpfsGatewayUrl: https://gateway.ipfscdn.io/ipfs/
+  storageIpfsGatewayUrl: 
   relayerUrl: 
   forwarderAddress: 
   forwarderDomainOverride: 

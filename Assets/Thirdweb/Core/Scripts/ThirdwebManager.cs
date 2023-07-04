@@ -55,7 +55,7 @@ public class ThirdwebManager : MonoBehaviour
     public string appUrl = null;
 
     [Tooltip("IPFS Gateway Override")]
-    public string storageIpfsGatewayUrl = "https://gateway.ipfscdn.io/ipfs/";
+    public string storageIpfsGatewayUrl = null;
 
     [Tooltip("Autotask URL")]
     public string relayerUrl = null;
@@ -161,7 +161,7 @@ public class ThirdwebManager : MonoBehaviour
                 chainOrRPC = currentChain.identifier;
         }
 
-        // Set up storage and gasless options (if an)
+        // Set up storage and gasless options (if any)
 
         var options = new ThirdwebSDK.Options();
 
