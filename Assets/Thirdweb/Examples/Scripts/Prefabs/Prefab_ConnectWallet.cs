@@ -40,6 +40,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         WalletProvider.WalletConnect,
         WalletProvider.SmartWallet,
         WalletProvider.LocalWallet,
+        WalletProvider.Hyperplay
     };
 
     [Header("Additional event callbacks")]
@@ -127,7 +128,8 @@ public class Prefab_ConnectWallet : MonoBehaviour
             || SupportedWallets.Contains(WalletProvider.Coinbase)
             || SupportedWallets.Contains(WalletProvider.WalletConnect)
             || SupportedWallets.Contains(WalletProvider.Injected)
-            || SupportedWallets.Contains(WalletProvider.SmartWallet);
+            || SupportedWallets.Contains(WalletProvider.SmartWallet)
+            || SupportedWallets.Contains(WalletProvider.Hyperplay);
 
         OrGameObject.SetActive(usingEmailWallet && usingNormalWallet);
 
