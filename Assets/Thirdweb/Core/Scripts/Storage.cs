@@ -28,9 +28,9 @@ namespace Thirdweb
         public Storage(ThirdwebSDK.StorageOptions? storageOptions)
         {
             if (storageOptions != null)
-                this.IPFSGateway = string.IsNullOrEmpty(storageOptions.Value.ipfsGatewayUrl) ? "https://ipfs.thirdwebstorage.com/ipfs/" : storageOptions.Value.ipfsGatewayUrl;
+                this.IPFSGateway = string.IsNullOrEmpty(storageOptions.Value.ipfsGatewayUrl) ? "https://gateway.ipfscdn.io/ipfs/" : storageOptions.Value.ipfsGatewayUrl;
             else
-                this.IPFSGateway = "https://ipfs.thirdwebstorage.com/ipfs/";
+                this.IPFSGateway = "https://gateway.ipfscdn.io/ipfs/";
         }
 
         public async Task<IPFSUploadResult> UploadText(string text)
