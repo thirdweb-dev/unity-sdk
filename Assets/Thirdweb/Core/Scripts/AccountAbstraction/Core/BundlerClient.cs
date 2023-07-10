@@ -48,7 +48,8 @@ namespace Thirdweb.AccountAbstraction
 
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, url);
                 httpRequestMessage.Content = new StringContent(requestMessageJson, System.Text.Encoding.UTF8, "application/json");
-                httpRequestMessage.Headers.Add("x-api-key", apiKey);
+                if (url.Contains("thirdweb.com"))
+                    httpRequestMessage.Headers.Add("x-api-key", apiKey);
 
                 var httpResponse = await client.SendAsync(httpRequestMessage);
 

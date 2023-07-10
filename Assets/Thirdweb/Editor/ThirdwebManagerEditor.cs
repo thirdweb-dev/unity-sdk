@@ -20,7 +20,7 @@ public class ThirdwebManagerEditor : Editor
     private SerializedProperty walletConnectProjectIdProperty;
     private SerializedProperty paperClientIdProperty;
     private SerializedProperty factoryAddressProperty;
-    private SerializedProperty thirdwebApiKeyProperty;
+    private SerializedProperty apiKeyProperty;
     private SerializedProperty gaslessProperty;
     private SerializedProperty bundlerUrlProperty;
     private SerializedProperty paymasterUrlProperty;
@@ -57,7 +57,7 @@ public class ThirdwebManagerEditor : Editor
         walletConnectProjectIdProperty = serializedObject.FindProperty("walletConnectProjectId");
         paperClientIdProperty = serializedObject.FindProperty("paperClientId");
         factoryAddressProperty = serializedObject.FindProperty("factoryAddress");
-        thirdwebApiKeyProperty = serializedObject.FindProperty("thirdwebApiKey");
+        apiKeyProperty = serializedObject.FindProperty("apiKey");
         gaslessProperty = serializedObject.FindProperty("gasless");
         bundlerUrlProperty = serializedObject.FindProperty("bundlerUrl");
         paymasterUrlProperty = serializedObject.FindProperty("paymasterUrl");
@@ -159,6 +159,7 @@ public class ThirdwebManagerEditor : Editor
                 EditorGUILayout.PropertyField(chainProperty);
                 EditorGUILayout.Space(10);
                 supportedChainsList.DoLayoutList();
+                EditorGUILayout.PropertyField(apiKeyProperty);
                 EditorGUILayout.EndVertical();
             }
         );
@@ -275,7 +276,6 @@ public class ThirdwebManagerEditor : Editor
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 EditorGUILayout.PropertyField(factoryAddressProperty);
-                EditorGUILayout.PropertyField(thirdwebApiKeyProperty);
                 EditorGUILayout.PropertyField(gaslessProperty);
 
                 EditorGUI.BeginChangeCheck();

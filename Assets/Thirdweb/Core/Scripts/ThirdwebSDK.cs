@@ -34,6 +34,11 @@ namespace Thirdweb
             /// Smart wallet configuration options for the Thirdweb SDK.
             /// </summary>
             public SmartWalletConfig? smartWalletConfig;
+
+            /// <summary>
+            /// The API key for Thirdweb services. Generate one from the thirdweb dashboard.
+            /// </summary>
+            public string apiKey;
         }
 
         /// <summary>
@@ -93,11 +98,6 @@ namespace Thirdweb
             /// The address of the factory contract for smart wallets.
             /// </summary>
             public string factoryAddress;
-
-            /// <summary>
-            /// The API key for Thirdweb services.
-            /// </summary>
-            public string thirdwebApiKey;
 
             /// <summary>
             /// Indicates whether gasless transactions are enabled for smart wallets.
@@ -228,7 +228,7 @@ namespace Thirdweb
             this.deployer = new Deployer();
             this.storage = new Storage(options.storage);
 
-            string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3" : chainOrRPC;
+            string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/" : chainOrRPC;
 
             if (Utils.IsWebGLBuild())
             {
@@ -240,6 +240,9 @@ namespace Thirdweb
                     throw new UnityException("Chain ID override required for native platforms!");
                 this.session = new ThirdwebSession(options, chainId.Value, rpc);
             }
+
+            if (string.IsNullOrEmpty(options.apiKey))
+                Debug.LogWarning("No Thirdweb API key provided. This will limit Storage and Account Abstraction default functionality. You can get an API key from https://thirdweb.com/dashboard/");
         }
 
         /// <summary>

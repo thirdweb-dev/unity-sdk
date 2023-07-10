@@ -42,6 +42,9 @@ public class ThirdwebManager : MonoBehaviour
         new ChainData("binance-testnet", "97", null),
     };
 
+    [Tooltip("Thirdweb API Key (https://thirdweb.com/dashboard/api-keys)")]
+    public string apiKey;
+
     [Tooltip("The name of your app")]
     public string appName = null;
 
@@ -80,9 +83,6 @@ public class ThirdwebManager : MonoBehaviour
 
     [Tooltip("Factory Contract Address")]
     public string factoryAddress;
-
-    [Tooltip("Thirdweb API Key (https://thirdweb.com/dashboard/api-keys)")]
-    public string thirdwebApiKey;
 
     [Tooltip("Whether it should use a paymaster for gasless transactions or not")]
     public bool gasless;
@@ -196,18 +196,18 @@ public class ThirdwebManager : MonoBehaviour
             paperClientId = string.IsNullOrEmpty(paperClientId) ? null : paperClientId,
         };
 
-        options.smartWalletConfig =
-            string.IsNullOrEmpty(factoryAddress) || string.IsNullOrEmpty(thirdwebApiKey)
-                ? null
-                : new ThirdwebSDK.SmartWalletConfig()
-                {
-                    factoryAddress = factoryAddress,
-                    thirdwebApiKey = thirdwebApiKey,
-                    gasless = gasless,
-                    bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{currentChain.identifier}.bundler.thirdweb.com" : bundlerUrl,
-                    paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{currentChain.identifier}.bundler.thirdweb.com" : paymasterUrl,
-                    entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
-                };
+        options.smartWalletConfig = string.IsNullOrEmpty(factoryAddress)
+            ? null
+            : new ThirdwebSDK.SmartWalletConfig()
+            {
+                factoryAddress = factoryAddress,
+                gasless = gasless,
+                bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{currentChain.identifier}.bundler.thirdweb.com" : bundlerUrl,
+                paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{currentChain.identifier}.bundler.thirdweb.com" : paymasterUrl,
+                entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
+            };
+
+        options.apiKey = string.IsNullOrEmpty(apiKey) ? null : apiKey;
 
         SDK = new ThirdwebSDK(chainOrRPC, chainId, options);
     }
