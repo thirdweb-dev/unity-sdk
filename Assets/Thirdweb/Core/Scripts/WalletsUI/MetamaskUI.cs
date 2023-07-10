@@ -81,6 +81,7 @@ namespace Thirdweb.Wallets
             QRCodeImage.sprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new Vector2(0.5f, 0.5f));
             DeepLinkButton.onClick.RemoveAllListeners();
             DeepLinkButton.onClick.AddListener(() => Application.OpenURL(url));
+            QRCodeImage.mainTexture.filterMode = FilterMode.Point;
         }
 
         private void OnWalletConnected(object sender, EventArgs e)
