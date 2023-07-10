@@ -52,8 +52,8 @@ namespace Thirdweb
             using (UnityWebRequest bearerTokenReq = UnityWebRequest.Get(BEARER_TOKEN_URI))
             {
                 bearerTokenReq.SetRequestHeader("X-APP-NAME", "Unity SDK");
-                if (BEARER_TOKEN_URI.Contains("thirdweb.com"))
-                    bearerTokenReq.SetRequestHeader("X-API-KEY", ThirdwebManager.Instance.SDK.session.Options.apiKey);
+                if (BEARER_TOKEN_URI.Contains("nftlabs.co"))
+                    bearerTokenReq.SetRequestHeader("Authorization", $"Bearer {ThirdwebManager.Instance.SDK.session.Options.apiKey}");
 
                 await bearerTokenReq.SendWebRequest();
 
