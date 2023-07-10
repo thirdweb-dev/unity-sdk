@@ -58,7 +58,7 @@ namespace Thirdweb
 
                 var symbol = await TransactionManager.ThirdwebRead<TokenERC20Contract.SymbolFunction, TokenERC20Contract.SymbolOutputDTO>(contractAddress, new TokenERC20Contract.SymbolFunction());
 
-                Currency c = new Currency(decimals.ReturnValue1.ToString(), name.ReturnValue1, symbol.ReturnValue1);
+                Currency c = new Currency(name.ReturnValue1, symbol.ReturnValue1, decimals.ReturnValue1.ToString());
                 return c;
             }
         }
