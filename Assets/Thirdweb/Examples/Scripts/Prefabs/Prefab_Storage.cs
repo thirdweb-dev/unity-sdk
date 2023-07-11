@@ -13,11 +13,10 @@ public class Prefab_Storage : MonoBehaviour
             if (File.Exists(fullPath))
                 File.Delete(fullPath);
             ScreenCapture.CaptureScreenshot(fullPath);
-            Debugger.Instance.Log("Screenshot Saved! Uploading to IPFS...", $"Screenshot Path: {fullPath}");
 
-            // Give some time for the file to be saved if first time, try again if need be
-            // Task.Delay may not work in WebGL without customizations, use Coroutines
-            await System.Threading.Tasks.Task.Delay(5);
+            await new WaitForSeconds(5f);
+
+            Debugger.Instance.Log("Screenshot Saved! Uploading to IPFS...", $"Screenshot Path: {fullPath}");
 
             var response = await ThirdwebManager.Instance.SDK.storage.UploadFromPath(fullPath); // SDK must be initialized with StorageOptions apiToken
             Debugger.Instance.Log("Uploaded to IPFS Successfully!", response.ToString());
