@@ -130,6 +130,16 @@ namespace Thirdweb
             /// The URL of the IPFS gateway.
             /// </summary>
             public string ipfsGatewayUrl;
+
+            /// <summary>
+            /// Custom IPFS Downloader
+            /// </summary>
+            public IStorageDownloader downloaderOverride;
+
+            /// <summary>
+            /// Custom IPFS Uploader
+            /// </summary>
+            public IStorageUploader uploaderOverride;
         }
 
         /// <summary>
