@@ -238,7 +238,7 @@ namespace Thirdweb
             this.deployer = new Deployer();
             this.storage = new Storage(options.storage);
 
-            string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/" : chainOrRPC;
+            string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3" : chainOrRPC;
 
             if (Utils.IsWebGLBuild())
             {
