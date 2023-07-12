@@ -18,7 +18,17 @@ namespace Thirdweb
 
         public override async Task<object> InterceptSendRequestAsync<T>(Func<RpcRequest, string, Task<T>> interceptedSendRequestAsync, RpcRequest request, string route = null)
         {
-            if (request.Method == "eth_accounts")
+            if (request.Method == "eth_chainId")
+            {
+                switch (_thirdwebWallet.GetProvider())
+                {
+                    case WalletProvider.WalletConnect:
+                        return ThirdwebManager.Instance.SDK.session.CurrentChainData.chainId;
+                    default:
+                        break;
+                }
+            }
+            else if (request.Method == "eth_accounts")
             {
                 var addy = await _thirdwebWallet.GetAddress();
                 return new string[] { addy };
@@ -65,7 +75,17 @@ namespace Thirdweb
             params object[] paramList
         )
         {
-            if (method == "eth_accounts")
+            if (method == "eth_chainId")
+            {
+                switch (_thirdwebWallet.GetProvider())
+                {
+                    case WalletProvider.WalletConnect:
+                        return ThirdwebManager.Instance.SDK.session.CurrentChainData.chainId;
+                    default:
+                        break;
+                }
+            }
+            else if (method == "eth_accounts")
             {
                 var addy = await _thirdwebWallet.GetAddress();
                 return new string[] { addy };
