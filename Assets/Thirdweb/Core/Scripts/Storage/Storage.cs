@@ -10,19 +10,20 @@ namespace Thirdweb
         private IStorageUploader uploader;
         private IStorageDownloader downloader;
 
-        private const string DEFAULT_IPFS_GATEWAY = "https://gateway.ipfscdn.io/ipfs/";
+        private const string FALLBACK_IPFS_GATEWAY = "https://cloudflare-ipfs.com/ipfs/";
 
-        public Storage(ThirdwebSDK.StorageOptions? storageOptions)
+        public Storage(ThirdwebSDK.StorageOptions? storageOptions, string clientId = null)
         {
+            string thirdwebIpfsGateway = $"https://{clientId}.thirdwebstorage-dev.com/ipfs/";
             if (storageOptions == null)
             {
-                this.IPFSGateway = DEFAULT_IPFS_GATEWAY;
+                this.IPFSGateway = clientId != null ? thirdwebIpfsGateway : FALLBACK_IPFS_GATEWAY;
                 this.uploader = new StorageUploader();
                 this.downloader = new StorageDownloader();
             }
             else
             {
-                this.IPFSGateway = string.IsNullOrEmpty(storageOptions.Value.ipfsGatewayUrl) ? DEFAULT_IPFS_GATEWAY : storageOptions.Value.ipfsGatewayUrl;
+                this.IPFSGateway = string.IsNullOrEmpty(storageOptions?.ipfsGatewayUrl) ? (clientId != null ? thirdwebIpfsGateway : FALLBACK_IPFS_GATEWAY) : storageOptions?.ipfsGatewayUrl;
                 this.uploader = storageOptions.Value.uploaderOverride ?? new StorageUploader();
                 this.downloader = storageOptions.Value.downloaderOverride ?? new StorageDownloader();
             }

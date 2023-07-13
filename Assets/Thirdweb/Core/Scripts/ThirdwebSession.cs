@@ -7,6 +7,8 @@ using Nethereum.Siwe;
 using Nethereum.Web3;
 using UnityEngine;
 using Thirdweb.Wallets;
+using System.Linq;
+using Newtonsoft.Json;
 
 namespace Thirdweb
 {
@@ -37,7 +39,7 @@ namespace Thirdweb
             RPC = rpcUrl;
             SiweSession = new SiweMessageService();
             Web3 = new Web3(rpcUrl);
-            CurrentChainData = FetchChainData();
+            CurrentChainData = options.supportedChains.ToList().Find(x => x.chainId == chainId.ToString());
         }
 
         #endregion
@@ -152,60 +154,47 @@ namespace Thirdweb
             CurrentChainData = newChainData;
         }
 
-        private ThirdwebChainData FetchChainData()
+        public static ThirdwebChainData FetchChainData(BigInteger chainId, string rpcOverride = null)
         {
             var allChainsJson = (TextAsset)Resources.Load("all_chains", typeof(TextAsset));
 
-            List<ChainIDNetworkData> allNetworkData = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(allChainsJson.text);
+            List<ChainIDNetworkData> allNetworkData = JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(
+                allChainsJson.text,
+                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Include }
+            );
 
-            ChainIDNetworkData currentNetwork = allNetworkData.Find(x => x.chainId == ChainId.ToString());
+            ChainIDNetworkData currentNetwork = allNetworkData.Find(x => x.chainId == chainId.ToString());
 
             List<string> explorerUrls = new List<string>();
-            foreach (var explorer in currentNetwork.explorers)
-                explorerUrls.Add(explorer.url);
+            if (currentNetwork.explorers != null)
+            {
+                foreach (var explorer in currentNetwork.explorers)
+                    explorerUrls.Add(explorer.url);
+            }
             if (explorerUrls.Count == 0)
                 explorerUrls.Add("https://etherscan.io");
+            if (string.IsNullOrEmpty(currentNetwork.icon))
+                currentNetwork.icon = "ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt";
 
             return new ThirdwebChainData()
             {
-                chainId = BigInteger.Parse(currentNetwork.chainId).ToHex(false, true) ?? BigInteger.Parse(ChainId.ToString()).ToHex(false, true),
+                chainId = BigInteger.Parse(currentNetwork.chainId).ToHex(false, true) ?? BigInteger.Parse(chainId.ToString()).ToHex(false, true),
                 blockExplorerUrls = explorerUrls.ToArray(),
                 chainName = currentNetwork.name ?? ThirdwebManager.Instance.chain,
-                iconUrls = new string[] { "ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt" },
+                iconUrls = new string[] { currentNetwork.icon },
                 nativeCurrency = new ThirdwebNativeCurrency()
                 {
                     name = currentNetwork.nativeCurrency?.name ?? "Ether",
                     symbol = currentNetwork.nativeCurrency?.symbol ?? "ETH",
                     decimals = int.Parse(currentNetwork.nativeCurrency?.decimals ?? "18")
                 },
-                rpcUrls = new string[] { RPC }
+                rpcUrls = rpcOverride != null ? new string[] { rpcOverride } : currentNetwork.rpc.ToArray()
             };
         }
 
         #endregion
 
         #region Nested Classes
-
-        public class ThirdwebChainData : ThirdwebChain
-        {
-            public string[] blockExplorerUrls;
-            public string chainName;
-            public string[] iconUrls;
-            public ThirdwebNativeCurrency nativeCurrency;
-            public string[] rpcUrls;
-        }
-
-        public class ThirdwebChain
-        {
-            public string chainId;
-        }
-
-        public class ThirdwebNativeCurrency
-        {
-            public string name;
-            public string symbol;
-            public int decimals;
-        }
 
         [System.Serializable]
         public class ChainIDNetworkData

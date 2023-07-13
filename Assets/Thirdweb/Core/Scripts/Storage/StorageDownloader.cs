@@ -10,9 +10,17 @@ namespace Thirdweb
         public async Task<T> DownloadText<T>(string textURI)
         {
             textURI = textURI.ReplaceIPFS();
+            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains("thirdwebstorage-dev.com");
+            if (isThirdwebRequest)
+                textURI = textURI.AppendBundleIdQueryParam();
+
+            Debug.Log($"Downloading text from {textURI}");
 
             using (UnityWebRequest req = UnityWebRequest.Get(textURI))
             {
+                if (isThirdwebRequest)
+                    req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
+
                 await req.SendWebRequest();
                 if (req.result != UnityWebRequest.Result.Success)
                 {
@@ -27,9 +35,17 @@ namespace Thirdweb
         public async Task<Sprite> DownloadImage(string imageURI)
         {
             imageURI = imageURI.ReplaceIPFS();
+            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains("thirdwebstorage-dev.com");
+            if (isThirdwebRequest)
+                imageURI = imageURI.AppendBundleIdQueryParam();
+
+            Debug.Log($"Downloading image from {imageURI}");
 
             using (UnityWebRequest req = UnityWebRequestTexture.GetTexture(imageURI))
             {
+                if (isThirdwebRequest)
+                    req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
+
                 await req.SendWebRequest();
                 if (req.result != UnityWebRequest.Result.Success)
                 {

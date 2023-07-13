@@ -133,14 +133,11 @@ public class ThirdwebManager : MonoBehaviour
 
         BigInteger chainId = -1;
 
-        if (!Utils.IsWebGLBuild())
-        {
-            if (string.IsNullOrEmpty(currentChain.chainId))
-                throw new UnityException("You must provide a Chain ID on native platforms!");
+        if (string.IsNullOrEmpty(currentChain.chainId))
+            throw new UnityException("You must provide a Chain ID on native platforms!");
 
-            if (!BigInteger.TryParse(currentChain.chainId, out chainId))
-                throw new UnityException("The Chain ID must be a non-negative integer!");
-        }
+        if (!BigInteger.TryParse(currentChain.chainId, out chainId))
+            throw new UnityException("The Chain ID must be a non-negative integer!");
 
         // Must provide a proper chain identifier (https://thirdweb.com/dashboard/rpc) or RPC override.
 
@@ -207,7 +204,33 @@ public class ThirdwebManager : MonoBehaviour
                 entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
             };
 
-        options.apiKey = string.IsNullOrEmpty(apiKey) ? null : apiKey;
+        options.clientId = string.IsNullOrEmpty(apiKey) ? null : apiKey;
+
+        var supportedChainData = new List<ThirdwebChainData>();
+        foreach (var chain in this.supportedChains)
+        {
+            string rpc = string.IsNullOrEmpty(chain.rpcOverride)
+                ? (
+                    string.IsNullOrEmpty(apiKey)
+                        ? $"https://{chain.identifier}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3"
+                        : $"https://{chain.identifier}.rpc.thirdweb.com/${apiKey}"
+                )
+                : chain.rpcOverride;
+
+            if (rpc.Contains("thirdweb.com"))
+                rpc = rpc.AppendBundleIdQueryParam();
+            try
+            {
+                supportedChainData.Add(ThirdwebSession.FetchChainData(BigInteger.Parse(chain.chainId), rpc));
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"Failed to fetch chain data for {chain.identifier} ({chain.chainId}) - {e}, skipping...");
+                continue;
+            }
+        }
+
+        options.supportedChains = supportedChainData.ToArray();
 
         SDK = new ThirdwebSDK(chainOrRPC, chainId, options);
     }

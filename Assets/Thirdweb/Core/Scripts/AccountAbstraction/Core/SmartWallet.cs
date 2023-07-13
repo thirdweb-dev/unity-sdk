@@ -122,7 +122,7 @@ namespace Thirdweb.AccountAbstraction
 
         private async Task<RpcResponseMessage> CreateUserOpAndSend(RpcRequestMessage requestMessage)
         {
-            string apiKey = ThirdwebManager.Instance.SDK.session.Options.apiKey;
+            string apiKey = ThirdwebManager.Instance.SDK.session.Options.clientId;
 
             // Deserialize the transaction input from the request message
 

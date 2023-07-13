@@ -20,8 +20,7 @@ namespace Thirdweb
 
     public class StorageUploader : IStorageUploader
     {
-        private readonly string BEARER_TOKEN_URI = "https://upload.nftlabs.co/grant";
-        private readonly string PIN_URI = "https://api.pinata.cloud/pinning/pinFileToIPFS";
+        private readonly string PIN_URI = "https://uploadLink.thirdweb.com/upload";
 
         public async Task<IPFSUploadResult> UploadText(string text)
         {
@@ -37,27 +36,13 @@ namespace Thirdweb
             WWWForm form = new WWWForm();
             form.AddBinaryData("file", bytes);
 
-            // Get Token
-            string token = "";
-            using (UnityWebRequest bearerTokenReq = UnityWebRequest.Get(BEARER_TOKEN_URI))
-            {
-                bearerTokenReq.SetRequestHeader("X-APP-NAME", "Unity SDK");
-                if (BEARER_TOKEN_URI.Contains("nftlabs.co"))
-                    bearerTokenReq.SetRequestHeader("Authorization", $"Bearer {ThirdwebManager.Instance.SDK.session.Options.apiKey}");
-
-                await bearerTokenReq.SendWebRequest();
-
-                if (bearerTokenReq.result != UnityWebRequest.Result.Success)
-                    throw new UnityException($"Token Request Failed! Result {bearerTokenReq.downloadHandler.text}");
-
-                token = bearerTokenReq.downloadHandler.text;
-            }
-
             // Pin
             string result = "";
             using (UnityWebRequest pinReq = UnityWebRequest.Post(PIN_URI, form))
             {
-                pinReq.SetRequestHeader("Authorization", $"Bearer {token}");
+                pinReq.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
+                if (!Utils.IsWebGLBuild())
+                    pinReq.SetRequestHeader("x-bundle-id", Utils.GetBundleId());
 
                 await pinReq.SendWebRequest();
 

@@ -49,7 +49,11 @@ namespace Thirdweb.AccountAbstraction
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, url);
                 httpRequestMessage.Content = new StringContent(requestMessageJson, System.Text.Encoding.UTF8, "application/json");
                 if (url.Contains("thirdweb.com"))
-                    httpRequestMessage.Headers.Add("Authorization", $"Bearer {apiKey}");
+                {
+                    httpRequestMessage.Headers.Add("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
+                    if (!Utils.IsWebGLBuild())
+                        httpRequestMessage.Headers.Add("x-bundle-id", Utils.GetBundleId());
+                }
 
                 var httpResponse = await client.SendAsync(httpRequestMessage);
 
