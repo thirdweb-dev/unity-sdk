@@ -213,7 +213,7 @@ public class ThirdwebManager : MonoBehaviour
                 ? (
                     string.IsNullOrEmpty(clientId)
                         ? $"https://{chain.identifier}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3"
-                        : $"https://{chain.identifier}.rpc.thirdweb.com/${clientId}"
+                        : $"https://{chain.identifier}.rpc.thirdweb.com/{clientId}"
                 )
                 : chain.rpcOverride;
 
