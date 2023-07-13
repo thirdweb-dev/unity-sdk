@@ -43,7 +43,7 @@ public class ThirdwebManager : MonoBehaviour
     };
 
     [Tooltip("Thirdweb API Key (https://thirdweb.com/dashboard/). Used for Storage and Account Abstraction.")]
-    public string apiKey;
+    public string clientId;
 
     [Tooltip("The name of your app")]
     public string appName = null;
@@ -204,16 +204,16 @@ public class ThirdwebManager : MonoBehaviour
                 entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
             };
 
-        options.clientId = string.IsNullOrEmpty(apiKey) ? null : apiKey;
+        options.clientId = string.IsNullOrEmpty(clientId) ? null : clientId;
 
         var supportedChainData = new List<ThirdwebChainData>();
         foreach (var chain in this.supportedChains)
         {
             string rpc = string.IsNullOrEmpty(chain.rpcOverride)
                 ? (
-                    string.IsNullOrEmpty(apiKey)
+                    string.IsNullOrEmpty(clientId)
                         ? $"https://{chain.identifier}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3"
-                        : $"https://{chain.identifier}.rpc.thirdweb.com/${apiKey}"
+                        : $"https://{chain.identifier}.rpc.thirdweb.com/${clientId}"
                 )
                 : chain.rpcOverride;
 
