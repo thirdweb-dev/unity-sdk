@@ -14,8 +14,6 @@ namespace Thirdweb
             if (isThirdwebRequest)
                 textURI = textURI.AppendBundleIdQueryParam();
 
-            Debug.Log($"Downloading text from {textURI}");
-
             using (UnityWebRequest req = UnityWebRequest.Get(textURI))
             {
                 if (isThirdwebRequest)
@@ -38,8 +36,6 @@ namespace Thirdweb
             bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains("thirdwebstorage-dev.com");
             if (isThirdwebRequest)
                 imageURI = imageURI.AppendBundleIdQueryParam();
-
-            Debug.Log($"Downloading image from {imageURI}");
 
             using (UnityWebRequest req = UnityWebRequestTexture.GetTexture(imageURI))
             {

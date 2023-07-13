@@ -204,7 +204,11 @@ public class ThirdwebManager : MonoBehaviour
                 entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
             };
 
+        // Set up Client ID
+
         options.clientId = string.IsNullOrEmpty(clientId) ? null : clientId;
+
+        // Pass supported chains with replaced RPCs
 
         var supportedChainData = new List<ThirdwebChainData>();
         foreach (var chain in this.supportedChains)
