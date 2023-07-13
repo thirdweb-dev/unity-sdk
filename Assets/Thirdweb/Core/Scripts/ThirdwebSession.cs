@@ -9,6 +9,7 @@ using UnityEngine;
 using Thirdweb.Wallets;
 using System.Linq;
 using Newtonsoft.Json;
+using Nethereum.Hex.HexTypes;
 
 namespace Thirdweb
 {
@@ -39,7 +40,7 @@ namespace Thirdweb
             RPC = rpcUrl;
             SiweSession = new SiweMessageService();
             Web3 = new Web3(rpcUrl);
-            CurrentChainData = options.supportedChains.ToList().Find(x => x.chainId == chainId.ToString());
+            CurrentChainData = options.supportedChains.ToList().Find(x => x.chainId == new HexBigInteger(chainId).HexValue);
         }
 
         #endregion

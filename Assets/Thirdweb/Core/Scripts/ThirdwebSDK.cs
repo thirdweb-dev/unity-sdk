@@ -240,7 +240,13 @@ namespace Thirdweb
             this.deployer = new Deployer();
             this.storage = new Storage(options.storage, options.clientId);
 
-            string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3" : chainOrRPC;
+            string rpc = !chainOrRPC.StartsWith("https://")
+                ? (
+                    string.IsNullOrEmpty(options.clientId)
+                        ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3"
+                        : $"https://{chainOrRPC}.rpc.thirdweb.com/{options.clientId}"
+                )
+                : chainOrRPC;
 
             if (rpc.Contains("thirdweb.com"))
                 rpc = rpc.AppendBundleIdQueryParam();
