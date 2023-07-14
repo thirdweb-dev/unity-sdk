@@ -20,7 +20,7 @@ namespace Thirdweb
 
     public class StorageUploader : IStorageUploader
     {
-        private readonly string PIN_URI = "https://storage.thirdweb.com/ipfs/upload";
+        private readonly string PIN_URI = "https://storage.staging.thirdweb.com/ipfs/upload";
 
         public async Task<IPFSUploadResult> UploadText(string text)
         {
