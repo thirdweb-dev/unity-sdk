@@ -10,7 +10,7 @@ namespace Thirdweb
         public async Task<T> DownloadText<T>(string textURI)
         {
             textURI = textURI.ReplaceIPFS();
-            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains("thirdwebstorage-dev.com");
+            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains("thirdwebstorage-staging.com");
             if (isThirdwebRequest)
                 textURI = textURI.AppendBundleIdQueryParam();
 
@@ -33,7 +33,7 @@ namespace Thirdweb
         public async Task<Sprite> DownloadImage(string imageURI)
         {
             imageURI = imageURI.ReplaceIPFS();
-            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains("thirdwebstorage-dev.com");
+            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains("thirdwebstorage-staging.com");
             if (isThirdwebRequest)
                 imageURI = imageURI.AppendBundleIdQueryParam();
 
@@ -45,7 +45,7 @@ namespace Thirdweb
                 await req.SendWebRequest();
                 if (req.result != UnityWebRequest.Result.Success)
                 {
-                    Debug.LogWarning($"Unable to fetch image uri {imageURI} data!");
+                    Debug.LogWarning($"Unable to fetch image uri {imageURI} data! {req.error}");
                     return null;
                 }
                 else

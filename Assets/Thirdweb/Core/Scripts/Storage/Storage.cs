@@ -14,7 +14,7 @@ namespace Thirdweb
 
         public Storage(ThirdwebSDK.StorageOptions? storageOptions, string clientId = null)
         {
-            string thirdwebIpfsGateway = $"https://{clientId}.thirdwebstorage-dev.com/ipfs/";
+            string thirdwebIpfsGateway = $"https://{clientId}.thirdwebstorage-staging.com/ipfs/";
             if (storageOptions == null)
             {
                 this.IPFSGateway = clientId != null ? thirdwebIpfsGateway : FALLBACK_IPFS_GATEWAY;
