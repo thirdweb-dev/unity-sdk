@@ -151,7 +151,7 @@ public class ThirdwebManagerEditor : Editor
 
         // Required Settings
         sectionExpanded[0] = DrawSectionWithExpand(
-            "Required Settings",
+            "General Settings",
             sectionExpanded[0],
             () =>
             {
