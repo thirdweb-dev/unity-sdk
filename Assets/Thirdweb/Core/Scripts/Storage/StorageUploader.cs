@@ -47,7 +47,7 @@ namespace Thirdweb
                 await pinReq.SendWebRequest();
 
                 if (pinReq.result != UnityWebRequest.Result.Success)
-                    throw new UnityException($"Pin Request Failed! Result {pinReq.downloadHandler.text}");
+                    throw new UnityException($"Pin Request Failed! {pinReq.error}");
 
                 result = pinReq.downloadHandler.text;
             }
