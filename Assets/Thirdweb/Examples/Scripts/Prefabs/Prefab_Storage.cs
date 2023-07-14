@@ -14,7 +14,7 @@ public class Prefab_Storage : MonoBehaviour
                 File.Delete(fullPath);
             ScreenCapture.CaptureScreenshot(fullPath);
 
-            await new WaitForSeconds(5f);
+            await new WaitForSeconds(3f);
 
             Debugger.Instance.Log("Screenshot Saved! Uploading to IPFS...", $"Screenshot Path: {fullPath}");
 
@@ -23,7 +23,7 @@ public class Prefab_Storage : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debugger.Instance.Log("[Storage] Upload Error", $"Error uploading from path: {e.Message}");
+            Debugger.Instance.Log("[Storage] Upload Error", $"Error uploading, make sure a Client ID is set: {e.Message}");
         }
     }
 }
