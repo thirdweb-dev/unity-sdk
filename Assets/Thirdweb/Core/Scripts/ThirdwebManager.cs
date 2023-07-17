@@ -42,7 +42,7 @@ public class ThirdwebManager : MonoBehaviour
         new ChainData("binance-testnet", "97", null),
     };
 
-    [Tooltip("Thirdweb Client ID (https://thirdweb.com/dashboard/). Used for default thirdweb services such as Storage and Account Abstraction.")]
+    [Tooltip("Thirdweb Client ID (https://thirdweb.com/create-api-key/). Used for default thirdweb services such as Storage and Account Abstraction.")]
     public string clientId;
 
     [Tooltip("The name of your app")]
