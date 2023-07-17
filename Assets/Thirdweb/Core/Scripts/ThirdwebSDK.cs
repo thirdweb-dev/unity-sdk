@@ -264,7 +264,7 @@ namespace Thirdweb
 
             if (string.IsNullOrEmpty(options.clientId))
                 Debug.LogWarning(
-                    "No Client ID provided. You will have limited access to thirdweb services for storage, RPC, and Account Abstraction. You can get a Client ID from https://thirdweb.com/dashboard/settings/api-keys"
+                    "No Client ID provided. You will have limited access to thirdweb services for storage, RPC, and Account Abstraction. You can get a Client ID from https://thirdweb.com/dashboard/"
                 );
         }
 
