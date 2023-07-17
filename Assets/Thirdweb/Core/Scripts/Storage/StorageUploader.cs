@@ -40,7 +40,7 @@ namespace Thirdweb
             string result = "";
             using (UnityWebRequest pinReq = UnityWebRequest.Post(PIN_URI, form))
             {
-                pinReq.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
+                pinReq.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
                 if (!Utils.IsWebGLBuild())
                     pinReq.SetRequestHeader("x-bundle-id", Utils.GetBundleId());
 

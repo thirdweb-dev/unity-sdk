@@ -6,6 +6,7 @@ namespace Thirdweb
     public class Storage
     {
         public string IPFSGateway { get; private set; }
+        public string ClientId { get; private set; }
 
         private IStorageUploader uploader;
         private IStorageDownloader downloader;
@@ -14,16 +15,18 @@ namespace Thirdweb
 
         public Storage(ThirdwebSDK.StorageOptions? storageOptions, string clientId = null)
         {
-            string thirdwebIpfsGateway = $"https://{clientId}.thirdwebstorage-staging.com/ipfs/";
+            this.ClientId = clientId;
+
+            string thirdwebIpfsGateway = $"https://{ClientId}.thirdwebstorage-staging.com/ipfs/";
             if (storageOptions == null)
             {
-                this.IPFSGateway = clientId != null ? thirdwebIpfsGateway : FALLBACK_IPFS_GATEWAY;
+                this.IPFSGateway = ClientId != null ? thirdwebIpfsGateway : FALLBACK_IPFS_GATEWAY;
                 this.uploader = new StorageUploader();
                 this.downloader = new StorageDownloader();
             }
             else
             {
-                this.IPFSGateway = string.IsNullOrEmpty(storageOptions?.ipfsGatewayUrl) ? (clientId != null ? thirdwebIpfsGateway : FALLBACK_IPFS_GATEWAY) : storageOptions?.ipfsGatewayUrl;
+                this.IPFSGateway = string.IsNullOrEmpty(storageOptions?.ipfsGatewayUrl) ? (ClientId != null ? thirdwebIpfsGateway : FALLBACK_IPFS_GATEWAY) : storageOptions?.ipfsGatewayUrl;
                 this.uploader = storageOptions.Value.uploaderOverride ?? new StorageUploader();
                 this.downloader = storageOptions.Value.downloaderOverride ?? new StorageDownloader();
             }

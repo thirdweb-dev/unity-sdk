@@ -17,7 +17,7 @@ namespace Thirdweb
             using (UnityWebRequest req = UnityWebRequest.Get(textURI))
             {
                 if (isThirdwebRequest)
-                    req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
+                    req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
 
                 await req.SendWebRequest();
                 if (req.result != UnityWebRequest.Result.Success)
@@ -40,7 +40,7 @@ namespace Thirdweb
             using (UnityWebRequest req = UnityWebRequestTexture.GetTexture(imageURI))
             {
                 if (isThirdwebRequest)
-                    req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
+                    req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
 
                 await req.SendWebRequest();
                 if (req.result != UnityWebRequest.Result.Success)
