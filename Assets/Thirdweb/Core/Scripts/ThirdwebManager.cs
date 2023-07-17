@@ -221,7 +221,7 @@ public class ThirdwebManager : MonoBehaviour
                 )
                 : chain.rpcOverride;
 
-            if (rpc.Contains("thirdweb.com"))
+            if (new System.Uri(rpc).Host.EndsWith(".thirdweb.com"))
                 rpc = rpc.AppendBundleIdQueryParam();
             try
             {

@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
+using System;
 
 namespace Thirdweb
 {
@@ -9,8 +10,14 @@ namespace Thirdweb
     {
         public async Task<T> DownloadText<T>(string textURI)
         {
+            if (string.IsNullOrEmpty(textURI))
+            {
+                Debug.LogWarning($"Unable to download text from empty uri!");
+                return default(T);
+            }
+
             textURI = textURI.ReplaceIPFS();
-            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains(".ipfscdn.io");
+            bool isThirdwebRequest = new Uri(textURI).Host.EndsWith(".ipfscdn.io");
             if (isThirdwebRequest)
                 textURI = textURI.AppendBundleIdQueryParam();
 
@@ -32,8 +39,14 @@ namespace Thirdweb
 
         public async Task<Sprite> DownloadImage(string imageURI)
         {
+            if (string.IsNullOrEmpty(imageURI))
+            {
+                Debug.LogWarning($"Unable to download image from empty uri!");
+                return null;
+            }
+
             imageURI = imageURI.ReplaceIPFS();
-            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains(".ipfscdn.io");
+            bool isThirdwebRequest = new Uri(imageURI).Host.EndsWith(".ipfscdn.io");
             if (isThirdwebRequest)
                 imageURI = imageURI.AppendBundleIdQueryParam();
 

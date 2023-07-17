@@ -48,7 +48,7 @@ namespace Thirdweb.AccountAbstraction
 
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, url);
                 httpRequestMessage.Content = new StringContent(requestMessageJson, System.Text.Encoding.UTF8, "application/json");
-                if (url.Contains(".thirdweb.com"))
+                if (new Uri(url).Host.EndsWith(".thirdweb.com"))
                 {
                     httpRequestMessage.Headers.Add("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
                     if (!Utils.IsWebGLBuild())

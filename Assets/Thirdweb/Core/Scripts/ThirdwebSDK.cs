@@ -248,7 +248,7 @@ namespace Thirdweb
                 )
                 : chainOrRPC;
 
-            if (rpc.Contains("thirdweb.com"))
+            if (new System.Uri(rpc).Host.EndsWith(".thirdweb.com"))
                 rpc = rpc.AppendBundleIdQueryParam();
 
             if (Utils.IsWebGLBuild())
