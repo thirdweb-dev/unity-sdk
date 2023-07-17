@@ -10,7 +10,7 @@ namespace Thirdweb
         public async Task<T> DownloadText<T>(string textURI)
         {
             textURI = textURI.ReplaceIPFS();
-            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains(".thirdwebstorage.com");
+            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains(".ipfscdn.io");
             if (isThirdwebRequest)
                 textURI = textURI.AppendBundleIdQueryParam();
 
@@ -33,7 +33,7 @@ namespace Thirdweb
         public async Task<Sprite> DownloadImage(string imageURI)
         {
             imageURI = imageURI.ReplaceIPFS();
-            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains(".thirdwebstorage.com");
+            bool isThirdwebRequest = ThirdwebManager.Instance.SDK.storage.IPFSGateway.Contains(".ipfscdn.io");
             if (isThirdwebRequest)
                 imageURI = imageURI.AppendBundleIdQueryParam();
 

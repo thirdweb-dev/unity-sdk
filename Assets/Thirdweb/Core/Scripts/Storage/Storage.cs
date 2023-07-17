@@ -17,7 +17,7 @@ namespace Thirdweb
         {
             this.ClientId = clientId;
 
-            string thirdwebIpfsGateway = $"https://{ClientId}.thirdwebstorage.com/ipfs/";
+            string thirdwebIpfsGateway = $"https://{ClientId}.ipfscdn.io/ipfs/";
             if (storageOptions == null)
             {
                 this.IPFSGateway = ClientId != null ? thirdwebIpfsGateway : FALLBACK_IPFS_GATEWAY;
