@@ -34,6 +34,13 @@ namespace Thirdweb
             /// Smart wallet configuration options for the Thirdweb SDK.
             /// </summary>
             public SmartWalletConfig? smartWalletConfig;
+
+            /// <summary>
+            /// The Client ID for Thirdweb services. Generate one from the thirdweb dashboard.
+            /// </summary>
+            public string clientId;
+
+            public ThirdwebChainData[] supportedChains;
         }
 
         /// <summary>
@@ -95,11 +102,6 @@ namespace Thirdweb
             public string factoryAddress;
 
             /// <summary>
-            /// The API key for Thirdweb services.
-            /// </summary>
-            public string thirdwebApiKey;
-
-            /// <summary>
             /// Indicates whether gasless transactions are enabled for smart wallets.
             /// </summary>
             public bool gasless;
@@ -130,6 +132,16 @@ namespace Thirdweb
             /// The URL of the IPFS gateway.
             /// </summary>
             public string ipfsGatewayUrl;
+
+            /// <summary>
+            /// Custom IPFS Downloader
+            /// </summary>
+            public IStorageDownloader downloaderOverride;
+
+            /// <summary>
+            /// Custom IPFS Uploader
+            /// </summary>
+            public IStorageUploader uploaderOverride;
         }
 
         /// <summary>
@@ -226,9 +238,18 @@ namespace Thirdweb
             this.chainOrRPC = chainOrRPC;
             this.wallet = new Wallet();
             this.deployer = new Deployer();
-            this.storage = new Storage(options.storage);
+            this.storage = new Storage(options.storage, options.clientId);
 
-            string rpc = !chainOrRPC.StartsWith("https://") ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3" : chainOrRPC;
+            string rpc = !chainOrRPC.StartsWith("https://")
+                ? (
+                    string.IsNullOrEmpty(options.clientId)
+                        ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3"
+                        : $"https://{chainOrRPC}.rpc.thirdweb.com/{options.clientId}"
+                )
+                : chainOrRPC;
+
+            if (new System.Uri(rpc).Host.EndsWith(".thirdweb.com"))
+                rpc = rpc.AppendBundleIdQueryParam();
 
             if (Utils.IsWebGLBuild())
             {
@@ -240,6 +261,11 @@ namespace Thirdweb
                     throw new UnityException("Chain ID override required for native platforms!");
                 this.session = new ThirdwebSession(options, chainId.Value, rpc);
             }
+
+            if (string.IsNullOrEmpty(options.clientId))
+                Debug.LogWarning(
+                    "No Client ID provided. You will have limited access to thirdweb services for storage, RPC, and Account Abstraction. You can get a Client ID from https://thirdweb.com/create-api-key/"
+                );
         }
 
         /// <summary>
@@ -252,5 +278,26 @@ namespace Thirdweb
         {
             return new Contract(this.chainOrRPC, address, abi);
         }
+    }
+
+    public class ThirdwebChainData : ThirdwebChain
+    {
+        public string[] blockExplorerUrls;
+        public string chainName;
+        public string[] iconUrls;
+        public ThirdwebNativeCurrency nativeCurrency;
+        public string[] rpcUrls;
+    }
+
+    public class ThirdwebChain
+    {
+        public string chainId;
+    }
+
+    public class ThirdwebNativeCurrency
+    {
+        public string name;
+        public string symbol;
+        public int decimals;
     }
 }

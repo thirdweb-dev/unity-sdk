@@ -46,7 +46,6 @@ namespace Thirdweb.AccountAbstraction
             Config = new ThirdwebSDK.SmartWalletConfig()
             {
                 factoryAddress = config.factoryAddress,
-                thirdwebApiKey = config.thirdwebApiKey,
                 gasless = config.gasless,
                 bundlerUrl = string.IsNullOrEmpty(config.bundlerUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.bundlerUrl,
                 paymasterUrl = string.IsNullOrEmpty(config.paymasterUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.paymasterUrl,
@@ -123,6 +122,8 @@ namespace Thirdweb.AccountAbstraction
 
         private async Task<RpcResponseMessage> CreateUserOpAndSend(RpcRequestMessage requestMessage)
         {
+            string apiKey = ThirdwebManager.Instance.SDK.session.Options.clientId;
+
             // Deserialize the transaction input from the request message
 
             var paramList = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(requestMessage.RawParameters));
@@ -165,7 +166,7 @@ namespace Thirdweb.AccountAbstraction
 
             // Update paymaster data if any
 
-            partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestMessage.Id, partialUserOpHexified);
+            partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestMessage.Id, partialUserOpHexified, apiKey);
 
             // Hash, sign and encode the user operation
 
@@ -176,7 +177,7 @@ namespace Thirdweb.AccountAbstraction
 
             Debug.Log("Valid UserOp: " + JsonConvert.SerializeObject(partialUserOp));
             Debug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(partialUserOpHexified));
-            var userOpHash = await BundlerClient.EthSendUserOperation(Config.bundlerUrl, Config.thirdwebApiKey, requestMessage.Id, partialUserOpHexified, Config.entryPointAddress);
+            var userOpHash = await BundlerClient.EthSendUserOperation(Config.bundlerUrl, apiKey, requestMessage.Id, partialUserOpHexified, Config.entryPointAddress);
             Debug.Log("UserOp Hash: " + userOpHash);
 
             // Wait for the transaction to be mined
@@ -184,7 +185,7 @@ namespace Thirdweb.AccountAbstraction
             string txHash = null;
             while (txHash == null && Application.isPlaying)
             {
-                var getUserOpResponse = await BundlerClient.EthGetUserOperationByHash(Config.bundlerUrl, Config.thirdwebApiKey, requestMessage.Id, userOpHash);
+                var getUserOpResponse = await BundlerClient.EthGetUserOperationByHash(Config.bundlerUrl, apiKey, requestMessage.Id, userOpHash);
                 txHash = getUserOpResponse?.transactionHash;
                 await new WaitForSecondsRealtime(5f);
             }
@@ -215,10 +216,10 @@ namespace Thirdweb.AccountAbstraction
             return nonce.ReturnValue1;
         }
 
-        private async Task<byte[]> GetPaymasterAndData(object requestId, UserOperationHexified userOp)
+        private async Task<byte[]> GetPaymasterAndData(object requestId, UserOperationHexified userOp, string apiKey)
         {
             return Config.gasless
-                ? (await BundlerClient.PMSponsorUserOperation(Config.paymasterUrl, Config.thirdwebApiKey, requestId, userOp, Config.entryPointAddress)).paymasterAndData.HexStringToByteArray()
+                ? (await BundlerClient.PMSponsorUserOperation(Config.paymasterUrl, apiKey, requestId, userOp, Config.entryPointAddress)).paymasterAndData.HexStringToByteArray()
                 : new byte[] { };
         }
     }

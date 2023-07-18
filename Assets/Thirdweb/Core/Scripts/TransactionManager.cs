@@ -27,7 +27,7 @@ namespace Thirdweb
             {
                 if (!warned)
                 {
-                    Debug.LogWarning("Sending accountless query, make sure a wallet is connected if this was not intended.");
+                    Debug.Log("Sending accountless query, make sure a wallet is connected if this was not intended.");
                     warned = true;
                 }
             }
