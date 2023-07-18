@@ -23,7 +23,7 @@ public class Prefab_Storage : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debugger.Instance.Log("[Storage] Upload Error", $"Error uploading, make sure a Client ID is set: {e.Message}");
+            Debugger.Instance.Log("[Storage] Upload Error", $"Error uploading: {e.Message}");
         }
     }
 }

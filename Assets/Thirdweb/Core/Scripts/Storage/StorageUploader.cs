@@ -31,6 +31,9 @@ namespace Thirdweb
 
         public async Task<IPFSUploadResult> UploadFromPath(string path)
         {
+            if (string.IsNullOrEmpty(ThirdwebManager.Instance.SDK.storage.ClientId))
+                throw new UnityException("You cannot use default Upload features without setting a Client ID in the ThirdwebManager.");
+
             // Get data
             byte[] bytes = System.IO.File.ReadAllBytes(path);
             WWWForm form = new WWWForm();
