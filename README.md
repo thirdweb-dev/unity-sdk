@@ -9,12 +9,14 @@
 
 </p>
 <p align="center"><strong>Best in class Web3 SDK for Unity games</strong></p>
-<p align="center"><strong><a href="https://bafybeihlzllg4ifsptwenccbuko326jkq2tkjayjtu4a5i7efnxddiqjeq.ipfs-public.thirdwebcdn.com/">Live Demo</a></strong></p>
+<p align="center"><strong><a href="https://bafybeibh73sdxugia63nvuzxeqrcozalbhszaojcpgaatuli3skou3d3bq.ipfs.dweb.link/">Live Demo</a></strong></p>
 <br />
 
 # Supported platforms
 
 ![providers-unity](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/8bac2226-a67a-4709-8a5d-49fadd58160c)
+
+More on wallets [here](https://thirdweb.com/dashboard/wallet).
 
 # Installation
 
@@ -23,6 +25,8 @@ Head over to the [releases](https://github.com/thirdweb-dev/unity-sdk/releases) 
 Drag and drop the file into your project.
 
 The package comes with a sample Scene and Prefab examples showcasing the different capabilities of the SDK.
+
+All you need is a ThirdwebManager component in your scene. See [documentation](https://portal.thirdweb.com/unity) for more information.
 
 Note: The Newtonsoft DLL is included as part of the Unity Package, feel free to deselect it if you already have it installed as a dependency to avoid conflicts.
 
@@ -41,11 +45,10 @@ Note that in order to communicate with the SDK on WebGL, you need to `Build and 
 
 ## Other Platforms
 
-- Requires a ThirdwebManager prefab in your scene.
-- Multiple networks are not supported.
 - Use IL2CPP over Mono when possible in the Player Settings.
 - Using the SDK in the editor (pressing Play) is an accurate reflection of what you can expect to see on native platforms.
 - If building to mobile and running into RPC issues, it is best to run Force Resolve from the `Assets` menu > `External Dependency Manager` > `Android Resolver` > `Force Resolve` for example.
+- If building for iOS and missing a Metamask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder
 - In some cases, setting `Managed Stripping Level` to minimal when using IL2CPP is also helpful - you can find it under `Player Settings` > `Other Settings` > `Optimization`
 
 # Usage

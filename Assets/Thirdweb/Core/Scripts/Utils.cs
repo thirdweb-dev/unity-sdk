@@ -381,6 +381,19 @@ namespace Thirdweb
             return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address);
         }
 
+        public static string GetBundleId()
+        {
+            return Application.identifier.ToLower();
+        }
+
+        public static string AppendBundleIdQueryParam(this string uri)
+        {
+            string bundleId = GetBundleId();
+            if (!Utils.IsWebGLBuild())
+                uri += $"?bundleId={bundleId}";
+            return uri;
+        }
+
         public static string GetNativeTokenWrapper(BigInteger chainId)
         {
             string id = chainId.ToString();

@@ -199,7 +199,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.TransferFunction() { Amount = BigInteger.Parse(amount.ToWei()) });
+                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.TransferFunction() { To = to, Amount = BigInteger.Parse(amount.ToWei()) });
             }
         }
 
