@@ -9,18 +9,22 @@ using System;
 using Nethereum.JsonRpc.Client.RpcMessages;
 using System.Linq;
 using Newtonsoft.Json;
+using WalletConnectSharp.Sign.Models;
+using System.Collections.Generic;
+using WalletConnectSharp.Common.Utils;
+using Thirdweb.WalletConnect;
 
 namespace Thirdweb.Wallets
 {
     public class ThirdwebWalletConnect : IThirdwebWallet
     {
-        public WalletConnectSignClient Client { get; private set; }
-
         private Web3 _web3;
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
         private string _walletConnectProjectId;
         private string _address;
+
+        private WalletConnect.WalletConnect _walletConnect;
 
         public ThirdwebWalletConnect(string walletConnectProjectId)
         {
@@ -39,24 +43,29 @@ namespace Thirdweb.Wallets
             }
 
             string topic = null;
-            (Client, _address, topic) = await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
+            string eipChainId = null;
+            WalletConnectSignClient client = null;
+            (client, _address, eipChainId) = await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
 
-            Debug.Log($"Connected to {_address}");
-            _web3 = new Web3();
-            return await GetAddress();
+            Debug.Log($"Connected to {_address} with topic {topic} and chainId {eipChainId}");
+
+            var accounts = new string[] { await GetAddress() };
+            _walletConnect = new WalletConnect.WalletConnect(accounts, eipChainId, client);
+            _web3 = _walletConnect.CreateWeb3();
+            return accounts[0];
         }
 
         public async Task Disconnect()
         {
-            await Client.Disconnect(
-                "User disconnected",
-                new ErrorResponse()
-                {
-                    Code = 0,
-                    Message = "User disconnected",
-                    Data = null
-                }
-            );
+            try
+            {
+                await _walletConnect.Disconnect();
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Error disconnecting sign client: " + e.Message);
+            }
+
             _web3 = null;
         }
 

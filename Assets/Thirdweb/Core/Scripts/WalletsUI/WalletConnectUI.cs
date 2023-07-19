@@ -15,9 +15,13 @@ using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Common.Utils;
 using Newtonsoft.Json;
 using WalletConnectSharp.Core.Models;
+using System.IO;
+using WalletConnect;
+using System.Linq;
 
 namespace Thirdweb.Wallets
 {
+    [RequireComponent(typeof(WCWebSocketBuilder))]
     public class WalletConnectUI : MonoBehaviour
     {
         public GameObject WalletConnectCanvas;
@@ -26,6 +30,8 @@ namespace Thirdweb.Wallets
         public string[] SupportedMethods = new string[] { "eth_sendTransaction", "personal_sign", "eth_signTypedData_v4" };
 
         public static WalletConnectUI Instance { get; private set; }
+
+        private WCWebSocketBuilder _builder;
 
         private void Awake()
         {
@@ -47,13 +53,20 @@ namespace Thirdweb.Wallets
 
             try
             {
+                if (File.Exists(Application.persistentDataPath + "/walletconnect.json"))
+                    File.Delete(Application.persistentDataPath + "/walletconnect.json");
+
+                if (_builder == null)
+                    _builder = GetComponent<WCWebSocketBuilder>();
+
                 WalletConnectCore core = new WalletConnectCore(
                     new CoreOptions()
                     {
                         Name = ThirdwebManager.Instance.SDK.session.Options.wallet?.appName,
                         ProjectId = walletConnectProjectId,
                         BaseContext = "unity-game",
-                        Storage = new InMemoryStorage() //new FileSystemStorage(Application.persistentDataPath + "/walletconnect.json"),
+                        Storage = new FileSystemStorage(Application.persistentDataPath + "/walletconnect.json"),
+                        ConnectionBuilder = _builder
                     }
                 );
 
@@ -101,10 +114,12 @@ namespace Thirdweb.Wallets
                 QRCodeImage.sprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new Vector2(0.5f, 0.5f));
                 DeepLinkButton.onClick.RemoveAllListeners();
                 DeepLinkButton.onClick.AddListener(() => Application.OpenURL(connectData.Uri));
+                QRCodeImage.mainTexture.filterMode = FilterMode.Point;
 
                 var sessionData = await connectData.Approval;
 
                 string address = null;
+                string eipChainId = null;
 
                 var selectedNamespace = sessionData.Namespaces["eip155"];
                 if (selectedNamespace != null && selectedNamespace.Accounts.Length > 0)
@@ -112,10 +127,11 @@ namespace Thirdweb.Wallets
                     var currentSession = selectedNamespace.Accounts[0];
                     var parameters = currentSession.Split(':');
                     address = parameters[2];
+                    eipChainId = string.Join(':', parameters.Take(2));
                 }
 
                 WalletConnectCanvas.SetActive(false);
-                return (client, address, sessionData.Topic);
+                return (client, address, eipChainId);
             }
             catch (System.Exception)
             {
