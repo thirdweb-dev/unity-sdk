@@ -302,7 +302,7 @@ namespace Thirdweb
         /// Gets the connected chainId.
         /// </summary>
         /// <returns>The connected chainId as an integer.</returns>
-        public async Task<int> GetChainId()
+        public async Task<BigInteger> GetChainId()
         {
             if (Utils.IsWebGLBuild())
             {
@@ -311,7 +311,7 @@ namespace Thirdweb
             else
             {
                 var hexChainId = await ThirdwebManager.Instance.SDK.session.Request<string>("eth_chainId");
-                return (int)hexChainId.HexToBigInteger(false);
+                return hexChainId.HexToBigInteger(false);
             }
         }
 
