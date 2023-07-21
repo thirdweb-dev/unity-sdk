@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Nethereum.Web3;
 using Thirdweb.AccountAbstraction;
 using Nethereum.Web3.Accounts;
+using System.Numerics;
 
 namespace Thirdweb.Wallets
 {
@@ -81,6 +82,11 @@ namespace Thirdweb.Wallets
         public Task<bool> IsConnected()
         {
             return Task.FromResult(_web3 != null);
+        }
+
+        public Task<bool> SwitchNetworkOverride(BigInteger newChainId, string newRpc)
+        {
+            return Task.FromException<bool>(new System.NotImplementedException());
         }
     }
 }

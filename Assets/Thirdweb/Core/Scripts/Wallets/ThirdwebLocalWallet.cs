@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
@@ -74,6 +75,13 @@ namespace Thirdweb.Wallets
         public Task<bool> IsConnected()
         {
             return Task.FromResult(_web3 != null);
+        }
+
+        public Task<bool> SwitchNetworkOverride(BigInteger newChainId, string newRpc)
+        {
+            _account = new Account(_account.PrivateKey, newChainId);
+            _web3 = new Web3(_account, newRpc);
+            return Task.FromResult(false);
         }
     }
 }

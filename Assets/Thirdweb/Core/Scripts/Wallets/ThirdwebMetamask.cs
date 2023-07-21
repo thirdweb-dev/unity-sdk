@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Threading.Tasks;
 using MetaMask.NEthereum;
 using MetaMask.Unity;
@@ -80,6 +81,11 @@ namespace Thirdweb.Wallets
         public Task<bool> IsConnected()
         {
             return Task.FromResult(_web3 != null);
+        }
+
+        public Task<bool> SwitchNetworkOverride(BigInteger newChainId, string newRpc)
+        {
+            return Task.FromResult(true);
         }
     }
 }
