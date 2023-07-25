@@ -17,7 +17,7 @@ namespace Thirdweb.Wallets
 
         public static PaperUI Instance { get; private set; }
 
-        private PaperEmbeddedWalletSdk _paper;
+        private EmbeddedWallet _paper;
         private string _email;
         private User _user;
         private System.Exception _exception;
@@ -36,7 +36,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        public async Task<User> Connect(PaperEmbeddedWalletSdk paper, string email)
+        public async Task<User> Connect(EmbeddedWallet paper, string email)
         {
             _paper = paper;
             _email = email;
@@ -71,9 +71,10 @@ namespace Thirdweb.Wallets
         {
             try
             {
-                (bool isNewUser, bool isNewDevice) = await _paper.SendPaperEmailLoginOtp(_email);
-                RecoveryInput.interactable = !isNewUser && isNewDevice;
-                Debug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
+                (bool isNewUser, bool isNewDevice) = await _paper.SendOtpEmailAsync(_email);
+                bool needsRecoveryCode = await _paper.FetchRecoveryCodeRequirementAsync(_email);
+                RecoveryInput.interactable = needsRecoveryCode;
+                Debug.Log($"Finished sending OTP: Needs recovery: {needsRecoveryCode}, New user: {isNewUser}, New device: {isNewDevice}");
             }
             catch (System.Exception e)
             {
@@ -87,8 +88,13 @@ namespace Thirdweb.Wallets
             {
                 string recoveryCode = string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text;
                 string otp = OTPInput.text;
-                _user = await _paper.VerifyPaperEmailLoginOtp(_email, otp, recoveryCode);
-                Debug.Log($"finished validating OTP:  EmailAddress {_user.EmailAddress}, Address {_user.Account.Address}");
+                var verifyRes = await _paper.VerifyOtpAsync(_email, otp, recoveryCode);
+                if (verifyRes.User == null)
+                {
+                    throw new System.Exception($"Unable to verify OTP, can retry: {verifyRes.CanRetry}");
+                }
+                _user = verifyRes.User;
+                Debug.Log($"Finished validating OTP:  EmailAddress {_user.EmailAddress}, Address {_user.Account.Address}");
             }
             catch (System.Exception e)
             {

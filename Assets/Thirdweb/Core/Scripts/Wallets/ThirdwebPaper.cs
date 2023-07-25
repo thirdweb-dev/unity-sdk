@@ -11,7 +11,7 @@ namespace Thirdweb.Wallets
         private Web3 _web3;
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
-        private PaperEmbeddedWalletSdk _paper;
+        private EmbeddedWallet _paper;
         private User _user;
 
         public ThirdwebPaper(string paperClientId)
@@ -19,7 +19,7 @@ namespace Thirdweb.Wallets
             _web3 = null;
             _provider = WalletProvider.Paper;
             _signerProvider = WalletProvider.LocalWallet;
-            _paper = new PaperEmbeddedWalletSdk(paperClientId);
+            _paper = new EmbeddedWallet(paperClientId);
         }
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
@@ -37,7 +37,7 @@ namespace Thirdweb.Wallets
 
         public async Task Disconnect()
         {
-            await _paper.Logout();
+            await _paper.SignOutAsync();
             _user = null;
             _web3 = null;
         }
