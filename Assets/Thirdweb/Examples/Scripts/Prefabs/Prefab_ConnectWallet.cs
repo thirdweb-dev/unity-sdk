@@ -254,7 +254,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
     {
         Debug.Log($"Connected to: {_address}");
 
-        var chainSprite = NetworkIcons.Find(x => x.chain == _currentChainData.identifier).sprite;
+        var chainSprite = NetworkIcons.Find(x => x.chain == _currentChainData.identifier)?.sprite;
         var walletSprite = SupportedWalletsUI[_walletProvider].sprite;
         var balance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
 
