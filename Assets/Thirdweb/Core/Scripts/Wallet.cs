@@ -302,7 +302,7 @@ namespace Thirdweb
         /// Gets the connected chainId.
         /// </summary>
         /// <returns>The connected chainId as an integer.</returns>
-        public async Task<int> GetChainId()
+        public async Task<BigInteger> GetChainId()
         {
             if (Utils.IsWebGLBuild())
             {
@@ -311,7 +311,7 @@ namespace Thirdweb
             else
             {
                 var hexChainId = await ThirdwebManager.Instance.SDK.session.Request<string>("eth_chainId");
-                return (int)hexChainId.HexToBigInteger(false);
+                return hexChainId.HexToBigInteger(false);
             }
         }
 
@@ -320,15 +320,24 @@ namespace Thirdweb
         /// </summary>
         /// <param name="chainId">The chainId to switch to.</param>
         /// <returns>A task representing the switching process.</returns>
-        public async Task SwitchNetwork(int chainId)
+        public async Task SwitchNetwork(BigInteger chainId)
         {
+            if (!await IsConnected())
+                throw new Exception("No account connected!");
+
             if (Utils.IsWebGLBuild())
             {
-                await Bridge.SwitchNetwork(chainId);
+                int safeId;
+                if (!int.TryParse(chainId.ToString(), out safeId))
+                {
+                    throw new Exception("Chain ID too large for WebGL platforms");
+                }
+
+                await Bridge.SwitchNetwork(safeId);
             }
             else
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                await ThirdwebManager.Instance.SDK.session.EnsureCorrectNetwork(chainId);
             }
         }
 

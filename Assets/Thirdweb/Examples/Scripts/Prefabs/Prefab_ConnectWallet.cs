@@ -332,7 +332,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
         Debug.Log($"Switching to network: {chainData.identifier}...");
         try
         {
-            await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(int.Parse(chainData.chainId));
+            await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(BigInteger.Parse(chainData.chainId));
             _currentChainData = chainData;
             SwitchNetworkPanel.SetActive(false);
             ShowConnectedState();
