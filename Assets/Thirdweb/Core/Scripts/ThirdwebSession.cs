@@ -132,32 +132,38 @@ namespace Thirdweb
                 throw new UnityException("The chain you are trying to switch to is not part of the ThirdwebManager's supported chains.");
             }
 
-            bool continueWithRequest = await ActiveWallet.SwitchNetworkOverride(newChainId, newChainData.rpcUrls[0]);
+            NetworkSwitchAction switchResult = await ActiveWallet.PrepareForNetworkSwitch(newChainId, newChainData.rpcUrls[0]);
 
-            if (continueWithRequest)
+            switch (switchResult)
             {
-                var hexChainId = await Request<string>("eth_chainId");
-                var connectedChainId = hexChainId.HexToBigInteger(false);
-                if (connectedChainId != ChainId)
-                {
-                    try
+                case NetworkSwitchAction.ContinueSwitch:
+                    var hexChainId = await Request<string>("eth_chainId");
+                    var connectedChainId = hexChainId.HexToBigInteger(false);
+                    if (connectedChainId != ChainId)
                     {
-                        await SwitchNetwork(new ThirdwebChain() { chainId = newChainData.chainId });
-                    }
-                    catch (System.Exception e)
-                    {
-                        Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
                         try
                         {
-                            await AddNetwork(newChainData);
                             await SwitchNetwork(new ThirdwebChain() { chainId = newChainData.chainId });
                         }
-                        catch (System.Exception f)
+                        catch (System.Exception e)
                         {
-                            throw new UnityException("Adding chain error: " + f.Message);
+                            Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
+                            try
+                            {
+                                await AddNetwork(newChainData);
+                                await SwitchNetwork(new ThirdwebChain() { chainId = newChainData.chainId });
+                            }
+                            catch (System.Exception f)
+                            {
+                                throw new UnityException("Adding chain error: " + f.Message);
+                            }
                         }
                     }
-                }
+                    break;
+                case NetworkSwitchAction.Handled:
+                    break;
+                case NetworkSwitchAction.Unsupported:
+                    throw new UnityException("Network switching is not supported by the active wallet.");
             }
 
             ChainId = newChainId;

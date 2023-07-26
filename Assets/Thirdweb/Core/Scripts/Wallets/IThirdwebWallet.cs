@@ -72,11 +72,29 @@ namespace Thirdweb.Wallets
         Task<bool> IsConnected();
 
         /// <summary>
-        /// Optionally update wallet variables and return whether to proceed with a wallet_switchEthereumChain call, return exception if switching is completely unsupported.
+        /// Prepares the wallet for a network switch and returns an actionable response.
         /// </summary>
         /// <param name="newChainId">The new chain ID to switch to.</param>
         /// <param name="newRpc">The new RPC endpoint to switch to.</param>
-        /// <returns>True to continue with a wallet_switchEthereumChain call; false not to; exception if switching is completely unsupported.</returns>
-        Task<bool> SwitchNetworkOverride(BigInteger newChainId, string newRpc);
+        /// <returns>A <see cref="NetworkSwitchAction"/> indicating the action to be taken.</returns>
+        Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc);
+    }
+
+    public enum NetworkSwitchAction
+    {
+        /// <summary>
+        /// Indicates that the network switch can proceed. The SDK should continue with the wallet_switchEthereumChain RPC call.
+        /// </summary>
+        ContinueSwitch,
+
+        /// <summary>
+        /// Indicates that the wallet has already handled the network switch internally. There's no need to make the wallet_switchEthereumChain RPC call.
+        /// </summary>
+        Handled,
+
+        /// <summary>
+        /// Indicates that the network switching feature is completely unsupported for the current wallet implementation.
+        /// </summary>
+        Unsupported
     }
 }

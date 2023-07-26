@@ -84,9 +84,9 @@ namespace Thirdweb.Wallets
             return Task.FromResult(_web3 != null);
         }
 
-        public Task<bool> SwitchNetworkOverride(BigInteger newChainId, string newRpc)
+        public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
         {
-            return Task.FromException<bool>(new System.NotImplementedException());
+            return Task.FromResult(NetworkSwitchAction.Unsupported);
         }
     }
 }

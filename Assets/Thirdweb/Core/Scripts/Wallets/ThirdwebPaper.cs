@@ -86,11 +86,11 @@ namespace Thirdweb.Wallets
             return Task.FromResult(_web3 != null);
         }
 
-        public Task<bool> SwitchNetworkOverride(BigInteger newChainId, string newRpc)
+        public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
         {
             _account = new Account(_account.PrivateKey, newChainId);
             _web3 = new Web3(_account, newRpc);
-            return Task.FromResult(false);
+            return Task.FromResult(NetworkSwitchAction.Handled);
         }
     }
 }
