@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Thirdweb;
+using Nethereum.ABI.FunctionEncoding.Attributes;
+using System.Numerics;
+using Newtonsoft.Json;
 
-// Your Event data structure
+// Your Event type (WebGL)
 [System.Serializable]
 public struct TransferEvent
 {
@@ -12,7 +15,26 @@ public struct TransferEvent
 
     public override string ToString()
     {
-        return $"TransferEvent:" + $"\n>prevURI: {from}" + $"\n>newURI: {to}" + $"\n>tokenId: {tokenId}";
+        return $"TransferEvent:" + $"\n>from: {from}" + $"\n>to: {to}" + $"\n>tokenId: {tokenId}";
+    }
+}
+
+// Your Event type (Native platforms)
+[Event("Transfer")]
+public class TransferEventDTO : IEventDTO
+{
+    [Parameter("address", "from", 1, true)]
+    public string From { get; set; }
+
+    [Parameter("address", "to", 2, true)]
+    public string To { get; set; }
+
+    [Parameter("uint256", "tokenId", 3, true)]
+    public BigInteger TokenId { get; set; }
+
+    public override string ToString()
+    {
+        return $"TransferEvent:" + $"\n>from: {From}" + $"\n>to: {To}" + $"\n>tokenId: {TokenId}";
     }
 }
 
@@ -26,12 +48,24 @@ public class Prefab_Events : MonoBehaviour
         {
             Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x2e01763fA0e15e07294D74B63cE4b526B321E389");
 
-            // Optional event query options
-            Dictionary<string, object> filters = new Dictionary<string, object> { { "tokenId", 20 } };
-            EventQueryOptions options = new EventQueryOptions(filters);
+            if (Utils.IsWebGLBuild())
+            {
+                // Optional event query options
+                Dictionary<string, object> filters = new Dictionary<string, object> { { "tokenId", 20 } };
+                EventQueryOptions options = new EventQueryOptions(filters);
 
-            List<ContractEvent<TransferEvent>> allEvents = await contract.events.Get<TransferEvent>("Transfer", options);
-            Debugger.Instance.Log("[Get Events] Get - TransferEvent #1", allEvents[0].ToString());
+                List<ContractEvent<TransferEvent>> allEvents = await contract.events.Get<TransferEvent>("Transfer", options);
+                Debugger.Instance.Log("[Get Events] Get - TransferEvent #1", allEvents[0].ToString());
+            }
+            else
+            {
+                // Optional event query options
+                ulong? fromBlock = null;
+                ulong? toBlock = null;
+
+                var allEvents = await contract.GetEventLogs<TransferEventDTO>(fromBlock, toBlock);
+                Debugger.Instance.Log("[Get Events] Get - TransferEvent #1", allEvents[0].Event.ToString());
+            }
         }
         catch (System.Exception e)
         {

@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using Nethereum.ABI.FunctionEncoding;
 using System.Linq;
 using System;
+using Nethereum.Contracts;
+using Nethereum.RPC.Eth.DTOs;
+using Nethereum.ABI.FunctionEncoding.Attributes;
 
 namespace Thirdweb
 {
@@ -141,6 +144,23 @@ namespace Thirdweb
             var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
             var function = contract.GetFunction(functionName);
             return function.DecodeInput(encodedArgs);
+        }
+
+        /// <summary>
+        /// Get the events of a contract. For WebGL use contract.Events class instead.
+        /// <returns>A list of <see cref="EventLog"/> (extending IEventDTO) objects representing the events.</returns>
+        /// </summary>
+        public async Task<List<EventLog<TEventDTO>>> GetEventLogs<TEventDTO>(ulong? fromBlock = null, ulong? toBlock = null)
+            where TEventDTO : IEventDTO, new()
+        {
+            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            var transferEventHandler = web3.Eth.GetEvent<TEventDTO>(this.address);
+            var filter = transferEventHandler.CreateFilterInput(
+                fromBlock: fromBlock == null ? BlockParameter.CreateEarliest() : new BlockParameter(fromBlock.Value),
+                toBlock: toBlock == null ? BlockParameter.CreateLatest() : new BlockParameter(toBlock.Value)
+            );
+            var allTransferEventsForContract = await transferEventHandler.GetAllChangesAsync(filter);
+            return allTransferEventsForContract;
         }
 
         /// <summary>
