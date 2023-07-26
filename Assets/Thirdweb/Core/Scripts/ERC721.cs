@@ -6,6 +6,7 @@ using UnityEngine;
 using Newtonsoft.Json;
 using TokenERC721Contract = Thirdweb.Contracts.TokenERC721.ContractDefinition;
 using DropERC721Contract = Thirdweb.Contracts.DropERC721.ContractDefinition;
+using ERC721AQueryable = Thirdweb.Contracts.ERC721AQueryableUpgradeable.ContractDefinition;
 
 namespace Thirdweb
 {
@@ -133,18 +134,34 @@ namespace Thirdweb
                 }
                 catch
                 {
-                    // ERC721 totalSupply
-                    var count = await TotalCount();
-                    for (int i = 0; i < count; i++)
+                    // ERC721AQueryable
+                    try
                     {
-                        if (await OwnerOf(i.ToString()) == owner)
+                        var tokensOwned = await TransactionManager.ThirdwebRead<ERC721AQueryable.TokensOfOwnerFunction, ERC721AQueryable.TokensOfOwnerOutputDTO>(
+                            contractAddress,
+                            new ERC721AQueryable.TokensOfOwnerFunction() { Owner = owner }
+                        );
+                        for (int i = 0; i < tokensOwned.ReturnValue1.Count; i++)
                         {
-                            ownedNfts.Add(await Get(i.ToString()));
-                            if (ownedNfts.Count == balanceOfOwner)
-                                break;
+                            ownedNfts.Add(await Get(tokensOwned.ReturnValue1[i].ToString()));
                         }
+                        return ownedNfts;
                     }
-                    return ownedNfts;
+                    catch
+                    {
+                        // ERC721Supply
+                        var count = await TotalCount();
+                        for (int i = 0; i < count; i++)
+                        {
+                            if (await OwnerOf(i.ToString()) == owner)
+                            {
+                                ownedNfts.Add(await Get(i.ToString()));
+                                if (ownedNfts.Count == balanceOfOwner)
+                                    break;
+                            }
+                        }
+                        return ownedNfts;
+                    }
                 }
             }
         }
