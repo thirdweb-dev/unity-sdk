@@ -36,6 +36,21 @@ namespace Thirdweb
             return await queryHandler.QueryAsync<TWResult>(contractAddress, functionMessage);
         }
 
+        public static async Task<TWResult[]> ThirdwebMultiRead<TWFunction, TWResult>(string contractAddress, TWFunction[] functionMessages)
+            where TWFunction : FunctionMessage, new()
+            where TWResult : IFunctionOutputDTO, new()
+        {
+            MultiQueryHandler multiqueryHandler = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetMultiQueryHandler();
+            var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
+            var calls = new List<MulticallInputOutput<TWFunction, TWResult>>();
+            for (int i = 0; i < functionMessages.Length; i++)
+            {
+                calls.Add(new MulticallInputOutput<TWFunction, TWResult>(functionMessages[i], contractAddress));
+            }
+            var results = await multiqueryHandler.MultiCallAsync(MultiQueryHandler.DEFAULT_CALLS_PER_REQUEST, calls.ToArray()).ConfigureAwait(false);
+            return calls.Select(x => x.Output).ToArray();
+        }
+
         public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null, BigInteger? gasOverride = null)
             where TWFunction : FunctionMessage, new()
         {
