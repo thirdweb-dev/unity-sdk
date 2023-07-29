@@ -97,7 +97,6 @@ All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-
 - Drag and drop it into your scene.
 - Set up the networks you want to support from the ThirdwebManager prefab.
 - You can add callbacks from the inspector for when the wallet is connected, disconnected, fails to connect or disconnect, as well as callbacks when the network is switched or fails to do so.
-- For native platforms: some wallet providers may not be supported, and multiple networks in the ThirdwebManager is not supported.
 
 [NFT Loader](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_NFTLoader.cs) - Standalone drag & drop grid/scroll view of NFTs you ask it to display!
 
