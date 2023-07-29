@@ -385,11 +385,21 @@ namespace Thirdweb
                     new DropERC20Contract.GetClaimConditionByIdFunction() { ConditionId = id.ReturnValue1 }
                 );
 
+                Currency currency = new Currency();
+                try
+                {
+                    await ThirdwebManager.Instance.SDK.GetContract(data.Condition.Currency).ERC20.Get();
+                }
+                catch
+                {
+                    Debug.Log("Could not fetch currency metadata, proceeding without it.");
+                }
+
                 return new ClaimConditions()
                 {
                     availableSupply = (data.Condition.MaxClaimableSupply - data.Condition.SupplyClaimed).ToString(),
                     currencyAddress = data.Condition.Currency,
-                    currencyMetadata = new CurrencyValue() { value = data.Condition.PricePerToken.ToString(), },
+                    currencyMetadata = new CurrencyValue(currency.name, currency.symbol, currency.decimals, data.Condition.PricePerToken.ToString(), data.Condition.PricePerToken.ToString().ToEth()),
                     currentMintSupply = data.Condition.SupplyClaimed.ToString(),
                     maxClaimablePerWallet = data.Condition.QuantityLimitPerWallet.ToString(),
                     maxClaimableSupply = data.Condition.MaxClaimableSupply.ToString(),

@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using TokenERC721Contract = Thirdweb.Contracts.TokenERC721.ContractDefinition;
 using DropERC721Contract = Thirdweb.Contracts.DropERC721.ContractDefinition;
 using ERC721AQueryable = Thirdweb.Contracts.ERC721AQueryableUpgradeable.ContractDefinition;
+using SignatureDropContract = Thirdweb.Contracts.SignatureDrop.ContractDefinition;
 
 namespace Thirdweb
 {
@@ -460,24 +461,59 @@ namespace Thirdweb
             }
             else
             {
-                var id = await TransactionManager.ThirdwebRead<DropERC721Contract.GetActiveClaimConditionIdFunction, DropERC721Contract.GetActiveClaimConditionIdOutputDTO>(
-                    contractAddress,
-                    new DropERC721Contract.GetActiveClaimConditionIdFunction() { }
-                );
+                DropERC721Contract.ClaimCondition data;
+                try
+                {
+                    var id = await TransactionManager.ThirdwebRead<DropERC721Contract.GetActiveClaimConditionIdFunction, DropERC721Contract.GetActiveClaimConditionIdOutputDTO>(
+                        contractAddress,
+                        new DropERC721Contract.GetActiveClaimConditionIdFunction() { }
+                    );
 
-                var data = await TransactionManager.ThirdwebRead<DropERC721Contract.GetClaimConditionByIdFunction, DropERC721Contract.GetClaimConditionByIdOutputDTO>(
-                    contractAddress,
-                    new DropERC721Contract.GetClaimConditionByIdFunction() { ConditionId = id.ReturnValue1 }
-                );
+                    data = (
+                        await TransactionManager.ThirdwebRead<DropERC721Contract.GetClaimConditionByIdFunction, DropERC721Contract.GetClaimConditionByIdOutputDTO>(
+                            contractAddress,
+                            new DropERC721Contract.GetClaimConditionByIdFunction() { ConditionId = id.ReturnValue1 }
+                        )
+                    ).Condition;
+                }
+                catch
+                {
+                    var sigDropCondition = await TransactionManager.ThirdwebRead<SignatureDropContract.ClaimConditionFunction, SignatureDropContract.ClaimConditionOutputDTO>(
+                        contractAddress,
+                        new SignatureDropContract.ClaimConditionFunction() { }
+                    );
+
+                    data = new DropERC721Contract.ClaimCondition()
+                    {
+                        StartTimestamp = sigDropCondition.StartTimestamp,
+                        MaxClaimableSupply = sigDropCondition.MaxClaimableSupply,
+                        SupplyClaimed = sigDropCondition.SupplyClaimed,
+                        QuantityLimitPerWallet = sigDropCondition.QuantityLimitPerWallet,
+                        MerkleRoot = sigDropCondition.MerkleRoot,
+                        PricePerToken = sigDropCondition.PricePerToken,
+                        Currency = sigDropCondition.Currency,
+                        Metadata = sigDropCondition.Metadata,
+                    };
+                }
+
+                Currency currency = new Currency();
+                try
+                {
+                    await ThirdwebManager.Instance.SDK.GetContract(data.Currency).ERC20.Get();
+                }
+                catch
+                {
+                    Debug.Log("Could not fetch currency metadata, proceeding without it.");
+                }
 
                 return new ClaimConditions()
                 {
-                    availableSupply = (data.Condition.MaxClaimableSupply - data.Condition.SupplyClaimed).ToString(),
-                    currencyAddress = data.Condition.Currency,
-                    currencyMetadata = new CurrencyValue() { value = data.Condition.PricePerToken.ToString(), },
-                    currentMintSupply = data.Condition.SupplyClaimed.ToString(),
-                    maxClaimablePerWallet = data.Condition.QuantityLimitPerWallet.ToString(),
-                    maxClaimableSupply = data.Condition.MaxClaimableSupply.ToString(),
+                    availableSupply = (data.MaxClaimableSupply - data.SupplyClaimed).ToString(),
+                    currencyAddress = data.Currency,
+                    currencyMetadata = new CurrencyValue(currency.name, currency.symbol, currency.decimals, data.PricePerToken.ToString(), data.PricePerToken.ToString().ToEth()),
+                    currentMintSupply = data.SupplyClaimed.ToString(),
+                    maxClaimablePerWallet = data.QuantityLimitPerWallet.ToString(),
+                    maxClaimableSupply = data.MaxClaimableSupply.ToString(),
                 };
             }
         }
