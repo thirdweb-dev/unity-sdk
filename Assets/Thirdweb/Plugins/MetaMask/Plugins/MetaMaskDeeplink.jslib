@@ -120,6 +120,27 @@ WebGLIsMobile: function () {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 },
 
+LSExists: function (key) {
+  return localStorage.getItem(UTF8ToString(key)) !== null
+},
+  
+LSWrite: function(key, data) {
+  localStorage.setItem(UTF8ToString(key), UTF8ToString(data))
+},
+
+LSRead: function(key) {
+  var data = localStorage.getItem(UTF8ToString(key))
+  
+  // required to return string data
+  var bufferSize = lengthBytesUTF8(data) + 1;
+  var buffer = _malloc(bufferSize)
+  stringToUTF8(data, buffer, bufferSize);
+  return buffer;
+},
+
+LSDelete: function(key) {
+  localStorage.removeItem(UTF8ToString(key))
+},
 };
 
 mergeInto(LibraryManager.library, LibraryMetaMaskDeeplink);

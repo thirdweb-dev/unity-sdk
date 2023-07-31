@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-
+using MetaMask.Cryptography;
 using MetaMask.Logging;
 using MetaMask.Models;
 using MetaMask.Sockets;
@@ -16,38 +17,53 @@ namespace MetaMask
     /// <summary>
     /// The main interface to interact with the MetaMask wallet.
     /// </summary>
-    public class MetaMaskWallet : IDisposable
+    public class MetaMaskWallet : IMetaMaskEventsHandler, IDisposable
     {
 
         #region Events
 
+        public bool Connecting => this.connectionTcs != null && !this.connectionTcs.Task.IsCompleted;
+
+        public IMetaMaskEventsHandler Events => this;
+
+        public EventHandler<MetaMaskConnectEventArgs> StartConnectingHandler { get; set; }
+
         /// <summary>Raised when the wallet is ready.</summary>
-        public event EventHandler WalletReady;
+        public EventHandler WalletReadyHandler { get; set; }
         /// <summary>Raised when the wallet is paused.</summary>
-        public event EventHandler WalletPaused;
+        public EventHandler WalletPausedHandler { get; set; }
+
+        private event EventHandler _walletConnectedHandler;
+
         /// <summary>Occurs when a wallet is connected.</summary>
-        public event EventHandler WalletConnected;
+        public EventHandler WalletConnectedHandler
+        {
+            get => _walletConnectedHandler;
+            set => _walletConnectedHandler = value;
+        }
+
         /// <summary>Occurs when a wallet is disconnected.</summary>
-        public event EventHandler WalletDisconnected;
+        public EventHandler WalletDisconnectedHandler { get; set; }
         /// <summary>Occurs when the chain ID is changed.</summary>
-        public event EventHandler ChainIdChanged;
+        public EventHandler ChainIdChangedHandler { get; set; }
         /// <summary>Occurs when the account is changed.</summary>
-        public event EventHandler AccountChanged;
+        public EventHandler AccountChangedHandler { get; set; }
         /// <summary>Occurs when the wallet connection is authorized by the user.</summary>
-        public event EventHandler WalletAuthorized;
+        public EventHandler WalletAuthorizedHandler { get; set; }
         /// <summary>Occurs when the wallet connection is unauthorized by the user.</summary>
-        public event EventHandler WalletUnauthorized;
+        public EventHandler WalletUnauthorizedHandler { get; set; }
         /// <summary>Occurs when the Ethereum request's response received.</summary>
-        public event EventHandler<MetaMaskEthereumRequestResultEventArgs> EthereumRequestResultReceived;
+        public EventHandler<MetaMaskEthereumRequestResultEventArgs> EthereumRequestResultReceivedHandler { get; set; }
         /// <summary>Occurs when the Ethereum request has failed.</summary>
-        public event EventHandler<MetaMaskEthereumRequestFailedEventArgs> EthereumRequestFailed;
+        public EventHandler<MetaMaskEthereumRequestFailedEventArgs> EthereumRequestFailedHandler { get; set; }
 
         #endregion
 
         #region Constants
 
         /// <summary>The URL of the MetaMask app.</summary>
-        public const string MetaMaskAppLinkUrl = "https://metamask.app.link";
+        public const string MetaMaskUniversalLinkUrl = "https://metamask.app.link";
+        public const string MetaMaskDeepLinkUrl = "`metamask://";
 
         /// <summary>The URL of the socket.io server.</summary>
         public const string SocketUrl = "https://socket.codefi.network";
@@ -64,6 +80,8 @@ namespace MetaMask
         protected const string ClientsDisconnectedEventName = "clients_disconnected";
         /// <summary>The name of the event that is raised when clients are waiting to join.</summary>
         protected const string ClientsWaitingToJoinEventName = "clients_waiting_to_join";
+
+        protected const string ClientsReadyEventName = "clients_ready";
 
         protected const string TrackingEventRequest = "sdk_connect_request_started";
         protected const string TrackingEventConnected = "sdk_connection_established";
@@ -94,34 +112,56 @@ namespace MetaMask
         /// <summary>The socket connection url.</summary>
         protected string socketUrl;
 
+        /// <summary>
+        /// The data manager to use to persist session data
+        /// </summary>
+        protected MetaMaskDataManager _dataManager;
+
         /// <summary>Indicates whether the keys have been exchanged.</summary>
         /// <returns>True if the keys have been exchanged; otherwise, false.</returns>
         protected bool keysExchanged = false;
-        /// <summary>The public key of the wallet.</summary>
-        protected string walletPublicKey = string.Empty;
+        protected bool handshakeCompleted = false;
         /// <summary>Gets or sets the selected address.</summary>
         protected string selectedAddress = string.Empty;
         /// <summary>The ID of the chain that is currently selected.</summary>
         protected string selectedChainId = string.Empty;
 
+        /// <summary>
+        /// The public key of the wallet that is currently connected.
+        /// </summary>
+        protected string walletPublicKey = string.Empty;
+
         /// <summary>Indicates whether the application is connected to the Internet.</summary>
         /// <returns>True if the application is connected to the Internet; otherwise, false.</returns>
         protected bool connected = false;
+
+        protected bool socketConnected = false;
         /// <summary>Gets or sets a value indicating whether the application is paused.</summary>
         /// <value>true if the application is paused; otherwise, false.</value>
         protected bool paused = false;
 
         protected bool authorized = false;
+        protected bool authorizing = false;
 
         protected TaskCompletionSource<JsonElement> connectionTcs;
+        protected TaskCompletionSource<bool> validateKeyTcs;
 
         /// <summary>The Socket URL</summary>
-        protected string connectionUrl;
+        protected string universalConnectionUrl;
+        protected string deeplinkConnectionUrl;
 
         /// <summary>Submitted requests dictionary.</summary>
         protected Dictionary<string, MetaMaskSubmittedRequest> submittedRequests = new Dictionary<string, MetaMaskSubmittedRequest>();
 
         protected string analyticsPlatform = "unknown";
+
+        protected ConnectionContext _connectionContext;
+
+        protected string sessionId = "metamask.session.data";
+
+        protected bool sessionEnded;
+
+        protected Queue<object> queuedMessage = new Queue<object>();
 
         #endregion
 
@@ -168,6 +208,9 @@ namespace MetaMask
 
         public bool IsAuthorized => this.authorized;
 
+        public bool HasSession => _dataManager != null && !string.IsNullOrWhiteSpace(sessionId) &&
+                                  _dataManager.Storage.Exists(sessionId);
+
         /// <summary>Gets or sets the analytics platform.</summary>
         public string AnalyticsPlatform
         {
@@ -181,9 +224,37 @@ namespace MetaMask
             }
         }
 
+        /// <summary>
+        /// The context in which this MetaMaskWallet connection is made
+        /// </summary>
+        public ConnectionContext ConnectionContext
+        {
+            get
+            {
+                return _connectionContext;
+            }
+        }
+
         #endregion
 
         #region Constructors
+
+        public MetaMaskWallet(MetaMaskDataManager dataManager, string appName, string appUrl,
+            string sessionId, IEciesProvider eciesProvider, IMetaMaskTransport transport, 
+            IMetaMaskSocketWrapper socket, string socketUrl = SocketUrl)
+        {
+            this.sessionId = sessionId;
+            this._dataManager = dataManager;
+
+            LoadOrCreateSession(appName, appUrl, eciesProvider);
+
+            this.transport = transport;
+            this.socket = socket;
+            this.socketUrl = socketUrl;
+
+            this.socket.Connected += OnSocketConnected;
+            this.socket.Disconnected += OnSocketDisconnected;
+        }
 
         /// <summary>Creates a new instance of the MetaMaskWallet class.</summary>
         /// <param name="session">The MetaMask session.</param>
@@ -205,27 +276,62 @@ namespace MetaMask
 
         #region Protected Methods
 
+        protected void ReloadNewSession()
+        {
+            LoadOrCreateSession(session.Data.AppName, session.Data.AppUrl, session.EciesProvider);
+        }
+
+        protected void LoadOrCreateSession(string appName, string appUrl, IEciesProvider eciesProvider)
+        {
+            var sessionData = new MetaMaskSessionData(appName, appUrl);
+            this._dataManager.LoadInto(this.sessionId, sessionData);
+            this.session = new MetaMaskSession(eciesProvider, sessionData);
+        }
+
         /// <summary>Sends a message to the other party.</summary>
         /// <param name="data">The data to send.</param>
         /// <param name="encrypt">Whether to encrypt the data.</param>
         protected void SendMessage(object data, bool encrypt)
         {
-            var message = this.session.PrepareMessage(data, encrypt, this.walletPublicKey);
             if (this.paused)
             {
                 MetaMaskDebug.Log("Queuing message");
-                void SendMessageWhenReady(object sender, EventArgs e)
+                queuedMessage.Enqueue(data);
+                /*void SendMessageWhenReady(object sender, EventArgs e)
                 {
-                    this.socket.Emit(MessageEventName, message);
+                    // grab "this" from sender, probably more memory safe
+                    var senderThis = (MetaMaskWallet)sender;
+                    MetaMaskDebug.Log("Sending queued message");
+                    senderThis.socket.Emit(MessageEventName, message);
                     WalletReady -= SendMessageWhenReady;
                 }
-                WalletReady += SendMessageWhenReady;
+                WalletReady += SendMessageWhenReady;*/
             }
             else
             {
+                var message = this.session.PrepareMessage(data, encrypt, this.WalletPublicKey);
                 MetaMaskDebug.Log("Sending message");
                 this.socket.Emit(MessageEventName, message);
             }
+        }
+
+        protected void EmptyMessageQueue()
+        {
+            while (queuedMessage.Count > 0)
+            {
+                var message = queuedMessage.Dequeue();
+                if (message == null)
+                {
+                    MetaMaskDebug.LogWarning("Message in queue is null! Perhaps this object was collected by GC?");
+                    continue;
+                }
+                
+                MetaMaskDebug.Log("Sending queued message");
+                SendMessage(message, true);
+                MetaMaskDebug.Log("Queued message sent!");
+            }
+            
+            queuedMessage.Clear();
         }
 
         /// <summary>Sends analytics data to Socket.io server.</summary>
@@ -278,21 +384,37 @@ namespace MetaMask
         /// <summary>Called when the wallet is paused.</summary>
         protected void OnWalletPaused()
         {
+            if (this.paused)
+                return;
+            
             MetaMaskDebug.Log("Wallet Paused");
             this.paused = true;
 
-            WalletPaused?.Invoke(this, null);
-        }
-
-        protected async Task OnWalletResume()
-        {
-            MetaMaskDebug.Log("Wallet Resumed");
-            this.paused = false;
-            WalletConnected?.Invoke(this, EventArgs.Empty);
+            WalletPausedHandler?.Invoke(this, null);
             
-            InitializeState();
+            // Re-save the connection urls with redirect
+            /*if (transport.IsMobile)
+            {
+                SaveConnectionUrl(true);
+            }*/
 
-            this.connectionTcs = new TaskCompletionSource<JsonElement>();
+            SaveSession();
+        }
+        
+        protected async Task ValidateKeyExchange()
+        {
+            MetaMaskDebug.Log("Key validation requested");
+            if (this.validateKeyTcs != null)
+            {
+                MetaMaskDebug.Log("Key validation already pending");
+                await this.validateKeyTcs.Task;
+                return;
+            }
+
+            // This function will return a task when the key has been validated.
+            // We use the connectionTcs to validate that the response was received.
+            // We complete the validateKeyTcs once connectionTcs completes (inside KeyValidationComplete)
+            this.validateKeyTcs = new TaskCompletionSource<bool>();
             var request = new MetaMaskEthereumRequest
             {
                 Method = "eth_requestAccounts",
@@ -306,58 +428,84 @@ namespace MetaMask
                 Promise = this.connectionTcs
             };
 
+            MetaMaskDebug.Log("Sending eth_requestAccounts for key validation");
             this.submittedRequests.Add(id, submittedRequest);
             SendEthereumRequest(id, request, false);
-
-            await this.connectionTcs.Task;
             
-            this.connected = true;
+            try
+            {
+                await this.connectionTcs.Task;
+                MetaMaskDebug.Log("Response for eth_requestAccounts during key validation");
+                if (this.validateKeyTcs.Task.IsCompleted)
+                {
+                    MetaMaskDebug.LogWarning("Response for eth_requestAccounts during key validation, but validation task already completed!");
+                    return;
+                }
+
+                this.validateKeyTcs.TrySetResult(this.connectionTcs.Task.IsCompletedSuccessfully);
+            }
+            catch (Exception e)
+            {
+                this.validateKeyTcs.SetException(e);
+                MetaMaskDebug.Log("Key validation completed failed");
+                return;
+            }
         }
 
         /// <summary>Called when the wallet is ready.</summary>
-        protected async Task OnWalletReady()
+        protected async Task OnWalletAuthorized()
         {
+            MetaMaskDebug.Log("Wallet Ready Post pre-start");
+            if (this.authorizing)
+                return;
+
+            this.authorizing = true;
             MetaMaskDebug.Log("Wallet Ready");
             this.paused = false;
-            WalletConnected?.Invoke(this, EventArgs.Empty);
 
-            InitializeState();
-
-            this.connectionTcs = new TaskCompletionSource<JsonElement>();
-            var request = new MetaMaskEthereumRequest
+            try
             {
-                Method = "eth_requestAccounts",
-                Parameters = new string[] { }
-            };
-            string id = Guid.NewGuid().ToString();
+                this.WalletConnectedHandler?.Invoke(this, EventArgs.Empty);
+                await this.ValidateKeyExchange();
+                MetaMaskDebug.Log("Key validation completed successfully");
 
-            var submittedRequest = new MetaMaskSubmittedRequest
+                if (!this.authorized)
+                {
+                    MetaMaskDebug.Log("Invoking authorized event");
+                    this.authorized = true;
+                    this.WalletAuthorizedHandler?.Invoke(this, EventArgs.Empty);
+                }
+
+                if (!this.connected)
+                {
+                    MetaMaskDebug.Log("Invoking ready event");
+                    this.connected = true;
+                    this.WalletReadyHandler?.Invoke(this, EventArgs.Empty);
+
+                    MetaMaskDebug.Log("Invoking transport onSuccess");
+                    this.transport.OnSuccess();
+                }
+
+                MetaMaskDebug.Log("Resetting connection URL");
+                // Resave connection URL in-case we added a redirect at some point
+                this.SaveConnectionUrl();
+
+                MetaMaskDebug.Log("Saving session");
+                this.SaveSession();
+
+                // TODO Fix this, bug causes app to crash on Resume with queued messages
+                //MetaMaskDebug.Log("Emptying message queue");
+                this.EmptyMessageQueue();
+            }
+            catch (Exception e)
             {
-                Method = request.Method,
-                Promise = this.connectionTcs
-            };
-
-            this.submittedRequests.Add(id, submittedRequest);
-            SendEthereumRequest(id, request, false);
-
-            await this.connectionTcs.Task;
-            
-            this.connected = true;
-
-            WalletReady?.Invoke(this, EventArgs.Empty);
-            
-            this.transport.OnSuccess();
-        }
-
-        /// <summary>Initialize the wallet state.</summary>
-        protected void InitializeState()
-        {
-            var request = new MetaMaskEthereumRequest
+                MetaMaskDebug.LogError(e);
+                this.OnWalletUnauthorized();
+            }
+            finally
             {
-                Method = "eth_requestAccounts",
-                Parameters = new string[] { }
-            };
-            Request(request);
+                this.authorizing = false;
+            }
         }
 
         /// <summary>Raised when the socket is connected.</summary>
@@ -375,8 +523,14 @@ namespace MetaMask
             this.socket.On($"{ClientsDisconnectedEventName}-{channelId}", OnClientsDisconnected);
             this.socket.On($"{ClientsWaitingToJoinEventName}-{channelId}", OnClientsWaitingToJoin);
 
+            this.socketConnected = true;
+            this.socket.Disconnected += (o, args) => this.socketConnected = false;
+
             // Join the channel
             JoinChannel(channelId);
+            
+            // Alert transport we have connected
+            transport.OnConnectRequest();
         }
 
         private void OnSocketDisconnected(object sender, EventArgs e)
@@ -397,7 +551,7 @@ namespace MetaMask
 
         /// <summary>Called when a message is received.</summary>
         /// <param name="response">The response from the background task.</param>
-        protected void OnMessageReceived(string response)
+        protected async void OnMessageReceived(string response)
         {
             MetaMaskDebug.Log("Message received");
             MetaMaskDebug.Log(response);
@@ -412,12 +566,16 @@ namespace MetaMask
             {
                 value = document.RootElement;
             }
+
             var message = value.GetProperty("message");
             string messageType = string.Empty;
-            if (message.ValueKind == JsonValueKind.Object && message.TryGetProperty("type", out var messageTypeProperty))
+            if (message.ValueKind == JsonValueKind.Object &&
+                message.TryGetProperty("type", out var messageTypeProperty))
             {
                 messageType = messageTypeProperty.ToString();
             }
+            
+            // TODO Move response handling to typed event-based system.
 
             // Key exchange & handshake
             if (message.ValueKind != JsonValueKind.String && messageType == "key_handshake_start")
@@ -425,119 +583,154 @@ namespace MetaMask
                 // Always restart key exchange when we get key_handshake_start
                 // regardless of previous key exchange
                 this.keysExchanged = false;
+                this.handshakeCompleted = false;
                 this.paused = false;
-                // TODO Perhaps ready = false instead
-                //this.connected = false;
-                var keyExchangeSYN = new MetaMaskKeyExchangeMessage("key_handshake_SYN", this.session.PublicKey);
+                this.connected = false;
+                this.sessionEnded = false;
+                
+                ClearValidateTask();
 
-                SendMessage(keyExchangeSYN, false);
+                ExchangeKeys();
+                return;
             }
-            // NOTE: Double check this to see how it flows
-            else if (!this.keysExchanged)
+
+            if (!this.handshakeCompleted && messageType == "key_handshake_SYNACK")
             {
-                if (messageType == "key_handshake_SYNACK")
-                {
-                    MetaMaskDebug.Log("Wallet public key");
-                    this.walletPublicKey = message.GetProperty("pubkey").GetString();
-                    MetaMaskDebug.Log(this.walletPublicKey);
-                    var keyExchangeACK = new MetaMaskKeyExchangeMessage("key_handshake_ACK", this.session.PublicKey);
+                MetaMaskDebug.Log("Wallet public key");
+                this.walletPublicKey = message.GetProperty("pubkey").GetString();
+                MetaMaskDebug.Log(this.WalletPublicKey);
+                var keyExchangeACK = new MetaMaskKeyExchangeMessage("key_handshake_ACK", this.session.PublicKey);
 
-                    SendMessage(keyExchangeACK, false);
-
-                    this.keysExchanged = true;
-                    SendOriginatorInfo();
-                }
+                SendMessage(keyExchangeACK, false);
+                SendOriginatorInfo();
+                return;
             }
-            else
+
+            if (messageType == "ping")
             {
+                MetaMaskDebug.Log("Wallet responded with ping");
+                //MetaMaskDebug.LogError("Connection failed, prompting user to try again");
+                // Try again?
+                // EndSession(true);
+                
+                // Exchange keys again???
+                // ExchangeKeys(true);
+                
+                // Ping????
+                SendMessage(new MetaMaskPing(), false);
+                return;
+            }
+
+            // If it wasn't a key exchange or handshake, try to decrypt the JSON
+            try
+            {
+                MetaMaskDebug.Log("Encrypted message received");
+                string decryptedJson;
                 try
                 {
-                    MetaMaskDebug.Log("Encrypted message received");
-                    string decryptedJson;
-                    try
-                    {
-                        decryptedJson = this.session.DecryptMessage(message.ToString());
-                    }
-                    catch (Exception)
-                    {
-                        // If we can't decrypt, our keys may be outdated
-                        MetaMaskDebug.LogError("Could not decrypt message, restarting key exchange");
-                        this.keysExchanged = false;
-                        var keyExchangeSYN = new MetaMaskKeyExchangeMessage("key_handshake_SYN", this.session.PublicKey);
-                        SendMessage(keyExchangeSYN, false);
-                        throw;
-                    }
+                    decryptedJson = this.session.DecryptMessage(message.ToString());
+                }
+                catch (Exception)
+                {
+                    // If we can't decrypt, our keys may be outdated
+                    MetaMaskDebug.LogError("Could not decrypt message, restarting key exchange");
+                    this.handshakeCompleted = false;
+                    ExchangeKeys(true);
+                    throw;
+                }
 
-                    MetaMaskDebug.Log(decryptedJson);
-                    var decryptedMessage = JsonDocument.Parse(decryptedJson).RootElement;
-                    var decryptedMessageType = decryptedMessage.TryGetProperty("type", out var type)
-                        ? type.ToString()
-                        : string.Empty;
+                MetaMaskDebug.Log(decryptedJson);
+                if (string.IsNullOrWhiteSpace(decryptedJson))
+                {
+                    // If we can't decrypt, our keys may be outdated
+                    MetaMaskDebug.LogError("Could not decrypt message, restarting key exchange");
+                    this.handshakeCompleted = false;
+                    ExchangeKeys(true);
+                    return;
+                }
+                var decryptedMessage = JsonDocument.Parse(decryptedJson).RootElement;
+                var decryptedMessageType = decryptedMessage.TryGetProperty("type", out var type)
+                    ? type.ToString()
+                    : string.Empty;
 
-                    if (decryptedMessageType == "pause")
+                if (decryptedMessageType == "pause")
+                {
+                    OnWalletPaused();
+                    return;
+                }
+                else if (decryptedMessageType == "otp")
+                {
+                    var answer = decryptedMessage.TryGetProperty("otpAnswer", out var answerTypeElement)
+                        ? int.Parse(answerTypeElement.ToString())
+                        : throw new ArgumentException("Could not parse otp answer");
+
+                    OnOtpReceived(answer);
+                    return;
+                }
+                else if (decryptedMessageType == "ready")
+                {
+                    // Key exchange successful
+                    this.handshakeCompleted = true;
+                    // Test key exchange by sending eth_requestAccounts
+                    await ValidateKeyExchange();
+                    if (!transport.IsMobile) return;
+                    
+                    await OnWalletAuthorized();
+                    return;
+                }
+
+                if (!this.connected)
+                {
+                    if (decryptedMessageType == "authorized")
                     {
-                        OnWalletPaused();
+                        await OnWalletAuthorized();
                         return;
                     }
-                    else if (decryptedMessageType == "otp")
+
+                    if (decryptedMessageType == "wallet_info")
                     {
-                        var answer = decryptedMessage.TryGetProperty("otpAnswer", out var answerTypeElement)
-                            ? int.Parse(answerTypeElement.ToString())
-                            : throw new ArgumentException("Could not parse otp answer");
-                        
-                        OnOtpReceived(answer);
-                    }
-                    else if (decryptedMessageType == "ready")
-                    {
-                        OnWalletReady();
+                        // TODO Store wallet info
+                        // OnWalletAuthorized();
                         return;
                     }
 
-                    if (!this.connected)
+                    if (decryptedMessageType == "terminate")
                     {
-                        if (decryptedMessageType == "wallet_info")
-                        {
-                            // Only do something if we were paused
-                            if (this.paused)
-                                OnWalletResume();
-                            
-                            //OnWalletConnected();
-                            return;
-                        }
+                        OnWalletUnauthorized();
+                        return;
                     }
+                }
 
-                    if (decryptedMessage.TryGetProperty("data", out var data))
+                if (decryptedMessage.TryGetProperty("data", out var data))
+                {
+                    if (data.TryGetProperty("id", out var id))
                     {
-                        if (data.TryGetProperty("id", out var id))
-                        {
-                            OnEthereumRequestReceived(id.ToString(), data);
-                        }
-                        else
-                        {
-                            OnEthereumEventReceived(data);
-                        }
+                        OnEthereumRequestReceived(id.ToString(), data);
                     }
                     else
                     {
-                        if (decryptedMessage.TryGetProperty("walletinfo", out var walletinfo))
-                        {
-                            OnEthereumEventReceived(walletinfo);
-                        }
+                        OnEthereumEventReceived(data);
                     }
                 }
-                catch (Exception e)
+                else
                 {
-                    MetaMaskDebug.LogException(e);
+                    if (decryptedMessage.TryGetProperty("walletinfo", out var walletinfo))
+                    {
+                        OnEthereumEventReceived(walletinfo);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                MetaMaskDebug.LogException(e);
             }
         }
 
         protected void OnOtpReceived(int answer)
         {
-            MetaMaskDebug.Log($"Displaying OTP Answer: {answer}");
+            MetaMaskDebug.Log($"Displaying OTP Answer");
             
-            // TODO Make sure this is QR Code only
-            // TODO Pass answer to UI transport 
+            this.transport.OnOTPCode(answer);
         }
 
         /// <summary>Called when the clients are waiting to join.</summary>
@@ -545,7 +738,6 @@ namespace MetaMask
         protected void OnClientsWaitingToJoin(string response)
         {
             MetaMaskDebug.Log("Clients waiting to join");
-            transport.OnConnectRequest(connectionUrl);
         }
 
         /// <summary>Called when the server sends a response to the client's connection request.</summary>
@@ -554,11 +746,33 @@ namespace MetaMask
         {
             MetaMaskDebug.Log("Clients connected");
 
-            if (!this.keysExchanged)
+            if (this.paused)
+            {
+                MetaMaskDebug.Log("Wallet Un-paused");
+                this.paused = false;
+
+                /*
+                if (this.transport.IsMobile)
+                {
+                    // Re-save the connection urls with no redirect
+                    SaveConnectionUrl();
+                }
+                */
+                
+                //WalletReady?.Invoke(this, EventArgs.Empty);
+            }
+            
+            //ExchangeKeys();
+        }
+
+        protected void ExchangeKeys(bool forceExchange = false)
+        {
+            if (!this.keysExchanged || forceExchange)
             {
                 MetaMaskDebug.Log("Exchanging keys");
                 var keyExchangeSYN = new MetaMaskKeyExchangeMessage("key_handshake_SYN", this.session.PublicKey);
                 SendMessage(keyExchangeSYN, false);
+                this.keysExchanged = true;
             }
         }
 
@@ -570,29 +784,15 @@ namespace MetaMask
 
             if (!this.paused)
             {
-                this.connected = false;
-                this.keysExchanged = false;
-
-                // TODO: Reset session
-
-                Disconnect();
-            }
-        }
-
-        protected void OnWalletAuthorized()
-        {
-            if (!this.authorized)
-            {
-                this.authorized = true;
-                WalletAuthorized?.Invoke(this, EventArgs.Empty);
+                OnWalletPaused();
             }
         }
 
         protected void OnWalletUnauthorized()
         {
             this.authorized = false;
-            WalletUnauthorized?.Invoke(this, EventArgs.Empty);
-            Disconnect();
+            WalletUnauthorizedHandler?.Invoke(this, EventArgs.Empty);
+            EndSession();
         }
 
         /// <summary>Raised when an Ethereum request is received.</summary>
@@ -605,17 +805,10 @@ namespace MetaMask
             // The request has failed with an error
             if (data.TryGetProperty("error", out var error))
             {
-                switch (request.Method)
-                {
-                    case "eth_requestAccounts":
-                        OnWalletUnauthorized();
-                        break;
-                }
-
                 var ex = new Exception(error.ToString());
                 this.transport.OnFailure(ex);
                 request.Promise.SetException(ex);
-                EthereumRequestFailed?.Invoke(this, new MetaMaskEthereumRequestFailedEventArgs(request, error));
+                EthereumRequestFailedHandler?.Invoke(this, new MetaMaskEthereumRequestFailedEventArgs(request, error));
             }
 
             // The request has been successful
@@ -628,15 +821,24 @@ namespace MetaMask
                         OnChainIdChanged(result.GetProperty("chainId").ToString());
                         break;
                     case "eth_requestAccounts":
-                        OnWalletAuthorized();
                         OnAccountsChanged(result);
+                        // If the request.Promise is different than current connection task,
+                        // then invoke that too
+                        if (request.Promise != this.connectionTcs)
+                        {
+                            MetaMaskDebug.Log("Connection task is different than request promise");
+                            MetaMaskDebug.Log("Setting result of connection task");
+                            this.connectionTcs.TrySetResult(result);
+                        }
+
                         break;
                     case "eth_chainId":
                         OnChainIdChanged(result.ToString());
                         break;
                 }
-                request.Promise.SetResult(result);
-                EthereumRequestResultReceived?.Invoke(this, new MetaMaskEthereumRequestResultEventArgs(request, data));
+                MetaMaskDebug.Log("Setting result of request task");
+                request.Promise.TrySetResult(result);
+                EthereumRequestResultReceivedHandler?.Invoke(this, new MetaMaskEthereumRequestResultEventArgs(request, data));
             }
         }
 
@@ -665,11 +867,7 @@ namespace MetaMask
             try
             {
                 this.selectedAddress = accounts[0].ToString();
-                AccountChanged?.Invoke(this, EventArgs.Empty);
-                if (this.paused)
-                {
-                    OnWalletReady();
-                }
+                AccountChangedHandler?.Invoke(this, EventArgs.Empty);
             }
             catch
             {
@@ -683,7 +881,7 @@ namespace MetaMask
         {
             MetaMaskDebug.Log("Chain ID changed");
             this.selectedChainId = newChainId;
-            ChainIdChanged?.Invoke(this, EventArgs.Empty);
+            ChainIdChangedHandler?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>Sends an Ethereum request to the MetaMask server.</summary>
@@ -723,7 +921,18 @@ namespace MetaMask
                 return true;
             }
 
-            return MethodsToRedirect.Contains(method);
+            if (MethodsToRedirect.Contains(method))
+            {
+                return true; 
+            } 
+            else if (this.paused && transport.IsMobile)
+            {
+                // Set a connection redirect URL so we can open deeplink for this method
+                SaveConnectionUrl(true);
+                return true;
+            }
+
+            return false;
         }
 
         #endregion
@@ -733,7 +942,7 @@ namespace MetaMask
         /// <summary>Sends a request to the MetaMask server.</summary>
         /// <param name="request">The request to send.</param>
         /// <returns>The response from the server.</returns>
-        public Task<JsonElement> Request(MetaMaskEthereumRequest request)
+        public async Task<JsonElement> Request(MetaMaskEthereumRequest request)
         {
             // Check if the parameters passed in has a ISerializerCallback
             if (request.Parameters is ISerializerCallback callback)
@@ -759,15 +968,33 @@ namespace MetaMask
                 if (this.connectionTcs == null || this.connectionTcs.Task.IsCompleted || (this.connectionTcs.Task.IsCompleted && !this.connected))
                 {
                     Connect();
+
+                    if (this.connectionTcs == null)
+                    {
+                        throw new Exception("Failed to reconnect to socket during Request.");
+                    }
                 }
-                return this.connectionTcs.Task;
+
+                return await this.connectionTcs.Task;
             }
-            else if (!this.connected)
+            else if (!this.connected && !this.transport.IsMobile)
             {
                 throw new Exception("MetaMask Wallet is not connected.");
             }
             else
             {
+                if (!this.socketConnected)
+                {
+                    // Ensure we are marked as paused
+                    if (!this.paused)
+                        this.paused = true;
+                    MetaMaskDebug.Log("Socket disconnected, reconnecting..");
+                    // Connect the socket first before sending a message
+                    Connect();
+                    MetaMaskDebug.Log("Socket re-connected, resuming request sending");
+                }
+                
+                // Send and deeplink if we're on mobile, wallet will auto-resume
                 var tcs = new TaskCompletionSource<JsonElement>();
                 var id = Guid.NewGuid().ToString();
                 var submittedRequest = new MetaMaskSubmittedRequest()
@@ -776,16 +1003,46 @@ namespace MetaMask
                     Promise = tcs
                 };
                 this.submittedRequests.Add(id, submittedRequest);
-                SendEthereumRequest(id, request, ShouldOpenMM(request.Method));
-                return tcs.Task;
+                SendEthereumRequest(id, request, this.socketConnected && ShouldOpenMM(request.Method));
+                return await tcs.Task;
             }
+        }
+
+        [Obsolete("This function should only be used internally or by editor code. You may want to use EndSession.")]
+        public void ClearSession()
+        {
+            if (this._dataManager != null)
+                this._dataManager.Delete(this.sessionId);
+
+            // Recreate session
+            ReloadNewSession();
+        }
+
+        private void ClearValidateTask()
+        {
+            MetaMaskDebug.Log("Clearing validation task");
+            // Make sure we let everyone know, party's over :(
+            // We're starting a new connect, so new validation is in order
+            if (this.validateKeyTcs != null && !this.validateKeyTcs.Task.IsCompleted)
+            {
+                this.validateKeyTcs.SetCanceled();
+            }
+
+            this.validateKeyTcs = null;
         }
 
         /// <summary>Connects to the server.</summary>
         public void Connect()
         {
             MetaMaskDebug.Log("Connecting...");
+            
+            ReloadNewSession();
+            
             this.connectionTcs = new TaskCompletionSource<JsonElement>();
+            ClearValidateTask();
+            
+            if (string.IsNullOrWhiteSpace(this.session.Data.ChannelId))
+                this.session.Data.ChannelId = Guid.NewGuid().ToString();
 
             // Initialize the socket
             this.socket.Initialize(this.socketUrl, new MetaMaskSocketOptions()
@@ -797,17 +1054,30 @@ namespace MetaMask
             });
             this.socket.ConnectAsync();
 
-            // TODO Remove for session persistence
-            //if (string.IsNullOrWhiteSpace(this.session.Data.ChannelId))
-            this.session.Data.ChannelId = Guid.NewGuid().ToString();
-            
-            string channelId = this.session.Data.ChannelId;
+            // Save connection urls in the transport
+            SaveConnectionUrl();
 
-            // Open the transport for connection
-            this.connectionUrl = MetaMaskAppLinkUrl + "/connect?channelId=" + Uri.EscapeDataString(channelId) + "&pubkey=" + Uri.EscapeDataString(this.session.PublicKey);
+            SaveSession();
+
+            StartConnectingHandler?.Invoke(this, new MetaMaskConnectEventArgs(this.universalConnectionUrl, this.deeplinkConnectionUrl));
+        }
+
+        protected void SaveConnectionUrl(bool redirect = false)
+        {
+            string channelId = this.session.Data.ChannelId;
+            var urlParams =
+                $"channelId={Uri.EscapeDataString(channelId)}&pubkey={Uri.EscapeDataString(this.session.PublicKey)}&comm=socket";
+
+            if (redirect)
+                urlParams += "&redirect=true";
+            
+            this.universalConnectionUrl = $"{MetaMaskUniversalLinkUrl}/connect?{urlParams}";
+            this.deeplinkConnectionUrl = $"{MetaMaskDeepLinkUrl}connect?{urlParams}";
+            
+            MetaMaskDebug.Log("Setting connection URLs: " + this.universalConnectionUrl);
             try
             {
-                this.transport.Connect(connectionUrl);
+                this.transport.UpdateUrls(universalConnectionUrl, deeplinkConnectionUrl);
             }
             catch (Exception exception)
             {
@@ -820,6 +1090,9 @@ namespace MetaMask
         public void Disconnect()
         {
             MetaMaskDebug.Log("Disconnected");
+            LeaveChannel();
+            
+            this.transport.OnDisconnect();
 
             this.connected = false;
             this.connectionTcs = null;
@@ -828,61 +1101,54 @@ namespace MetaMask
             this.authorized = false;
             this.paused = false;
             this.keysExchanged = false;
+            this.handshakeCompleted = false;
 
             this.walletPublicKey = string.Empty;
+            
             this.selectedAddress = string.Empty;
             this.selectedChainId = string.Empty;
 
             this.socket.DisconnectAsync();
-            WalletDisconnected?.Invoke(this, EventArgs.Empty);
+            WalletDisconnectedHandler?.Invoke(this, EventArgs.Empty);
+            
+            SaveSession();
         }
 
         /// <summary>Disposes and resets the wallet client when a user is disconnected.</summary>
         public void Dispose()
         {
-            string channelId = this.session.Data.ChannelId;
-
-            // Leave the channel
-            LeaveChannel(channelId);
-
             Disconnect();
             this.socket.Dispose();
         }
 
+        private void LeaveChannel()
+        {
+            string channelId = this.session.Data.ChannelId;
+
+            // Leave the channel
+            LeaveChannel(channelId);
+        }
+
+        public void SaveSession()
+        {
+            if (this._dataManager != null && !sessionEnded)
+            {
+                this._dataManager.Save(this.sessionId, this.session.Data);
+            }
+        }
+
         #endregion
 
-    }
-
-    public class MetaMaskEthereumRequestResultEventArgs : EventArgs
-    {
-        public readonly MetaMaskSubmittedRequest Request;
-        public readonly JsonElement Result;
-        public readonly string TransactionHash;
-
-        /// <summary>Initializes a new instance of the <see cref="MetaMaskEthereumRequestResultEventArgs"/> class.</summary>
-        /// <param name="request">The initial Ethereum request.</param>
-        /// <param name="result">The request's result.</param>
-        public MetaMaskEthereumRequestResultEventArgs(MetaMaskSubmittedRequest request, JsonElement result)
+        public void EndSession(bool forceDisconnect = false)
         {
-            this.Request = request;
-            this.Result = result;
-            this.TransactionHash = result.ValueKind == JsonValueKind.String ? result.ToString() : string.Empty;
-        }
-    }
-
-    public class MetaMaskEthereumRequestFailedEventArgs : EventArgs
-    {
-        public readonly MetaMaskSubmittedRequest Request;
-        public readonly JsonElement Error;
-
-        /// <summary>Initializes a new instance of the <see cref="MetaMaskEthereumRequestFailedEventArgs"/> class.</summary>
-        /// <param name="request">The initial Ethereum request.</param>
-        /// <param name="error">The request's result.</param>
-        public MetaMaskEthereumRequestFailedEventArgs(MetaMaskSubmittedRequest request, JsonElement error)
-        {
-            this.Request = request;
-            this.Error = error;
-
+            sessionEnded = true;
+            
+#pragma warning disable CS0618
+            ClearSession();
+#pragma warning restore CS0618
+            
+            if (IsConnected || forceDisconnect)
+                Disconnect();
         }
     }
 }

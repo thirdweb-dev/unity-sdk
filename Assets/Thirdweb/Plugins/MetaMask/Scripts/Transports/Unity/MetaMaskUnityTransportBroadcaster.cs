@@ -2,19 +2,16 @@ using System;
 using System.Collections.Generic;
 
 using MetaMask.Models;
-
+using MetaMask.SocketIOClient;
 using UnityEngine;
 
 namespace MetaMask.Transports.Unity
 {
-
     public class MetaMaskUnityTransportBroadcaster : MonoBehaviour
     {
-
         #region Fields
 
         private static MetaMaskUnityTransportBroadcaster instance;
-
 
         [SerializeField]
         protected GameObject[] listeners;
@@ -101,14 +98,17 @@ namespace MetaMask.Transports.Unity
 
         #region MetaMask Events
 
-        public void OnMetaMaskConnectRequest(string url)
+        public void OnMetaMaskConnectRequest(string universalLink, string deepLink)
         {
             for (int i = 0; i < this.allListeners.Count; i++)
             {
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    listener.OnMetaMaskConnectRequest(url);
+                    UnityThread.executeInUpdate(() =>
+                    {
+                        listener.OnMetaMaskConnectRequest(universalLink, deepLink);
+                    });
                 }
             }
         }
@@ -120,7 +120,10 @@ namespace MetaMask.Transports.Unity
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    listener.OnMetaMaskFailure(error);
+                    UnityThread.executeInUpdate(() =>
+                    {
+                        listener.OnMetaMaskFailure(error);
+                    });
                 }
             }
         }
@@ -132,7 +135,10 @@ namespace MetaMask.Transports.Unity
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    listener.OnMetaMaskRequest(id, request);
+                    UnityThread.executeInUpdate(() =>
+                    {
+                        listener.OnMetaMaskRequest(id, request);
+                    });
                 }
             }
         }
@@ -144,12 +150,29 @@ namespace MetaMask.Transports.Unity
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    listener.OnMetaMaskSuccess();
+                    UnityThread.executeInUpdate(() =>
+                    {
+                        listener.OnMetaMaskSuccess();
+                    });
+                }
+            }
+        }
+
+        public void OnMetaMaskOTP(int code)
+        {
+            for (int i = 0; i < this.allListeners.Count; i++)
+            {
+                var listener = this.allListeners[i];
+                if (listener != null)
+                {
+                    UnityThread.executeInUpdate(() =>
+                    {
+                        listener.OnMetaMaskOTP(code);
+                    });
                 }
             }
         }
 
         #endregion
     }
-
 }

@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using ZXing;
 using ZXing.QrCode;
+using TMPro;
 
 namespace Thirdweb.Wallets
 {
@@ -18,6 +19,8 @@ namespace Thirdweb.Wallets
         public GameObject MetamaskCanvas;
         public Image QRCodeImage;
         public Button DeepLinkButton;
+        public GameObject OTPPanel;
+        public TMP_Text OTPText;
 
         public static MetamaskUI Instance;
 
@@ -41,27 +44,31 @@ namespace Thirdweb.Wallets
 
         public async Task<string> Connect()
         {
+            OTPPanel.SetActive(false);
+
             _connected = false;
             _authorized = false;
             _exception = null;
 
             MetamaskCanvas.SetActive(true);
 
-            MetaMaskUnity.Instance.Wallet.WalletConnected += OnWalletConnected;
-            MetaMaskUnity.Instance.Wallet.WalletAuthorized += OnWalletAuthorized;
+            MetaMaskUnity.Instance.Wallet.WalletConnectedHandler += OnWalletConnected;
+            MetaMaskUnity.Instance.Wallet.WalletAuthorizedHandler += OnWalletAuthorized;
 
             MetaMaskUnity.Instance.Connect();
 
             await new WaitUntil(() => (_connected && _authorized) || _exception != null);
 
-            MetaMaskUnity.Instance.Wallet.WalletConnected -= OnWalletConnected;
-            MetaMaskUnity.Instance.Wallet.WalletAuthorized -= OnWalletAuthorized;
+            MetaMaskUnity.Instance.Wallet.WalletAuthorizedHandler -= OnWalletConnected;
+            MetaMaskUnity.Instance.Wallet.WalletAuthorizedHandler -= OnWalletAuthorized;
+
+            OTPPanel.SetActive(false);
 
             MetamaskCanvas.SetActive(false);
 
             if (_exception != null)
             {
-                MetaMaskUnity.Instance.Disconnect();
+                MetaMaskUnity.Instance.Disconnect(true);
                 throw _exception;
             }
 
@@ -73,14 +80,15 @@ namespace Thirdweb.Wallets
             _exception = new UnityException("User cancelled");
         }
 
-        public void ShowQR(string url)
+        public void ShowQR(string universalLink, string deepLink)
         {
-            Debug.Log($"URI: {url}");
+            Debug.Log($"Universal Link: {universalLink}");
+            Debug.Log($"Deep Link: {deepLink}");
 
-            var qrCodeAsTexture2D = GenerateQRTexture(url);
+            var qrCodeAsTexture2D = GenerateQRTexture(universalLink);
             QRCodeImage.sprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new Vector2(0.5f, 0.5f));
             DeepLinkButton.onClick.RemoveAllListeners();
-            DeepLinkButton.onClick.AddListener(() => Application.OpenURL(url));
+            DeepLinkButton.onClick.AddListener(() => Application.OpenURL(deepLink));
             QRCodeImage.mainTexture.filterMode = FilterMode.Point;
         }
 
@@ -113,11 +121,6 @@ namespace Thirdweb.Wallets
             return writer.Write(textForEncoding);
         }
 
-        public void OnMetaMaskConnectRequest(string url)
-        {
-            ShowQR(url);
-        }
-
         public void OnMetaMaskRequest(string id, MetaMaskEthereumRequest request)
         {
             return;
@@ -130,7 +133,24 @@ namespace Thirdweb.Wallets
 
         public void OnMetaMaskSuccess()
         {
-            return;
+            _connected = true;
+            _authorized = true;
+        }
+
+        public void OnMetaMaskConnectRequest(string universalLink, string deepLink)
+        {
+            ShowQR(universalLink, deepLink);
+        }
+
+        public void OnMetaMaskOTP(int otp)
+        {
+            OTPPanel.SetActive(true);
+            OTPText.text = otp.ToString();
+        }
+
+        public void OnMetaMaskDisconnected()
+        {
+            _exception = new UnityException("User disconnected");
         }
     }
 }

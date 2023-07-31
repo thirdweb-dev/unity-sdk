@@ -110,6 +110,16 @@ namespace MetaMask
 
         #region Public Methods
 
+        public void Delete(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            this.storage.Delete(key);
+        }
+
         /// <summary>
         /// Saves the <paramref name="value"/> by serializing it and then storing it to the <paramref name="key"/> inside the storage.
         /// </summary>
@@ -139,7 +149,7 @@ namespace MetaMask
                 {
                     using (var cryptoStream = GetCryptoStream(stream, CryptoStreamMode.Write))
                     {
-                        cryptoStream.Write(bytes);
+                        cryptoStream.Write(bytes, 0, bytes.Length);
                     }
                     data = Convert.ToBase64String(stream.ToArray());
                 }
@@ -228,6 +238,7 @@ namespace MetaMask
                 var loadedData = this.storage.Read(key);
                 if (string.IsNullOrEmpty(loadedData))
                 {
+                    MetaMaskDebug.Log("Storage reported empty data for key " + key);
                     return instance;
                 }
 
@@ -261,6 +272,10 @@ namespace MetaMask
                 }
 
                 return instance;
+            }
+            else
+            {
+                MetaMaskDebug.Log("Storage reported no key " + key);
             }
             return instance;
         }

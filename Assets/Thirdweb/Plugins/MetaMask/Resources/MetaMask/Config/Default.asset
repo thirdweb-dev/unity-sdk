@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Default
   m_EditorClassIdentifier: 
   log: 1
-  appName: thirdweb powered dApp
-  appUrl: https://thirdweb.com
+  appName: thirdweb demo app
+  appUrl: thirdweb.com
   encrypt: 1
   encryptionPassword: UnityUGUITransport/1.0.0
   sessionIdentifier: metamask.session.data

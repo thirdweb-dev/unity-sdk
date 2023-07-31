@@ -28,5 +28,11 @@
         /// <returns>Returns the data read</returns>
         string Read(string key);
 
+        /// <summary>
+        /// Delete the given <paramref name="key"/> inside the storage.
+        /// </summary>
+        /// <param name="key">The key to delete</param>
+        void Delete(string key);
+
     }
 }

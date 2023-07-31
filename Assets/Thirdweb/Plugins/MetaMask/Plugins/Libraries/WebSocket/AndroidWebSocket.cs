@@ -31,6 +31,7 @@ namespace MetaMask.NativeWebSocket
 
         private string url;
         private AndroidJavaObject webSocketHandler;
+        private AndroidJavaObject unityActivity;
 
         #endregion
 
@@ -56,9 +57,7 @@ namespace MetaMask.NativeWebSocket
         {
             this.url = url;
 
-            var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-            var unityActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-            webSocketHandler = new AndroidJavaObject(HandlerClassName, unityActivity, this, this.url);
+            BuildAndroidObjects();
         }
 
         #endregion
@@ -131,6 +130,17 @@ namespace MetaMask.NativeWebSocket
             OnMessage?.Invoke(bytes);
         }
 
+        #endregion
+        
+        #region Private Methods\
+
+        private void BuildAndroidObjects()
+        {
+            var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            unityActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            webSocketHandler = new AndroidJavaObject(HandlerClassName, unityActivity, this, this.url);
+        }
+        
         #endregion
 
     }

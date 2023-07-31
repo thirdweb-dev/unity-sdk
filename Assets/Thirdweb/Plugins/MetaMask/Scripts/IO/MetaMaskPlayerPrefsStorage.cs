@@ -1,3 +1,5 @@
+using MetaMask.SocketIOClient;
+using MetaMask.Unity;
 using UnityEngine;
 
 namespace MetaMask.IO
@@ -38,8 +40,14 @@ namespace MetaMask.IO
         /// <param name="data">The data to write.</param>
         public void Write(string key, string data)
         {
-            PlayerPrefs.SetString(key, data);
-            PlayerPrefs.Save();
+            if (MetaMaskUnity.Instance.IsInUnityThread())
+            {
+                DoWrite(key, data);
+            }
+            else
+            {
+                UnityThread.executeInUpdate(() => { DoWrite(key, data); });
+            }
         }
 
         /// <summary>Reads a string from persistent storage.</summary>
@@ -47,6 +55,30 @@ namespace MetaMask.IO
         public string Read(string key)
         {
             return PlayerPrefs.GetString(key);
+        }
+
+        public void Delete(string key)
+        {
+            if (MetaMaskUnity.Instance.IsInUnityThread())
+            {
+                DoDelete(key);
+            }
+            else
+            {
+                UnityThread.executeInUpdate(() => { DoDelete(key); });
+            }
+        }
+
+        private void DoWrite(string key, string data)
+        {
+            PlayerPrefs.SetString(key, data);
+            PlayerPrefs.Save();
+        }
+
+        private void DoDelete(string key)
+        {
+            PlayerPrefs.DeleteKey(key);
+            PlayerPrefs.Save();
         }
     }
 }

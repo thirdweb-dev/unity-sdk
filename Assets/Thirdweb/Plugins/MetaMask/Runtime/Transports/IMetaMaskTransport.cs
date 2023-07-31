@@ -16,24 +16,35 @@ namespace MetaMask.Transports
         /// Gets the transport's user agent to be used in headers.
         /// </summary>
         string UserAgent { get; }
+        
+        /// <summary>
+        /// Whether the transport (device) is a mobile device and supports deeplinking
+        /// </summary>
+        bool IsMobile { get; }
 
         /// <summary>
         /// Initialize the transport.
         /// </summary>
         void Initialize();
-
+        
         /// <summary>
         /// Present a connection request to the user.
         /// </summary>
         /// <param name="url"></param>
-        void Connect(string url);
+        void UpdateUrls(string universalLink, string deepLink);
 
-        void OnConnectRequest(string url);
+        void OnConnectRequest();
 
         /// <summary>
         /// Present a request to the user.
         /// </summary>
         void OnRequest(string id, MetaMaskEthereumRequest request);
+
+        /// <summary>
+        /// Present a OTP modal to the user with the given code
+        /// </summary>
+        /// <param name="code">The code to display</param>
+        void OnOTPCode(int code);
 
         /// <summary>
         /// Present a session-based request to the user.
@@ -51,6 +62,8 @@ namespace MetaMask.Transports
         /// Called when the request has been successful.
         /// </summary>
         void OnSuccess();
+
+        void OnDisconnect();
 
     }
 }
