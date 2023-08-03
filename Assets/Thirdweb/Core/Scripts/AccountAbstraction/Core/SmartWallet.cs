@@ -164,8 +164,13 @@ namespace Thirdweb.AccountAbstraction
             partialUserOp.PreVerificationGas = partialUserOp.CalcPreVerificationGas();
             var partialUserOpHexified = partialUserOp.EncodeUserOperation();
 
-            // Update paymaster data if any
+            // Update gas estimates and paymaster data if any
 
+            var gasEstimates = await BundlerClient.EthEstimateUserOperationGas(Config.bundlerUrl, apiKey, requestMessage.Id, partialUserOpHexified, Config.entryPointAddress);
+
+            partialUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value;
+            partialUserOp.CallGasLimit = new HexBigInteger(gasEstimates.CallGasLimit).Value;
+            partialUserOp.VerificationGasLimit = new HexBigInteger(gasEstimates.VerificationGas).Value;
             partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestMessage.Id, partialUserOpHexified, apiKey);
 
             // Hash, sign and encode the user operation
