@@ -82,7 +82,7 @@ namespace MetaMask.Transports.Unity.UI
             get { return this.userAgent; }
         }
 
-        public bool UseDeeplink => IsMobile;
+        public bool UseDeeplink = false;
 
         #endregion
 

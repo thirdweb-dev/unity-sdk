@@ -4,8 +4,10 @@ using MetaMask.Models;
 
 namespace MetaMask.Transports.Unity
 {
+
     public interface IMetaMaskUnityTransportListener
     {
+
         /// <summary>Called when the MetaMask client wants to connect to the application.</summary>
         /// <param name="url">The URL to connect to.</param>
         void OnMetaMaskConnectRequest(string universalLink, string deepLink);
@@ -29,5 +31,7 @@ namespace MetaMask.Transports.Unity
         void OnMetaMaskOTP(int otp);
 
         void OnMetaMaskDisconnected();
+
     }
+
 }

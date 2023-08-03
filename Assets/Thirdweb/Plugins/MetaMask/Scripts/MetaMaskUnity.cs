@@ -85,6 +85,11 @@ namespace MetaMask.Unity
         {
             get
             {
+                if (Application.isEditor && !Application.isPlaying)
+                {
+                    return null;
+                }
+
                 if (instance == null)
                 {
                     var instances = FindObjectsOfType<MetaMaskUnity>();
@@ -308,7 +313,7 @@ namespace MetaMask.Unity
 
         private void OnValidate()
         {
-            if (clearSessionData && Application.isEditor)
+            if (clearSessionData && Application.isEditor && Application.isPlaying)
             {
                 ForceClearSession();
                 clearSessionData = false;
@@ -323,8 +328,6 @@ namespace MetaMask.Unity
         /// <returns>A new instance of the <see cref="MetaMaskUnity"/> class.</returns>
         protected static MetaMaskUnity CreateNewInstance()
         {
-            if (Application.isEditor && !Application.isPlaying)
-                return null;
             var go = new GameObject(nameof(MetaMaskUnity));
             DontDestroyOnLoad(go);
             return go.AddComponent<MetaMaskUnity>();

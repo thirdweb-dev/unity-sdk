@@ -6,16 +6,18 @@ using UnityEngine;
 
 namespace MetaMask.SocketIOClient
 {
-
     public class WebSocketDispatcher : MonoBehaviour
     {
-
         private static WebSocketDispatcher instance;
 
         public static WebSocketDispatcher Instance
         {
             get
             {
+                if (Application.isEditor && !Application.isPlaying)
+                {
+                    return null;
+                }
                 if (instance == null)
                 {
                     instance = new GameObject("WebSocket Dispatcher").AddComponent<WebSocketDispatcher>();
@@ -55,7 +57,5 @@ namespace MetaMask.SocketIOClient
         {
             this.webSockets.Remove(webSocket);
         }
-
     }
-
 }
