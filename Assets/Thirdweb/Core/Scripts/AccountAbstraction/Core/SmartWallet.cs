@@ -12,6 +12,8 @@ using EntryPointContract = Thirdweb.Contracts.EntryPoint.ContractDefinition;
 using FactoryContract = Thirdweb.Contracts.AccountFactory.ContractDefinition;
 using UnityEngine;
 using Nethereum.Contracts;
+using Nethereum.Hex.HexConvertors.Extensions;
+using Nethereum.Util;
 
 namespace Thirdweb.AccountAbstraction
 {
@@ -37,8 +39,19 @@ namespace Thirdweb.AccountAbstraction
         public Web3 PersonalWeb3 { get; internal set; }
         public ThirdwebSDK.SmartWalletConfig Config { get; internal set; }
 
-        private bool _initialized;
         private bool _deployed;
+        public bool IsDeployed
+        {
+            get { return _deployed; }
+        }
+
+        private bool _deploying;
+        public bool IsDeploying
+        {
+            get { return _deploying; }
+        }
+
+        private bool _initialized;
 
         public SmartWallet(Web3 personalWeb3, ThirdwebSDK.SmartWalletConfig config)
         {
@@ -54,6 +67,7 @@ namespace Thirdweb.AccountAbstraction
 
             _deployed = false;
             _initialized = false;
+            _deploying = false;
         }
 
         internal async Task<string> GetPersonalAddress()
@@ -87,6 +101,28 @@ namespace Thirdweb.AccountAbstraction
         {
             var bytecode = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetCode.SendRequestAsync(Accounts[0]);
             _deployed = bytecode != "0x";
+        }
+
+        internal async Task ForceDeploy()
+        {
+            if (_deployed)
+                return;
+
+            _deploying = true;
+            var input = new TransactionInput("0x", Accounts[0], new HexBigInteger(0));
+            var txHash = await Request(new RpcRequestMessage(1, "eth_sendTransaction", input));
+            await Transaction.WaitForTransactionResult(txHash.Result.ToString());
+            await UpdateDeploymentStatus();
+            _deploying = false;
+        }
+
+        internal async Task<bool> VerifySignature(byte[] hash, byte[] signature)
+        {
+            var verifyRes = await TransactionManager.ThirdwebRead<AccountContract.IsValidSignatureFunction, AccountContract.IsValidSignatureOutputDTO>(
+                Accounts[0],
+                new AccountContract.IsValidSignatureFunction() { Hash = hash, Signature = signature }
+            );
+            return verifyRes.MagicValue.ToHex(true) == new byte[] { 0x16, 0x26, 0xba, 0x7e }.ToHex(true);
         }
 
         internal async Task<(byte[] initCode, BigInteger gas)> GetInitCode()
@@ -153,7 +189,7 @@ namespace Thirdweb.AccountAbstraction
                 Nonce = await GetNonce(),
                 InitCode = initData.initCode,
                 CallData = executeInput.Data.HexStringToByteArray(),
-                CallGasLimit = transactionInput.Gas.Value,
+                CallGasLimit = transactionInput.Gas != null ? (transactionInput.Gas.Value < 21000 ? 100000 : transactionInput.Gas.Value) : 100000,
                 VerificationGasLimit = 100000 + initData.gas,
                 PreVerificationGas = 21000,
                 MaxFeePerGas = latestBlock.BaseFeePerGas.Value * 2 + BigInteger.Parse("1500000000"),
@@ -164,13 +200,8 @@ namespace Thirdweb.AccountAbstraction
             partialUserOp.PreVerificationGas = partialUserOp.CalcPreVerificationGas();
             var partialUserOpHexified = partialUserOp.EncodeUserOperation();
 
-            // Update gas estimates and paymaster data if any
+            // Update paymaster data if any
 
-            var gasEstimates = await BundlerClient.EthEstimateUserOperationGas(Config.bundlerUrl, apiKey, requestMessage.Id, partialUserOpHexified, Config.entryPointAddress);
-
-            partialUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value;
-            partialUserOp.CallGasLimit = new HexBigInteger(gasEstimates.CallGasLimit).Value;
-            partialUserOp.VerificationGasLimit = new HexBigInteger(gasEstimates.VerificationGas).Value;
             partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestMessage.Id, partialUserOpHexified, apiKey);
 
             // Hash, sign and encode the user operation
@@ -188,7 +219,7 @@ namespace Thirdweb.AccountAbstraction
             // Wait for the transaction to be mined
 
             string txHash = null;
-            while (txHash == null && Application.isPlaying)
+            while (txHash == null)
             {
                 var getUserOpResponse = await BundlerClient.EthGetUserOperationByHash(Config.bundlerUrl, apiKey, requestMessage.Id, userOpHash);
                 txHash = getUserOpResponse?.transactionHash;

@@ -96,7 +96,7 @@ namespace Thirdweb
                     Resources = new List<string>(),
                     Uri = $"https://{domain}",
                     Statement = "Please ensure that the domain above matches the URL of the current website.",
-                    Address = await GetSignerAddress(),
+                    Address = await GetAddress(),
                     Domain = domain,
                     ChainId = (await GetChainId()).ToString(),
                     Version = "1",
@@ -166,9 +166,13 @@ namespace Thirdweb
                 };
                 var signature = payload.signature;
                 var validUser = await siwe.IsUserAddressRegistered(siweMessage);
+                var msg = SiweMessageStringBuilder.BuildMessage(siweMessage);
                 if (validUser)
                 {
-                    if (await siwe.IsMessageSignatureValid(siweMessage, signature))
+                    string recoveredAddress = await RecoverAddress(msg, signature);
+                    Debug.Log($"Recovered address: {recoveredAddress}");
+                    Debug.Log($"Message address: {siweMessage.Address}");
+                    if (recoveredAddress == siweMessage.Address)
                     {
                         if (siwe.IsMessageTheSameAsSessionStored(siweMessage))
                         {
@@ -376,12 +380,25 @@ namespace Thirdweb
         /// <returns>The signature of the message as a string.</returns>
         public async Task<string> Sign(string message)
         {
+            if (!await IsConnected())
+                throw new Exception("No account connected!");
+
             if (Utils.IsWebGLBuild())
             {
                 return await Bridge.InvokeRoute<string>(getRoute("sign"), Utils.ToJsonStringArray(message));
             }
             else
             {
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                {
+                    var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                    if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
+                    {
+                        Debug.Log("SmartWallet not deployed, deploying before signing...");
+                        await sw.SmartWallet.ForceDeploy();
+                    }
+                }
+
                 return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
             }
         }
@@ -397,7 +414,20 @@ namespace Thirdweb
         public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
             where TDomain : IDomain
         {
-            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet)
+            if (!await IsConnected())
+                throw new Exception("No account connected!");
+
+            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+            {
+                var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
+                {
+                    Debug.Log("SmartWallet not deployed, deploying before signing...");
+                    await sw.SmartWallet.ForceDeploy();
+                }
+            }
+
+            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount() != null)
             {
                 var signer = new Eip712TypedDataSigner();
                 var key = new EthECKey(ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount().PrivateKey);
@@ -441,6 +471,15 @@ namespace Thirdweb
             else
             {
                 var signer = new EthereumMessageSigner();
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                {
+                    var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                    bool isSigValid = await sw.SmartWallet.VerifySignature(signer.HashPrefixedMessage(System.Text.Encoding.UTF8.GetBytes(message)), signature.HexStringToByteArray());
+                    if (isSigValid)
+                    {
+                        return await GetAddress();
+                    }
+                }
                 var addressRecovered = signer.EncodeUTF8AndEcRecover(message, signature);
                 return addressRecovered;
             }
@@ -463,9 +502,9 @@ namespace Thirdweb
                     transactionRequest.data,
                     transactionRequest.to,
                     transactionRequest.from,
-                    new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
-                    new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
-                    new Nethereum.Hex.HexTypes.HexBigInteger(transactionRequest.value)
+                    new HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
+                    new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
+                    new HexBigInteger(transactionRequest.value)
                 );
                 var receipt = await ThirdwebManager.Instance.SDK.session.Web3.Eth.TransactionManager.SendTransactionAndWaitForReceiptAsync(input);
                 return receipt.ToTransactionResult();

@@ -148,33 +148,45 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
     private void ValidateConnection(WalletProvider walletProvider)
     {
-        Debug.Log("ShowSecondaryPanel: " + walletProvider);
+        Debug.Log("ValidateConnection: " + walletProvider);
 
         ConnectPanel.SetActive(false);
 
-        WalletProvider personalWallet = WalletProvider.LocalWallet;
+        WalletProvider personalWallet = WalletProvider.Metamask;
 
-        switch (walletProvider)
+        if (walletProvider == WalletProvider.Paper || personalWallet == WalletProvider.Paper)
         {
-            case WalletProvider.Paper:
-            case WalletProvider.MagicLink:
-                if (SupportedWalletsUI[walletProvider].emailInput == null || string.IsNullOrEmpty(SupportedWalletsUI[walletProvider].emailInput.text))
-                {
-                    Debug.LogWarning("Could not connect, no email provided!");
-                    ConnectPanel.SetActive(false);
-                    return;
-                }
-                else
-                {
-                    _email = SupportedWalletsUI[walletProvider].emailInput.text;
-                    break;
-                }
-            case WalletProvider.LocalWallet:
-                if (!Utils.IsWebGLBuild() && Utils.HasStoredAccount())
-                    ToggleLocalWalletUISaved(true);
-                else
-                    ToggleLocalWalletUINew(true);
+            if (SupportedWalletsUI[WalletProvider.Paper].emailInput == null || string.IsNullOrEmpty(SupportedWalletsUI[WalletProvider.Paper].emailInput.text))
+            {
+                Debug.LogWarning("Could not connect, no email provided!");
+                ConnectPanel.SetActive(false);
                 return;
+            }
+            else
+            {
+                _email = SupportedWalletsUI[WalletProvider.Paper].emailInput.text;
+            }
+        }
+        else if (walletProvider == WalletProvider.MagicLink || personalWallet == WalletProvider.MagicLink)
+        {
+            if (SupportedWalletsUI[WalletProvider.MagicLink].emailInput == null || string.IsNullOrEmpty(SupportedWalletsUI[WalletProvider.MagicLink].emailInput.text))
+            {
+                Debug.LogWarning("Could not connect, no email provided!");
+                ConnectPanel.SetActive(false);
+                return;
+            }
+            else
+            {
+                _email = SupportedWalletsUI[WalletProvider.MagicLink].emailInput.text;
+            }
+        }
+        else if (walletProvider == WalletProvider.LocalWallet)
+        {
+            if (!Utils.IsWebGLBuild() && Utils.HasStoredAccount())
+                ToggleLocalWalletUISaved(true);
+            else
+                ToggleLocalWalletUINew(true);
+            return;
         }
 
         ConnectWallet(walletProvider, _password, _email, personalWallet);

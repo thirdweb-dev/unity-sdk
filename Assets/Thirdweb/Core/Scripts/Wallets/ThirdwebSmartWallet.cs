@@ -8,11 +8,16 @@ namespace Thirdweb.Wallets
 {
     public class ThirdwebSmartWallet : IThirdwebWallet
     {
+        private SmartWallet _smartWallet;
+        public SmartWallet SmartWallet
+        {
+            get { return _smartWallet; }
+        }
+
         private Web3 _web3;
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
         private IThirdwebWallet _personalWallet;
-        private SmartWallet _smartWallet;
         private ThirdwebSDK.SmartWalletConfig _config;
 
         public ThirdwebSmartWallet(IThirdwebWallet personalWallet, ThirdwebSDK.SmartWalletConfig config)

@@ -31,7 +31,7 @@ namespace Thirdweb.Wallets
             }
 
             _account = (await PaperUI.Instance.Connect(_paper, walletConnection.email)).Account;
-            _web3 = new Web3(_account, ThirdwebManager.Instance.SDK.session.RPC);
+            _web3 = new Web3(_account, rpc);
 
             return await GetAddress();
         }

@@ -15,7 +15,7 @@ namespace Thirdweb.AccountAbstraction
             );
 
             var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet;
-            if (smartWallet.GetSignerProvider() == WalletProvider.LocalWallet)
+            if (smartWallet.GetLocalAccount() != null)
             {
                 var localWallet = smartWallet.GetLocalAccount();
                 return new EthereumMessageSigner().Sign(userOpHash.ReturnValue1, new EthECKey(localWallet.PrivateKey)).HexStringToByteArray();

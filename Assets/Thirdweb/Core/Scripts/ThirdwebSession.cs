@@ -29,6 +29,8 @@ namespace Thirdweb
 
         public static int Nonce = 0;
 
+        public string BundleId { get; private set; }
+
         #endregion
 
         #region Constructors
@@ -41,6 +43,7 @@ namespace Thirdweb
             SiweSession = new SiweMessageService();
             Web3 = new Web3(rpcUrl);
             CurrentChainData = options.supportedChains.ToList().Find(x => x.chainId == new HexBigInteger(chainId).HexValue);
+            BundleId = Utils.GetBundleId();
         }
 
         #endregion

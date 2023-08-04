@@ -45,7 +45,7 @@ namespace Thirdweb
             {
                 pinReq.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
                 if (!Utils.IsWebGLBuild())
-                    pinReq.SetRequestHeader("x-bundle-id", Utils.GetBundleId());
+                    pinReq.SetRequestHeader("x-bundle-id", ThirdwebManager.Instance.SDK.session.BundleId);
 
                 await pinReq.SendWebRequest();
 

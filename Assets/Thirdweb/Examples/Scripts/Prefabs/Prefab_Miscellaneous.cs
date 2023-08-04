@@ -76,7 +76,7 @@ public class Prefab_Miscellaneous : MonoBehaviour
             LoginPayload data = await ThirdwebManager.Instance.SDK.wallet.Authenticate("example.com");
             // Verify
             string resultAddressOrError = await ThirdwebManager.Instance.SDK.wallet.Verify(data);
-            if (await ThirdwebManager.Instance.SDK.wallet.GetSignerAddress() == resultAddressOrError)
+            if (await ThirdwebManager.Instance.SDK.wallet.GetAddress() == resultAddressOrError)
             {
                 Debugger.Instance.Log("[Authenticate] Successful", resultAddressOrError);
             }

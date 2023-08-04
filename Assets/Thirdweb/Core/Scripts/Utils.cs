@@ -388,9 +388,10 @@ namespace Thirdweb
 
         public static string AppendBundleIdQueryParam(this string uri)
         {
-            string bundleId = GetBundleId();
-            if (!Utils.IsWebGLBuild())
-                uri += $"?bundleId={bundleId}";
+            if (Utils.IsWebGLBuild())
+                return uri;
+
+            uri += $"?bundleId={ThirdwebManager.Instance?.SDK?.session?.BundleId ?? GetBundleId()}";
             return uri;
         }
 
