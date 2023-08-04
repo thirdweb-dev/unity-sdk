@@ -3,30 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Image))]
-public class SpriteSwap : MonoBehaviour
+namespace Thirdweb.Examples
 {
-    public Sprite sprite1;
-    public Sprite sprite2;
-
-    private Image image;
-    private bool swapped;
-
-    private void Awake()
+    [RequireComponent(typeof(Image))]
+    public class SpriteSwap : MonoBehaviour
     {
-        image = GetComponent<Image>();
-    }
+        public Sprite sprite1;
+        public Sprite sprite2;
 
-    public void Swap()
-    {
-        if (IsInvoking("Swap"))
-            return;
+        private Image image;
+        private bool swapped;
 
-        if (!swapped)
-            Invoke("Swap", 3f);
+        private void Awake()
+        {
+            image = GetComponent<Image>();
+        }
 
-        image.sprite = swapped ? sprite1 : sprite2;
+        public void Swap()
+        {
+            if (IsInvoking("Swap"))
+                return;
 
-        swapped = !swapped;
+            if (!swapped)
+                Invoke("Swap", 3f);
+
+            image.sprite = swapped ? sprite1 : sprite2;
+
+            swapped = !swapped;
+        }
     }
 }
