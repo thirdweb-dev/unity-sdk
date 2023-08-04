@@ -170,8 +170,6 @@ namespace Thirdweb
                 if (validUser)
                 {
                     string recoveredAddress = await RecoverAddress(msg, signature);
-                    Debug.Log($"Recovered address: {recoveredAddress}");
-                    Debug.Log($"Message address: {siweMessage.Address}");
                     if (recoveredAddress == siweMessage.Address)
                     {
                         if (siwe.IsMessageTheSameAsSessionStored(siweMessage))

@@ -42,7 +42,7 @@ namespace Thirdweb.AccountAbstraction
         {
             using (HttpClient client = new HttpClient())
             {
-                UnityEngine.Debug.Log($"Bundler Request: {method}({string.Join(", ", args)})");
+                // UnityEngine.Debug.Log($"Bundler Request: {method}({string.Join(", ", args)})");
                 RpcRequestMessage requestMessage = new RpcRequestMessage(requestId, method, args);
                 string requestMessageJson = JsonConvert.SerializeObject(requestMessage);
 
@@ -61,7 +61,7 @@ namespace Thirdweb.AccountAbstraction
                     throw new Exception($"Bundler Request Failed. Error: {httpResponse.StatusCode} - {httpResponse.ReasonPhrase} - {await httpResponse.Content.ReadAsStringAsync()}");
 
                 var httpResponseJson = await httpResponse.Content.ReadAsStringAsync();
-                UnityEngine.Debug.Log($"Bundler Response: {httpResponseJson}");
+                // UnityEngine.Debug.Log($"Bundler Response: {httpResponseJson}");
 
                 var response = JsonConvert.DeserializeObject<RpcResponseMessage>(httpResponseJson);
                 if (response.Error != null)
