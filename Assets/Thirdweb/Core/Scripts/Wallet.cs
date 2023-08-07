@@ -308,7 +308,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("getChainId"), new string[] { });
+                return await Bridge.InvokeRoute<BigInteger>(getRoute("getChainId"), new string[] { });
             }
             else
             {
@@ -329,13 +329,7 @@ namespace Thirdweb
 
             if (Utils.IsWebGLBuild())
             {
-                int safeId;
-                if (!int.TryParse(chainId.ToString(), out safeId))
-                {
-                    throw new Exception("Chain ID too large for WebGL platforms");
-                }
-
-                await Bridge.SwitchNetwork(safeId);
+                await Bridge.SwitchNetwork(chainId.ToString());
             }
             else
             {

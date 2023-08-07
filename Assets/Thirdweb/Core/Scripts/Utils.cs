@@ -343,7 +343,7 @@ namespace Thirdweb
             return keyStoreService.SerializeKeyStoreToJson(keyStore);
         }
 
-        public static Account GenerateRandomAccount(int chainId)
+        public static Account GenerateRandomAccount(BigInteger chainId)
         {
             byte[] seed = new byte[32];
             using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
