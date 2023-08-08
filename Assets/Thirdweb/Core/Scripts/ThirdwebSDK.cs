@@ -211,7 +211,7 @@ namespace Thirdweb
             public string apiKey;
         }
 
-        private string chainOrRPC;
+        private readonly string chainOrRPC;
 
         /// <summary>
         /// Connect and interact with a user's wallet.

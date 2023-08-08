@@ -26,7 +26,7 @@ namespace Thirdweb
         /// </summary>
         public ERC721ClaimConditions claimConditions;
 
-        private string contractAddress;
+        private readonly string contractAddress;
 
         /// <summary>
         /// Interact with any ERC721 compatible contract.
@@ -59,12 +59,14 @@ namespace Thirdweb
 
                 tokenURI.ReturnValue1 = tokenURI.ReturnValue1.Contains("0x{id}") ? tokenURI.ReturnValue1.Replace("0x{id}", tokenId) : tokenURI.ReturnValue1;
 
-                NFT nft = new NFT();
-                nft.owner = await OwnerOf(tokenId);
-                nft.type = "ERC721";
-                nft.supply = await TotalCount();
-                nft.quantityOwned = 1;
-                nft.metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1);
+                var nft = new NFT
+                {
+                    owner = await OwnerOf(tokenId),
+                    type = "ERC721",
+                    supply = await TotalCount(),
+                    quantityOwned = 1,
+                    metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1)
+                };
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
                 nft.metadata.id = tokenId;
                 nft.metadata.uri = tokenURI.ReturnValue1.ReplaceIPFS();
@@ -97,7 +99,7 @@ namespace Thirdweb
                     end = totalSupply - 1;
                 }
 
-                List<NFT> allNfts = new List<NFT>();
+                var allNfts = new List<NFT>();
                 for (int i = start; i <= end; i++)
                     allNfts.Add(await Get(i.ToString()));
                 return allNfts;
@@ -116,9 +118,9 @@ namespace Thirdweb
             }
             else
             {
-                string owner = address == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : address;
+                string owner = address ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
                 var balanceOfOwner = int.Parse(await BalanceOf(owner));
-                List<NFT> ownedNfts = new List<NFT>();
+                var ownedNfts = new List<NFT>();
 
                 try
                 {
@@ -432,7 +434,7 @@ namespace Thirdweb
             else
             {
                 var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(nft));
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC721Contract.MintToFunction() { To = address, Uri = uri.IpfsHash.cidToIpfsUrl() });
+                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC721Contract.MintToFunction() { To = address, Uri = uri.IpfsHash.CidToIpfsUrl() });
             }
         }
     }
@@ -442,7 +444,7 @@ namespace Thirdweb
     /// </summary>
     public class ERC721ClaimConditions : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         public ERC721ClaimConditions(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "claimConditions"))
@@ -496,10 +498,10 @@ namespace Thirdweb
                     };
                 }
 
-                Currency currency = new Currency();
+                var currency = new Currency();
                 try
                 {
-                    await ThirdwebManager.Instance.SDK.GetContract(data.Currency).ERC20.Get();
+                    currency = await ThirdwebManager.Instance.SDK.GetContract(data.Currency).ERC20.Get();
                 }
                 catch
                 {
@@ -624,7 +626,7 @@ namespace Thirdweb
     /// </summary>
     public class ERC721Signature : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
@@ -709,7 +711,7 @@ namespace Thirdweb
                     RoyaltyRecipient = royaltyInfo.ReturnValue1,
                     RoyaltyBps = royaltyInfo.ReturnValue2,
                     PrimarySaleRecipient = primarySaleRecipient.ReturnValue1,
-                    Uri = uri.IpfsHash.cidToIpfsUrl(),
+                    Uri = uri.IpfsHash.CidToIpfsUrl(),
                     Price = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
                     ValidityStartTimestamp = payloadToSign.mintStartTime,

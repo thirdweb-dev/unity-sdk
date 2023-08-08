@@ -24,23 +24,24 @@ public class ThirdwebManager : MonoBehaviour
     public string chain = "goerli";
 
     [Tooltip("Support any chain by adding it to this list from the inspector")]
-    public List<ChainData> supportedChains = new List<ChainData>()
-    {
-        new ChainData("ethereum", "1", null),
-        new ChainData("goerli", "5", null),
-        new ChainData("polygon", "137", null),
-        new ChainData("mumbai", "80001", null),
-        new ChainData("fantom", "250", null),
-        new ChainData("fantom-testnet", "4002", null),
-        new ChainData("avalanche", "43114", null),
-        new ChainData("avalanche-fuji", "43113", null),
-        new ChainData("optimism", "10", null),
-        new ChainData("optimism-goerli", "420", null),
-        new ChainData("arbitrum", "42161", null),
-        new ChainData("arbitrum-goerli", "421613", null),
-        new ChainData("binance", "56", null),
-        new ChainData("binance-testnet", "97", null),
-    };
+    public List<ChainData> supportedChains =
+        new()
+        {
+            new ChainData("ethereum", "1", null),
+            new ChainData("goerli", "5", null),
+            new ChainData("polygon", "137", null),
+            new ChainData("mumbai", "80001", null),
+            new ChainData("fantom", "250", null),
+            new ChainData("fantom-testnet", "4002", null),
+            new ChainData("avalanche", "43114", null),
+            new ChainData("avalanche-fuji", "43113", null),
+            new ChainData("optimism", "10", null),
+            new ChainData("optimism-goerli", "420", null),
+            new ChainData("arbitrum", "42161", null),
+            new ChainData("arbitrum-goerli", "421613", null),
+            new ChainData("binance", "56", null),
+            new ChainData("binance-testnet", "97", null),
+        };
 
     [Tooltip("Thirdweb Client ID (https://thirdweb.com/create-api-key/). Used for default thirdweb services such as Storage and Account Abstraction.")]
     public string clientId;

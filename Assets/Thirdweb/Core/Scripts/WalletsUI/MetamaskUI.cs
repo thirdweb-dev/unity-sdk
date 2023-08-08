@@ -96,7 +96,7 @@ namespace Thirdweb.Wallets
 
         private static Texture2D GenerateQRTexture(string text)
         {
-            Texture2D encoded = new Texture2D(256, 256);
+            var encoded = new Texture2D(256, 256);
             var color32 = EncodeToQR(text, encoded.width, encoded.height);
             encoded.SetPixels32(color32);
             encoded.Apply();

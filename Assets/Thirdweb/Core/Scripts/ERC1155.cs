@@ -24,7 +24,7 @@ namespace Thirdweb
         /// </summary>
         public ERC1155ClaimConditions claimConditions;
 
-        private string contractAddress;
+        private readonly string contractAddress;
 
         /// <summary>
         /// Interact with any ERC1155 compatible contract.
@@ -57,12 +57,14 @@ namespace Thirdweb
 
                 tokenURI.ReturnValue1 = tokenURI.ReturnValue1.Contains("0x{id}") ? tokenURI.ReturnValue1.Replace("0x{id}", tokenId) : tokenURI.ReturnValue1;
 
-                NFT nft = new NFT();
-                nft.owner = "";
-                nft.type = "ERC1155";
-                nft.supply = await TotalSupply(tokenId);
-                nft.quantityOwned = 404;
-                nft.metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1);
+                var nft = new NFT
+                {
+                    owner = "",
+                    type = "ERC1155",
+                    supply = await TotalSupply(tokenId),
+                    quantityOwned = 404,
+                    metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1)
+                };
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
                 nft.metadata.id = tokenId;
                 nft.metadata.uri = tokenURI.ReturnValue1.ReplaceIPFS();
@@ -94,7 +96,7 @@ namespace Thirdweb
                     start = 0;
                     end = totalCount - 1;
                 }
-                List<NFT> allNfts = new List<NFT>();
+                var allNfts = new List<NFT>();
                 for (int i = start; i <= end; i++)
                     allNfts.Add(await Get(i.ToString()));
                 return allNfts;
@@ -113,9 +115,9 @@ namespace Thirdweb
             }
             else
             {
-                string owner = address == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : address;
+                string owner = address ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
                 int totalCount = await TotalCount();
-                List<NFT> ownedNfts = new List<NFT>();
+                var ownedNfts = new List<NFT>();
                 for (int i = 0; i < totalCount; i++)
                 {
                     BigInteger ownedBalance = BigInteger.Parse(await BalanceOf(owner, i.ToString()));
@@ -372,7 +374,7 @@ namespace Thirdweb
                     {
                         To = address,
                         TokenId = Utils.GetMaxUint256(),
-                        Uri = uri.IpfsHash.cidToIpfsUrl(),
+                        Uri = uri.IpfsHash.CidToIpfsUrl(),
                         Amount = nft.supply
                     }
                 );
@@ -429,7 +431,7 @@ namespace Thirdweb
     /// </summary>
     public class ERC1155ClaimConditions : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         public ERC1155ClaimConditions(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "claimConditions"))
@@ -458,10 +460,10 @@ namespace Thirdweb
                     new DropERC1155Contract.GetClaimConditionByIdFunction() { TokenId = BigInteger.Parse(tokenId), ConditionId = conditionId.ReturnValue1 }
                 );
 
-                Currency currency = new Currency();
+                var currency = new Currency();
                 try
                 {
-                    await ThirdwebManager.Instance.SDK.GetContract(data.Condition.Currency).ERC20.Get();
+                    currency = await ThirdwebManager.Instance.SDK.GetContract(data.Condition.Currency).ERC20.Get();
                 }
                 catch
                 {
@@ -517,7 +519,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(claimerAddress));
+                return await Bridge.InvokeRoute<bool>(getRoute("getClaimerProofs"), Utils.ToJsonStringArray(tokenId, claimerAddress));
             }
             else
             {
@@ -619,7 +621,7 @@ namespace Thirdweb
     /// </summary>
     public class ERC1155Signature : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
@@ -708,7 +710,7 @@ namespace Thirdweb
                     RoyaltyBps = royalty.ReturnValue2,
                     PrimarySaleRecipient = primarySaleRecipient.ReturnValue1,
                     TokenId = Utils.GetMaxUint256(),
-                    Uri = uri.IpfsHash.cidToIpfsUrl(),
+                    Uri = uri.IpfsHash.CidToIpfsUrl(),
                     Quantity = payloadToSign.quantity,
                     PricePerToken = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,

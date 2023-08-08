@@ -38,8 +38,8 @@ namespace Thirdweb
             }
         }
 
-        private static Dictionary<string, TaskCompletionSource<string>> taskMap = new Dictionary<string, TaskCompletionSource<string>>();
-        private static Dictionary<string, GenericAction> taskActionMap = new Dictionary<string, GenericAction>();
+        private static readonly Dictionary<string, TaskCompletionSource<string>> taskMap = new();
+        private static readonly Dictionary<string, GenericAction> taskActionMap = new();
 
         [AOT.MonoPInvokeCallback(typeof(Action<string, string, string>))]
         private static void jsCallback(string taskId, string result, string error)
@@ -93,11 +93,11 @@ namespace Thirdweb
 #if UNITY_WEBGL
             ThirdwebConnect(
                 taskId, 
-                walletConnection.provider.ToString().Substring(0,1).ToLower() + walletConnection.provider.ToString().Substring(1), 
+                walletConnection.provider.ToString()[..1].ToLower() + walletConnection.provider.ToString()[1..], 
                 walletConnection.chainId.ToString(), 
                 string.IsNullOrEmpty(walletConnection.password) ? Utils.GetDeviceIdentifier() : walletConnection.password, 
                 walletConnection.email, 
-                walletConnection.personalWallet.ToString().Substring(0,1).ToLower() + walletConnection.personalWallet.ToString().Substring(1), 
+                walletConnection.personalWallet.ToString()[..1].ToLower() + walletConnection.personalWallet.ToString()[1..], 
                 jsCallback
             );
 #endif
@@ -142,7 +142,7 @@ namespace Thirdweb
             if (!Utils.IsWebGLBuild())
             {
                 Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
-                return default(T);
+                return default;
             }
             var msg = Utils.ToJson(new RequestMessageBody(body));
             string taskId = Guid.NewGuid().ToString();

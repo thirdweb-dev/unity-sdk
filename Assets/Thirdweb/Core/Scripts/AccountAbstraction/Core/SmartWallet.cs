@@ -170,15 +170,15 @@ namespace Thirdweb.AccountAbstraction
                 dummySig[i] = 0x01;
 
             await UpdateDeploymentStatus();
-            var initData = await GetInitCode();
+            var (initCode, gas) = await GetInitCode();
 
-            var executeFn = new AccountContract.ExecuteFunction()
+            var executeFn = new AccountContract.ExecuteFunction
             {
                 Target = transactionInput.To,
                 Value = transactionInput.Value.Value,
                 Calldata = transactionInput.Data.HexStringToByteArray(),
+                FromAddress = Accounts[0]
             };
-            executeFn.FromAddress = Accounts[0];
             var executeInput = executeFn.CreateTransactionInput(Accounts[0]);
 
             // Create the user operation and its safe (hexified) version
@@ -187,10 +187,10 @@ namespace Thirdweb.AccountAbstraction
             {
                 Sender = Accounts[0],
                 Nonce = await GetNonce(),
-                InitCode = initData.initCode,
+                InitCode = initCode,
                 CallData = executeInput.Data.HexStringToByteArray(),
                 CallGasLimit = transactionInput.Gas != null ? (transactionInput.Gas.Value < 21000 ? 100000 : transactionInput.Gas.Value) : 100000,
-                VerificationGasLimit = 100000 + initData.gas,
+                VerificationGasLimit = 100000 + gas,
                 PreVerificationGas = 21000,
                 MaxFeePerGas = latestBlock.BaseFeePerGas.Value * 2 + BigInteger.Parse("1500000000"),
                 MaxPriorityFeePerGas = BigInteger.Parse("1500000000"),

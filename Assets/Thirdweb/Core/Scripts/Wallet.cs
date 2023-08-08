@@ -70,9 +70,7 @@ namespace Thirdweb
             }
             else
             {
-                var localAccount = ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount();
-                if (localAccount == null)
-                    throw new Exception("No local account found");
+                var localAccount = ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount() ?? throw new Exception("No local account found");
                 return Utils.EncryptAndGenerateKeyStore(new EthECKey(localAccount.PrivateKey), password);
             }
         }
@@ -223,8 +221,8 @@ namespace Thirdweb
                 }
                 else
                 {
-                    HexBigInteger balance = null;
                     string address = await GetAddress();
+                    HexBigInteger balance;
                     try
                     {
                         balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
@@ -512,10 +510,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                if (options.address == null)
-                {
-                    options.address = await GetAddress();
-                }
+                options.address ??= await GetAddress();
                 await Bridge.FundWallet(options);
             }
             else

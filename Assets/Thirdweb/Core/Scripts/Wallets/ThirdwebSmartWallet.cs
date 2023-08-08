@@ -15,9 +15,9 @@ namespace Thirdweb.Wallets
         }
 
         private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
-        private IThirdwebWallet _personalWallet;
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
+        private readonly IThirdwebWallet _personalWallet;
         private ThirdwebSDK.SmartWalletConfig _config;
 
         public ThirdwebSmartWallet(IThirdwebWallet personalWallet, ThirdwebSDK.SmartWalletConfig config)

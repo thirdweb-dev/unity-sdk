@@ -201,7 +201,7 @@ namespace Thirdweb
 
             ChainIDNetworkData currentNetwork = allNetworkData.Find(x => x.chainId == chainId.ToString());
 
-            List<string> explorerUrls = new List<string>();
+            var explorerUrls = new List<string>();
             if (currentNetwork.explorers != null)
             {
                 foreach (var explorer in currentNetwork.explorers)

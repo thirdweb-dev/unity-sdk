@@ -8,15 +8,15 @@ namespace Thirdweb.AccountAbstraction
 {
     public class SmartWalletClient : ClientBase
     {
-        private SmartWallet _smartWallet;
+        private readonly SmartWallet _smartWallet;
 
         public SmartWalletClient(SmartWallet smartWallet)
         {
             this._smartWallet = smartWallet;
         }
 
-        private static readonly Random rng = new Random();
-        private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly Random rng = new();
+        private static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public static long GenerateRpcId()
         {

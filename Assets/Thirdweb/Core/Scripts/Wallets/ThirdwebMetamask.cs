@@ -11,8 +11,8 @@ namespace Thirdweb.Wallets
     public class ThirdwebMetamask : IThirdwebWallet
     {
         private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
 
         public ThirdwebMetamask()
         {

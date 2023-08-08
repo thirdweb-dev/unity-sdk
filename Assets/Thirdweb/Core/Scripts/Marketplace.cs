@@ -18,12 +18,9 @@ namespace Thirdweb
         public EnglishAuctions englishAuctions;
         public Offers offers;
 
-        private string contractAddress;
-
         public Marketplace(string parentRoute, string contractAddress)
             : base(parentRoute)
         {
-            this.contractAddress = contractAddress;
             this.directListings = new DirectListings(baseRoute, contractAddress);
             this.englishAuctions = new EnglishAuctions(baseRoute, contractAddress);
             this.offers = new Offers(baseRoute, contractAddress);
@@ -32,7 +29,7 @@ namespace Thirdweb
 
     public class DirectListings : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         public DirectListings(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "directListings"))
@@ -126,7 +123,7 @@ namespace Thirdweb
                 );
 
                 Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Listing.Currency).ERC20.Get();
-                NFTMetadata metadata = new NFTMetadata();
+                var metadata = new NFTMetadata();
                 try
                 {
                     metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Listing.AssetContract).ERC721.Get(result.Listing.TokenId.ToString())).metadata;
@@ -365,7 +362,7 @@ namespace Thirdweb
 
     public class EnglishAuctions : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         public EnglishAuctions(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "englishAuctions"))
@@ -459,7 +456,7 @@ namespace Thirdweb
                 );
 
                 Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Auction.Currency).ERC20.Get();
-                NFTMetadata metadata = new NFTMetadata();
+                var metadata = new NFTMetadata();
                 try
                 {
                     metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Auction.AssetContract).ERC721.Get(result.Auction.TokenId.ToString())).metadata;
@@ -725,7 +722,7 @@ namespace Thirdweb
 
     public class Offers : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         public Offers(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "offers"))
@@ -819,7 +816,7 @@ namespace Thirdweb
                 );
 
                 Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Offer.Currency).ERC20.Get();
-                NFTMetadata metadata = new NFTMetadata();
+                var metadata = new NFTMetadata();
                 try
                 {
                     metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Offer.AssetContract).ERC721.Get(result.Offer.TokenId.ToString())).metadata;
