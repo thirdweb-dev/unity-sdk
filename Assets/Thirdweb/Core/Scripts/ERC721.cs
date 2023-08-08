@@ -577,10 +577,8 @@ namespace Thirdweb
         public int quantity;
         public NFTMetadata metadata;
         public string uid;
-
-        // TODO implement these, needs JS bridging support
-        // public long mintStartTime;
-        // public long mintEndTime;
+        public long mintStartTime;
+        public long mintEndTime;
 
         public ERC721MintPayload(string receiverAddress, NFTMetadata metadata)
         {
@@ -593,9 +591,8 @@ namespace Thirdweb
             this.royaltyBps = 0;
             this.quantity = 1;
             this.uid = Utils.ToBytes32HexString(Guid.NewGuid().ToByteArray());
-            // TODO temporary solution
-            // this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
-            // this.mintEndTime = this.mintStartTime + 1000L * 60L * 60L * 24L * 365L;
+            this.mintStartTime = Utils.GetUnixTimeStampNow() - 60;
+            this.mintEndTime = Utils.GetUnixTimeStampIn10Years();
         }
     }
 
@@ -645,13 +642,58 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+                var signedPayload = await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+
+                if (privateKeyOverride == "")
+                    return signedPayload;
+
+                var req = new TokenERC721Contract.MintRequest()
+                {
+                    To = payloadToSign.to,
+                    RoyaltyRecipient = signedPayload.payload.royaltyRecipient,
+                    RoyaltyBps = signedPayload.payload.royaltyBps,
+                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
+                    Uri = signedPayload.payload.uri,
+                    Price = BigInteger.Parse(payloadToSign.price.ToWei()),
+                    Currency = payloadToSign.currencyAddress,
+                    ValidityStartTimestamp = payloadToSign.mintStartTime,
+                    ValidityEndTimestamp = payloadToSign.mintEndTime,
+                    Uid = payloadToSign.uid.HexStringToByteArray()
+                };
+
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC721(
+                    "TokenERC721",
+                    "1",
+                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    contractAddress,
+                    req,
+                    string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
+                );
+
+                signedPayload = new ERC721SignedPayload()
+                {
+                    signature = signature,
+                    payload = new ERC721SignedPayloadOutput()
+                    {
+                        to = req.To,
+                        price = req.Price.ToString(),
+                        currencyAddress = req.Currency,
+                        primarySaleRecipient = req.PrimarySaleRecipient,
+                        royaltyRecipient = req.RoyaltyRecipient,
+                        royaltyBps = (int)req.RoyaltyBps,
+                        quantity = 1,
+                        uri = req.Uri,
+                        uid = req.Uid.ByteArrayToHexString(),
+                        mintStartTime = (long)req.ValidityStartTimestamp,
+                        mintEndTime = (long)req.ValidityEndTimestamp
+                    }
+                };
+
+                return signedPayload;
             }
             else
             {
                 var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
-                var startTime = await Utils.GetCurrentBlockTimeStamp();
-                var endTime = Utils.GetUnixTimeStampIn10Years();
                 var royaltyInfo = await TransactionManager.ThirdwebRead<TokenERC721Contract.GetDefaultRoyaltyInfoFunction, TokenERC721Contract.GetDefaultRoyaltyInfoOutputDTO>(
                     contractAddress,
                     new TokenERC721Contract.GetDefaultRoyaltyInfoFunction() { }
@@ -670,8 +712,8 @@ namespace Thirdweb
                     Uri = uri.IpfsHash.cidToIpfsUrl(),
                     Price = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
-                    ValidityStartTimestamp = startTime,
-                    ValidityEndTimestamp = endTime,
+                    ValidityStartTimestamp = payloadToSign.mintStartTime,
+                    ValidityEndTimestamp = payloadToSign.mintEndTime,
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
@@ -684,21 +726,23 @@ namespace Thirdweb
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
 
-                ERC721SignedPayload signedPayload = new ERC721SignedPayload();
-                signedPayload.signature = signature;
-                signedPayload.payload = new ERC721SignedPayloadOutput()
+                var signedPayload = new ERC721SignedPayload()
                 {
-                    to = req.To,
-                    price = req.Price.ToString(),
-                    currencyAddress = req.Currency,
-                    primarySaleRecipient = req.PrimarySaleRecipient,
-                    royaltyRecipient = req.RoyaltyRecipient,
-                    royaltyBps = (int)req.RoyaltyBps,
-                    quantity = 1,
-                    uri = req.Uri,
-                    uid = req.Uid.ByteArrayToHexString(),
-                    mintStartTime = (long)req.ValidityStartTimestamp,
-                    mintEndTime = (long)req.ValidityEndTimestamp
+                    signature = signature,
+                    payload = new ERC721SignedPayloadOutput()
+                    {
+                        to = req.To,
+                        price = req.Price.ToString(),
+                        currencyAddress = req.Currency,
+                        primarySaleRecipient = req.PrimarySaleRecipient,
+                        royaltyRecipient = req.RoyaltyRecipient,
+                        royaltyBps = (int)req.RoyaltyBps,
+                        quantity = 1,
+                        uri = req.Uri,
+                        uid = req.Uid.ByteArrayToHexString(),
+                        mintStartTime = (long)req.ValidityStartTimestamp,
+                        mintEndTime = (long)req.ValidityEndTimestamp
+                    }
                 };
                 return signedPayload;
             }

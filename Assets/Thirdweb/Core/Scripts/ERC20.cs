@@ -311,10 +311,8 @@ namespace Thirdweb
         public string primarySaleRecipient;
         public string quantity;
         public string uid;
-
-        // TODO implement these, needs JS bridging support
-        // public long mintStartTime;
-        // public long mintEndTime;
+        public long mintStartTime;
+        public long mintEndTime;
 
         public ERC20MintPayload(string receiverAddress, string quantity)
         {
@@ -324,9 +322,8 @@ namespace Thirdweb
             this.currencyAddress = Utils.AddressZero;
             this.primarySaleRecipient = Utils.AddressZero;
             this.uid = Utils.ToBytes32HexString(Guid.NewGuid().ToByteArray());
-            // TODO temporary solution
-            // this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
-            // this.mintEndTime = this.mintStartTime + 1000L * 60L * 60L * 24L * 365L;
+            this.mintStartTime = Utils.GetUnixTimeStampNow() - 60;
+            this.mintEndTime = Utils.GetUnixTimeStampIn10Years();
         }
     }
 
@@ -476,25 +473,59 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+                var signedPayload = await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+
+                if (privateKeyOverride == "")
+                    return signedPayload;
+
+                var name = await ThirdwebManager.Instance.SDK.GetContract(contractAddress).Read<string>("name");
+                var req = new TokenERC20Contract.MintRequest()
+                {
+                    To = payloadToSign.to,
+                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
+                    Quantity = BigInteger.Parse(payloadToSign.quantity.ToWei()),
+                    Price = BigInteger.Parse(payloadToSign.price.ToWei()),
+                    Currency = payloadToSign.currencyAddress,
+                    ValidityStartTimestamp = payloadToSign.mintStartTime,
+                    ValidityEndTimestamp = payloadToSign.mintEndTime,
+                    Uid = payloadToSign.uid.HexStringToByteArray()
+                };
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(name, "1", await ThirdwebManager.Instance.SDK.wallet.GetChainId(), contractAddress, req, privateKeyOverride);
+
+                signedPayload = new ERC20SignedPayload()
+                {
+                    signature = signature,
+                    payload = new ERC20SignedPayloadOutput()
+                    {
+                        to = req.To,
+                        price = req.Price.ToString(),
+                        currencyAddress = req.Currency,
+                        primarySaleRecipient = req.PrimarySaleRecipient,
+                        quantity = req.Quantity.ToString(),
+                        uid = req.Uid.ByteArrayToHexString(),
+                        mintStartTime = (long)req.ValidityStartTimestamp,
+                        mintEndTime = (long)req.ValidityEndTimestamp
+                    }
+                };
+
+                return signedPayload;
             }
             else
             {
-                var startTime = await Utils.GetCurrentBlockTimeStamp();
-                var endTime = Utils.GetUnixTimeStampIn10Years();
                 var primarySaleRecipient = await TransactionManager.ThirdwebRead<TokenERC20Contract.PrimarySaleRecipientFunction, TokenERC20Contract.PrimarySaleRecipientOutputDTO>(
                     contractAddress,
                     new TokenERC20Contract.PrimarySaleRecipientFunction() { }
                 );
-                TokenERC20Contract.MintRequest req = new TokenERC20Contract.MintRequest()
+
+                var req = new TokenERC20Contract.MintRequest()
                 {
                     To = payloadToSign.to,
                     PrimarySaleRecipient = primarySaleRecipient.ReturnValue1,
                     Quantity = BigInteger.Parse(payloadToSign.quantity.ToWei()),
                     Price = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
-                    ValidityStartTimestamp = startTime,
-                    ValidityEndTimestamp = endTime,
+                    ValidityStartTimestamp = payloadToSign.mintStartTime,
+                    ValidityEndTimestamp = payloadToSign.mintEndTime,
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
@@ -509,19 +540,22 @@ namespace Thirdweb
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
 
-                ERC20SignedPayload signedPayload = new ERC20SignedPayload();
-                signedPayload.signature = signature;
-                signedPayload.payload = new ERC20SignedPayloadOutput()
+                var signedPayload = new ERC20SignedPayload()
                 {
-                    to = req.To,
-                    price = req.Price.ToString(),
-                    currencyAddress = req.Currency,
-                    primarySaleRecipient = req.PrimarySaleRecipient,
-                    quantity = req.Quantity.ToString(),
-                    uid = req.Uid.ByteArrayToHexString(),
-                    mintStartTime = (long)req.ValidityStartTimestamp,
-                    mintEndTime = (long)req.ValidityEndTimestamp
+                    signature = signature,
+                    payload = new ERC20SignedPayloadOutput()
+                    {
+                        to = req.To,
+                        price = req.Price.ToString(),
+                        currencyAddress = req.Currency,
+                        primarySaleRecipient = req.PrimarySaleRecipient,
+                        quantity = req.Quantity.ToString(),
+                        uid = req.Uid.ByteArrayToHexString(),
+                        mintStartTime = (long)req.ValidityStartTimestamp,
+                        mintEndTime = (long)req.ValidityEndTimestamp
+                    }
                 };
+
                 return signedPayload;
             }
         }
