@@ -152,7 +152,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
         ConnectPanel.SetActive(false);
 
-        WalletProvider personalWallet = WalletProvider.Metamask;
+        WalletProvider personalWallet = WalletProvider.LocalWallet;
 
         if (walletProvider == WalletProvider.Paper || personalWallet == WalletProvider.Paper)
         {
