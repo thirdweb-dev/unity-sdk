@@ -55,7 +55,6 @@ namespace Thirdweb.Examples
         [Header("UI ELEMENTS (DANGER ZONE)")]
         [Header("Connecting State")]
         public Button ConnectButton;
-
         public GameObject ConnectPanel;
         public GameObject OrGameObject;
         public WalletProviderUIDictionary SupportedWalletsUI;
@@ -154,7 +153,7 @@ namespace Thirdweb.Examples
 
             ConnectPanel.SetActive(false);
 
-            WalletProvider personalWallet = WalletProvider.Metamask;
+            WalletProvider personalWallet = WalletProvider.LocalWallet;
 
             if (walletProvider == WalletProvider.Paper || personalWallet == WalletProvider.Paper)
             {
@@ -210,7 +209,6 @@ namespace Thirdweb.Examples
                     LocalWalletSavedPasswordWrong.SetActive(true);
                     return;
                 }
-
                 ConnectWallet(WalletProvider.LocalWallet, _password, null, WalletProvider.LocalWallet);
                 LocalWalletUISaved.SetActive(false);
             });
