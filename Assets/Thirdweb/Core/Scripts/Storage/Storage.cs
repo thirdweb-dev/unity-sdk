@@ -8,8 +8,8 @@ namespace Thirdweb
         public string IPFSGateway { get; private set; }
         public string ClientId { get; private set; }
 
-        private IStorageUploader uploader;
-        private IStorageDownloader downloader;
+        private readonly IStorageUploader uploader;
+        private readonly IStorageDownloader downloader;
 
         private const string FALLBACK_IPFS_GATEWAY = "https://cloudflare-ipfs.com/ipfs/";
 

@@ -27,7 +27,7 @@ namespace Thirdweb
         public string external_url;
         public object attributes;
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"NFTMetadata:"
                 + $"\n>id: {id}"
@@ -46,9 +46,9 @@ namespace Thirdweb
         public NFTMetadata metadata;
         public int supply;
 
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return $"NFTMetadataWithSupply:" + $"\n>>>>>\n{metadata.ToString()}\n<<<<<" + $"\n>supply: {supply}";
+            return $"NFTMetadataWithSupply:" + $"\n>>>>>\n{metadata}\n<<<<<" + $"\n>supply: {supply}";
         }
     }
 
@@ -61,9 +61,9 @@ namespace Thirdweb
         public int supply;
         public int quantityOwned; // only for ERC1155.GetOwned()
 
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return $"NFT:" + $"\n>>>>>\n{metadata.ToString()}\n<<<<<" + $"\n>owner: {owner}" + $"\n>type: {type}" + $"\n>supply: {supply}" + $"\n>quantityOwned: {quantityOwned}";
+            return $"NFT:" + $"\n>>>>>\n{metadata}\n<<<<<" + $"\n>owner: {owner}" + $"\n>type: {type}" + $"\n>supply: {supply}" + $"\n>quantityOwned: {quantityOwned}";
         }
     }
 
@@ -83,7 +83,7 @@ namespace Thirdweb
             this.decimals = decimals;
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Currency:" + $"\n>name: {name}" + $"\n>symbol: {symbol}" + $"\n>decimals: {decimals}";
         }
@@ -107,7 +107,7 @@ namespace Thirdweb
             this.displayValue = displayValue;
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"CurrencyValue:" + $"\n>name: {name}" + $"\n>symbol: {symbol}" + $"\n>decimals: {decimals}" + $"\n>value: {value}" + $"\n>displayValue: {displayValue}";
         }
@@ -153,7 +153,7 @@ namespace Thirdweb
         public bool? isReservedListing; // Whether the listing is reserved to be bought from a specific set of buyers.
         public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return "DirectListing:\n"
                 + $"id: {id?.ToString()}\n"
@@ -205,7 +205,7 @@ namespace Thirdweb
         public NFTMetadata? asset; // The asset being auctioned.
         public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return "Auction:\n"
                 + $"id: {id?.ToString()}\n"
@@ -257,7 +257,7 @@ namespace Thirdweb
         public long? endTimeInSeconds; // The end time of the offer.
         public MarkteplaceStatus? status; // Whether the listing is CREATED, COMPLETED, or CANCELLED.
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return "Offer:\n"
                 + $"id: {id?.ToString()}\n"
@@ -315,7 +315,7 @@ namespace Thirdweb
             return $"ClaimConditions:"
                 + $"\n>availableSupply: {availableSupply}"
                 + $"\n>currentMintSupply: {currentMintSupply}"
-                + $"\n>>>>>\n{currencyMetadata.ToString()}\n<<<<<"
+                + $"\n>>>>>\n{currencyMetadata}\n<<<<<"
                 + $"\n>currencyAddress: {currencyAddress}"
                 + $"\n>maxClaimableSupply: {maxClaimableSupply}"
                 + $"\n>maxClaimablePerWallet: {maxClaimablePerWallet}"
@@ -349,7 +349,7 @@ namespace Thirdweb
         public string blockHash;
         public string transactionHash;
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Receipt:"
                 + $"\n>from: {from}"
@@ -367,14 +367,9 @@ namespace Thirdweb
         public Receipt receipt;
         public string id;
 
-        public bool isSuccessful()
-        {
-            return receipt.transactionHash != null;
-        }
-
         public override string ToString()
         {
-            return $"TransactionResult:" + $"\n{receipt.ToString()}" + $"\n>id: {id}";
+            return $"TransactionResult:" + $"\n{receipt}" + $"\n>id: {id}";
         }
     }
 
@@ -398,7 +393,7 @@ namespace Thirdweb
             this.gasPrice = gasPrice;
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"TransactionRequest:" + $"\n>from: {from}" + $"\n>to: {to}" + $"\n>data: {data}" + $"\n>value: {value}" + $"\n>gasLimit: {gasLimit}" + $"\n>gasPrice: {gasPrice}";
         }
@@ -410,9 +405,9 @@ namespace Thirdweb
         public LoginPayloadData payload;
         public string signature;
 
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return $"LoginPayloadData:" + $"\n>>>>>\n{payload.ToString()}\n<<<<<" + $"\n>signature: {signature}";
+            return $"LoginPayloadData:" + $"\n>>>>>\n{payload}\n<<<<<" + $"\n>signature: {signature}";
         }
     }
 
@@ -490,9 +485,9 @@ namespace Thirdweb
         public T data;
         public EventTransaction transaction;
 
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return $"ContractEvent:" + $"\n>eventName: {eventName}" + $"\n>data: {data.ToString()}" + $"\n{transaction.ToString()}";
+            return $"ContractEvent:" + $"\n>eventName: {eventName}" + $"\n>data: {data}" + $"\n{transaction}";
         }
     }
 
@@ -511,7 +506,7 @@ namespace Thirdweb
         public string @event;
         public string eventSignature;
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"EventTransaction:"
                 + $"\n>blockNumber: {blockNumber}"

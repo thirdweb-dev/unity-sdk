@@ -12,7 +12,7 @@ namespace Thirdweb
         public string PinSize;
         public string Timestamp;
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return JsonConvert.SerializeObject(this);
         }
@@ -36,7 +36,7 @@ namespace Thirdweb
 
             // Get data
             byte[] bytes = System.IO.File.ReadAllBytes(path);
-            WWWForm form = new WWWForm();
+            var form = new WWWForm();
             form.AddBinaryData("file", bytes);
 
             // Pin

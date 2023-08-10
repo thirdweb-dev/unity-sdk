@@ -69,7 +69,7 @@ namespace Thirdweb
             this.ERC721 = new ERC721(baseRoute, address);
             this.ERC1155 = new ERC1155(baseRoute, address);
             this.marketplace = new Marketplace(baseRoute, address);
-            this.pack = new Pack(chain, address);
+            this.pack = new Pack(address);
             this.events = new Events(baseRoute);
         }
 
@@ -86,9 +86,7 @@ namespace Thirdweb
             else
             {
                 BigInteger balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
-                CurrencyValue cv = new CurrencyValue();
-                cv.value = balance.ToString();
-                cv.displayValue = balance.ToString().ToEth();
+                var cv = new CurrencyValue { value = balance.ToString(), displayValue = balance.ToString().ToEth() };
                 return cv;
             }
         }
@@ -185,7 +183,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                args = args ?? new object[0];
+                args ??= new object[0];
                 return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), Utils.ToJsonStringArray(functionName, args, transactionOverrides));
             }
             else

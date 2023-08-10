@@ -201,7 +201,7 @@ namespace Thirdweb
 
             ChainIDNetworkData currentNetwork = allNetworkData.Find(x => x.chainId == chainId.ToString());
 
-            List<string> explorerUrls = new List<string>();
+            var explorerUrls = new List<string>();
             if (currentNetwork.explorers != null)
             {
                 foreach (var explorer in currentNetwork.explorers)
@@ -216,7 +216,7 @@ namespace Thirdweb
             {
                 chainId = BigInteger.Parse(currentNetwork.chainId).ToHex(false, true) ?? BigInteger.Parse(chainId.ToString()).ToHex(false, true),
                 blockExplorerUrls = explorerUrls.ToArray(),
-                chainName = currentNetwork.name ?? ThirdwebManager.Instance.chain,
+                chainName = currentNetwork.name ?? ThirdwebManager.Instance.activeChain,
                 iconUrls = new string[] { currentNetwork.icon },
                 nativeCurrency = new ThirdwebNativeCurrency()
                 {

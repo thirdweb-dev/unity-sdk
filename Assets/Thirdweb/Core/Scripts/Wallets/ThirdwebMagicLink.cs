@@ -10,9 +10,9 @@ namespace Thirdweb.Wallets
     public class ThirdwebMagicLink : IThirdwebWallet
     {
         private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
-        private string _magicLinkApiKey;
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
+        private readonly string _magicLinkApiKey;
         private Magic _magic;
 
         public ThirdwebMagicLink(string magicLinkApiKey)

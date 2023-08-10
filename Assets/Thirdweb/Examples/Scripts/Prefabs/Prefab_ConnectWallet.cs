@@ -26,13 +26,12 @@ namespace Thirdweb.Examples
     }
 
     [System.Serializable]
-    public class WalletProviderUIDictionary : SerializableDictionaryBase<WalletProvider, WalletProviderUI>
-    {
-    }
+    public class WalletProviderUIDictionary : SerializableDictionaryBase<WalletProvider, WalletProviderUI> { }
 
     public class Prefab_ConnectWallet : MonoBehaviour
     {
-        [Header("SETUP")] [Header("Wallets you want to support")]
+        [Header("SETUP")]
+        [Header("Wallets you want to support")]
         public List<WalletProvider> SupportedWallets = new List<WalletProvider>()
         {
             WalletProvider.Paper,
@@ -45,28 +44,32 @@ namespace Thirdweb.Examples
             WalletProvider.Hyperplay
         };
 
-        [Header("Additional event callbacks")] public UnityEvent OnConnect;
+        [Header("Additional event callbacks")]
+        public UnityEvent OnConnect;
         public UnityEvent OnDisconnect;
         public UnityEvent OnSwitchNetwork;
         public UnityEvent OnConnectFailed;
         public UnityEvent OnDisconnectFailed;
         public UnityEvent OnSwitchNetworkFailed;
 
-        [Header("UI ELEMENTS (DANGER ZONE)")] [Header("Connecting State")]
+        [Header("UI ELEMENTS (DANGER ZONE)")]
+        [Header("Connecting State")]
         public Button ConnectButton;
 
         public GameObject ConnectPanel;
         public GameObject OrGameObject;
         public WalletProviderUIDictionary SupportedWalletsUI;
 
-        [Header("Connected State")] public List<NetworkIcon> NetworkIcons;
+        [Header("Connected State")]
+        public List<NetworkIcon> NetworkIcons;
         public Button ConnectedButton;
         public Image ConnectedButtonNetworkImage;
         public TMP_Text ConnectedButtonBalanceText;
         public TMP_Text ConnectedButtonAddressText;
         public Image ConnectedButtonWalletIcon;
 
-        [Header("Connected State Dropdown")] public GameObject ConnectedDropdownPanel;
+        [Header("Connected State Dropdown")]
+        public GameObject ConnectedDropdownPanel;
         public Button ConnectedDropdownCopy;
         public Button ConnectedDropdownDisconnect;
         public Image ConnectedDropdownNetworkImage;
@@ -77,11 +80,13 @@ namespace Thirdweb.Examples
         public Button ConnectedDropdownSwitchWalletButton;
         public Button ConnectedDropdownExportButton;
 
-        [Header("Switch Network Panel")] public GameObject SwitchNetworkPanel;
+        [Header("Switch Network Panel")]
+        public GameObject SwitchNetworkPanel;
         public Transform SwitchNetworkContent;
         public GameObject SwitchNetworkButtonPrefab;
 
-        [Header("Custom LocalWallet UI")] public GameObject LocalWalletUISaved;
+        [Header("Custom LocalWallet UI")]
+        public GameObject LocalWalletUISaved;
         public TMP_InputField LocalWalletSavedPasswordInput;
         public Button LocalWalletSavedConnectButton;
         public Button LocalWalletSavedCreateNewButton;
@@ -132,7 +137,7 @@ namespace Thirdweb.Examples
 
             OrGameObject.SetActive(usingEmailWallet && usingNormalWallet);
 
-            _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.chain);
+            _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
             _address = null;
             _email = null;
             _password = null;

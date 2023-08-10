@@ -372,31 +372,29 @@ namespace Thirdweb
 
                 var postData = new RelayerRequest(request, signature, forwarderAddress);
 
-                using (UnityWebRequest req = UnityWebRequest.Post(relayerUrl, ""))
+                using UnityWebRequest req = UnityWebRequest.Post(relayerUrl, "");
+                byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(postData));
+                req.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+                req.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+                req.SetRequestHeader("Content-Type", "application/json");
+                await req.SendWebRequest();
+                if (req.result != UnityWebRequest.Result.Success)
                 {
-                    byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(postData));
-                    req.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
-                    req.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-                    req.SetRequestHeader("Content-Type", "application/json");
-                    await req.SendWebRequest();
-                    if (req.result != UnityWebRequest.Result.Success)
+                    throw new UnityException(
+                        $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {forwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
+                    );
+                }
+                else
+                {
+                    var response = JsonConvert.DeserializeObject<RelayerResponse>(req.downloadHandler.text);
+                    if (response.status != "success")
                     {
                         throw new UnityException(
                             $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {forwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
                         );
                     }
-                    else
-                    {
-                        var response = JsonConvert.DeserializeObject<RelayerResponse>(req.downloadHandler.text);
-                        if (response.status != "success")
-                        {
-                            throw new UnityException(
-                                $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {forwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
-                            );
-                        }
-                        var result = JsonConvert.DeserializeObject<RelayerResult>(response.result);
-                        return result.txHash;
-                    }
+                    var result = JsonConvert.DeserializeObject<RelayerResult>(response.result);
+                    return result.txHash;
                 }
             }
         }

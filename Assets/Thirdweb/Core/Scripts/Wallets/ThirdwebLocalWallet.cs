@@ -9,8 +9,8 @@ namespace Thirdweb.Wallets
     {
         private Account _account;
         private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
 
         public ThirdwebLocalWallet()
         {

@@ -5,8 +5,10 @@ using UnityEditorInternal;
 [CustomEditor(typeof(ThirdwebManager))]
 public class ThirdwebManagerEditor : Editor
 {
-    private SerializedProperty chainProperty;
+    private SerializedProperty activeChainProperty;
     private SerializedProperty supportedChainsProperty;
+    private SerializedProperty clientIdProperty;
+    private SerializedProperty initializeOnAwakeProperty;
     private SerializedProperty appNameProperty;
     private SerializedProperty appDescriptionProperty;
     private SerializedProperty appIconsProperty;
@@ -20,7 +22,6 @@ public class ThirdwebManagerEditor : Editor
     private SerializedProperty walletConnectProjectIdProperty;
     private SerializedProperty paperClientIdProperty;
     private SerializedProperty factoryAddressProperty;
-    private SerializedProperty clientIdProperty;
     private SerializedProperty gaslessProperty;
     private SerializedProperty bundlerUrlProperty;
     private SerializedProperty paymasterUrlProperty;
@@ -42,8 +43,10 @@ public class ThirdwebManagerEditor : Editor
 
     private void OnEnable()
     {
-        chainProperty = serializedObject.FindProperty("chain");
+        activeChainProperty = serializedObject.FindProperty("activeChain");
         supportedChainsProperty = serializedObject.FindProperty("supportedChains");
+        clientIdProperty = serializedObject.FindProperty("clientId");
+        initializeOnAwakeProperty = serializedObject.FindProperty("initializeOnAwake");
         appNameProperty = serializedObject.FindProperty("appName");
         appDescriptionProperty = serializedObject.FindProperty("appDescription");
         appIconsProperty = serializedObject.FindProperty("appIcons");
@@ -57,7 +60,6 @@ public class ThirdwebManagerEditor : Editor
         walletConnectProjectIdProperty = serializedObject.FindProperty("walletConnectProjectId");
         paperClientIdProperty = serializedObject.FindProperty("paperClientId");
         factoryAddressProperty = serializedObject.FindProperty("factoryAddress");
-        clientIdProperty = serializedObject.FindProperty("clientId");
         gaslessProperty = serializedObject.FindProperty("gasless");
         bundlerUrlProperty = serializedObject.FindProperty("bundlerUrl");
         paymasterUrlProperty = serializedObject.FindProperty("paymasterUrl");
@@ -156,10 +158,11 @@ public class ThirdwebManagerEditor : Editor
             () =>
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                EditorGUILayout.PropertyField(chainProperty);
+                EditorGUILayout.PropertyField(activeChainProperty);
                 EditorGUILayout.Space(10);
                 supportedChainsList.DoLayoutList();
                 EditorGUILayout.PropertyField(clientIdProperty);
+                EditorGUILayout.PropertyField(initializeOnAwakeProperty);
                 EditorGUILayout.EndVertical();
             }
         );

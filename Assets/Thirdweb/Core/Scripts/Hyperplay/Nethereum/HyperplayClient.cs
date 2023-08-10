@@ -8,15 +8,15 @@ namespace Thirdweb.Hyperplay
 {
     public class HyperplayClient : ClientBase
     {
-        private Hyperplay _hyperplay;
+        private readonly Hyperplay _hyperplay;
 
         public HyperplayClient(Hyperplay Hyperplay)
         {
             this._hyperplay = Hyperplay;
         }
 
-        private static readonly Random rng = new Random();
-        private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly Random rng = new();
+        private static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public static long GenerateRpcId()
         {
