@@ -4,16 +4,19 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(TMP_InputField))]
-public class InputFieldEnter : MonoBehaviour
+namespace Thirdweb.Examples
 {
-    public Button SubmitButton;
-
-    private TMP_InputField _inputField;
-
-    private void Awake()
+    [RequireComponent(typeof(TMP_InputField))]
+    public class InputFieldEnter : MonoBehaviour
     {
-        _inputField = GetComponent<TMP_InputField>();
-        _inputField.onSubmit.AddListener((s) => SubmitButton.onClick.Invoke());
+        public Button SubmitButton;
+
+        private TMP_InputField _inputField;
+
+        private void Awake()
+        {
+            _inputField = GetComponent<TMP_InputField>();
+            _inputField.onSubmit.AddListener((s) => SubmitButton.onClick.Invoke());
+        }
     }
 }
