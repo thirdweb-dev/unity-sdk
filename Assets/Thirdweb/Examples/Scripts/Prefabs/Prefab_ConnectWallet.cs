@@ -135,7 +135,7 @@ public class Prefab_ConnectWallet : MonoBehaviour
 
         OrGameObject.SetActive(usingEmailWallet && usingNormalWallet);
 
-        _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.chain);
+        _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
         _address = null;
         _email = null;
         _password = null;

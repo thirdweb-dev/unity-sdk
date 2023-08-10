@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Numerics;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Thirdweb
@@ -241,14 +242,10 @@ namespace Thirdweb
             this.storage = new Storage(options.storage, options.clientId);
 
             string rpc = !chainOrRPC.StartsWith("https://")
-                ? (
-                    string.IsNullOrEmpty(options.clientId)
-                        ? $"https://{chainOrRPC}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3"
-                        : $"https://{chainOrRPC}.rpc.thirdweb.com/{options.clientId}"
-                )
+                ? (string.IsNullOrEmpty(options.clientId) ? $"https://{chainOrRPC}.rpc.thirdweb.com/" : $"https://{chainOrRPC}.rpc.thirdweb.com/{options.clientId}")
                 : chainOrRPC;
 
-            if (new System.Uri(rpc).Host.EndsWith(".thirdweb.com"))
+            if (new System.Uri(rpc).Host.EndsWith(".thirdweb.com") && !rpc.Contains("bundleId="))
                 rpc = rpc.AppendBundleIdQueryParam();
 
             if (Utils.IsWebGLBuild())
@@ -266,6 +263,8 @@ namespace Thirdweb
                 Debug.LogWarning(
                     "No Client ID provided. You will have limited access to thirdweb services for storage, RPC, and Account Abstraction. You can get a Client ID from https://thirdweb.com/create-api-key/"
                 );
+
+            Debug.Log($"Thirdweb SDK Initialized.\nRPC: {rpc}\nChain ID: {chainId}\nOptions: {JsonConvert.SerializeObject(options, Formatting.Indented)}");
         }
 
         /// <summary>
