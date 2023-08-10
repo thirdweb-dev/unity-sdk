@@ -46,9 +46,11 @@ namespace Thirdweb.Examples
 
     public class Prefab_NFTLoader : MonoBehaviour
     {
-        [Header("SETTINGS")] public NFTQuery query;
+        [Header("SETTINGS")]
+        public NFTQuery query;
 
-        [Header("UI ELEMENTS (DO NOT EDIT)")] public Transform contentParent;
+        [Header("UI ELEMENTS (DO NOT EDIT)")]
+        public Transform contentParent;
         public Prefab_NFT nftPrefab;
         public GameObject loadingPanel;
 
@@ -94,8 +96,8 @@ namespace Thirdweb.Examples
 
                     List<NFT> tempNFTList =
                         multiQuery.type == NFTType.ERC1155
-                            ? await tempContract.ERC1155.GetAll(new QueryAllParams() {start = multiQuery.startID, count = multiQuery.count})
-                            : await tempContract.ERC721.GetAll(new QueryAllParams() {start = multiQuery.startID, count = multiQuery.count});
+                            ? await tempContract.ERC1155.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count })
+                            : await tempContract.ERC721.GetAll(new QueryAllParams() { start = multiQuery.startID, count = multiQuery.count });
 
                     nftsToLoad.AddRange(tempNFTList);
                 }

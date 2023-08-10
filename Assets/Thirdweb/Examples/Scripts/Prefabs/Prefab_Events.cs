@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Thirdweb.Examples
 {
-// Your Event type (WebGL)
+    // Your Event type (WebGL)
     [System.Serializable]
     public struct TransferEvent
     {
@@ -20,14 +20,15 @@ namespace Thirdweb.Examples
         }
     }
 
-// Your Event type (Native platforms)
+    // Your Event type (Native platforms)
     [Event("Transfer")]
     public class TransferEventDTO : IEventDTO
     {
         [Parameter("address", "from", 1, true)]
         public string From { get; set; }
 
-        [Parameter("address", "to", 2, true)] public string To { get; set; }
+        [Parameter("address", "to", 2, true)]
+        public string To { get; set; }
 
         [Parameter("uint256", "tokenId", 3, true)]
         public BigInteger TokenId { get; set; }
@@ -51,7 +52,7 @@ namespace Thirdweb.Examples
                 if (Utils.IsWebGLBuild())
                 {
                     // Optional event query options
-                    Dictionary<string, object> filters = new Dictionary<string, object> {{"tokenId", 20}};
+                    Dictionary<string, object> filters = new Dictionary<string, object> { { "tokenId", 20 } };
                     EventQueryOptions options = new EventQueryOptions(filters);
 
                     List<ContractEvent<TransferEvent>> allEvents = await contract.events.Get<TransferEvent>("Transfer", options);

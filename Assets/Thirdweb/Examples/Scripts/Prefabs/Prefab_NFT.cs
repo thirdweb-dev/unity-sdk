@@ -8,7 +8,8 @@ namespace Thirdweb.Examples
 {
     public class Prefab_NFT : MonoBehaviour
     {
-        [Header("UI ELEMENTS")] public Image nftImage;
+        [Header("UI ELEMENTS")]
+        public Image nftImage;
         public TMP_Text nftName;
         public Button nftButton;
 

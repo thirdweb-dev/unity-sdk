@@ -97,7 +97,7 @@ namespace Thirdweb.Examples
             try
             {
                 string address = await ThirdwebManager.Instance.SDK.deployer.DeployNFTCollection(
-                    new NFTContractDeployMetadata {name = "Unity Collection", primary_sale_recipient = await ThirdwebManager.Instance.SDK.wallet.GetAddress(),}
+                    new NFTContractDeployMetadata { name = "Unity Collection", primary_sale_recipient = await ThirdwebManager.Instance.SDK.wallet.GetAddress(), }
                 );
                 Debugger.Instance.Log("[Deploy] Successful", $"Address: {address}");
             }
