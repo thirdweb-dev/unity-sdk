@@ -13,6 +13,7 @@ using WalletConnectSharp.Sign.Models;
 using System.Collections.Generic;
 using WalletConnectSharp.Common.Utils;
 using Thirdweb.WalletConnect;
+using System.Numerics;
 
 namespace Thirdweb.Wallets
 {
@@ -111,6 +112,11 @@ namespace Thirdweb.Wallets
         public Task<bool> IsConnected()
         {
             return Task.FromResult(_web3 != null);
+        }
+
+        public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
+        {
+            return Task.FromResult(NetworkSwitchAction.Unsupported);
         }
     }
 }
