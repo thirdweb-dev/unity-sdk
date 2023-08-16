@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using WalletConnectSharp.Core.Models.Pairing;
 using WalletConnectSharp.Sign;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
@@ -9,15 +8,11 @@ using WalletConnectSharp.Storage;
 using WalletConnectSharp.Core;
 using ZXing;
 using ZXing.QrCode;
-using Nethereum.JsonRpc.Client;
-using Nethereum.Unity.RpcModel;
-using WalletConnectSharp.Network.Models;
-using WalletConnectSharp.Common.Utils;
-using Newtonsoft.Json;
 using WalletConnectSharp.Core.Models;
 using System.IO;
 using WalletConnect;
 using System.Linq;
+using System.Numerics;
 
 namespace Thirdweb.Wallets
 {
@@ -47,7 +42,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        public async Task<(WalletConnectSignClient, string, string)> Connect(string walletConnectProjectId, System.Numerics.BigInteger chainId)
+        public async Task<(WalletConnectSignClient, string, string)> Connect(string walletConnectProjectId, BigInteger chainId)
         {
             WalletConnectCanvas.SetActive(true);
 
@@ -111,7 +106,7 @@ namespace Thirdweb.Wallets
                 Debug.Log($"URI: {connectData.Uri}");
 
                 var qrCodeAsTexture2D = GenerateQRTexture(connectData.Uri);
-                QRCodeImage.sprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new Vector2(0.5f, 0.5f));
+                QRCodeImage.sprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new UnityEngine.Vector2(0.5f, 0.5f));
                 DeepLinkButton.onClick.RemoveAllListeners();
                 DeepLinkButton.onClick.AddListener(() => Application.OpenURL(connectData.Uri));
                 QRCodeImage.mainTexture.filterMode = FilterMode.Point;

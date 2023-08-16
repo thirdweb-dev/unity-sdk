@@ -9,6 +9,8 @@ using Nethereum.RPC.Eth.DTOs;
 using WalletConnectSharp.Sign.Models;
 using System.Linq;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
+using Nethereum.Hex.HexTypes;
+using System.Numerics;
 
 namespace Thirdweb.WalletConnect
 {
@@ -57,6 +59,19 @@ namespace Thirdweb.WalletConnect
                     var ethSignTypedDataReq = new EthSignTypedDataV4(new string[] { ethSignTypedDataReqParams[0], ethSignTypedDataReqParams[1] });
                     var ethSignTypedDataRes = await Client.Request<EthSignTypedDataV4, string>(Topic, ethSignTypedDataReq, ChainId);
                     return new RpcResponseMessage(message.Id, ethSignTypedDataRes);
+                case "wallet_switchEthereumChain":
+                    var walletSwitchEthereumChainReqParams = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(message.RawParameters));
+                    var walletSwitchEthereumChainReq = new WalletSwitchEthereumChain(new object[] { walletSwitchEthereumChainReqParams[0] });
+                    UnityEngine.Debug.Log($"WalletSwitchEthereumChain: {JsonConvert.SerializeObject(walletSwitchEthereumChainReq)}");
+                    var walletSwitchEthereumChainRes = await Client.Request<WalletSwitchEthereumChain, object>(Topic, walletSwitchEthereumChainReq, ChainId);
+                    ThirdwebChain newChain = JsonConvert.DeserializeObject<ThirdwebChain>(JsonConvert.SerializeObject(walletSwitchEthereumChainReqParams[0]));
+                    ChainId = ChainId.Substring(0, ChainId.IndexOf(":") + 1) + new HexBigInteger(newChain.chainId).Value;
+                    return new RpcResponseMessage(message.Id, JsonConvert.SerializeObject(walletSwitchEthereumChainRes));
+                case "wallet_addEthereumChain":
+                    var walletAddEthereumChainReqParams = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(message.RawParameters));
+                    var walletAddEthereumChainReq = new WalletAddEthereumChain(new object[] { walletAddEthereumChainReqParams[0] });
+                    var walletAddEthereumChainRes = await Client.Request<WalletAddEthereumChain, object>(Topic, walletAddEthereumChainReq, ChainId);
+                    return new RpcResponseMessage(message.Id, JsonConvert.SerializeObject(walletAddEthereumChainRes));
                 default:
                     throw new System.Exception($"Method {message.Method} not implemented");
             }
@@ -97,14 +112,14 @@ namespace Thirdweb.WalletConnect
         public string Data { get; set; } = "0x";
     }
 
-    [RpcMethod("eth_sendTransaction"), RpcRequestOptions(Clock.ONE_MINUTE, 99997)]
+    [RpcMethod("eth_sendTransaction"), RpcRequestOptions(Clock.ONE_MINUTE, 99999)]
     public class EthSendTransaction : List<Transaction>
     {
         public EthSendTransaction(params Transaction[] transactions)
             : base(transactions) { }
     }
 
-    [RpcMethod("personal_sign"), RpcRequestOptions(Clock.ONE_MINUTE, 99998)]
+    [RpcMethod("personal_sign"), RpcRequestOptions(Clock.ONE_MINUTE, 99999)]
     public class PersonalSign : List<string>
     {
         public PersonalSign(params string[] personalSignParams)
@@ -116,5 +131,19 @@ namespace Thirdweb.WalletConnect
     {
         public EthSignTypedDataV4(params string[] ethSignTypedDataParams)
             : base(ethSignTypedDataParams) { }
+    }
+
+    [RpcMethod("wallet_switchEthereumChain"), RpcRequestOptions(Clock.ONE_MINUTE, 99999)]
+    public class WalletSwitchEthereumChain : List<object>
+    {
+        public WalletSwitchEthereumChain(params object[] walletSwitchEthereumChainParams)
+            : base(walletSwitchEthereumChainParams) { }
+    }
+
+    [RpcMethod("wallet_addEthereumChain"), RpcRequestOptions(Clock.ONE_MINUTE, 99999)]
+    public class WalletAddEthereumChain : List<object>
+    {
+        public WalletAddEthereumChain(params object[] walletAddEthereumChainParams)
+            : base(walletAddEthereumChainParams) { }
     }
 }
