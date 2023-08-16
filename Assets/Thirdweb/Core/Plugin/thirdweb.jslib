@@ -69,7 +69,7 @@ var plugin = {
     window.bridge
       .connect(
         UTF8ToString(wallet),
-        chainId,
+        UTF8ToString(chainId),
         UTF8ToString(password),
         UTF8ToString(email),
         UTF8ToString(personalWallet)
@@ -100,7 +100,7 @@ var plugin = {
     stringToUTF8(id, idPtr, idSize);
     // execute bridge call
     window.bridge
-      .switchNetwork(chainId)
+      .switchNetwork(UTF8ToString(chainId))
       .then(() => {
         dynCall_viii(cb, idPtr, null, null);
       })

@@ -1,32 +1,35 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Image))]
-public class LoadingSpinner : MonoBehaviour
+namespace Thirdweb.Examples
 {
-    public Image spinner;
-
-    private void Awake()
+    [RequireComponent(typeof(Image))]
+    public class LoadingSpinner : MonoBehaviour
     {
-        spinner.type = Image.Type.Filled;
-        spinner.fillMethod = Image.FillMethod.Radial360;
-        spinner.fillAmount = 0;
-        spinner.fillClockwise = true;
-    }
+        public Image spinner;
 
-    private void Update()
-    {
-        if (spinner.fillClockwise)
+        private void Awake()
         {
-            spinner.fillAmount += Time.deltaTime;
-            if (spinner.fillAmount >= 1f)
-                spinner.fillClockwise = false;
+            spinner.type = Image.Type.Filled;
+            spinner.fillMethod = Image.FillMethod.Radial360;
+            spinner.fillAmount = 0;
+            spinner.fillClockwise = true;
         }
-        else
+
+        private void Update()
         {
-            spinner.fillAmount -= Time.deltaTime;
-            if (spinner.fillAmount <= 0f)
-                spinner.fillClockwise = true;
+            if (spinner.fillClockwise)
+            {
+                spinner.fillAmount += Time.deltaTime;
+                if (spinner.fillAmount >= 1f)
+                    spinner.fillClockwise = false;
+            }
+            else
+            {
+                spinner.fillAmount -= Time.deltaTime;
+                if (spinner.fillAmount <= 0f)
+                    spinner.fillClockwise = true;
+            }
         }
     }
 }

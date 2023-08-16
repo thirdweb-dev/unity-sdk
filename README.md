@@ -53,37 +53,44 @@ Note that in order to communicate with the SDK on WebGL, you need to `Build and 
 
 # Usage
 
+In order to access the SDK, you only need to have a [ThirdwebManager](https://portal.thirdweb.com/unity/thirdwebmanager) in your scene.
+
 ```csharp
-// instantiate a read only SDK on any EVM chain
-var sdk = new ThirdwebSDK("goerli");
+// Reference to your Thirdweb SDK
+var sdk = ThirdwebManager.Instance.SDK;
 
-// connect the user's wallet - supports Metamask, Coinbase Wallet, WalletConnect and more
-var walletAddress = await sdk.wallet.Connect();
+// Configure the connection
+var connection = new WalletConnection(
+  provider: WalletProvider.Paper,          // The wallet provider you want to connect to (Required)
+  chainId: 1,                              // The chain you want to connect to (Required)
+  email: "email@email.com"                 // The email you want to authenticate with (Required for this provider)
+);
 
-// interact with the wallet
+// Connect the wallet
+string address = await sdk.wallet.Connect(connection);
+
+// Interact with the wallet
 CurrencyValue balance = await sdk.wallet.GetBalance();
 var signature = await sdk.wallet.Sign("message to sign");
 
-// get an instance of a deployed contract (no ABI required!)
+// Get an instance of a deployed contract (no ABI required!)
 var contract = sdk.GetContract("0x...");
 
-// fetch data from any ERC20/721/1155 or marketplace contract
+// Fetch data from any ERC20/721/1155 or marketplace contract
 CurrencyValue currencyValue = await contract.ERC20.TotalSupply();
 NFT erc721NFT = await contract.ERC721.Get(tokenId);
 List<NFT> erc1155NFTs = await contract.ERC1155.GetAll();
 List<Listing> listings = await marketplace.GetAllListings();
 
-// execute transactions from the connected wallet
+// Execute transactions from the connected wallet
 await contract.ERC20.Mint("1.2");
 await contract.ERC721.signature.Mint(signedPayload);
 await contract.ERC1155.Claim(tokenId, quantity);
 await marketplace.BuyListing(listingId, quantity);
 
-// deploy contracts from the connected wallet
-var address = await sdk.deployer.DeployNFTCollection(new NFTContractDeployMetadata {
-    name = "My Personal Unity Collection",
-    primary_sale_recipient = await sdk.wallet.GetAddress(),
-});
+// Custom interactions
+var res = await contract.Read<string>("myReadFunction", arg1, arg2, ...);
+var txRes = await contract.Write("myWriteFunction", arg1, arg2, ...);
 ```
 
 # Prefabs
@@ -97,7 +104,6 @@ All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-
 - Drag and drop it into your scene.
 - Set up the networks you want to support from the ThirdwebManager prefab.
 - You can add callbacks from the inspector for when the wallet is connected, disconnected, fails to connect or disconnect, as well as callbacks when the network is switched or fails to do so.
-- For native platforms: some wallet providers may not be supported, and multiple networks in the ThirdwebManager is not supported.
 
 [NFT Loader](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_NFTLoader.cs) - Standalone drag & drop grid/scroll view of NFTs you ask it to display!
 

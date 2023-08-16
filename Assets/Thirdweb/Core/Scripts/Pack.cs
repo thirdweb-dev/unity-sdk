@@ -13,16 +13,14 @@ namespace Thirdweb
     /// </summary>
     public class Pack : Routable
     {
-        private string chain;
-        private string contractAddress;
+        private readonly string contractAddress;
 
         /// <summary>
         /// Interact with a Marketplace contract.
         /// </summary>
-        public Pack(string chain, string address)
+        public Pack(string address)
             : base($"{address}{subSeparator}pack")
         {
-            this.chain = chain;
             this.contractAddress = address;
         }
 
@@ -44,12 +42,14 @@ namespace Thirdweb
                     new PackContract.UriFunction() { TokenId = BigInteger.Parse(tokenId) }
                 );
 
-                NFT nft = new NFT();
-                nft.owner = "";
-                nft.type = "ERC1155";
-                nft.supply = await TotalSupply(tokenId);
-                nft.quantityOwned = 404;
-                nft.metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1);
+                var nft = new NFT
+                {
+                    owner = "",
+                    type = "ERC1155",
+                    supply = await TotalSupply(tokenId),
+                    quantityOwned = 404,
+                    metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1)
+                };
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
                 nft.metadata.id = tokenId;
                 nft.metadata.uri = tokenURI.ReturnValue1.ReplaceIPFS();
@@ -199,34 +199,38 @@ namespace Thirdweb
                     switch (tokenReward.TokenType)
                     {
                         case 0:
-                            var tempERC20 = new ERC20Contents();
-                            tempERC20.contractAddress = tokenReward.AssetContract;
-                            tempERC20.quantityPerReward = amount.ToString().ToEth(18);
-                            tempERC20.totalRewards = (tokenReward.TotalAmount / amount).ToString().ToEth(18);
+                            var tempERC20 = new ERC20Contents
+                            {
+                                contractAddress = tokenReward.AssetContract,
+                                quantityPerReward = amount.ToString().ToEth(18),
+                                totalRewards = (tokenReward.TotalAmount / amount).ToString().ToEth(18)
+                            };
                             erc20R.Add(tempERC20);
                             break;
                         case 1:
-                            var tempERC721 = new ERC721Contents();
-                            tempERC721.contractAddress = tokenReward.AssetContract;
-                            tempERC721.tokenId = tokenReward.TokenId.ToString();
+                            var tempERC721 = new ERC721Contents { contractAddress = tokenReward.AssetContract, tokenId = tokenReward.TokenId.ToString() };
                             erc721R.Add(tempERC721);
                             break;
                         case 2:
-                            var tempERC1155 = new ERC1155Contents();
-                            tempERC1155.contractAddress = tokenReward.AssetContract;
-                            tempERC1155.tokenId = tokenReward.TokenId.ToString();
-                            tempERC1155.quantityPerReward = amount.ToString();
-                            tempERC1155.totalRewards = (tokenReward.TotalAmount / amount).ToString();
+                            var tempERC1155 = new ERC1155Contents
+                            {
+                                contractAddress = tokenReward.AssetContract,
+                                tokenId = tokenReward.TokenId.ToString(),
+                                quantityPerReward = amount.ToString(),
+                                totalRewards = (tokenReward.TotalAmount / amount).ToString()
+                            };
                             erc1155R.Add(tempERC1155);
                             break;
                         default:
                             break;
                     }
                 }
-                PackContents contents = new PackContents();
-                contents.erc20Rewards = erc20R;
-                contents.erc721Rewards = erc721R;
-                contents.erc1155Rewards = erc1155R;
+                var contents = new PackContents
+                {
+                    erc20Rewards = erc20R,
+                    erc721Rewards = erc721R,
+                    erc1155Rewards = erc1155R
+                };
                 return contents;
             }
         }
@@ -306,7 +310,7 @@ namespace Thirdweb
                     {
                         Contents = pack.ToPackTokenList(),
                         NumOfRewardUnits = pack.ToPackRewardUnitsList(),
-                        PackUri = uri.IpfsHash.cidToIpfsUrl(),
+                        PackUri = uri.IpfsHash.CidToIpfsUrl(),
                         OpenStartTimestamp = await Utils.GetCurrentBlockTimeStamp(),
                         AmountDistributedPerOpen = BigInteger.Parse(pack.rewardsPerPack),
                         Recipient = receiverAddress
@@ -345,12 +349,12 @@ namespace Thirdweb
                 var openPackResult = await TransactionManager.ThirdwebWriteRawResult(contractAddress, openPackFunction, null, gasLimit);
 
                 var packOpenedEvents = openPackResult.DecodeAllEvents<PackContract.PackOpenedEventDTO>();
-                List<PackContract.Token> tokensAwarded = new List<PackContract.Token>();
+                var tokensAwarded = new List<PackContract.Token>();
                 foreach (var packOpenedEvent in packOpenedEvents)
                 {
                     tokensAwarded.AddRange(packOpenedEvent.Event.RewardUnitsDistributed);
                 }
-                PackRewards packRewards = new PackRewards()
+                var packRewards = new PackRewards()
                 {
                     erc20Rewards = new List<ERC20Reward>(),
                     erc721Rewards = new List<ERC721Reward>(),
@@ -438,7 +442,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return "NewPackInput:\n" + $"packMetadata: {packMetadata.ToString()}\n" + $"rewardsPerPack: {rewardsPerPack.ToString()}\n";
+            return "NewPackInput:\n" + $"packMetadata: {packMetadata}\n" + $"rewardsPerPack: {rewardsPerPack}\n";
         }
     }
 
@@ -453,7 +457,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return "ERC20Reward:\n" + $"contractAddress: {contractAddress.ToString()}\n" + $"quantityPerReward: {quantityPerReward.ToString()}\n";
+            return "ERC20Reward:\n" + $"contractAddress: {contractAddress}\n" + $"quantityPerReward: {quantityPerReward}\n";
         }
     }
 
@@ -464,7 +468,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return base.ToString() + $"totalRewards: {totalRewards.ToString()}\n";
+            return base.ToString() + $"totalRewards: {totalRewards}\n";
         }
     }
 
@@ -479,7 +483,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return "ERC721Reward:\n" + $"contractAddress: {contractAddress.ToString()}\n" + $"tokenId: {tokenId.ToString()}\n";
+            return "ERC721Reward:\n" + $"contractAddress: {contractAddress}\n" + $"tokenId: {tokenId}\n";
         }
     }
 
@@ -506,7 +510,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return "ERC1155Reward:\n" + $"contractAddress: {contractAddress.ToString()}\n" + $"tokenId: {tokenId.ToString()}\n" + $"quantityPerReward: {quantityPerReward.ToString()}\n";
+            return "ERC1155Reward:\n" + $"contractAddress: {contractAddress}\n" + $"tokenId: {tokenId}\n" + $"quantityPerReward: {quantityPerReward}\n";
         }
     }
 
@@ -517,7 +521,7 @@ namespace Thirdweb
 
         public override string ToString()
         {
-            return base.ToString() + $"totalRewards: {totalRewards.ToString()}\n";
+            return base.ToString() + $"totalRewards: {totalRewards}\n";
         }
     }
 }

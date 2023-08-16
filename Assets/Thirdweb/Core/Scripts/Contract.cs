@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using Nethereum.ABI.FunctionEncoding;
 using System.Linq;
 using System;
+using Nethereum.Contracts;
+using Nethereum.RPC.Eth.DTOs;
+using Nethereum.ABI.FunctionEncoding.Attributes;
 
 namespace Thirdweb
 {
@@ -66,7 +69,7 @@ namespace Thirdweb
             this.ERC721 = new ERC721(baseRoute, address);
             this.ERC1155 = new ERC1155(baseRoute, address);
             this.marketplace = new Marketplace(baseRoute, address);
-            this.pack = new Pack(chain, address);
+            this.pack = new Pack(address);
             this.events = new Events(baseRoute);
         }
 
@@ -83,9 +86,7 @@ namespace Thirdweb
             else
             {
                 BigInteger balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
-                CurrencyValue cv = new CurrencyValue();
-                cv.value = balance.ToString();
-                cv.displayValue = balance.ToString().ToEth();
+                var cv = new CurrencyValue { value = balance.ToString(), displayValue = balance.ToString().ToEth() };
                 return cv;
             }
         }
@@ -144,6 +145,23 @@ namespace Thirdweb
         }
 
         /// <summary>
+        /// Get the events of a contract. For WebGL use contract.Events class instead.
+        /// <returns>A list of <see cref="EventLog"/> (extending IEventDTO) objects representing the events.</returns>
+        /// </summary>
+        public async Task<List<EventLog<TEventDTO>>> GetEventLogs<TEventDTO>(ulong? fromBlock = null, ulong? toBlock = null)
+            where TEventDTO : IEventDTO, new()
+        {
+            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            var transferEventHandler = web3.Eth.GetEvent<TEventDTO>(this.address);
+            var filter = transferEventHandler.CreateFilterInput(
+                fromBlock: fromBlock == null ? BlockParameter.CreateEarliest() : new BlockParameter(fromBlock.Value),
+                toBlock: toBlock == null ? BlockParameter.CreateLatest() : new BlockParameter(toBlock.Value)
+            );
+            var allTransferEventsForContract = await transferEventHandler.GetAllChangesAsync(filter);
+            return allTransferEventsForContract;
+        }
+
+        /// <summary>
         /// Execute a write transaction on a contract.
         /// </summary>
         /// <param name="functionName">The name of the contract function to call.</param>
@@ -165,7 +183,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                args = args ?? new object[0];
+                args ??= new object[0];
                 return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), Utils.ToJsonStringArray(functionName, args, transactionOverrides));
             }
             else

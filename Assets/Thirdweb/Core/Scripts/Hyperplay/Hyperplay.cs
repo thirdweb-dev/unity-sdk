@@ -25,29 +25,27 @@ namespace Thirdweb.Hyperplay
 
         internal async Task<RpcResponseMessage> Request(RpcRequestMessage message)
         {
-            HyperplayRequest hyperplayRequest = new HyperplayRequest() { Method = message.Method, Params = message.RawParameters };
+            HyperplayRequest hyperplayRequest = new() { Method = message.Method, Params = message.RawParameters };
             string jsonString = JsonConvert.SerializeObject(hyperplayRequest);
             byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(jsonString);
-            using (var request = new UnityWebRequest("localhost:9680/rpcRaw", "POST"))
+            using var request = new UnityWebRequest("localhost:9680/rpcRaw", "POST");
+            request.uploadHandler = new UploadHandlerRaw(jsonBytes);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+            await request.SendWebRequest();
+            if (request.result != UnityWebRequest.Result.Success)
             {
-                request.uploadHandler = new UploadHandlerRaw(jsonBytes);
-                request.downloadHandler = new DownloadHandlerBuffer();
-                request.SetRequestHeader("Content-Type", "application/json");
-                await request.SendWebRequest();
-                if (request.result != UnityWebRequest.Result.Success)
-                {
-                    Debug.LogError(request.error);
-                    throw new UnityException("RPC request failed: " + request.error);
-                }
-                var hyperplayResult = JsonConvert.DeserializeObject<HyperplayResult>(request.downloadHandler.text);
-                try
-                {
-                    return new RpcResponseMessage(message.Id, JsonConvert.DeserializeObject<JToken>(hyperplayResult.Result.ToString()));
-                }
-                catch
-                {
-                    return new RpcResponseMessage(message.Id, hyperplayResult.Result.ToString());
-                }
+                Debug.LogError(request.error);
+                throw new UnityException("RPC request failed: " + request.error);
+            }
+            var hyperplayResult = JsonConvert.DeserializeObject<HyperplayResult>(request.downloadHandler.text);
+            try
+            {
+                return new RpcResponseMessage(message.Id, JsonConvert.DeserializeObject<JToken>(hyperplayResult.Result.ToString()));
+            }
+            catch
+            {
+                return new RpcResponseMessage(message.Id, hyperplayResult.Result.ToString());
             }
         }
     }

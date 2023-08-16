@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Threading.Tasks;
 using MetaMask.NEthereum;
 using MetaMask.Unity;
@@ -10,8 +11,8 @@ namespace Thirdweb.Wallets
     public class ThirdwebMetamask : IThirdwebWallet
     {
         private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
 
         public ThirdwebMetamask()
         {
@@ -80,6 +81,11 @@ namespace Thirdweb.Wallets
         public Task<bool> IsConnected()
         {
             return Task.FromResult(_web3 != null);
+        }
+
+        public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
+        {
+            return Task.FromResult(NetworkSwitchAction.ContinueSwitch);
         }
     }
 }

@@ -3,16 +3,17 @@ using Paper;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
+using System.Numerics;
 
 namespace Thirdweb.Wallets
 {
     public class ThirdwebPaper : IThirdwebWallet
     {
         private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
-        private PaperEmbeddedWalletSdk _paper;
-        private User _user;
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
+        private readonly PaperEmbeddedWalletSdk _paper;
+        private Account _account;
 
         public ThirdwebPaper(string paperClientId)
         {
@@ -29,8 +30,8 @@ namespace Thirdweb.Wallets
                 GameObject.Instantiate(ThirdwebManager.Instance.PaperPrefab);
             }
 
-            _user = await PaperUI.Instance.Connect(_paper, walletConnection.email);
-            _web3 = new Web3(_user.Account, ThirdwebManager.Instance.SDK.session.RPC);
+            _account = (await PaperUI.Instance.Connect(_paper, walletConnection.email)).Account;
+            _web3 = new Web3(_account, rpc);
 
             return await GetAddress();
         }
@@ -38,18 +39,18 @@ namespace Thirdweb.Wallets
         public async Task Disconnect()
         {
             await _paper.Logout();
-            _user = null;
+            _account = null;
             _web3 = null;
         }
 
         public Account GetLocalAccount()
         {
-            return _user.Account;
+            return _account;
         }
 
         public Task<string> GetAddress()
         {
-            var addy = _user.Account.Address;
+            var addy = _account.Address;
             if (addy != null)
                 addy = addy.ToChecksumAddress();
             return Task.FromResult(addy);
@@ -83,6 +84,13 @@ namespace Thirdweb.Wallets
         public Task<bool> IsConnected()
         {
             return Task.FromResult(_web3 != null);
+        }
+
+        public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
+        {
+            _account = new Account(_account.PrivateKey, newChainId);
+            _web3 = new Web3(_account, newRpc);
+            return Task.FromResult(NetworkSwitchAction.Handled);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Threading.Tasks;
 using link.magic.unity.sdk;
 using link.magic.unity.sdk.Relayer;
@@ -9,9 +10,9 @@ namespace Thirdweb.Wallets
     public class ThirdwebMagicLink : IThirdwebWallet
     {
         private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
-        private string _magicLinkApiKey;
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
+        private readonly string _magicLinkApiKey;
         private Magic _magic;
 
         public ThirdwebMagicLink(string magicLinkApiKey)
@@ -81,6 +82,11 @@ namespace Thirdweb.Wallets
         public Task<bool> IsConnected()
         {
             return Task.FromResult(_web3 != null);
+        }
+
+        public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
+        {
+            return Task.FromResult(NetworkSwitchAction.ContinueSwitch);
         }
     }
 }

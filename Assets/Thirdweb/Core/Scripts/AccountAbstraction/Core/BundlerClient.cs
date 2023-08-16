@@ -40,34 +40,31 @@ namespace Thirdweb.AccountAbstraction
 
         private static async Task<RpcResponseMessage> BundlerRequest(string url, string apiKey, object requestId, string method, params object[] args)
         {
-            using (HttpClient client = new HttpClient())
+            using HttpClient client = new HttpClient();
+            // UnityEngine.Debug.Log($"Bundler Request: {method}({string.Join(", ", args)})");
+            var requestMessage = new RpcRequestMessage(requestId, method, args);
+            string requestMessageJson = JsonConvert.SerializeObject(requestMessage);
+
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, url) { Content = new StringContent(requestMessageJson, System.Text.Encoding.UTF8, "application/json") };
+            if (new Uri(url).Host.EndsWith(".thirdweb.com"))
             {
-                UnityEngine.Debug.Log($"Bundler Request: {method}({string.Join(", ", args)})");
-                RpcRequestMessage requestMessage = new RpcRequestMessage(requestId, method, args);
-                string requestMessageJson = JsonConvert.SerializeObject(requestMessage);
-
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, url);
-                httpRequestMessage.Content = new StringContent(requestMessageJson, System.Text.Encoding.UTF8, "application/json");
-                if (new Uri(url).Host.EndsWith(".thirdweb.com"))
-                {
-                    httpRequestMessage.Headers.Add("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
-                    if (!Utils.IsWebGLBuild())
-                        httpRequestMessage.Headers.Add("x-bundle-id", Utils.GetBundleId());
-                }
-
-                var httpResponse = await client.SendAsync(httpRequestMessage);
-
-                if (!httpResponse.IsSuccessStatusCode)
-                    throw new Exception($"Bundler Request Failed. Error: {httpResponse.StatusCode} - {httpResponse.ReasonPhrase} - {await httpResponse.Content.ReadAsStringAsync()}");
-
-                var httpResponseJson = await httpResponse.Content.ReadAsStringAsync();
-                UnityEngine.Debug.Log($"Bundler Response: {httpResponseJson}");
-
-                var response = JsonConvert.DeserializeObject<RpcResponseMessage>(httpResponseJson);
-                if (response.Error != null)
-                    throw new Exception($"Bundler Request Failed. Error: {response.Error.Code} - {response.Error.Message} - {response.Error.Data}");
-                return response;
+                httpRequestMessage.Headers.Add("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
+                if (!Utils.IsWebGLBuild())
+                    httpRequestMessage.Headers.Add("x-bundle-id", ThirdwebManager.Instance.SDK.session.BundleId);
             }
+
+            var httpResponse = await client.SendAsync(httpRequestMessage);
+
+            if (!httpResponse.IsSuccessStatusCode)
+                throw new Exception($"Bundler Request Failed. Error: {httpResponse.StatusCode} - {httpResponse.ReasonPhrase} - {await httpResponse.Content.ReadAsStringAsync()}");
+
+            var httpResponseJson = await httpResponse.Content.ReadAsStringAsync();
+            // UnityEngine.Debug.Log($"Bundler Response: {httpResponseJson}");
+
+            var response = JsonConvert.DeserializeObject<RpcResponseMessage>(httpResponseJson);
+            if (response.Error != null)
+                throw new Exception($"Bundler Request Failed. Error: {response.Error.Code} - {response.Error.Message} - {response.Error.Data}");
+            return response;
         }
     }
 }

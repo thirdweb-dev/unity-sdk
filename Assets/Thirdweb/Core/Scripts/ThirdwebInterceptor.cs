@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Nethereum.JsonRpc.Client;
 using Nethereum.Signer;
-using Newtonsoft.Json;
 using Thirdweb.Wallets;
 
 namespace Thirdweb

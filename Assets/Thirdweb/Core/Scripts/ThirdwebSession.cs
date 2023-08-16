@@ -29,6 +29,8 @@ namespace Thirdweb
 
         public static int Nonce = 0;
 
+        public string BundleId { get; private set; }
+
         #endregion
 
         #region Constructors
@@ -41,13 +43,14 @@ namespace Thirdweb
             SiweSession = new SiweMessageService();
             Web3 = new Web3(rpcUrl);
             CurrentChainData = options.supportedChains.ToList().Find(x => x.chainId == new HexBigInteger(chainId).HexValue);
+            BundleId = Utils.GetBundleId();
         }
 
         #endregion
 
-        #region Public Methods
+        #region Internal Methods
 
-        public async Task<string> Connect(WalletConnection walletConnection)
+        internal async Task<string> Connect(WalletConnection walletConnection)
         {
             switch (walletConnection.provider)
             {
@@ -90,7 +93,14 @@ namespace Thirdweb
             Web3 = await ActiveWallet.GetWeb3();
             Web3.Client.OverridingRequestInterceptor = new ThirdwebInterceptor(ActiveWallet);
 
-            await EnsureCorrectNetwork();
+            try
+            {
+                await EnsureCorrectNetwork(ChainId);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("WalletProvider unable to switch chains, proceeding anyway. Error:" + e.Message);
+            }
 
             var addy = await ActiveWallet.GetAddress();
 
@@ -99,59 +109,84 @@ namespace Thirdweb
             return addy;
         }
 
-        public async Task Disconnect()
+        internal async Task Disconnect()
         {
             await ActiveWallet.Disconnect();
             ThirdwebManager.Instance.SDK.session = new ThirdwebSession(Options, ChainId, RPC);
         }
 
-        public async Task<T> Request<T>(string method, params object[] parameters)
+        internal async Task<T> Request<T>(string method, params object[] parameters)
         {
             var request = new RpcRequest(Nonce, method, parameters);
             Nonce++;
             return await Web3.Client.SendRequestAsync<T>(request);
         }
 
+        internal async Task EnsureCorrectNetwork(BigInteger newChainId)
+        {
+            ThirdwebChainData newChainData = null;
+            try
+            {
+                newChainData = Options.supportedChains.ToList().Find(x => x.chainId == new HexBigInteger(newChainId).HexValue);
+            }
+            catch
+            {
+                throw new UnityException("The chain you are trying to switch to is not part of the ThirdwebManager's supported chains.");
+            }
+
+            NetworkSwitchAction switchResult = await ActiveWallet.PrepareForNetworkSwitch(newChainId, newChainData.rpcUrls[0]);
+
+            switch (switchResult)
+            {
+                case NetworkSwitchAction.ContinueSwitch:
+                    var hexChainId = await Request<string>("eth_chainId");
+                    var connectedChainId = hexChainId.HexToBigInteger(false);
+                    if (connectedChainId != ChainId)
+                    {
+                        try
+                        {
+                            await SwitchNetwork(new ThirdwebChain() { chainId = newChainData.chainId });
+                        }
+                        catch (System.Exception e)
+                        {
+                            Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
+                            try
+                            {
+                                await AddNetwork(newChainData);
+                                await SwitchNetwork(new ThirdwebChain() { chainId = newChainData.chainId });
+                            }
+                            catch (System.Exception f)
+                            {
+                                throw new UnityException("Adding chain error: " + f.Message);
+                            }
+                        }
+                    }
+                    break;
+                case NetworkSwitchAction.Handled:
+                    break;
+                case NetworkSwitchAction.Unsupported:
+                    throw new UnityException("Network switching is not supported by the active wallet.");
+            }
+
+            ChainId = newChainId;
+            CurrentChainData = newChainData;
+            RPC = CurrentChainData.rpcUrls[0];
+            Web3 = await ActiveWallet.GetWeb3();
+            Web3.Client.OverridingRequestInterceptor = new ThirdwebInterceptor(ActiveWallet);
+        }
+
         #endregion
 
         #region Private Methods
 
-        private async Task EnsureCorrectNetwork()
-        {
-            var hexChainId = await Request<string>("eth_chainId");
-            var connectedChainId = (int)hexChainId.HexToBigInteger(false);
-            if (connectedChainId != ChainId)
-            {
-                try
-                {
-                    await SwitchNetwork(new ThirdwebChain() { chainId = CurrentChainData.chainId });
-                }
-                catch (System.Exception e)
-                {
-                    Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
-                    try
-                    {
-                        await AddNetwork(CurrentChainData);
-                        await SwitchNetwork(new ThirdwebChain() { chainId = CurrentChainData.chainId });
-                    }
-                    catch (System.Exception f)
-                    {
-                        Debug.LogWarning("Adding chain error: " + f.Message);
-                    }
-                }
-            }
-        }
-
         private async Task SwitchNetwork(ThirdwebChain newChain)
         {
             await Request<object>("wallet_switchEthereumChain", new object[] { newChain });
-            CurrentChainData.chainId = newChain.chainId;
         }
 
         private async Task AddNetwork(ThirdwebChainData newChainData)
         {
             await Request<object>("wallet_addEthereumChain", new object[] { newChainData });
-            CurrentChainData = newChainData;
         }
 
         public static ThirdwebChainData FetchChainData(BigInteger chainId, string rpcOverride = null)
@@ -165,7 +200,7 @@ namespace Thirdweb
 
             ChainIDNetworkData currentNetwork = allNetworkData.Find(x => x.chainId == chainId.ToString());
 
-            List<string> explorerUrls = new List<string>();
+            var explorerUrls = new List<string>();
             if (currentNetwork.explorers != null)
             {
                 foreach (var explorer in currentNetwork.explorers)
@@ -180,7 +215,7 @@ namespace Thirdweb
             {
                 chainId = BigInteger.Parse(currentNetwork.chainId).ToHex(false, true) ?? BigInteger.Parse(chainId.ToString()).ToHex(false, true),
                 blockExplorerUrls = explorerUrls.ToArray(),
-                chainName = currentNetwork.name ?? ThirdwebManager.Instance.chain,
+                chainName = currentNetwork.name ?? ThirdwebManager.Instance.activeChain,
                 iconUrls = new string[] { currentNetwork.icon },
                 nativeCurrency = new ThirdwebNativeCurrency()
                 {

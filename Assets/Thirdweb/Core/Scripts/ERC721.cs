@@ -6,6 +6,8 @@ using UnityEngine;
 using Newtonsoft.Json;
 using TokenERC721Contract = Thirdweb.Contracts.TokenERC721.ContractDefinition;
 using DropERC721Contract = Thirdweb.Contracts.DropERC721.ContractDefinition;
+using ERC721AQueryable = Thirdweb.Contracts.ERC721AQueryableUpgradeable.ContractDefinition;
+using SignatureDropContract = Thirdweb.Contracts.SignatureDrop.ContractDefinition;
 
 namespace Thirdweb
 {
@@ -24,7 +26,7 @@ namespace Thirdweb
         /// </summary>
         public ERC721ClaimConditions claimConditions;
 
-        private string contractAddress;
+        private readonly string contractAddress;
 
         /// <summary>
         /// Interact with any ERC721 compatible contract.
@@ -57,12 +59,14 @@ namespace Thirdweb
 
                 tokenURI.ReturnValue1 = tokenURI.ReturnValue1.Contains("0x{id}") ? tokenURI.ReturnValue1.Replace("0x{id}", tokenId) : tokenURI.ReturnValue1;
 
-                NFT nft = new NFT();
-                nft.owner = await OwnerOf(tokenId);
-                nft.type = "ERC721";
-                nft.supply = await TotalCount();
-                nft.quantityOwned = 1;
-                nft.metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1);
+                var nft = new NFT
+                {
+                    owner = await OwnerOf(tokenId),
+                    type = "ERC721",
+                    supply = await TotalCount(),
+                    quantityOwned = 1,
+                    metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1)
+                };
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
                 nft.metadata.id = tokenId;
                 nft.metadata.uri = tokenURI.ReturnValue1.ReplaceIPFS();
@@ -95,7 +99,7 @@ namespace Thirdweb
                     end = totalSupply - 1;
                 }
 
-                List<NFT> allNfts = new List<NFT>();
+                var allNfts = new List<NFT>();
                 for (int i = start; i <= end; i++)
                     allNfts.Add(await Get(i.ToString()));
                 return allNfts;
@@ -114,9 +118,9 @@ namespace Thirdweb
             }
             else
             {
-                string owner = address == null ? await ThirdwebManager.Instance.SDK.wallet.GetAddress() : address;
+                string owner = address ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
                 var balanceOfOwner = int.Parse(await BalanceOf(owner));
-                List<NFT> ownedNfts = new List<NFT>();
+                var ownedNfts = new List<NFT>();
 
                 try
                 {
@@ -133,18 +137,34 @@ namespace Thirdweb
                 }
                 catch
                 {
-                    // ERC721 totalSupply
-                    var count = await TotalCount();
-                    for (int i = 0; i < count; i++)
+                    // ERC721AQueryable
+                    try
                     {
-                        if (await OwnerOf(i.ToString()) == owner)
+                        var tokensOwned = await TransactionManager.ThirdwebRead<ERC721AQueryable.TokensOfOwnerFunction, ERC721AQueryable.TokensOfOwnerOutputDTO>(
+                            contractAddress,
+                            new ERC721AQueryable.TokensOfOwnerFunction() { Owner = owner }
+                        );
+                        for (int i = 0; i < tokensOwned.ReturnValue1.Count; i++)
                         {
-                            ownedNfts.Add(await Get(i.ToString()));
-                            if (ownedNfts.Count == balanceOfOwner)
-                                break;
+                            ownedNfts.Add(await Get(tokensOwned.ReturnValue1[i].ToString()));
                         }
+                        return ownedNfts;
                     }
-                    return ownedNfts;
+                    catch
+                    {
+                        // ERC721Supply
+                        var count = await TotalCount();
+                        for (int i = 0; i < count; i++)
+                        {
+                            if (await OwnerOf(i.ToString()) == owner)
+                            {
+                                ownedNfts.Add(await Get(i.ToString()));
+                                if (ownedNfts.Count == balanceOfOwner)
+                                    break;
+                            }
+                        }
+                        return ownedNfts;
+                    }
                 }
             }
         }
@@ -414,7 +434,7 @@ namespace Thirdweb
             else
             {
                 var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(nft));
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC721Contract.MintToFunction() { To = address, Uri = uri.IpfsHash.cidToIpfsUrl() });
+                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC721Contract.MintToFunction() { To = address, Uri = uri.IpfsHash.CidToIpfsUrl() });
             }
         }
     }
@@ -424,7 +444,7 @@ namespace Thirdweb
     /// </summary>
     public class ERC721ClaimConditions : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         public ERC721ClaimConditions(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "claimConditions"))
@@ -443,24 +463,59 @@ namespace Thirdweb
             }
             else
             {
-                var id = await TransactionManager.ThirdwebRead<DropERC721Contract.GetActiveClaimConditionIdFunction, DropERC721Contract.GetActiveClaimConditionIdOutputDTO>(
-                    contractAddress,
-                    new DropERC721Contract.GetActiveClaimConditionIdFunction() { }
-                );
+                DropERC721Contract.ClaimCondition data;
+                try
+                {
+                    var id = await TransactionManager.ThirdwebRead<DropERC721Contract.GetActiveClaimConditionIdFunction, DropERC721Contract.GetActiveClaimConditionIdOutputDTO>(
+                        contractAddress,
+                        new DropERC721Contract.GetActiveClaimConditionIdFunction() { }
+                    );
 
-                var data = await TransactionManager.ThirdwebRead<DropERC721Contract.GetClaimConditionByIdFunction, DropERC721Contract.GetClaimConditionByIdOutputDTO>(
-                    contractAddress,
-                    new DropERC721Contract.GetClaimConditionByIdFunction() { ConditionId = id.ReturnValue1 }
-                );
+                    data = (
+                        await TransactionManager.ThirdwebRead<DropERC721Contract.GetClaimConditionByIdFunction, DropERC721Contract.GetClaimConditionByIdOutputDTO>(
+                            contractAddress,
+                            new DropERC721Contract.GetClaimConditionByIdFunction() { ConditionId = id.ReturnValue1 }
+                        )
+                    ).Condition;
+                }
+                catch
+                {
+                    var sigDropCondition = await TransactionManager.ThirdwebRead<SignatureDropContract.ClaimConditionFunction, SignatureDropContract.ClaimConditionOutputDTO>(
+                        contractAddress,
+                        new SignatureDropContract.ClaimConditionFunction() { }
+                    );
+
+                    data = new DropERC721Contract.ClaimCondition()
+                    {
+                        StartTimestamp = sigDropCondition.StartTimestamp,
+                        MaxClaimableSupply = sigDropCondition.MaxClaimableSupply,
+                        SupplyClaimed = sigDropCondition.SupplyClaimed,
+                        QuantityLimitPerWallet = sigDropCondition.QuantityLimitPerWallet,
+                        MerkleRoot = sigDropCondition.MerkleRoot,
+                        PricePerToken = sigDropCondition.PricePerToken,
+                        Currency = sigDropCondition.Currency,
+                        Metadata = sigDropCondition.Metadata,
+                    };
+                }
+
+                var currency = new Currency();
+                try
+                {
+                    currency = await ThirdwebManager.Instance.SDK.GetContract(data.Currency).ERC20.Get();
+                }
+                catch
+                {
+                    Debug.Log("Could not fetch currency metadata, proceeding without it.");
+                }
 
                 return new ClaimConditions()
                 {
-                    availableSupply = (data.Condition.MaxClaimableSupply - data.Condition.SupplyClaimed).ToString(),
-                    currencyAddress = data.Condition.Currency,
-                    currencyMetadata = new CurrencyValue() { value = data.Condition.PricePerToken.ToString(), },
-                    currentMintSupply = data.Condition.SupplyClaimed.ToString(),
-                    maxClaimablePerWallet = data.Condition.QuantityLimitPerWallet.ToString(),
-                    maxClaimableSupply = data.Condition.MaxClaimableSupply.ToString(),
+                    availableSupply = (data.MaxClaimableSupply - data.SupplyClaimed).ToString(),
+                    currencyAddress = data.Currency,
+                    currencyMetadata = new CurrencyValue(currency.name, currency.symbol, currency.decimals, data.PricePerToken.ToString(), data.PricePerToken.ToString().ToEth()),
+                    currentMintSupply = data.SupplyClaimed.ToString(),
+                    maxClaimablePerWallet = data.QuantityLimitPerWallet.ToString(),
+                    maxClaimableSupply = data.MaxClaimableSupply.ToString(),
                 };
             }
         }
@@ -524,10 +579,8 @@ namespace Thirdweb
         public int quantity;
         public NFTMetadata metadata;
         public string uid;
-
-        // TODO implement these, needs JS bridging support
-        // public long mintStartTime;
-        // public long mintEndTime;
+        public long mintStartTime;
+        public long mintEndTime;
 
         public ERC721MintPayload(string receiverAddress, NFTMetadata metadata)
         {
@@ -540,9 +593,8 @@ namespace Thirdweb
             this.royaltyBps = 0;
             this.quantity = 1;
             this.uid = Utils.ToBytes32HexString(Guid.NewGuid().ToByteArray());
-            // TODO temporary solution
-            // this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
-            // this.mintEndTime = this.mintStartTime + 1000L * 60L * 60L * 24L * 365L;
+            this.mintStartTime = Utils.GetUnixTimeStampNow() - 60;
+            this.mintEndTime = Utils.GetUnixTimeStampIn10Years();
         }
     }
 
@@ -574,7 +626,7 @@ namespace Thirdweb
     /// </summary>
     public class ERC721Signature : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
@@ -592,13 +644,58 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+                var signedPayload = await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+
+                if (privateKeyOverride == "")
+                    return signedPayload;
+
+                var req = new TokenERC721Contract.MintRequest()
+                {
+                    To = payloadToSign.to,
+                    RoyaltyRecipient = signedPayload.payload.royaltyRecipient,
+                    RoyaltyBps = signedPayload.payload.royaltyBps,
+                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
+                    Uri = signedPayload.payload.uri,
+                    Price = BigInteger.Parse(payloadToSign.price.ToWei()),
+                    Currency = payloadToSign.currencyAddress,
+                    ValidityStartTimestamp = payloadToSign.mintStartTime,
+                    ValidityEndTimestamp = payloadToSign.mintEndTime,
+                    Uid = payloadToSign.uid.HexStringToByteArray()
+                };
+
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC721(
+                    "TokenERC721",
+                    "1",
+                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    contractAddress,
+                    req,
+                    string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
+                );
+
+                signedPayload = new ERC721SignedPayload()
+                {
+                    signature = signature,
+                    payload = new ERC721SignedPayloadOutput()
+                    {
+                        to = req.To,
+                        price = req.Price.ToString(),
+                        currencyAddress = req.Currency,
+                        primarySaleRecipient = req.PrimarySaleRecipient,
+                        royaltyRecipient = req.RoyaltyRecipient,
+                        royaltyBps = (int)req.RoyaltyBps,
+                        quantity = 1,
+                        uri = req.Uri,
+                        uid = req.Uid.ByteArrayToHexString(),
+                        mintStartTime = (long)req.ValidityStartTimestamp,
+                        mintEndTime = (long)req.ValidityEndTimestamp
+                    }
+                };
+
+                return signedPayload;
             }
             else
             {
                 var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
-                var startTime = await Utils.GetCurrentBlockTimeStamp();
-                var endTime = Utils.GetUnixTimeStampIn10Years();
                 var royaltyInfo = await TransactionManager.ThirdwebRead<TokenERC721Contract.GetDefaultRoyaltyInfoFunction, TokenERC721Contract.GetDefaultRoyaltyInfoOutputDTO>(
                     contractAddress,
                     new TokenERC721Contract.GetDefaultRoyaltyInfoFunction() { }
@@ -614,11 +711,11 @@ namespace Thirdweb
                     RoyaltyRecipient = royaltyInfo.ReturnValue1,
                     RoyaltyBps = royaltyInfo.ReturnValue2,
                     PrimarySaleRecipient = primarySaleRecipient.ReturnValue1,
-                    Uri = uri.IpfsHash.cidToIpfsUrl(),
+                    Uri = uri.IpfsHash.CidToIpfsUrl(),
                     Price = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
-                    ValidityStartTimestamp = startTime,
-                    ValidityEndTimestamp = endTime,
+                    ValidityStartTimestamp = payloadToSign.mintStartTime,
+                    ValidityEndTimestamp = payloadToSign.mintEndTime,
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
@@ -631,21 +728,23 @@ namespace Thirdweb
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
 
-                ERC721SignedPayload signedPayload = new ERC721SignedPayload();
-                signedPayload.signature = signature;
-                signedPayload.payload = new ERC721SignedPayloadOutput()
+                var signedPayload = new ERC721SignedPayload()
                 {
-                    to = req.To,
-                    price = req.Price.ToString(),
-                    currencyAddress = req.Currency,
-                    primarySaleRecipient = req.PrimarySaleRecipient,
-                    royaltyRecipient = req.RoyaltyRecipient,
-                    royaltyBps = (int)req.RoyaltyBps,
-                    quantity = 1,
-                    uri = req.Uri,
-                    uid = req.Uid.ByteArrayToHexString(),
-                    mintStartTime = (long)req.ValidityStartTimestamp,
-                    mintEndTime = (long)req.ValidityEndTimestamp
+                    signature = signature,
+                    payload = new ERC721SignedPayloadOutput()
+                    {
+                        to = req.To,
+                        price = req.Price.ToString(),
+                        currencyAddress = req.Currency,
+                        primarySaleRecipient = req.PrimarySaleRecipient,
+                        royaltyRecipient = req.RoyaltyRecipient,
+                        royaltyBps = (int)req.RoyaltyBps,
+                        quantity = 1,
+                        uri = req.Uri,
+                        uid = req.Uid.ByteArrayToHexString(),
+                        mintStartTime = (long)req.ValidityStartTimestamp,
+                        mintEndTime = (long)req.ValidityEndTimestamp
+                    }
                 };
                 return signedPayload;
             }

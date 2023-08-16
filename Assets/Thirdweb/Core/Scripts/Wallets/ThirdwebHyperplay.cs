@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
@@ -8,9 +9,9 @@ namespace Thirdweb.Wallets
     public class ThirdwebHyperplay : IThirdwebWallet
     {
         private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
-        private Hyperplay.Hyperplay _hyperPlay;
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
+        private readonly Hyperplay.Hyperplay _hyperPlay;
 
         public ThirdwebHyperplay(string chainId)
         {
@@ -74,6 +75,11 @@ namespace Thirdweb.Wallets
         public Task<bool> IsConnected()
         {
             return Task.FromResult(_web3 != null);
+        }
+
+        public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
+        {
+            return Task.FromResult(NetworkSwitchAction.ContinueSwitch);
         }
     }
 }

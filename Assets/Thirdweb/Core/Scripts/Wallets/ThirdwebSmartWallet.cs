@@ -2,16 +2,22 @@ using System.Threading.Tasks;
 using Nethereum.Web3;
 using Thirdweb.AccountAbstraction;
 using Nethereum.Web3.Accounts;
+using System.Numerics;
 
 namespace Thirdweb.Wallets
 {
     public class ThirdwebSmartWallet : IThirdwebWallet
     {
-        private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
-        private IThirdwebWallet _personalWallet;
         private SmartWallet _smartWallet;
+        public SmartWallet SmartWallet
+        {
+            get { return _smartWallet; }
+        }
+
+        private Web3 _web3;
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
+        private readonly IThirdwebWallet _personalWallet;
         private ThirdwebSDK.SmartWalletConfig _config;
 
         public ThirdwebSmartWallet(IThirdwebWallet personalWallet, ThirdwebSDK.SmartWalletConfig config)
@@ -81,6 +87,11 @@ namespace Thirdweb.Wallets
         public Task<bool> IsConnected()
         {
             return Task.FromResult(_web3 != null);
+        }
+
+        public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
+        {
+            return Task.FromResult(NetworkSwitchAction.Unsupported);
         }
     }
 }

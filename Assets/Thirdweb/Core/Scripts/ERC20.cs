@@ -23,7 +23,7 @@ namespace Thirdweb
         /// </summary>
         public ERC20ClaimConditions claimConditions;
 
-        private string contractAddress;
+        private readonly string contractAddress;
 
         /// <summary>
         /// Interact with any ERC20 compatible contract.
@@ -58,8 +58,7 @@ namespace Thirdweb
 
                 var symbol = await TransactionManager.ThirdwebRead<TokenERC20Contract.SymbolFunction, TokenERC20Contract.SymbolOutputDTO>(contractAddress, new TokenERC20Contract.SymbolFunction());
 
-                Currency c = new Currency(name.ReturnValue1, symbol.ReturnValue1, decimals.ReturnValue1.ToString());
-                return c;
+                return new Currency(name.ReturnValue1, symbol.ReturnValue1, decimals.ReturnValue1.ToString());
             }
         }
 
@@ -169,7 +168,7 @@ namespace Thirdweb
                 CurrencyValue currentAllowance = await Allowance(spender);
                 BigInteger diff = BigInteger.Parse(amount.ToWei()) - BigInteger.Parse(currentAllowance.value);
 
-                TransactionResult result = new TransactionResult();
+                var result = new TransactionResult();
                 if (diff == 0)
                 {
                     Debug.LogWarning($"Allowance is already of amount {amount} - Skipping request...");
@@ -311,10 +310,8 @@ namespace Thirdweb
         public string primarySaleRecipient;
         public string quantity;
         public string uid;
-
-        // TODO implement these, needs JS bridging support
-        // public long mintStartTime;
-        // public long mintEndTime;
+        public long mintStartTime;
+        public long mintEndTime;
 
         public ERC20MintPayload(string receiverAddress, string quantity)
         {
@@ -324,9 +321,8 @@ namespace Thirdweb
             this.currencyAddress = Utils.AddressZero;
             this.primarySaleRecipient = Utils.AddressZero;
             this.uid = Utils.ToBytes32HexString(Guid.NewGuid().ToByteArray());
-            // TODO temporary solution
-            // this.mintStartTime = Utils.UnixTimeNowMs() * 1000L;
-            // this.mintEndTime = this.mintStartTime + 1000L * 60L * 60L * 24L * 365L;
+            this.mintStartTime = Utils.GetUnixTimeStampNow() - 60;
+            this.mintEndTime = Utils.GetUnixTimeStampIn10Years();
         }
     }
 
@@ -356,7 +352,7 @@ namespace Thirdweb
 #nullable enable
     public class ERC20ClaimConditions : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         public ERC20ClaimConditions(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "claimConditions"))
@@ -385,11 +381,21 @@ namespace Thirdweb
                     new DropERC20Contract.GetClaimConditionByIdFunction() { ConditionId = id.ReturnValue1 }
                 );
 
+                var currency = new Currency();
+                try
+                {
+                    currency = await ThirdwebManager.Instance.SDK.GetContract(data.Condition.Currency).ERC20.Get();
+                }
+                catch
+                {
+                    Debug.Log("Could not fetch currency metadata, proceeding without it.");
+                }
+
                 return new ClaimConditions()
                 {
                     availableSupply = (data.Condition.MaxClaimableSupply - data.Condition.SupplyClaimed).ToString(),
                     currencyAddress = data.Condition.Currency,
-                    currencyMetadata = new CurrencyValue() { value = data.Condition.PricePerToken.ToString(), },
+                    currencyMetadata = new CurrencyValue(currency.name, currency.symbol, currency.decimals, data.Condition.PricePerToken.ToString(), data.Condition.PricePerToken.ToString().ToEth()),
                     currentMintSupply = data.Condition.SupplyClaimed.ToString(),
                     maxClaimablePerWallet = data.Condition.QuantityLimitPerWallet.ToString(),
                     maxClaimableSupply = data.Condition.MaxClaimableSupply.ToString(),
@@ -448,7 +454,7 @@ namespace Thirdweb
     /// </summary>
     public class ERC20Signature : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
@@ -466,25 +472,59 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+                var signedPayload = await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+
+                if (privateKeyOverride == "")
+                    return signedPayload;
+
+                var name = await ThirdwebManager.Instance.SDK.GetContract(contractAddress).Read<string>("name");
+                var req = new TokenERC20Contract.MintRequest()
+                {
+                    To = payloadToSign.to,
+                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
+                    Quantity = BigInteger.Parse(payloadToSign.quantity.ToWei()),
+                    Price = BigInteger.Parse(payloadToSign.price.ToWei()),
+                    Currency = payloadToSign.currencyAddress,
+                    ValidityStartTimestamp = payloadToSign.mintStartTime,
+                    ValidityEndTimestamp = payloadToSign.mintEndTime,
+                    Uid = payloadToSign.uid.HexStringToByteArray()
+                };
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(name, "1", await ThirdwebManager.Instance.SDK.wallet.GetChainId(), contractAddress, req, privateKeyOverride);
+
+                signedPayload = new ERC20SignedPayload()
+                {
+                    signature = signature,
+                    payload = new ERC20SignedPayloadOutput()
+                    {
+                        to = req.To,
+                        price = req.Price.ToString(),
+                        currencyAddress = req.Currency,
+                        primarySaleRecipient = req.PrimarySaleRecipient,
+                        quantity = req.Quantity.ToString(),
+                        uid = req.Uid.ByteArrayToHexString(),
+                        mintStartTime = (long)req.ValidityStartTimestamp,
+                        mintEndTime = (long)req.ValidityEndTimestamp
+                    }
+                };
+
+                return signedPayload;
             }
             else
             {
-                var startTime = await Utils.GetCurrentBlockTimeStamp();
-                var endTime = Utils.GetUnixTimeStampIn10Years();
                 var primarySaleRecipient = await TransactionManager.ThirdwebRead<TokenERC20Contract.PrimarySaleRecipientFunction, TokenERC20Contract.PrimarySaleRecipientOutputDTO>(
                     contractAddress,
                     new TokenERC20Contract.PrimarySaleRecipientFunction() { }
                 );
-                TokenERC20Contract.MintRequest req = new TokenERC20Contract.MintRequest()
+
+                var req = new TokenERC20Contract.MintRequest()
                 {
                     To = payloadToSign.to,
                     PrimarySaleRecipient = primarySaleRecipient.ReturnValue1,
                     Quantity = BigInteger.Parse(payloadToSign.quantity.ToWei()),
                     Price = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
-                    ValidityStartTimestamp = startTime,
-                    ValidityEndTimestamp = endTime,
+                    ValidityStartTimestamp = payloadToSign.mintStartTime,
+                    ValidityEndTimestamp = payloadToSign.mintEndTime,
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
@@ -499,19 +539,22 @@ namespace Thirdweb
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
 
-                ERC20SignedPayload signedPayload = new ERC20SignedPayload();
-                signedPayload.signature = signature;
-                signedPayload.payload = new ERC20SignedPayloadOutput()
+                var signedPayload = new ERC20SignedPayload()
                 {
-                    to = req.To,
-                    price = req.Price.ToString(),
-                    currencyAddress = req.Currency,
-                    primarySaleRecipient = req.PrimarySaleRecipient,
-                    quantity = req.Quantity.ToString(),
-                    uid = req.Uid.ByteArrayToHexString(),
-                    mintStartTime = (long)req.ValidityStartTimestamp,
-                    mintEndTime = (long)req.ValidityEndTimestamp
+                    signature = signature,
+                    payload = new ERC20SignedPayloadOutput()
+                    {
+                        to = req.To,
+                        price = req.Price.ToString(),
+                        currencyAddress = req.Currency,
+                        primarySaleRecipient = req.PrimarySaleRecipient,
+                        quantity = req.Quantity.ToString(),
+                        uid = req.Uid.ByteArrayToHexString(),
+                        mintStartTime = (long)req.ValidityStartTimestamp,
+                        mintEndTime = (long)req.ValidityEndTimestamp
+                    }
                 };
+
                 return signedPayload;
             }
         }
