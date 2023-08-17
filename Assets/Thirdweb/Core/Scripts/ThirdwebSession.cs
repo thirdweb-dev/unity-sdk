@@ -112,7 +112,14 @@ namespace Thirdweb
 
         internal async Task Disconnect()
         {
-            await ActiveWallet.Disconnect();
+            if (ActiveWallet != null)
+            {
+                await ActiveWallet.Disconnect();
+            }
+            else
+            {
+                Debug.LogWarning("No active wallet detected, unable to disconnect.");
+            }
             ThirdwebManager.Instance.SDK.session = new ThirdwebSession(Options, ChainId, RPC);
         }
 
