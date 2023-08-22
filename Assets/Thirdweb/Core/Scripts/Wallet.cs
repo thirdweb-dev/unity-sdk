@@ -203,7 +203,7 @@ namespace Thirdweb
         /// </summary>
         /// <param name="currencyAddress">Optional address of the currency to check balance of.</param>
         /// <returns>The balance of the wallet as a CurrencyValue object.</returns>
-        public async Task<CurrencyValue> GetBalance(string currencyAddress = Utils.NativeTokenAddress)
+        public async Task<CurrencyValue> GetBalance(string currencyAddress = null)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -214,7 +214,7 @@ namespace Thirdweb
                 if (!await IsConnected())
                     throw new Exception("No account connected!");
 
-                if (currencyAddress != Utils.NativeTokenAddress)
+                if (currencyAddress != null)
                 {
                     Contract contract = ThirdwebManager.Instance.SDK.GetContract(currencyAddress);
                     return await contract.ERC20.Balance();
@@ -342,7 +342,7 @@ namespace Thirdweb
         /// <param name="amount">The amount of currency to transfer.</param>
         /// <param name="currencyAddress">Optional address of the currency to transfer (defaults to native token address).</param>
         /// <returns>The result of the transfer as a TransactionResult object.</returns>
-        public async Task<TransactionResult> Transfer(string to, string amount, string currencyAddress = Utils.NativeTokenAddress)
+        public async Task<TransactionResult> Transfer(string to, string amount, string currencyAddress = null)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -350,7 +350,7 @@ namespace Thirdweb
             }
             else
             {
-                if (currencyAddress != Utils.NativeTokenAddress)
+                if (currencyAddress != null)
                 {
                     Contract contract = ThirdwebManager.Instance.SDK.GetContract(currencyAddress);
                     return await contract.ERC20.Transfer(to, amount);

@@ -93,7 +93,7 @@ namespace Thirdweb
                     contractAddress,
                     new TokenERC20Contract.BalanceOfFunction() { Account = address }
                 );
-                return new CurrencyValue(c.name, c.symbol, c.decimals, balance.ReturnValue1.ToString(), balance.ReturnValue1.ToString().ToEth());
+                return new CurrencyValue(c.name, c.symbol, c.decimals, balance.ReturnValue1.ToString(), balance.ReturnValue1.ToString().FormatERC20(4, int.Parse(c.decimals), true));
             }
         }
 
@@ -128,7 +128,7 @@ namespace Thirdweb
                     contractAddress,
                     new TokenERC20Contract.AllowanceFunction() { Owner = owner, Spender = spender }
                 );
-                return new CurrencyValue(c.name, c.symbol, c.decimals, allowance.ReturnValue1.ToString(), allowance.ReturnValue1.ToString().ToEth());
+                return new CurrencyValue(c.name, c.symbol, c.decimals, allowance.ReturnValue1.ToString(), allowance.ReturnValue1.ToString().FormatERC20(4, int.Parse(c.decimals), true));
             }
         }
 
@@ -148,7 +148,7 @@ namespace Thirdweb
                     contractAddress,
                     new TokenERC20Contract.TotalSupplyFunction() { }
                 );
-                return new CurrencyValue(c.name, c.symbol, c.decimals, totalSupply.ReturnValue1.ToString(), totalSupply.ReturnValue1.ToString().ToEth());
+                return new CurrencyValue(c.name, c.symbol, c.decimals, totalSupply.ReturnValue1.ToString(), totalSupply.ReturnValue1.ToString().FormatERC20(4, int.Parse(c.decimals), true));
             }
         }
 
@@ -198,7 +198,9 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.TransferFunction() { To = to, Amount = BigInteger.Parse(amount.ToWei()) });
+                var currency = await Get();
+                var rawAmountToTransfer = BigInteger.Parse(amount.ToWei()).AdjustDecimals(18, int.Parse(currency.decimals));
+                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.TransferFunction() { To = to, Amount = rawAmountToTransfer });
             }
         }
 
@@ -248,24 +250,26 @@ namespace Thirdweb
                     contractAddress,
                     new TokenERC20Contract.DecimalsFunction()
                 );
+                var rawAmountToClaim = BigInteger.Parse(amount.ToWei()).AdjustDecimals(18, int.Parse(decimals.ReturnValue1.ToString()));
+                var rawPrice = BigInteger.Parse(claimCondition.currencyMetadata.value);
                 return await TransactionManager.ThirdwebWrite(
                     contractAddress,
                     new DropERC20Contract.ClaimFunction()
                     {
                         Receiver = address,
-                        Quantity = BigInteger.Parse(amount.ToWei()),
+                        Quantity = rawAmountToClaim,
                         Currency = claimCondition.currencyAddress,
-                        PricePerToken = BigInteger.Parse(claimCondition.currencyMetadata.value),
+                        PricePerToken = rawPrice,
                         AllowlistProof = new DropERC20Contract.AllowlistProof
                         {
                             Proof = new List<byte[]>(),
                             Currency = claimCondition.currencyAddress,
-                            PricePerToken = BigInteger.Parse(claimCondition.currencyMetadata.value),
+                            PricePerToken = rawPrice,
                             QuantityLimitPerWallet = BigInteger.Parse(claimCondition.maxClaimablePerWallet),
                         },
                         Data = new byte[] { }
                     },
-                    (BigInteger.Parse(amount.ToWei()) * BigInteger.Parse(claimCondition.currencyMetadata.value)) / BigInteger.Parse(decimals.ReturnValue1.ToString())
+                    claimCondition.currencyAddress == Utils.NativeTokenAddress ? BigInteger.Parse((decimal.Parse(amount) * (decimal)rawPrice).ToString("F0")) : 0
                 );
             }
         }
@@ -395,7 +399,13 @@ namespace Thirdweb
                 {
                     availableSupply = (data.Condition.MaxClaimableSupply - data.Condition.SupplyClaimed).ToString(),
                     currencyAddress = data.Condition.Currency,
-                    currencyMetadata = new CurrencyValue(currency.name, currency.symbol, currency.decimals, data.Condition.PricePerToken.ToString(), data.Condition.PricePerToken.ToString().ToEth()),
+                    currencyMetadata = new CurrencyValue(
+                        currency.name,
+                        currency.symbol,
+                        currency.decimals,
+                        data.Condition.PricePerToken.ToString(),
+                        data.Condition.PricePerToken.ToString().FormatERC20(4, int.Parse(currency.decimals), true)
+                    ),
                     currentMintSupply = data.Condition.SupplyClaimed.ToString(),
                     maxClaimablePerWallet = data.Condition.QuantityLimitPerWallet.ToString(),
                     maxClaimableSupply = data.Condition.MaxClaimableSupply.ToString(),

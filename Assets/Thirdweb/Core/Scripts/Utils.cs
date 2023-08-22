@@ -17,8 +17,7 @@ namespace Thirdweb
     public static class Utils
     {
         public const string AddressZero = "0x0000000000000000000000000000000000000000";
-        public const string NativeTokenAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-        public const string NativeTokenAddressV2 = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+        public const string NativeTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
         public const double DECIMALS_18 = 1000000000000000000;
 
         public static string[] ToJsonStringArray(params object[] args)
@@ -79,6 +78,7 @@ namespace Thirdweb
 
         public static string FormatERC20(this string wei, int decimalsToDisplay = 4, int decimals = 18, bool addCommas = true)
         {
+            decimals = decimals == 0 ? 18 : decimals;
             if (!BigInteger.TryParse(wei, out BigInteger weiBigInt))
                 throw new ArgumentException("Invalid wei value.");
             double eth = (double)weiBigInt / Math.Pow(10.0, decimals);
@@ -88,6 +88,22 @@ namespace Thirdweb
             for (int i = 0; i < decimalsToDisplay; i++)
                 format += "#";
             return eth.ToString(format);
+        }
+
+        public static BigInteger AdjustDecimals(this BigInteger value, int fromDecimals, int toDecimals)
+        {
+            int differenceInDecimals = fromDecimals - toDecimals;
+
+            if (differenceInDecimals > 0)
+            {
+                return value / BigInteger.Pow(10, differenceInDecimals);
+            }
+            else if (differenceInDecimals < 0)
+            {
+                return value * BigInteger.Pow(10, -differenceInDecimals);
+            }
+
+            return value;
         }
 
         public static string ShortenAddress(this string address)

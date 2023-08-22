@@ -146,7 +146,7 @@ namespace Thirdweb
                         currency.symbol,
                         currency.decimals,
                         result.Listing.PricePerToken.ToString(),
-                        result.Listing.PricePerToken.ToString().ToEth()
+                        result.Listing.PricePerToken.ToString().FormatERC20(4, int.Parse(currency.decimals), true)
                     ),
                     pricePerToken = result.Listing.PricePerToken.ToString(),
                     asset = metadata,
@@ -277,7 +277,7 @@ namespace Thirdweb
                             AssetContract = input.assetContractAddress,
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
-                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
+                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddress,
                             PricePerToken = BigInteger.Parse(input.pricePerToken),
                             StartTimestamp = (BigInteger)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp() + 60),
                             EndTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
@@ -480,7 +480,7 @@ namespace Thirdweb
                         currency.symbol,
                         currency.decimals,
                         result.Auction.MinimumBidAmount.ToString(),
-                        result.Auction.MinimumBidAmount.ToString().ToEth()
+                        result.Auction.MinimumBidAmount.ToString().FormatERC20(4, int.Parse(currency.decimals), true)
                     ),
                     buyoutBidAmount = result.Auction.BuyoutBidAmount.ToString(),
                     buyoutCurrencyValue = new CurrencyValue(
@@ -488,7 +488,7 @@ namespace Thirdweb
                         currency.symbol,
                         currency.decimals,
                         result.Auction.BuyoutBidAmount.ToString(),
-                        result.Auction.BuyoutBidAmount.ToString().ToEth()
+                        result.Auction.BuyoutBidAmount.ToString().FormatERC20(4, int.Parse(currency.decimals), true)
                     ),
                     timeBufferInSeconds = (int)result.Auction.TimeBufferInSeconds,
                     bidBufferBps = (int)result.Auction.BidBufferBps,
@@ -525,7 +525,7 @@ namespace Thirdweb
                 var winningBid = await GetWinningBid(auctionId);
                 var cv = auction.minimumBidCurrencyValue.Value;
                 cv.value = (BigInteger.Parse(cv.value) + BigInteger.Parse(winningBid.bidAmount)).ToString();
-                cv.displayValue = cv.value.ToEth();
+                cv.displayValue = cv.value.FormatERC20(4, int.Parse(cv.decimals), true);
                 return cv;
             }
         }
@@ -583,7 +583,13 @@ namespace Thirdweb
                     bidderAddress = winningBid.Bidder,
                     currencyContractAddress = winningBid.Currency,
                     bidAmount = winningBid.BidAmount.ToString(),
-                    bidAmountCurrencyValue = new CurrencyValue(c.name, c.symbol, c.decimals, winningBid.BidAmount.ToString(), winningBid.BidAmount.ToString().ToEth())
+                    bidAmountCurrencyValue = new CurrencyValue(
+                        c.name,
+                        c.symbol,
+                        c.decimals,
+                        winningBid.BidAmount.ToString(),
+                        winningBid.BidAmount.ToString().FormatERC20(4, int.Parse(c.decimals), true)
+                    )
                 };
             }
         }
@@ -676,7 +682,7 @@ namespace Thirdweb
                             AssetContract = input.assetContractAddress,
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
-                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
+                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddress,
                             MinimumBidAmount = BigInteger.Parse(input.minimumBidAmount.ToWei()),
                             BuyoutBidAmount = BigInteger.Parse(input.buyoutBidAmount.ToWei()),
                             TimeBufferInSeconds = ulong.Parse(input.timeBufferInSeconds ?? "900"),
@@ -834,7 +840,13 @@ namespace Thirdweb
                     tokenId = result.Offer.TokenId.ToString(),
                     quantity = result.Offer.Quantity.ToString(),
                     currencyContractAddress = result.Offer.Currency,
-                    currencyValue = new CurrencyValue(currency.name, currency.symbol, currency.decimals, result.Offer.TotalPrice.ToString(), result.Offer.TotalPrice.ToString().ToEth()),
+                    currencyValue = new CurrencyValue(
+                        currency.name,
+                        currency.symbol,
+                        currency.decimals,
+                        result.Offer.TotalPrice.ToString(),
+                        result.Offer.TotalPrice.ToString().FormatERC20(4, int.Parse(currency.decimals), true)
+                    ),
                     totalPrice = result.Offer.TotalPrice.ToString(),
                     asset = metadata,
                     endTimeInSeconds = (long)result.Offer.ExpirationTimestamp,
