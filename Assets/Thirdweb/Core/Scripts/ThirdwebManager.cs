@@ -41,6 +41,7 @@ public class ThirdwebManager : MonoBehaviour
             new ChainData("arbitrum-goerli", "421613", null),
             new ChainData("binance", "56", null),
             new ChainData("binance-testnet", "97", null),
+            new ChainData("sepolia", "11155111", null),
         };
 
     [Tooltip("Thirdweb Client ID (https://thirdweb.com/create-api-key/). Used for default thirdweb services such as Storage and Account Abstraction.")]
