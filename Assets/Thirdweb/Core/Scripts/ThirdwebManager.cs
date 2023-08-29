@@ -206,7 +206,7 @@ public class ThirdwebManager : MonoBehaviour
         {
             appName = string.IsNullOrEmpty(appName) ? "thirdweb powered dApp" : appName,
             appDescription = string.IsNullOrEmpty(appDescription) ? "thirdweb powered dApp" : appDescription,
-            appIcons = string.IsNullOrEmpty(appIcons[0]) ? new string[] { "https://thirdweb.com/favicon.ico" } : appIcons,
+            appIcons = (appIcons == null || appIcons.Length == 0 || string.IsNullOrEmpty(appIcons[0])) ? new string[] { "https://thirdweb.com/favicon.ico" } : appIcons,
             appUrl = string.IsNullOrEmpty(appUrl) ? "https://thirdweb.com" : appUrl,
             magicLinkApiKey = string.IsNullOrEmpty(magicLinkApiKey) ? null : magicLinkApiKey,
             walletConnectProjectId = string.IsNullOrEmpty(walletConnectProjectId) ? "145769e410f16970a79ff77b2d89a1e0" : walletConnectProjectId,
