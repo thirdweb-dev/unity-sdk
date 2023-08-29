@@ -434,5 +434,23 @@ namespace Thirdweb
                 _ => throw new UnityException("Native Token Wrapper Unavailable For This Chain!"),
             };
         }
+
+        public static bool Supports1559(string chainId)
+        {
+            switch (chainId)
+            {
+                // BNB Mainnet
+                case "56":
+                // BNB Testnet
+                case "97":
+                // opBNB Mainnet
+                case "204":
+                // opBNB Testnet
+                case "5611":
+                    return false;
+                default:
+                    return true;
+            }
+        }
     }
 }

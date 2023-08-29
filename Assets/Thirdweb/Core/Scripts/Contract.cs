@@ -202,9 +202,12 @@ namespace Thirdweb
                         ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasLimit))
                         : await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, value, args);
 
+                var gasPrice = transactionOverrides?.gasPrice != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasPrice)) : null;
+
                 var receipt = await function.SendTransactionAndWaitForReceiptAsync(
                     from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
                     gas: gas,
+                    gasPrice: gasPrice,
                     value: value,
                     receiptRequestCancellationToken: null,
                     args
