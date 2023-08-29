@@ -319,6 +319,7 @@ namespace Thirdweb
             else
             {
                 var claimCondition = await claimConditions.GetActive(tokenId);
+                BigInteger rawPrice = BigInteger.Parse(claimCondition.currencyMetadata.value);
                 return await TransactionManager.ThirdwebWrite(
                     contractAddress,
                     new DropERC1155Contract.ClaimFunction()
@@ -327,16 +328,17 @@ namespace Thirdweb
                         TokenId = BigInteger.Parse(tokenId),
                         Quantity = quantity,
                         Currency = claimCondition.currencyAddress,
-                        PricePerToken = BigInteger.Parse(claimCondition.currencyMetadata.value),
+                        PricePerToken = rawPrice,
                         AllowlistProof = new DropERC1155Contract.AllowlistProof
                         {
                             Proof = new List<byte[]>(),
                             Currency = claimCondition.currencyAddress,
-                            PricePerToken = BigInteger.Parse(claimCondition.currencyMetadata.value),
+                            PricePerToken = rawPrice,
                             QuantityLimitPerWallet = BigInteger.Parse(claimCondition.maxClaimablePerWallet),
                         }, // TODO add support for allowlists
                         Data = new byte[] { }
-                    }
+                    },
+                    claimCondition.currencyAddress == Utils.NativeTokenAddress ? quantity * rawPrice : 0
                 );
             }
         }
@@ -474,7 +476,13 @@ namespace Thirdweb
                 {
                     availableSupply = (data.Condition.MaxClaimableSupply - data.Condition.SupplyClaimed).ToString(),
                     currencyAddress = data.Condition.Currency,
-                    currencyMetadata = new CurrencyValue(currency.name, currency.symbol, currency.decimals, data.Condition.PricePerToken.ToString(), data.Condition.PricePerToken.ToString().ToEth()),
+                    currencyMetadata = new CurrencyValue(
+                        currency.name,
+                        currency.symbol,
+                        currency.decimals,
+                        data.Condition.PricePerToken.ToString(),
+                        data.Condition.PricePerToken.ToString().FormatERC20(4, int.Parse(currency.decimals), true)
+                    ),
                     currentMintSupply = data.Condition.SupplyClaimed.ToString(),
                     maxClaimablePerWallet = data.Condition.QuantityLimitPerWallet.ToString(),
                     maxClaimableSupply = data.Condition.MaxClaimableSupply.ToString(),

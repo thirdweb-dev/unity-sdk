@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56d9559a79e304f44b5ac4d726f1ee68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chain: goerli
+  activeChain: goerli
   supportedChains:
   - identifier: ethereum
     chainId: 1
@@ -88,10 +88,14 @@ MonoBehaviour:
   - identifier: binance-testnet
     chainId: 97
     rpcOverride: 
+  - identifier: sepolia
+    chainId: 11155111
+    rpcOverride: 
+  clientId: 
+  initializeOnAwake: 1
   appName: 
   appDescription: 
-  appIcons:
-  - 
+  appIcons: []
   appUrl: 
   storageIpfsGatewayUrl: 
   relayerUrl: 
@@ -102,7 +106,6 @@ MonoBehaviour:
   walletConnectProjectId: 
   paperClientId: 
   factoryAddress: 
-  thirdwebApiKey: 
   gasless: 0
   bundlerUrl: 
   paymasterUrl: 

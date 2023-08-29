@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Xai Goerli Orbit",
+    "title": "Xai Goerli Orbit Testnet",
+    "chain": "ETH",
+    "rpc": ["https://testnet.xai-chain.net/rpc"],
+    "faucets": [],
+    "nativeCurrency": {
+      "name": "Xai Goerli Ether",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "infoURL": "https://xai.games/",
+    "shortName": "xai-goerli",
+    "chainId": 47279324479,
+    "networkId": 47279324479,
+    "explorers": [
+      {
+        "name": "Xai Goerli Testnet Explorer",
+        "url": "https://testnet-explorer.xai-chain.net",
+        "standard": "EIP3091"
+      }
+    ],
+    "parent": {
+      "type": "L2",
+      "chain": "eip155-421613",
+      "bridges": [
+        {
+          "url": "https://bridge.arbitrum.io"
+        }
+      ]
+    }
+  }
+]

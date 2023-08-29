@@ -5,7 +5,7 @@ namespace Thirdweb.Examples
 {
     public class Prefab_Reading : MonoBehaviour
     {
-        private const string TOKEN_ERC20_CONTRACT = "0x76Ec89310842DBD9d0AcA3B2E27858E85cdE595A";
+        private const string TOKEN_ERC20_CONTRACT = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F";
         private const string DROP_ERC20_CONTRACT = "0x450b943729Ddba196Ab58b589Cea545551DF71CC";
         private const string TOKEN_ERC721_CONTRACT = "0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC";
         private const string DROP_ERC721_CONTRACT = "0x8ED1C3618d70785d23E5fdE767058FA6cA6D9E43";

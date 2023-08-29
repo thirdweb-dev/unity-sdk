@@ -125,6 +125,18 @@ namespace Thirdweb.Examples
                 walletUI.Value.connectButton.onClick.AddListener(() => ValidateConnection(walletUI.Key));
             }
 
+            foreach (var chain in ThirdwebManager.Instance.supportedChains)
+            {
+                if (NetworkIcons.Find(x => x.chain == chain.identifier) == null)
+                    NetworkIcons.Add(new NetworkIcon() { chain = chain.identifier, sprite = null });
+            }
+
+            for (int i = 0; i < NetworkIcons.Count; i++)
+            {
+                if (NetworkIcons[i].sprite == null)
+                    NetworkIcons[i].sprite = NetworkIcons[0].sprite;
+            }
+
             bool usingEmailWallet = SupportedWallets.Contains(WalletProvider.MagicLink) || SupportedWallets.Contains(WalletProvider.Paper);
             bool usingNormalWallet =
                 SupportedWallets.Contains(WalletProvider.Metamask)
@@ -267,7 +279,7 @@ namespace Thirdweb.Examples
         {
             Debug.Log($"Connected to: {_address}");
 
-            var chainSprite = NetworkIcons.Find(x => x.chain == _currentChainData.identifier)?.sprite;
+            var chainSprite = NetworkIcons.Find(x => x.chain == _currentChainData.identifier).sprite;
             var walletSprite = SupportedWalletsUI[_walletProvider].sprite;
             var balance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
 

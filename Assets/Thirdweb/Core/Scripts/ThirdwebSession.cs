@@ -111,7 +111,14 @@ namespace Thirdweb
 
         internal async Task Disconnect()
         {
-            await ActiveWallet.Disconnect();
+            if (ActiveWallet != null)
+            {
+                await ActiveWallet.Disconnect();
+            }
+            else
+            {
+                Debug.LogWarning("No active wallet detected, unable to disconnect.");
+            }
             ThirdwebManager.Instance.SDK.session = new ThirdwebSession(Options, ChainId, RPC);
         }
 
@@ -172,6 +179,7 @@ namespace Thirdweb
             CurrentChainData = newChainData;
             RPC = CurrentChainData.rpcUrls[0];
             Web3 = await ActiveWallet.GetWeb3();
+            Web3.TransactionManager.UseLegacyAsDefault = !Utils.Supports1559(newChainId.ToString());
             Web3.Client.OverridingRequestInterceptor = new ThirdwebInterceptor(ActiveWallet);
         }
 
@@ -192,19 +200,20 @@ namespace Thirdweb
         public static ThirdwebChainData FetchChainData(BigInteger chainId, string rpcOverride = null)
         {
             var allChainsJson = (TextAsset)Resources.Load("all_chains", typeof(TextAsset));
+            var allChainsData = JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(allChainsJson.text, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Include });
 
-            List<ChainIDNetworkData> allNetworkData = JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(
-                allChainsJson.text,
-                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Include }
-            );
+            var additionalChainsJson = (TextAsset)Resources.Load("all_chains_additional", typeof(TextAsset));
+            var additionalChainsData = JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(additionalChainsJson.text, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Include });
 
-            ChainIDNetworkData currentNetwork = allNetworkData.Find(x => x.chainId == chainId.ToString());
+            allChainsData.AddRange(additionalChainsData);
+
+            ChainIDNetworkData currentNetwork = allChainsData.Find(x => x.chainId == chainId.ToString());
 
             var explorerUrls = new List<string>();
             if (currentNetwork.explorers != null)
             {
                 foreach (var explorer in currentNetwork.explorers)
-                    explorerUrls.Add(explorer.url);
+                    explorerUrls.Add(explorer.url.Replace("http://", "https://"));
             }
             if (explorerUrls.Count == 0)
                 explorerUrls.Add("https://etherscan.io");
