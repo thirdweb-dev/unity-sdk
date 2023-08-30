@@ -11,6 +11,7 @@ using System.Linq;
 using WalletConnectSharp.Sign.Models.Engine.Methods;
 using Nethereum.Hex.HexTypes;
 using System.Numerics;
+using UnityEngine;
 
 namespace Thirdweb.WalletConnect
 {
@@ -32,6 +33,7 @@ namespace Thirdweb.WalletConnect
         internal async Task<RpcResponseMessage> Request(RpcRequestMessage message)
         {
             UnityEngine.Debug.Log($"WalletConnect Request: {JsonConvert.SerializeObject(message)}");
+            OpenWallet();
             switch (message.Method)
             {
                 case "eth_sendTransaction":
@@ -75,6 +77,13 @@ namespace Thirdweb.WalletConnect
                 default:
                     throw new System.Exception($"Method {message.Method} not implemented");
             }
+        }
+
+        private async void OpenWallet()
+        {
+            await new WaitForSecondsRealtime(0.5f);
+            if (Application.isMobilePlatform && !Application.isEditor)
+                UnityEngine.Application.OpenURL("wc://");
         }
 
         internal async Task Disconnect()
