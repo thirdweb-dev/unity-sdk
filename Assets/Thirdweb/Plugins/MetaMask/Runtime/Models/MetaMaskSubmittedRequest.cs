@@ -13,9 +13,5 @@ namespace MetaMask.Models
         [JsonPropertyName("method")]
         public string Method { get; set; }
 
-        [JsonProperty("promise")]
-        [JsonPropertyName("promise")]
-        public TaskCompletionSource<JsonElement> Promise { get; set; }
-
     }
 }

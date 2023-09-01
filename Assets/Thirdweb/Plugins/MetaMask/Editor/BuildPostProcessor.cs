@@ -27,6 +27,10 @@ namespace MetaMask
                 // Add `-ObjC` to "Other Linker Flags".
                 project.AddBuildProperty(projectTarget, "OTHER_LDFLAGS", "-ObjC");
                 project.SetBuildProperty(projectTarget, "ENABLE_BITCODE", "YES");
+                
+                // Fix for iOS 15
+                project.AddBuildProperty(projectTarget, "OTHER_CODE_SIGN_FLAGS", 
+                    "--generate-entitlement-der -o runtime --runtime-version $DEPLOYMENT_TARGET");
 
                 // Write.
                 File.WriteAllText(projectPath, project.WriteToString());

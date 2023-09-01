@@ -58,14 +58,6 @@ namespace MetaMask.Transports.Unity.UI
         {
             this.rawImage = GetComponent<RawImage>();
         }
-      
-        /// <summary>Called when the connection is being established.</summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="MetaMaskUnityConnectEventArgs"/> instance containing the event data.</param>
-        private void OnConnecting(object sender, MetaMaskUnityConnectEventArgs e)
-        {
-            ShowQR(e.Url);
-        }
 
         /// <summary>Encodes the given text into a QR code.</summary>
         /// <param name="textForEncoding">The text to encode.</param>
@@ -126,9 +118,9 @@ namespace MetaMask.Transports.Unity.UI
 
         /// <summary>Called when the MetaMask client wants to connect to the application.</summary>
         /// <param name="url">The URL to connect to.</param>
-        public void OnMetaMaskConnectRequest(string url)
+        public void OnMetaMaskConnectRequest(string universalLink, string deepLink)
         {
-            ShowQR(url);
+            ShowQR(universalLink);
         }
 
         /// <summary>Called when a MetaMask request is received.</summary>
@@ -146,6 +138,14 @@ namespace MetaMask.Transports.Unity.UI
 
         /// <summary>Called when the MetaMask login was successful.</summary>
         public void OnMetaMaskSuccess()
+        {
+        }
+
+        public void OnMetaMaskOTP(int otp)
+        {
+        }
+
+        public void OnMetaMaskDisconnected()
         {
         }
 

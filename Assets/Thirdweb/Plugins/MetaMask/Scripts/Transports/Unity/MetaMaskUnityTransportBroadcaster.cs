@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using MetaMask.Models;
-
+using MetaMask.SocketIOClient;
 using UnityEngine;
 
 namespace MetaMask.Transports.Unity
@@ -39,7 +39,8 @@ namespace MetaMask.Transports.Unity
                     }
                     else
                     {
-                        instance = CreateNewInstance();
+                        // Don't automatically create a new instance
+                        return null;
                     }
                     instance.Initialize();
                 }
@@ -101,14 +102,26 @@ namespace MetaMask.Transports.Unity
 
         #region MetaMask Events
 
-        public void OnMetaMaskConnectRequest(string url)
+        public void OnMetaMaskConnectRequest(string universalLink, string deepLink)
         {
             for (int i = 0; i < this.allListeners.Count; i++)
             {
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    listener.OnMetaMaskConnectRequest(url);
+                    UnityThread.executeInUpdate(() => { listener.OnMetaMaskConnectRequest(universalLink, deepLink); });
+                }
+            }
+        }
+        
+        public void OnMetaMaskOTPCode(int code)
+        {
+            for (int i = 0; i < this.allListeners.Count; i++)
+            {
+                var listener = this.allListeners[i];
+                if (listener != null)
+                {
+                    UnityThread.executeInUpdate(() => { listener.OnMetaMaskOTP(code); });
                 }
             }
         }
@@ -120,7 +133,7 @@ namespace MetaMask.Transports.Unity
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    listener.OnMetaMaskFailure(error);
+                    UnityThread.executeInUpdate(() => { listener.OnMetaMaskFailure(error); });
                 }
             }
         }
@@ -132,7 +145,7 @@ namespace MetaMask.Transports.Unity
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    listener.OnMetaMaskRequest(id, request);
+                    UnityThread.executeInUpdate(() => { listener.OnMetaMaskRequest(id, request); });
                 }
             }
         }
@@ -144,7 +157,7 @@ namespace MetaMask.Transports.Unity
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    listener.OnMetaMaskSuccess();
+                    UnityThread.executeInUpdate(() => { listener.OnMetaMaskSuccess(); });
                 }
             }
         }

@@ -1,0 +1,57 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.7.2 (swiftlang-5.7.2.135.5 clang-1400.0.29.51)
+// swift-module-flags: -target arm64-apple-ios13.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name MetaMask_iOS
+// swift-module-flags-ignorable: -enable-bare-slash-regex
+import Foundation
+@_exported import MetaMask_iOS
+import Starscream
+import Swift
+import _Concurrency
+import _StringProcessing
+@objc public class UnityWebSocket : ObjectiveC.NSObject, Starscream.WebSocketDelegate, MetaMask_iOS.WebSocketProvider {
+  @objc public static func createWebSocket(_ url: Swift.String) -> Any
+  public static var lastId: Swift.Int32
+  public static var socketInstances: [MetaMask_iOS.UnityWebSocket]
+  @objc public var instanceId: Swift.Int32
+  @objc public var textMessageReceived: MetaMask_iOS.WebSocketTextMessageReceivedCallback?
+  @objc public var binaryMessageReceived: MetaMask_iOS.WebSocketBinaryMessageReceivedCallback?
+  @objc public var opened: MetaMask_iOS.WebSocketOpenedCallback?
+  @objc public var closed: MetaMask_iOS.WebSocketClosedCallback?
+  @objc public var errorOccured: MetaMask_iOS.WebSocketErrorCallback?
+  public var shouldConnect: Swift.Bool
+  @objc public var url: Swift.String
+  @objc required public init(url: Swift.String)
+  @objc public func connect()
+  @objc public func disconnect()
+  @objc public func sendText(_ text: Swift.String)
+  @objc public func sendBytes(_ bytes: Foundation.Data)
+  public func didReceive(event: Starscream.WebSocketEvent, client: Starscream.WebSocket)
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @objc public class WebSocketClient : MetaMask_iOS.UnityWebSocket {
+  public static func createWebSocket(url: Swift.String) -> MetaMask_iOS.WebSocketClient
+  @objc required public init(url: Swift.String)
+  @objc deinit
+}
+@_cdecl("unityWebSocket_create")
+public func unityWebSocket_create(_ urlPtr: Swift.UnsafePointer<Swift.CChar>?) -> Swift.Int32
+@_cdecl("unityWebSocket_destroy")
+public func unityWebSocket_destroy(_ instanceId: Swift.Int32)
+@_cdecl("unityWebSocket_connect")
+public func unityWebSocket_connect(_ instanceId: Swift.Int32)
+@_cdecl("unityWebSocket_disconnect")
+public func unityWebSocket_disconnect(_ instanceId: Swift.Int32)
+@_cdecl("unityWebSocket_sendText")
+public func unityWebSocket_sendText(_ instanceId: Swift.Int32, stringPtr: Swift.UnsafePointer<Swift.CChar>?)
+@_cdecl("unityWebSocket_sendBytes")
+public func unityWebSocket_sendBytes(_ instanceId: Swift.Int32, bytes: Foundation.Data)
+@_cdecl("unityWebSocket_setTextMessageReceivedCallback")
+public func unityWebSocket_setTextMessageReceivedCallback(_ instanceId: Swift.Int32, callbackPtr: Swift.UnsafeMutableRawPointer?)
+@_cdecl("unityWebSocket_setBinaryMessageReceivedCallback")
+public func unityWebSocket_setBinaryMessageReceivedCallback(_ instanceId: Swift.Int32, callbackPtr: Swift.UnsafeMutableRawPointer?)
+@_cdecl("unityWebSocket_setConnectedCallback")
+public func unityWebSocket_setConnectedCallback(_ instanceId: Swift.Int32, callbackPtr: Swift.UnsafeMutableRawPointer?)
+@_cdecl("unityWebSocket_setDisconnectedCallback")
+public func unityWebSocket_setDisconnectedCallback(_ instanceId: Swift.Int32, callbackPtr: Swift.UnsafeMutableRawPointer?)
+@_cdecl("unityWebSocket_setErrorCallback")
+public func unityWebSocket_setErrorCallback(_ instanceId: Swift.Int32, callbackPtr: Swift.UnsafeMutableRawPointer?)

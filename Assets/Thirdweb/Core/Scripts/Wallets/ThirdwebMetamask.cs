@@ -35,7 +35,7 @@ namespace Thirdweb.Wallets
 
         public Task Disconnect()
         {
-            MetaMaskUnity.Instance.Disconnect();
+            MetaMaskUnity.Instance.Disconnect(false);
             _web3 = null;
             return Task.CompletedTask;
         }
