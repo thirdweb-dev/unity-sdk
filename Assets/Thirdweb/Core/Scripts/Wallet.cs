@@ -70,9 +70,7 @@ namespace Thirdweb
             }
             else
             {
-                var localAccount = ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount();
-                if (localAccount == null)
-                    throw new Exception("No local account found");
+                var localAccount = ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount() ?? throw new Exception("No local account found");
                 return Utils.EncryptAndGenerateKeyStore(new EthECKey(localAccount.PrivateKey), password);
             }
         }
@@ -96,7 +94,7 @@ namespace Thirdweb
                     Resources = new List<string>(),
                     Uri = $"https://{domain}",
                     Statement = "Please ensure that the domain above matches the URL of the current website.",
-                    Address = await GetSignerAddress(),
+                    Address = await GetAddress(),
                     Domain = domain,
                     ChainId = (await GetChainId()).ToString(),
                     Version = "1",
@@ -166,9 +164,11 @@ namespace Thirdweb
                 };
                 var signature = payload.signature;
                 var validUser = await siwe.IsUserAddressRegistered(siweMessage);
+                var msg = SiweMessageStringBuilder.BuildMessage(siweMessage);
                 if (validUser)
                 {
-                    if (await siwe.IsMessageSignatureValid(siweMessage, signature))
+                    string recoveredAddress = await RecoverAddress(msg, signature);
+                    if (recoveredAddress == siweMessage.Address)
                     {
                         if (siwe.IsMessageTheSameAsSessionStored(siweMessage))
                         {
@@ -203,7 +203,7 @@ namespace Thirdweb
         /// </summary>
         /// <param name="currencyAddress">Optional address of the currency to check balance of.</param>
         /// <returns>The balance of the wallet as a CurrencyValue object.</returns>
-        public async Task<CurrencyValue> GetBalance(string currencyAddress = Utils.NativeTokenAddress)
+        public async Task<CurrencyValue> GetBalance(string currencyAddress = null)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -214,23 +214,23 @@ namespace Thirdweb
                 if (!await IsConnected())
                     throw new Exception("No account connected!");
 
-                if (currencyAddress != Utils.NativeTokenAddress)
+                if (currencyAddress != null)
                 {
                     Contract contract = ThirdwebManager.Instance.SDK.GetContract(currencyAddress);
                     return await contract.ERC20.Balance();
                 }
                 else
                 {
-                    HexBigInteger balance = null;
                     string address = await GetAddress();
-                    // try
-                    // {
-                    //     balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
-                    // }
-                    // catch
-                    // {
-                    balance = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetBalance.SendRequestAsync(address);
-                    // }
+                    HexBigInteger balance;
+                    try
+                    {
+                        balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
+                    }
+                    catch
+                    {
+                        balance = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetBalance.SendRequestAsync(address);
+                    }
                     var nativeCurrency = ThirdwebManager.Instance.SDK.session.CurrentChainData.nativeCurrency;
                     return new CurrencyValue(nativeCurrency.name, nativeCurrency.symbol, nativeCurrency.decimals.ToString(), balance.Value.ToString(), balance.Value.ToString().ToEth());
                 }
@@ -306,7 +306,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("getChainId"), new string[] { });
+                return await Bridge.InvokeRoute<BigInteger>(getRoute("getChainId"), new string[] { });
             }
             else
             {
@@ -327,13 +327,7 @@ namespace Thirdweb
 
             if (Utils.IsWebGLBuild())
             {
-                int safeId;
-                if (!int.TryParse(chainId.ToString(), out safeId))
-                {
-                    throw new Exception("Chain ID too large for WebGL platforms");
-                }
-
-                await Bridge.SwitchNetwork(safeId);
+                await Bridge.SwitchNetwork(chainId.ToString());
             }
             else
             {
@@ -348,7 +342,7 @@ namespace Thirdweb
         /// <param name="amount">The amount of currency to transfer.</param>
         /// <param name="currencyAddress">Optional address of the currency to transfer (defaults to native token address).</param>
         /// <returns>The result of the transfer as a TransactionResult object.</returns>
-        public async Task<TransactionResult> Transfer(string to, string amount, string currencyAddress = Utils.NativeTokenAddress)
+        public async Task<TransactionResult> Transfer(string to, string amount, string currencyAddress = null)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -356,7 +350,7 @@ namespace Thirdweb
             }
             else
             {
-                if (currencyAddress != Utils.NativeTokenAddress)
+                if (currencyAddress != null)
                 {
                     Contract contract = ThirdwebManager.Instance.SDK.GetContract(currencyAddress);
                     return await contract.ERC20.Transfer(to, amount);
@@ -376,12 +370,25 @@ namespace Thirdweb
         /// <returns>The signature of the message as a string.</returns>
         public async Task<string> Sign(string message)
         {
+            if (!await IsConnected())
+                throw new Exception("No account connected!");
+
             if (Utils.IsWebGLBuild())
             {
                 return await Bridge.InvokeRoute<string>(getRoute("sign"), Utils.ToJsonStringArray(message));
             }
             else
             {
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                {
+                    var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                    if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
+                    {
+                        Debug.Log("SmartWallet not deployed, deploying before signing...");
+                        await sw.SmartWallet.ForceDeploy();
+                    }
+                }
+
                 return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
             }
         }
@@ -397,7 +404,20 @@ namespace Thirdweb
         public async Task<string> SignTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData)
             where TDomain : IDomain
         {
-            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet)
+            if (!await IsConnected())
+                throw new Exception("No account connected!");
+
+            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+            {
+                var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
+                {
+                    Debug.Log("SmartWallet not deployed, deploying before signing...");
+                    await sw.SmartWallet.ForceDeploy();
+                }
+            }
+
+            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount() != null)
             {
                 var signer = new Eip712TypedDataSigner();
                 var key = new EthECKey(ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount().PrivateKey);
@@ -441,6 +461,15 @@ namespace Thirdweb
             else
             {
                 var signer = new EthereumMessageSigner();
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                {
+                    var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                    bool isSigValid = await sw.SmartWallet.VerifySignature(signer.HashPrefixedMessage(System.Text.Encoding.UTF8.GetBytes(message)), signature.HexStringToByteArray());
+                    if (isSigValid)
+                    {
+                        return await GetAddress();
+                    }
+                }
                 var addressRecovered = signer.EncodeUTF8AndEcRecover(message, signature);
                 return addressRecovered;
             }
@@ -463,9 +492,9 @@ namespace Thirdweb
                     transactionRequest.data,
                     transactionRequest.to,
                     transactionRequest.from,
-                    new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
-                    new Nethereum.Hex.HexTypes.HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
-                    new Nethereum.Hex.HexTypes.HexBigInteger(transactionRequest.value)
+                    new HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
+                    new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
+                    new HexBigInteger(transactionRequest.value)
                 );
                 var receipt = await ThirdwebManager.Instance.SDK.session.Web3.Eth.TransactionManager.SendTransactionAndWaitForReceiptAsync(input);
                 return receipt.ToTransactionResult();
@@ -481,10 +510,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                if (options.address == null)
-                {
-                    options.address = await GetAddress();
-                }
+                options.address ??= await GetAddress();
                 await Bridge.FundWallet(options);
             }
             else

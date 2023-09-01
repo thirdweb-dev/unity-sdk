@@ -10,9 +10,9 @@ namespace Thirdweb.Wallets
     public class ThirdwebPaper : IThirdwebWallet
     {
         private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
-        private PaperEmbeddedWalletSdk _paper;
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
+        private readonly PaperEmbeddedWalletSdk _paper;
         private Account _account;
 
         public ThirdwebPaper(string paperClientId)
@@ -31,7 +31,7 @@ namespace Thirdweb.Wallets
             }
 
             _account = (await PaperUI.Instance.Connect(_paper, walletConnection.email)).Account;
-            _web3 = new Web3(_account, ThirdwebManager.Instance.SDK.session.RPC);
+            _web3 = new Web3(_account, rpc);
 
             return await GetAddress();
         }

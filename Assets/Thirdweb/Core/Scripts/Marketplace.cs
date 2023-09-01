@@ -18,12 +18,9 @@ namespace Thirdweb
         public EnglishAuctions englishAuctions;
         public Offers offers;
 
-        private string contractAddress;
-
         public Marketplace(string parentRoute, string contractAddress)
             : base(parentRoute)
         {
-            this.contractAddress = contractAddress;
             this.directListings = new DirectListings(baseRoute, contractAddress);
             this.englishAuctions = new EnglishAuctions(baseRoute, contractAddress);
             this.offers = new Offers(baseRoute, contractAddress);
@@ -32,7 +29,7 @@ namespace Thirdweb
 
     public class DirectListings : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         public DirectListings(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "directListings"))
@@ -126,7 +123,7 @@ namespace Thirdweb
                 );
 
                 Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Listing.Currency).ERC20.Get();
-                NFTMetadata metadata = new NFTMetadata();
+                var metadata = new NFTMetadata();
                 try
                 {
                     metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Listing.AssetContract).ERC721.Get(result.Listing.TokenId.ToString())).metadata;
@@ -149,7 +146,7 @@ namespace Thirdweb
                         currency.symbol,
                         currency.decimals,
                         result.Listing.PricePerToken.ToString(),
-                        result.Listing.PricePerToken.ToString().ToEth()
+                        result.Listing.PricePerToken.ToString().FormatERC20(4, int.Parse(currency.decimals), true)
                     ),
                     pricePerToken = result.Listing.PricePerToken.ToString(),
                     asset = metadata,
@@ -280,7 +277,7 @@ namespace Thirdweb
                             AssetContract = input.assetContractAddress,
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
-                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
+                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddress,
                             PricePerToken = BigInteger.Parse(input.pricePerToken),
                             StartTimestamp = (BigInteger)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp() + 60),
                             EndTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
@@ -365,7 +362,7 @@ namespace Thirdweb
 
     public class EnglishAuctions : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         public EnglishAuctions(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "englishAuctions"))
@@ -459,7 +456,7 @@ namespace Thirdweb
                 );
 
                 Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Auction.Currency).ERC20.Get();
-                NFTMetadata metadata = new NFTMetadata();
+                var metadata = new NFTMetadata();
                 try
                 {
                     metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Auction.AssetContract).ERC721.Get(result.Auction.TokenId.ToString())).metadata;
@@ -483,7 +480,7 @@ namespace Thirdweb
                         currency.symbol,
                         currency.decimals,
                         result.Auction.MinimumBidAmount.ToString(),
-                        result.Auction.MinimumBidAmount.ToString().ToEth()
+                        result.Auction.MinimumBidAmount.ToString().FormatERC20(4, int.Parse(currency.decimals), true)
                     ),
                     buyoutBidAmount = result.Auction.BuyoutBidAmount.ToString(),
                     buyoutCurrencyValue = new CurrencyValue(
@@ -491,7 +488,7 @@ namespace Thirdweb
                         currency.symbol,
                         currency.decimals,
                         result.Auction.BuyoutBidAmount.ToString(),
-                        result.Auction.BuyoutBidAmount.ToString().ToEth()
+                        result.Auction.BuyoutBidAmount.ToString().FormatERC20(4, int.Parse(currency.decimals), true)
                     ),
                     timeBufferInSeconds = (int)result.Auction.TimeBufferInSeconds,
                     bidBufferBps = (int)result.Auction.BidBufferBps,
@@ -528,7 +525,7 @@ namespace Thirdweb
                 var winningBid = await GetWinningBid(auctionId);
                 var cv = auction.minimumBidCurrencyValue.Value;
                 cv.value = (BigInteger.Parse(cv.value) + BigInteger.Parse(winningBid.bidAmount)).ToString();
-                cv.displayValue = cv.value.ToEth();
+                cv.displayValue = cv.value.FormatERC20(4, int.Parse(cv.decimals), true);
                 return cv;
             }
         }
@@ -586,7 +583,13 @@ namespace Thirdweb
                     bidderAddress = winningBid.Bidder,
                     currencyContractAddress = winningBid.Currency,
                     bidAmount = winningBid.BidAmount.ToString(),
-                    bidAmountCurrencyValue = new CurrencyValue(c.name, c.symbol, c.decimals, winningBid.BidAmount.ToString(), winningBid.BidAmount.ToString().ToEth())
+                    bidAmountCurrencyValue = new CurrencyValue(
+                        c.name,
+                        c.symbol,
+                        c.decimals,
+                        winningBid.BidAmount.ToString(),
+                        winningBid.BidAmount.ToString().FormatERC20(4, int.Parse(c.decimals), true)
+                    )
                 };
             }
         }
@@ -679,7 +682,7 @@ namespace Thirdweb
                             AssetContract = input.assetContractAddress,
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
-                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddressV2,
+                            Currency = input.currencyContractAddress ?? Utils.NativeTokenAddress,
                             MinimumBidAmount = BigInteger.Parse(input.minimumBidAmount.ToWei()),
                             BuyoutBidAmount = BigInteger.Parse(input.buyoutBidAmount.ToWei()),
                             TimeBufferInSeconds = ulong.Parse(input.timeBufferInSeconds ?? "900"),
@@ -725,7 +728,7 @@ namespace Thirdweb
 
     public class Offers : Routable
     {
-        private string contractAddress;
+        private readonly string contractAddress;
 
         public Offers(string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "offers"))
@@ -819,7 +822,7 @@ namespace Thirdweb
                 );
 
                 Currency currency = await ThirdwebManager.Instance.SDK.GetContract(result.Offer.Currency).ERC20.Get();
-                NFTMetadata metadata = new NFTMetadata();
+                var metadata = new NFTMetadata();
                 try
                 {
                     metadata = (await ThirdwebManager.Instance.SDK.GetContract(result.Offer.AssetContract).ERC721.Get(result.Offer.TokenId.ToString())).metadata;
@@ -837,7 +840,13 @@ namespace Thirdweb
                     tokenId = result.Offer.TokenId.ToString(),
                     quantity = result.Offer.Quantity.ToString(),
                     currencyContractAddress = result.Offer.Currency,
-                    currencyValue = new CurrencyValue(currency.name, currency.symbol, currency.decimals, result.Offer.TotalPrice.ToString(), result.Offer.TotalPrice.ToString().ToEth()),
+                    currencyValue = new CurrencyValue(
+                        currency.name,
+                        currency.symbol,
+                        currency.decimals,
+                        result.Offer.TotalPrice.ToString(),
+                        result.Offer.TotalPrice.ToString().FormatERC20(4, int.Parse(currency.decimals), true)
+                    ),
                     totalPrice = result.Offer.TotalPrice.ToString(),
                     asset = metadata,
                     endTimeInSeconds = (long)result.Offer.ExpirationTimestamp,

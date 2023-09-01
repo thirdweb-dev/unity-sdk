@@ -17,13 +17,12 @@ namespace Thirdweb
     public static class Utils
     {
         public const string AddressZero = "0x0000000000000000000000000000000000000000";
-        public const string NativeTokenAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-        public const string NativeTokenAddressV2 = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+        public const string NativeTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
         public const double DECIMALS_18 = 1000000000000000000;
 
         public static string[] ToJsonStringArray(params object[] args)
         {
-            List<string> stringArgs = new List<string>();
+            var stringArgs = new List<string>();
             for (int i = 0; i < args.Length; i++)
             {
                 if (args[i] == null)
@@ -66,8 +65,7 @@ namespace Thirdweb
 
         public static string ToWei(this string eth)
         {
-            double ethDouble = 0;
-            if (!double.TryParse(eth, out ethDouble))
+            if (!double.TryParse(eth, out double ethDouble))
                 throw new ArgumentException("Invalid eth value.");
             BigInteger wei = (BigInteger)(ethDouble * DECIMALS_18);
             return wei.ToString();
@@ -80,8 +78,8 @@ namespace Thirdweb
 
         public static string FormatERC20(this string wei, int decimalsToDisplay = 4, int decimals = 18, bool addCommas = true)
         {
-            BigInteger weiBigInt = 0;
-            if (!BigInteger.TryParse(wei, out weiBigInt))
+            decimals = decimals == 0 ? 18 : decimals;
+            if (!BigInteger.TryParse(wei, out BigInteger weiBigInt))
                 throw new ArgumentException("Invalid wei value.");
             double eth = (double)weiBigInt / Math.Pow(10.0, decimals);
             string format = addCommas ? "#,0" : "#0";
@@ -92,11 +90,27 @@ namespace Thirdweb
             return eth.ToString(format);
         }
 
+        public static BigInteger AdjustDecimals(this BigInteger value, int fromDecimals, int toDecimals)
+        {
+            int differenceInDecimals = fromDecimals - toDecimals;
+
+            if (differenceInDecimals > 0)
+            {
+                return value / BigInteger.Pow(10, differenceInDecimals);
+            }
+            else if (differenceInDecimals < 0)
+            {
+                return value * BigInteger.Pow(10, -differenceInDecimals);
+            }
+
+            return value;
+        }
+
         public static string ShortenAddress(this string address)
         {
             if (address.Length != 42)
                 throw new ArgumentException("Invalid Address Length.");
-            return $"{address.Substring(0, 6)}...{address.Substring(38)}";
+            return $"{address[..6]}...{address[38..]}";
         }
 
         public static bool IsWebGLBuild()
@@ -119,7 +133,7 @@ namespace Thirdweb
 
         public static TransactionResult ToTransactionResult(this Nethereum.RPC.Eth.DTOs.TransactionReceipt receipt)
         {
-            TransactionResult result = new TransactionResult();
+            var result = new TransactionResult();
 
             if (receipt != null)
             {
@@ -135,14 +149,14 @@ namespace Thirdweb
             return result;
         }
 
-        public static List<Thirdweb.Contracts.Pack.ContractDefinition.Token> ToPackTokenList(this NewPackInput packContents)
+        public static List<Contracts.Pack.ContractDefinition.Token> ToPackTokenList(this NewPackInput packContents)
         {
-            List<Thirdweb.Contracts.Pack.ContractDefinition.Token> tokenList = new List<Contracts.Pack.ContractDefinition.Token>();
+            var tokenList = new List<Contracts.Pack.ContractDefinition.Token>();
             // Add ERC20 Rewards
             foreach (var erc20Reward in packContents.erc20Rewards)
             {
                 tokenList.Add(
-                    new Thirdweb.Contracts.Pack.ContractDefinition.Token()
+                    new Contracts.Pack.ContractDefinition.Token()
                     {
                         AssetContract = erc20Reward.contractAddress,
                         TokenType = 0,
@@ -155,7 +169,7 @@ namespace Thirdweb
             foreach (var erc721Reward in packContents.erc721Rewards)
             {
                 tokenList.Add(
-                    new Thirdweb.Contracts.Pack.ContractDefinition.Token()
+                    new Contracts.Pack.ContractDefinition.Token()
                     {
                         AssetContract = erc721Reward.contractAddress,
                         TokenType = 1,
@@ -168,7 +182,7 @@ namespace Thirdweb
             foreach (var erc1155Reward in packContents.erc1155Rewards)
             {
                 tokenList.Add(
-                    new Thirdweb.Contracts.Pack.ContractDefinition.Token()
+                    new Contracts.Pack.ContractDefinition.Token()
                     {
                         AssetContract = erc1155Reward.contractAddress,
                         TokenType = 2,
@@ -182,7 +196,7 @@ namespace Thirdweb
 
         public static List<BigInteger> ToPackRewardUnitsList(this PackContents packContents)
         {
-            List<BigInteger> rewardUnits = new List<BigInteger>();
+            var rewardUnits = new List<BigInteger>();
             // Add ERC20 Rewards
             foreach (var content in packContents.erc20Rewards)
             {
@@ -218,10 +232,10 @@ namespace Thirdweb
 
         public static string HexConcat(params string[] hexStrings)
         {
-            StringBuilder hex = new StringBuilder("0x");
+            var hex = new StringBuilder("0x");
 
             foreach (var hexStr in hexStrings)
-                hex.Append(hexStr.Substring(2));
+                hex.Append(hexStr[2..]);
 
             return hex.ToString();
         }
@@ -343,7 +357,7 @@ namespace Thirdweb
             return keyStoreService.SerializeKeyStoreToJson(keyStore);
         }
 
-        public static Account GenerateRandomAccount(int chainId)
+        public static Account GenerateRandomAccount(BigInteger chainId)
         {
             byte[] seed = new byte[32];
             using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
@@ -354,7 +368,7 @@ namespace Thirdweb
             return new Account(ecKey, chainId);
         }
 
-        public static string cidToIpfsUrl(this string cid, bool useGateway = false)
+        public static string CidToIpfsUrl(this string cid, bool useGateway = false)
         {
             string ipfsRaw = $"ipfs://{cid}";
             return useGateway ? ipfsRaw.ReplaceIPFS() : ipfsRaw;
@@ -388,53 +402,54 @@ namespace Thirdweb
 
         public static string AppendBundleIdQueryParam(this string uri)
         {
-            string bundleId = GetBundleId();
-            if (!Utils.IsWebGLBuild())
-                uri += $"?bundleId={bundleId}";
+            if (Utils.IsWebGLBuild())
+                return uri;
+
+            uri += $"?bundleId={ThirdwebManager.Instance?.SDK?.session?.BundleId ?? GetBundleId()}";
             return uri;
         }
 
         public static string GetNativeTokenWrapper(BigInteger chainId)
         {
             string id = chainId.ToString();
-            switch (id)
+            return id switch
             {
-                case "1":
-                    return "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
-                case "4":
-                    return "0xc778417E063141139Fce010982780140Aa0cD5Ab"; // rinkeby
-                case "5":
-                    return "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"; // goerli
-                case "137":
-                    return "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
-                case "80001":
-                    return "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889";
-                case "43114":
-                    return "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7";
-                case "43113":
-                    return "0xd00ae08403B9bbb9124bB305C09058E32C39A48c";
-                case "250":
-                    return "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83";
-                case "4002":
-                    return "0xf1277d1Ed8AD466beddF92ef448A132661956621";
-                case "10":
-                    return "0x4200000000000000000000000000000000000006"; // optimism
-                case "69":
-                    return "0xbC6F6b680bc61e30dB47721c6D1c5cde19C1300d"; // optimism kovan
-                case "420":
-                    return "0x4200000000000000000000000000000000000006"; // optimism goerli
-                case "42161":
-                    return "0x82af49447d8a07e3bd95bd0d56f35241523fbab1"; // arbitrum
-                case "421611":
-                    return "0xEBbc3452Cc911591e4F18f3b36727Df45d6bd1f9"; // arbitrum rinkeby
-                case "421613":
-                    return "0xe39Ab88f8A4777030A534146A9Ca3B52bd5D43A3"; // arbitrum goerli
+                "1" => "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "4" => "0xc778417E063141139Fce010982780140Aa0cD5Ab", // rinkeby
+                "5" => "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6", // goerli
+                "137" => "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+                "80001" => "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
+                "43114" => "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+                "43113" => "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
+                "250" => "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83",
+                "4002" => "0xf1277d1Ed8AD466beddF92ef448A132661956621",
+                "10" => "0x4200000000000000000000000000000000000006", // optimism
+                "69" => "0xbC6F6b680bc61e30dB47721c6D1c5cde19C1300d", // optimism kovan
+                "420" => "0x4200000000000000000000000000000000000006", // optimism goerli
+                "42161" => "0x82af49447d8a07e3bd95bd0d56f35241523fbab1", // arbitrum
+                "421611" => "0xEBbc3452Cc911591e4F18f3b36727Df45d6bd1f9", // arbitrum rinkeby
+                "421613" => "0xe39Ab88f8A4777030A534146A9Ca3B52bd5D43A3", // arbitrum goerli
+                "56" => "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", // binance mainnet
+                "97" => "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd", // binance testnet
+                _ => throw new UnityException("Native Token Wrapper Unavailable For This Chain!"),
+            };
+        }
+
+        public static bool Supports1559(string chainId)
+        {
+            switch (chainId)
+            {
+                // BNB Mainnet
                 case "56":
-                    return "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"; // binance mainnet
+                // BNB Testnet
                 case "97":
-                    return "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"; // binance testnet
+                // opBNB Mainnet
+                case "204":
+                // opBNB Testnet
+                case "5611":
+                    return false;
                 default:
-                    throw new UnityException("Native Token Wrapper Unavailable For This Chain!");
+                    return true;
             }
         }
     }

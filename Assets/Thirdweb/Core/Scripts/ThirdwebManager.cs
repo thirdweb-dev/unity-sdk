@@ -21,29 +21,34 @@ public class ChainData
 public class ThirdwebManager : MonoBehaviour
 {
     [Tooltip("The chain to initialize the SDK with")]
-    public string chain = "goerli";
+    public string activeChain = "goerli";
 
     [Tooltip("Support any chain by adding it to this list from the inspector")]
-    public List<ChainData> supportedChains = new List<ChainData>()
-    {
-        new ChainData("ethereum", "1", null),
-        new ChainData("goerli", "5", null),
-        new ChainData("polygon", "137", null),
-        new ChainData("mumbai", "80001", null),
-        new ChainData("fantom", "250", null),
-        new ChainData("fantom-testnet", "4002", null),
-        new ChainData("avalanche", "43114", null),
-        new ChainData("avalanche-fuji", "43113", null),
-        new ChainData("optimism", "10", null),
-        new ChainData("optimism-goerli", "420", null),
-        new ChainData("arbitrum", "42161", null),
-        new ChainData("arbitrum-goerli", "421613", null),
-        new ChainData("binance", "56", null),
-        new ChainData("binance-testnet", "97", null),
-    };
+    public List<ChainData> supportedChains =
+        new()
+        {
+            new ChainData("ethereum", "1", null),
+            new ChainData("goerli", "5", null),
+            new ChainData("polygon", "137", null),
+            new ChainData("mumbai", "80001", null),
+            new ChainData("fantom", "250", null),
+            new ChainData("fantom-testnet", "4002", null),
+            new ChainData("avalanche", "43114", null),
+            new ChainData("avalanche-fuji", "43113", null),
+            new ChainData("optimism", "10", null),
+            new ChainData("optimism-goerli", "420", null),
+            new ChainData("arbitrum", "42161", null),
+            new ChainData("arbitrum-goerli", "421613", null),
+            new ChainData("binance", "56", null),
+            new ChainData("binance-testnet", "97", null),
+            new ChainData("sepolia", "11155111", null),
+        };
 
     [Tooltip("Thirdweb Client ID (https://thirdweb.com/create-api-key/). Used for default thirdweb services such as Storage and Account Abstraction.")]
     public string clientId;
+
+    [Tooltip("Whether the SDK should initialize on awake or not")]
+    public bool initializeOnAwake = true;
 
     [Tooltip("The name of your app")]
     public string appName = null;
@@ -111,8 +116,6 @@ public class ThirdwebManager : MonoBehaviour
 
     private void Awake()
     {
-        // Single persistent instance at all times.
-
         if (Instance == null)
         {
             Instance = this;
@@ -125,42 +128,59 @@ public class ThirdwebManager : MonoBehaviour
             return;
         }
 
-        // Inspector chain data dictionary.
+        if (initializeOnAwake)
+            Initialize(activeChain);
+    }
 
-        ChainData currentChain = supportedChains.Find(x => x.identifier == chain);
-
-        // Chain ID must be provided on native platforms.
-
-        BigInteger chainId = -1;
-
-        if (string.IsNullOrEmpty(currentChain.chainId))
-            throw new UnityException("You must provide a Chain ID on native platforms!");
-
-        if (!BigInteger.TryParse(currentChain.chainId, out chainId))
-            throw new UnityException("The Chain ID must be a non-negative integer!");
-
-        // Must provide a proper chain identifier (https://thirdweb.com/dashboard/rpc) or RPC override.
-
-        string chainOrRPC = null;
-
-        if (!string.IsNullOrEmpty(currentChain.rpcOverride))
-        {
-            if (!currentChain.rpcOverride.StartsWith("https://"))
-                throw new UnityException("RPC overrides must start with https:// !");
-            else
-                chainOrRPC = currentChain.rpcOverride;
-        }
-        else
-        {
-            if (string.IsNullOrEmpty(currentChain.identifier))
-                throw new UnityException("When not providing an RPC, you must provide a chain identifier!");
-            else
-                chainOrRPC = currentChain.identifier;
-        }
-
-        // Set up storage and gasless options (if any)
+    public void Initialize(string chainIdentifier)
+    {
+        // Pass supported chains with replaced RPCs
 
         var options = new ThirdwebSDK.Options();
+
+        activeChain = chainIdentifier;
+        string activeChainId = null;
+        string activeChainRpc = null;
+
+        var supportedChainData = new List<ThirdwebChainData>();
+        foreach (var chainData in this.supportedChains)
+        {
+            if (string.IsNullOrEmpty(chainData.identifier))
+                throw new UnityException($"You must provide a valid chain identifier! See https://thirdweb.com/dashboard/rpc for a list of supported chains.");
+
+            if (string.IsNullOrEmpty(chainData.chainId) || !BigInteger.TryParse(chainData.chainId, out _))
+                throw new UnityException($"Could not add {chainData.identifier} to supported chains, you must provide a valid chain ID!");
+
+            if (!string.IsNullOrEmpty(chainData.rpcOverride) && !chainData.rpcOverride.StartsWith("https://"))
+                throw new UnityException($"Could not add {chainData.identifier} to supported chains, RPC overrides must start with https:// or be left empty to use thirdweb RPCs!");
+
+            string rpc = string.IsNullOrEmpty(chainData.rpcOverride)
+                ? (string.IsNullOrEmpty(clientId) ? $"https://{chainData.identifier}.rpc.thirdweb.com/" : $"https://{chainData.identifier}.rpc.thirdweb.com/{clientId}")
+                : chainData.rpcOverride;
+
+            if (new System.Uri(rpc).Host.EndsWith(".thirdweb.com"))
+                rpc = rpc.AppendBundleIdQueryParam();
+
+            if (chainData.identifier == activeChain)
+            {
+                activeChainId = chainData.chainId;
+                activeChainRpc = rpc;
+            }
+
+            try
+            {
+                supportedChainData.Add(ThirdwebSession.FetchChainData(BigInteger.Parse(chainData.chainId), rpc));
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"Failed to fetch chain data for {chainData.identifier} ({chainData.chainId}) - {e}, skipping...");
+                continue;
+            }
+        }
+
+        options.supportedChains = supportedChainData.ToArray();
+
+        // Set up storage and gasless options (if any)
 
         if (!string.IsNullOrEmpty(storageIpfsGatewayUrl))
         {
@@ -186,7 +206,7 @@ public class ThirdwebManager : MonoBehaviour
         {
             appName = string.IsNullOrEmpty(appName) ? "thirdweb powered dApp" : appName,
             appDescription = string.IsNullOrEmpty(appDescription) ? "thirdweb powered dApp" : appDescription,
-            appIcons = string.IsNullOrEmpty(appIcons[0]) ? new string[] { "https://thirdweb.com/favicon.ico" } : appIcons,
+            appIcons = (appIcons == null || appIcons.Length == 0 || string.IsNullOrEmpty(appIcons[0])) ? new string[] { "https://thirdweb.com/favicon.ico" } : appIcons,
             appUrl = string.IsNullOrEmpty(appUrl) ? "https://thirdweb.com" : appUrl,
             magicLinkApiKey = string.IsNullOrEmpty(magicLinkApiKey) ? null : magicLinkApiKey,
             walletConnectProjectId = string.IsNullOrEmpty(walletConnectProjectId) ? "145769e410f16970a79ff77b2d89a1e0" : walletConnectProjectId,
@@ -199,8 +219,8 @@ public class ThirdwebManager : MonoBehaviour
             {
                 factoryAddress = factoryAddress,
                 gasless = gasless,
-                bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{currentChain.identifier}.bundler.thirdweb.com" : bundlerUrl,
-                paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{currentChain.identifier}.bundler.thirdweb.com" : paymasterUrl,
+                bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{activeChain}.bundler.thirdweb.com" : bundlerUrl,
+                paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{activeChain}.bundler.thirdweb.com" : paymasterUrl,
                 entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
             };
 
@@ -208,34 +228,8 @@ public class ThirdwebManager : MonoBehaviour
 
         options.clientId = string.IsNullOrEmpty(clientId) ? null : clientId;
 
-        // Pass supported chains with replaced RPCs
+        // Pass active chain rpc and chainId
 
-        var supportedChainData = new List<ThirdwebChainData>();
-        foreach (var chain in this.supportedChains)
-        {
-            string rpc = string.IsNullOrEmpty(chain.rpcOverride)
-                ? (
-                    string.IsNullOrEmpty(clientId)
-                        ? $"https://{chain.identifier}.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3"
-                        : $"https://{chain.identifier}.rpc.thirdweb.com/{clientId}"
-                )
-                : chain.rpcOverride;
-
-            if (new System.Uri(rpc).Host.EndsWith(".thirdweb.com"))
-                rpc = rpc.AppendBundleIdQueryParam();
-            try
-            {
-                supportedChainData.Add(ThirdwebSession.FetchChainData(BigInteger.Parse(chain.chainId), rpc));
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogWarning($"Failed to fetch chain data for {chain.identifier} ({chain.chainId}) - {e}, skipping...");
-                continue;
-            }
-        }
-
-        options.supportedChains = supportedChainData.ToArray();
-
-        SDK = new ThirdwebSDK(chainOrRPC, chainId, options);
+        SDK = new ThirdwebSDK(activeChainRpc, BigInteger.Parse(activeChainId), options);
     }
 }

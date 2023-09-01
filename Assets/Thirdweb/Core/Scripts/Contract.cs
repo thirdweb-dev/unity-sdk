@@ -69,7 +69,7 @@ namespace Thirdweb
             this.ERC721 = new ERC721(baseRoute, address);
             this.ERC1155 = new ERC1155(baseRoute, address);
             this.marketplace = new Marketplace(baseRoute, address);
-            this.pack = new Pack(chain, address);
+            this.pack = new Pack(address);
             this.events = new Events(baseRoute);
         }
 
@@ -86,9 +86,7 @@ namespace Thirdweb
             else
             {
                 BigInteger balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
-                CurrencyValue cv = new CurrencyValue();
-                cv.value = balance.ToString();
-                cv.displayValue = balance.ToString().ToEth();
+                var cv = new CurrencyValue { value = balance.ToString(), displayValue = balance.ToString().ToEth() };
                 return cv;
             }
         }
@@ -185,7 +183,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                args = args ?? new object[0];
+                args ??= new object[0];
                 return await Bridge.InvokeRoute<TransactionResult>(getRoute("call"), Utils.ToJsonStringArray(functionName, args, transactionOverrides));
             }
             else
@@ -204,9 +202,12 @@ namespace Thirdweb
                         ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasLimit))
                         : await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, value, args);
 
+                var gasPrice = transactionOverrides?.gasPrice != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasPrice)) : null;
+
                 var receipt = await function.SendTransactionAndWaitForReceiptAsync(
                     from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
                     gas: gas,
+                    gasPrice: gasPrice,
                     value: value,
                     receiptRequestCancellationToken: null,
                     args
@@ -248,11 +249,18 @@ namespace Thirdweb
             // Single
             if (rawResults.Count == 1)
             {
-                return ConvertValue<T>(rawResults[0]);
+                try
+                {
+                    return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(rawResults[0]));
+                }
+                catch
+                {
+                    return ConvertValue<T>(rawResults[0]);
+                }
             }
 
             // List or array
-            if ((typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(List<>)) || (typeof(T).IsArray))
+            if ((typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(List<>)) || typeof(T).IsArray)
             {
                 return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(rawResults));
             }
@@ -263,11 +271,13 @@ namespace Thirdweb
                 var targetType = typeof(T);
                 var properties = targetType.GetProperties();
                 var fields = targetType.GetFields();
+                var combinedCount = properties.Length + fields.Length;
 
-                if (rawResults.Count == properties.Length)
+                var instance = Activator.CreateInstance<T>();
+
+                if (rawResults.Count == combinedCount)
                 {
-                    var instance = Activator.CreateInstance<T>();
-
+                    // Assign values to properties
                     for (int i = 0; i < properties.Length; i++)
                     {
                         try
@@ -277,7 +287,23 @@ namespace Thirdweb
                         catch (ArgumentException ex)
                         {
                             throw new UnityException(
-                                $"Type mismatch assigning value to property {properties[i].Name}: expected {rawResults[i].GetType().Name}, got {properties[i].PropertyType.Name}",
+                                $"Type mismatch assigning value to property {properties[i].Name} of type {typeof(T).Name}: expected {rawResults[i].GetType().Name}, got {properties[i].PropertyType.Name}",
+                                ex
+                            );
+                        }
+                    }
+
+                    // Assign values to fields
+                    for (int i = 0; i < fields.Length; i++)
+                    {
+                        try
+                        {
+                            fields[i].SetValue(instance, rawResults[properties.Length + i]);
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            throw new UnityException(
+                                $"Type mismatch assigning value to field {fields[i].Name} of type {typeof(T).Name}: expected {rawResults[properties.Length + i].GetType().Name}, got {fields[i].FieldType.Name}",
                                 ex
                             );
                         }
@@ -285,10 +311,27 @@ namespace Thirdweb
 
                     return instance;
                 }
-                else if (rawResults.Count == fields.Length)
+                else if (rawResults.Count == properties.Length) // Just Properties
                 {
-                    var instance = Activator.CreateInstance<T>();
+                    for (int i = 0; i < properties.Length; i++)
+                    {
+                        try
+                        {
+                            properties[i].SetValue(instance, rawResults[i]);
+                        }
+                        catch (ArgumentException ex)
+                        {
+                            throw new UnityException(
+                                $"Type mismatch assigning value to property {properties[i].Name} of type {typeof(T).Name}: expected {rawResults[i].GetType().Name}, got {properties[i].PropertyType.Name}",
+                                ex
+                            );
+                        }
+                    }
 
+                    return instance;
+                }
+                else if (rawResults.Count == fields.Length) // Just Fields
+                {
                     for (int i = 0; i < fields.Length; i++)
                     {
                         try
@@ -297,7 +340,10 @@ namespace Thirdweb
                         }
                         catch (ArgumentException ex)
                         {
-                            throw new UnityException($"Type mismatch assigning value to field {fields[i].Name}: expected {rawResults[i].GetType().Name}, got {fields[i].FieldType.Name}", ex);
+                            throw new UnityException(
+                                $"Type mismatch assigning value to field {fields[i].Name} of type {typeof(T).Name}: expected {rawResults[i].GetType().Name}, got {fields[i].FieldType.Name}",
+                                ex
+                            );
                         }
                     }
 
@@ -306,7 +352,7 @@ namespace Thirdweb
                 else
                 {
                     throw new UnityException(
-                        $"The number of properties or fields in the target type do not match the number of results: expected {rawResults.Count}, got {properties.Length} properties and {fields.Length} fields"
+                        $"The number of combined properties and fields in type {typeof(T).Name} does not match the number of results: expected {combinedCount}, got {properties.Length} properties and {fields.Length} fields with {rawResults.Count} results."
                     );
                 }
             }

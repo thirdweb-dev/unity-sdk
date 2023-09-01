@@ -9,9 +9,9 @@ namespace Thirdweb.Wallets
     public class ThirdwebHyperplay : IThirdwebWallet
     {
         private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
-        private Hyperplay.Hyperplay _hyperPlay;
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
+        private readonly Hyperplay.Hyperplay _hyperPlay;
 
         public ThirdwebHyperplay(string chainId)
         {
