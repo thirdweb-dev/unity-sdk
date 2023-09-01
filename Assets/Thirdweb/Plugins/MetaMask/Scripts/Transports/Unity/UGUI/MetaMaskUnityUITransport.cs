@@ -7,9 +7,11 @@ using UnityEngine.Serialization;
 
 namespace MetaMask.Transports.Unity.UI
 {
+
     [CreateAssetMenu(menuName = "MetaMask/Transports/Unity UI")]
     public class MetaMaskUnityUITransport : MetaMaskUnityScriptableObjectTransport
     {
+
         #region Events
         /// <summary>Raised when the application is disconnecting to the wallet.</summary>
         public override event EventHandler<MetaMaskUnityRequestEventArgs> Requesting;
@@ -20,7 +22,6 @@ namespace MetaMask.Transports.Unity.UI
 
         /// <summary>The path to the transports resource folder.</summary>
         protected const string ResourcePath = "MetaMask/Transports";
-
         /// <summary>The default resource path for Unity UI resources.</summary>
         /// <remarks>This is the default resource path for Unity UI resources. It is used when the <see cref="ResourcePath"/> property is not set.</remarks>
         protected const string DefaultResourcePath = ResourcePath + "/UnityUI";
@@ -36,7 +37,6 @@ namespace MetaMask.Transports.Unity.UI
         /// <remarks>This is used to identify the application when making requests.</remarks>
         [SerializeField]
         protected string userAgent = "UnityUGUITransport/1.0.0";
-
         /// <summary>Whether to use the deeplink to open the app.</summary>
         /// <remarks>This is only used when the app is launched from a deeplink.</remarks>
         //[FormerlySerializedAs("useDeeplink")] [SerializeField]
@@ -44,14 +44,12 @@ namespace MetaMask.Transports.Unity.UI
         /// <summary>Whether to spawn a canvas on startup.</summary>
         [SerializeField]
         protected bool spawnCanvas = false;
-
         /// <summary>The canvas that contains the MetaMask UI.</summary>
         [SerializeField]
         protected GameObject metaMaskCanvas;
 
         /// <summary>The instance of the MetaMask canvas.</summary>
         protected GameObject metaMaskCanvasInstance;
-
         /// <summary>The UI handler for the MetaMask Unity plugin.</summary>
         protected MetaMaskUnityUIHandler uiHandler;
 
@@ -79,10 +77,13 @@ namespace MetaMask.Transports.Unity.UI
         /// <returns>The user agent string.</returns>
         public override string UserAgent
         {
-            get { return this.userAgent; }
+            get
+            {
+                return this.userAgent;
+            }
         }
-
-        public bool UseDeeplink = false;
+        
+        public bool UseDeeplink => IsMobile;
 
         #endregion
 
@@ -96,7 +97,7 @@ namespace MetaMask.Transports.Unity.UI
                 this.metaMaskCanvasInstance = Instantiate(this.metaMaskCanvas);
                 this.uiHandler = this.metaMaskCanvasInstance.GetComponent<MetaMaskUnityUIHandler>();
             }
-
+            
             MetaMaskUnity.Instance.Events.StartConnecting += WalletOnStartConnecting;
         }
 
@@ -104,15 +105,16 @@ namespace MetaMask.Transports.Unity.UI
         {
             var universalLink = this.connectionUniversalLinkUrl;
             var deepLink = this.connectionDeepLinkUrl;
-
+            
+            
             if (this.uiHandler != null)
             {
                 this.uiHandler.OpenQRCode();
             }
-
+            
             EmitListenerEvent(l => l.OnMetaMaskConnectRequest(universalLink, deepLink));
 
-            MetaMaskUnityTransportBroadcaster.Instance.OnMetaMaskConnectRequest(universalLink, deepLink);
+            AlertBroadcasterIfInUse(mmutb => mmutb.OnMetaMaskConnectRequest(universalLink, deepLink));
         }
 
         /// <summary>Connects to the specified URL.</summary>
@@ -121,6 +123,7 @@ namespace MetaMask.Transports.Unity.UI
         {
             this.connectionDeepLinkUrl = deepLink;
             this.connectionUniversalLinkUrl = universalLink;
+            
         }
 
         public override void OnConnectRequest()
@@ -144,8 +147,8 @@ namespace MetaMask.Transports.Unity.UI
             Debug.LogError("On Failure: " + error);
 
             EmitListenerEvent(l => l.OnMetaMaskFailure(error));
-
-            MetaMaskUnityTransportBroadcaster.Instance.OnMetaMaskFailure(error);
+            
+            AlertBroadcasterIfInUse(mmutb => mmutb.OnMetaMaskFailure(error));
         }
 
         /// <summary>Called when a request is received.</summary>
@@ -154,17 +157,17 @@ namespace MetaMask.Transports.Unity.UI
         public override void OnRequest(string id, MetaMaskEthereumRequest request)
         {
             Requesting?.Invoke(this, new MetaMaskUnityRequestEventArgs(request));
-
+            
             if (UseDeeplink)
             {
                 // Use otp to re-enable host approval
                 OpenConnectionDeepLink();
                 //OpenDeeplinkURL(MetaMaskWallet.MetaMaskUniversalLinkUrl);
             }
-
+            
             EmitListenerEvent(l => l.OnMetaMaskRequest(id, request));
 
-            MetaMaskUnityTransportBroadcaster.Instance.OnMetaMaskRequest(id, request);
+            AlertBroadcasterIfInUse(mmutb => mmutb.OnMetaMaskRequest(id, request));
         }
 
         public override void OnOTPCode(int code)
@@ -173,20 +176,23 @@ namespace MetaMask.Transports.Unity.UI
             {
                 this.uiHandler.OnMetaMaskOTP(code);
             }
-
-            MetaMaskUnityTransportBroadcaster.Instance.OnMetaMaskOTP(code);
+            
+            EmitListenerEvent(l => l.OnMetaMaskOTP(code));
+            AlertBroadcasterIfInUse(mmutb => mmutb.OnMetaMaskOTPCode(code));
         }
 
-        /// <summary>Notifies the application that a new session has been created.</summary>
+        /// <summary>Notifies the application that a new session has been created.</summary>        
         /// <param name="session">The session that has been created.</param>
-        public override void OnSessionRequest(MetaMaskSessionData session) { }
+        public override void OnSessionRequest(MetaMaskSessionData session)
+        {
+        }
 
         /// <summary>Called when the MetaMask client has successfully connected to the Ethereum network.</summary>
         public override void OnSuccess()
         {
             EmitListenerEvent(l => l.OnMetaMaskSuccess());
 
-            MetaMaskUnityTransportBroadcaster.Instance.OnMetaMaskSuccess();
+            AlertBroadcasterIfInUse(mmutb => mmutb.OnMetaMaskSuccess());
         }
 
         public override void OnDisconnect()
@@ -200,6 +206,14 @@ namespace MetaMask.Transports.Unity.UI
             return UseDeeplink;
         }
 
+        private void AlertBroadcasterIfInUse(Action<MetaMaskUnityTransportBroadcaster> action)
+        {
+            if (MetaMaskUnityTransportBroadcaster.Instance == null)
+                return;
+            
+            action(MetaMaskUnityTransportBroadcaster.Instance);
+        }
+
         #endregion
 
         #region Private Methods
@@ -210,7 +224,8 @@ namespace MetaMask.Transports.Unity.UI
             {
                 UnityThread.executeInUpdate(() =>
                 {
-                    var listeners = this.metaMaskCanvasInstance.GetComponentsInChildren<IMetaMaskUnityTransportListener>();
+                    var listeners =
+                        this.metaMaskCanvasInstance.GetComponentsInChildren<IMetaMaskUnityTransportListener>();
                     for (int i = 0; i < listeners.Length; i++)
                     {
                         callback(listeners[i]);
@@ -221,4 +236,5 @@ namespace MetaMask.Transports.Unity.UI
 
         #endregion
     }
+
 }

@@ -125,21 +125,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: MetaMaskTest, Assembly-CSharp
-        m_MethodName: Connect
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: MetaMask.Unity.Samples.VisualController, Assembly-CSharp
-        m_MethodName: OpenMainScreen
+      - m_Target: {fileID: 45923903797546926}
+        m_TargetAssemblyTypeName: MetaMask.Transports.Unity.UI.MetaMaskOTPPanel,
+          MetaMaskUnity.Runtime
+        m_MethodName: OnDisconnect
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -156,7 +145,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1183405676231325757}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 718bb0aa974f2ad4ab6fb3474f3bd9b7, type: 3}
   m_Name: 
@@ -175,6 +164,7 @@ MonoBehaviour:
   clickSound: {fileID: 8300000, guid: 46cbfe6d75667c442b635e14528f8b17, type: 3}
   clickSoundNegative: {fileID: 8300000, guid: 91663e26f21345346ab496d6dde8b530, type: 3}
   DisableAnimation: 1
+  DisableStartAnimation: 1
 --- !u!82 &892906291545261737
 AudioSource:
   m_ObjectHideFlags: 0
@@ -432,7 +422,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1301874994801964035}
-  m_LocalRotation: {x: -0, y: -0, z: -1, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: -1, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -442,8 +432,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -180}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -3.0179, y: 231.18506}
-  m_SizeDelta: {x: 798.8386, y: 302.8972}
+  m_AnchoredPosition: {x: -3.5368, y: 230.3}
+  m_SizeDelta: {x: 798.8602, y: 302.8972}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6716903020152288247
 CanvasRenderer:
@@ -742,14 +732,14 @@ GameObject:
   m_Component:
   - component: {fileID: 4751590749222510982}
   - component: {fileID: 8290723059239505651}
-  - component: {fileID: 1728193270561623479}
+  - component: {fileID: 45923903797546926}
   m_Layer: 5
   m_Name: OTP Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4751590749222510982
 RectTransform:
   m_ObjectHideFlags: 0
@@ -788,7 +778,7 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &1728193270561623479
+--- !u!114 &45923903797546926
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -797,13 +787,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 6679804656875098759}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 884edae6b9577c74dab2373fd7d1a8b1, type: 3}
+  m_Script: {fileID: 11500000, guid: 4478478a417d48d3b21628f5a664e86e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audioClip: {fileID: 0}
-  playAudio: 0
-  tweenInOnStart: 1
-  tweenInTime: 0.7
+  codeText: {fileID: 9020589096059800127}
 --- !u!1 &7657022319446177028
 GameObject:
   m_ObjectHideFlags: 0

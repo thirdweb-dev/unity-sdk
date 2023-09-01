@@ -280,10 +280,12 @@ namespace MetaMask.Unity.Utils
 	{
 
 		public int index = 0;
+		public bool optional = false;
 
-		public Inject(int index = 0)
+		public Inject(int index = 0, bool optional = false)
 		{
 			this.index = index;
+			this.optional = optional;
 		}
 
 		public override void InjectInto(Object obj, FieldInfo field)
@@ -303,7 +305,8 @@ namespace MetaMask.Unity.Utils
 
 			if (rawResult == null)
 			{
-				Debug.LogError("Could not find object of type " + injectType + " for field " + field.Name);
+				if (!optional)
+					Debug.LogError("Could not find object of type " + injectType + " for field " + field.Name);
 			}
 			else if (rawResult is object[])
 			{
@@ -313,7 +316,8 @@ namespace MetaMask.Unity.Utils
 				{
 					if (index >= result.Length)
 					{
-						Debug.LogError("Could not find object of type " + injectType + " for field " + field.Name +
+						if (!optional)
+							Debug.LogError("Could not find object of type " + injectType + " for field " + field.Name +
 						               " at index " + index);
 					}
 					else
@@ -325,7 +329,8 @@ namespace MetaMask.Unity.Utils
 				}
 				else
 				{
-					Debug.LogError("Could not find object of type " + injectType + " for field " + field.Name + " in " +
+					if (!optional)
+						Debug.LogError("Could not find object of type " + injectType + " for field " + field.Name + " in " +
 					               obj.name);
 				}
 			}

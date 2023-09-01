@@ -6,22 +6,16 @@ using UnityEngine;
 
 namespace MetaMask.SocketIOClient
 {
+
     public class WebSocketDispatcher : MonoBehaviour
     {
+
         private static WebSocketDispatcher instance;
 
         public static WebSocketDispatcher Instance
         {
             get
             {
-                if (Application.isEditor && !Application.isPlaying)
-                {
-                    return null;
-                }
-                if (instance == null)
-                {
-                    instance = new GameObject("WebSocket Dispatcher").AddComponent<WebSocketDispatcher>();
-                }
                 return instance;
             }
         }
@@ -30,7 +24,15 @@ namespace MetaMask.SocketIOClient
 
         private void Awake()
         {
-            DontDestroyOnLoad(gameObject);
+            if (instance != null)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
         }
 
 #if !UNITY_WEBGL || UNITY_EDITOR
@@ -57,5 +59,7 @@ namespace MetaMask.SocketIOClient
         {
             this.webSockets.Remove(webSocket);
         }
+
     }
+
 }

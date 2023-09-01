@@ -36,6 +36,12 @@ namespace MetaMask.Unity.Samples
         [SerializeField]
         protected MetaMaskConfig config;
 
+        public GameObject tokenList;
+        public GameObject mainMenu;
+        public GameObject nftList;
+        
+        private GameObject currentUI;
+
         #endregion
 
         #region Unity Methods
@@ -43,6 +49,8 @@ namespace MetaMask.Unity.Samples
         /// <summary>Initializes the MetaMaskUnity instance.</summary>
         private void Awake()
         {
+            this.currentUI = mainMenu;
+            
             MetaMaskUnity.Instance.Initialize();
             MetaMaskUnity.Instance.Events.WalletAuthorized += walletConnected;
             MetaMaskUnity.Instance.Events.WalletDisconnected += walletDisconnected;
@@ -84,7 +92,12 @@ namespace MetaMask.Unity.Samples
         /// <summary>Raised when the wallet is disconnected.</summary>
         private void walletDisconnected(object sender, EventArgs e)
         {
-            UnityThread.executeInUpdate(() => { onWalletDisconnected?.Invoke(this, EventArgs.Empty); });
+            if (this.currentUI != null)
+            {
+                this.currentUI.SetActive(false);
+            }
+            
+            onWalletDisconnected?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>Raised when the wallet is ready.</summary>
@@ -172,6 +185,35 @@ namespace MetaMask.Unity.Samples
             MetaMaskUnity.Instance.EndSession();
         }
 
+        public void ShowTokenList()
+        {
+            SetCurrentMenu(tokenList);
+        }
+
+        public void ShowMainMenu()
+        {
+            SetCurrentMenu(mainMenu);
+        }
+
+        public void ShowNftList()
+        {
+            SetCurrentMenu(nftList);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void SetCurrentMenu(GameObject menu)
+        {
+            if (this.currentUI != null)
+            {
+                this.currentUI.SetActive(false);
+            }
+            
+            menu.SetActive(true);
+            this.currentUI = menu;
+        }
         #endregion
     }
 

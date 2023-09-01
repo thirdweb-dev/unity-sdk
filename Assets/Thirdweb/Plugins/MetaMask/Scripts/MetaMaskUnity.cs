@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using evm.net;
 using System.Threading;
 using MetaMask.Cryptography;
 using MetaMask.IO;
 using MetaMask.Logging;
 using MetaMask.Models;
+using MetaMask.SocketIOClient;
 using MetaMask.Sockets;
 using MetaMask.Transports;
 using MetaMask.Transports.Unity;
@@ -11,12 +15,26 @@ using MetaMask.Transports.Unity.UI;
 using MetaMask.Unity.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 namespace MetaMask.Unity
 {
     [RequireComponent(typeof(MetaMaskUnityEventHandler))]
+    [RequireComponent(typeof(MetaMaskHttpService))]
     public class MetaMaskUnity : MonoBehaviour, IMetaMaskEvents
     {
+
+        #region Classes
+
+        [Serializable]
+        public class MetaMaskUnityRpcUrlConfig
+        {
+            public long ChainId;
+
+            public string RpcUrl;
+        }
+
+        #endregion
         #region Fields
 
         protected static MetaMaskUnity instance;
@@ -24,40 +42,39 @@ namespace MetaMask.Unity
         /// <summary>The configuration for the MetaMask client.</summary>
         [SerializeField]
         protected MetaMaskConfig config;
-
-        /// <summary>Whether or not to initialize the wallet on start.</summary>
+        /// <summary>Whether or not to initialize the wallet on awake.</summary>
         /// <remarks>This is useful for testing.</remarks>
-        [SerializeField]
-        protected bool initializeOnStart = true;
+        [FormerlySerializedAs("initializeOnStart")] [SerializeField]
+        protected bool initializeOnAwake = true;
 
         [SerializeField]
         protected MetaMaskUnityScriptableObjectTransport _transport;
+
 
         /// <summary>Initializes the MetaMask Wallet Plugin.</summary>
         protected bool initialized = false;
 
         /// <param name="transport">The transport to use for communication with the MetaMask backend.</param>
         protected IMetaMaskTransport transport;
-
         /// <param name="socket">The socket wrapper to use for communication with the MetaMask backend.</param>
         protected IMetaMaskSocketWrapper socket;
-
         /// <param name="dataManager">The data manager to use for storing data.</param>
         protected MetaMaskDataManager dataManager;
-
         /// <param name="session">The session to use for storing data.</param>
         protected MetaMaskSession session;
-
         /// <param name="sessionData">The session data to use for storing data.</param>
         protected MetaMaskSessionData sessionData;
-
         /// <param name="wallet">The wallet to use for storing data.</param>
         protected MetaMaskWallet wallet;
-
+        /// <summary>
+        /// The RPC URL to use for web3 query requests when the MetaMask wallet is paused
+        /// </summary>
+        [SerializeField]
+        protected List<MetaMaskUnityRpcUrlConfig> RpcUrl;
         internal Thread unityThread;
 
         #endregion
-
+        
         #region Events
 
         [Inject]
@@ -65,15 +82,8 @@ namespace MetaMask.Unity
 
         public IMetaMaskEventsHandler Events => _eventHandler;
 
-        public MetaMaskConnectedEvent MetaMaskConnected => _eventHandler.MetaMaskConnected;
-        public MetaMaskWalletReadyEvent MetaMaskWalletReady => _eventHandler.MetaMaskWalletReady;
-        public MetaMaskWalletPausedEvent MetaMaskWalletPaused => _eventHandler.MetaMaskWalletPaused;
-        public MetaMaskConnectingEvent MetamaskConnecting => _eventHandler.MetamaskConnecting;
-        public MetaMaskWalletDisconnectedEvent MetaMaskWalletDisconnected => _eventHandler.MetaMaskWalletDisconnected;
-
-        public MetaMaskWalletAccountChangedEvent MetaMaskWalletAccountChanged => _eventHandler.MetaMaskWalletAccountChanged;
-
-        public MetaMaskChainIdChangedEvent MetaMaskChainIdChanged => _eventHandler.MetaMaskChainIdChanged;
+        public event EventHandler MetaMaskUnityBeforeInitialized;
+        public event EventHandler MetaMaskUnityInitialized;
 
         #endregion
 
@@ -85,11 +95,6 @@ namespace MetaMask.Unity
         {
             get
             {
-                if (Application.isEditor && !Application.isPlaying)
-                {
-                    return null;
-                }
-
                 if (instance == null)
                 {
                     var instances = FindObjectsOfType<MetaMaskUnity>();
@@ -102,10 +107,12 @@ namespace MetaMask.Unity
                     {
                         instance = instances[0];
                     }
+                    // Don't automatically create new instances
+                    /*
                     else
                     {
                         instance = CreateNewInstance();
-                    }
+                    }*/
                 }
                 return instance;
             }
@@ -151,11 +158,12 @@ namespace MetaMask.Unity
                 Debug.LogError("There are more than 1 instances of " + nameof(MetaMaskUnity) + " inside the scene, there should be only one.");
                 Destroy(gameObject);
             }
-            if (this.initializeOnStart)
+            if (this.initializeOnAwake)
             {
                 Initialize(Config);
             }
         }
+
 
         /// <summary>Saves the current session.</summary>
         protected void OnApplicationQuit()
@@ -212,7 +220,7 @@ namespace MetaMask.Unity
 
             this.transport = transport;
             this.socket = socket;
-
+            
             // Inject variables
             UnityBinder.Inject(this);
 
@@ -220,34 +228,64 @@ namespace MetaMask.Unity
             if (Config.AppName == "example" || Config.AppUrl == "example.com")
             {
                 if (SceneManager.GetActiveScene().name.ToLower() != "metamask main (sample)")
-                    throw new ArgumentException("Cannot use example App name or App URL, please update app info in Window > MetaMask > Setup Window under Credentials");
+                    throw new ArgumentException(
+                        "Cannot use example App name or App URL, please update app info in Window > MetaMask > Setup Window under Credentials");
             }
-
+            
             try
             {
+                // Check if we need to create a WebsocketDispatcher
+                var dispatcher = FindObjectOfType<WebSocketDispatcher>();
+                if (dispatcher == null)
+                {
+                    MetaMaskDebug.Log("No WebSocketDispatcher found in scene, creating one on " + gameObject.name);
+                    gameObject.AddComponent<WebSocketDispatcher>();
+                }
+                
                 this.unityThread = Thread.CurrentThread;
-
+                
                 // Configure persistent data manager
                 this.dataManager = new MetaMaskDataManager(MetaMaskUnityStorage.Instance, this.config.Encrypt, this.config.EncryptionPassword);
-
+                
                 // Grab app name, app url and session id
                 var appName = Config.AppName;
                 var appUrl = Config.AppUrl;
                 var sessionId = this.config.SessionIdentifier;
 
                 // Setup the wallet
-                this.wallet = new MetaMaskWallet(this.dataManager, appName, appUrl, sessionId, UnityEciesProvider.Singleton, transport, socket, this.config.SocketUrl);
-
+                this.wallet = new MetaMaskWallet(this.dataManager, 
+                    appName, appUrl, sessionId, UnityEciesProvider.Singleton, 
+                    transport, socket, this.config.SocketUrl);
+                
                 // Grab session data
                 this.session = this.wallet.Session;
                 this.sessionData = this.wallet.Session.Data;
-
+                
                 this.wallet.AnalyticsPlatform = "unity";
+                
+                // Setup the fallback provider, if set
+                if (RpcUrl != null && RpcUrl.Count > 0)
+                {
+                    var rpcUrlMap = RpcUrl.ToDictionary(
+                        c => c.ChainId,
+                        c => c.RpcUrl
+                    );
+                    
+                    this.wallet.FallbackProvider = new HttpProvider(rpcUrlMap, this.wallet);
+                }
 
+                if (this.MetaMaskUnityBeforeInitialized != null)
+                    this.MetaMaskUnityBeforeInitialized(this, EventArgs.Empty);
+                
+                _eventHandler.SetupEvents();
+                
                 // Initialize the transport
                 transport.Initialize();
 
                 this.initialized = true;
+                
+                if (this.MetaMaskUnityInitialized != null)
+                    this.MetaMaskUnityInitialized(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
@@ -271,11 +309,11 @@ namespace MetaMask.Unity
         {
             if (this.wallet.IsConnected)
                 this.wallet.Disconnect();
-
+            
             if (endSession)
                 EndSession();
         }
-
+        
         public void EndSession()
         {
             this.wallet.EndSession();
@@ -297,7 +335,7 @@ namespace MetaMask.Unity
             {
                 if (this.dataManager == null)
                     this.dataManager = new MetaMaskDataManager(MetaMaskUnityStorage.Instance, this.config.Encrypt, this.config.EncryptionPassword);
-
+                    
                 this.dataManager.Delete(this.config.SessionIdentifier);
             }
         }
@@ -313,7 +351,7 @@ namespace MetaMask.Unity
 
         private void OnValidate()
         {
-            if (clearSessionData && Application.isEditor && Application.isPlaying)
+            if (clearSessionData && Application.isEditor)
             {
                 ForceClearSession();
                 clearSessionData = false;
@@ -340,5 +378,6 @@ namespace MetaMask.Unity
         }
 
         #endregion
+
     }
 }

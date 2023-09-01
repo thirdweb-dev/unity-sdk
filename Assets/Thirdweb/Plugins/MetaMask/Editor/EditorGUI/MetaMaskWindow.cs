@@ -104,6 +104,13 @@ namespace MetaMask.Unity
 
         #region Drawer Methods
 
+        private void DrawHeader(string title)
+        {
+            GUILayout.Box(Resources.Load<Texture>(_headerImagePath), _headerStyle);
+            GUILayout.Box(Resources.Load<Texture>(_metamaskLogoImagePath), _metamaskLogoStyle);
+            GUILayout.Box(title, _higherTextStyle);
+        }
+
         /// <summary>Draws the connect screen.</summary>
         private void DrawConnect()
         {

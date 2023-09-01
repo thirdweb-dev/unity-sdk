@@ -1,0 +1,2426 @@
+{
+  "ABIRoot": {
+    "kind": "Root",
+    "name": "TopLevel",
+    "printedName": "TopLevel",
+    "children": [
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Starscream",
+        "printedName": "Starscream",
+        "declKind": "Import",
+        "moduleName": "MetaMask_iOS"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "UnityWebSocket",
+        "printedName": "UnityWebSocket",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "createWebSocket",
+            "printedName": "createWebSocket(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "ProtocolComposition",
+                "printedName": "Any"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(cm)createWebSocket:",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC06createeF0yypSSFZ",
+            "moduleName": "MetaMask_iOS",
+            "static": true,
+            "objc_name": "createWebSocket:",
+            "declAttributes": [
+              "Final",
+              "ObjC",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Var",
+            "name": "lastId",
+            "printedName": "lastId",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int32",
+                "printedName": "Swift.Int32",
+                "usr": "s:s5Int32V"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:12MetaMask_iOS14UnityWebSocketC6lastIds5Int32VvpZ",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6lastIds5Int32VvpZ",
+            "moduleName": "MetaMask_iOS",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int32",
+                    "printedName": "Swift.Int32",
+                    "usr": "s:s5Int32V"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC6lastIds5Int32VvgZ",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6lastIds5Int32VvgZ",
+                "moduleName": "MetaMask_iOS",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int32",
+                    "printedName": "Swift.Int32",
+                    "usr": "s:s5Int32V"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC6lastIds5Int32VvsZ",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6lastIds5Int32VvsZ",
+                "moduleName": "MetaMask_iOS",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC6lastIds5Int32VvMZ",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6lastIds5Int32VvMZ",
+                "moduleName": "MetaMask_iOS",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "socketInstances",
+            "printedName": "socketInstances",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[MetaMask_iOS.UnityWebSocket]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "UnityWebSocket",
+                    "printedName": "MetaMask_iOS.UnityWebSocket",
+                    "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket"
+                  }
+                ],
+                "usr": "s:Sa"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:12MetaMask_iOS14UnityWebSocketC15socketInstancesSayACGvpZ",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC15socketInstancesSayACGvpZ",
+            "moduleName": "MetaMask_iOS",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Array",
+                    "printedName": "[MetaMask_iOS.UnityWebSocket]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "UnityWebSocket",
+                        "printedName": "MetaMask_iOS.UnityWebSocket",
+                        "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket"
+                      }
+                    ],
+                    "usr": "s:Sa"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC15socketInstancesSayACGvgZ",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC15socketInstancesSayACGvgZ",
+                "moduleName": "MetaMask_iOS",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Array",
+                    "printedName": "[MetaMask_iOS.UnityWebSocket]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "UnityWebSocket",
+                        "printedName": "MetaMask_iOS.UnityWebSocket",
+                        "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket"
+                      }
+                    ],
+                    "usr": "s:Sa"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC15socketInstancesSayACGvsZ",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC15socketInstancesSayACGvsZ",
+                "moduleName": "MetaMask_iOS",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC15socketInstancesSayACGvMZ",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC15socketInstancesSayACGvMZ",
+                "moduleName": "MetaMask_iOS",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "instanceId",
+            "printedName": "instanceId",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int32",
+                "printedName": "Swift.Int32",
+                "usr": "s:s5Int32V"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(py)instanceId",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC10instanceIds5Int32Vvp",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "instanceId",
+            "declAttributes": [
+              "HasInitialValue",
+              "ObjC",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int32",
+                    "printedName": "Swift.Int32",
+                    "usr": "s:s5Int32V"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)instanceId",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC10instanceIds5Int32Vvg",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "instanceId",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int32",
+                    "printedName": "Swift.Int32",
+                    "usr": "s:s5Int32V"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)setInstanceId:",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC10instanceIds5Int32Vvs",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "setInstanceId:",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC10instanceIds5Int32VvM",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC10instanceIds5Int32VvM",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "textMessageReceived",
+            "printedName": "textMessageReceived",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int32",
+                            "printedName": "Swift.Int32",
+                            "usr": "s:s5Int32V"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "UnsafePointer",
+                            "printedName": "Swift.UnsafePointer<Swift.Int8>",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int8",
+                                "printedName": "Swift.Int8",
+                                "usr": "s:s4Int8V"
+                              }
+                            ],
+                            "usr": "s:SP"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(py)textMessageReceived",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC19textMessageReceivedys5Int32V_SPys4Int8VGtXCSgvp",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "textMessageReceived",
+            "declAttributes": [
+              "HasInitialValue",
+              "ObjC",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int32",
+                                "printedName": "Swift.Int32",
+                                "usr": "s:s5Int32V"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "UnsafePointer",
+                                "printedName": "Swift.UnsafePointer<Swift.Int8>",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "Int8",
+                                    "printedName": "Swift.Int8",
+                                    "usr": "s:s4Int8V"
+                                  }
+                                ],
+                                "usr": "s:SP"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)textMessageReceived",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC19textMessageReceivedys5Int32V_SPys4Int8VGtXCSgvg",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "textMessageReceived",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int32",
+                                "printedName": "Swift.Int32",
+                                "usr": "s:s5Int32V"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "UnsafePointer",
+                                "printedName": "Swift.UnsafePointer<Swift.Int8>",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "Int8",
+                                    "printedName": "Swift.Int8",
+                                    "usr": "s:s4Int8V"
+                                  }
+                                ],
+                                "usr": "s:SP"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)setTextMessageReceived:",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC19textMessageReceivedys5Int32V_SPys4Int8VGtXCSgvs",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "setTextMessageReceived:",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC19textMessageReceivedys5Int32V_SPys4Int8VGtXCSgvM",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC19textMessageReceivedys5Int32V_SPys4Int8VGtXCSgvM",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "binaryMessageReceived",
+            "printedName": "binaryMessageReceived",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((Swift.Int32, Swift.UnsafeMutablePointer<Swift.UInt8>) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.Int32, Swift.UnsafeMutablePointer<Swift.UInt8>) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(Swift.Int32, Swift.UnsafeMutablePointer<Swift.UInt8>)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int32",
+                            "printedName": "Swift.Int32",
+                            "usr": "s:s5Int32V"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "UnsafeMutablePointer",
+                            "printedName": "Swift.UnsafeMutablePointer<Swift.UInt8>",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "UInt8",
+                                "printedName": "Swift.UInt8",
+                                "usr": "s:s5UInt8V"
+                              }
+                            ],
+                            "usr": "s:Sp"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(py)binaryMessageReceived",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC21binaryMessageReceivedys5Int32V_Spys5UInt8VGtXCSgvp",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "binaryMessageReceived",
+            "declAttributes": [
+              "HasInitialValue",
+              "ObjC",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((Swift.Int32, Swift.UnsafeMutablePointer<Swift.UInt8>) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(Swift.Int32, Swift.UnsafeMutablePointer<Swift.UInt8>) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(Swift.Int32, Swift.UnsafeMutablePointer<Swift.UInt8>)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int32",
+                                "printedName": "Swift.Int32",
+                                "usr": "s:s5Int32V"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "UnsafeMutablePointer",
+                                "printedName": "Swift.UnsafeMutablePointer<Swift.UInt8>",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "UInt8",
+                                    "printedName": "Swift.UInt8",
+                                    "usr": "s:s5UInt8V"
+                                  }
+                                ],
+                                "usr": "s:Sp"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)binaryMessageReceived",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC21binaryMessageReceivedys5Int32V_Spys5UInt8VGtXCSgvg",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "binaryMessageReceived",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((Swift.Int32, Swift.UnsafeMutablePointer<Swift.UInt8>) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(Swift.Int32, Swift.UnsafeMutablePointer<Swift.UInt8>) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(Swift.Int32, Swift.UnsafeMutablePointer<Swift.UInt8>)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int32",
+                                "printedName": "Swift.Int32",
+                                "usr": "s:s5Int32V"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "UnsafeMutablePointer",
+                                "printedName": "Swift.UnsafeMutablePointer<Swift.UInt8>",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "UInt8",
+                                    "printedName": "Swift.UInt8",
+                                    "usr": "s:s5UInt8V"
+                                  }
+                                ],
+                                "usr": "s:Sp"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)setBinaryMessageReceived:",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC21binaryMessageReceivedys5Int32V_Spys5UInt8VGtXCSgvs",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "setBinaryMessageReceived:",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC21binaryMessageReceivedys5Int32V_Spys5UInt8VGtXCSgvM",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC21binaryMessageReceivedys5Int32V_Spys5UInt8VGtXCSgvM",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "opened",
+            "printedName": "opened",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((Swift.Int32) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.Int32) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Int32",
+                        "printedName": "Swift.Int32",
+                        "usr": "s:s5Int32V"
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(py)opened",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6openedys5Int32VXCSgvp",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "opened",
+            "declAttributes": [
+              "HasInitialValue",
+              "ObjC",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((Swift.Int32) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(Swift.Int32) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int32",
+                            "printedName": "Swift.Int32",
+                            "usr": "s:s5Int32V"
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)opened",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6openedys5Int32VXCSgvg",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "opened",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((Swift.Int32) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(Swift.Int32) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int32",
+                            "printedName": "Swift.Int32",
+                            "usr": "s:s5Int32V"
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)setOpened:",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6openedys5Int32VXCSgvs",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "setOpened:",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC6openedys5Int32VXCSgvM",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6openedys5Int32VXCSgvM",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "closed",
+            "printedName": "closed",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((Swift.Int32, Swift.Int32) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.Int32, Swift.Int32) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(Swift.Int32, Swift.Int32)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int32",
+                            "printedName": "Swift.Int32",
+                            "usr": "s:s5Int32V"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int32",
+                            "printedName": "Swift.Int32",
+                            "usr": "s:s5Int32V"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(py)closed",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6closedys5Int32V_AFtXCSgvp",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "closed",
+            "declAttributes": [
+              "HasInitialValue",
+              "ObjC",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((Swift.Int32, Swift.Int32) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(Swift.Int32, Swift.Int32) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(Swift.Int32, Swift.Int32)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int32",
+                                "printedName": "Swift.Int32",
+                                "usr": "s:s5Int32V"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int32",
+                                "printedName": "Swift.Int32",
+                                "usr": "s:s5Int32V"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)closed",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6closedys5Int32V_AFtXCSgvg",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "closed",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((Swift.Int32, Swift.Int32) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(Swift.Int32, Swift.Int32) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(Swift.Int32, Swift.Int32)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int32",
+                                "printedName": "Swift.Int32",
+                                "usr": "s:s5Int32V"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int32",
+                                "printedName": "Swift.Int32",
+                                "usr": "s:s5Int32V"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)setClosed:",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6closedys5Int32V_AFtXCSgvs",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "setClosed:",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC6closedys5Int32V_AFtXCSgvM",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC6closedys5Int32V_AFtXCSgvM",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "errorOccured",
+            "printedName": "errorOccured",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int32",
+                            "printedName": "Swift.Int32",
+                            "usr": "s:s5Int32V"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "UnsafePointer",
+                            "printedName": "Swift.UnsafePointer<Swift.Int8>",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int8",
+                                "printedName": "Swift.Int8",
+                                "usr": "s:s4Int8V"
+                              }
+                            ],
+                            "usr": "s:SP"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(py)errorOccured",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC12errorOccuredys5Int32V_SPys4Int8VGtXCSgvp",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "errorOccured",
+            "declAttributes": [
+              "HasInitialValue",
+              "ObjC",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int32",
+                                "printedName": "Swift.Int32",
+                                "usr": "s:s5Int32V"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "UnsafePointer",
+                                "printedName": "Swift.UnsafePointer<Swift.Int8>",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "Int8",
+                                    "printedName": "Swift.Int8",
+                                    "usr": "s:s4Int8V"
+                                  }
+                                ],
+                                "usr": "s:SP"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)errorOccured",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC12errorOccuredys5Int32V_SPys4Int8VGtXCSgvg",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "errorOccured",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(Swift.Int32, Swift.UnsafePointer<Swift.Int8>)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int32",
+                                "printedName": "Swift.Int32",
+                                "usr": "s:s5Int32V"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "UnsafePointer",
+                                "printedName": "Swift.UnsafePointer<Swift.Int8>",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "Int8",
+                                    "printedName": "Swift.Int8",
+                                    "usr": "s:s4Int8V"
+                                  }
+                                ],
+                                "usr": "s:SP"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)setErrorOccured:",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC12errorOccuredys5Int32V_SPys4Int8VGtXCSgvs",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "setErrorOccured:",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC12errorOccuredys5Int32V_SPys4Int8VGtXCSgvM",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC12errorOccuredys5Int32V_SPys4Int8VGtXCSgvM",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "shouldConnect",
+            "printedName": "shouldConnect",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:12MetaMask_iOS14UnityWebSocketC13shouldConnectSbvp",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC13shouldConnectSbvp",
+            "moduleName": "MetaMask_iOS",
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC13shouldConnectSbvg",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC13shouldConnectSbvg",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC13shouldConnectSbvs",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC13shouldConnectSbvs",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC13shouldConnectSbvM",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC13shouldConnectSbvM",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "url",
+            "printedName": "url",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(py)url",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC3urlSSvp",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "url",
+            "declAttributes": [
+              "ObjC",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)url",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC3urlSSvg",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "url",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)setUrl:",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC3urlSSvs",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "objc_name": "setUrl:",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:12MetaMask_iOS14UnityWebSocketC3urlSSvM",
+                "mangledName": "$s12MetaMask_iOS14UnityWebSocketC3urlSSvM",
+                "moduleName": "MetaMask_iOS",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(url:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UnityWebSocket",
+                "printedName": "MetaMask_iOS.UnityWebSocket",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)initWithUrl:",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC3urlACSS_tcfc",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "initWithUrl:",
+            "declAttributes": [
+              "ObjC",
+              "AccessControl",
+              "Required"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Function",
+            "name": "connect",
+            "printedName": "connect()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)connect",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC7connectyyF",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "connect",
+            "declAttributes": [
+              "ObjC",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "disconnect",
+            "printedName": "disconnect()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)disconnect",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC10disconnectyyF",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "disconnect",
+            "declAttributes": [
+              "ObjC",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "sendText",
+            "printedName": "sendText(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)sendText:",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC8sendTextyySSF",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "sendText:",
+            "declAttributes": [
+              "ObjC",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "sendBytes",
+            "printedName": "sendBytes(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Data",
+                "printedName": "Foundation.Data",
+                "usr": "s:10Foundation4DataV"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)sendBytes:",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC9sendBytesyy10Foundation4DataVF",
+            "moduleName": "MetaMask_iOS",
+            "objc_name": "sendBytes:",
+            "declAttributes": [
+              "ObjC",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "didReceive",
+            "printedName": "didReceive(event:client:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "WebSocketEvent",
+                "printedName": "Starscream.WebSocketEvent",
+                "usr": "s:10Starscream14WebSocketEventO"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "WebSocket",
+                "printedName": "Starscream.WebSocket",
+                "usr": "s:10Starscream9WebSocketC"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:12MetaMask_iOS14UnityWebSocketC10didReceive5event6clienty10Starscream0eF5EventO_AG0eF0CtF",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketC10didReceive5event6clienty10Starscream0eF5EventO_AG0eF0CtF",
+            "moduleName": "MetaMask_iOS",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UnityWebSocket",
+                "printedName": "MetaMask_iOS.UnityWebSocket",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket(im)init",
+            "mangledName": "$s12MetaMask_iOS14UnityWebSocketCACycfc",
+            "moduleName": "MetaMask_iOS",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket",
+        "mangledName": "$s12MetaMask_iOS14UnityWebSocketC",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "WebSocketDelegate",
+            "printedName": "WebSocketDelegate",
+            "usr": "s:10Starscream17WebSocketDelegateP",
+            "mangledName": "$s10Starscream17WebSocketDelegateP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "WebSocketClient",
+        "printedName": "WebSocketClient",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "createWebSocket",
+            "printedName": "createWebSocket(url:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "WebSocketClient",
+                "printedName": "MetaMask_iOS.WebSocketClient",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)WebSocketClient"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:12MetaMask_iOS15WebSocketClientC06createdE03urlACSS_tFZ",
+            "mangledName": "$s12MetaMask_iOS15WebSocketClientC06createdE03urlACSS_tFZ",
+            "moduleName": "MetaMask_iOS",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(url:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "WebSocketClient",
+                "printedName": "MetaMask_iOS.WebSocketClient",
+                "usr": "c:@M@MetaMask_iOS@objc(cs)WebSocketClient"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@MetaMask_iOS@objc(cs)WebSocketClient(im)initWithUrl:",
+            "mangledName": "$s12MetaMask_iOS15WebSocketClientC3urlACSS_tcfc",
+            "moduleName": "MetaMask_iOS",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "initWithUrl:",
+            "declAttributes": [
+              "ObjC",
+              "Required"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@MetaMask_iOS@objc(cs)WebSocketClient",
+        "mangledName": "$s12MetaMask_iOS15WebSocketClientC",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:@M@MetaMask_iOS@objc(cs)UnityWebSocket",
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "MetaMask_iOS.UnityWebSocket",
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "WebSocketDelegate",
+            "printedName": "WebSocketDelegate",
+            "usr": "s:10Starscream17WebSocketDelegateP",
+            "mangledName": "$s10Starscream17WebSocketDelegateP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      },
+      {
+        "kind": "Function",
+        "name": "unityWebSocket_create",
+        "printedName": "unityWebSocket_create(_:)",
+        "children": [
+          {
+            "kind": "TypeNominal",
+            "name": "Int32",
+            "printedName": "Swift.Int32",
+            "usr": "s:s5Int32V"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Optional",
+            "printedName": "Swift.UnsafePointer<Swift.Int8>?",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UnsafePointer",
+                "printedName": "Swift.UnsafePointer<Swift.Int8>",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int8",
+                    "printedName": "Swift.Int8",
+                    "usr": "s:s4Int8V"
+                  }
+                ],
+                "usr": "s:SP"
+              }
+            ],
+            "usr": "s:Sq"
+          }
+        ],
+        "declKind": "Func",
+        "usr": "c:(cm)unityWebSocket_create:",
+        "mangledName": "$s12MetaMask_iOS21unityWebSocket_createys5Int32VSPys4Int8VGSgF",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "CDecl"
+        ],
+        "funcSelfKind": "NonMutating"
+      },
+      {
+        "kind": "Function",
+        "name": "unityWebSocket_destroy",
+        "printedName": "unityWebSocket_destroy(_:)",
+        "children": [
+          {
+            "kind": "TypeNominal",
+            "name": "Void",
+            "printedName": "()"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Int32",
+            "printedName": "Swift.Int32",
+            "usr": "s:s5Int32V"
+          }
+        ],
+        "declKind": "Func",
+        "usr": "c:(cm)unityWebSocket_destroy:",
+        "mangledName": "$s12MetaMask_iOS22unityWebSocket_destroyyys5Int32VF",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "CDecl"
+        ],
+        "funcSelfKind": "NonMutating"
+      },
+      {
+        "kind": "Function",
+        "name": "unityWebSocket_connect",
+        "printedName": "unityWebSocket_connect(_:)",
+        "children": [
+          {
+            "kind": "TypeNominal",
+            "name": "Void",
+            "printedName": "()"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Int32",
+            "printedName": "Swift.Int32",
+            "usr": "s:s5Int32V"
+          }
+        ],
+        "declKind": "Func",
+        "usr": "c:(cm)unityWebSocket_connect:",
+        "mangledName": "$s12MetaMask_iOS22unityWebSocket_connectyys5Int32VF",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "CDecl"
+        ],
+        "funcSelfKind": "NonMutating"
+      },
+      {
+        "kind": "Function",
+        "name": "unityWebSocket_disconnect",
+        "printedName": "unityWebSocket_disconnect(_:)",
+        "children": [
+          {
+            "kind": "TypeNominal",
+            "name": "Void",
+            "printedName": "()"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Int32",
+            "printedName": "Swift.Int32",
+            "usr": "s:s5Int32V"
+          }
+        ],
+        "declKind": "Func",
+        "usr": "c:(cm)unityWebSocket_disconnect:",
+        "mangledName": "$s12MetaMask_iOS25unityWebSocket_disconnectyys5Int32VF",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "CDecl"
+        ],
+        "funcSelfKind": "NonMutating"
+      },
+      {
+        "kind": "Function",
+        "name": "unityWebSocket_sendText",
+        "printedName": "unityWebSocket_sendText(_:stringPtr:)",
+        "children": [
+          {
+            "kind": "TypeNominal",
+            "name": "Void",
+            "printedName": "()"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Int32",
+            "printedName": "Swift.Int32",
+            "usr": "s:s5Int32V"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Optional",
+            "printedName": "Swift.UnsafePointer<Swift.Int8>?",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UnsafePointer",
+                "printedName": "Swift.UnsafePointer<Swift.Int8>",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int8",
+                    "printedName": "Swift.Int8",
+                    "usr": "s:s4Int8V"
+                  }
+                ],
+                "usr": "s:SP"
+              }
+            ],
+            "usr": "s:Sq"
+          }
+        ],
+        "declKind": "Func",
+        "usr": "c:(cm)unityWebSocket_sendText:stringPtr:",
+        "mangledName": "$s12MetaMask_iOS23unityWebSocket_sendText_9stringPtrys5Int32V_SPys4Int8VGSgtF",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "CDecl"
+        ],
+        "funcSelfKind": "NonMutating"
+      },
+      {
+        "kind": "Function",
+        "name": "unityWebSocket_sendBytes",
+        "printedName": "unityWebSocket_sendBytes(_:bytes:)",
+        "children": [
+          {
+            "kind": "TypeNominal",
+            "name": "Void",
+            "printedName": "()"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Int32",
+            "printedName": "Swift.Int32",
+            "usr": "s:s5Int32V"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Data",
+            "printedName": "Foundation.Data",
+            "usr": "s:10Foundation4DataV"
+          }
+        ],
+        "declKind": "Func",
+        "usr": "c:(cm)unityWebSocket_sendBytes:bytes:",
+        "mangledName": "$s12MetaMask_iOS24unityWebSocket_sendBytes_5bytesys5Int32V_10Foundation4DataVtF",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "CDecl"
+        ],
+        "funcSelfKind": "NonMutating"
+      },
+      {
+        "kind": "Function",
+        "name": "unityWebSocket_setTextMessageReceivedCallback",
+        "printedName": "unityWebSocket_setTextMessageReceivedCallback(_:callbackPtr:)",
+        "children": [
+          {
+            "kind": "TypeNominal",
+            "name": "Void",
+            "printedName": "()"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Int32",
+            "printedName": "Swift.Int32",
+            "usr": "s:s5Int32V"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Optional",
+            "printedName": "Swift.UnsafeMutableRawPointer?",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UnsafeMutableRawPointer",
+                "printedName": "Swift.UnsafeMutableRawPointer",
+                "usr": "s:Sv"
+              }
+            ],
+            "usr": "s:Sq"
+          }
+        ],
+        "declKind": "Func",
+        "usr": "c:(cm)unityWebSocket_setTextMessageReceivedCallback:callbackPtr:",
+        "mangledName": "$s12MetaMask_iOS45unityWebSocket_setTextMessageReceivedCallback_11callbackPtrys5Int32V_SvSgtF",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "CDecl"
+        ],
+        "funcSelfKind": "NonMutating"
+      },
+      {
+        "kind": "Function",
+        "name": "unityWebSocket_setBinaryMessageReceivedCallback",
+        "printedName": "unityWebSocket_setBinaryMessageReceivedCallback(_:callbackPtr:)",
+        "children": [
+          {
+            "kind": "TypeNominal",
+            "name": "Void",
+            "printedName": "()"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Int32",
+            "printedName": "Swift.Int32",
+            "usr": "s:s5Int32V"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Optional",
+            "printedName": "Swift.UnsafeMutableRawPointer?",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UnsafeMutableRawPointer",
+                "printedName": "Swift.UnsafeMutableRawPointer",
+                "usr": "s:Sv"
+              }
+            ],
+            "usr": "s:Sq"
+          }
+        ],
+        "declKind": "Func",
+        "usr": "c:(cm)unityWebSocket_setBinaryMessageReceivedCallback:callbackPtr:",
+        "mangledName": "$s12MetaMask_iOS47unityWebSocket_setBinaryMessageReceivedCallback_11callbackPtrys5Int32V_SvSgtF",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "CDecl"
+        ],
+        "funcSelfKind": "NonMutating"
+      },
+      {
+        "kind": "Function",
+        "name": "unityWebSocket_setConnectedCallback",
+        "printedName": "unityWebSocket_setConnectedCallback(_:callbackPtr:)",
+        "children": [
+          {
+            "kind": "TypeNominal",
+            "name": "Void",
+            "printedName": "()"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Int32",
+            "printedName": "Swift.Int32",
+            "usr": "s:s5Int32V"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Optional",
+            "printedName": "Swift.UnsafeMutableRawPointer?",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UnsafeMutableRawPointer",
+                "printedName": "Swift.UnsafeMutableRawPointer",
+                "usr": "s:Sv"
+              }
+            ],
+            "usr": "s:Sq"
+          }
+        ],
+        "declKind": "Func",
+        "usr": "c:(cm)unityWebSocket_setConnectedCallback:callbackPtr:",
+        "mangledName": "$s12MetaMask_iOS35unityWebSocket_setConnectedCallback_11callbackPtrys5Int32V_SvSgtF",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "CDecl"
+        ],
+        "funcSelfKind": "NonMutating"
+      },
+      {
+        "kind": "Function",
+        "name": "unityWebSocket_setDisconnectedCallback",
+        "printedName": "unityWebSocket_setDisconnectedCallback(_:callbackPtr:)",
+        "children": [
+          {
+            "kind": "TypeNominal",
+            "name": "Void",
+            "printedName": "()"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Int32",
+            "printedName": "Swift.Int32",
+            "usr": "s:s5Int32V"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Optional",
+            "printedName": "Swift.UnsafeMutableRawPointer?",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UnsafeMutableRawPointer",
+                "printedName": "Swift.UnsafeMutableRawPointer",
+                "usr": "s:Sv"
+              }
+            ],
+            "usr": "s:Sq"
+          }
+        ],
+        "declKind": "Func",
+        "usr": "c:(cm)unityWebSocket_setDisconnectedCallback:callbackPtr:",
+        "mangledName": "$s12MetaMask_iOS38unityWebSocket_setDisconnectedCallback_11callbackPtrys5Int32V_SvSgtF",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "CDecl"
+        ],
+        "funcSelfKind": "NonMutating"
+      },
+      {
+        "kind": "Function",
+        "name": "unityWebSocket_setErrorCallback",
+        "printedName": "unityWebSocket_setErrorCallback(_:callbackPtr:)",
+        "children": [
+          {
+            "kind": "TypeNominal",
+            "name": "Void",
+            "printedName": "()"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Int32",
+            "printedName": "Swift.Int32",
+            "usr": "s:s5Int32V"
+          },
+          {
+            "kind": "TypeNominal",
+            "name": "Optional",
+            "printedName": "Swift.UnsafeMutableRawPointer?",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UnsafeMutableRawPointer",
+                "printedName": "Swift.UnsafeMutableRawPointer",
+                "usr": "s:Sv"
+              }
+            ],
+            "usr": "s:Sq"
+          }
+        ],
+        "declKind": "Func",
+        "usr": "c:(cm)unityWebSocket_setErrorCallback:callbackPtr:",
+        "mangledName": "$s12MetaMask_iOS31unityWebSocket_setErrorCallback_11callbackPtrys5Int32V_SvSgtF",
+        "moduleName": "MetaMask_iOS",
+        "declAttributes": [
+          "AccessControl",
+          "CDecl"
+        ],
+        "funcSelfKind": "NonMutating"
+      }
+    ],
+    "json_format_version": 8
+  },
+  "ConstValues": [
+    {
+      "filePath": "\/Users\/hasanbayat\/Documents\/GitHub\/metamask-unity-sdk\/src\/MetaMask.iOS\/MetaMask.iOS\/UnityWebSocket.swift",
+      "kind": "StringLiteral",
+      "offset": 1016,
+      "length": 29,
+      "value": "\"io.metamask.unity.websocket\""
+    },
+    {
+      "filePath": "\/Users\/hasanbayat\/Documents\/GitHub\/metamask-unity-sdk\/src\/MetaMask.iOS\/MetaMask.iOS\/UnityWebSocket.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1086,
+      "length": 2,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/hasanbayat\/Documents\/GitHub\/metamask-unity-sdk\/src\/MetaMask.iOS\/MetaMask.iOS\/UnityWebSocket.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1185,
+      "length": 2,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/hasanbayat\/Documents\/GitHub\/metamask-unity-sdk\/src\/MetaMask.iOS\/MetaMask.iOS\/UnityWebSocket.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1556,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/hasanbayat\/Documents\/GitHub\/metamask-unity-sdk\/src\/MetaMask.iOS\/MetaMask.iOS\/UnityWebSocket.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1699,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/hasanbayat\/Documents\/GitHub\/metamask-unity-sdk\/src\/MetaMask.iOS\/MetaMask.iOS\/UnityWebSocket.swift",
+      "kind": "StringLiteral",
+      "offset": 735,
+      "length": 14,
+      "value": "\"MetaMask_iOS.UnityWebSocket\""
+    }
+  ]
+}

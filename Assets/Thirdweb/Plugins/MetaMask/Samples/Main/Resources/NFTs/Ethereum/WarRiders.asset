@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9bf78eab9e343138abaf12f0330a57a, type: 3}
+  m_Name: WarRiders
+  m_EditorClassIdentifier: 
+  ContractAddresses:
+  - ChainId: 1
+    Address: 0x5CAeBd3b32e210E85CE3E9d51638B9C445481567

@@ -41,7 +41,7 @@ namespace MetaMask.Transports.Unity
 
         public abstract void OnSuccess();
         
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         public static extern void OpenMetaMaskDeeplink(string url);
         
@@ -53,7 +53,7 @@ namespace MetaMask.Transports.Unity
         {
             get
             {
-                #if UNITY_WEBGL
+                #if UNITY_WEBGL && !UNITY_EDITOR
                     return WebGLIsMobile();
                 #else
                     return Application.isMobilePlatform;
@@ -61,9 +61,10 @@ namespace MetaMask.Transports.Unity
             }
         }
         public abstract void OnDisconnect();
+
         protected void OpenDeeplinkURL(string url)
         {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             OpenMetaMaskDeeplink(url);
 #else
             Application.OpenURL(url);

@@ -21,7 +21,7 @@ namespace MetaMask.IO
 
         private static void BuildPlatformStorage()
         {
-            #if UNITY_WEBGL
+            #if UNITY_WEBGL && !UNITY_EDITOR
             _instance = MetaMaskWebLocalStorage.Singleton;
             #else
             _instance = MetaMaskPlayerPrefsStorage.Singleton;

@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using evm.net.Models;
 using MetaMask.Models;
 
 namespace MetaMask
@@ -109,29 +110,27 @@ namespace MetaMask
     public class MetaMaskEthereumRequestResultEventArgs : EventArgs
     {
         public readonly MetaMaskSubmittedRequest Request;
-        public readonly JsonElement Result;
-        public readonly string TransactionHash;
+        public readonly string Result;
 
         /// <summary>Initializes a new instance of the <see cref="MetaMaskEthereumRequestResultEventArgs"/> class.</summary>
         /// <param name="request">The initial Ethereum request.</param>
         /// <param name="result">The request's result.</param>
-        public MetaMaskEthereumRequestResultEventArgs(MetaMaskSubmittedRequest request, JsonElement result)
+        public MetaMaskEthereumRequestResultEventArgs(MetaMaskSubmittedRequest request, string result)
         {
             this.Request = request;
             this.Result = result;
-            this.TransactionHash = result.ValueKind == JsonValueKind.String ? result.ToString() : string.Empty;
         }
     }
 
     public class MetaMaskEthereumRequestFailedEventArgs : EventArgs
     {
         public readonly MetaMaskSubmittedRequest Request;
-        public readonly JsonElement Error;
+        public readonly JsonRpcError Error;
 
         /// <summary>Initializes a new instance of the <see cref="MetaMaskEthereumRequestFailedEventArgs"/> class.</summary>
         /// <param name="request">The initial Ethereum request.</param>
         /// <param name="error">The request's result.</param>
-        public MetaMaskEthereumRequestFailedEventArgs(MetaMaskSubmittedRequest request, JsonElement error)
+        public MetaMaskEthereumRequestFailedEventArgs(MetaMaskSubmittedRequest request, JsonRpcError error)
         {
             this.Request = request;
             this.Error = error;

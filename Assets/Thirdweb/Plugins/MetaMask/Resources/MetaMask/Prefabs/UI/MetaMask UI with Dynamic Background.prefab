@@ -529,7 +529,7 @@ MonoBehaviour:
   qrCodePanel: {fileID: 1850004062007021657}
   isOpen: 0
   qrImage: {fileID: 3950203764407014509}
-  otpPanel: {fileID: 45923903797546926}
+  otpPanel: {fileID: 7158928114340607608}
   background: {fileID: 8693613688436065262}
   fadeDuration: 0.5
 --- !u!1 &8801738631881413888
@@ -938,41 +938,9 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8076574866014554358}
     m_Modifications:
-    - target: {fileID: 1728193270561623479, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_Enabled
+    - target: {fileID: 4332644768163851999, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
+      propertyPath: m_SortingLayer
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2411377507205221984, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_PixelsPerUnitMultiplier
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 3273917818847182916, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3273917818847182916, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 45923903797546926}
-    - target: {fileID: 3273917818847182916, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 3273917818847182916, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnDisconnect
-      objectReference: {fileID: 0}
-    - target: {fileID: 3273917818847182916, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: MetaMask.Transports.Unity.UI.MetaMaskOTPPanel, MetaMaskUnity.Runtime
-      objectReference: {fileID: 0}
-    - target: {fileID: 4519065099083792754, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4519065099083792754, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: DisableStartAnimation
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4751590749222510982, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
       propertyPath: m_Pivot.x
@@ -1058,79 +1026,29 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6280002738903190903, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_PixelsPerUnitMultiplier
-      value: 4
-      objectReference: {fileID: 0}
     - target: {fileID: 6679804656875098759, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
       propertyPath: m_Name
       value: OTP Panel
       objectReference: {fileID: 0}
-    - target: {fileID: 6679804656875098759, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_IsActive
+    - target: {fileID: 7631325021668220152, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
+      propertyPath: m_SortingLayer
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8423982654817606664, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 798.8602
-      objectReference: {fileID: 0}
-    - target: {fileID: 8423982654817606664, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8423982654817606664, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8423982654817606664, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8423982654817606664, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -3.5368
-      objectReference: {fileID: 0}
-    - target: {fileID: 8423982654817606664, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 230.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8423982654817606664, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: -180
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
---- !u!114 &2221727354356593641 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9020589096059800127, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
-  m_PrefabInstance: {fileID: 7204273674467768790}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &2453250273249450064 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4751590749222510982, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
   m_PrefabInstance: {fileID: 7204273674467768790}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &4560411724180826961 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6679804656875098759, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
+--- !u!114 &7158928114340607608 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 45923903797546926, guid: 513690537ccf6e549b3a6bfaa595ad1f, type: 3}
   m_PrefabInstance: {fileID: 7204273674467768790}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &45923903797546926
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4560411724180826961}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4478478a417d48d3b21628f5a664e86e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  codeText: {fileID: 2221727354356593641}

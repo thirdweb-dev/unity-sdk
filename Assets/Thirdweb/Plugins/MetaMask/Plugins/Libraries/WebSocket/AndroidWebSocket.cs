@@ -132,7 +132,7 @@ namespace MetaMask.NativeWebSocket
 
         #endregion
         
-        #region Private Methods\
+        #region Private Methods
 
         private void BuildAndroidObjects()
         {

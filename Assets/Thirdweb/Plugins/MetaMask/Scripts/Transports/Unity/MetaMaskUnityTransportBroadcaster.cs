@@ -7,11 +7,14 @@ using UnityEngine;
 
 namespace MetaMask.Transports.Unity
 {
+
     public class MetaMaskUnityTransportBroadcaster : MonoBehaviour
     {
+
         #region Fields
 
         private static MetaMaskUnityTransportBroadcaster instance;
+
 
         [SerializeField]
         protected GameObject[] listeners;
@@ -36,7 +39,8 @@ namespace MetaMask.Transports.Unity
                     }
                     else
                     {
-                        instance = CreateNewInstance();
+                        // Don't automatically create a new instance
+                        return null;
                     }
                     instance.Initialize();
                 }
@@ -105,10 +109,19 @@ namespace MetaMask.Transports.Unity
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    UnityThread.executeInUpdate(() =>
-                    {
-                        listener.OnMetaMaskConnectRequest(universalLink, deepLink);
-                    });
+                    UnityThread.executeInUpdate(() => { listener.OnMetaMaskConnectRequest(universalLink, deepLink); });
+                }
+            }
+        }
+        
+        public void OnMetaMaskOTPCode(int code)
+        {
+            for (int i = 0; i < this.allListeners.Count; i++)
+            {
+                var listener = this.allListeners[i];
+                if (listener != null)
+                {
+                    UnityThread.executeInUpdate(() => { listener.OnMetaMaskOTP(code); });
                 }
             }
         }
@@ -120,10 +133,7 @@ namespace MetaMask.Transports.Unity
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    UnityThread.executeInUpdate(() =>
-                    {
-                        listener.OnMetaMaskFailure(error);
-                    });
+                    UnityThread.executeInUpdate(() => { listener.OnMetaMaskFailure(error); });
                 }
             }
         }
@@ -135,10 +145,7 @@ namespace MetaMask.Transports.Unity
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    UnityThread.executeInUpdate(() =>
-                    {
-                        listener.OnMetaMaskRequest(id, request);
-                    });
+                    UnityThread.executeInUpdate(() => { listener.OnMetaMaskRequest(id, request); });
                 }
             }
         }
@@ -150,29 +157,12 @@ namespace MetaMask.Transports.Unity
                 var listener = this.allListeners[i];
                 if (listener != null)
                 {
-                    UnityThread.executeInUpdate(() =>
-                    {
-                        listener.OnMetaMaskSuccess();
-                    });
-                }
-            }
-        }
-
-        public void OnMetaMaskOTP(int code)
-        {
-            for (int i = 0; i < this.allListeners.Count; i++)
-            {
-                var listener = this.allListeners[i];
-                if (listener != null)
-                {
-                    UnityThread.executeInUpdate(() =>
-                    {
-                        listener.OnMetaMaskOTP(code);
-                    });
+                    UnityThread.executeInUpdate(() => { listener.OnMetaMaskSuccess(); });
                 }
             }
         }
 
         #endregion
     }
+
 }

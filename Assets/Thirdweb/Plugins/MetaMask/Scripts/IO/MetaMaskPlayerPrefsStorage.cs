@@ -46,7 +46,10 @@ namespace MetaMask.IO
             }
             else
             {
-                UnityThread.executeInUpdate(() => { DoWrite(key, data); });
+                UnityThread.executeInUpdate(() =>
+                {
+                    DoWrite(key, data);
+                });
             }
         }
 
@@ -59,13 +62,16 @@ namespace MetaMask.IO
 
         public void Delete(string key)
         {
-            if (MetaMaskUnity.Instance.IsInUnityThread())
+            if (MetaMaskUnity.Instance != null && MetaMaskUnity.Instance.IsInUnityThread())
             {
                 DoDelete(key);
             }
             else
             {
-                UnityThread.executeInUpdate(() => { DoDelete(key); });
+                UnityThread.executeInUpdate(() =>
+                {
+                    DoDelete(key);
+                });
             }
         }
 
