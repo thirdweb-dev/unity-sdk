@@ -94,7 +94,7 @@ namespace Thirdweb.AccountAbstraction
 
             _initialized = true;
 
-            Debug.Log($"Initialized with Factory: {Config.factoryAddress}, AdminSigner: {PersonalAddress}, Predicted Account: {Accounts[0]}, Deployed: {_deployed}");
+            ThirdwebDebug.Log($"Initialized with Factory: {Config.factoryAddress}, AdminSigner: {PersonalAddress}, Predicted Account: {Accounts[0]}, Deployed: {_deployed}");
         }
 
         internal async Task UpdateDeploymentStatus()
@@ -139,7 +139,7 @@ namespace Thirdweb.AccountAbstraction
 
         internal async Task<RpcResponseMessage> Request(RpcRequestMessage requestMessage)
         {
-            Debug.Log("Requesting: " + requestMessage.Method + "...");
+            ThirdwebDebug.Log("Requesting: " + requestMessage.Method + "...");
 
             if (requestMessage.Method == "eth_chainId")
             {
@@ -211,10 +211,10 @@ namespace Thirdweb.AccountAbstraction
 
             // Send the user operation
 
-            Debug.Log("Valid UserOp: " + JsonConvert.SerializeObject(partialUserOp));
-            Debug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(partialUserOpHexified));
+            ThirdwebDebug.Log("Valid UserOp: " + JsonConvert.SerializeObject(partialUserOp));
+            ThirdwebDebug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(partialUserOpHexified));
             var userOpHash = await BundlerClient.EthSendUserOperation(Config.bundlerUrl, apiKey, requestMessage.Id, partialUserOpHexified, Config.entryPointAddress);
-            Debug.Log("UserOp Hash: " + userOpHash);
+            ThirdwebDebug.Log("UserOp Hash: " + userOpHash);
 
             // Wait for the transaction to be mined
 
@@ -225,7 +225,7 @@ namespace Thirdweb.AccountAbstraction
                 txHash = getUserOpResponse?.transactionHash;
                 await new WaitForSecondsRealtime(5f);
             }
-            Debug.Log("Tx Hash: " + txHash);
+            ThirdwebDebug.Log("Tx Hash: " + txHash);
 
             // Check if successful
 
@@ -233,13 +233,13 @@ namespace Thirdweb.AccountAbstraction
             var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
             if (decodedEvents[0].Event.Success == false)
             {
-                Debug.Log("Transaction not successful, checking reason...");
+                ThirdwebDebug.Log("Transaction not successful, checking reason...");
                 var reason = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
                 throw new Exception($"Transaction {txHash} reverted with reason: {reason}");
             }
             else
             {
-                Debug.Log("Transaction successful");
+                ThirdwebDebug.Log("Transaction successful");
                 _deployed = true;
             }
 

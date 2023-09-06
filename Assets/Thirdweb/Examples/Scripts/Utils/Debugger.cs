@@ -29,7 +29,7 @@ namespace Thirdweb.Examples
             debuggerPanel.SetActive(true);
             titleText.text = title;
             descriptionText.text = description;
-            Debug.Log($"{title} | {description}");
+            ThirdwebDebug.Log($"{title} | {description}");
         }
     }
 }

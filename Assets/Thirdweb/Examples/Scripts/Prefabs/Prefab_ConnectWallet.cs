@@ -161,7 +161,7 @@ namespace Thirdweb.Examples
 
         private void ValidateConnection(WalletProvider walletProvider)
         {
-            Debug.Log("ValidateConnection: " + walletProvider);
+            ThirdwebDebug.Log("ValidateConnection: " + walletProvider);
 
             ConnectPanel.SetActive(false);
 
@@ -171,7 +171,7 @@ namespace Thirdweb.Examples
             {
                 if (SupportedWalletsUI[WalletProvider.Paper].emailInput == null || string.IsNullOrEmpty(SupportedWalletsUI[WalletProvider.Paper].emailInput.text))
                 {
-                    Debug.LogWarning("Could not connect, no email provided!");
+                    ThirdwebDebug.LogWarning("Could not connect, no email provided!");
                     ConnectPanel.SetActive(false);
                     return;
                 }
@@ -184,7 +184,7 @@ namespace Thirdweb.Examples
             {
                 if (SupportedWalletsUI[WalletProvider.MagicLink].emailInput == null || string.IsNullOrEmpty(SupportedWalletsUI[WalletProvider.MagicLink].emailInput.text))
                 {
-                    Debug.LogWarning("Could not connect, no email provided!");
+                    ThirdwebDebug.LogWarning("Could not connect, no email provided!");
                     ConnectPanel.SetActive(false);
                     return;
                 }
@@ -255,7 +255,7 @@ namespace Thirdweb.Examples
 
         private async void ConnectWallet(WalletProvider walletProvider, string password, string email, WalletProvider personalWallet)
         {
-            Debug.Log($"Connecting to Wallet Provider: {walletProvider}...");
+            ThirdwebDebug.Log($"Connecting to Wallet Provider: {walletProvider}...");
 
             try
             {
@@ -267,7 +267,7 @@ namespace Thirdweb.Examples
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning($"Could not connect to Wallet Provider: {walletProvider}! {e}");
+                ThirdwebDebug.LogWarning($"Could not connect to Wallet Provider: {walletProvider}! {e}");
                 ConnectPanel.SetActive(false);
                 LocalWalletUISaved.SetActive(false);
                 LocalWalletUINew.SetActive(false);
@@ -277,7 +277,7 @@ namespace Thirdweb.Examples
 
         private async void ShowConnectedState()
         {
-            Debug.Log($"Connected to: {_address}");
+            ThirdwebDebug.Log($"Connected to: {_address}");
 
             var chainSprite = NetworkIcons.Find(x => x.chain == _currentChainData.identifier).sprite;
             var walletSprite = SupportedWalletsUI[_walletProvider].sprite;
@@ -330,7 +330,7 @@ namespace Thirdweb.Examples
 
         public void ToggleSwitchNetworkPanel(bool active)
         {
-            Debug.Log("ToggleSwitchNetworkPanel: " + active);
+            ThirdwebDebug.Log("ToggleSwitchNetworkPanel: " + active);
             SwitchNetworkPanel.SetActive(active);
 
             foreach (Transform item in SwitchNetworkContent)
@@ -354,7 +354,7 @@ namespace Thirdweb.Examples
 
         private async void SwitchNetwork(ChainData chainData)
         {
-            Debug.Log($"Switching to network: {chainData.identifier}...");
+            ThirdwebDebug.Log($"Switching to network: {chainData.identifier}...");
             try
             {
                 await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(BigInteger.Parse(chainData.chainId));
@@ -365,7 +365,7 @@ namespace Thirdweb.Examples
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning($"Could not switch network! {e}");
+                ThirdwebDebug.LogWarning($"Could not switch network! {e}");
                 SwitchNetworkPanel.SetActive(false);
                 OnSwitchNetworkFailed?.Invoke();
             }
@@ -375,12 +375,12 @@ namespace Thirdweb.Examples
         {
             string address = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
             GUIUtility.systemCopyBuffer = address;
-            Debug.Log($"Copied address to clipboard: {address}");
+            ThirdwebDebug.Log($"Copied address to clipboard: {address}");
         }
 
         private async void DisconnectWallet()
         {
-            Debug.Log("Disconnecting wallet...");
+            ThirdwebDebug.Log("Disconnecting wallet...");
             try
             {
                 await ThirdwebManager.Instance.SDK.wallet.Disconnect();
@@ -391,7 +391,7 @@ namespace Thirdweb.Examples
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning($"Could not disconnect wallet! {e}");
+                ThirdwebDebug.LogWarning($"Could not disconnect wallet! {e}");
                 ConnectedDropdownPanel.SetActive(false);
                 OnDisconnectFailed?.Invoke();
             }
@@ -399,10 +399,10 @@ namespace Thirdweb.Examples
 
         private async void ExportWallet()
         {
-            Debug.Log("Exporting wallet...");
+            ThirdwebDebug.Log("Exporting wallet...");
             string json = await ThirdwebManager.Instance.SDK.wallet.Export(_password);
             GUIUtility.systemCopyBuffer = json;
-            Debug.Log($"Copied wallet to clipboard: {json}");
+            ThirdwebDebug.Log($"Copied wallet to clipboard: {json}");
         }
 
         private string PrettifyNetwork(string networkIdentifier)

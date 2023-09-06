@@ -52,6 +52,9 @@ namespace Thirdweb
         [Tooltip("Whether the SDK should initialize on awake or not")]
         public bool initializeOnAwake = true;
 
+        [Tooltip("Whether to show thirdweb sdk debug logs")]
+        public bool showDebugLogs = true;
+
         [Tooltip("The name of your app")]
         public string appName = null;
 
@@ -125,7 +128,7 @@ namespace Thirdweb
             }
             else
             {
-                Debug.LogWarning("Two ThirdwebManager instances were found, removing this one.");
+                ThirdwebDebug.LogWarning("Two ThirdwebManager instances were found, removing this one.");
                 Destroy(this.gameObject);
                 return;
             }
@@ -175,7 +178,7 @@ namespace Thirdweb
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogWarning($"Failed to fetch chain data for {chainData.identifier} ({chainData.chainId}) - {e}, skipping...");
+                    ThirdwebDebug.LogWarning($"Failed to fetch chain data for {chainData.identifier} ({chainData.chainId}) - {e}, skipping...");
                     continue;
                 }
             }

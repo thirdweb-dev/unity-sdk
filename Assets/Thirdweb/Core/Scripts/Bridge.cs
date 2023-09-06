@@ -72,7 +72,7 @@ namespace Thirdweb
         {
             if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Initializing the thirdweb SDK is not fully supported in the editor.");
+                ThirdwebDebug.LogWarning("Initializing the thirdweb SDK is not fully supported in the editor.");
                 return;
             }
 #if UNITY_WEBGL
@@ -84,7 +84,7 @@ namespace Thirdweb
         {
             if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Connecting wallets is not fully supported in the editor.");
+                ThirdwebDebug.LogWarning("Connecting wallets is not fully supported in the editor.");
                 return Utils.AddressZero;
             }
             var task = new TaskCompletionSource<string>();
@@ -109,7 +109,7 @@ namespace Thirdweb
         {
             if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Disconnecting wallets is not fully supported in the editor.");
+                ThirdwebDebug.LogWarning("Disconnecting wallets is not fully supported in the editor.");
                 return;
             }
             var task = new TaskCompletionSource<string>();
@@ -125,7 +125,7 @@ namespace Thirdweb
         {
             if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Switching networks is not fully supported in the editor.");
+                ThirdwebDebug.LogWarning("Switching networks is not fully supported in the editor.");
                 return;
             }
             var task = new TaskCompletionSource<string>();
@@ -141,7 +141,7 @@ namespace Thirdweb
         {
             if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
                 return default;
             }
             var msg = Utils.ToJson(new RequestMessageBody(body));
@@ -152,7 +152,7 @@ namespace Thirdweb
             ThirdwebInvoke(taskId, route, msg, jsCallback);
 #endif
             string result = await task.Task;
-            // Debug.Log($"InvokeRoute Result: {result}");
+            ThirdwebDebug.Log($"InvokeRoute Result: {result}");
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
         }
 
@@ -160,7 +160,7 @@ namespace Thirdweb
         {
             if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
                 return null;
             }
 
@@ -177,7 +177,7 @@ namespace Thirdweb
         {
             if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
                 return;
             }
             var msg = Utils.ToJson(payload);
@@ -194,7 +194,7 @@ namespace Thirdweb
         {
             if (!Utils.IsWebGLBuild())
             {
-                Debug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
                 return null;
             }
             string taskId = Guid.NewGuid().ToString();

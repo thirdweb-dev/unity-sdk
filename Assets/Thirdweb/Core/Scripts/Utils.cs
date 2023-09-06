@@ -298,7 +298,7 @@ namespace Thirdweb
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning("Error deleting account: " + e.Message);
+                ThirdwebDebug.LogWarning("Error deleting account: " + e.Message);
                 return false;
             }
         }
