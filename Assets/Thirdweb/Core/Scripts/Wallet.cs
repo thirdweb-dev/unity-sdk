@@ -376,7 +376,7 @@ namespace Thirdweb
                     var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                     if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
                     {
-                        Debug.Log("SmartWallet not deployed, deploying before signing...");
+                        ThirdwebDebug.Log("SmartWallet not deployed, deploying before signing...");
                         await sw.SmartWallet.ForceDeploy();
                     }
                 }
@@ -404,7 +404,7 @@ namespace Thirdweb
                 var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
                 {
-                    Debug.Log("SmartWallet not deployed, deploying before signing...");
+                    ThirdwebDebug.Log("SmartWallet not deployed, deploying before signing...");
                     await sw.SmartWallet.ForceDeploy();
                 }
             }

@@ -171,7 +171,7 @@ namespace Thirdweb
                 var result = new TransactionResult();
                 if (diff == 0)
                 {
-                    Debug.LogWarning($"Allowance is already of amount {amount} - Skipping request...");
+                    ThirdwebDebug.LogWarning($"Allowance is already of amount {amount} - Skipping request...");
                     result = null;
                 }
                 else if (diff < 0)
@@ -392,7 +392,7 @@ namespace Thirdweb
                 }
                 catch
                 {
-                    Debug.Log("Could not fetch currency metadata, proceeding without it.");
+                    ThirdwebDebug.Log("Could not fetch currency metadata, proceeding without it.");
                 }
 
                 return new ClaimConditions()

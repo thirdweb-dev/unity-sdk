@@ -73,7 +73,7 @@ namespace Thirdweb.Wallets
             {
                 (bool isNewUser, bool isNewDevice) = await _paper.SendPaperEmailLoginOtp(_email);
                 RecoveryInput.interactable = !isNewUser && isNewDevice;
-                Debug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
+                ThirdwebDebug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
             }
             catch (System.Exception e)
             {
@@ -88,7 +88,7 @@ namespace Thirdweb.Wallets
                 string recoveryCode = string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text;
                 string otp = OTPInput.text;
                 _user = await _paper.VerifyPaperEmailLoginOtp(_email, otp, recoveryCode);
-                Debug.Log($"finished validating OTP:  EmailAddress {_user.EmailAddress}, Address {_user.Account.Address}");
+                ThirdwebDebug.Log($"finished validating OTP:  EmailAddress {_user.EmailAddress}, Address {_user.Account.Address}");
             }
             catch (System.Exception e)
             {

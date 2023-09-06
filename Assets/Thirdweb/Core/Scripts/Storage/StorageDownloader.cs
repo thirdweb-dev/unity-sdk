@@ -12,7 +12,7 @@ namespace Thirdweb
         {
             if (string.IsNullOrEmpty(textURI))
             {
-                Debug.LogWarning($"Unable to download text from empty uri!");
+                ThirdwebDebug.LogWarning($"Unable to download text from empty uri!");
                 return default;
             }
 
@@ -28,7 +28,7 @@ namespace Thirdweb
             await req.SendWebRequest();
             if (req.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogWarning($"Unable to fetch text uri {textURI} data! {req.error}");
+                ThirdwebDebug.LogWarning($"Unable to fetch text uri {textURI} data! {req.error}");
                 return default;
             }
             string json = req.downloadHandler.text;
@@ -39,7 +39,7 @@ namespace Thirdweb
         {
             if (string.IsNullOrEmpty(imageURI))
             {
-                Debug.LogWarning($"Unable to download image from empty uri!");
+                ThirdwebDebug.LogWarning($"Unable to download image from empty uri!");
                 return null;
             }
 
@@ -55,7 +55,7 @@ namespace Thirdweb
             await req.SendWebRequest();
             if (req.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogWarning($"Unable to fetch image uri {imageURI} data! {req.error}");
+                ThirdwebDebug.LogWarning($"Unable to fetch image uri {imageURI} data! {req.error}");
                 return null;
             }
             else

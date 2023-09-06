@@ -2,13 +2,14 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
 
-[CustomEditor(typeof(ThirdwebManager))]
+[CustomEditor(typeof(Thirdweb.ThirdwebManager))]
 public class ThirdwebManagerEditor : Editor
 {
     private SerializedProperty activeChainProperty;
     private SerializedProperty supportedChainsProperty;
     private SerializedProperty clientIdProperty;
     private SerializedProperty initializeOnAwakeProperty;
+    private SerializedProperty showDebugLogsProperty;
     private SerializedProperty appNameProperty;
     private SerializedProperty appDescriptionProperty;
     private SerializedProperty appIconsProperty;
@@ -47,6 +48,7 @@ public class ThirdwebManagerEditor : Editor
         supportedChainsProperty = serializedObject.FindProperty("supportedChains");
         clientIdProperty = serializedObject.FindProperty("clientId");
         initializeOnAwakeProperty = serializedObject.FindProperty("initializeOnAwake");
+        showDebugLogsProperty = serializedObject.FindProperty("showDebugLogs");
         appNameProperty = serializedObject.FindProperty("appName");
         appDescriptionProperty = serializedObject.FindProperty("appDescription");
         appIconsProperty = serializedObject.FindProperty("appIcons");
@@ -163,6 +165,7 @@ public class ThirdwebManagerEditor : Editor
                 supportedChainsList.DoLayoutList();
                 EditorGUILayout.PropertyField(clientIdProperty);
                 EditorGUILayout.PropertyField(initializeOnAwakeProperty);
+                EditorGUILayout.PropertyField(showDebugLogsProperty);
                 EditorGUILayout.EndVertical();
             }
         );

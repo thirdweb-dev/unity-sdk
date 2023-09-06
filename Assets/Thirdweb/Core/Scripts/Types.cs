@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.Numerics;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Thirdweb
 {
@@ -342,22 +345,27 @@ namespace Thirdweb
     [System.Serializable]
     public struct Receipt
     {
-        public string from;
         public string to;
-        public int transactionIndex;
-        public string gasUsed;
+        public string from;
+        public string contractAddress;
+        public BigInteger transactionIndex;
+        public BigInteger gasUsed;
+        public string logsBloom;
         public string blockHash;
         public string transactionHash;
+        public JArray logs;
+        public BigInteger blockNumber;
+        public BigInteger confirmations;
+        public BigInteger cumulativeGasUsed;
+        public BigInteger effectiveGasPrice;
+        public BigInteger status;
+        public BigInteger type;
+        public bool? byzantium;
+        public JArray events;
 
         public override readonly string ToString()
         {
-            return $"Receipt:"
-                + $"\n>from: {from}"
-                + $"\n>to: {to}"
-                + $"\n>transactionIndex: {transactionIndex}"
-                + $"\n>gasUsed: {gasUsed}"
-                + $"\n>blockHash: {blockHash}"
-                + $"\n>transactionHash: {transactionHash}";
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
     }
 

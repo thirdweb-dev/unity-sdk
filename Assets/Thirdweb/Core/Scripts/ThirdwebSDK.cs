@@ -260,11 +260,11 @@ namespace Thirdweb
             }
 
             if (string.IsNullOrEmpty(options.clientId))
-                Debug.LogWarning(
+                ThirdwebDebug.LogWarning(
                     "No Client ID provided. You will have limited access to thirdweb services for storage, RPC, and Account Abstraction. You can get a Client ID from https://thirdweb.com/create-api-key/"
                 );
 
-            Debug.Log($"Thirdweb SDK Initialized.\nRPC: {rpc}\nChain ID: {chainId}\nOptions: {JsonConvert.SerializeObject(options, Formatting.Indented)}");
+            ThirdwebDebug.Log($"Thirdweb SDK Initialized.\nRPC: {rpc}\nChain ID: {chainId}\nOptions: {JsonConvert.SerializeObject(options, Formatting.Indented)}");
         }
 
         /// <summary>

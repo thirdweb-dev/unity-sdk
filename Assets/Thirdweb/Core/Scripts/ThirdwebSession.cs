@@ -100,12 +100,12 @@ namespace Thirdweb
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning("WalletProvider unable to switch chains, proceeding anyway. Error:" + e.Message);
+                ThirdwebDebug.LogWarning("WalletProvider unable to switch chains, proceeding anyway. Error:" + e.Message);
             }
 
             var addy = await ActiveWallet.GetAddress();
 
-            Debug.Log($"Connected wallet {walletConnection.provider} with address {addy} on chain {ChainId} with RPC {RPC}");
+            ThirdwebDebug.Log($"Connected wallet {walletConnection.provider} with address {addy} on chain {ChainId} with RPC {RPC}");
 
             return addy;
         }
@@ -118,7 +118,7 @@ namespace Thirdweb
             }
             else
             {
-                Debug.LogWarning("No active wallet detected, unable to disconnect.");
+                ThirdwebDebug.LogWarning("No active wallet detected, unable to disconnect.");
             }
             ThirdwebManager.Instance.SDK.session = new ThirdwebSession(Options, ChainId, RPC);
         }
@@ -157,7 +157,7 @@ namespace Thirdweb
                         }
                         catch (System.Exception e)
                         {
-                            Debug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
+                            ThirdwebDebug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
                             try
                             {
                                 await AddNetwork(newChainData);

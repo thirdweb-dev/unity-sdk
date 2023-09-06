@@ -27,7 +27,7 @@ namespace Thirdweb
             {
                 if (!warned)
                 {
-                    Debug.Log("Sending accountless query, make sure a wallet is connected if this was not intended.");
+                    ThirdwebDebug.Log("Sending accountless query, make sure a wallet is connected if this was not intended.");
                     warned = true;
                 }
             }
@@ -65,7 +65,7 @@ namespace Thirdweb
                 }
                 catch (System.InvalidOperationException e)
                 {
-                    Debug.LogWarning($"Failed to estimate gas for transaction, proceeding with 100k gas: {e}");
+                    ThirdwebDebug.LogWarning($"Failed to estimate gas for transaction, proceeding with 100k gas: {e}");
                     functionMessage.Gas = 100000;
                 }
             }
@@ -118,7 +118,7 @@ namespace Thirdweb
 
                 var postData = new RelayerRequest(request, signature, forwarderAddress);
 
-                using UnityWebRequest req = UnityWebRequest.Post(relayerUrl, "");
+                using UnityWebRequest req = UnityWebRequest.Post(relayerUrl, "", "application/json");
                 byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(postData));
                 req.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
                 req.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
@@ -143,7 +143,7 @@ namespace Thirdweb
                     txHash = result.txHash;
                 }
             }
-            Debug.Log("txHash: " + txHash);
+            ThirdwebDebug.Log("txHash: " + txHash);
             var receiptPoller = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
             return await receiptPoller.TransactionReceiptPolling.PollForReceiptAsync(txHash);
         }

@@ -469,7 +469,7 @@ namespace Thirdweb
                 }
                 catch
                 {
-                    Debug.Log("Could not fetch currency metadata, proceeding without it.");
+                    ThirdwebDebug.Log("Could not fetch currency metadata, proceeding without it.");
                 }
 
                 return new ClaimConditions()
