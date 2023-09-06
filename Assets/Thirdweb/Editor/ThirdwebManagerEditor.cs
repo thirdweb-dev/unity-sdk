@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
 
-[CustomEditor(typeof(ThirdwebManager))]
+[CustomEditor(typeof(Thirdweb.ThirdwebManager))]
 public class ThirdwebManagerEditor : Editor
 {
     private SerializedProperty activeChainProperty;
