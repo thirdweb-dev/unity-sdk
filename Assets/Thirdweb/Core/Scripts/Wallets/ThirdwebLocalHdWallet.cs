@@ -16,8 +16,7 @@ namespace Thirdweb.Wallets
         {
             _account = null;
             _web3 = null;
-            // I guess, we can use the local wallet provider here to avoid breaking conditions that rely on the local wallet provider
-            _provider = WalletProvider.LocalWallet;
+            _provider = WalletProvider.LocalHdWallet;
             _signerProvider = WalletProvider.LocalWallet;
         }
 
