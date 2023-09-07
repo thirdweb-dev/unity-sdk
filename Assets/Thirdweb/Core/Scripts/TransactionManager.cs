@@ -118,7 +118,7 @@ namespace Thirdweb
 
                 var postData = new RelayerRequest(request, signature, forwarderAddress);
 
-                using UnityWebRequest req = UnityWebRequest.PostWwwForm(relayerUrl, "");
+                using UnityWebRequest req = UnityWebRequest.Post(relayerUrl, "");
                 byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(postData));
                 req.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
                 req.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
