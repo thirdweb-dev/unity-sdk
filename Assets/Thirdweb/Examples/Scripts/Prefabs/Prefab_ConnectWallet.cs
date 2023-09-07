@@ -41,6 +41,7 @@ namespace Thirdweb.Examples
             WalletProvider.WalletConnect,
             WalletProvider.SmartWallet,
             WalletProvider.LocalWallet,
+            WalletProvider.LocalHdWallet,
             WalletProvider.Hyperplay
         };
 
@@ -193,7 +194,7 @@ namespace Thirdweb.Examples
                     _email = SupportedWalletsUI[WalletProvider.MagicLink].emailInput.text;
                 }
             }
-            else if (walletProvider == WalletProvider.LocalWallet)
+            else if (walletProvider is WalletProvider.LocalWallet or WalletProvider.LocalHdWallet)
             {
                 if (!Utils.IsWebGLBuild() && Utils.HasStoredAccount())
                     ToggleLocalWalletUISaved(true);
@@ -202,7 +203,7 @@ namespace Thirdweb.Examples
                 return;
             }
 
-            ConnectWallet(walletProvider, _password, _email, personalWallet);
+            ConnectWallet(walletProvider, _password, null, _email, personalWallet);
         }
 
         public void ToggleLocalWalletUISaved(bool active)
@@ -221,7 +222,7 @@ namespace Thirdweb.Examples
                     LocalWalletSavedPasswordWrong.SetActive(true);
                     return;
                 }
-                ConnectWallet(WalletProvider.LocalWallet, _password, null, WalletProvider.LocalWallet);
+                ConnectWallet(WalletProvider.LocalWallet, _password, null, null, WalletProvider.LocalWallet);
                 LocalWalletUISaved.SetActive(false);
             });
 
@@ -245,7 +246,7 @@ namespace Thirdweb.Examples
                     Utils.DeleteLocalAccount();
 
                 _password = string.IsNullOrEmpty(LocalWalletNewPasswordInput.text) ? null : LocalWalletNewPasswordInput.text;
-                ConnectWallet(WalletProvider.LocalWallet, _password, null, WalletProvider.LocalWallet);
+                ConnectWallet(WalletProvider.LocalWallet, _password, null, null, WalletProvider.LocalWallet);
                 LocalWalletUINew.SetActive(false);
             });
 
@@ -253,7 +254,7 @@ namespace Thirdweb.Examples
                 ToggleConnectPanel(true);
         }
 
-        private async void ConnectWallet(WalletProvider walletProvider, string password, string email, WalletProvider personalWallet)
+        private async void ConnectWallet(WalletProvider walletProvider, string password, string mnemonic, string email, WalletProvider personalWallet)
         {
             ThirdwebDebug.Log($"Connecting to Wallet Provider: {walletProvider}...");
 
@@ -261,7 +262,7 @@ namespace Thirdweb.Examples
             {
                 _walletProvider = walletProvider;
                 _personalWalletProvider = personalWallet;
-                _address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(walletProvider, BigInteger.Parse(_currentChainData.chainId), password, email, personalWallet));
+                _address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(walletProvider, BigInteger.Parse(_currentChainData.chainId), password, mnemonic, email, personalWallet));
                 ShowConnectedState();
                 OnConnect?.Invoke();
             }

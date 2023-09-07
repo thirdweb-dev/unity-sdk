@@ -522,6 +522,8 @@ namespace Thirdweb
         public BigInteger chainId;
 
         public string password;
+        
+        public string mnemonic;
 
         public string email;
 
@@ -535,11 +537,12 @@ namespace Thirdweb
         /// <param name="password">The wallet password if using local wallets.</param>
         /// <param name="email">The email to login with if using email based providers.</param>
         /// <param name="personalWallet">The personal wallet provider if using smart wallets.</param>
-        public WalletConnection(WalletProvider provider, BigInteger chainId, string password = null, string email = null, WalletProvider personalWallet = WalletProvider.LocalWallet)
+        public WalletConnection(WalletProvider provider, BigInteger chainId, string password = null, string mnemonic = null, string email = null, WalletProvider personalWallet = WalletProvider.LocalWallet)
         {
             this.provider = provider;
             this.chainId = chainId;
             this.password = password;
+            this.mnemonic = mnemonic;
             this.email = email;
             this.personalWallet = personalWallet;
         }
@@ -557,6 +560,7 @@ namespace Thirdweb
         Injected,
         MagicLink,
         LocalWallet,
+        LocalHdWallet,
         SmartWallet,
         Paper,
         Hyperplay
