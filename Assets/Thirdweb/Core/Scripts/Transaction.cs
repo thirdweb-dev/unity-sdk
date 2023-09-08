@@ -38,6 +38,8 @@ namespace Thirdweb
     public class Transaction
     {
         private readonly Contract contract;
+        private readonly string fnName;
+        private object[] fnArgs;
 
         /// <summary>
         /// Gets the transaction input.
@@ -49,10 +51,12 @@ namespace Thirdweb
         /// </summary>
         /// <param name="contract">The contract associated with the transaction.</param>
         /// <param name="txInput">The transaction input.</param>
-        public Transaction(Contract contract, TransactionInput txInput)
+        public Transaction(Contract contract, TransactionInput txInput, string fnName, object[] fnArgs)
         {
             this.contract = contract;
             this.Input = txInput;
+            this.fnName = fnName;
+            this.fnArgs = fnArgs;
         }
 
         /// <summary>
@@ -192,9 +196,16 @@ namespace Thirdweb
         /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetArgs(params object[] args)
         {
-            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
-            var function = web3.Eth.GetContract(contract.abi, contract.address).GetFunction(Input.To);
-            Input.Data = function.GetData(args);
+            if (Utils.IsWebGLBuild())
+            {
+                this.fnArgs = args;
+            }
+            else
+            {
+                var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+                var function = web3.Eth.GetContract(contract.abi, contract.address).GetFunction(Input.To);
+                Input.Data = function.GetData(args);
+            }
             return this;
         }
 
@@ -204,12 +215,19 @@ namespace Thirdweb
         /// <returns>The gas price for the transaction as a <see cref="BigInteger"/>.</returns>
         public async Task<BigInteger> GetGasPrice()
         {
-            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
-            var gasPrice = await web3.Eth.GasPrice.SendRequestAsync();
-            var maxGasPrice = BigInteger.Parse("300000000000"); // 300 Gwei in Wei
-            var extraTip = gasPrice.Value / 10; // +10%
-            var txGasPrice = gasPrice.Value + extraTip;
-            return txGasPrice > maxGasPrice ? maxGasPrice : txGasPrice;
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<BigInteger>(GetTxBuilderRoute("getGasPrice"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+            }
+            else
+            {
+                var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+                var gasPrice = await web3.Eth.GasPrice.SendRequestAsync();
+                var maxGasPrice = BigInteger.Parse("300000000000"); // 300 Gwei in Wei
+                var extraTip = gasPrice.Value / 10; // +10%
+                var txGasPrice = gasPrice.Value + extraTip;
+                return txGasPrice > maxGasPrice ? maxGasPrice : txGasPrice;
+            }
         }
 
         /// <summary>
@@ -218,9 +236,16 @@ namespace Thirdweb
         /// <returns>The estimated gas limit for the transaction as a <see cref="BigInteger"/>.</returns>
         public async Task<BigInteger> EstimateGasLimit()
         {
-            var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
-            var gas = await gasEstimator.Eth.Transactions.EstimateGas.SendRequestAsync(Input);
-            return gas.Value;
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<BigInteger>(GetTxBuilderRoute("estimateGasLimit"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+            }
+            else
+            {
+                var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+                var gas = await gasEstimator.Eth.Transactions.EstimateGas.SendRequestAsync(Input);
+                return gas.Value;
+            }
         }
 
         /// <summary>
@@ -229,11 +254,17 @@ namespace Thirdweb
         /// <returns>The estimated gas costs for the transaction as a <see cref="GasCosts"/> struct.</returns>
         public async Task<GasCosts> EstimateGasCosts()
         {
-            var gasLimit = await EstimateGasLimit();
-            var gasPrice = await GetGasPrice();
-            var gasCost = gasLimit * gasPrice;
-
-            return new GasCosts { ether = gasPrice.ToString().ToEth(18, false), wei = gasCost };
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<GasCosts>(GetTxBuilderRoute("estimateGasCosts"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+            }
+            else
+            {
+                var gasLimit = await EstimateGasLimit();
+                var gasPrice = await GetGasPrice();
+                var gasCost = gasLimit * gasPrice;
+                return new GasCosts { ether = gasCost.ToString().ToEth(18, false), wei = gasCost };
+            }
         }
 
         /// <summary>
@@ -255,8 +286,15 @@ namespace Thirdweb
         /// <returns>The result of the transaction simulation as a string.</returns>
         public async Task<string> Simulate()
         {
-            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
-            return await web3.Eth.Transactions.Call.SendRequestAsync(Input);
+            if (Utils.IsWebGLBuild())
+            {
+                return JsonConvert.SerializeObject(await Bridge.InvokeRoute<object>(GetTxBuilderRoute("simulate"), Utils.ToJsonStringArray(Input, fnName, fnArgs)));
+            }
+            else
+            {
+                var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+                return await web3.Eth.Transactions.Call.SendRequestAsync(Input);
+            }
         }
 
         /// <summary>
@@ -266,21 +304,28 @@ namespace Thirdweb
         /// <returns>The transaction hash as a string.</returns>
         public async Task<string> Send(bool? gasless = null)
         {
-            if (Input.Gas == null)
-                await EstimateAndSetGasLimitAsync();
-
-            if (Input.Value == null)
-                Input.Value = new HexBigInteger(0);
-
-            bool isGaslessSetup = ThirdwebManager.Instance.SDK.session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin.HasValue;
-            if (gasless != null && gasless.Value && !isGaslessSetup)
-                throw new UnityException("Gasless transactions are not enabled. Please enable them in the SDK options.");
-
-            bool sendGaslessly = gasless == null ? isGaslessSetup : gasless.Value;
-            if (sendGaslessly)
-                return await SendGasless();
+            if (Utils.IsWebGLBuild())
+            {
+                if (gasless == null || gasless == false)
+                    return await Send();
+                else
+                    return await SendGasless();
+            }
             else
-                return await Send();
+            {
+                if (Input.Gas == null)
+                    await EstimateAndSetGasLimitAsync();
+                if (Input.Value == null)
+                    Input.Value = new HexBigInteger(0);
+                bool isGaslessSetup = ThirdwebManager.Instance.SDK.session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin.HasValue;
+                if (gasless != null && gasless.Value && !isGaslessSetup)
+                    throw new UnityException("Gasless transactions are not enabled. Please enable them in the SDK options.");
+                bool sendGaslessly = gasless == null ? isGaslessSetup : gasless.Value;
+                if (sendGaslessly)
+                    return await SendGasless();
+                else
+                    return await Send();
+            }
         }
 
         /// <summary>
@@ -290,8 +335,21 @@ namespace Thirdweb
         /// <returns>The transaction result as a <see cref="TransactionResult"/> object.</returns>
         public async Task<TransactionResult> SendAndWaitForTransactionResult(bool? gasless = null)
         {
-            var txHash = await Send(gasless);
-            return await WaitForTransactionResult(txHash);
+            if (Utils.IsWebGLBuild())
+            {
+                string action;
+                if (gasless == null || gasless == false)
+                    action = "execute";
+                else
+                    action = "executeGasless";
+
+                return await Bridge.InvokeRoute<TransactionResult>(GetTxBuilderRoute(action), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+            }
+            else
+            {
+                var txHash = await Send(gasless);
+                return await WaitForTransactionResult(txHash);
+            }
         }
 
         /// <summary>
@@ -301,6 +359,9 @@ namespace Thirdweb
         /// <returns>The transaction result as a <see cref="TransactionResult"/> object.</returns>
         public static async Task<TransactionResult> WaitForTransactionResult(string txHash)
         {
+            if (Utils.IsWebGLBuild())
+                throw new UnityException("WaitForTransactionResult is not supported in WebGL builds.");
+
             var receiptPoller = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
             var receipt = await receiptPoller.TransactionReceiptPolling.PollForReceiptAsync(txHash);
             return receipt.ToTransactionResult();
@@ -310,10 +371,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
-                // string route = contract.abi != null ? $"{contract.address}{Routable.subSeparator}{contract.abi}" : contract.address;
-                // string sendRoute = $"{route}{Routable.separator}send";
-                // return await Bridge.InvokeRoute<string>(sendRoute, new string[] { JsonConvert.SerializeObject(Input) });
+                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("send"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
             }
             else
             {
@@ -336,7 +394,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("sendGasless"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
             }
             else
             {
@@ -397,6 +455,12 @@ namespace Thirdweb
                     return result.txHash;
                 }
             }
+        }
+
+        private string GetTxBuilderRoute(string action)
+        {
+            string route = contract.abi != null ? $"{contract.address}{Routable.subSeparator}{contract.abi}" : contract.address;
+            return $"{route}{Routable.separator}tx{Routable.separator}{action}";
         }
     }
 }

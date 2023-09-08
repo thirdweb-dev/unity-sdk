@@ -23,36 +23,9 @@ namespace Thirdweb.Examples
             {
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract("0x62Cf5485B6C24b707E47C5E0FB2EAe7EbE18EC4c", MY_CUSTOM_CONTRACT_ABI);
 
-                // Contract.Prepare
-                // string connectedAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
-                // Transaction transaction = await contract.Prepare(functionName: "claim", from: connectedAddress, connectedAddress, 0, 1);
-                // Debugger.Instance.Log("[Custom Call] Prepare Successful", transaction.ToString());
-                // // transaction.SetValue("0.00000000001");
-                // // transaction.SetGasLimit("100000");
-                // try
-                // {
-                //     var data = await transaction.Simulate();
-                //     Debugger.Instance.Log("[Custom Call] Simulate Successful", "Data: " + data.ToString() + " \nSending Transaction...");
-                // }
-                // catch (System.Exception e)
-                // {
-                //     Debugger.Instance.Log("[Custom Call] Simulate Error", e.Message);
-                //     return;
-                // }
-
-                // try
-                // {
-                //     TransactionResult transactionResult = await transaction.SendAndWaitForTransactionResult();
-                //     Debugger.Instance.Log("[Custom Call] Send Successful", transactionResult.ToString());
-                // }
-                // catch (System.Exception e)
-                // {
-                //     Debugger.Instance.Log("[Custom Call] Send Error", e.ToString());
-                // }
-
                 // Contract.Read
-                string uri = await contract.Read<string>("uri", 0);
-                Debugger.Instance.Log("[Custom Call] Read Custom URI Successful", uri);
+                // string uri = await contract.Read<string>("uri", 0);
+                // Debugger.Instance.Log("[Custom Call] Read Custom URI Successful", uri);
 
                 // Contract.Write
                 // TransactionResult transactionResult = await contract.Write("claimKitten");
@@ -62,6 +35,43 @@ namespace Thirdweb.Examples
                 // {
                 //     value = "0.05".ToWei() // 0.05 ETH
                 // }, "0xE79ee09bD47F4F5381dbbACaCff2040f2FbC5803", 0, 1);
+
+                // Contract.Prepare
+                string connectedAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+                Transaction transaction = await contract.Prepare(functionName: "claim", from: connectedAddress, connectedAddress, 0, 1);
+                // transaction.SetValue("0.00000000001");
+                // transaction.SetGasLimit("100000");
+
+                try
+                {
+                    var data = await transaction.Simulate();
+                    Debugger.Instance.Log("[Custom Call] Simulate Successful", "Data: " + data.ToString() + " \nSending Transaction...");
+                }
+                catch (System.Exception e)
+                {
+                    Debugger.Instance.Log("[Custom Call] Simulate Error", e.Message);
+                    return;
+                }
+
+                await transaction.EstimateAndSetGasLimitAsync();
+
+                var gasPrice = await transaction.GetGasPrice();
+                Debug.Log($"Gas Price: {gasPrice}");
+
+                var gasCosts = await transaction.EstimateGasCosts();
+                Debug.Log($"Gas Cost: {gasCosts.wei} WEI");
+
+                Debugger.Instance.Log("[Custom Call] Transaction Preview", transaction.ToString());
+
+                try
+                {
+                    string transactionResult = await transaction.Send(gasless: false);
+                    Debugger.Instance.Log("[Custom Call] Send Successful", "Tx Hash: " + transactionResult);
+                }
+                catch (System.Exception e)
+                {
+                    Debugger.Instance.Log("[Custom Call] Send Error", e.ToString());
+                }
             }
             catch (System.Exception e)
             {
