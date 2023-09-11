@@ -16,10 +16,6 @@ namespace MetaMask.SocketIOClient
         {
             get
             {
-                if (instance == null)
-                {
-                    instance = new GameObject("WebSocket Dispatcher").AddComponent<WebSocketDispatcher>();
-                }
                 return instance;
             }
         }
@@ -28,7 +24,15 @@ namespace MetaMask.SocketIOClient
 
         private void Awake()
         {
-            DontDestroyOnLoad(gameObject);
+            if (instance != null)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
         }
 
 #if !UNITY_WEBGL || UNITY_EDITOR

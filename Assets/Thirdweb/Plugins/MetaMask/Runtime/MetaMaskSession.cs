@@ -30,6 +30,8 @@ namespace MetaMask
         /// </summary>
         public MetaMaskSessionData Data => this.data;
 
+        public IEciesProvider EciesProvider => this.ecies;
+
         /// <summary>
         /// Gets the client's public key derived from the private key that has been generated the first time.
         /// </summary>
@@ -107,7 +109,6 @@ namespace MetaMask
         }
 
         #endregion
-
     }
 
     /// <summary>
@@ -133,13 +134,6 @@ namespace MetaMask
         /// </summary>
         [JsonProperty("channel_id")]
         public string ChannelId { get; set; } = Guid.NewGuid().ToString();
-
-        /// <summary>
-        /// Gets or sets the Private Key of the client.
-        /// </summary>
-        // NOTE: Not needed, will be recreated each resume
-        //[JsonProperty("private_key")]
-        // public string PrivateKey { get; set; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="MetaMaskSessionData"/>.

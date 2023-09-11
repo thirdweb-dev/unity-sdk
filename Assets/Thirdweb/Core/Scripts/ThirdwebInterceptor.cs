@@ -1,5 +1,7 @@
 using System;
+using System.Numerics;
 using System.Threading.Tasks;
+using Nethereum.Hex.HexTypes;
 using Nethereum.JsonRpc.Client;
 using Nethereum.Signer;
 using Thirdweb.Wallets;
@@ -23,6 +25,8 @@ namespace Thirdweb
                 {
                     case WalletProvider.WalletConnect:
                         return ThirdwebManager.Instance.SDK.session.CurrentChainData.chainId;
+                    case WalletProvider.Metamask:
+                        return new HexBigInteger((BigInteger)MetaMask.Unity.MetaMaskUnity.Instance.Wallet.ChainId).HexValue;
                     default:
                         break;
                 }
@@ -80,6 +84,8 @@ namespace Thirdweb
                 {
                     case WalletProvider.WalletConnect:
                         return ThirdwebManager.Instance.SDK.session.CurrentChainData.chainId;
+                    case WalletProvider.Metamask:
+                        return new HexBigInteger((BigInteger)MetaMask.Unity.MetaMaskUnity.Instance.Wallet.ChainId).HexValue;
                     default:
                         break;
                 }

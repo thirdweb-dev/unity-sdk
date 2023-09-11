@@ -111,11 +111,16 @@ namespace Thirdweb
         /// <returns>A <see cref="Transaction"/> object representing the prepared transaction.</returns>
         public async Task<Transaction> Prepare(string functionName, string from = null, params object[] args)
         {
-            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
-            var function = contract.GetFunction(functionName);
-            var fromAddress = from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
-            var txInput = function.CreateTransactionInput(fromAddress, args);
-            return new Transaction(this, txInput);
+            var initialInput = new TransactionInput();
+            if (!Utils.IsWebGLBuild())
+            {
+                var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+                var function = contract.GetFunction(functionName);
+                var fromAddress = from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+                initialInput = function.CreateTransactionInput(fromAddress, args);
+            }
+
+            return new Transaction(this, initialInput, functionName, args);
         }
 
         /// <summary>
@@ -244,7 +249,7 @@ namespace Thirdweb
             else
                 rawResults.AddRange(result.Select(item => item.Result));
 
-            Debug.Log("Raw Result: " + JsonConvert.SerializeObject(rawResults));
+            ThirdwebDebug.Log("Raw Result: " + JsonConvert.SerializeObject(rawResults));
 
             // Single
             if (rawResults.Count == 1)

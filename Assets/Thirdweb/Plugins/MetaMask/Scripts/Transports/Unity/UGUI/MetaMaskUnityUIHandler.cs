@@ -1,15 +1,16 @@
 using System;
-
+using System.Collections;
 using MetaMask.Models;
 
 using UnityEngine;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 namespace MetaMask.Transports.Unity.UI
 {
 
     public class MetaMaskUnityUIHandler : MonoBehaviour, IMetaMaskUnityTransportListener
     {
-
         #region Events
 
         /// <summary>Occurs when the application's open state changes.</summary>
@@ -22,6 +23,9 @@ namespace MetaMask.Transports.Unity.UI
         /// <summary>The CanvasGroup component attached to the root GameObject.</summary>
         [SerializeField]
         protected CanvasGroup canvasGroup;
+
+        [SerializeField]
+        protected GameObject qrCodePanel;
         /// <summary>Gets or sets a value indicating whether the dropdown is open.</summary>
         /// <value>true if the dropdown is open; otherwise, false.</value>
         [SerializeField]
@@ -30,6 +34,15 @@ namespace MetaMask.Transports.Unity.UI
         /// <summary>The QR image.</summary>
         [SerializeField]
         protected MetaMaskUnityUIQRImage qrImage;
+
+        [SerializeField]
+        protected MetaMaskOTPPanel otpPanel;
+
+        [SerializeField]
+        protected GameObject background;
+
+        [SerializeField]
+        protected float fadeDuration = 0.5f;
 
         #endregion
 
@@ -43,11 +56,14 @@ namespace MetaMask.Transports.Unity.UI
 
         #region Protected Methods
         /// <summary>Returns whether a UI is opened.</summary>
-        protected virtual void OnOpenStateChanged()
+        protected virtual void OnQRCodeOpenStateChanged()
         {
+            this.qrCodePanel.SetActive(this.isOpen);
             this.canvasGroup.interactable = this.isOpen;
             this.canvasGroup.blocksRaycasts = this.isOpen;
             this.canvasGroup.alpha = this.isOpen ? 1f : 0f;
+
+            StartCoroutine(FadeBackground(this.canvasGroup.alpha));
 
             OpenStateChanged?.Invoke(this, null);
         }
@@ -57,40 +73,40 @@ namespace MetaMask.Transports.Unity.UI
         #region Public Methods
 
         /// <summary>Opens the clipboard.</summary>
-        public virtual void Open()
+        public virtual void OpenQRCode()
         {
-            SetOpen(true);
+            SetOpenQRCode(true);
         }
 
         /// <summary>Closes the window.</summary>
-        public virtual void Close()
+        public virtual void CloseQRCode()
         {
-            SetOpen(false);
+            SetOpenQRCode(false);
         }
 
         /// <summary>Toggles the open state of the menu.</summary>
-        public virtual void ToggleOpen()
+        public virtual void ToggleOpenQRCode()
         {
-            SetOpen(!this.isOpen);
+            SetOpenQRCode(!this.isOpen);
         }
 
         /// <summary>Sets the open state of the menu.</summary>
         /// <param name="open">Whether the menu is open.</param>
-        public void SetOpen(bool open)
+        public void SetOpenQRCode(bool open)
         {
             if (this.isOpen == open)
             {
                 return;
             }
             this.isOpen = open;
-            OnOpenStateChanged();
+            OnQRCodeOpenStateChanged();
         }
 
         /// <summary>Called when the MetaMask client wants to connect to the application.</summary>
         /// <param name="url">The URL to connect to.</param>
-        public void OnMetaMaskConnectRequest(string url)
+        public void OnMetaMaskConnectRequest(string universalLink, string deepLink)
         {
-            this.qrImage.ShowQR(url);
+            this.qrImage.ShowQR(universalLink);
         }
 
         /// <summary>Handles a MetaMask request.</summary>
@@ -109,6 +125,103 @@ namespace MetaMask.Transports.Unity.UI
         /// <summary>Called when the MetaMask login was successful.</summary>
         public void OnMetaMaskSuccess()
         {
+            CloseQRCode();
+            if (otpPanel != null)
+            {
+                otpPanel.gameObject.SetActive(false);
+            }
+        }
+
+        public void OnMetaMaskOTP(int otp)
+        {
+            if (otpPanel != null)
+            {
+                otpPanel.gameObject.SetActive(true);
+                otpPanel.ShowOTP(otp);
+                qrCodePanel.SetActive(false);
+                
+                StartCoroutine(FadeBackground(1f));
+            }
+            else
+            {
+                throw new Exception("No OTP UI Panel found");
+            }
+        }
+
+        public void OnMetaMaskDisconnected()
+        {
+            CloseQRCode();
+            if (otpPanel != null)
+            {
+                otpPanel.gameObject.SetActive(false);
+                StartCoroutine(FadeBackground(0f));
+            }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private IEnumerator FadeBackground(float targetAlpha)
+        {
+            if (targetAlpha == 1f)
+            {
+                targetAlpha = 0.75f;
+            }
+
+            var image = background.GetComponent<Image>();
+            var canvasGroup = background.GetComponent<CanvasGroup>();
+
+            if (image)
+                return FadeBackgroundImage(targetAlpha, image);
+            if (canvasGroup)
+                return FadeBackgroundCanvasGroup(targetAlpha, canvasGroup);
+            
+            throw new Exception("Supplied background gameObject " + background.name +
+                                " has no Image or CanvasGroup component");
+        }
+
+        private IEnumerator FadeBackgroundCanvasGroup(float targetAlpha, CanvasGroup backgroundCanvasGroup)
+        {
+            float startAlpha = backgroundCanvasGroup.alpha;
+            float startTime = Time.time;
+
+            while (backgroundCanvasGroup.alpha != targetAlpha)
+            {
+                float duration = (Time.time - startTime) / fadeDuration;
+                float a = Mathf.Lerp(startAlpha, targetAlpha, duration);
+
+                if (duration >= fadeDuration)
+                {
+                    a = targetAlpha;
+                }
+
+                backgroundCanvasGroup.alpha = a;
+
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
+        private IEnumerator FadeBackgroundImage(float targetAlpha, Image backgroundImage)
+        {
+            float startAlpha = backgroundImage.color.a;
+            float startTime = Time.time;
+
+            while (backgroundImage.color.a != targetAlpha)
+            {
+                float duration = (Time.time - startTime) / fadeDuration;
+                float a = Mathf.Lerp(startAlpha, targetAlpha, duration);
+
+                if (duration >= fadeDuration)
+                {
+                    a = targetAlpha;
+                }
+
+                backgroundImage.color = new Color(backgroundImage.color.r, backgroundImage.color.g,
+                    backgroundImage.color.b, a);
+
+                yield return new WaitForEndOfFrame();
+            }
         }
 
         #endregion

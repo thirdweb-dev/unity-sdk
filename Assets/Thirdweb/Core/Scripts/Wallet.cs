@@ -222,15 +222,7 @@ namespace Thirdweb
                 else
                 {
                     string address = await GetAddress();
-                    HexBigInteger balance;
-                    try
-                    {
-                        balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
-                    }
-                    catch
-                    {
-                        balance = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetBalance.SendRequestAsync(address);
-                    }
+                    HexBigInteger balance = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetBalance.SendRequestAsync(address);
                     var nativeCurrency = ThirdwebManager.Instance.SDK.session.CurrentChainData.nativeCurrency;
                     return new CurrencyValue(nativeCurrency.name, nativeCurrency.symbol, nativeCurrency.decimals.ToString(), balance.Value.ToString(), balance.Value.ToString().ToEth());
                 }
@@ -384,7 +376,7 @@ namespace Thirdweb
                     var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                     if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
                     {
-                        Debug.Log("SmartWallet not deployed, deploying before signing...");
+                        ThirdwebDebug.Log("SmartWallet not deployed, deploying before signing...");
                         await sw.SmartWallet.ForceDeploy();
                     }
                 }
@@ -412,7 +404,7 @@ namespace Thirdweb
                 var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
                 {
-                    Debug.Log("SmartWallet not deployed, deploying before signing...");
+                    ThirdwebDebug.Log("SmartWallet not deployed, deploying before signing...");
                     await sw.SmartWallet.ForceDeploy();
                 }
             }

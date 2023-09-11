@@ -35,7 +35,7 @@ namespace Thirdweb.Hyperplay
             await request.SendWebRequest();
             if (request.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogError(request.error);
+                ThirdwebDebug.LogError(request.error);
                 throw new UnityException("RPC request failed: " + request.error);
             }
             var hyperplayResult = JsonConvert.DeserializeObject<HyperplayResult>(request.downloadHandler.text);

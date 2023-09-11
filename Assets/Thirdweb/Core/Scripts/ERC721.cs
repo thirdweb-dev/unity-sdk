@@ -190,7 +190,7 @@ namespace Thirdweb
                 }
                 catch (System.Exception)
                 {
-                    Debug.LogWarning($"Unable to find owner of {tokenId}, return address(0)");
+                    ThirdwebDebug.LogWarning($"Unable to find owner of {tokenId}, return address(0)");
                     return "0x0000000000000000000000000000000000000000";
                 }
             }
@@ -506,7 +506,7 @@ namespace Thirdweb
                 }
                 catch
                 {
-                    Debug.Log("Could not fetch currency metadata, proceeding without it.");
+                    ThirdwebDebug.Log("Could not fetch currency metadata, proceeding without it.");
                 }
 
                 return new ClaimConditions()

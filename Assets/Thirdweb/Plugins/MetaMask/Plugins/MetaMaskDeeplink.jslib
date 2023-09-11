@@ -1,4 +1,3 @@
-
 var LibraryMetaMaskDeeplink = {
 
 OpenMetaMaskDeeplink: function (url) {
@@ -120,6 +119,71 @@ WebGLIsMobile: function () {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 },
 
+LSExists: function (key) {
+  return localStorage.getItem(UTF8ToString(key)) !== null
+},
+  
+LSWrite: function(key, data) {
+  localStorage.setItem(UTF8ToString(key), UTF8ToString(data))
+},
+
+LSRead: function(key) {
+  var data = localStorage.getItem(UTF8ToString(key))
+  
+  // required to return string data
+  var bufferSize = lengthBytesUTF8(data) + 1;
+  var buffer = _malloc(bufferSize)
+  stringToUTF8(data, buffer, bufferSize);
+  return buffer;
+},
+
+LSDelete: function(key) {
+  localStorage.removeItem(UTF8ToString(key))
+}, 
+  
+_SendRequestFetch: function(idUtf8, objectNameUtf8, methodUtf8, urlUtf8, parUtf8, isGet, authHeaderKeyUtf8, authHeaderValueUtf8) {
+  const id = UTF8ToString(idUtf8)
+  const objectName = UTF8ToString(objectNameUtf8)
+  const method = UTF8ToString(methodUtf8)
+  const url = UTF8ToString(urlUtf8)
+  const par = UTF8ToString(parUtf8)
+  const authHeaderKey = UTF8ToString(authHeaderKeyUtf8)
+  const authHeaderValue = UTF8ToString(authHeaderValueUtf8)
+  
+  let headers = {}
+  if (authHeaderKey) {
+    headers = {
+      [authHeaderKey]: authHeaderValue
+    }
+  }
+  
+  const data = {
+    method,
+    body: par,
+    headers
+  }
+  
+  fetch(url, data).then(function (resp) {
+    return resp.json()
+  }).then(function (result) {
+    const resultData = {
+      responseJson: JSON.stringify(result),
+      errorMessage: null,
+      id,
+    }
+    
+    window.unityInstance.SendMessage(objectName, "OnFetchResponseCallback", JSON.stringify(resultData))
+  }).catch(function(e) {
+    const resultData = {
+      responseJson: null,
+      errorMessage: e.toString(),
+      id,
+    }
+    
+    window.unityInstance.SendMessage(objectName, "OnFetchResponseCallback", JSON.stringify(resultData))
+  })
+},
+  
 };
 
 mergeInto(LibraryManager.library, LibraryMetaMaskDeeplink);

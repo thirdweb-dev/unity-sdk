@@ -137,12 +137,23 @@ namespace Thirdweb
 
             if (receipt != null)
             {
-                result.receipt.from = receipt.From;
                 result.receipt.to = receipt.To;
-                result.receipt.transactionIndex = receipt.TransactionIndex != null ? int.Parse(receipt.TransactionIndex.ToString()) : -1;
-                result.receipt.gasUsed = receipt.GasUsed != null ? receipt.GasUsed.ToString() : "-1";
+                result.receipt.from = receipt.From;
+                result.receipt.contractAddress = receipt.ContractAddress;
+                result.receipt.transactionIndex = receipt.TransactionIndex != null ? receipt.TransactionIndex.Value : -1;
+                result.receipt.gasUsed = receipt.GasUsed != null ? receipt.GasUsed.Value : -1;
+                result.receipt.logsBloom = receipt.LogsBloom;
                 result.receipt.blockHash = receipt.BlockHash;
                 result.receipt.transactionHash = receipt.TransactionHash;
+                result.receipt.logs = receipt.Logs;
+                result.receipt.blockNumber = receipt.BlockNumber != null ? receipt.BlockNumber.Value : -1;
+                result.receipt.confirmations = -1;
+                result.receipt.cumulativeGasUsed = receipt.CumulativeGasUsed != null ? receipt.CumulativeGasUsed.Value : -1;
+                result.receipt.effectiveGasPrice = receipt.EffectiveGasPrice != null ? receipt.EffectiveGasPrice.Value : -1;
+                result.receipt.status = receipt.Status != null ? receipt.Status.Value : -1;
+                result.receipt.type = receipt.Type != null ? receipt.Type.Value : -1;
+                result.receipt.byzantium = null;
+                result.receipt.events = null;
                 result.id = receipt.Status != null ? receipt.Status.ToString() : "-1";
             }
 
@@ -298,7 +309,7 @@ namespace Thirdweb
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning("Error deleting account: " + e.Message);
+                ThirdwebDebug.LogWarning("Error deleting account: " + e.Message);
                 return false;
             }
         }

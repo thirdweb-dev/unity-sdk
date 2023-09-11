@@ -1,5 +1,7 @@
 using System;
 using MetaMask.Models;
+using MetaMask.SocketIOClient;
+using MetaMask.Unity;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -11,9 +13,6 @@ namespace MetaMask.Transports.Unity.UI
     {
 
         #region Events
-
-        /// <summary>Raised when the application is connecting to the wallet.</summary>
-        public override event EventHandler<MetaMaskUnityConnectEventArgs> Connecting;
         /// <summary>Raised when the application is disconnecting to the wallet.</summary>
         public override event EventHandler<MetaMaskUnityRequestEventArgs> Requesting;
 
@@ -54,7 +53,8 @@ namespace MetaMask.Transports.Unity.UI
         /// <summary>The UI handler for the MetaMask Unity plugin.</summary>
         protected MetaMaskUnityUIHandler uiHandler;
 
-        protected string lastDeepLinkUrl;
+        protected string connectionDeepLinkUrl;
+        protected string connectionUniversalLinkUrl;
 
         #endregion
 
@@ -83,8 +83,6 @@ namespace MetaMask.Transports.Unity.UI
             }
         }
         
-        
-
         public bool UseDeeplink => IsMobile;
 
         #endregion
@@ -99,40 +97,47 @@ namespace MetaMask.Transports.Unity.UI
                 this.metaMaskCanvasInstance = Instantiate(this.metaMaskCanvas);
                 this.uiHandler = this.metaMaskCanvasInstance.GetComponent<MetaMaskUnityUIHandler>();
             }
+            
+            MetaMaskUnity.Instance.Events.StartConnecting += WalletOnStartConnecting;
+        }
+
+        private void WalletOnStartConnecting(object sender, MetaMaskConnectEventArgs e)
+        {
+            var universalLink = this.connectionUniversalLinkUrl;
+            var deepLink = this.connectionDeepLinkUrl;
+            
+            
+            if (this.uiHandler != null)
+            {
+                this.uiHandler.OpenQRCode();
+            }
+            
+            EmitListenerEvent(l => l.OnMetaMaskConnectRequest(universalLink, deepLink));
+
+            AlertBroadcasterIfInUse(mmutb => mmutb.OnMetaMaskConnectRequest(universalLink, deepLink));
         }
 
         /// <summary>Connects to the specified URL.</summary>
         /// <param name="url">The URL to connect to.</param>
-        public override void Connect(string url)
+        public override void UpdateUrls(string universalLink, string deepLink)
         {
-            Connecting?.Invoke(this, new MetaMaskUnityConnectEventArgs(url));
-            if (this.uiHandler != null)
-            {
-                this.uiHandler.Open();
-            }
-            if (this.metaMaskCanvasInstance)
-            {
-                var listeners = this.metaMaskCanvasInstance.GetComponentsInChildren<IMetaMaskUnityTransportListener>();
-                for (int i = 0; i < listeners.Length; i++)
-                {
-                    listeners[i].OnMetaMaskConnectRequest(url);
-                }
-            }
-            MetaMaskUnityTransportBroadcaster.Instance.OnMetaMaskConnectRequest(url);
+            this.connectionDeepLinkUrl = deepLink;
+            this.connectionUniversalLinkUrl = universalLink;
+            
         }
 
-        public override void OnConnectRequest(string url)
+        public override void OnConnectRequest()
         {
-            this.lastDeepLinkUrl = url;
             if (UseDeeplink)
             {
-                OpenDeeplinkURL(url);
+                OpenConnectionDeepLink();
             }
         }
 
-        public void OpenLastDeepLink()
+        public void OpenConnectionDeepLink()
         {
-            OpenDeeplinkURL(this.lastDeepLinkUrl);
+            Debug.Log("Opening Connection URL: " + this.connectionUniversalLinkUrl);
+            OpenDeeplinkURL(this.connectionUniversalLinkUrl);
         }
 
         /// <summary>Called when the application fails to retrieve the content of the request.</summary>
@@ -140,15 +145,10 @@ namespace MetaMask.Transports.Unity.UI
         public override void OnFailure(Exception error)
         {
             Debug.LogError("On Failure: " + error);
-            if (this.metaMaskCanvasInstance)
-            {
-                var listeners = this.metaMaskCanvasInstance.GetComponentsInChildren<IMetaMaskUnityTransportListener>();
-                for (int i = 0; i < listeners.Length; i++)
-                {
-                    listeners[i].OnMetaMaskFailure(error);
-                }
-            }
-            MetaMaskUnityTransportBroadcaster.Instance.OnMetaMaskFailure(error);
+
+            EmitListenerEvent(l => l.OnMetaMaskFailure(error));
+            
+            AlertBroadcasterIfInUse(mmutb => mmutb.OnMetaMaskFailure(error));
         }
 
         /// <summary>Called when a request is received.</summary>
@@ -160,22 +160,25 @@ namespace MetaMask.Transports.Unity.UI
             
             if (UseDeeplink)
             {
-                OpenDeeplinkURL(MetaMaskWallet.MetaMaskAppLinkUrl);
+                // Use otp to re-enable host approval
+                OpenConnectionDeepLink();
+                //OpenDeeplinkURL(MetaMaskWallet.MetaMaskUniversalLinkUrl);
             }
             
+            EmitListenerEvent(l => l.OnMetaMaskRequest(id, request));
+
+            AlertBroadcasterIfInUse(mmutb => mmutb.OnMetaMaskRequest(id, request));
+        }
+
+        public override void OnOTPCode(int code)
+        {
             if (this.uiHandler != null)
             {
-                this.uiHandler.Open();
+                this.uiHandler.OnMetaMaskOTP(code);
             }
-            if (this.metaMaskCanvasInstance)
-            {
-                var listeners = this.metaMaskCanvasInstance.GetComponentsInChildren<IMetaMaskUnityTransportListener>();
-                for (int i = 0; i < listeners.Length; i++)
-                {
-                    listeners[i].OnMetaMaskRequest(id, request);
-                }
-            }
-            MetaMaskUnityTransportBroadcaster.Instance.OnMetaMaskRequest(id, request);
+            
+            EmitListenerEvent(l => l.OnMetaMaskOTP(code));
+            AlertBroadcasterIfInUse(mmutb => mmutb.OnMetaMaskOTPCode(code));
         }
 
         /// <summary>Notifies the application that a new session has been created.</summary>        
@@ -187,21 +190,48 @@ namespace MetaMask.Transports.Unity.UI
         /// <summary>Called when the MetaMask client has successfully connected to the Ethereum network.</summary>
         public override void OnSuccess()
         {
-            if (this.metaMaskCanvasInstance)
-            {
-                var listeners = this.metaMaskCanvasInstance.GetComponentsInChildren<IMetaMaskUnityTransportListener>();
-                for (int i = 0; i < listeners.Length; i++)
-                {
-                    listeners[i].OnMetaMaskSuccess();
-                }
-            }
-            MetaMaskUnityTransportBroadcaster.Instance.OnMetaMaskSuccess();
+            EmitListenerEvent(l => l.OnMetaMaskSuccess());
+
+            AlertBroadcasterIfInUse(mmutb => mmutb.OnMetaMaskSuccess());
+        }
+
+        public override void OnDisconnect()
+        {
+            EmitListenerEvent(l => l.OnMetaMaskDisconnected());
         }
 
         /// <summary>Returns wheter deeplinking is available on the client.</summary>
         public bool IsDeeplinkAvailable()
         {
             return UseDeeplink;
+        }
+
+        private void AlertBroadcasterIfInUse(Action<MetaMaskUnityTransportBroadcaster> action)
+        {
+            if (MetaMaskUnityTransportBroadcaster.Instance == null)
+                return;
+            
+            action(MetaMaskUnityTransportBroadcaster.Instance);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void EmitListenerEvent(Action<IMetaMaskUnityTransportListener> callback)
+        {
+            if (this.metaMaskCanvasInstance)
+            {
+                UnityThread.executeInUpdate(() =>
+                {
+                    var listeners =
+                        this.metaMaskCanvasInstance.GetComponentsInChildren<IMetaMaskUnityTransportListener>();
+                    for (int i = 0; i < listeners.Length; i++)
+                    {
+                        callback(listeners[i]);
+                    }
+                });
+            }
         }
 
         #endregion

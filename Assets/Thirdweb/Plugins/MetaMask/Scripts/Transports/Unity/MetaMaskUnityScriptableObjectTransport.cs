@@ -22,27 +22,26 @@ namespace MetaMask.Transports.Unity
 #endif
             }
         }
-
-        public abstract event EventHandler<MetaMaskUnityConnectEventArgs> Connecting;
         public abstract event EventHandler<MetaMaskUnityRequestEventArgs> Requesting;
 
         public abstract string UserAgent { get; }
 
         public abstract void Initialize();
 
-        public abstract void Connect(string url);
+        public abstract void UpdateUrls(string universalLink, string deepLink);
 
-        public abstract void OnConnectRequest(string url);
+        public abstract void OnConnectRequest();
 
         public abstract void OnFailure(Exception error);
 
         public abstract void OnRequest(string id, MetaMaskEthereumRequest request);
+        public abstract void OnOTPCode(int code);
 
         public abstract void OnSessionRequest(MetaMaskSessionData session);
 
         public abstract void OnSuccess();
         
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         public static extern void OpenMetaMaskDeeplink(string url);
         
@@ -54,35 +53,22 @@ namespace MetaMask.Transports.Unity
         {
             get
             {
-                #if UNITY_WEBGL
+                #if UNITY_WEBGL && !UNITY_EDITOR
                     return WebGLIsMobile();
                 #else
                     return Application.isMobilePlatform;
                 #endif
             }
         }
+        public abstract void OnDisconnect();
 
-        public void OpenDeeplinkURL(string url)
+        protected void OpenDeeplinkURL(string url)
         {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             OpenMetaMaskDeeplink(url);
 #else
             Application.OpenURL(url);
 #endif
-        }
-
-    }
-
-    public class MetaMaskUnityConnectEventArgs : EventArgs
-    {
-        /// <summary>The Url to be called</summary>
-        public readonly string Url;
-
-        /// <summary>Initializes a new instance of the <see cref="MetaMaskUnityConnectEventArgs"/> class.</summary>
-        /// <param name="url">The URL of the Unity application.</param>
-        public MetaMaskUnityConnectEventArgs(string url)
-        {
-            this.Url = url;
         }
 
     }

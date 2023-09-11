@@ -28,6 +28,8 @@ The package comes with a sample Scene and Prefab examples showcasing the differe
 
 All you need is a ThirdwebManager component in your scene. See [documentation](https://portal.thirdweb.com/unity) for more information.
 
+The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS.
+
 Note: The Newtonsoft DLL is included as part of the Unity Package, feel free to deselect it if you already have it installed as a dependency to avoid conflicts.
 
 # Build
