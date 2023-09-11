@@ -9,7 +9,14 @@
     ".NETStandard,Version=v2.1/": {
       "WalletConnectSharp.Sign/1.0.0": {
         "dependencies": {
-          "WalletConnect.Core": "2.1.0"
+          "WalletConnect.Core": "2.1.0",
+          "WalletConnectSharp.Common": "2.1.0.0",
+          "WalletConnectSharp.Core": "2.1.0.0",
+          "WalletConnectSharp.Crypto": "2.1.0.0",
+          "WalletConnectSharp.Events": "2.1.0.0",
+          "WalletConnectSharp.Network": "2.1.0.0",
+          "WalletConnectSharp.Network.Websocket": "2.1.0.0",
+          "WalletConnectSharp.Storage": "2.1.0.0"
         },
         "runtime": {
           "WalletConnectSharp.Sign.dll": {}
@@ -286,6 +293,62 @@
         "runtime": {
           "WalletConnectSharp.Storage.dll": {}
         }
+      },
+      "WalletConnectSharp.Common/2.1.0.0": {
+        "runtime": {
+          "WalletConnectSharp.Common.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      },
+      "WalletConnectSharp.Core/2.1.0.0": {
+        "runtime": {
+          "WalletConnectSharp.Core.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      },
+      "WalletConnectSharp.Crypto/2.1.0.0": {
+        "runtime": {
+          "WalletConnectSharp.Crypto.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      },
+      "WalletConnectSharp.Events/2.1.0.0": {
+        "runtime": {
+          "WalletConnectSharp.Events.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      },
+      "WalletConnectSharp.Network/2.1.0.0": {
+        "runtime": {
+          "WalletConnectSharp.Network.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      },
+      "WalletConnectSharp.Network.Websocket/2.1.0.0": {
+        "runtime": {
+          "WalletConnectSharp.Network.Websocket.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      },
+      "WalletConnectSharp.Storage/2.1.0.0": {
+        "runtime": {
+          "WalletConnectSharp.Storage.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
       }
     }
   },
@@ -488,6 +551,41 @@
     },
     "WalletConnect.Storage/2.1.0": {
       "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "WalletConnectSharp.Common/2.1.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "WalletConnectSharp.Core/2.1.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "WalletConnectSharp.Crypto/2.1.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "WalletConnectSharp.Events/2.1.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "WalletConnectSharp.Network/2.1.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "WalletConnectSharp.Network.Websocket/2.1.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "WalletConnectSharp.Storage/2.1.0.0": {
+      "type": "reference",
       "serviceable": false,
       "sha512": ""
     }

@@ -103,7 +103,7 @@ namespace Thirdweb.Wallets
                     }
                 );
 
-                Debug.Log($"URI: {connectData.Uri}");
+                ThirdwebDebug.Log($"URI: {connectData.Uri}");
 
                 var qrCodeAsTexture2D = GenerateQRTexture(connectData.Uri);
                 QRCodeImage.sprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new UnityEngine.Vector2(0.5f, 0.5f));

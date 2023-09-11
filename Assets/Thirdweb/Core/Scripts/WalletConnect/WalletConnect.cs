@@ -32,7 +32,7 @@ namespace Thirdweb.WalletConnect
 
         internal async Task<RpcResponseMessage> Request(RpcRequestMessage message)
         {
-            UnityEngine.Debug.Log($"WalletConnect Request: {JsonConvert.SerializeObject(message)}");
+            ThirdwebDebug.Log($"WalletConnect Request: {JsonConvert.SerializeObject(message)}");
             OpenWallet();
             switch (message.Method)
             {
@@ -64,7 +64,7 @@ namespace Thirdweb.WalletConnect
                 case "wallet_switchEthereumChain":
                     var walletSwitchEthereumChainReqParams = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(message.RawParameters));
                     var walletSwitchEthereumChainReq = new WalletSwitchEthereumChain(new object[] { walletSwitchEthereumChainReqParams[0] });
-                    UnityEngine.Debug.Log($"WalletSwitchEthereumChain: {JsonConvert.SerializeObject(walletSwitchEthereumChainReq)}");
+                    ThirdwebDebug.Log($"WalletSwitchEthereumChain: {JsonConvert.SerializeObject(walletSwitchEthereumChainReq)}");
                     var walletSwitchEthereumChainRes = await Client.Request<WalletSwitchEthereumChain, object>(Topic, walletSwitchEthereumChainReq, ChainId);
                     ThirdwebChain newChain = JsonConvert.DeserializeObject<ThirdwebChain>(JsonConvert.SerializeObject(walletSwitchEthereumChainReqParams[0]));
                     ChainId = ChainId.Substring(0, ChainId.IndexOf(":") + 1) + new HexBigInteger(newChain.chainId).Value;
