@@ -835,7 +835,10 @@ PlayerSettings:
     Server: 1
     Standalone: 1
   il2cppCompilerConfiguration: {}
-  il2cppCodeGeneration: {}
+  il2cppCodeGeneration:
+    Android: 1
+    Standalone: 1
+    WebGL: 1
   managedStrippingLevel:
     Android: 4
     EmbeddedLinux: 1

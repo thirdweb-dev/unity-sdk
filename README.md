@@ -28,7 +28,7 @@ The package comes with a sample Scene and Prefab examples showcasing the differe
 
 All you need is a ThirdwebManager component in your scene. See [documentation](https://portal.thirdweb.com/unity) for more information.
 
-The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS.
+The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS. We recommend using 2022 LTS.
 
 Note: The Newtonsoft DLL is included as part of the Unity Package, feel free to deselect it if you already have it installed as a dependency to avoid conflicts.
 
@@ -38,7 +38,7 @@ Note: The Newtonsoft DLL is included as part of the Unity Package, feel free to 
 
 - Open your `Build settings`, select `WebGL` as the target platform.
 - Open `Player settings` > `Resolution and Presentation` and under `WebGLTemplate` choose `Thirdweb`.
-- Use `Smaller (faster) Builds` in the Build Settings.
+- Use `Smaller (faster) Builds` in the Build Settings (IL2CPP Code Generation in Unity 2022).
 - Save and click `Build and Run` to test out your game in a browser.
 
 If you're uploading your build, set `Compression Format` to `Disabled` in `Player Settings` > `Publishing Settings`.
