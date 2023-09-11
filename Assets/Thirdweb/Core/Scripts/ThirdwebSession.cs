@@ -58,11 +58,10 @@ namespace Thirdweb
                     ActiveWallet = new ThirdwebLocalWallet();
                     break;
                 case WalletProvider.WalletConnect:
-                    throw new UnityException("WalletConnectV2 is currently only supported in WebGL Builds, please check again later!");
-                // if (Options.wallet == null || string.IsNullOrEmpty(Options.wallet?.walletConnectProjectId))
-                //     throw new UnityException("Wallet connect project id is required for wallet connect connection method!");
-                // ActiveWallet = new ThirdwebWalletConnect(Options.wallet?.walletConnectProjectId);
-                // break;
+                    if (Options.wallet == null || string.IsNullOrEmpty(Options.wallet?.walletConnectProjectId))
+                        throw new UnityException("Wallet connect project id is required for wallet connect connection method!");
+                    ActiveWallet = new ThirdwebWalletConnect(Options.wallet?.walletConnectProjectId);
+                    break;
                 case WalletProvider.MagicLink:
                     if (Options.wallet == null || string.IsNullOrEmpty(Options.wallet?.magicLinkApiKey))
                         throw new UnityException("Magic link api key is required for magic link connection method!");

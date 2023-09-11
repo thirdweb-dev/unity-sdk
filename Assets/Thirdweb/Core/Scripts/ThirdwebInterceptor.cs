@@ -23,6 +23,8 @@ namespace Thirdweb
             {
                 switch (_thirdwebWallet.GetProvider())
                 {
+                    case WalletProvider.WalletConnect:
+                        return ThirdwebManager.Instance.SDK.session.CurrentChainData.chainId;
                     case WalletProvider.Metamask:
                         return new HexBigInteger((BigInteger)MetaMask.Unity.MetaMaskUnity.Instance.Wallet.ChainId).HexValue;
                     default:
@@ -80,6 +82,8 @@ namespace Thirdweb
             {
                 switch (_thirdwebWallet.GetProvider())
                 {
+                    case WalletProvider.WalletConnect:
+                        return ThirdwebManager.Instance.SDK.session.CurrentChainData.chainId;
                     case WalletProvider.Metamask:
                         return new HexBigInteger((BigInteger)MetaMask.Unity.MetaMaskUnity.Instance.Wallet.ChainId).HexValue;
                     default:

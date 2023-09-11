@@ -835,11 +835,7 @@ PlayerSettings:
     Server: 1
     Standalone: 1
   il2cppCompilerConfiguration: {}
-  il2cppCodeGeneration:
-    Android: 1
-    Server: 1
-    Standalone: 1
-    WebGL: 1
+  il2cppCodeGeneration: {}
   managedStrippingLevel:
     Android: 4
     EmbeddedLinux: 1
@@ -857,7 +853,7 @@ PlayerSettings:
     tvOS: 1
   incrementalIl2cppBuild: {}
   suppressCommonWarnings: 1
-  allowUnsafeCode: 1
+  allowUnsafeCode: 0
   useDeterministicCompilation: 1
   additionalIl2CppArgs: 
   scriptingRuntimeVersion: 1

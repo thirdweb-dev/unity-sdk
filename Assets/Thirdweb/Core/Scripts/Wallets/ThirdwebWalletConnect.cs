@@ -1,102 +1,122 @@
-// using System.Threading.Tasks;
-// using Nethereum.Web3;
-// using Nethereum.Web3.Accounts;
-// using UnityEngine;
-// using WalletConnectSharp.Sign;
-// using WalletConnectSharp.Network.Models;
-// using Nethereum.JsonRpc.Client;
-// using WalletConnect;
+using System.Threading.Tasks;
+using Nethereum.Web3;
+using Nethereum.Web3.Accounts;
+using UnityEngine;
+using WalletConnectSharp.Sign;
+using WalletConnectSharp.Network.Models;
+using Nethereum.JsonRpc.Client;
+using System;
+using Nethereum.JsonRpc.Client.RpcMessages;
+using System.Linq;
+using Newtonsoft.Json;
+using WalletConnectSharp.Sign.Models;
+using System.Collections.Generic;
+using WalletConnectSharp.Common.Utils;
+using Thirdweb.WalletConnect;
+using System.Numerics;
 
-// namespace Thirdweb.Wallets
-// {
-//     public class ThirdwebWalletConnect : IThirdwebWallet
-//     {
-//         private Web3 _web3;
-//         private WalletProvider _provider;
-//         private WalletProvider _signerProvider;
+namespace Thirdweb.Wallets
+{
+    public class ThirdwebWalletConnect : IThirdwebWallet
+    {
+        private Web3 _web3;
+        private WalletProvider _provider;
+        private WalletProvider _signerProvider;
+        private string _walletConnectProjectId;
+        private string _address;
 
-//         private string _walletConnectProjectId;
+        private WalletConnect.WalletConnect _walletConnect;
 
-//         public ThirdwebWalletConnect(string walletConnectProjectId)
-//         {
-//             _web3 = null;
-//             _provider = WalletProvider.WalletConnect;
-//             _signerProvider = WalletProvider.WalletConnect;
-//             _walletConnectProjectId = walletConnectProjectId;
-//         }
+        public ThirdwebWalletConnect(string walletConnectProjectId)
+        {
+            _web3 = null;
+            _provider = WalletProvider.WalletConnect;
+            _signerProvider = WalletProvider.WalletConnect;
+            _walletConnectProjectId = walletConnectProjectId;
+        }
 
-//         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
-//         {
-//             if (WalletConnectUI.Instance == null)
-//             {
-//                 GameObject.Instantiate(ThirdwebManager.Instance.WalletConnectPrefab);
-//                 await new WaitForSeconds(0.5f);
-//             }
+        public async Task<string> Connect(WalletConnection walletConnection, string rpc)
+        {
+            if (WalletConnectUI.Instance == null)
+            {
+                GameObject.Instantiate(ThirdwebManager.Instance.WalletConnectPrefab);
+                await new WaitForSeconds(0.5f);
+            }
 
-//             var address = await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
+            string topic = null;
+            string eipChainId = null;
+            WalletConnectSignClient client = null;
+            (client, _address, eipChainId) = await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
 
-//             var wcProtocol = WCSignClient.Instance.SignClient.Protocol;
-//             var client = new RpcClient(new System.Uri(wcProtocol));
-//             _web3 = new Web3(client);
-//             return address;
-//         }
+            Debug.Log($"Connected to {_address} with topic {topic} and chainId {eipChainId}");
 
-//         public async Task Disconnect()
-//         {
-//             await WCSignClient.Instance.SignClient.Disconnect(
-//                 "User disconnected",
-//                 new Error()
-//                 {
-//                     Code = 0,
-//                     Message = "User disconnected",
-//                     Data = null
-//                 }
-//             );
-//             _web3 = null;
-//         }
+            var accounts = new string[] { await GetAddress() };
+            _walletConnect = new WalletConnect.WalletConnect(accounts, eipChainId, client);
+            _web3 = _walletConnect.CreateWeb3();
+            return accounts[0];
+        }
 
-//         public Account GetLocalAccount()
-//         {
-//             return null;
-//         }
+        public async Task Disconnect()
+        {
+            try
+            {
+                await _walletConnect.Disconnect();
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Error disconnecting sign client: " + e.Message);
+            }
 
-//         public async Task<string> GetAddress()
-//         {
-//             var ethAccs = await _web3.Eth.Accounts.SendRequestAsync();
-//             var addy = ethAccs[0];
-//             if (addy != null)
-//                 addy = addy.ToChecksumAddress();
-//             return addy;
-//         }
+            _web3 = null;
+        }
 
-//         public async Task<string> GetSignerAddress()
-//         {
-//             return await GetAddress();
-//         }
+        public Account GetLocalAccount()
+        {
+            return null;
+        }
 
-//         public WalletProvider GetProvider()
-//         {
-//             return _provider;
-//         }
+        public Task<string> GetAddress()
+        {
+            var ethAccs = new string[] { _address };
+            var addy = ethAccs[0];
+            if (addy != null)
+                addy = addy.ToChecksumAddress();
+            return Task.FromResult(addy);
+        }
 
-//         public WalletProvider GetSignerProvider()
-//         {
-//             return _signerProvider;
-//         }
+        public async Task<string> GetSignerAddress()
+        {
+            return await GetAddress();
+        }
 
-//         public Task<Web3> GetWeb3()
-//         {
-//             return Task.FromResult(_web3);
-//         }
+        public WalletProvider GetProvider()
+        {
+            return _provider;
+        }
 
-//         public Task<Web3> GetSignerWeb3()
-//         {
-//             return Task.FromResult(_web3);
-//         }
+        public WalletProvider GetSignerProvider()
+        {
+            return _signerProvider;
+        }
 
-//         public Task<bool> IsConnected()
-//         {
-//             return Task.FromResult(_web3 != null);
-//         }
-//     }
-// }
+        public Task<Web3> GetWeb3()
+        {
+            return Task.FromResult(_web3);
+        }
+
+        public Task<Web3> GetSignerWeb3()
+        {
+            return Task.FromResult(_web3);
+        }
+
+        public Task<bool> IsConnected()
+        {
+            return Task.FromResult(_web3 != null);
+        }
+
+        public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
+        {
+            return Task.FromResult(NetworkSwitchAction.Unsupported);
+        }
+    }
+}
