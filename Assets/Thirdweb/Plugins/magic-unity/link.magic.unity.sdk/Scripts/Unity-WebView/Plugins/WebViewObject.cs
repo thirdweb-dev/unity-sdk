@@ -1,15 +1,15 @@
 /*
  * Copyright (C) 2011 Keijiro Takahashi
  * Copyright (C) 2012 GREE, Inc.
- * 
+ *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
  * arising from the use of this software.
- * 
+ *
  * Permission is granted to anyone to use this software for any purpose,
  * including commercial applications, and to alter it and redistribute it
  * freely, subject to the following restrictions:
- * 
+ *
  * 1. The origin of this software must not be misrepresented; you must not
  *    claim that you wrote the original software. If you use this software
  *    in a product, an acknowledgment in the product documentation would be
@@ -398,13 +398,14 @@ public class WebViewObject : MonoBehaviour
         bool zoom = true,
         string ua = "",
         // android
-        int androidForceDarkMode = 0,  // 0: follow system setting, 1: force dark off, 2: force dark on
+        int androidForceDarkMode = 0, // 0: follow system setting, 1: force dark off, 2: force dark on
         // ios
         bool enableWKWebView = true,
-        int  wkContentMode = 0,  // 0: recommended, 1: mobile, 2: desktop
+        int wkContentMode = 0, // 0: recommended, 1: mobile, 2: desktop
         bool wkAllowsLinkPreview = true,
         // editor
-        bool separated = false)
+        bool separated = false
+    )
     {
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
         _CWebViewPlugin_InitStatic(
@@ -537,7 +538,7 @@ public class WebViewObject : MonoBehaviour
     {
 #if UNITY_WEBPLAYER || UNITY_WEBGL
         //TODO: UNSUPPORTED
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX || UNITY_STANDALONE
         //TODO: UNSUPPORTED
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
         //TODO: UNSUPPORTED
@@ -554,9 +555,9 @@ public class WebViewObject : MonoBehaviour
     // NOTE: for historical reasons, `center` means the lower left corner and positive y values extend up.
     public void SetCenterPositionWithScale(Vector2 center, Vector2 scale)
     {
-#if UNITY_WEBPLAYER || UNITY_WEBGL
+#if UNITY_WEBPLAYER || UNITY_WEBGL || UNITY_SERVER
         //TODO: UNSUPPORTED
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
 #else
         float left = (Screen.width - scale.x) / 2.0f + center.x;
@@ -569,7 +570,7 @@ public class WebViewObject : MonoBehaviour
 
     public void SetMargins(int left, int top, int right, int bottom, bool relative = false)
     {
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
         return;
 #elif UNITY_WEBPLAYER || UNITY_WEBGL
@@ -589,8 +590,11 @@ public class WebViewObject : MonoBehaviour
         mMarginRight = right;
         mMarginBottom = bottom;
         mMarginRelative = relative;
-        float ml, mt, mr, mb;
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+        float ml,
+            mt,
+            mr,
+            mb;
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
 #elif UNITY_WEBPLAYER || UNITY_WEBGL
         ml = left;
@@ -641,11 +645,7 @@ public class WebViewObject : MonoBehaviour
 #endif
         bool r = relative;
 
-        if (ml == mMarginLeftComputed
-            && mt == mMarginTopComputed
-            && mr == mMarginRightComputed
-            && mb == mMarginBottomComputed
-            && r == mMarginRelativeComputed)
+        if (ml == mMarginLeftComputed && mt == mMarginTopComputed && mr == mMarginRightComputed && mb == mMarginBottomComputed && r == mMarginRelativeComputed)
         {
             return;
         }
@@ -655,7 +655,7 @@ public class WebViewObject : MonoBehaviour
         mMarginBottomComputed = mb;
         mMarginRelativeComputed = r;
 
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
 #elif UNITY_WEBPLAYER
         Application.ExternalCall("unityWebView.setMargins", name, (int)ml, (int)mt, (int)mr, (int)mb);
@@ -681,7 +681,7 @@ public class WebViewObject : MonoBehaviour
 #endif
 #elif UNITY_WEBPLAYER
         Application.ExternalCall("unityWebView.setVisibility", name, v);
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
         if (webView == IntPtr.Zero)
@@ -818,7 +818,7 @@ public class WebViewObject : MonoBehaviour
 #if UNITY_WEBPLAYER || UNITY_WEBGL
         //TODO: UNSUPPORTED
         return false;
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
         return false;
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_IPHONE
@@ -842,7 +842,7 @@ public class WebViewObject : MonoBehaviour
 #endif
 #elif UNITY_WEBPLAYER
         Application.ExternalCall("unityWebView.loadURL", name, url);
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_IPHONE
         if (webView == IntPtr.Zero)
@@ -863,7 +863,7 @@ public class WebViewObject : MonoBehaviour
             baseUrl = "";
 #if UNITY_WEBPLAYER || UNITY_WEBGL
         //TODO: UNSUPPORTED
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_IPHONE
         if (webView == IntPtr.Zero)
@@ -884,7 +884,7 @@ public class WebViewObject : MonoBehaviour
 #endif
 #elif UNITY_WEBPLAYER
         Application.ExternalCall("unityWebView.evaluateJS", name, js);
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_IPHONE
         if (webView == IntPtr.Zero)
@@ -902,7 +902,7 @@ public class WebViewObject : MonoBehaviour
 #if UNITY_WEBPLAYER || UNITY_WEBGL
         //TODO: UNSUPPORTED
         return 0;
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
         return 0;
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_IPHONE
@@ -921,7 +921,7 @@ public class WebViewObject : MonoBehaviour
 #if UNITY_WEBPLAYER || UNITY_WEBGL
         //TODO: UNSUPPORTED
         return false;
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
         return false;
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_IPHONE
@@ -940,7 +940,7 @@ public class WebViewObject : MonoBehaviour
 #if UNITY_WEBPLAYER || UNITY_WEBGL
         //TODO: UNSUPPORTED
         return false;
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
         return false;
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_IPHONE
@@ -958,7 +958,7 @@ public class WebViewObject : MonoBehaviour
     {
 #if UNITY_WEBPLAYER || UNITY_WEBGL
         //TODO: UNSUPPORTED
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_IPHONE
         if (webView == IntPtr.Zero)
@@ -975,7 +975,7 @@ public class WebViewObject : MonoBehaviour
     {
 #if UNITY_WEBPLAYER || UNITY_WEBGL
         //TODO: UNSUPPORTED
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_IPHONE
         if (webView == IntPtr.Zero)
@@ -992,7 +992,7 @@ public class WebViewObject : MonoBehaviour
     {
 #if UNITY_WEBPLAYER || UNITY_WEBGL
         //TODO: UNSUPPORTED
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_IPHONE
         if (webView == IntPtr.Zero)
@@ -1067,7 +1067,6 @@ public class WebViewObject : MonoBehaviour
         }
     }
 
-
     public void AddCustomHeader(string headerKey, string headerValue)
     {
 #if UNITY_WEBPLAYER || UNITY_WEBGL
@@ -1090,7 +1089,7 @@ public class WebViewObject : MonoBehaviour
 #if UNITY_WEBPLAYER || UNITY_WEBGL
         //TODO: UNSUPPORTED
         return null;
-#elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
+#elif UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
         return null;
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_IPHONE
@@ -1153,7 +1152,6 @@ public class WebViewObject : MonoBehaviour
 #endif
     }
 
-
     public void SaveCookies()
     {
 #if UNITY_WEBPLAYER || UNITY_WEBGL
@@ -1170,7 +1168,6 @@ public class WebViewObject : MonoBehaviour
         webView.Call("SaveCookies");
 #endif
     }
-
 
     public string GetCookies(string url)
     {
@@ -1229,7 +1226,6 @@ public class WebViewObject : MonoBehaviour
         webView.Call("ClearCache", includeDiskFiles);
 #endif
     }
-
 
     public void SetTextZoom(int textZoom)
     {
