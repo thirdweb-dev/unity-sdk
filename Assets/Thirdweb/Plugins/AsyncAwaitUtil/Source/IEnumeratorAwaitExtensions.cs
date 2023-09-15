@@ -11,6 +11,8 @@ using UnityEngine;
 using UnityAsyncAwaitUtil;
 using UnityEngine.Networking;
 
+#pragma warning disable CS0436
+
 // We could just add a generic GetAwaiter to YieldInstruction and CustomYieldInstruction
 // but instead we add specific methods to each derived class to allow for return values
 // that make the most sense for the specific instruction type

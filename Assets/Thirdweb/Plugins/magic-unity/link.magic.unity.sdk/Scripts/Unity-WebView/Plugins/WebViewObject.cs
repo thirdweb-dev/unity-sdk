@@ -568,6 +568,8 @@ public class WebViewObject : MonoBehaviour
 #endif
     }
 
+#pragma warning disable CS0162
+
     public void SetMargins(int left, int top, int right, int bottom, bool relative = false)
     {
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE || UNITY_EDITOR_LINUX
@@ -672,6 +674,8 @@ public class WebViewObject : MonoBehaviour
         webView.Call("SetMargins", (int)ml, (int)mt, (int)mr, (int)mb);
 #endif
     }
+
+#pragma warning restore CS0162
 
     public void SetVisibility(bool v)
     {

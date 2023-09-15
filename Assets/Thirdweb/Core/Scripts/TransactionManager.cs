@@ -10,6 +10,8 @@ using Thirdweb.Contracts.Forwarder.ContractDefinition;
 using Nethereum.RPC.Eth.Transactions;
 using Nethereum.Web3;
 
+#pragma warning disable CS0618
+
 namespace Thirdweb
 {
     public static class TransactionManager

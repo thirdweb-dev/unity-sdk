@@ -10,6 +10,8 @@ using UnityEngine;
 using MinimalForwarder = Thirdweb.Contracts.Forwarder.ContractDefinition;
 using UnityEngine.Networking;
 
+#pragma warning disable CS0618
+
 namespace Thirdweb
 {
     /// <summary>
