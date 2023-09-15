@@ -21,7 +21,7 @@ namespace MetaMask.Contracts
 {
 	public class ERC20PresetMinterPauserBacking : Contract, ERC20PresetMinterPauser
 	{
-		public string Address
+		public new string Address
 		{
 			get => base.Address;
 		}

@@ -21,7 +21,7 @@ namespace MetaMask.Contracts
 {
 	public class ERC20PresetFixedSupplyBacking : Contract, ERC20PresetFixedSupply
 	{
-		public string Address
+		public new string Address
 		{
 			get => base.Address;
 		}
