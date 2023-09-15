@@ -21,7 +21,7 @@ namespace MetaMask.Contracts
 {
 	public class ERC721Backing : Contract, ERC721
 	{
-		public string Address
+		public new string Address
 		{
 			get => base.Address;
 		}

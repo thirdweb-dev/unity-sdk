@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 
+#pragma warning disable CS0436
+
 // TODO: Remove the allocs here, use a static memory pool?
 public static class Awaiters
 {

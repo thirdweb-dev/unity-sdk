@@ -32,7 +32,7 @@ namespace WalletConnect
         public string ProjectName;
         public string ProjectId;
         public Metadata ClientMetadata;
-        
+
         public bool ConnectOnAwake;
         public bool ConnectOnStart;
         public bool EnableCoreLogging;
@@ -53,7 +53,7 @@ namespace WalletConnect
             {
                 if (string.IsNullOrWhiteSpace(DefaultWalletId))
                     return null;
-                
+
                 if (SupportedWallets.Count == 0)
                     throw new Exception("WalletConnectUnity.Instance.FetchWallets has not been invoked");
 
@@ -92,7 +92,7 @@ namespace WalletConnect
         // Start is called before the first frame update
         async void Start()
         {
-            if (ConnectOnStart) 
+            if (ConnectOnStart)
             {
                 await InitCore();
             }
@@ -127,15 +127,17 @@ namespace WalletConnect
                 if (_builder == null)
                     _builder = GetComponent<WCWebSocketBuilder>();
 
-                Core = new WalletConnectCore(new CoreOptions()
-                {
-                    Name = ProjectName,
-                    ProjectId = ProjectId,
-                    BaseContext = BaseContext,
-                    Storage = storage,
-                    ConnectionBuilder = _builder,
-                    //CryptoModule = crypto,
-                });
+                Core = new WalletConnectCore(
+                    new CoreOptions()
+                    {
+                        Name = ProjectName,
+                        ProjectId = ProjectId,
+                        BaseContext = BaseContext,
+                        Storage = storage,
+                        ConnectionBuilder = _builder,
+                        //CryptoModule = crypto,
+                    }
+                );
 
                 await Core.Start();
 
@@ -175,7 +177,6 @@ namespace WalletConnect
 
             DefaultWallet.OpenWallet();
         }
-        
 
 #if !UNITY_MONO
         [Preserve]
@@ -199,15 +200,15 @@ namespace WalletConnect
         {
             StartCoroutine(FetchWalletList(downloadImages));
         }
-        
+
         private IEnumerator FetchWalletList(bool downloadImages = true, Action callback = null)
         {
             using (UnityWebRequest webRequest = UnityWebRequest.Get("https://registry.walletconnect.org/data/wallets.json"))
             {
                 // Request and wait for the desired page.
                 yield return webRequest.SendWebRequest();
-                
-                if (webRequest.isNetworkError)
+
+                if (webRequest.result != UnityWebRequest.Result.Success)
                 {
                     Debug.Log("Error Getting Wallet Info: " + webRequest.error);
                 }
@@ -242,7 +243,7 @@ namespace WalletConnect
         {
             int tally = 0;
 
-            foreach(IEnumerator c in coroutines)
+            foreach (IEnumerator c in coroutines)
             {
                 StartCoroutine(RunCoroutine(c));
             }
@@ -259,7 +260,7 @@ namespace WalletConnect
                 tally--;
             }
         }
-        
+
         private IEnumerator DownloadImagesFor(string id)
         {
             Dictionary<string, Action<Wallet, Sprite>> sizeMapping = new Dictionary<string, Action<Wallet, Sprite>>()
@@ -279,16 +280,14 @@ namespace WalletConnect
                 {
                     yield return imageRequest.SendWebRequest();
 
-                    if (imageRequest.isNetworkError)
+                    if (imageRequest.result != UnityWebRequest.Result.Success)
                     {
                         Debug.Log("Error Getting Wallet Icon: " + imageRequest.error);
                     }
                     else
                     {
-                        var texture = ((DownloadHandlerTexture) imageRequest.downloadHandler).texture;
-                        var sprite = Sprite.Create(texture,
-                            new Rect(0.0f, 0.0f, texture.width, texture.height),
-                            new Vector2(0.5f, 0.5f), 100.0f);
+                        var texture = ((DownloadHandlerTexture)imageRequest.downloadHandler).texture;
+                        var sprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100.0f);
 
                         sizeMapping[size](data, sprite);
                     }
@@ -300,40 +299,38 @@ namespace WalletConnect
         {
             if (SupportedWallets.Count == 0)
             {
-                if (!tryFetchWallets) throw new Exception("No wallets to search");
-                
+                if (!tryFetchWallets)
+                    throw new Exception("No wallets to search");
+
                 StartCoroutine(FetchWalletList(callback: () => FindAndSetDefaultWallet(walletName, tryFetchWallets: false)));
                 return;
-
             }
 
             if (ignoreCase)
                 walletName = walletName.ToLower();
-            
-            var defaultWalletId = SupportedWallets.FirstOrDefault(t => (ignoreCase ? t.Value.Name.ToLower() : t.Value.Name) == walletName)
-                .Key;
+
+            var defaultWalletId = SupportedWallets.FirstOrDefault(t => (ignoreCase ? t.Value.Name.ToLower() : t.Value.Name) == walletName).Key;
 
             if (defaultWalletId != null)
                 DefaultWalletId = defaultWalletId;
             else
                 throw new KeyNotFoundException($"No wallet by the name of {walletName} could be found");
         }
-        
+
         public void FindAndSetDefaultWallet(Metadata peer, bool tryFetchWallets = true)
         {
             if (SupportedWallets.Count == 0)
             {
-                if (!tryFetchWallets) throw new Exception("No wallets to search");
-                
+                if (!tryFetchWallets)
+                    throw new Exception("No wallets to search");
+
                 StartCoroutine(FetchWalletList(callback: () => FindAndSetDefaultWallet(peer, tryFetchWallets: false)));
                 return;
-
             }
 
             var nativeUrl = peer.Redirect.Native.Replace("//", "");
-            
-            var defaultWalletId = SupportedWallets.FirstOrDefault(t => t.Value.Mobile.NativeProtocol == nativeUrl || t.Value.Desktop.NativeProtocol == nativeUrl)
-                .Key;
+
+            var defaultWalletId = SupportedWallets.FirstOrDefault(t => t.Value.Mobile.NativeProtocol == nativeUrl || t.Value.Desktop.NativeProtocol == nativeUrl).Key;
 
             if (defaultWalletId != null)
                 DefaultWalletId = defaultWalletId;
@@ -341,6 +338,6 @@ namespace WalletConnect
                 throw new KeyNotFoundException($"No wallet by the name of {peer.Name} could be found");
         }
 
-        public Dictionary<string,Wallet> SupportedWallets { get; set; }
+        public Dictionary<string, Wallet> SupportedWallets { get; set; }
     }
 }
