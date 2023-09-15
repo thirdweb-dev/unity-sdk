@@ -349,8 +349,8 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var receipt = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetEtherTransferService().TransferEtherAndWaitForReceiptAsync(to, decimal.Parse(amount));
-                    return receipt.ToTransactionResult();
+                    var txHash = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetEtherTransferService().TransferEtherAsync(to, decimal.Parse(amount));
+                    return await Transaction.WaitForTransactionResult(txHash);
                 }
             }
         }
