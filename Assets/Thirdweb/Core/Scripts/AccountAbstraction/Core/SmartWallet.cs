@@ -223,25 +223,25 @@ namespace Thirdweb.AccountAbstraction
             {
                 var getUserOpResponse = await BundlerClient.EthGetUserOperationByHash(Config.bundlerUrl, apiKey, requestMessage.Id, userOpHash);
                 txHash = getUserOpResponse?.transactionHash;
-                await new WaitForSecondsRealtime(5f);
+                await new WaitForSecondsRealtime(2f);
             }
             ThirdwebDebug.Log("Tx Hash: " + txHash);
 
-            // Check if successful
+            // // Check if successful
 
-            var receipt = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txHash);
-            var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
-            if (decodedEvents[0].Event.Success == false)
-            {
-                ThirdwebDebug.Log("Transaction not successful, checking reason...");
-                var reason = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
-                throw new Exception($"Transaction {txHash} reverted with reason: {reason}");
-            }
-            else
-            {
-                ThirdwebDebug.Log("Transaction successful");
-                _deployed = true;
-            }
+            // var receipt = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txHash);
+            // var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
+            // if (decodedEvents[0].Event.Success == false)
+            // {
+            //     ThirdwebDebug.Log("Transaction not successful, checking reason...");
+            //     var reason = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
+            //     throw new Exception($"Transaction {txHash} reverted with reason: {reason}");
+            // }
+            // else
+            // {
+            //     ThirdwebDebug.Log("Transaction successful");
+            //     _deployed = true;
+            // }
 
             return new RpcResponseMessage(requestMessage.Id, txHash);
         }
