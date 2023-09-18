@@ -1,10 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Paper;
 using System.Threading.Tasks;
 using UnityEngine.UI;
 using TMPro;
+using Thirdweb.Redcode.Awaiting;
 
 namespace Thirdweb.Wallets
 {

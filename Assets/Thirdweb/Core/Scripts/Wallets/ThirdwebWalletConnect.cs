@@ -3,17 +3,10 @@ using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
 using WalletConnectSharp.Sign;
-using WalletConnectSharp.Network.Models;
-using Nethereum.JsonRpc.Client;
 using System;
-using Nethereum.JsonRpc.Client.RpcMessages;
-using System.Linq;
-using Newtonsoft.Json;
-using WalletConnectSharp.Sign.Models;
-using System.Collections.Generic;
-using WalletConnectSharp.Common.Utils;
 using Thirdweb.WalletConnect;
 using System.Numerics;
+using Thirdweb.Redcode.Awaiting;
 
 namespace Thirdweb.Wallets
 {

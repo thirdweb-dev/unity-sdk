@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using NativeWebSocket;
+using WalletConnect.NativeWebSocket;
 using Newtonsoft.Json;
 using UnityEngine;
 using WalletConnectSharp.Common;
@@ -13,17 +13,16 @@ using WalletConnectSharp.Network;
 using WalletConnectSharp.Network.Models;
 using WalletConnectSharp.Network.Websocket;
 using Exception = System.Exception;
-using WebSocket = NativeWebSocket.WebSocket;
+using WebSocket = WalletConnect.NativeWebSocket.WebSocket;
 
 namespace WalletConnect
 {
     public class WCWebSocket : MonoBehaviour, IJsonRpcConnection, IModule
     {
-        
         WebSocket _socket;
 
         private EventDelegator _delegator;
-        
+
         [SerializeField]
         private string url;
         private bool _registering;
@@ -41,10 +40,7 @@ namespace WalletConnect
         /// </summary>
         public string Url
         {
-            get
-            {
-                return url;
-            }
+            get { return url; }
             set => url = value;
         }
 
@@ -55,10 +51,7 @@ namespace WalletConnect
         /// </summary>
         public string Name
         {
-            get
-            {
-                return "websocket-connection";
-            }
+            get { return "websocket-connection"; }
         }
 
         /// <summary>
@@ -66,10 +59,7 @@ namespace WalletConnect
         /// </summary>
         public string Context
         {
-            get
-            {
-                return _context.ToString();
-            }
+            get { return _context.ToString(); }
         }
 
         /// <summary>
@@ -77,12 +67,9 @@ namespace WalletConnect
         /// </summary>
         public EventDelegator Events
         {
-            get
-            {
-                return _delegator;
-            }
+            get { return _delegator; }
         }
-        
+
         /// <summary>
         /// Whether this websocket connection is connected
         /// </summary>
@@ -101,11 +88,9 @@ namespace WalletConnect
         /// </summary>
         public bool Connecting
         {
-            get
-            {
-                return _registering;
-            }
+            get { return _registering; }
         }
+
         public async void Dispose()
         {
             if (Connected)
@@ -149,13 +134,13 @@ namespace WalletConnect
             try
             {
                 Debug.Log($"[WCWebSocket-{_context}] Sending request {JsonConvert.SerializeObject(requestPayload)}");
-                
+
                 await _socket.SendText(JsonConvert.SerializeObject(requestPayload));
             }
             catch (Exception e)
             {
                 Debug.LogError(e);
-                
+
                 OnError<T>(requestPayload, e);
             }
         }
@@ -205,20 +190,23 @@ namespace WalletConnect
 
             if (_registering)
             {
-                TaskCompletionSource<WebSocket> registeringTask =
-                    new TaskCompletionSource<WebSocket>(TaskCreationOptions.None);
-                
-                Events.ListenForOnce(WebsocketConnectionEvents.RegisterError,
+                TaskCompletionSource<WebSocket> registeringTask = new TaskCompletionSource<WebSocket>(TaskCreationOptions.None);
+
+                Events.ListenForOnce(
+                    WebsocketConnectionEvents.RegisterError,
                     delegate(object sender, GenericEvent<Exception> @event)
                     {
                         registeringTask.SetException(@event.EventData);
-                    });
-                
-                Events.ListenForOnce(WebsocketConnectionEvents.Open,
+                    }
+                );
+
+                Events.ListenForOnce(
+                    WebsocketConnectionEvents.Open,
                     delegate(object sender, GenericEvent<WebSocket> @event)
                     {
                         registeringTask.SetResult(@event.EventData);
-                    });
+                    }
+                );
 
                 await registeringTask.Task;
 
@@ -240,7 +228,7 @@ namespace WalletConnect
             catch (Exception e)
             {
                 Events.Trigger(WebsocketConnectionEvents.RegisterError, e);
-                
+
                 WCLogger.Log($"Calling close due to exception {e}");
                 OnClose(WebSocketCloseCode.ServerError);
 
@@ -256,30 +244,30 @@ namespace WalletConnect
 
             return beginConnect.Task;
         }
-        
+
         private void OnOpen(WebSocket socket)
         {
             socket.OnMessage += OnPayload;
             socket.OnClose += OnDisconnect;
-            
+
             this._registering = false;
             Events.Trigger(WebsocketConnectionEvents.Open, _socket);
         }
-        
+
         private void OnDisconnect(WebSocketCloseCode obj)
         {
             if (obj != WebSocketCloseCode.Normal)
                 Events.Trigger(WebsocketConnectionEvents.Error, obj);
-            
+
             WCLogger.Log("Socket closing due to Disconnect event from socket");
             OnClose(obj);
         }
-        
+
         private void OnClose(WebSocketCloseCode obj)
         {
             if (this._socket == null)
                 return;
-            
+
             //_socket.Dispose();
             this._socket = null;
             this._registering = false;
@@ -289,11 +277,12 @@ namespace WalletConnect
         private void OnPayload(byte[] data)
         {
             string json = System.Text.Encoding.UTF8.GetString(data);
-            
+
             Debug.Log($"[WCWebSocket-{_context}] Got payload {json}");
-            
-            if (string.IsNullOrWhiteSpace(json)) return;
-            
+
+            if (string.IsNullOrWhiteSpace(json))
+                return;
+
             Debug.Log($"[WCWebsocket-{_context}] Triggering payload event with JSON {json}");
 
             Events.Trigger(WebsocketConnectionEvents.Payload, json);
@@ -309,8 +298,10 @@ namespace WalletConnect
 
         private async void LateUpdate()
         {
-            if (begunConnect || beginConnect == null || beginConnect.Task.IsCompleted) return;
-            if (_socket == null) return;
+            if (begunConnect || beginConnect == null || beginConnect.Task.IsCompleted)
+                return;
+            if (_socket == null)
+                return;
 
             begunConnect = true;
             this._socket.OnOpen += SocketOnOnOpen;
@@ -334,17 +325,19 @@ namespace WalletConnect
 
         private void OnError<T>(IJsonRpcPayload ogPayload, Exception e)
         {
-            var exception = e.Message.Contains(addressNotFoundError) || e.Message.Contains(connectionRefusedError)
-                ? new IOException("Unavailable WS RPC url at " + this.url)
-                : e;
+            var exception = e.Message.Contains(addressNotFoundError) || e.Message.Contains(connectionRefusedError) ? new IOException("Unavailable WS RPC url at " + this.url) : e;
 
             var message = exception.Message;
-            var payload = new JsonRpcResponse<T>(ogPayload.Id, new Error()
-            {
-                Code = exception.HResult,
-                Data = null,
-                Message = message
-            }, default(T));
+            var payload = new JsonRpcResponse<T>(
+                ogPayload.Id,
+                new Error()
+                {
+                    Code = exception.HResult,
+                    Data = null,
+                    Message = message
+                },
+                default(T)
+            );
 
             //Trigger the payload event, converting the new JsonRpcResponse object to JSON string
             Events.Trigger(WebsocketConnectionEvents.Payload, JsonConvert.SerializeObject(payload));

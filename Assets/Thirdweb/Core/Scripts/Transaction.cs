@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 using MinimalForwarder = Thirdweb.Contracts.Forwarder.ContractDefinition;
 using UnityEngine.Networking;
+using Thirdweb.Redcode.Awaiting;
 
 #pragma warning disable CS0618
 

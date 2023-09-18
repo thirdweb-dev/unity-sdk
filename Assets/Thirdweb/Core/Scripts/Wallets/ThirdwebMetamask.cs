@@ -5,6 +5,7 @@ using MetaMask.Unity;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
+using Thirdweb.Redcode.Awaiting;
 
 namespace Thirdweb.Wallets
 {

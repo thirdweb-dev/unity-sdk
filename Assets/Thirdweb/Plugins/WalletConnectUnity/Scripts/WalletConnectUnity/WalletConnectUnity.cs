@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using UnityBinder;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Scripting;
@@ -19,6 +18,7 @@ using WalletConnectSharp.Sign.Models.Engine.Methods;
 using WalletConnectSharp.Storage;
 using WalletConnectUnity.Models;
 using WalletConnectSharp.Storage.Interfaces;
+using WalletConnect.UnityBinder;
 
 namespace WalletConnect
 {
