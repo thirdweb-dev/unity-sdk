@@ -16,7 +16,7 @@ namespace Thirdweb
 
         #region Editor Window Setup
 
-        [MenuItem("Thirdweb/Thirdweb Unity SDK Setup")]
+        [MenuItem("Tools/Thirdweb/Thirdweb Unity SDK Setup")]
         public static void ShowWindow()
         {
             EditorWindow.GetWindow<ThirdwebSDKInstallerPopup>("Thirdweb Unity SDK Setup").minSize = new Vector2(450, 600);

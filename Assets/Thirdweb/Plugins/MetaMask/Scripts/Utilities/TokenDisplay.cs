@@ -3,34 +3,37 @@ using MetaMask.Unity.Contracts;
 using TMPro;
 using UnityEngine;
 
-public class TokenDisplay : MonoBehaviour
+namespace MetaMask
 {
-    private MetaMaskUnity _metaMask;
-    private TextMeshProUGUI _balanceText;
-
-    public ScriptableERC20 contract;
-    
-    // Start is called before the first frame update
-    void Start()
+    public class TokenDisplay : MonoBehaviour
     {
-        _metaMask = MetaMaskUnity.Instance;
-        _balanceText = GetComponent<TextMeshProUGUI>();
+        private MetaMaskUnity _metaMask;
+        private TextMeshProUGUI _balanceText;
 
-        if (_metaMask.Wallet.IsConnected)
+        public ScriptableERC20 contract;
+
+        // Start is called before the first frame update
+        void Start()
         {
-            DisplayBalance();
+            _metaMask = MetaMaskUnity.Instance;
+            _balanceText = GetComponent<TextMeshProUGUI>();
+
+            if (_metaMask.Wallet.IsConnected)
+            {
+                DisplayBalance();
+            }
+
+            _metaMask.Wallet.Events.AccountChanged += (_, _) => DisplayBalance();
         }
 
-        _metaMask.Wallet.Events.AccountChanged += (_, _) => DisplayBalance();
-    }
+        private async void DisplayBalance()
+        {
+            var address = _metaMask.Wallet.SelectedAddress;
 
-    private async void DisplayBalance()
-    {
-        var address = _metaMask.Wallet.SelectedAddress;
+            var tokenSymbol = await contract.Symbol();
+            var tokenBalance = await contract.BalanceOf(address);
 
-        var tokenSymbol = await contract.Symbol();
-        var tokenBalance = await contract.BalanceOf(address);
-
-        _balanceText.text = $"{tokenSymbol}: {tokenBalance}";
+            _balanceText.text = $"{tokenSymbol}: {tokenBalance}";
+        }
     }
 }

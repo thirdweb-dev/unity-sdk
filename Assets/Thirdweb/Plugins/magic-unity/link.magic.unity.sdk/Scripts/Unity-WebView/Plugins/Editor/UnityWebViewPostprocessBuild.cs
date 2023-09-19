@@ -12,6 +12,8 @@ using UnityEditor.Callbacks;
 using UnityEditor;
 using UnityEngine;
 
+namespace link.magic.unity.sdk
+{
 #if UNITY_2018_1_OR_NEWER
 public class UnityWebViewPostprocessBuild : IPostGenerateGradleAndroidProject
 #else
@@ -408,5 +410,6 @@ internal class AndroidManifest : AndroidXmlDocument {
         }
         return changed;
     }
+}
 }
 #endif

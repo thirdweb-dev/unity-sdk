@@ -4,51 +4,54 @@ using link.magic.unity.sdk.Relayer;
 using Nethereum.ABI.EIP712;
 using UnityEngine;
 
-public class MagicUnity : MonoBehaviour
+namespace link.magic.unity.sdk
 {
-    public static MagicUnity Instance;
-
-    private Magic _magic;
-
-    private void Awake()
+    public class MagicUnity : MonoBehaviour
     {
-        if (Instance == null)
+        public static MagicUnity Instance;
+
+        private Magic _magic;
+
+        private void Awake()
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Instance == null)
+            {
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
         }
-        else
+
+        public void Initialize(string apikey, CustomNodeConfiguration config, string locale = "en-US")
         {
-            Destroy(gameObject);
-            return;
+            _magic = new Magic(apikey, config, locale);
+            Magic.Instance = _magic;
         }
-    }
 
-    public void Initialize(string apikey, CustomNodeConfiguration config, string locale = "en-US")
-    {
-        _magic = new Magic(apikey, config, locale);
-        Magic.Instance = _magic;
-    }
+        public async Task<string> EnableMagicAuth(string email)
+        {
+            return await _magic.Auth.LoginWithEmailOtp(email);
+        }
 
-    public async Task<string> EnableMagicAuth(string email)
-    {
-        return await _magic.Auth.LoginWithEmailOtp(email);
-    }
+        public async Task<string> GetAddress()
+        {
+            var metadata = await _magic.User.GetMetadata();
+            return metadata.publicAddress;
+        }
 
-    public async Task<string> GetAddress()
-    {
-        var metadata = await _magic.User.GetMetadata();
-        return metadata.publicAddress;
-    }
+        public async Task<string> GetEmail()
+        {
+            var metadata = await _magic.User.GetMetadata();
+            return metadata.email;
+        }
 
-    public async Task<string> GetEmail()
-    {
-        var metadata = await _magic.User.GetMetadata();
-        return metadata.email;
-    }
-
-    public async Task DisableMagicAuth()
-    {
-        await _magic.User.Logout();
+        public async Task DisableMagicAuth()
+        {
+            await _magic.User.Logout();
+        }
     }
 }
