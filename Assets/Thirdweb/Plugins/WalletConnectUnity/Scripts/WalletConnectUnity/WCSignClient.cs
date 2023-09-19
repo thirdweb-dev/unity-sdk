@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityBinder;
+using WalletConnect.UnityBinder;
 using UnityEngine;
 using UnityEngine.Scripting;
 using WalletConnectSharp.Common.Logging;
@@ -27,15 +27,15 @@ namespace WalletConnect
         private static WCSignClient _currentInstance;
 
         public static WCSignClient Instance => _currentInstance;
-        
+
         [BindComponent]
         private WalletConnectUnity WalletConnectUnity;
-        
+
         public WalletConnectSignClient SignClient { get; private set; }
 
         public event EventHandler<ConnectedData> OnConnect;
 
-        public event EventHandler<SessionStruct> OnSessionApproved; 
+        public event EventHandler<SessionStruct> OnSessionApproved;
 
         public bool ConnectOnAwake => WalletConnectUnity.ConnectOnAwake;
         public bool ConnectOnStart => WalletConnectUnity.ConnectOnStart;
@@ -43,13 +43,13 @@ namespace WalletConnect
         public bool SetDefaultSessionOnApproval = true;
 
         private TaskCompletionSource<bool> initTask = null;
-        
+
         public List<string> OpenWalletMethods = new List<string>();
-        
+
         protected override async void Awake()
         {
             base.Awake();
-            
+
             if (_currentInstance == null || _currentInstance == this)
             {
                 _currentInstance = this;
@@ -60,7 +60,7 @@ namespace WalletConnect
                 Destroy(this);
                 return;
             }
-            
+
             if (ConnectOnAwake)
             {
                 await InitSignClient();
@@ -85,29 +85,31 @@ namespace WalletConnect
 
             if (SignClient != null)
                 return;
-            
+
             initTask = new TaskCompletionSource<bool>();
 
             try
             {
                 await WalletConnectUnity.InitCore();
 
-                SignClient = await WalletConnectSignClient.Init(new SignClientOptions()
-                {
-                    BaseContext = WalletConnectUnity.BaseContext,
-                    Core = WalletConnectUnity.Core,
-                    Metadata = WalletConnectUnity.ClientMetadata,
-                    Name = WalletConnectUnity.ProjectName,
-                    ProjectId = WalletConnectUnity.ProjectId,
-                    Storage = WalletConnectUnity.Core.Storage,
-                });
-                
+                SignClient = await WalletConnectSignClient.Init(
+                    new SignClientOptions()
+                    {
+                        BaseContext = WalletConnectUnity.BaseContext,
+                        Core = WalletConnectUnity.Core,
+                        Metadata = WalletConnectUnity.ClientMetadata,
+                        Name = WalletConnectUnity.ProjectName,
+                        ProjectId = WalletConnectUnity.ProjectId,
+                        Storage = WalletConnectUnity.Core.Storage,
+                    }
+                );
+
                 initTask.SetResult(true);
             }
             catch (Exception e)
             {
                 Debug.LogError(e);
-                
+
                 initTask.SetException(e);
             }
             finally
@@ -118,7 +120,7 @@ namespace WalletConnect
         }
 
         public SessionStruct DefaultSession;
-        
+
         public string Name => SignClient.Name;
         public string Context => SignClient.Context;
         public EventDelegator Events => SignClient.Events;
@@ -132,6 +134,7 @@ namespace WalletConnect
         public SignClientOptions Options => SignClient.Options;
         public string Protocol => SignClient.Protocol;
         public int Version => SignClient.Version;
+
         public async Task<ConnectedData> Connect(ConnectOptions options)
         {
             WCLogger.Log("Starting connect");
@@ -139,7 +142,7 @@ namespace WalletConnect
 
             if (connectData == null)
                 throw new Exception("Failed to connect");
-            
+
             if (OnConnect != null)
                 OnConnect(this, connectData);
 
@@ -149,10 +152,10 @@ namespace WalletConnect
             {
                 WCLogger.Log("Waiting for approval from wallet");
                 await ogApproval;
-                
+
                 WCLogger.Log("Got approval");
                 var sessionResult = ogApproval.Result;
-                
+
                 OnSessionApproval(sessionResult);
 
                 return sessionResult;
@@ -160,8 +163,9 @@ namespace WalletConnect
 
             connectData.Approval = ApprovalWrapper();
 
-            if (!WalletConnectUnity.UseDeeplink || WalletConnectUnity.DefaultWallet == null) return connectData;
-            
+            if (!WalletConnectUnity.UseDeeplink || WalletConnectUnity.DefaultWallet == null)
+                return connectData;
+
             WalletConnectUnity.DefaultWallet.OpenDeeplink(connectData);
 
             return connectData;
@@ -174,7 +178,7 @@ namespace WalletConnect
 
             if (SetDefaultSessionOnApproval)
                 DefaultSession = session;
-            
+
             WalletConnectUnity.FindAndSetDefaultWallet(session.Peer.Metadata);
         }
 
@@ -236,8 +240,13 @@ namespace WalletConnect
             var method = RpcMethodAttribute.MethodForType<T>();
             if (OpenWalletMethods.Contains(method))
             {
-                Core.Relayer.Events.ListenForOnce<object>(RelayerEvents.Publish,
-                    (_, _) => { WalletConnectUnity.OpenDefaultWallet(); });
+                Core.Relayer.Events.ListenForOnce<object>(
+                    RelayerEvents.Publish,
+                    (_, _) =>
+                    {
+                        WalletConnectUnity.OpenDefaultWallet();
+                    }
+                );
             }
 
             return SignClient.Request<T, TR>(topic, data, chainId, expiry);
@@ -299,10 +308,10 @@ namespace WalletConnect
         }
 
         public void HandleEventMessageType<T>(Func<string, JsonRpcRequest<SessionEvent<T>>, Task> requestCallback, Func<string, JsonRpcResponse<bool>, Task> responseCallback)
-        { 
+        {
             SignClient.HandleEventMessageType<T>(requestCallback, responseCallback);
         }
-        
+
         private void ValidateDefaultSessionNotNull()
         {
             if (string.IsNullOrWhiteSpace(DefaultSession.Topic))
@@ -310,8 +319,8 @@ namespace WalletConnect
                 throw new Exception("No default session set. Set DefaultSession before invoking this method");
             }
         }
-        
-        #if !UNITY_MONO
+
+#if !UNITY_MONO
         [Preserve]
         void SetupAOT()
         {
@@ -327,6 +336,6 @@ namespace WalletConnect
             EventManager<string, GenericEvent<string>>.InstanceOf(null).PropagateEvent(null, null);
             throw new InvalidOperationException("This method is only for AOT code generation.");
         }
-        #endif
+#endif
     }
 }

@@ -1,0 +1,10 @@
+{
+  "name": "com.thirdweb.unitysdk",
+  "version": "3.2.0",
+  "displayName": "ThirdWeb Unity SDK",
+  "description": "Best in class web3 SDK for Unity games",
+  "unity": "2022.3.8f1",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.1.0"
+  }
+}

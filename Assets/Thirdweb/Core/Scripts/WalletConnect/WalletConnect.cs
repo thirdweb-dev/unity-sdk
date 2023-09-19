@@ -6,12 +6,9 @@ using WalletConnectSharp.Network.Models;
 using System.Collections.Generic;
 using WalletConnectSharp.Common.Utils;
 using Nethereum.RPC.Eth.DTOs;
-using WalletConnectSharp.Sign.Models;
-using System.Linq;
-using WalletConnectSharp.Sign.Models.Engine.Methods;
 using Nethereum.Hex.HexTypes;
-using System.Numerics;
 using UnityEngine;
+using Thirdweb.Redcode.Awaiting;
 
 namespace Thirdweb.WalletConnect
 {

@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using MetaMask.Models;
-using MetaMask.Transports;
 using MetaMask.Transports.Unity;
 using MetaMask.Unity;
 using UnityEngine;
@@ -11,6 +8,7 @@ using UnityEngine.UI;
 using ZXing;
 using ZXing.QrCode;
 using TMPro;
+using Thirdweb.Redcode.Awaiting;
 
 namespace Thirdweb.Wallets
 {

@@ -13,7 +13,7 @@ using FactoryContract = Thirdweb.Contracts.AccountFactory.ContractDefinition;
 using UnityEngine;
 using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
-using Nethereum.Util;
+using Thirdweb.Redcode.Awaiting;
 
 namespace Thirdweb.AccountAbstraction
 {

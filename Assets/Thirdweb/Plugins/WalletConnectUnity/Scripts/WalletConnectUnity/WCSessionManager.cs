@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using UnityBinder;
+using WalletConnect.UnityBinder;
 using UnityEngine;
 using UnityEngine.Events;
 using WalletConnectSharp.Common.Utils;
@@ -11,8 +11,11 @@ namespace WalletConnect
 {
     public class WCSessionManager : BindableMonoBehavior
     {
-        [Inject] private WCSignClient _walletConnect;
-        [Inject] private WalletConnectUnity _wcUnity;
+        [Inject]
+        private WCSignClient _walletConnect;
+
+        [Inject]
+        private WalletConnectUnity _wcUnity;
 
         public bool ResumeOnStart = true;
 
@@ -33,19 +36,13 @@ namespace WalletConnect
         private SessionResumedEvent _sessionResumedEvent;
 
         [Serializable]
-        public class NoSessionToResumeEvent : UnityEvent
-        {
-        }
+        public class NoSessionToResumeEvent : UnityEvent { }
 
         [Serializable]
-        public class SessionResumeFailedEvent : UnityEvent<string>
-        {
-        }
+        public class SessionResumeFailedEvent : UnityEvent<string> { }
 
         [Serializable]
-        public class SessionResumedEvent : UnityEvent<SessionStruct>
-        {
-        }
+        public class SessionResumedEvent : UnityEvent<SessionStruct> { }
 
         // Start is called before the first frame update
         async void Start()
@@ -60,7 +57,7 @@ namespace WalletConnect
         {
             // Ensure we are initialized
             await _walletConnect.InitSignClient();
-            
+
             Debug.Log("Restoring session with " + session.Peer.Metadata.Name);
 
             if (session.Expiry != null && Clock.IsExpired((long)session.Expiry))
@@ -91,7 +88,7 @@ namespace WalletConnect
                     return false;
                 }
             }
-            
+
             SessionResume(session);
 
             return true;
@@ -101,7 +98,7 @@ namespace WalletConnect
         {
             // Ensure we are initialized
             await _walletConnect.InitSignClient();
-            
+
             // Find the first session, and check if it's still active
             var sessions = _walletConnect.Session.Values;
             if (sessions.Length == 0)
@@ -123,7 +120,7 @@ namespace WalletConnect
         {
             // Ensure we are initialized
             await _walletConnect.InitSignClient();
-            
+
             var sessions = _walletConnect.Session.Values;
             if (sessions.Length == 0)
             {
@@ -147,7 +144,7 @@ namespace WalletConnect
 
             if (SessionResumed != null)
                 SessionResumed(this, session);
-            
+
             if (_sessionResumedEvent != null)
                 _sessionResumedEvent.Invoke(session);
         }
@@ -156,7 +153,7 @@ namespace WalletConnect
         {
             if (NoSessionToResume != null)
                 NoSessionToResume(this, EventArgs.Empty);
-            
+
             if (_noSessionToResume != null)
                 _noSessionToResume.Invoke();
         }
@@ -165,14 +162,14 @@ namespace WalletConnect
         {
             if (SessionResumeFailed != null)
                 SessionResumeFailed(this, reason);
-            
+
             if (_sessionResumeFailed != null)
                 _sessionResumeFailed.Invoke(reason);
         }
 
         private void OnValidate()
         {
-            if (_wcUnity != null) 
+            if (_wcUnity != null)
                 _wcUnity.StorageType = WCStorageType.Disk;
             else if (Application.isEditor)
             {
