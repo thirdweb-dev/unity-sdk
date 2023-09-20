@@ -23,6 +23,7 @@ namespace Thirdweb
         private SerializedProperty forwaderVersionOverrideProperty;
         private SerializedProperty magicLinkApiKeyProperty;
         private SerializedProperty walletConnectProjectIdProperty;
+        private SerializedProperty walletConnectExplorerRecommendedWalletIdsProperty;
         private SerializedProperty paperClientIdProperty;
         private SerializedProperty factoryAddressProperty;
         private SerializedProperty gaslessProperty;
@@ -62,6 +63,7 @@ namespace Thirdweb
             forwaderVersionOverrideProperty = serializedObject.FindProperty("forwaderVersionOverride");
             magicLinkApiKeyProperty = serializedObject.FindProperty("magicLinkApiKey");
             walletConnectProjectIdProperty = serializedObject.FindProperty("walletConnectProjectId");
+            walletConnectExplorerRecommendedWalletIdsProperty = serializedObject.FindProperty("walletConnectExplorerRecommendedWalletIds");
             paperClientIdProperty = serializedObject.FindProperty("paperClientId");
             factoryAddressProperty = serializedObject.FindProperty("factoryAddress");
             gaslessProperty = serializedObject.FindProperty("gasless");
@@ -256,6 +258,7 @@ namespace Thirdweb
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                     EditorGUILayout.PropertyField(walletConnectProjectIdProperty);
+                    EditorGUILayout.PropertyField(walletConnectExplorerRecommendedWalletIdsProperty);
                     EditorGUILayout.EndVertical();
                 }
             );

@@ -81,6 +81,11 @@ namespace Thirdweb
             public string walletConnectProjectId;
 
             /// <summary>
+            /// Wallets to display in the WC modal (https://walletconnect.com/explorer)
+            /// </summary>
+            public string[] walletConnectExplorerRecommendedWalletIds;
+
+            /// <summary>
             /// The client ID for Paper authentication.
             /// </summary>
             public string paperClientId;
