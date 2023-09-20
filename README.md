@@ -34,24 +34,26 @@ Note: The Newtonsoft DLL is included as part of the Unity Package, feel free to 
 
 # Build
 
+## General
+
+- Use `Smaller (faster) Builds` in the Build Settings (IL2CPP Code Generation in Unity 2022).
+- Use IL2CPP over Mono when possible in the Player Settings.
+- Using the SDK in the editor (pressing Play) is an accurate reflection of what you can expect to see on native platforms.
+- In order to communicate with the SDK on WebGL, you need to `Build and run` your project so it runs in a browser context.
+- In some cases, setting `Managed Stripping Level` to minimal when using IL2CPP is also helpful - you can find it under `Player Settings` > `Other Settings` > `Optimization`
+
 ## WebGL
 
 - Open your `Build settings`, select `WebGL` as the target platform.
 - Open `Player settings` > `Resolution and Presentation` and under `WebGLTemplate` choose `Thirdweb`.
-- Use `Smaller (faster) Builds` in the Build Settings (IL2CPP Code Generation in Unity 2022).
 - Save and click `Build and Run` to test out your game in a browser.
 
 If you're uploading your build, set `Compression Format` to `Disabled` in `Player Settings` > `Publishing Settings`.
 
-Note that in order to communicate with the SDK on WebGL, you need to `Build and run` your project so it runs in a browser context.
-
 ## Other Platforms
 
-- Use IL2CPP over Mono when possible in the Player Settings.
-- Using the SDK in the editor (pressing Play) is an accurate reflection of what you can expect to see on native platforms.
-- If building to mobile and running into RPC issues, it is best to run Force Resolve from the `Assets` menu > `External Dependency Manager` > `Android Resolver` > `Force Resolve` for example.
+- If building to mobile and running into issues, it is best to run Force Resolve from the `Assets` menu > `External Dependency Manager` > `Android Resolver` > `Force Resolve` for example.
 - If building for iOS and missing a Metamask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder
-- In some cases, setting `Managed Stripping Level` to minimal when using IL2CPP is also helpful - you can find it under `Player Settings` > `Other Settings` > `Optimization`
 
 # Usage
 
