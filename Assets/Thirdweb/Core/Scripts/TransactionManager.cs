@@ -147,8 +147,7 @@ namespace Thirdweb
                 }
             }
             ThirdwebDebug.Log("txHash: " + txHash);
-            var receiptPoller = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
-            return await receiptPoller.TransactionReceiptPolling.PollForReceiptAsync(txHash);
+            return await Transaction.WaitForTransactionResultRaw(txHash);
         }
     }
 

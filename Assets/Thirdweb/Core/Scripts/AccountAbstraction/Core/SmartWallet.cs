@@ -38,19 +38,10 @@ namespace Thirdweb.AccountAbstraction
         public string PersonalAddress { get; internal set; }
         public Web3 PersonalWeb3 { get; internal set; }
         public ThirdwebSDK.SmartWalletConfig Config { get; internal set; }
+        public bool IsDeployed { get; internal set; }
+        public bool IsDeploying { get; internal set; }
 
-        private bool _deployed;
-        public bool IsDeployed
-        {
-            get { return _deployed; }
-        }
-
-        private bool _deploying;
-        public bool IsDeploying
-        {
-            get { return _deploying; }
-        }
-
+        private BigInteger _lastNonce;
         private bool _initialized;
 
         public SmartWallet(Web3 personalWeb3, ThirdwebSDK.SmartWalletConfig config)
@@ -65,9 +56,10 @@ namespace Thirdweb.AccountAbstraction
                 entryPointAddress = string.IsNullOrEmpty(config.entryPointAddress) ? Constants.DEFAULT_ENTRYPOINT_ADDRESS : config.entryPointAddress,
             };
 
-            _deployed = false;
+            IsDeployed = false;
+            IsDeploying = false;
+            _lastNonce = -1;
             _initialized = false;
-            _deploying = false;
         }
 
         internal async Task<string> GetPersonalAddress()
@@ -94,26 +86,22 @@ namespace Thirdweb.AccountAbstraction
 
             _initialized = true;
 
-            ThirdwebDebug.Log($"Initialized with Factory: {Config.factoryAddress}, AdminSigner: {PersonalAddress}, Predicted Account: {Accounts[0]}, Deployed: {_deployed}");
+            ThirdwebDebug.Log($"Initialized with Factory: {Config.factoryAddress}, AdminSigner: {PersonalAddress}, Predicted Account: {Accounts[0]}, Deployed: {IsDeployed}");
         }
 
         internal async Task UpdateDeploymentStatus()
         {
             var bytecode = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetCode.SendRequestAsync(Accounts[0]);
-            _deployed = bytecode != "0x";
+            IsDeployed = bytecode != "0x";
         }
 
         internal async Task ForceDeploy()
         {
-            if (_deployed)
+            if (IsDeployed)
                 return;
 
-            _deploying = true;
             var input = new TransactionInput("0x", Accounts[0], new HexBigInteger(0));
-            var txHash = await Request(new RpcRequestMessage(1, "eth_sendTransaction", input));
-            await Transaction.WaitForTransactionResult(txHash.Result.ToString());
-            await UpdateDeploymentStatus();
-            _deploying = false;
+            await Request(new RpcRequestMessage(1, "eth_sendTransaction", input));
         }
 
         internal async Task<bool> VerifySignature(byte[] hash, byte[] signature)
@@ -127,7 +115,7 @@ namespace Thirdweb.AccountAbstraction
 
         internal async Task<(byte[] initCode, BigInteger gas)> GetInitCode()
         {
-            if (_deployed)
+            if (IsDeployed)
                 return (new byte[] { }, 0);
 
             var fn = new FactoryContract.CreateAccountFunction() { Admin = PersonalAddress, Data = new byte[] { } };
@@ -158,19 +146,26 @@ namespace Thirdweb.AccountAbstraction
 
         private async Task<RpcResponseMessage> CreateUserOpAndSend(RpcRequestMessage requestMessage)
         {
+            if (IsDeploying)
+                await new WaitUntil(() => !IsDeploying);
+
             string apiKey = ThirdwebManager.Instance.SDK.session.Options.clientId;
 
             // Deserialize the transaction input from the request message
 
             var paramList = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(requestMessage.RawParameters));
             var transactionInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(paramList[0]));
-            var latestBlock = await Utils.GetBlockByNumber(await Utils.GetLatestBlockNumber());
             var dummySig = new byte[Constants.DUMMY_SIG_LENGTH];
             for (int i = 0; i < Constants.DUMMY_SIG_LENGTH; i++)
                 dummySig[i] = 0x01;
 
             await UpdateDeploymentStatus();
+            if (!IsDeployed)
+                IsDeploying = true;
+
             var (initCode, gas) = await GetInitCode();
+
+            var latestBlock = await Utils.GetBlockByNumber(await Utils.GetLatestBlockNumber());
 
             var executeFn = new AccountContract.ExecuteFunction
             {
@@ -227,21 +222,24 @@ namespace Thirdweb.AccountAbstraction
             }
             ThirdwebDebug.Log("Tx Hash: " + txHash);
 
-            // // Check if successful
+            // Check if successful
 
-            // var receipt = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txHash);
-            // var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
-            // if (decodedEvents[0].Event.Success == false)
-            // {
-            //     ThirdwebDebug.Log("Transaction not successful, checking reason...");
-            //     var reason = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
-            //     throw new Exception($"Transaction {txHash} reverted with reason: {reason}");
-            // }
-            // else
-            // {
-            //     ThirdwebDebug.Log("Transaction successful");
-            //     _deployed = true;
-            // }
+            if (!IsDeployed)
+            {
+                var receipt = await Transaction.WaitForTransactionResultRaw(txHash);
+                IsDeploying = false;
+                var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
+                if (decodedEvents[0].Event.Success == false)
+                {
+                    IsDeployed = false;
+                    throw new Exception($"Transaction {txHash} execution reverted");
+                }
+                else
+                {
+                    IsDeployed = true;
+                    ThirdwebDebug.Log("Transaction successful");
+                }
+            }
 
             return new RpcResponseMessage(requestMessage.Id, txHash);
         }
@@ -249,7 +247,10 @@ namespace Thirdweb.AccountAbstraction
         private async Task<BigInteger> GetNonce()
         {
             var nonce = await TransactionManager.ThirdwebRead<AccountContract.GetNonceFunction, AccountContract.GetNonceOutputDTO>(Accounts[0], new AccountContract.GetNonceFunction() { });
-            return nonce.ReturnValue1;
+            var currentNonce = nonce.ReturnValue1;
+            var newNonce = currentNonce > _lastNonce ? currentNonce : _lastNonce + 1;
+            _lastNonce = newNonce;
+            return newNonce;
         }
 
         private async Task<byte[]> GetPaymasterAndData(object requestId, UserOperationHexified userOp, string apiKey)

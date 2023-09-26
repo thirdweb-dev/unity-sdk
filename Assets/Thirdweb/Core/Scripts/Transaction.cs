@@ -362,12 +362,29 @@ namespace Thirdweb
         /// <returns>The transaction result as a <see cref="TransactionResult"/> object.</returns>
         public static async Task<TransactionResult> WaitForTransactionResult(string txHash)
         {
+            var receipt = await WaitForTransactionResultRaw(txHash);
+            return receipt.ToTransactionResult();
+        }
+
+        /// <summary>
+        /// Waits for the transaction result asynchronously.
+        /// </summary>
+        /// <param name="txHash">The transaction hash to wait for.</param>
+        /// <returns>The transaction result as a <see cref="TransactionResult"/> object.</returns>
+        public static async Task<TransactionReceipt> WaitForTransactionResultRaw(string txHash)
+        {
             if (Utils.IsWebGLBuild())
                 throw new UnityException("WaitForTransactionResult is not supported in WebGL builds.");
 
-            var receiptPoller = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
-            var receipt = await receiptPoller.TransactionReceiptPolling.PollForReceiptAsync(txHash);
-            return receipt.ToTransactionResult();
+            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            var receipt = await web3.TransactionReceiptPolling.PollForReceiptAsync(txHash);
+            if (receipt.Failed())
+            {
+                var reason = await web3.Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
+                if (!string.IsNullOrEmpty(reason))
+                    throw new UnityException($"Transaction failed: {reason}");
+            }
+            return receipt;
         }
 
         private async Task<string> Send()
