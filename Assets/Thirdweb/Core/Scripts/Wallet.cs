@@ -559,6 +559,7 @@ namespace Thirdweb
         LocalWallet,
         SmartWallet,
         Paper,
-        Hyperplay
+        Hyperplay,
+        EmbeddedWallet
     }
 }

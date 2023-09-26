@@ -16,7 +16,7 @@ namespace Thirdweb.Wallets
 
         public static PaperUI Instance { get; private set; }
 
-        private PaperEmbeddedWalletSdk _paper;
+        private EmbeddedWallet _paper;
         private string _email;
         private User _user;
         private System.Exception _exception;
@@ -35,7 +35,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        public async Task<User> Connect(PaperEmbeddedWalletSdk paper, string email)
+        public async Task<User> Connect(EmbeddedWallet paper, string email)
         {
             _paper = paper;
             _email = email;
@@ -70,7 +70,7 @@ namespace Thirdweb.Wallets
         {
             try
             {
-                (bool isNewUser, bool isNewDevice) = await _paper.SendPaperEmailLoginOtp(_email);
+                (bool isNewUser, bool isNewDevice) = await _paper.SendOtpEmailAsync(_email);
                 RecoveryInput.interactable = !isNewUser && isNewDevice;
                 ThirdwebDebug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
             }
@@ -86,7 +86,8 @@ namespace Thirdweb.Wallets
             {
                 string recoveryCode = string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text;
                 string otp = OTPInput.text;
-                _user = await _paper.VerifyPaperEmailLoginOtp(_email, otp, recoveryCode);
+                var res = await _paper.VerifyOtpAsync(_email, otp, recoveryCode);
+                _user = res.User;
                 ThirdwebDebug.Log($"finished validating OTP:  EmailAddress {_user.EmailAddress}, Address {_user.Account.Address}");
             }
             catch (System.Exception e)

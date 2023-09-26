@@ -33,6 +33,7 @@ namespace Thirdweb
         private SerializedProperty WalletConnectPrefabProperty;
         private SerializedProperty MetamaskPrefabProperty;
         private SerializedProperty PaperPrefabProperty;
+        private SerializedProperty EmbeddedWalletPrefabProperty;
 
         private ReorderableList supportedChainsList;
         private bool[] sectionExpanded;
@@ -73,6 +74,7 @@ namespace Thirdweb
             WalletConnectPrefabProperty = serializedObject.FindProperty("WalletConnectPrefab");
             MetamaskPrefabProperty = serializedObject.FindProperty("MetamaskPrefab");
             PaperPrefabProperty = serializedObject.FindProperty("PaperPrefab");
+            EmbeddedWalletPrefabProperty = serializedObject.FindProperty("EmbeddedWalletPrefab");
 
             supportedChainsList = new ReorderableList(serializedObject, supportedChainsProperty, true, true, true, true);
             supportedChainsList.drawHeaderCallback = rect =>
@@ -342,6 +344,7 @@ namespace Thirdweb
                         EditorGUILayout.PropertyField(WalletConnectPrefabProperty);
                         EditorGUILayout.PropertyField(MetamaskPrefabProperty);
                         EditorGUILayout.PropertyField(PaperPrefabProperty);
+                        EditorGUILayout.PropertyField(EmbeddedWalletPrefabProperty);
                     }
 
                     EditorGUILayout.EndVertical();

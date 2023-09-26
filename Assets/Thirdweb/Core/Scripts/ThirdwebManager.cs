@@ -118,6 +118,9 @@ namespace Thirdweb
         [Tooltip("Instantiates the Paper SDK for Native platforms.")]
         public GameObject PaperPrefab;
 
+        [Tooltip("Instantiates the EmbeddedWallet SDK for Native platforms.")]
+        public GameObject EmbeddedWalletPrefab;
+
         public ThirdwebSDK SDK;
 
         public static ThirdwebManager Instance { get; private set; }

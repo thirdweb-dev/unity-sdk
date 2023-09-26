@@ -84,6 +84,11 @@ namespace Thirdweb
                 case WalletProvider.Hyperplay:
                     ActiveWallet = new ThirdwebHyperplay(ChainId.ToString());
                     break;
+                case WalletProvider.EmbeddedWallet:
+                    if (string.IsNullOrEmpty(Options.clientId))
+                        throw new UnityException("thirdweb client id is required for EmbeddedWallet connection method!");
+                    ActiveWallet = new ThirdwebEmbeddedWallet(Options.clientId);
+                    break;
                 default:
                     throw new UnityException("This wallet connection method is not supported on this platform!");
             }
