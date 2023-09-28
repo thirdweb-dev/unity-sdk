@@ -78,6 +78,8 @@ namespace Thirdweb.Wallets
 
         public async void OnSubmitOTP()
         {
+            OTPInput.interactable = false;
+            SubmitButton.interactable = false;
             try
             {
                 string otp = OTPInput.text;
@@ -88,6 +90,11 @@ namespace Thirdweb.Wallets
             catch (System.Exception e)
             {
                 _exception = e;
+            }
+            finally
+            {
+                OTPInput.interactable = true;
+                SubmitButton.interactable = true;
             }
         }
     }
