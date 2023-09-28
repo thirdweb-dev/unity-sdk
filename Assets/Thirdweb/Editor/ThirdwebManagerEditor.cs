@@ -10,6 +10,7 @@ namespace Thirdweb
         private SerializedProperty activeChainProperty;
         private SerializedProperty supportedChainsProperty;
         private SerializedProperty clientIdProperty;
+        private SerializedProperty bundleIdOverrideProperty;
         private SerializedProperty initializeOnAwakeProperty;
         private SerializedProperty showDebugLogsProperty;
         private SerializedProperty appNameProperty;
@@ -33,6 +34,7 @@ namespace Thirdweb
         private SerializedProperty WalletConnectPrefabProperty;
         private SerializedProperty MetamaskPrefabProperty;
         private SerializedProperty PaperPrefabProperty;
+        private SerializedProperty EmbeddedWalletPrefabProperty;
 
         private ReorderableList supportedChainsList;
         private bool[] sectionExpanded;
@@ -50,6 +52,7 @@ namespace Thirdweb
             activeChainProperty = serializedObject.FindProperty("activeChain");
             supportedChainsProperty = serializedObject.FindProperty("supportedChains");
             clientIdProperty = serializedObject.FindProperty("clientId");
+            bundleIdOverrideProperty = serializedObject.FindProperty("bundleIdOverride");
             initializeOnAwakeProperty = serializedObject.FindProperty("initializeOnAwake");
             showDebugLogsProperty = serializedObject.FindProperty("showDebugLogs");
             appNameProperty = serializedObject.FindProperty("appName");
@@ -73,6 +76,7 @@ namespace Thirdweb
             WalletConnectPrefabProperty = serializedObject.FindProperty("WalletConnectPrefab");
             MetamaskPrefabProperty = serializedObject.FindProperty("MetamaskPrefab");
             PaperPrefabProperty = serializedObject.FindProperty("PaperPrefab");
+            EmbeddedWalletPrefabProperty = serializedObject.FindProperty("EmbeddedWalletPrefab");
 
             supportedChainsList = new ReorderableList(serializedObject, supportedChainsProperty, true, true, true, true);
             supportedChainsList.drawHeaderCallback = rect =>
@@ -168,6 +172,7 @@ namespace Thirdweb
                     EditorGUILayout.Space(10);
                     supportedChainsList.DoLayoutList();
                     EditorGUILayout.PropertyField(clientIdProperty);
+                    EditorGUILayout.PropertyField(bundleIdOverrideProperty);
                     EditorGUILayout.PropertyField(initializeOnAwakeProperty);
                     EditorGUILayout.PropertyField(showDebugLogsProperty);
                     EditorGUILayout.EndVertical();
@@ -342,6 +347,7 @@ namespace Thirdweb
                         EditorGUILayout.PropertyField(WalletConnectPrefabProperty);
                         EditorGUILayout.PropertyField(MetamaskPrefabProperty);
                         EditorGUILayout.PropertyField(PaperPrefabProperty);
+                        EditorGUILayout.PropertyField(EmbeddedWalletPrefabProperty);
                     }
 
                     EditorGUILayout.EndVertical();

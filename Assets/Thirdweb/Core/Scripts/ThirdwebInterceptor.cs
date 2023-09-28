@@ -44,6 +44,7 @@ namespace Thirdweb
                 {
                     case WalletProvider.LocalWallet:
                     case WalletProvider.Paper:
+                    case WalletProvider.EmbeddedWallet:
                         var message = request.RawParameters[0].ToString();
                         return new EthereumMessageSigner().EncodeUTF8AndSign(message, new EthECKey(_thirdwebWallet.GetLocalAccount().PrivateKey));
                     case WalletProvider.SmartWallet:
@@ -60,6 +61,7 @@ namespace Thirdweb
                 {
                     case WalletProvider.LocalWallet:
                     case WalletProvider.Paper:
+                    case WalletProvider.EmbeddedWallet:
                         throw new Exception("Please use Wallet.SignTypedDataV4 instead.");
                     case WalletProvider.SmartWallet:
                         return await signerWeb3.Client.SendRequestAsync<T>("eth_signTypedData_v4", null, request.RawParameters);
@@ -103,6 +105,7 @@ namespace Thirdweb
                 {
                     case WalletProvider.LocalWallet:
                     case WalletProvider.Paper:
+                    case WalletProvider.EmbeddedWallet:
                         var message = paramList[0].ToString();
                         return new EthereumMessageSigner().EncodeUTF8AndSign(message, new EthECKey(_thirdwebWallet.GetLocalAccount().PrivateKey));
                     case WalletProvider.SmartWallet:
@@ -119,6 +122,7 @@ namespace Thirdweb
                 {
                     case WalletProvider.LocalWallet:
                     case WalletProvider.Paper:
+                    case WalletProvider.EmbeddedWallet:
                         throw new Exception("Please use Wallet.SignTypedDataV4 instead.");
                     case WalletProvider.SmartWallet:
                         return await signerWeb3.Client.SendRequestAsync<T>("eth_signTypedData_v4", null, paramList);

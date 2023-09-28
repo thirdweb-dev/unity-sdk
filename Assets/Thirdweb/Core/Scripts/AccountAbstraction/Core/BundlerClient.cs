@@ -50,7 +50,7 @@ namespace Thirdweb.AccountAbstraction
             {
                 httpRequestMessage.Headers.Add("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
                 if (!Utils.IsWebGLBuild())
-                    httpRequestMessage.Headers.Add("x-bundle-id", ThirdwebManager.Instance.SDK.session.BundleId);
+                    httpRequestMessage.Headers.Add("x-bundle-id", ThirdwebManager.Instance.SDK.session.Options.bundleId);
             }
 
             var httpResponse = await client.SendAsync(httpRequestMessage);
