@@ -408,15 +408,16 @@ namespace Thirdweb
 
         public static string GetBundleId()
         {
-            return Application.identifier.ToLower();
+            return ThirdwebManager.Instance.SDK?.session?.BundleId
+                ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.bundleIdOverride) ? Application.identifier.ToLower() : ThirdwebManager.Instance.bundleIdOverride);
         }
 
         public static string AppendBundleIdQueryParam(this string uri)
         {
-            if (Utils.IsWebGLBuild())
+            if (IsWebGLBuild())
                 return uri;
 
-            uri += $"?bundleId={ThirdwebManager.Instance?.SDK?.session?.BundleId ?? GetBundleId()}";
+            uri += $"?bundleId={GetBundleId()}";
             return uri;
         }
 

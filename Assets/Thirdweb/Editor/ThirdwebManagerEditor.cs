@@ -10,6 +10,7 @@ namespace Thirdweb
         private SerializedProperty activeChainProperty;
         private SerializedProperty supportedChainsProperty;
         private SerializedProperty clientIdProperty;
+        private SerializedProperty bundleIdOverrideProperty;
         private SerializedProperty initializeOnAwakeProperty;
         private SerializedProperty showDebugLogsProperty;
         private SerializedProperty appNameProperty;
@@ -51,6 +52,7 @@ namespace Thirdweb
             activeChainProperty = serializedObject.FindProperty("activeChain");
             supportedChainsProperty = serializedObject.FindProperty("supportedChains");
             clientIdProperty = serializedObject.FindProperty("clientId");
+            bundleIdOverrideProperty = serializedObject.FindProperty("bundleIdOverride");
             initializeOnAwakeProperty = serializedObject.FindProperty("initializeOnAwake");
             showDebugLogsProperty = serializedObject.FindProperty("showDebugLogs");
             appNameProperty = serializedObject.FindProperty("appName");
@@ -170,6 +172,7 @@ namespace Thirdweb
                     EditorGUILayout.Space(10);
                     supportedChainsList.DoLayoutList();
                     EditorGUILayout.PropertyField(clientIdProperty);
+                    EditorGUILayout.PropertyField(bundleIdOverrideProperty);
                     EditorGUILayout.PropertyField(initializeOnAwakeProperty);
                     EditorGUILayout.PropertyField(showDebugLogsProperty);
                     EditorGUILayout.EndVertical();

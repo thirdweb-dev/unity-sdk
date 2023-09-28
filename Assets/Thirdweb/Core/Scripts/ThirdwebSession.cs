@@ -18,18 +18,18 @@ namespace Thirdweb
         #region Properties
 
 
-        public ThirdwebSDK.Options Options { get; private set; }
-        public BigInteger ChainId { get; private set; }
-        public string RPC { get; private set; }
-        public SiweMessageService SiweSession { get; private set; }
-        public Web3 Web3 { get; private set; }
-        public ThirdwebChainData CurrentChainData { get; private set; }
+        internal ThirdwebSDK.Options Options { get; private set; }
+        internal BigInteger ChainId { get; private set; }
+        internal string RPC { get; private set; }
+        internal SiweMessageService SiweSession { get; private set; }
+        internal Web3 Web3 { get; private set; }
+        internal ThirdwebChainData CurrentChainData { get; private set; }
 
-        public IThirdwebWallet ActiveWallet { get; private set; }
+        internal IThirdwebWallet ActiveWallet { get; private set; }
 
-        public static int Nonce = 0;
+        internal static int Nonce = 0;
 
-        public string BundleId { get; private set; }
+        internal string BundleId { get; private set; }
 
         #endregion
 
@@ -43,7 +43,7 @@ namespace Thirdweb
             SiweSession = new SiweMessageService();
             Web3 = new Web3(rpcUrl);
             CurrentChainData = options.supportedChains.ToList().Find(x => x.chainId == new HexBigInteger(chainId).HexValue);
-            BundleId = Utils.GetBundleId();
+            BundleId = Options.bundleId;
         }
 
         #endregion
@@ -246,7 +246,7 @@ namespace Thirdweb
         #region Nested Classes
 
         [System.Serializable]
-        public class ChainIDNetworkData
+        class ChainIDNetworkData
         {
             public string name;
             public string chain;
@@ -258,7 +258,7 @@ namespace Thirdweb
         }
 
         [System.Serializable]
-        public class ChainIDNetworkNativeCurrency
+        class ChainIDNetworkNativeCurrency
         {
             public string name;
             public string symbol;
@@ -266,14 +266,14 @@ namespace Thirdweb
         }
 
         [System.Serializable]
-        public class ChainIDNetworkExplorer
+        class ChainIDNetworkExplorer
         {
             public string name;
             public string url;
             public string standard;
         }
 
-        public struct ChaiNIDNetworkIcon
+        struct ChaiNIDNetworkIcon
         {
             public string url;
             public int width;

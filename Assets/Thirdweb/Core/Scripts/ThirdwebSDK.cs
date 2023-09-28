@@ -41,6 +41,11 @@ namespace Thirdweb
             /// </summary>
             public string clientId;
 
+            /// <summary>
+            /// Optional Bundle ID override for thirdweb services.
+            /// </summary>
+            public string bundleId;
+
             public ThirdwebChainData[] supportedChains;
         }
 
