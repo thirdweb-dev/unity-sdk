@@ -44,6 +44,9 @@ namespace Thirdweb.Examples
             WalletProvider.Hyperplay
         };
 
+        [Header("Personal Wallet (EOA option if using Smart Wallets)")]
+        public WalletProvider personalWallet = WalletProvider.LocalWallet;
+
         [Header("Additional event callbacks")]
         public UnityEvent OnConnect;
         public UnityEvent OnDisconnect;
@@ -164,8 +167,6 @@ namespace Thirdweb.Examples
             ThirdwebDebug.Log("ValidateConnection: " + walletProvider);
 
             ConnectPanel.SetActive(false);
-
-            WalletProvider personalWallet = WalletProvider.LocalWallet;
 
             if (walletProvider == WalletProvider.EmbeddedWallet || personalWallet == WalletProvider.EmbeddedWallet)
             {
