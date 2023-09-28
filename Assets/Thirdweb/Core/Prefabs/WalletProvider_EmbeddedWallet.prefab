@@ -1069,8 +1069,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: Thirdweb.Wallets.PaperUI, Assembly-CSharp
+      - m_Target: {fileID: 7585343039585244319}
+        m_TargetAssemblyTypeName: Thirdweb.Wallets.EmbeddedWalletUI, Assembly-CSharp
         m_MethodName: Cancel
         m_Mode: 1
         m_Arguments:
