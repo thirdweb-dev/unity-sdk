@@ -29,8 +29,6 @@ namespace Thirdweb
 
         internal static int Nonce = 0;
 
-        internal string BundleId { get; private set; }
-
         #endregion
 
         #region Constructors
@@ -43,7 +41,6 @@ namespace Thirdweb
             SiweSession = new SiweMessageService();
             Web3 = new Web3(rpcUrl);
             CurrentChainData = options.supportedChains.ToList().Find(x => x.chainId == new HexBigInteger(chainId).HexValue);
-            BundleId = Options.bundleId;
         }
 
         #endregion
@@ -87,7 +84,7 @@ namespace Thirdweb
                 case WalletProvider.EmbeddedWallet:
                     if (string.IsNullOrEmpty(Options.clientId))
                         throw new UnityException("thirdweb client id is required for EmbeddedWallet connection method!");
-                    ActiveWallet = new ThirdwebEmbeddedWallet(Options.clientId);
+                    ActiveWallet = new ThirdwebEmbeddedWallet(Options.clientId, Options.bundleId);
                     break;
                 default:
                     throw new UnityException("This wallet connection method is not supported on this platform!");

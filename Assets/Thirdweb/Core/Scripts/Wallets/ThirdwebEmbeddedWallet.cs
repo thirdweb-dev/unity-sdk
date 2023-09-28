@@ -15,17 +15,17 @@ namespace Thirdweb.Wallets
         private readonly EmbeddedWallet _embeddedWallet;
         private Account _account;
 
-        public ThirdwebEmbeddedWallet(string clientId)
+        public ThirdwebEmbeddedWallet(string clientId, string bundleId)
         {
             _web3 = null;
             _provider = WalletProvider.EmbeddedWallet;
             _signerProvider = WalletProvider.LocalWallet;
-            _embeddedWallet = new EmbeddedWallet(clientId);
+            _embeddedWallet = new EmbeddedWallet(clientId, bundleId);
         }
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
         {
-            await _embeddedWallet.VerifyThirdwebClientIdAsync(domain: "https://thirdweb.com");
+            await _embeddedWallet.VerifyThirdwebClientIdAsync("");
 
             if (EmbeddedWalletUI.Instance == null)
             {

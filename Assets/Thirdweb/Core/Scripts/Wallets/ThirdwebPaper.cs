@@ -20,7 +20,7 @@ namespace Thirdweb.Wallets
             _web3 = null;
             _provider = WalletProvider.Paper;
             _signerProvider = WalletProvider.LocalWallet;
-            _paper = new EmbeddedWallet(paperClientId);
+            _paper = new EmbeddedWallet(paperClientId, "");
         }
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
