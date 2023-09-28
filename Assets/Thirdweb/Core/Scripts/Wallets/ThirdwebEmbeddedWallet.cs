@@ -25,6 +25,8 @@ namespace Thirdweb.Wallets
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
         {
+            await _embeddedWallet.VerifyThirdwebClientIdAsync(domain: "https://thirdweb.com");
+
             if (EmbeddedWalletUI.Instance == null)
             {
                 GameObject.Instantiate(ThirdwebManager.Instance.EmbeddedWalletPrefab);

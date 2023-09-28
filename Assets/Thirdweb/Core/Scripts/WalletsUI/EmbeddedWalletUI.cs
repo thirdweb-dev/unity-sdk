@@ -67,7 +67,7 @@ namespace Thirdweb.Wallets
         {
             try
             {
-                (bool isNewUser, bool isNewDevice) = await _embeddedWallet.SendOtpEmailAsync(_email, true);
+                (bool isNewUser, bool isNewDevice) = await _embeddedWallet.SendOtpEmailAsync(_email);
                 ThirdwebDebug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
             }
             catch (System.Exception e)
