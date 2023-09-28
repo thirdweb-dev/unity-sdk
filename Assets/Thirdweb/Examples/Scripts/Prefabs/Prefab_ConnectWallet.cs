@@ -34,7 +34,7 @@ namespace Thirdweb.Examples
         [Header("Wallets you want to support")]
         public List<WalletProvider> SupportedWallets = new List<WalletProvider>()
         {
-            WalletProvider.Paper,
+            WalletProvider.EmbeddedWallet,
             WalletProvider.Injected,
             WalletProvider.Metamask,
             WalletProvider.Coinbase,
@@ -137,7 +137,7 @@ namespace Thirdweb.Examples
                     NetworkIcons[i].sprite = NetworkIcons[0].sprite;
             }
 
-            bool usingEmailWallet = SupportedWallets.Contains(WalletProvider.MagicLink) || SupportedWallets.Contains(WalletProvider.Paper);
+            bool usingEmailWallet = SupportedWallets.Contains(WalletProvider.MagicLink) || SupportedWallets.Contains(WalletProvider.Paper) || SupportedWallets.Contains(WalletProvider.EmbeddedWallet);
             bool usingNormalWallet =
                 SupportedWallets.Contains(WalletProvider.Metamask)
                 || SupportedWallets.Contains(WalletProvider.Coinbase)
@@ -167,7 +167,20 @@ namespace Thirdweb.Examples
 
             WalletProvider personalWallet = WalletProvider.LocalWallet;
 
-            if (walletProvider == WalletProvider.Paper || personalWallet == WalletProvider.Paper)
+            if (walletProvider == WalletProvider.EmbeddedWallet || personalWallet == WalletProvider.EmbeddedWallet)
+            {
+                if (SupportedWalletsUI[WalletProvider.EmbeddedWallet].emailInput == null || string.IsNullOrEmpty(SupportedWalletsUI[WalletProvider.EmbeddedWallet].emailInput.text))
+                {
+                    ThirdwebDebug.LogWarning("Could not connect, no email provided!");
+                    ConnectPanel.SetActive(false);
+                    return;
+                }
+                else
+                {
+                    _email = SupportedWalletsUI[WalletProvider.EmbeddedWallet].emailInput.text;
+                }
+            }
+            else if (walletProvider == WalletProvider.Paper || personalWallet == WalletProvider.Paper)
             {
                 if (SupportedWalletsUI[WalletProvider.Paper].emailInput == null || string.IsNullOrEmpty(SupportedWalletsUI[WalletProvider.Paper].emailInput.text))
                 {
