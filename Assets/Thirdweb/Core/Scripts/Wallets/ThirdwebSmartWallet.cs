@@ -40,6 +40,7 @@ namespace Thirdweb.Wallets
         public Task Disconnect()
         {
             _web3 = null;
+            _personalWallet.Disconnect();
             return Task.CompletedTask;
         }
 
