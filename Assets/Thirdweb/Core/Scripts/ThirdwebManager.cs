@@ -46,7 +46,7 @@ namespace Thirdweb
                 new ChainData("sepolia", "11155111", null),
             };
 
-        [Tooltip("Thirdweb Client ID (https://thirdweb.com/create-api-key/). Used for default thirdweb services such as Storage and Account Abstraction.")]
+        [Tooltip("Thirdweb Client ID (https://thirdweb.com/create-api-key/). Used for default thirdweb services such as RPC, Storage and Account Abstraction.")]
         public string clientId;
 
         [Tooltip("Whether the SDK should initialize on awake or not")]
@@ -54,6 +54,9 @@ namespace Thirdweb
 
         [Tooltip("Whether to show thirdweb sdk debug logs")]
         public bool showDebugLogs = true;
+
+        [Tooltip("Optional Bundle ID override for thirdweb services")]
+        public string bundleIdOverride = null;
 
         [Tooltip("The name of your app")]
         public string appName = null;
@@ -145,6 +148,13 @@ namespace Thirdweb
             // Pass supported chains with replaced RPCs
 
             var options = new ThirdwebSDK.Options();
+
+            // Set up Client ID and Bundle ID
+
+            options.clientId = string.IsNullOrEmpty(clientId) ? null : clientId;
+            options.bundleId = string.IsNullOrEmpty(bundleIdOverride) ? Application.identifier.ToLower() : bundleIdOverride;
+
+            // Set up supported chains
 
             activeChain = chainIdentifier;
             string activeChainId = null;
@@ -278,10 +288,6 @@ namespace Thirdweb
                     paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{activeChain}.bundler.thirdweb.com" : paymasterUrl,
                     entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
                 };
-
-            // Set up Client ID
-
-            options.clientId = string.IsNullOrEmpty(clientId) ? null : clientId;
 
             // Pass active chain rpc and chainId
 
