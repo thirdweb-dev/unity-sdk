@@ -44,6 +44,9 @@ namespace Thirdweb.Examples
             WalletProvider.Hyperplay
         };
 
+        [Header("Personal Wallet (EOA option if using Smart Wallets)")]
+        public WalletProvider personalWallet = WalletProvider.LocalWallet;
+
         [Header("Additional event callbacks")]
         public UnityEvent OnConnect;
         public UnityEvent OnDisconnect;
@@ -159,13 +162,21 @@ namespace Thirdweb.Examples
             ConnectPanel.SetActive(active);
         }
 
+        public void GoogleLogin()
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Google login is only available on WebGL builds!");
+                return;
+            }
+            ConnectWallet(WalletProvider.EmbeddedWallet, null, null, personalWallet, true);
+        }
+
         private void ValidateConnection(WalletProvider walletProvider)
         {
             ThirdwebDebug.Log("ValidateConnection: " + walletProvider);
 
             ConnectPanel.SetActive(false);
-
-            WalletProvider personalWallet = WalletProvider.LocalWallet;
 
             if (walletProvider == WalletProvider.EmbeddedWallet || personalWallet == WalletProvider.EmbeddedWallet)
             {
@@ -266,7 +277,7 @@ namespace Thirdweb.Examples
                 ToggleConnectPanel(true);
         }
 
-        private async void ConnectWallet(WalletProvider walletProvider, string password, string email, WalletProvider personalWallet)
+        private async void ConnectWallet(WalletProvider walletProvider, string password, string email, WalletProvider personalWallet, bool useGoogle = false)
         {
             ThirdwebDebug.Log($"Connecting to Wallet Provider: {walletProvider}...");
 
@@ -274,7 +285,9 @@ namespace Thirdweb.Examples
             {
                 _walletProvider = walletProvider;
                 _personalWalletProvider = personalWallet;
-                _address = await ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(walletProvider, BigInteger.Parse(_currentChainData.chainId), password, email, personalWallet));
+                _address = await ThirdwebManager.Instance.SDK.wallet.Connect(
+                    new WalletConnection(walletProvider, BigInteger.Parse(_currentChainData.chainId), password, email, personalWallet, useGoogle)
+                );
                 ShowConnectedState();
                 OnConnect?.Invoke();
             }

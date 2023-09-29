@@ -527,6 +527,8 @@ namespace Thirdweb
 
         public WalletProvider personalWallet;
 
+        public bool useGoogle;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="WalletConnection"/> class with the specified parameters.
         /// </summary>
@@ -535,13 +537,21 @@ namespace Thirdweb
         /// <param name="password">The wallet password if using local wallets.</param>
         /// <param name="email">The email to login with if using email based providers.</param>
         /// <param name="personalWallet">The personal wallet provider if using smart wallets.</param>
-        public WalletConnection(WalletProvider provider, BigInteger chainId, string password = null, string email = null, WalletProvider personalWallet = WalletProvider.LocalWallet)
+        public WalletConnection(
+            WalletProvider provider,
+            BigInteger chainId,
+            string password = null,
+            string email = null,
+            WalletProvider personalWallet = WalletProvider.LocalWallet,
+            bool useGoogle = false
+        )
         {
             this.provider = provider;
             this.chainId = chainId;
             this.password = password;
             this.email = email;
             this.personalWallet = personalWallet;
+            this.useGoogle = useGoogle;
         }
     }
 

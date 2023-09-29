@@ -14,7 +14,7 @@
 
 # Supported platforms
 
-![supported_wallets](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/657003f0-d772-4317-8907-692e81491e31)
+![wallets](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/621563a7-25b6-4b01-a85a-c31c109bf88c)
 
 More on wallets [here](https://thirdweb.com/dashboard/wallet).
 
