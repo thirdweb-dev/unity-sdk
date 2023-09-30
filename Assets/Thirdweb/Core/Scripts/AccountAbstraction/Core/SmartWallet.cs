@@ -152,6 +152,10 @@ namespace Thirdweb.AccountAbstraction
                         var response = await CreateUserOpAndSend(requestMessage);
                         tcs.SetResult(response);
                     }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex);
+                    }
                     finally
                     {
                         _semaphore.Release();
