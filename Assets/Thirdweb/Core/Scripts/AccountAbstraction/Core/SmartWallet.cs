@@ -14,6 +14,8 @@ using UnityEngine;
 using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Thirdweb.Redcode.Awaiting;
+using System.Threading;
+using System.Collections.Concurrent;
 
 namespace Thirdweb.AccountAbstraction
 {
@@ -34,24 +36,19 @@ namespace Thirdweb.AccountAbstraction
 
     public class SmartWallet
     {
+        private bool _deployed;
+        private bool _deploying;
+        private bool _initialized;
+
         public List<string> Accounts { get; internal set; }
         public string PersonalAddress { get; internal set; }
         public Web3 PersonalWeb3 { get; internal set; }
         public ThirdwebSDK.SmartWalletConfig Config { get; internal set; }
+        public bool IsDeployed => _deployed;
+        public bool IsDeploying => _deploying;
 
-        private bool _deployed;
-        public bool IsDeployed
-        {
-            get { return _deployed; }
-        }
-
-        private bool _deploying;
-        public bool IsDeploying
-        {
-            get { return _deploying; }
-        }
-
-        private bool _initialized;
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        private readonly ConcurrentQueue<TaskCompletionSource<RpcResponseMessage>> _responseQueue = new ConcurrentQueue<TaskCompletionSource<RpcResponseMessage>>();
 
         public SmartWallet(Web3 personalWeb3, ThirdwebSDK.SmartWalletConfig config)
         {
@@ -141,14 +138,36 @@ namespace Thirdweb.AccountAbstraction
         {
             ThirdwebDebug.Log("Requesting: " + requestMessage.Method + "...");
 
-            if (requestMessage.Method == "eth_chainId")
+            if (requestMessage.Method == "eth_sendTransaction")
+            {
+                var tcs = new TaskCompletionSource<RpcResponseMessage>();
+                _responseQueue.Enqueue(tcs);
+
+                await _semaphore.WaitAsync();
+
+                if (_responseQueue.TryDequeue(out var dequeuedTcs) && dequeuedTcs == tcs)
+                {
+                    try
+                    {
+                        var response = await CreateUserOpAndSend(requestMessage);
+                        tcs.SetResult(response);
+                    }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex);
+                    }
+                    finally
+                    {
+                        _semaphore.Release();
+                    }
+                }
+
+                return await tcs.Task;
+            }
+            else if (requestMessage.Method == "eth_chainId")
             {
                 var chainId = await PersonalWeb3.Eth.ChainId.SendRequestAsync();
                 return new RpcResponseMessage(requestMessage.Id, chainId.HexValue);
-            }
-            else if (requestMessage.Method == "eth_sendTransaction")
-            {
-                return await CreateUserOpAndSend(requestMessage);
             }
             else
             {
@@ -227,22 +246,19 @@ namespace Thirdweb.AccountAbstraction
             }
             ThirdwebDebug.Log("Tx Hash: " + txHash);
 
-            // // Check if successful
+            // Check if successful
 
-            // var receipt = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txHash);
-            // var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
-            // if (decodedEvents[0].Event.Success == false)
-            // {
-            //     ThirdwebDebug.Log("Transaction not successful, checking reason...");
-            //     var reason = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
-            //     throw new Exception($"Transaction {txHash} reverted with reason: {reason}");
-            // }
-            // else
-            // {
-            //     ThirdwebDebug.Log("Transaction successful");
-            //     _deployed = true;
-            // }
-
+            var receipt = await Transaction.WaitForTransactionResultRaw(txHash);
+            var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
+            if (decodedEvents[0].Event.Success == false)
+            {
+                throw new Exception($"Transaction {txHash} execution reverted");
+            }
+            else
+            {
+                ThirdwebDebug.Log("Transaction successful");
+                _deployed = true;
+            }
             return new RpcResponseMessage(requestMessage.Id, txHash);
         }
 
