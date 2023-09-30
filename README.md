@@ -1,16 +1,21 @@
 <p align="center">
-<br />
-<a href="https://thirdweb.com"><img src="https://github.com/thirdweb-dev/js/blob/main/packages/sdk/logo.svg?raw=true" width="200" alt=""/></a>
-<br />
+  <br />
+  <a href="https://thirdweb.com">
+    <img src="https://github.com/thirdweb-dev/js/blob/main/packages/sdk/logo.svg?raw=true" width="200" alt=""/>
+  </a>
+  <br />
+  <h1 align="center">thirdweb Unity SDK</h1>
+  <p align="center">
+    <a href="https://discord.gg/thirdweb">
+      <img alt="Join our Discord!" src="https://img.shields.io/discord/834227967404146718.svg?color=7289da&label=discord&logo=discord&style=flat"/>
+    </a>
+    <br />
+    <a href="https://thirdweb-dev.github.io/unity-sdk/">
+      <img alt="Preview" src="https://img.shields.io/badge/Preview-Unity%20WebGL-brightgreen?logo=unity&style=flat"/>
+    </a>
+  </p>
 </p>
-<h1 align="center">thirdweb Unity SDK</h1>
-<p align="center">
-<a href="https://discord.gg/thirdweb"><img alt="Join our Discord!" src="https://img.shields.io/discord/834227967404146718.svg?color=7289da&label=discord&logo=discord&style=flat"/></a>
 
-</p>
-<p align="center"><strong>Best in class Web3 SDK for Unity games</strong></p>
-<p align="center"><strong><a href="https://bafybeibh73sdxugia63nvuzxeqrcozalbhszaojcpgaatuli3skou3d3bq.ipfs.dweb.link/">Live Demo</a></strong></p>
-<br />
 
 # Supported platforms
 
