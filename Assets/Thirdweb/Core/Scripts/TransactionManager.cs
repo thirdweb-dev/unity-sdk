@@ -35,7 +35,7 @@ namespace Thirdweb
                 }
             }
 
-            var queryHandler = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractQueryHandler<TWFunction>();
+            var queryHandler = Utils.GetWeb3().Eth.GetContractQueryHandler<TWFunction>();
             return await queryHandler.QueryAsync<TWResult>(contractAddress, functionMessage);
         }
 
@@ -62,7 +62,7 @@ namespace Thirdweb
             {
                 try
                 {
-                    var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionHandler<TWFunction>();
+                    var gasEstimator = Utils.GetWeb3().Eth.GetContractTransactionHandler<TWFunction>();
                     var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
                     functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
                 }

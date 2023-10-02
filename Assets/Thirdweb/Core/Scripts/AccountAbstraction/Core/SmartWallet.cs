@@ -96,7 +96,7 @@ namespace Thirdweb.AccountAbstraction
 
         internal async Task UpdateDeploymentStatus()
         {
-            var bytecode = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetCode.SendRequestAsync(Accounts[0]);
+            var bytecode = await Utils.GetWeb3().Eth.GetCode.SendRequestAsync(Accounts[0]);
             _deployed = bytecode != "0x";
         }
 
@@ -128,7 +128,7 @@ namespace Thirdweb.AccountAbstraction
                 return (new byte[] { }, 0);
 
             var fn = new FactoryContract.CreateAccountFunction() { Admin = PersonalAddress, Data = new byte[] { } };
-            var deployHandler = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
+            var deployHandler = Utils.GetWeb3().Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
             var txInput = await deployHandler.CreateTransactionInputEstimatingGasAsync(Config.factoryAddress, fn);
             var data = Utils.HexConcat(Config.factoryAddress, txInput.Data);
             return (data.HexStringToByteArray(), txInput.Gas.Value);
