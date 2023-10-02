@@ -24,7 +24,12 @@ namespace Thirdweb
 
             using UnityWebRequest req = UnityWebRequest.Get(textURI);
             if (isThirdwebRequest)
+            {
+                req.SetRequestHeader("x-sdk-name", "UnitySDK");
+                req.SetRequestHeader("x-sdk-platform", Utils.GetRuntimePlatform());
+                req.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
                 req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
+            }
 
             await req.SendWebRequest();
             if (req.result != UnityWebRequest.Result.Success)
@@ -51,7 +56,12 @@ namespace Thirdweb
 
             using UnityWebRequest req = UnityWebRequestTexture.GetTexture(imageURI);
             if (isThirdwebRequest)
+            {
+                req.SetRequestHeader("x-sdk-name", "UnitySDK");
+                req.SetRequestHeader("x-sdk-platform", Utils.GetRuntimePlatform());
+                req.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
                 req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
+            }
 
             await req.SendWebRequest();
             if (req.result != UnityWebRequest.Result.Success)

@@ -412,6 +412,11 @@ namespace Thirdweb
                 ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.bundleIdOverride) ? Application.identifier.ToLower() : ThirdwebManager.Instance.bundleIdOverride);
         }
 
+        public static string GetRuntimePlatform()
+        {
+            return Application.platform.ToString();
+        }
+
         public static string AppendBundleIdQueryParam(this string uri)
         {
             if (IsWebGLBuild())

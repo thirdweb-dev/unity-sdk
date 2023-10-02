@@ -44,6 +44,9 @@ namespace Thirdweb
             string result = "";
             using (UnityWebRequest pinReq = UnityWebRequest.Post(PIN_URI, form))
             {
+                pinReq.SetRequestHeader("x-sdk-name", "UnitySDK");
+                pinReq.SetRequestHeader("x-sdk-platform", Utils.GetRuntimePlatform());
+                pinReq.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
                 pinReq.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
                 if (!Utils.IsWebGLBuild())
                     pinReq.SetRequestHeader("x-bundle-id", ThirdwebManager.Instance.SDK.session.Options.bundleId);
