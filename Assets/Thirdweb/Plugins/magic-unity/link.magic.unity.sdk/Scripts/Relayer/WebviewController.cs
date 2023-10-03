@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using link.magic.unity.sdk.Provider;
 using UnityEngine;
+using Thirdweb.WebView;
 
 namespace link.magic.unity.sdk.Relayer
 {
@@ -16,11 +17,12 @@ namespace link.magic.unity.sdk.Relayer
 
         public WebviewController()
         {
-            // instantiate webview 
+            // instantiate webview
             _webViewObject = new GameObject("WebViewObject").AddComponent<WebViewObject>();
             _webViewObject.Init(
                 cb: _cb,
-                ld: (msg) => {
+                ld: (msg) =>
+                {
                     _relayerLoaded = true;
                 },
                 httpErr: (msg) =>
@@ -38,7 +40,6 @@ namespace link.magic.unity.sdk.Relayer
         {
             _webViewObject.LoadURL(url);
         }
-        
 
         // callback js hooks
         private void _cb(string msg)
@@ -89,8 +90,7 @@ namespace link.magic.unity.sdk.Relayer
 
                 Debug.Log($"MagicUnity Send Message to Relayer: {message}");
 
-                _webViewObject.EvaluateJS(
-                    $"window.dispatchEvent(new MessageEvent('message', {{ 'data': {message} }}));");
+                _webViewObject.EvaluateJS($"window.dispatchEvent(new MessageEvent('message', {{ 'data': {message} }}));");
 
                 _dequeue();
             }

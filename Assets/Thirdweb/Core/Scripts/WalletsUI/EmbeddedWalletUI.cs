@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine.UI;
 using TMPro;
 using Thirdweb.Redcode.Awaiting;
+using Thirdweb.WebView;
 
 namespace Thirdweb.Wallets
 {
@@ -19,6 +20,8 @@ namespace Thirdweb.Wallets
         private string _email;
         private User _user;
         private System.Exception _exception;
+        private WebViewObject _webViewObject;
+        private bool _webViewLoaded;
 
         private void Awake()
         {
@@ -34,28 +37,63 @@ namespace Thirdweb.Wallets
             }
         }
 
-        public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email)
+        public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, bool useGoogle)
         {
-            _embeddedWallet = embeddedWallet;
-            _email = email;
-            _user = null;
-            _exception = null;
-            OTPInput.text = "";
-            SubmitButton.onClick.RemoveAllListeners();
-            SubmitButton.onClick.AddListener(OnSubmitOTP);
+            if (useGoogle)
+            {
+                EmbeddedWalletCanvas.SetActive(false);
 
-            await OnSendOTP();
+                _webViewLoaded = false;
 
-            EmbeddedWalletCanvas.SetActive(true);
+                string state = System.Guid.NewGuid().ToString();
+                string authorizationUrl = GoogleAuthenticator.GetAuthorizationUrlAsync(state);
 
-            await new WaitUntil(() => _user != null || _exception != null);
+                _webViewObject = new GameObject("WebViewObject").AddComponent<WebViewObject>();
+                _webViewObject.Init(
+                    cb: WebViewCallback,
+                    ld: (msg) =>
+                    {
+                        _webViewLoaded = true;
+                    },
+                    httpErr: (msg) =>
+                    {
+                        ThirdwebDebug.LogError($"WebView HTTP Error [{msg}]");
+                    },
+                    err: (msg) =>
+                    {
+                        ThirdwebDebug.LogError($"WebView Error [{msg}]");
+                    }
+                );
 
-            EmbeddedWalletCanvas.SetActive(false);
+                await new WaitUntil(() => _webViewLoaded);
 
-            if (_exception != null)
-                throw _exception;
+                _webViewObject.LoadURL(authorizationUrl);
+                _webViewObject.SetVisibility(true);
+                throw new UnityException("Google authentication not yet implemented");
+            }
+            else
+            {
+                _embeddedWallet = embeddedWallet;
+                _email = email;
+                _user = null;
+                _exception = null;
+                OTPInput.text = "";
+                SubmitButton.onClick.RemoveAllListeners();
+                SubmitButton.onClick.AddListener(OnSubmitOTP);
 
-            return _user;
+                await OnSendOTP();
+
+                EmbeddedWalletCanvas.SetActive(true);
+
+                await new WaitUntil(() => _user != null || _exception != null);
+
+                EmbeddedWalletCanvas.SetActive(false);
+
+                if (_exception != null)
+                    throw _exception;
+
+                return _user;
+            }
         }
 
         public void Cancel()
@@ -96,6 +134,11 @@ namespace Thirdweb.Wallets
                 OTPInput.interactable = true;
                 SubmitButton.interactable = true;
             }
+        }
+
+        private void WebViewCallback(string msg)
+        {
+            ThirdwebDebug.Log($"WebViewCallback: {msg}");
         }
     }
 }

@@ -164,11 +164,11 @@ namespace Thirdweb.Examples
 
         public void GoogleLogin()
         {
-            if (!Utils.IsWebGLBuild())
-            {
-                ThirdwebDebug.LogWarning("Google login is only available on WebGL builds!");
-                return;
-            }
+            // if (!Utils.IsWebGLBuild())
+            // {
+            //     ThirdwebDebug.LogWarning("Google login is only available on WebGL builds!");
+            //     return;
+            // }
             ConnectWallet(WalletProvider.EmbeddedWallet, null, null, personalWallet, true);
         }
 
