@@ -48,11 +48,12 @@ namespace Thirdweb.Wallets
                 string state = System.Guid.NewGuid().ToString();
                 string authorizationUrl = GoogleAuthenticator.GetAuthorizationUrlAsync(state);
 
-                _webViewObject = new GameObject("WebViewObject").AddComponent<WebViewObject>();
+                _webViewObject ??= new GameObject("WebViewObject").AddComponent<WebViewObject>();
                 _webViewObject.Init(
                     cb: WebViewCallback,
                     ld: (msg) =>
                     {
+                        ThirdwebDebug.Log($"WebView Loaded [{msg}]");
                         _webViewLoaded = true;
                     },
                     httpErr: (msg) =>
