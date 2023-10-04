@@ -8,6 +8,9 @@ using Cdm.Authentication.Browser;
 using System.Web;
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
+using UnityEngine.Networking;
+using Newtonsoft.Json.Linq;
+using System;
 
 namespace Thirdweb.Wallets
 {
@@ -38,48 +41,6 @@ namespace Thirdweb.Wallets
             }
         }
 
-        [DataContract]
-        private class UserAuthDetails
-        {
-            [DataMember(Name = "email")]
-            internal string Email { get; set; }
-
-            [DataMember(Name = "userWalletId")]
-            internal string WalletUserId { get; set; }
-        }
-
-        [DataContract]
-        private class AuthVerifiedTokenReturnType
-        {
-            [DataMember(Name = "verifiedToken")]
-            internal VerifiedTokenType VerifiedToken { get; set; }
-
-            [DataMember(Name = "verifiedTokenJwtString")]
-            internal string VerifiedTokenJwtString { get; set; }
-
-            [DataContract]
-            internal class VerifiedTokenType
-            {
-                [DataMember(Name = "authDetails")]
-                internal UserAuthDetails AuthDetails { get; set; }
-
-                [DataMember]
-                private string authProvider;
-
-                [DataMember]
-                private string developerClientId;
-
-                [DataMember(Name = "isNewUser")]
-                internal bool IsNewUser { get; set; }
-
-                [DataMember]
-                private string rawToken;
-
-                [DataMember]
-                private string userId;
-            }
-        }
-
         public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, bool useGoogle)
         {
             _embeddedWallet = embeddedWallet;
@@ -93,20 +54,8 @@ namespace Thirdweb.Wallets
             {
                 EmbeddedWalletCanvas.SetActive(false);
 
-                // START TEST
-                var testVerifiedToken = new AuthVerifiedTokenReturnType
-                {
-                    VerifiedToken = new AuthVerifiedTokenReturnType.VerifiedTokenType
-                    {
-                        AuthDetails = new UserAuthDetails { Email = "0xfirekeeper+absolutetest@gmail.com", WalletUserId = null },
-                        IsNewUser = true
-                    }
-                };
-                var testVerifiedTokenJson = JsonConvert.SerializeObject(testVerifiedToken);
-                var testVerifiedTokenBase64 = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(testVerifiedTokenJson));
-                // END TEST
-
-                var loginUrl = $"http://localhost/?authVerifiedToken={testVerifiedTokenBase64}"; // TODO: replace with real login URL from server
+                string loginUrl =
+                    $"https://ews.thirdweb.com/sdk/2022-08-12/embedded-wallet/auth/headless-google-login-managed-unity?developerClientId={ThirdwebManager.Instance.SDK.session.Options.clientId}";
                 var crossPlatformBrowser = new CrossPlatformBrowser();
                 crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.LinuxEditor, new StandaloneBrowser());
                 crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.LinuxPlayer, new StandaloneBrowser());
@@ -117,13 +66,14 @@ namespace Thirdweb.Wallets
                 crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.IPhonePlayer, new ASWebAuthenticationSessionBrowser());
                 crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.Android, new DeepLinkBrowser());
 
-                var res = await crossPlatformBrowser.StartAsync(loginUrl, "http://localhost/");
-                var qparams = HttpUtility.ParseQueryString(res.redirectUrl[res.redirectUrl.IndexOf('?')..]);
-                var authVerifiedToken = qparams["authVerifiedToken"];
-                authVerifiedToken = System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(authVerifiedToken));
-                // Debug.Log($"authVerifiedToken: {authVerifiedToken}");
-                var user = await _embeddedWallet.SignInWithGoogleAsync(authVerifiedToken);
-                // Debug.Log($"user: {user.EmailAddress}, {user.Account.Address}");
+                var res = await crossPlatformBrowser.StartAsync(loginUrl, "http://localhost:3000/");
+                string decodedUrl = HttpUtility.UrlDecode(res.redirectUrl);
+                Uri uri = new(decodedUrl);
+                string queryString = uri.Query;
+                var queryDict = HttpUtility.ParseQueryString(queryString);
+                string authResultJson = queryDict["authResult"];
+                var user = await _embeddedWallet.SignInWithGoogleAsync(authResultJson);
+                ThirdwebDebug.Log($"User Email: {user.EmailAddress}, User Address: {user.Account.Address}");
                 return user;
             }
             else

@@ -523,19 +523,6 @@ public class UnitySendMessageDispatcher
     private static extern void _CWebViewPlugin_ClearCache(IntPtr instance, bool includeDiskFiles);
     [DllImport("__Internal")]
     private static extern void _CWebViewPlugin_SetSuspended(IntPtr instance, bool suspended);
-#elif UNITY_WEBGL
-    [DllImport("__Internal")]
-    private static extern void _gree_unity_webview_init(string name);
-    [DllImport("__Internal")]
-    private static extern void _gree_unity_webview_setMargins(string name, int left, int top, int right, int bottom);
-    [DllImport("__Internal")]
-    private static extern void _gree_unity_webview_setVisibility(string name, bool visible);
-    [DllImport("__Internal")]
-    private static extern void _gree_unity_webview_loadURL(string name, string url);
-    [DllImport("__Internal")]
-    private static extern void _gree_unity_webview_evaluateJS(string name, string js);
-    [DllImport("__Internal")]
-    private static extern void _gree_unity_webview_destroy(string name);
 #endif
 
         public static bool IsWebViewAvailable()
@@ -582,11 +569,7 @@ public class UnitySendMessageDispatcher
             onLoaded = ld;
             onHooked = hooked;
             onCookies = cookies;
-#if UNITY_WEBGL
-#if !UNITY_EDITOR
-        _gree_unity_webview_init(name);
-#endif
-#elif UNITY_WEBPLAYER
+#if UNITY_WEBPLAYER
         Application.ExternalCall("unityWebView.init", name);
 #elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
@@ -641,11 +624,7 @@ public class UnitySendMessageDispatcher
 
         protected virtual void OnDestroy()
         {
-#if UNITY_WEBGL
-#if !UNITY_EDITOR
-        _gree_unity_webview_destroy(name);
-#endif
-#elif UNITY_WEBPLAYER
+#if UNITY_WEBPLAYER
         Application.ExternalCall("unityWebView.destroy", name);
 #elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
@@ -814,8 +793,6 @@ public class UnitySendMessageDispatcher
         //TODO: UNSUPPORTED
 #elif UNITY_WEBPLAYER
         Application.ExternalCall("unityWebView.setMargins", name, (int)ml, (int)mt, (int)mr, (int)mb);
-#elif UNITY_WEBGL && !UNITY_EDITOR
-        _gree_unity_webview_setMargins(name, (int)ml, (int)mt, (int)mr, (int)mb);
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
         int width = (int)(Screen.width - (ml + mr));
         int height = (int)(Screen.height - (mb + mt));
@@ -830,11 +807,7 @@ public class UnitySendMessageDispatcher
 
         public void SetVisibility(bool v)
         {
-#if UNITY_WEBGL
-#if !UNITY_EDITOR
-        _gree_unity_webview_setVisibility(name, v);
-#endif
-#elif UNITY_WEBPLAYER
+#if UNITY_WEBPLAYER
         Application.ExternalCall("unityWebView.setVisibility", name, v);
 #elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
@@ -991,11 +964,8 @@ public class UnitySendMessageDispatcher
         {
             if (string.IsNullOrEmpty(url))
                 return;
-#if UNITY_WEBGL
-#if !UNITY_EDITOR
-        _gree_unity_webview_loadURL(name, url);
-#endif
-#elif UNITY_WEBPLAYER
+
+#if UNITY_WEBPLAYER
         Application.ExternalCall("unityWebView.loadURL", name, url);
 #elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
@@ -1033,11 +1003,7 @@ public class UnitySendMessageDispatcher
 
         public void EvaluateJS(string js)
         {
-#if UNITY_WEBGL
-#if !UNITY_EDITOR
-        _gree_unity_webview_evaluateJS(name, js);
-#endif
-#elif UNITY_WEBPLAYER
+#if UNITY_WEBPLAYER
         Application.ExternalCall("unityWebView.evaluateJS", name, js);
 #elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_EDITOR_LINUX
         //TODO: UNSUPPORTED
