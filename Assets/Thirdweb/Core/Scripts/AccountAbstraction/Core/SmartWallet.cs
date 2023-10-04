@@ -47,9 +47,6 @@ namespace Thirdweb.AccountAbstraction
         public bool IsDeployed => _deployed;
         public bool IsDeploying => _deploying;
 
-        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-        private readonly ConcurrentQueue<TaskCompletionSource<RpcResponseMessage>> _responseQueue = new ConcurrentQueue<TaskCompletionSource<RpcResponseMessage>>();
-
         public SmartWallet(Web3 personalWeb3, ThirdwebSDK.SmartWalletConfig config)
         {
             PersonalWeb3 = personalWeb3;
@@ -140,29 +137,7 @@ namespace Thirdweb.AccountAbstraction
 
             if (requestMessage.Method == "eth_sendTransaction")
             {
-                var tcs = new TaskCompletionSource<RpcResponseMessage>();
-                _responseQueue.Enqueue(tcs);
-
-                await _semaphore.WaitAsync();
-
-                if (_responseQueue.TryDequeue(out var dequeuedTcs) && dequeuedTcs == tcs)
-                {
-                    try
-                    {
-                        var response = await CreateUserOpAndSend(requestMessage);
-                        tcs.SetResult(response);
-                    }
-                    catch (Exception ex)
-                    {
-                        tcs.SetException(ex);
-                    }
-                    finally
-                    {
-                        _semaphore.Release();
-                    }
-                }
-
-                return await tcs.Task;
+                return await CreateUserOpAndSend(requestMessage);
             }
             else if (requestMessage.Method == "eth_chainId")
             {
@@ -177,6 +152,14 @@ namespace Thirdweb.AccountAbstraction
 
         private async Task<RpcResponseMessage> CreateUserOpAndSend(RpcRequestMessage requestMessage)
         {
+            await new WaitUntil(() => !_deploying);
+
+            await UpdateDeploymentStatus();
+            if (!_deployed)
+            {
+                _deploying = true;
+            }
+
             string apiKey = ThirdwebManager.Instance.SDK.session.Options.clientId;
 
             // Deserialize the transaction input from the request message
@@ -188,7 +171,6 @@ namespace Thirdweb.AccountAbstraction
             for (int i = 0; i < Constants.DUMMY_SIG_LENGTH; i++)
                 dummySig[i] = 0x01;
 
-            await UpdateDeploymentStatus();
             var (initCode, gas) = await GetInitCode();
 
             var executeFn = new AccountContract.ExecuteFunction
@@ -248,24 +230,33 @@ namespace Thirdweb.AccountAbstraction
 
             // Check if successful
 
-            var receipt = await Transaction.WaitForTransactionResultRaw(txHash);
-            var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
-            if (decodedEvents[0].Event.Success == false)
+            if (!_deployed)
             {
-                throw new Exception($"Transaction {txHash} execution reverted");
+                var receipt = await Transaction.WaitForTransactionResultRaw(txHash);
+                var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
+                if (decodedEvents[0].Event.Success == false)
+                {
+                    throw new Exception($"Transaction {txHash} execution reverted");
+                }
+                else
+                {
+                    ThirdwebDebug.Log("Transaction successful");
+                    _deployed = true;
+                }
             }
-            else
-            {
-                ThirdwebDebug.Log("Transaction successful");
-                _deployed = true;
-            }
+
+            _deploying = false;
+
             return new RpcResponseMessage(requestMessage.Id, txHash);
         }
 
         private async Task<BigInteger> GetNonce()
         {
-            var nonce = await TransactionManager.ThirdwebRead<AccountContract.GetNonceFunction, AccountContract.GetNonceOutputDTO>(Accounts[0], new AccountContract.GetNonceFunction() { });
-            return nonce.ReturnValue1;
+            var nonce = await TransactionManager.ThirdwebRead<EntryPointContract.GetNonceFunction, EntryPointContract.GetNonceOutputDTO>(
+                Config.entryPointAddress,
+                new EntryPointContract.GetNonceFunction() { Sender = Accounts[0], Key = UserOpUtils.GetRandomInt192() }
+            );
+            return nonce.Nonce;
         }
 
         private async Task<byte[]> GetPaymasterAndData(object requestId, UserOperationHexified userOp, string apiKey)

@@ -1,12 +1,32 @@
+using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Signer;
+using System.Security.Cryptography;
 using EntryPointContract = Thirdweb.Contracts.EntryPoint.ContractDefinition;
 
 namespace Thirdweb.AccountAbstraction
 {
     public static class UserOpUtils
     {
+        public static BigInteger GetRandomInt192()
+        {
+            byte[] randomBytes = GetRandomBytes(24); // 192 bits = 24 bytes
+            BigInteger randomInt = new(randomBytes);
+            randomInt = BigInteger.Abs(randomInt) % (BigInteger.One << 192);
+            return randomInt;
+        }
+
+        private static byte[] GetRandomBytes(int byteCount)
+        {
+            using (RNGCryptoServiceProvider rng = new())
+            {
+                byte[] randomBytes = new byte[byteCount];
+                rng.GetBytes(randomBytes);
+                return randomBytes;
+            }
+        }
+
         public static async Task<byte[]> HashAndSignUserOp(this EntryPointContract.UserOperation userOp, string entryPoint)
         {
             var userOpHash = await TransactionManager.ThirdwebRead<EntryPointContract.GetUserOpHashFunction, EntryPointContract.GetUserOpHashOutputDTO>(
