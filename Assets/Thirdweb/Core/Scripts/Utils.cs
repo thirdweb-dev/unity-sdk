@@ -276,13 +276,13 @@ namespace Thirdweb
 
         public async static Task<BigInteger> GetLatestBlockNumber()
         {
-            var hex = await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Blocks.GetBlockNumber.SendRequestAsync();
+            var hex = await Utils.GetWeb3().Eth.Blocks.GetBlockNumber.SendRequestAsync();
             return hex.Value;
         }
 
         public async static Task<Nethereum.RPC.Eth.DTOs.BlockWithTransactionHashes> GetBlockByNumber(BigInteger blockNumber)
         {
-            return await new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.Blocks.GetBlockWithTransactionsHashesByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
+            return await Utils.GetWeb3().Eth.Blocks.GetBlockWithTransactionsHashesByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
         }
 
         public static string GetDeviceIdentifier()
@@ -412,6 +412,11 @@ namespace Thirdweb
                 ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.bundleIdOverride) ? Application.identifier.ToLower() : ThirdwebManager.Instance.bundleIdOverride);
         }
 
+        public static string GetRuntimePlatform()
+        {
+            return Application.platform.ToString();
+        }
+
         public static string AppendBundleIdQueryParam(this string uri)
         {
             if (IsWebGLBuild())
@@ -419,6 +424,11 @@ namespace Thirdweb
 
             uri += $"?bundleId={GetBundleId()}";
             return uri;
+        }
+
+        public static Web3 GetWeb3()
+        {
+            return new Web3(new ThirdwebClient(new Uri(ThirdwebManager.Instance.SDK.session.RPC)));
         }
 
         public static string GetNativeTokenWrapper(BigInteger chainId)

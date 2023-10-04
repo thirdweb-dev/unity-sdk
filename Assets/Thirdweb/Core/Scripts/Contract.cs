@@ -85,7 +85,7 @@ namespace Thirdweb
             }
             else
             {
-                BigInteger balance = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetBalance.SendRequestAsync(address);
+                BigInteger balance = await Utils.GetWeb3().Eth.GetBalance.SendRequestAsync(address);
                 var cv = new CurrencyValue { value = balance.ToString(), displayValue = balance.ToString().ToEth() };
                 return cv;
             }
@@ -114,7 +114,7 @@ namespace Thirdweb
             var initialInput = new TransactionInput();
             if (!Utils.IsWebGLBuild())
             {
-                var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+                var contract = Utils.GetWeb3().Eth.GetContract(this.abi, this.address);
                 var function = contract.GetFunction(functionName);
                 var fromAddress = from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
                 initialInput = function.CreateTransactionInput(fromAddress, args);
@@ -131,7 +131,7 @@ namespace Thirdweb
         /// <returns>The encoded function data as a string.</returns>
         public string Encode(string functionName, params object[] args)
         {
-            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+            var contract = Utils.GetWeb3().Eth.GetContract(this.abi, this.address);
             var function = contract.GetFunction(functionName);
             return function.GetData(args);
         }
@@ -144,7 +144,7 @@ namespace Thirdweb
         /// <returns>A list of <see cref="ParameterOutput"/> objects representing the decoded arguments.</returns>
         public List<ParameterOutput> Decode(string functionName, string encodedArgs)
         {
-            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+            var contract = Utils.GetWeb3().Eth.GetContract(this.abi, this.address);
             var function = contract.GetFunction(functionName);
             return function.DecodeInput(encodedArgs);
         }
@@ -156,7 +156,7 @@ namespace Thirdweb
         public async Task<List<EventLog<TEventDTO>>> GetEventLogs<TEventDTO>(ulong? fromBlock = null, ulong? toBlock = null)
             where TEventDTO : IEventDTO, new()
         {
-            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            var web3 = Utils.GetWeb3();
             var transferEventHandler = web3.Eth.GetEvent<TEventDTO>(this.address);
             var filter = transferEventHandler.CreateFilterInput(
                 fromBlock: fromBlock == null ? BlockParameter.CreateEarliest() : new BlockParameter(fromBlock.Value),
@@ -238,7 +238,7 @@ namespace Thirdweb
             if (this.abi == null)
                 throw new UnityException("You must pass an ABI for native platform custom calls");
 
-            var contract = new Web3(ThirdwebManager.Instance.SDK.session.RPC).Eth.GetContract(this.abi, this.address);
+            var contract = Utils.GetWeb3().Eth.GetContract(this.abi, this.address);
             var function = contract.GetFunction(functionName);
             var result = await function.CallDecodingToDefaultAsync(args);
 

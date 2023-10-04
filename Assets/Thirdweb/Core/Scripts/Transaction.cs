@@ -205,7 +205,7 @@ namespace Thirdweb
             }
             else
             {
-                var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+                var web3 = Utils.GetWeb3();
                 var function = web3.Eth.GetContract(contract.abi, contract.address).GetFunction(Input.To);
                 Input.Data = function.GetData(args);
             }
@@ -224,7 +224,7 @@ namespace Thirdweb
             }
             else
             {
-                var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+                var web3 = Utils.GetWeb3();
                 var gasPrice = await web3.Eth.GasPrice.SendRequestAsync();
                 var maxGasPrice = BigInteger.Parse("300000000000"); // 300 Gwei in Wei
                 var extraTip = gasPrice.Value / 10; // +10%
@@ -245,7 +245,7 @@ namespace Thirdweb
             }
             else
             {
-                var gasEstimator = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+                var gasEstimator = Utils.GetWeb3();
                 var gas = await gasEstimator.Eth.Transactions.EstimateGas.SendRequestAsync(Input);
                 return gas.Value;
             }
@@ -295,7 +295,7 @@ namespace Thirdweb
             }
             else
             {
-                var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+                var web3 = Utils.GetWeb3();
                 return await web3.Eth.Transactions.Call.SendRequestAsync(Input);
             }
         }
@@ -376,7 +376,7 @@ namespace Thirdweb
             if (Utils.IsWebGLBuild())
                 throw new UnityException("WaitForTransactionResult is not supported in WebGL builds.");
 
-            var web3 = new Web3(ThirdwebManager.Instance.SDK.session.RPC);
+            var web3 = Utils.GetWeb3();
             var receipt = await web3.TransactionReceiptPolling.PollForReceiptAsync(txHash);
             if (receipt.Failed())
             {
