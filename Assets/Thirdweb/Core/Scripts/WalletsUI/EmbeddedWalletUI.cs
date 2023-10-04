@@ -4,7 +4,10 @@ using System.Threading.Tasks;
 using UnityEngine.UI;
 using TMPro;
 using Thirdweb.Redcode.Awaiting;
-using Thirdweb.WebView;
+using Cdm.Authentication.Browser;
+using System.Web;
+using Newtonsoft.Json;
+using System.Runtime.Serialization;
 
 namespace Thirdweb.Wallets
 {
@@ -20,8 +23,6 @@ namespace Thirdweb.Wallets
         private string _email;
         private User _user;
         private System.Exception _exception;
-        private WebViewObject _webViewObject;
-        private bool _webViewLoaded;
 
         private void Awake()
         {
@@ -37,62 +38,103 @@ namespace Thirdweb.Wallets
             }
         }
 
+        [DataContract]
+        private class UserAuthDetails
+        {
+            [DataMember(Name = "email")]
+            internal string Email { get; set; }
+
+            [DataMember(Name = "userWalletId")]
+            internal string WalletUserId { get; set; }
+        }
+
+        [DataContract]
+        private class AuthVerifiedTokenReturnType
+        {
+            [DataMember(Name = "verifiedToken")]
+            internal VerifiedTokenType VerifiedToken { get; set; }
+
+            [DataMember(Name = "verifiedTokenJwtString")]
+            internal string VerifiedTokenJwtString { get; set; }
+
+            [DataContract]
+            internal class VerifiedTokenType
+            {
+                [DataMember(Name = "authDetails")]
+                internal UserAuthDetails AuthDetails { get; set; }
+
+                [DataMember]
+                private string authProvider;
+
+                [DataMember]
+                private string developerClientId;
+
+                [DataMember(Name = "isNewUser")]
+                internal bool IsNewUser { get; set; }
+
+                [DataMember]
+                private string rawToken;
+
+                [DataMember]
+                private string userId;
+            }
+        }
+
         public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, bool useGoogle)
         {
+            _embeddedWallet = embeddedWallet;
+            _email = email;
+            _user = null;
+            _exception = null;
+            OTPInput.text = "";
+            SubmitButton.onClick.RemoveAllListeners();
+
             if (useGoogle)
             {
                 EmbeddedWalletCanvas.SetActive(false);
 
-                _webViewLoaded = false;
-
-                string state = System.Guid.NewGuid().ToString();
-                string authorizationUrl = GoogleAuthenticator.GetAuthorizationUrlAsync(state);
-
-                _webViewObject ??= new GameObject("WebViewObject").AddComponent<WebViewObject>();
-                _webViewObject.Init(
-                    cb: WebViewCallback,
-                    ld: (msg) =>
+                // START TEST
+                var testVerifiedToken = new AuthVerifiedTokenReturnType
+                {
+                    VerifiedToken = new AuthVerifiedTokenReturnType.VerifiedTokenType
                     {
-                        ThirdwebDebug.Log($"WebView Loaded [{msg}]");
-                        _webViewLoaded = true;
-                    },
-                    httpErr: (msg) =>
-                    {
-                        ThirdwebDebug.LogError($"WebView HTTP Error [{msg}]");
-                    },
-                    err: (msg) =>
-                    {
-                        ThirdwebDebug.LogError($"WebView Error [{msg}]");
+                        AuthDetails = new UserAuthDetails { Email = "0xfirekeeper+absolutetest@gmail.com", WalletUserId = null },
+                        IsNewUser = true
                     }
-                );
+                };
+                var testVerifiedTokenJson = JsonConvert.SerializeObject(testVerifiedToken);
+                var testVerifiedTokenBase64 = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(testVerifiedTokenJson));
+                // END TEST
 
-                await new WaitUntil(() => _webViewLoaded);
+                var loginUrl = $"http://localhost/?authVerifiedToken={testVerifiedTokenBase64}"; // TODO: replace with real login URL from server
+                var crossPlatformBrowser = new CrossPlatformBrowser();
+                crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.LinuxEditor, new StandaloneBrowser());
+                crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.LinuxPlayer, new StandaloneBrowser());
+                crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsEditor, new StandaloneBrowser());
+                crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsPlayer, new StandaloneBrowser());
+                crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.OSXEditor, new StandaloneBrowser());
+                crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.OSXPlayer, new StandaloneBrowser());
+                crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.IPhonePlayer, new ASWebAuthenticationSessionBrowser());
+                crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.Android, new DeepLinkBrowser());
 
-                _webViewObject.LoadURL(authorizationUrl);
-                _webViewObject.SetVisibility(true);
-                throw new UnityException("Google authentication not yet implemented");
+                var res = await crossPlatformBrowser.StartAsync(loginUrl, "http://localhost/");
+                var qparams = HttpUtility.ParseQueryString(res.redirectUrl[res.redirectUrl.IndexOf('?')..]);
+                var authVerifiedToken = qparams["authVerifiedToken"];
+                authVerifiedToken = System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(authVerifiedToken));
+                // Debug.Log($"authVerifiedToken: {authVerifiedToken}");
+                var user = await _embeddedWallet.SignInWithGoogleAsync(authVerifiedToken);
+                // Debug.Log($"user: {user.EmailAddress}, {user.Account.Address}");
+                return user;
             }
             else
             {
-                _embeddedWallet = embeddedWallet;
-                _email = email;
-                _user = null;
-                _exception = null;
-                OTPInput.text = "";
-                SubmitButton.onClick.RemoveAllListeners();
                 SubmitButton.onClick.AddListener(OnSubmitOTP);
-
                 await OnSendOTP();
-
                 EmbeddedWalletCanvas.SetActive(true);
-
                 await new WaitUntil(() => _user != null || _exception != null);
-
                 EmbeddedWalletCanvas.SetActive(false);
-
                 if (_exception != null)
                     throw _exception;
-
                 return _user;
             }
         }
