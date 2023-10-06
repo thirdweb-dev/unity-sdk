@@ -76,7 +76,7 @@ namespace Thirdweb
             }
         }
 
-        public int callbackOrder => 2;
+        public int callbackOrder => 1;
     }
 }
 #endif
