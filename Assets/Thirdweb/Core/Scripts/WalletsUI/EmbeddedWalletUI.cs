@@ -140,22 +140,27 @@ namespace Thirdweb.Wallets
 #if UNITY_IOS
         [DllImport("__Internal")]
         private static extern void _OpenURL(string url);
-#endif
 
         public void OpenURL(string url)
         {
-#if UNITY_IOS
             _OpenURL(url);
+            // TODO: Implement callback
+        }
 #elif UNITY_ANDROID
+        public void OpenURL(string url)
+        {
             AndroidJavaClass thirdwebActivityClass = new("com.unity3d.player.UnityPlayer");
             AndroidJavaObject thirdwebActivity = thirdwebActivityClass.GetStatic<AndroidJavaObject>("currentActivity");
             thirdwebActivity.Call("OpenCustomTab", url);
-#else
-            var standaloneBrowser = new StandaloneBrowser();
-            var res = await standaloneBrowser.StartAsync(loginUrl, "http://localhost:3000/");
-            _redirectUrl = res.redirectUrl;
-#endif
         }
+#else
+        public async void OpenURL(string url)
+        {
+            var standaloneBrowser = new StandaloneBrowser();
+            var res = await standaloneBrowser.StartAsync(url, "http://localhost:3000/");
+            _redirectUrl = res.redirectUrl;
+        }
+#endif
 
         public void OnDeepLinkActivated(string url)
         {
