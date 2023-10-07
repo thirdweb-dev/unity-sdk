@@ -25,6 +25,7 @@ public class ThirdwebActivity extends UnityPlayerActivity {
 
     public void OpenCustomTab(String url) {
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        builder.setUrlBarHidingEnabled(true);
         CustomTabsIntent customTabsIntent = builder.build();
         customTabsIntent.launchUrl(this, Uri.parse(url));
     }

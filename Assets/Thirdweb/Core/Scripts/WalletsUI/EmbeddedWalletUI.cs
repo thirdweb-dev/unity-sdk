@@ -27,6 +27,7 @@ namespace Thirdweb.Wallets
         private User _user;
         private Exception _exception;
         private string _redirectUrl;
+        private string _customScheme;
 
         private void Awake()
         {
@@ -46,6 +47,10 @@ namespace Thirdweb.Wallets
 
         public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, bool useGoogle)
         {
+            var config = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
+            _customScheme = config != null ? config.customScheme : null;
+            if (!string.IsNullOrEmpty(_customScheme))
+                _customScheme = _customScheme.EndsWith("://") ? _customScheme : $"{_customScheme}://";
             _embeddedWallet = embeddedWallet;
             _email = email;
             _user = null;
@@ -119,6 +124,9 @@ namespace Thirdweb.Wallets
 
         private async Task<User> LoginWithGoogle()
         {
+            if (Application.isMobilePlatform && string.IsNullOrEmpty(_customScheme))
+                throw new UnityException("No custom scheme provided for mobile deeplinks, please set one in your ThirdwebConfig (found in ThirdwebManager)");
+
             string loginUrl = await GetLoginLink();
 
             OpenURL(loginUrl);
@@ -164,11 +172,7 @@ namespace Thirdweb.Wallets
 
         public void OnDeepLinkActivated(string url)
         {
-            ThirdwebDebug.Log($"OnDeepLinkActivated {url}");
-            if (string.IsNullOrEmpty(url) || url == "thirdweb://" || !url.StartsWith("thirdweb://"))
-                return;
-
-            ThirdwebDebug.Log("Received URL: " + url);
+            ThirdwebDebug.Log($"Received Link {url}");
             _redirectUrl = url;
         }
 
@@ -179,15 +183,15 @@ namespace Thirdweb.Wallets
             string baseUrl = UnityWebRequest.EscapeURL("https://ews.thirdweb.com");
             string url = $"https://ews.thirdweb.com/api/2022-08-12/embedded-wallet/headless-login-link?platform={platform}&authProvider={authProvider}&baseUrl={baseUrl}";
 
-            // using UnityWebRequest req = UnityWebRequest.Get(url);
-            // await req.SendWebRequest();
+            using UnityWebRequest req = UnityWebRequest.Get(url);
+            await req.SendWebRequest();
 
-            // if (req.result != UnityWebRequest.Result.Success)
-            //     throw new UnityException("Failed to get login link");
+            if (req.result != UnityWebRequest.Result.Success)
+                throw new UnityException("Failed to get login link");
 
-            // string loginUrl = JsonConvert.DeserializeObject<JObject>(req.downloadHandler.text)["googleLoginLink"].ToString();
-            string loginUrl = "https://ews.thirdweb.com/sdk/2022-08-12/embedded-wallet/auth/headless-google-login-managed-redirect";
-            string redirectUrl = UnityWebRequest.EscapeURL(Application.isMobilePlatform ? "thirdweb://" : "http://localhost:3000/");
+            string loginUrl = JsonConvert.DeserializeObject<JObject>(req.downloadHandler.text)["platformLoginLink"].ToString();
+            Debug.Log($"Login URL: {loginUrl}");
+            string redirectUrl = UnityWebRequest.EscapeURL(Application.isMobilePlatform ? _customScheme : "http://localhost:3000/");
             string developerClientId = UnityWebRequest.EscapeURL(ThirdwebManager.Instance.SDK.session.Options.clientId);
             return $"{loginUrl}?platform={platform}&redirectUrl={redirectUrl}&developerClientId={developerClientId}";
         }

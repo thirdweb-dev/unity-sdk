@@ -96,6 +96,11 @@ namespace Thirdweb
             public string paperClientId;
 
             /// <summary>
+            /// When using OAuth2 (e.g. Google) to login on mobile, you can provide a redirect URL such as 'myapp://'.
+            /// </summary>
+            public string customScheme;
+
+            /// <summary>
             /// Additional data to pass to the wallet provider.
             /// </summary>
             public Dictionary<string, object> extras;

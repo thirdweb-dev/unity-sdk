@@ -17,7 +17,43 @@ namespace Cdm.Authentication.Browser
         /// <summary>
         /// Gets or sets the close page response. This HTML response is shown to the user after redirection is done.
         /// </summary>
-        public string closePageResponse { get; set; } = "<html><body><b>DONE!</b><br>(You can close this tab/window now)</body></html>";
+        public string closePageResponse { get; set; } =
+            @"
+            <html>
+            <head>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        background-color: #2c2c2c;
+                        color: #ffffff;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        flex-direction: column;
+                    }
+                    .container {
+                        background-color: #3c3c3c;
+                        padding: 20px;
+                        border-radius: 10px;
+                        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+                        text-align: center;
+                    }
+                    .instruction {
+                        margin-top: 20px;
+                        font-size: 18px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <b>DONE!</b>
+                    <div class='instruction'>
+                        You can close this tab/window now.
+                    </div>
+                </div>
+            </body>
+            </html>";
 
         public async Task<BrowserResult> StartAsync(string loginUrl, string redirectUrl, CancellationToken cancellationToken = default)
         {
