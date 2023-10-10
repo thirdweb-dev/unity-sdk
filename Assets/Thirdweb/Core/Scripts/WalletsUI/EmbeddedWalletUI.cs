@@ -172,7 +172,7 @@ namespace Thirdweb.Wallets
         public async void OpenURL(string url)
         {
             var standaloneBrowser = new StandaloneBrowser();
-            var res = await standaloneBrowser.StartAsync(url, "http://localhost:3000/");
+            var res = await standaloneBrowser.StartAsync(url, "http://localhost:8789/");
             _redirectUrl = res.redirectUrl;
         }
 #endif
@@ -198,7 +198,7 @@ namespace Thirdweb.Wallets
 
             string loginUrl = JsonConvert.DeserializeObject<JObject>(req.downloadHandler.text)["platformLoginLink"].ToString();
             Debug.Log($"Login URL: {loginUrl}");
-            string redirectUrl = UnityWebRequest.EscapeURL(Application.isMobilePlatform ? _customScheme : "http://localhost:3000/");
+            string redirectUrl = UnityWebRequest.EscapeURL(Application.isMobilePlatform ? _customScheme : "http://localhost:8789/");
             string developerClientId = UnityWebRequest.EscapeURL(ThirdwebManager.Instance.SDK.session.Options.clientId);
             return $"{loginUrl}?platform={platform}&redirectUrl={redirectUrl}&developerClientId={developerClientId}";
         }
