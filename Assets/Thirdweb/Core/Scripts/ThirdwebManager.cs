@@ -58,6 +58,9 @@ namespace Thirdweb
         [Tooltip("Optional Bundle ID override for thirdweb services")]
         public string bundleIdOverride = null;
 
+        [Tooltip("General Thirdweb Settings")]
+        public ThirdwebConfig thirdwebConfig;
+
         [Tooltip("The name of your app")]
         public string appName = null;
 
@@ -223,6 +226,8 @@ namespace Thirdweb
 
             // Set up wallet data
 
+            thirdwebConfig = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
+
             options.wallet = new ThirdwebSDK.WalletOptions()
             {
                 appName = string.IsNullOrEmpty(appName) ? "thirdweb powered dApp" : appName,
@@ -279,6 +284,7 @@ namespace Thirdweb
                         }
                         : walletConnectExplorerRecommendedWalletIds,
                 paperClientId = string.IsNullOrEmpty(paperClientId) ? null : paperClientId,
+                customScheme = string.IsNullOrEmpty(thirdwebConfig.customScheme) ? null : thirdwebConfig.customScheme,
             };
 
             options.smartWalletConfig = string.IsNullOrEmpty(factoryAddress)

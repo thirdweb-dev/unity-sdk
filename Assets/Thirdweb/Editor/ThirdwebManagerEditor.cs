@@ -13,6 +13,7 @@ namespace Thirdweb
         private SerializedProperty bundleIdOverrideProperty;
         private SerializedProperty initializeOnAwakeProperty;
         private SerializedProperty showDebugLogsProperty;
+        private SerializedProperty thirdwebConfigProperty;
         private SerializedProperty appNameProperty;
         private SerializedProperty appDescriptionProperty;
         private SerializedProperty appIconsProperty;
@@ -45,7 +46,7 @@ namespace Thirdweb
         private GUIContent warningIcon;
         private Texture2D bannerImage;
 
-        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState";
+        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_3.4.0";
 
         private void OnEnable()
         {
@@ -55,6 +56,7 @@ namespace Thirdweb
             bundleIdOverrideProperty = serializedObject.FindProperty("bundleIdOverride");
             initializeOnAwakeProperty = serializedObject.FindProperty("initializeOnAwake");
             showDebugLogsProperty = serializedObject.FindProperty("showDebugLogs");
+            thirdwebConfigProperty = serializedObject.FindProperty("thirdwebConfig");
             appNameProperty = serializedObject.FindProperty("appName");
             appDescriptionProperty = serializedObject.FindProperty("appDescription");
             appIconsProperty = serializedObject.FindProperty("appIcons");
@@ -175,6 +177,39 @@ namespace Thirdweb
                     EditorGUILayout.PropertyField(bundleIdOverrideProperty);
                     EditorGUILayout.PropertyField(initializeOnAwakeProperty);
                     EditorGUILayout.PropertyField(showDebugLogsProperty);
+
+                    // Draw the ThirdwebConfig property as a read-only field
+                    ThirdwebConfig thirdwebConfig = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
+                    if (thirdwebConfig != null)
+                    {
+                        EditorGUI.BeginDisabledGroup(true);
+                        EditorGUILayout.ObjectField("Thirdweb Config", thirdwebConfig, typeof(ThirdwebConfig), false);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    else
+                    {
+                        EditorGUILayout.HelpBox("No ThirdwebConfig asset found in Resources. Please create a ThirdwebConfig asset.", MessageType.Warning);
+
+                        if (GUILayout.Button("Create ThirdwebConfig in Resources"))
+                        {
+                            ThirdwebConfig newConfig = ScriptableObject.CreateInstance<ThirdwebConfig>();
+
+                            string directoryPath = "Assets/Thirdweb/Resources";
+                            if (!AssetDatabase.IsValidFolder(directoryPath))
+                            {
+                                if (!AssetDatabase.IsValidFolder("Assets/Thirdweb"))
+                                {
+                                    AssetDatabase.CreateFolder("Assets", "Thirdweb");
+                                }
+                                AssetDatabase.CreateFolder("Assets/Thirdweb", "Resources");
+                            }
+
+                            string assetPath = directoryPath + "/ThirdwebConfig.asset";
+                            AssetDatabase.CreateAsset(newConfig, assetPath);
+                            AssetDatabase.SaveAssets();
+                        }
+                    }
+
                     EditorGUILayout.EndVertical();
                 }
             );

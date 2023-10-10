@@ -97,6 +97,9 @@ namespace Thirdweb.Examples
         public TMP_InputField LocalWalletNewPasswordInput;
         public Button LocalWalletNewConnectButton;
 
+        [Header("Loading State")]
+        public GameObject LoadingPanel;
+
         private ChainData _currentChainData;
         private WalletProvider _walletProvider;
         private WalletProvider _personalWalletProvider;
@@ -106,8 +109,6 @@ namespace Thirdweb.Examples
 
         private void Start()
         {
-            ConnectPanel.SetActive(false);
-
             ConnectButton.gameObject.SetActive(true);
             ConnectPanel.SetActive(false);
             ConnectedButton.gameObject.SetActive(false);
@@ -115,6 +116,7 @@ namespace Thirdweb.Examples
             SwitchNetworkPanel.SetActive(false);
             LocalWalletUISaved.SetActive(false);
             LocalWalletUINew.SetActive(false);
+            LoadingPanel.SetActive(false);
 
             ConnectButton.onClick.RemoveAllListeners();
             ConnectButton.onClick.AddListener(() => ToggleConnectPanel(true));
@@ -164,11 +166,11 @@ namespace Thirdweb.Examples
 
         public void GoogleLogin()
         {
-            if (!Utils.IsWebGLBuild())
-            {
-                ThirdwebDebug.LogWarning("Google login is only available on WebGL builds!");
-                return;
-            }
+            // if (!Utils.IsWebGLBuild())
+            // {
+            //     ThirdwebDebug.LogWarning("Google login is only available on WebGL builds!");
+            //     return;
+            // }
             ConnectWallet(WalletProvider.EmbeddedWallet, null, null, personalWallet, true);
         }
 
@@ -283,11 +285,13 @@ namespace Thirdweb.Examples
 
             try
             {
+                LoadingPanel.SetActive(true);
                 _walletProvider = walletProvider;
                 _personalWalletProvider = personalWallet;
                 _address = await ThirdwebManager.Instance.SDK.wallet.Connect(
                     new WalletConnection(walletProvider, BigInteger.Parse(_currentChainData.chainId), password, email, personalWallet, useGoogle)
                 );
+                LoadingPanel.SetActive(false);
                 ShowConnectedState();
                 OnConnect?.Invoke();
             }
@@ -297,6 +301,7 @@ namespace Thirdweb.Examples
                 ConnectPanel.SetActive(false);
                 LocalWalletUISaved.SetActive(false);
                 LocalWalletUINew.SetActive(false);
+                LoadingPanel.SetActive(false);
                 OnConnectFailed?.Invoke();
             }
         }
