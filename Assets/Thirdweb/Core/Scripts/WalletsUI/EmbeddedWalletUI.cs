@@ -127,9 +127,15 @@ namespace Thirdweb.Wallets
             if (Application.isMobilePlatform && string.IsNullOrEmpty(_customScheme))
                 throw new UnityException("No custom scheme provided for mobile deeplinks, please set one in your ThirdwebConfig (found in ThirdwebManager)");
 
-            string loginUrl = await GetLoginLink();
-
-            OpenURL(loginUrl);
+            try
+            {
+                string loginUrl = await GetLoginLink();
+                OpenURL(loginUrl);
+            }
+            catch (System.Exception e)
+            {
+                _exception = e;
+            }
 
             await new WaitUntil(() => _redirectUrl != null || _exception != null);
             if (_exception != null)
@@ -146,13 +152,14 @@ namespace Thirdweb.Wallets
         }
 
 #if UNITY_IOS
-        [DllImport("__Internal")]
-        private static extern void _OpenURL(string url);
+        // [DllImport("__Internal")]
+        // private static extern void _OpenURL(string url);
 
         public void OpenURL(string url)
         {
-            _OpenURL(url);
-            // TODO: Implement callback
+            // _OpenURL(url);
+            // // TODO: Implement callback
+            throw new UnityException("Embedded Wallets are not supported on iOS yet!");
         }
 #elif UNITY_ANDROID
         public void OpenURL(string url)
