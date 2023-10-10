@@ -243,7 +243,7 @@ namespace Thirdweb
 
         public ThirdwebSession session;
 
-        internal const string version = "3.3.1";
+        internal const string version = "3.4.0";
 
         /// <summary>
         /// Create an instance of the Thirdweb SDK.
