@@ -152,14 +152,12 @@ namespace Thirdweb.Wallets
         }
 
 #if UNITY_IOS
-        // [DllImport("__Internal")]
-        // private static extern void _OpenURL(string url);
+        [DllImport("__Internal")]
+        private static extern void _OpenURL(string url);
 
         public void OpenURL(string url)
         {
-            // _OpenURL(url);
-            // // TODO: Implement callback
-            throw new UnityException("Embedded Wallets are not supported on iOS yet!");
+            _OpenURL(url);
         }
 #elif UNITY_ANDROID
         public void OpenURL(string url)
