@@ -75,7 +75,15 @@ namespace Cdm.Authentication.Browser
 
                 Application.OpenURL(loginUrl);
 
-                return await _taskCompletionSource.Task;
+                var completedTask = await Task.WhenAny(_taskCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(60)));
+                if (completedTask == _taskCompletionSource.Task)
+                {
+                    return await _taskCompletionSource.Task;
+                }
+                else
+                {
+                    throw new TimeoutException("The operation timed out.");
+                }
             }
             finally
             {

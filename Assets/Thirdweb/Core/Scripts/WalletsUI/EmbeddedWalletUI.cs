@@ -171,9 +171,16 @@ namespace Thirdweb.Wallets
 #else
         public async void OpenURL(string url)
         {
-            var standaloneBrowser = new StandaloneBrowser();
-            var res = await standaloneBrowser.StartAsync(url, "http://localhost:8789/");
-            _redirectUrl = res.redirectUrl;
+            try
+            {
+                var standaloneBrowser = new StandaloneBrowser();
+                var res = await standaloneBrowser.StartAsync(url, "http://localhost:8789/");
+                _redirectUrl = res.redirectUrl;
+            }
+            catch (System.Exception e)
+            {
+                _exception = e;
+            }
         }
 #endif
 
