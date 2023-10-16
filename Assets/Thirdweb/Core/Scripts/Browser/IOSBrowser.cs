@@ -30,7 +30,7 @@ namespace Thirdweb.Browser
             try
             {
                 OpenURL(loginUrl);
-                var completedTask = await Task.WhenAny(_taskCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(30)));
+                var completedTask = await Task.WhenAny(_taskCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(60)));
                 if (completedTask == _taskCompletionSource.Task)
                 {
                     return await _taskCompletionSource.Task;
