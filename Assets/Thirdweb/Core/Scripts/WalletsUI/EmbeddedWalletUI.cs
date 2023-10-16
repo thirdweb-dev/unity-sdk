@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine.UI;
 using TMPro;
 using Thirdweb.Redcode.Awaiting;
-using Cdm.Authentication.Browser;
+using Thirdweb.Browser;
 using System.Web;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
@@ -26,7 +26,7 @@ namespace Thirdweb.Wallets
         private string _email;
         private User _user;
         private Exception _exception;
-        private string _redirectUrl;
+        private string _callbackUrl;
         private string _customScheme;
 
         private void Awake()
@@ -41,8 +41,6 @@ namespace Thirdweb.Wallets
                 Destroy(this.gameObject);
                 return;
             }
-
-            Application.deepLinkActivated += OnDeepLinkActivated;
         }
 
         public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, bool useGoogle)
@@ -130,18 +128,24 @@ namespace Thirdweb.Wallets
             try
             {
                 string loginUrl = await GetLoginLink();
-                OpenURL(loginUrl);
+                string redirectUrl = Application.isMobilePlatform ? _customScheme : "http://localhost:8789/";
+                CrossPlatformBrowser browser = new();
+                var browserResult = await browser.Login(loginUrl, redirectUrl);
+                if (browserResult.status != BrowserStatus.Success)
+                    _exception = new UnityException($"Failed to login with Google: {browserResult.status} | {browserResult.error}");
+                else
+                    _callbackUrl = browserResult.callbackUrl;
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 _exception = e;
             }
 
-            await new WaitUntil(() => _redirectUrl != null || _exception != null);
+            await new WaitUntil(() => _callbackUrl != null || _exception != null);
             if (_exception != null)
                 throw _exception;
 
-            string decodedUrl = HttpUtility.UrlDecode(_redirectUrl);
+            string decodedUrl = HttpUtility.UrlDecode(_callbackUrl);
             Uri uri = new(decodedUrl);
             string queryString = uri.Query;
             var queryDict = HttpUtility.ParseQueryString(queryString);
@@ -149,45 +153,6 @@ namespace Thirdweb.Wallets
             var user = await _embeddedWallet.SignInWithGoogleAsync(authResultJson);
             ThirdwebDebug.Log($"User Email: {user.EmailAddress}, User Address: {user.Account.Address}");
             return user;
-        }
-
-#if UNITY_IOS
-        // [DllImport("__Internal")]
-        // private static extern void _OpenURL(string url);
-
-        public void OpenURL(string url)
-        {
-            // _OpenURL(url);
-            // // TODO: Implement callback
-            throw new UnityException("Embedded Wallets are not supported on iOS yet!");
-        }
-#elif UNITY_ANDROID
-        public void OpenURL(string url)
-        {
-            AndroidJavaClass thirdwebActivityClass = new("com.unity3d.player.UnityPlayer");
-            AndroidJavaObject thirdwebActivity = thirdwebActivityClass.GetStatic<AndroidJavaObject>("currentActivity");
-            thirdwebActivity.Call("OpenCustomTab", url);
-        }
-#else
-        public async void OpenURL(string url)
-        {
-            try
-            {
-                var standaloneBrowser = new StandaloneBrowser();
-                var res = await standaloneBrowser.StartAsync(url, "http://localhost:8789/");
-                _redirectUrl = res.redirectUrl;
-            }
-            catch (System.Exception e)
-            {
-                _exception = e;
-            }
-        }
-#endif
-
-        public void OnDeepLinkActivated(string url)
-        {
-            ThirdwebDebug.Log($"Received Link {url}");
-            _redirectUrl = url;
         }
 
         private async Task<string> GetLoginLink()
@@ -208,11 +173,6 @@ namespace Thirdweb.Wallets
             string redirectUrl = UnityWebRequest.EscapeURL(Application.isMobilePlatform ? _customScheme : "http://localhost:8789/");
             string developerClientId = UnityWebRequest.EscapeURL(ThirdwebManager.Instance.SDK.session.Options.clientId);
             return $"{loginUrl}?platform={platform}&redirectUrl={redirectUrl}&developerClientId={developerClientId}";
-        }
-
-        private void OnDestroy()
-        {
-            Application.deepLinkActivated -= OnDeepLinkActivated;
         }
     }
 }
