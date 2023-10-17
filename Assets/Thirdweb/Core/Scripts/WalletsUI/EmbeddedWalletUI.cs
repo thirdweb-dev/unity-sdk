@@ -43,7 +43,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, bool useGoogle)
+        public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions)
         {
             var config = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
             _customScheme = config != null ? config.customScheme : null;
@@ -55,12 +55,15 @@ namespace Thirdweb.Wallets
             _exception = null;
             OTPInput.text = "";
             SubmitButton.onClick.RemoveAllListeners();
+            EmbeddedWalletCanvas.SetActive(false);
 
-            if (useGoogle)
+            if (authOptions?.authProvider == AuthProvider.Google)
             {
-                EmbeddedWalletCanvas.SetActive(false);
-
                 return await LoginWithGoogle();
+            }
+            else if (authOptions?.authProvider == AuthProvider.CustomJwt)
+            {
+                return await LoginWithCustomJwt(authOptions.jwtToken, authOptions.recoveryCode);
             }
             else
             {
@@ -118,6 +121,11 @@ namespace Thirdweb.Wallets
             if (_exception != null)
                 throw _exception;
             return _user;
+        }
+
+        private async Task<User> LoginWithCustomJwt(string jwtToken, string recoveryCode)
+        {
+            return await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken, "Auth0", recoveryCode);
         }
 
         private async Task<User> LoginWithGoogle()

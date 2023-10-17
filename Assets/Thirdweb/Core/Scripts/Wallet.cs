@@ -10,7 +10,6 @@ using Nethereum.ABI.EIP712;
 using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
-using Nethereum.Web3;
 
 namespace Thirdweb
 {
@@ -515,6 +514,7 @@ namespace Thirdweb
     /// <summary>
     /// Represents the connection details for a wallet.
     /// </summary>
+    [System.Serializable]
     public class WalletConnection
     {
         public WalletProvider provider;
@@ -527,7 +527,7 @@ namespace Thirdweb
 
         public WalletProvider personalWallet;
 
-        public bool useGoogle;
+        public AuthOptions authOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WalletConnection"/> class with the specified parameters.
@@ -537,13 +537,15 @@ namespace Thirdweb
         /// <param name="password">The wallet password if using local wallets.</param>
         /// <param name="email">The email to login with if using email based providers.</param>
         /// <param name="personalWallet">The personal wallet provider if using smart wallets.</param>
+        /// <param name="authOptions">The authentication options if using embedded wallets.</param>
+        /// <returns>A new instance of the <see cref="WalletConnection"/> class.</returns>
         public WalletConnection(
             WalletProvider provider,
             BigInteger chainId,
             string password = null,
             string email = null,
             WalletProvider personalWallet = WalletProvider.LocalWallet,
-            bool useGoogle = false
+            AuthOptions authOptions = null
         )
         {
             this.provider = provider;
@@ -551,8 +553,26 @@ namespace Thirdweb
             this.password = password;
             this.email = email;
             this.personalWallet = personalWallet;
-            this.useGoogle = useGoogle;
+            this.authOptions =
+                authOptions
+                ?? new AuthOptions()
+                {
+                    authProvider = AuthProvider.Default,
+                    jwtToken = null,
+                    recoveryCode = null
+                };
         }
+    }
+
+    /// <summary>
+    /// Embedded Wallet Authentication Options.
+    /// </summary>
+    [System.Serializable]
+    public class AuthOptions
+    {
+        public AuthProvider authProvider;
+        public string jwtToken;
+        public string recoveryCode;
     }
 
     /// <summary>
@@ -571,5 +591,16 @@ namespace Thirdweb
         Paper,
         Hyperplay,
         EmbeddedWallet
+    }
+
+    /// <summary>
+    /// Represents the available auth providers.
+    /// </summary>
+    [System.Serializable]
+    public enum AuthProvider
+    {
+        Default,
+        Google,
+        CustomJwt
     }
 }

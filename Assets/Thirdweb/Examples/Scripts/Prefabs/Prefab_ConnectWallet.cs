@@ -289,7 +289,14 @@ namespace Thirdweb.Examples
                 _walletProvider = walletProvider;
                 _personalWalletProvider = personalWallet;
                 _address = await ThirdwebManager.Instance.SDK.wallet.Connect(
-                    new WalletConnection(walletProvider, BigInteger.Parse(_currentChainData.chainId), password, email, personalWallet, useGoogle)
+                    new WalletConnection(
+                        walletProvider,
+                        BigInteger.Parse(_currentChainData.chainId),
+                        password,
+                        email,
+                        personalWallet,
+                        new AuthOptions() { authProvider = useGoogle ? AuthProvider.Google : AuthProvider.Default }
+                    )
                 );
                 LoadingPanel.SetActive(false);
                 ShowConnectedState();
