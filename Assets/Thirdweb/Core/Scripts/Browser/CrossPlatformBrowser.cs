@@ -9,9 +9,9 @@ namespace Thirdweb.Browser
 
         public async Task<BrowserResult> Login(string loginUrl, string redirectUrl, CancellationToken cancellationToken = default)
         {
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_EDITOR
             _browser = new AndroidBrowser();
-#elif UNITY_IOS
+#elif UNITY_IOS && !UNITY_EDITOR
             _browser = new IOSBrowser();
 #else
             _browser = new StandaloneBrowser();

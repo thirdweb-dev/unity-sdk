@@ -1,12 +1,12 @@
+#if UNITY_IOS && !UNITY_EDITOR
+
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AOT;
 
-#if UNITY_IOS && !UNITY_EDITOR
 using System.Runtime.InteropServices;
-#endif
 
 namespace Thirdweb.Browser
 {
@@ -45,16 +45,14 @@ namespace Thirdweb.Browser
             _sessionPtr = IntPtr.Zero;
         }
 
-#if UNITY_IOS && !UNITY_EDITOR
         private const string DllName = "__Internal";
-        
+
         [DllImport(DllName)]
-        private static extern IntPtr Thirdweb_ASWebAuthenticationSession_InitWithURL(
-            string url, string callbackUrlScheme, AuthenticationSessionCompletedCallback completionHandler);
-        
+        private static extern IntPtr Thirdweb_ASWebAuthenticationSession_InitWithURL(string url, string callbackUrlScheme, AuthenticationSessionCompletedCallback completionHandler);
+
         [DllImport(DllName)]
         private static extern int Thirdweb_ASWebAuthenticationSession_Start(IntPtr session);
-        
+
         [DllImport(DllName)]
         private static extern void Thirdweb_ASWebAuthenticationSession_Cancel(IntPtr session);
 
@@ -62,37 +60,7 @@ namespace Thirdweb.Browser
         private static extern int Thirdweb_ASWebAuthenticationSession_GetPrefersEphemeralWebBrowserSession(IntPtr session);
 
         [DllImport(DllName)]
-        private static extern void Thirdweb_ASWebAuthenticationSession_SetPrefersEphemeralWebBrowserSession(
-            IntPtr session, int enable);
-#else
-
-        private const string NotSupportedMsg = "Only iOS platform is supported.";
-
-        private static IntPtr Thirdweb_ASWebAuthenticationSession_InitWithURL(string url, string callbackUrlScheme, AuthenticationSessionCompletedCallback completionHandler)
-        {
-            throw new NotImplementedException(NotSupportedMsg);
-        }
-
-        private static int Thirdweb_ASWebAuthenticationSession_Start(IntPtr session)
-        {
-            throw new NotImplementedException(NotSupportedMsg);
-        }
-
-        private static void Thirdweb_ASWebAuthenticationSession_Cancel(IntPtr session)
-        {
-            throw new NotImplementedException(NotSupportedMsg);
-        }
-
-        private static int Thirdweb_ASWebAuthenticationSession_GetPrefersEphemeralWebBrowserSession(IntPtr session)
-        {
-            throw new NotImplementedException(NotSupportedMsg);
-        }
-
-        private static void Thirdweb_ASWebAuthenticationSession_SetPrefersEphemeralWebBrowserSession(IntPtr session, int enable)
-        {
-            throw new NotImplementedException(NotSupportedMsg);
-        }
-#endif
+        private static extern void Thirdweb_ASWebAuthenticationSession_SetPrefersEphemeralWebBrowserSession(IntPtr session, int enable);
 
         public delegate void ASWebAuthenticationSessionCompletionHandler(string callbackUrl, ASWebAuthenticationSessionError error);
 
@@ -187,3 +155,5 @@ namespace Thirdweb.Browser
         PresentationContextInvalid = 3
     }
 }
+
+#endif
