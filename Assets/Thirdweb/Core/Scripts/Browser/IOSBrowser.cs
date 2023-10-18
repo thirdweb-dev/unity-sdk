@@ -108,7 +108,7 @@ namespace Thirdweb.Browser
         }
     }
 
-    public class ASWebAuthenticationSessionBrowser : IThirdwebBrowser
+    public class IOSBrowser : IThirdwebBrowser
     {
         private TaskCompletionSource<BrowserResult> _taskCompletionSource;
 
