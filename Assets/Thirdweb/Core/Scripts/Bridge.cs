@@ -98,7 +98,7 @@ namespace Thirdweb
                 string.IsNullOrEmpty(walletConnection.password) ? Utils.GetDeviceIdentifier() : walletConnection.password, 
                 walletConnection.email, 
                 walletConnection.personalWallet.ToString()[..1].ToLower() + walletConnection.personalWallet.ToString()[1..], 
-                walletConnection.useGoogle.ToString(),
+                JsonConvert.SerializeObject(walletConnection.authOptions),
                 jsCallback
             );
 #endif
@@ -216,7 +216,7 @@ namespace Thirdweb
         [DllImport("__Internal")]
         private static extern string ThirdwebInitialize(string chainOrRPC, string options);
         [DllImport("__Internal")]
-        private static extern string ThirdwebConnect(string taskId, string wallet, string chainId, string password, string email, string personalWallet, string useGoogle, Action<string, string, string> cb);
+        private static extern string ThirdwebConnect(string taskId, string wallet, string chainId, string password, string email, string personalWallet, string authOptions, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebDisconnect(string taskId, Action<string, string, string> cb);
         [DllImport("__Internal")]

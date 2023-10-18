@@ -10,7 +10,6 @@ using Newtonsoft.Json;
 using UnityEngine.Networking;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Runtime.InteropServices;
 
 namespace Thirdweb.Wallets
 {
@@ -18,6 +17,7 @@ namespace Thirdweb.Wallets
     {
         public GameObject EmbeddedWalletCanvas;
         public TMP_InputField OTPInput;
+        public TMP_InputField RecoveryInput;
         public Button SubmitButton;
 
         public static EmbeddedWalletUI Instance { get; private set; }
@@ -54,20 +54,30 @@ namespace Thirdweb.Wallets
             _user = null;
             _exception = null;
             OTPInput.text = "";
+            RecoveryInput.text = "";
+            RecoveryInput.gameObject.SetActive(false);
             SubmitButton.onClick.RemoveAllListeners();
             EmbeddedWalletCanvas.SetActive(false);
 
-            if (authOptions?.authProvider == AuthProvider.Google)
+            if (authOptions?.authProvider == AuthProvider.Default)
+            {
+                return await LoginWithOTP(false);
+            }
+            else if (authOptions?.authProvider == AuthProvider.DefaultManaged)
+            {
+                return await LoginWithOTP(true);
+            }
+            else if (authOptions?.authProvider == AuthProvider.GoogleManaged)
             {
                 return await LoginWithGoogle();
             }
             else if (authOptions?.authProvider == AuthProvider.CustomJwt)
             {
-                return await LoginWithCustomJwt(authOptions.jwtToken, authOptions.recoveryCode);
+                return await LoginWithCustomJwt(authOptions.jwtToken, authOptions.encryptionKey);
             }
             else
             {
-                return await LoginWithOTP();
+                throw new UnityException($"Unsupported auth provider: {authOptions?.authProvider}");
             }
         }
 
@@ -76,11 +86,29 @@ namespace Thirdweb.Wallets
             _exception = new UnityException("User cancelled");
         }
 
-        public async Task OnSendOTP()
+        // Default flow
+
+        private async Task<User> LoginWithOTP(bool managed)
+        {
+            if (_email == null)
+                throw new UnityException("Email is required for OTP login");
+
+            SubmitButton.onClick.AddListener(OnSubmitOTP);
+            await OnSendOTP(managed);
+            EmbeddedWalletCanvas.SetActive(true);
+            await new WaitUntil(() => _user != null || _exception != null);
+            EmbeddedWalletCanvas.SetActive(false);
+            if (_exception != null)
+                throw _exception;
+            return _user;
+        }
+
+        private async Task OnSendOTP(bool managed)
         {
             try
             {
-                (bool isNewUser, bool isNewDevice) = await _embeddedWallet.SendOtpEmailAsync(_email);
+                (bool isNewUser, bool isNewDevice) = await _embeddedWallet.SendOtpEmailAsync(_email, managed);
+                RecoveryInput.gameObject.SetActive(!managed && !isNewUser && isNewDevice);
                 ThirdwebDebug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
             }
             catch (System.Exception e)
@@ -89,14 +117,14 @@ namespace Thirdweb.Wallets
             }
         }
 
-        public async void OnSubmitOTP()
+        private async void OnSubmitOTP()
         {
             OTPInput.interactable = false;
             SubmitButton.interactable = false;
             try
             {
                 string otp = OTPInput.text;
-                var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, null);
+                var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
                 _user = res.User;
                 ThirdwebDebug.Log($"finished validating OTP:  EmailAddress {_user.EmailAddress}, Address {_user.Account.Address}");
             }
@@ -111,22 +139,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        private async Task<User> LoginWithOTP()
-        {
-            SubmitButton.onClick.AddListener(OnSubmitOTP);
-            await OnSendOTP();
-            EmbeddedWalletCanvas.SetActive(true);
-            await new WaitUntil(() => _user != null || _exception != null);
-            EmbeddedWalletCanvas.SetActive(false);
-            if (_exception != null)
-                throw _exception;
-            return _user;
-        }
-
-        private async Task<User> LoginWithCustomJwt(string jwtToken, string recoveryCode)
-        {
-            return await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken, "Auth0", recoveryCode);
-        }
+        // Google flow
 
         private async Task<User> LoginWithGoogle()
         {
@@ -181,6 +194,13 @@ namespace Thirdweb.Wallets
             string redirectUrl = UnityWebRequest.EscapeURL(Application.isMobilePlatform ? _customScheme : "http://localhost:8789/");
             string developerClientId = UnityWebRequest.EscapeURL(ThirdwebManager.Instance.SDK.session.Options.clientId);
             return $"{loginUrl}?platform={platform}&redirectUrl={redirectUrl}&developerClientId={developerClientId}";
+        }
+
+        // Custom auth flow
+
+        private async Task<User> LoginWithCustomJwt(string jwtToken, string recoveryCode)
+        {
+            return await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken, "", recoveryCode);
         }
     }
 }

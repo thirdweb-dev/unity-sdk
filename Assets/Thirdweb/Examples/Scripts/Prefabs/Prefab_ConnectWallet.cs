@@ -142,7 +142,7 @@ namespace Thirdweb.Examples
                     NetworkIcons[i].sprite = NetworkIcons[0].sprite;
             }
 
-            bool usingEmailWallet = SupportedWallets.Contains(WalletProvider.MagicLink) || SupportedWallets.Contains(WalletProvider.Paper) || SupportedWallets.Contains(WalletProvider.EmbeddedWallet);
+            bool usingEmailWallet = SupportedWallets.Contains(WalletProvider.EmbeddedWallet);
             bool usingNormalWallet =
                 SupportedWallets.Contains(WalletProvider.Metamask)
                 || SupportedWallets.Contains(WalletProvider.Coinbase)
@@ -191,32 +191,6 @@ namespace Thirdweb.Examples
                 else
                 {
                     _email = SupportedWalletsUI[WalletProvider.EmbeddedWallet].emailInput.text;
-                }
-            }
-            else if (walletProvider == WalletProvider.Paper || personalWallet == WalletProvider.Paper)
-            {
-                if (SupportedWalletsUI[WalletProvider.Paper].emailInput == null || string.IsNullOrEmpty(SupportedWalletsUI[WalletProvider.Paper].emailInput.text))
-                {
-                    ThirdwebDebug.LogWarning("Could not connect, no email provided!");
-                    ConnectPanel.SetActive(false);
-                    return;
-                }
-                else
-                {
-                    _email = SupportedWalletsUI[WalletProvider.Paper].emailInput.text;
-                }
-            }
-            else if (walletProvider == WalletProvider.MagicLink || personalWallet == WalletProvider.MagicLink)
-            {
-                if (SupportedWalletsUI[WalletProvider.MagicLink].emailInput == null || string.IsNullOrEmpty(SupportedWalletsUI[WalletProvider.MagicLink].emailInput.text))
-                {
-                    ThirdwebDebug.LogWarning("Could not connect, no email provided!");
-                    ConnectPanel.SetActive(false);
-                    return;
-                }
-                else
-                {
-                    _email = SupportedWalletsUI[WalletProvider.MagicLink].emailInput.text;
                 }
             }
             else if (walletProvider == WalletProvider.LocalWallet)
@@ -295,7 +269,7 @@ namespace Thirdweb.Examples
                         password,
                         email,
                         personalWallet,
-                        new AuthOptions() { authProvider = useGoogle ? AuthProvider.Google : AuthProvider.Default }
+                        new AuthOptions(authProvider: useGoogle ? AuthProvider.GoogleManaged : AuthProvider.DefaultManaged, jwtToken: null, encryptionKey: null)
                     )
                 );
                 LoadingPanel.SetActive(false);

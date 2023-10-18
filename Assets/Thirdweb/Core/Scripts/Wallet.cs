@@ -518,15 +518,10 @@ namespace Thirdweb
     public class WalletConnection
     {
         public WalletProvider provider;
-
         public BigInteger chainId;
-
         public string password;
-
         public string email;
-
         public WalletProvider personalWallet;
-
         public AuthOptions authOptions;
 
         /// <summary>
@@ -553,14 +548,7 @@ namespace Thirdweb
             this.password = password;
             this.email = email;
             this.personalWallet = personalWallet;
-            this.authOptions =
-                authOptions
-                ?? new AuthOptions()
-                {
-                    authProvider = AuthProvider.Default,
-                    jwtToken = null,
-                    recoveryCode = null
-                };
+            this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.Default, jwtToken: null, encryptionKey: null);
         }
     }
 
@@ -572,7 +560,21 @@ namespace Thirdweb
     {
         public AuthProvider authProvider;
         public string jwtToken;
-        public string recoveryCode;
+        public string encryptionKey;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthOptions"/> class with the specified parameters.
+        /// </summary>
+        /// <param name="authProvider">The authentication provider to use.</param>
+        /// <param name="jwtToken">The JWT token to use if using a custom JWT provider.</param>
+        /// <param name="encryptionKey">The encryption key to use if using a custom JWT provider.</param>
+        /// <returns>A new instance of the <see cref="AuthOptions"/> class.</returns>
+        public AuthOptions(AuthProvider authProvider, string jwtToken = null, string encryptionKey = null)
+        {
+            this.authProvider = authProvider;
+            this.jwtToken = jwtToken;
+            this.encryptionKey = encryptionKey;
+        }
     }
 
     /// <summary>
@@ -585,22 +587,36 @@ namespace Thirdweb
         Coinbase,
         WalletConnect,
         Injected,
-        MagicLink,
         LocalWallet,
         SmartWallet,
-        Paper,
         Hyperplay,
         EmbeddedWallet
     }
 
     /// <summary>
-    /// Represents the available auth providers.
+    /// Represents the available auth providers for Embedded Wallet.
     /// </summary>
     [System.Serializable]
     public enum AuthProvider
     {
+        /// <summary>
+        /// Default auth provider. Email OTP flow with user managed recovery code.
+        /// </summary>
         Default,
-        Google,
+
+        /// <summary>
+        /// Default auth provider. Email OTP flow with Thirdweb managed recovery code.
+        /// </summary>
+        DefaultManaged,
+
+        /// <summary>
+        /// Google auth provider. Google managed email OTP flow.
+        /// </summary>
+        GoogleManaged,
+
+        /// <summary>
+        /// Bring your own auth. Custom JWT flow, requires a JWT token and encryption key.
+        /// </summary>
         CustomJwt
     }
 }
