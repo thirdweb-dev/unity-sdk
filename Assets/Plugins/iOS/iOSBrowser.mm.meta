@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: a8b902c78bc2bc9498f63152b1d05ba8
+guid: 2fcb14eac0784fc4290686f8b11245f6
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -76,7 +76,7 @@ PluginImporter:
         AddToEmbeddedBinaries: false
         CPU: AnyCPU
         CompileFlags: 
-        FrameworkDependencies: SafariServices;
+        FrameworkDependencies: AuthenticationServices;
   userData: 
   assetBundleName: 
   assetBundleVariant: 
