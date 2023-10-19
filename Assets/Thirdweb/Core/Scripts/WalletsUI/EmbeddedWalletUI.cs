@@ -198,9 +198,9 @@ namespace Thirdweb.Wallets
 
         // Custom auth flow
 
-        private async Task<User> LoginWithCustomJwt(string jwtToken, string recoveryCode)
+        private async Task<User> LoginWithCustomJwt(string jwtToken, string encryptionKey)
         {
-            return await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken, "", recoveryCode);
+            return await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken, "CustomJWT", encryptionKey);
         }
     }
 }
