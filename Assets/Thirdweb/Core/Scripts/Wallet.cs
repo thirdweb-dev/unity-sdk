@@ -548,7 +548,7 @@ namespace Thirdweb
             this.password = password;
             this.email = email;
             this.personalWallet = personalWallet;
-            this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.Default, jwtToken: null, encryptionKey: null);
+            this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.EmailOTP, jwtToken: null, encryptionKey: null);
         }
     }
 
@@ -600,19 +600,14 @@ namespace Thirdweb
     public enum AuthProvider
     {
         /// <summary>
-        /// Default auth provider. Email OTP flow with user managed recovery code.
+        /// Email OTP Flow.
         /// </summary>
-        Default,
+        EmailOTP,
 
         /// <summary>
-        /// Default auth provider. Email OTP flow with Thirdweb managed recovery code.
+        /// Google OAuth2 Flow.
         /// </summary>
-        DefaultManaged,
-
-        /// <summary>
-        /// Google auth provider. Google managed email OTP flow.
-        /// </summary>
-        GoogleManaged,
+        Google,
 
         /// <summary>
         /// Bring your own auth. Custom JWT flow, requires a JWT token and encryption key.

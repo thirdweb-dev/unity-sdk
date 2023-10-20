@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Paper;
+using Thirdweb.EWS;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;

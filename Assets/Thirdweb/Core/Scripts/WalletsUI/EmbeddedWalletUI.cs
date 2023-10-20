@@ -1,5 +1,5 @@
 using UnityEngine;
-using Paper;
+using Thirdweb.EWS;
 using System.Threading.Tasks;
 using UnityEngine.UI;
 using TMPro;
@@ -59,15 +59,11 @@ namespace Thirdweb.Wallets
             SubmitButton.onClick.RemoveAllListeners();
             EmbeddedWalletCanvas.SetActive(false);
 
-            if (authOptions?.authProvider == AuthProvider.Default)
+            if (authOptions?.authProvider == AuthProvider.EmailOTP)
             {
-                return await LoginWithOTP(false);
+                return await LoginWithOTP();
             }
-            else if (authOptions?.authProvider == AuthProvider.DefaultManaged)
-            {
-                return await LoginWithOTP(true);
-            }
-            else if (authOptions?.authProvider == AuthProvider.GoogleManaged)
+            else if (authOptions?.authProvider == AuthProvider.Google)
             {
                 return await LoginWithGoogle();
             }
@@ -88,13 +84,13 @@ namespace Thirdweb.Wallets
 
         // Default flow
 
-        private async Task<User> LoginWithOTP(bool managed)
+        private async Task<User> LoginWithOTP()
         {
             if (_email == null)
                 throw new UnityException("Email is required for OTP login");
 
             SubmitButton.onClick.AddListener(OnSubmitOTP);
-            await OnSendOTP(managed);
+            await OnSendOTP();
             EmbeddedWalletCanvas.SetActive(true);
             await new WaitUntil(() => _user != null || _exception != null);
             EmbeddedWalletCanvas.SetActive(false);
@@ -103,12 +99,12 @@ namespace Thirdweb.Wallets
             return _user;
         }
 
-        private async Task OnSendOTP(bool managed)
+        private async Task OnSendOTP()
         {
             try
             {
-                (bool isNewUser, bool isNewDevice) = await _embeddedWallet.SendOtpEmailAsync(_email, managed);
-                RecoveryInput.gameObject.SetActive(!managed && !isNewUser && isNewDevice);
+                (bool isNewUser, bool isNewDevice) = await _embeddedWallet.SendOtpEmailAsync(_email);
+                RecoveryInput.gameObject.SetActive(!_embeddedWallet.IsManagedRecovery && !isNewUser && isNewDevice);
                 ThirdwebDebug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
             }
             catch (System.Exception e)
