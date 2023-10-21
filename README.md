@@ -19,9 +19,9 @@
 
 # Supported platforms
 
-![wallets](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/621563a7-25b6-4b01-a85a-c31c109bf88c)
+Build games for WebGL, Standalone and Mobile using 1000+ supported chains.
 
-More on wallets [here](https://thirdweb.com/dashboard/wallet).
+![tw_wallets](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/0c7f5ad1-263e-4cc8-9dfa-97a7f84bc471)
 
 # Installation
 
@@ -31,9 +31,11 @@ Drag and drop the file into your project.
 
 The package comes with a sample Scene and Prefab examples showcasing the different capabilities of the SDK.
 
-All you need is a ThirdwebManager component in your scene. See [documentation](https://portal.thirdweb.com/unity) for more information.
+All you need is a ThirdwebManager prefab in your scene. See [documentation](https://portal.thirdweb.com/unity) for more information.
 
 The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS. We recommend using 2022 LTS.
+
+The example scenes are built using Unity 2022 LTS.
 
 Note: The Newtonsoft DLL is included as part of the Unity Package, feel free to deselect it if you already have it installed as a dependency to avoid conflicts.
 
@@ -70,8 +72,8 @@ var sdk = ThirdwebManager.Instance.SDK;
 
 // Configure the connection
 var connection = new WalletConnection(
-  provider: WalletProvider.Paper,          // The wallet provider you want to connect to (Required)
-  chainId: 1,                              // The chain you want to connect to (Required)
+  provider: WalletProvider.EmbeddedWallet, // The wallet provider you want to connect to (Required)
+  chainId: 5,                              // The chain you want to connect to (Required)
   email: "email@email.com"                 // The email you want to authenticate with (Required for this provider)
 );
 
@@ -102,7 +104,7 @@ var res = await contract.Read<string>("myReadFunction", arg1, arg2, ...);
 var txRes = await contract.Write("myWriteFunction", arg1, arg2, ...);
 ```
 
-# Prefabs
+# Prefab Examples
 
 The `Examples` folder contains a demo scene using our user-friendly prefabs, check it out!
 
@@ -166,4 +168,4 @@ nftPrefabScript.LoadNFT(nft);
 - Authentication.
 - Deployment.
 
-See full documentation on the [thirdweb portal](https://portal.thirdweb.com).
+See full documentation on the [thirdweb portal](https://portal.thirdweb.com/unity).
