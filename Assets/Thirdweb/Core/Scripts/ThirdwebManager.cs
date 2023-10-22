@@ -88,17 +88,11 @@ namespace Thirdweb
         [Tooltip("Forwarder Version (Defaults to 0.0.1 if left empty)")]
         public string forwaderVersionOverride = null;
 
-        [Tooltip("Magic Link API Key (https://dashboard.magic.link)")]
-        public string magicLinkApiKey = null;
-
         [Tooltip("WalletConnect Project ID (https://cloud.walletconnect.com/app)")]
         public string walletConnectProjectId = null;
 
         [Tooltip("Wallets to show in the WalletConnect Modal (https://walletconnect.com/explorer)")]
         public string[] walletConnectExplorerRecommendedWalletIds = new string[] { };
-
-        [Tooltip("Paper Client ID (https://withpaper.com/dashboard)")]
-        public string paperClientId = null;
 
         [Tooltip("Factory Contract Address")]
         public string factoryAddress;
