@@ -175,9 +175,9 @@ namespace Thirdweb.Wallets
         private async Task<string> GetLoginLink()
         {
             string platform = UnityWebRequest.EscapeURL("unity");
-            string authProvider = UnityWebRequest.EscapeURL("google");
-            string baseUrl = UnityWebRequest.EscapeURL("https://ews.thirdweb.com");
-            string url = $"https://ews.thirdweb.com/api/2022-08-12/embedded-wallet/headless-login-link?platform={platform}&authProvider={authProvider}&baseUrl={baseUrl}";
+            string authProvider = UnityWebRequest.EscapeURL("Google");
+            string baseUrl = UnityWebRequest.EscapeURL("https://embedded-wallet.thirdweb.com");
+            string url = $"https://embedded-wallet.thirdweb.com/api/2023-10-20/embedded-wallet/headless-oauth-login-link?platform={platform}&authProvider={authProvider}&baseUrl={baseUrl}";
 
             using UnityWebRequest req = UnityWebRequest.Get(url);
             await req.SendWebRequest();
@@ -196,7 +196,7 @@ namespace Thirdweb.Wallets
 
         private async Task<User> LoginWithCustomJwt(string jwtToken, string encryptionKey)
         {
-            return await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken, "CustomJWT", encryptionKey);
+            return await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken, encryptionKey);
         }
     }
 }
