@@ -529,7 +529,7 @@ namespace Thirdweb
         /// </summary>
         /// <param name="provider">The wallet provider to connect to.</param>
         /// <param name="chainId">The chain ID.</param>
-        /// <param name="password">The wallet password if using local wallets.</param>
+        /// <param name="password">Optional encryption password if wallet recovery is user-managed.</param>
         /// <param name="email">The email to login with if using email based providers.</param>
         /// <param name="personalWallet">The personal wallet provider if using smart wallets.</param>
         /// <param name="authOptions">The authentication options if using embedded wallets.</param>
@@ -548,7 +548,7 @@ namespace Thirdweb
             this.password = password;
             this.email = email;
             this.personalWallet = personalWallet;
-            this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.EmailOTP, jwtToken: null, encryptionKey: null);
+            this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.EmailOTP, jwt: null, encryptionKey: null);
         }
     }
 
@@ -559,21 +559,18 @@ namespace Thirdweb
     public class AuthOptions
     {
         public AuthProvider authProvider;
-        public string jwtToken;
-        public string encryptionKey;
+        public string jwt;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthOptions"/> class with the specified parameters.
         /// </summary>
         /// <param name="authProvider">The authentication provider to use.</param>
-        /// <param name="jwtToken">The JWT token to use if using a custom JWT provider.</param>
-        /// <param name="encryptionKey">The encryption key to use if using a custom JWT provider.</param>
+        /// <param name="jwt">The JWT token to use if using a custom JWT provider.</param>
         /// <returns>A new instance of the <see cref="AuthOptions"/> class.</returns>
-        public AuthOptions(AuthProvider authProvider, string jwtToken = null, string encryptionKey = null)
+        public AuthOptions(AuthProvider authProvider, string jwt = null, string encryptionKey = null)
         {
             this.authProvider = authProvider;
-            this.jwtToken = jwtToken;
-            this.encryptionKey = encryptionKey;
+            this.jwt = jwt;
         }
     }
 

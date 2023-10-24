@@ -43,7 +43,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions)
+        public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions, string password = null)
         {
             var config = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
             _customScheme = config != null ? config.customScheme : null;
@@ -59,6 +59,21 @@ namespace Thirdweb.Wallets
             SubmitButton.onClick.RemoveAllListeners();
             EmbeddedWalletCanvas.SetActive(false);
 
+            try
+            {
+                _user = await _embeddedWallet.GetUserAsync(email);
+            }
+            catch (Exception e)
+            {
+                ThirdwebDebug.Log($"Could not recreate user automatically, proceeding with auth: {e}");
+            }
+
+            if (_user != null)
+            {
+                ThirdwebDebug.Log($"Logged In Existing User - Email: {_user.EmailAddress}, User Address: {_user.Account.Address}");
+                return _user;
+            }
+
             if (authOptions?.authProvider == AuthProvider.EmailOTP)
             {
                 return await LoginWithOTP();
@@ -69,7 +84,7 @@ namespace Thirdweb.Wallets
             }
             else if (authOptions?.authProvider == AuthProvider.CustomJwt)
             {
-                return await LoginWithCustomJwt(authOptions.jwtToken, authOptions.encryptionKey);
+                return await LoginWithCustomJwt(authOptions.jwt, password);
             }
             else
             {
@@ -103,8 +118,8 @@ namespace Thirdweb.Wallets
         {
             try
             {
-                (bool isNewUser, bool isNewDevice) = await _embeddedWallet.SendOtpEmailAsync(_email);
-                RecoveryInput.gameObject.SetActive(!_embeddedWallet.IsManagedRecovery && !isNewUser && isNewDevice);
+                (bool isNewUser, bool isNewDevice, bool needsRecoveryCode) = await _embeddedWallet.SendOtpEmailAsync(_email);
+                RecoveryInput.gameObject.SetActive(needsRecoveryCode && !isNewUser && isNewDevice);
                 ThirdwebDebug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
             }
             catch (System.Exception e)
@@ -122,6 +137,13 @@ namespace Thirdweb.Wallets
                 string otp = OTPInput.text;
                 var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
                 _user = res.User;
+                if (res.BackupRecoveryCodes != null)
+                {
+                    ThirdwebDebug.Log($"Backup recovery codes: {JsonConvert.SerializeObject(res.BackupRecoveryCodes)}");
+                    GUIUtility.systemCopyBuffer = JsonConvert.SerializeObject(res.BackupRecoveryCodes);
+                    ThirdwebDebug.Log($"Copied recovery codes to clipboard!");
+                }
+
                 ThirdwebDebug.Log($"finished validating OTP:  EmailAddress {_user.EmailAddress}, Address {_user.Account.Address}");
             }
             catch (System.Exception e)
@@ -168,25 +190,13 @@ namespace Thirdweb.Wallets
             var queryDict = HttpUtility.ParseQueryString(queryString);
             string authResultJson = queryDict["authResult"];
             var user = await _embeddedWallet.SignInWithGoogleAsync(authResultJson);
-            ThirdwebDebug.Log($"User Email: {user.EmailAddress}, User Address: {user.Account.Address}");
             return user;
         }
 
         private async Task<string> GetLoginLink()
         {
-            string platform = UnityWebRequest.EscapeURL("unity");
-            string authProvider = UnityWebRequest.EscapeURL("Google");
-            string baseUrl = UnityWebRequest.EscapeURL("https://embedded-wallet.thirdweb.com");
-            string url = $"https://embedded-wallet.thirdweb.com/api/2023-10-20/embedded-wallet/headless-oauth-login-link?platform={platform}&authProvider={authProvider}&baseUrl={baseUrl}";
-
-            using UnityWebRequest req = UnityWebRequest.Get(url);
-            await req.SendWebRequest();
-
-            if (req.result != UnityWebRequest.Result.Success)
-                throw new UnityException("Failed to get login link");
-
-            string loginUrl = JsonConvert.DeserializeObject<JObject>(req.downloadHandler.text)["platformLoginLink"].ToString();
-            Debug.Log($"Login URL: {loginUrl}");
+            string loginUrl = await _embeddedWallet.FetchHeadlessOauthLoginLinkAsync("Google");
+            string platform = "unity";
             string redirectUrl = UnityWebRequest.EscapeURL(Application.isMobilePlatform ? _customScheme : "http://localhost:8789/");
             string developerClientId = UnityWebRequest.EscapeURL(ThirdwebManager.Instance.SDK.session.Options.clientId);
             return $"{loginUrl}?platform={platform}&redirectUrl={redirectUrl}&developerClientId={developerClientId}";
