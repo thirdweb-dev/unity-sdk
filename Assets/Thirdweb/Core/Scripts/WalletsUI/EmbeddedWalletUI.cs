@@ -8,19 +8,18 @@ using Thirdweb.Browser;
 using System.Web;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
-using Newtonsoft.Json.Linq;
 using System;
 
 namespace Thirdweb.Wallets
 {
     public class EmbeddedWalletUI : MonoBehaviour
     {
+        #region Variables
+
         public GameObject EmbeddedWalletCanvas;
         public TMP_InputField OTPInput;
         public TMP_InputField RecoveryInput;
         public Button SubmitButton;
-
-        public static EmbeddedWalletUI Instance { get; private set; }
 
         private EmbeddedWallet _embeddedWallet;
         private string _email;
@@ -28,6 +27,12 @@ namespace Thirdweb.Wallets
         private Exception _exception;
         private string _callbackUrl;
         private string _customScheme;
+
+        #endregion
+
+        #region Initialization
+
+        public static EmbeddedWalletUI Instance { get; private set; }
 
         private void Awake()
         {
@@ -43,7 +48,11 @@ namespace Thirdweb.Wallets
             }
         }
 
-        public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions, string password = null)
+        #endregion
+
+        #region Connection Flow
+
+        public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions)
         {
             var config = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
             _customScheme = config != null ? config.customScheme : null;
@@ -74,21 +83,16 @@ namespace Thirdweb.Wallets
                 return _user;
             }
 
-            if (authOptions?.authProvider == AuthProvider.EmailOTP)
+            switch (authOptions.authProvider)
             {
-                return await LoginWithOTP();
-            }
-            else if (authOptions?.authProvider == AuthProvider.Google)
-            {
-                return await LoginWithGoogle();
-            }
-            else if (authOptions?.authProvider == AuthProvider.CustomJwt)
-            {
-                return await LoginWithCustomJwt(authOptions.jwt, password);
-            }
-            else
-            {
-                throw new UnityException($"Unsupported auth provider: {authOptions?.authProvider}");
+                case AuthProvider.EmailOTP:
+                    return await LoginWithOTP();
+                case AuthProvider.Google:
+                    return await LoginWithGoogle();
+                case AuthProvider.CustomJwt:
+                    return await LoginWithCustomJwt(authOptions.jwt);
+                default:
+                    throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}");
             }
         }
 
@@ -97,7 +101,9 @@ namespace Thirdweb.Wallets
             _exception = new UnityException("User cancelled");
         }
 
-        // Default flow
+        #endregion
+
+        #region Email OTP Flow
 
         private async Task<User> LoginWithOTP()
         {
@@ -146,7 +152,7 @@ namespace Thirdweb.Wallets
 
                 ThirdwebDebug.Log($"finished validating OTP:  EmailAddress {_user.EmailAddress}, Address {_user.Account.Address}");
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 _exception = e;
             }
@@ -157,7 +163,9 @@ namespace Thirdweb.Wallets
             }
         }
 
-        // Google flow
+        #endregion
+
+        #region OAuth2 Flow
 
         private async Task<User> LoginWithGoogle()
         {
@@ -193,20 +201,24 @@ namespace Thirdweb.Wallets
             return user;
         }
 
-        private async Task<string> GetLoginLink()
+        private async Task<string> GetLoginLink(string authProvider = "Google")
         {
-            string loginUrl = await _embeddedWallet.FetchHeadlessOauthLoginLinkAsync("Google");
+            string loginUrl = await _embeddedWallet.FetchHeadlessOauthLoginLinkAsync(authProvider);
             string platform = "unity";
             string redirectUrl = UnityWebRequest.EscapeURL(Application.isMobilePlatform ? _customScheme : "http://localhost:8789/");
             string developerClientId = UnityWebRequest.EscapeURL(ThirdwebManager.Instance.SDK.session.Options.clientId);
             return $"{loginUrl}?platform={platform}&redirectUrl={redirectUrl}&developerClientId={developerClientId}";
         }
 
-        // Custom auth flow
+        #endregion
 
-        private async Task<User> LoginWithCustomJwt(string jwtToken, string encryptionKey)
+        #region Custom JWT Flow
+
+        private async Task<User> LoginWithCustomJwt(string jwtToken)
         {
-            return await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken, encryptionKey);
+            return await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken);
         }
+
+        #endregion
     }
 }

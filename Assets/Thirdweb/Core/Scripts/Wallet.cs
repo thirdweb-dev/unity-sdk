@@ -529,7 +529,7 @@ namespace Thirdweb
         /// </summary>
         /// <param name="provider">The wallet provider to connect to.</param>
         /// <param name="chainId">The chain ID.</param>
-        /// <param name="password">Optional encryption password if wallet recovery is user-managed.</param>
+        /// <param name="password">Optional wallet encryption password</param>
         /// <param name="email">The email to login with if using email based providers.</param>
         /// <param name="personalWallet">The personal wallet provider if using smart wallets.</param>
         /// <param name="authOptions">The authentication options if using embedded wallets.</param>
