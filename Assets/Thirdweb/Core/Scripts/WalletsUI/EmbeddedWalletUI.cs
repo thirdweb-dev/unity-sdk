@@ -9,6 +9,8 @@ using System.Web;
 using Newtonsoft.Json;
 using UnityEngine.Networking;
 using System;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Thirdweb.Wallets
 {
@@ -20,6 +22,9 @@ namespace Thirdweb.Wallets
         public TMP_InputField OTPInput;
         public TMP_InputField RecoveryInput;
         public Button SubmitButton;
+        public GameObject RecoveryCodesCanvas;
+        public TMP_Text RecoveryCodesText;
+        public Button RecoveryCodesCopy;
 
         private EmbeddedWallet _embeddedWallet;
         private string _email;
@@ -67,21 +72,7 @@ namespace Thirdweb.Wallets
             RecoveryInput.gameObject.SetActive(false);
             SubmitButton.onClick.RemoveAllListeners();
             EmbeddedWalletCanvas.SetActive(false);
-
-            try
-            {
-                _user = await _embeddedWallet.GetUserAsync(email);
-            }
-            catch (Exception e)
-            {
-                ThirdwebDebug.Log($"Could not recreate user automatically, proceeding with auth: {e}");
-            }
-
-            if (_user != null)
-            {
-                ThirdwebDebug.Log($"Logged In Existing User - Email: {_user.EmailAddress}, User Address: {_user.Account.Address}");
-                return _user;
-            }
+            RecoveryCodesCanvas.SetActive(false);
 
             switch (authOptions.authProvider)
             {
@@ -89,8 +80,8 @@ namespace Thirdweb.Wallets
                     return await LoginWithOTP();
                 case AuthProvider.Google:
                     return await LoginWithGoogle();
-                case AuthProvider.CustomJwt:
-                    return await LoginWithCustomJwt(authOptions.jwt);
+                case AuthProvider.CustomAuth:
+                    return await LoginWithCustomJwt(authOptions.authToken);
                 default:
                     throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}");
             }
@@ -109,6 +100,21 @@ namespace Thirdweb.Wallets
         {
             if (_email == null)
                 throw new UnityException("Email is required for OTP login");
+
+            try
+            {
+                _user = await _embeddedWallet.GetUserAsync(_email);
+            }
+            catch (Exception e)
+            {
+                ThirdwebDebug.Log($"Could not recreate user automatically, proceeding with auth: {e}");
+            }
+
+            if (_user != null)
+            {
+                ThirdwebDebug.Log($"Logged In Existing User - Email: {_user.EmailAddress}, User Address: {_user.Account.Address}");
+                return _user;
+            }
 
             SubmitButton.onClick.AddListener(OnSubmitOTP);
             await OnSendOTP();
@@ -137,20 +143,20 @@ namespace Thirdweb.Wallets
         private async void OnSubmitOTP()
         {
             OTPInput.interactable = false;
+            RecoveryInput.interactable = false;
             SubmitButton.interactable = false;
             try
             {
                 string otp = OTPInput.text;
                 var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
                 _user = res.User;
-                if (res.BackupRecoveryCodes != null)
+                if (res.MainRecoveryCode != null)
                 {
-                    ThirdwebDebug.Log($"Backup recovery codes: {JsonConvert.SerializeObject(res.BackupRecoveryCodes)}");
-                    GUIUtility.systemCopyBuffer = JsonConvert.SerializeObject(res.BackupRecoveryCodes);
-                    ThirdwebDebug.Log($"Copied recovery codes to clipboard!");
+                    List<string> recoveryCodes = new() { res.MainRecoveryCode };
+                    if (res.BackupRecoveryCodes != null)
+                        recoveryCodes.AddRange(res.BackupRecoveryCodes);
+                    ShowRecoveryCodes(recoveryCodes);
                 }
-
-                ThirdwebDebug.Log($"finished validating OTP:  EmailAddress {_user.EmailAddress}, Address {_user.Account.Address}");
             }
             catch (Exception e)
             {
@@ -159,8 +165,21 @@ namespace Thirdweb.Wallets
             finally
             {
                 OTPInput.interactable = true;
+                RecoveryInput.interactable = true;
                 SubmitButton.interactable = true;
             }
+        }
+
+        private void ShowRecoveryCodes(List<string> recoveryCodes)
+        {
+            string recoveryCodesString = string.Join("\n", recoveryCodes.Select((code, i) => $"{i + 1}. {code}"));
+            string message = $"Please save the following recovery codes in a safe place:\n\n{recoveryCodesString}";
+            ThirdwebDebug.Log(message);
+            RecoveryCodesText.text = message;
+            string messageToSave = JsonConvert.SerializeObject(recoveryCodes);
+            RecoveryCodesCopy.onClick.RemoveAllListeners();
+            RecoveryCodesCopy.onClick.AddListener(() => GUIUtility.systemCopyBuffer = messageToSave);
+            RecoveryCodesCanvas.SetActive(true);
         }
 
         #endregion

@@ -548,7 +548,7 @@ namespace Thirdweb
             this.password = password;
             this.email = email;
             this.personalWallet = personalWallet;
-            this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.EmailOTP, jwt: null, encryptionKey: null);
+            this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.EmailOTP, authToken: null);
         }
     }
 
@@ -559,18 +559,18 @@ namespace Thirdweb
     public class AuthOptions
     {
         public AuthProvider authProvider;
-        public string jwt;
+        public string authToken;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthOptions"/> class with the specified parameters.
         /// </summary>
         /// <param name="authProvider">The authentication provider to use.</param>
-        /// <param name="jwt">The JWT token to use if using a custom JWT provider.</param>
+        /// <param name="authToken">The auth token to use for validation e.g. jwt</param>
         /// <returns>A new instance of the <see cref="AuthOptions"/> class.</returns>
-        public AuthOptions(AuthProvider authProvider, string jwt = null, string encryptionKey = null)
+        public AuthOptions(AuthProvider authProvider, string authToken = null)
         {
             this.authProvider = authProvider;
-            this.jwt = jwt;
+            this.authToken = authToken;
         }
     }
 
@@ -607,8 +607,8 @@ namespace Thirdweb
         Google,
 
         /// <summary>
-        /// Bring your own auth. Custom JWT flow, requires a JWT token and encryption key.
+        /// Bring your own auth.
         /// </summary>
-        CustomJwt
+        CustomAuth
     }
 }

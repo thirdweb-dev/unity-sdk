@@ -269,7 +269,7 @@ namespace Thirdweb.Examples
                         password,
                         email,
                         personalWallet,
-                        new AuthOptions(authProvider: useGoogle ? AuthProvider.Google : AuthProvider.EmailOTP, jwt: null, encryptionKey: null)
+                        new AuthOptions(authProvider: useGoogle ? AuthProvider.Google : AuthProvider.EmailOTP, authToken: null)
                     )
                 );
                 LoadingPanel.SetActive(false);
