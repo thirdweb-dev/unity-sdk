@@ -6105,7 +6105,7 @@ MonoBehaviour:
     - objectToShow: {fileID: 7867051632074200907}
       connectButton: {fileID: 1571991665878368157}
       emailInput: {fileID: 1659905533252778070}
-      sprite: {fileID: 21300000, guid: db8ba9cab203b1e459eceb66e03f1106, type: 3}
+      sprite: {fileID: 21300000, guid: befd990ebc2430f45adb782bee875bf7, type: 3}
     - objectToShow: {fileID: 205585819}
       connectButton: {fileID: 205585821}
       emailInput: {fileID: 0}
