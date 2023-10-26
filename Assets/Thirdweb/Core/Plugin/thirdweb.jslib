@@ -58,7 +58,7 @@ var plugin = {
     password,
     email,
     personalWallet,
-    useGoogle,
+    authOptions,
     cb
   ) {
     // convert taskId from pointer to str and allocate it to keep in memory
@@ -74,7 +74,7 @@ var plugin = {
         UTF8ToString(password),
         UTF8ToString(email),
         UTF8ToString(personalWallet),
-        UTF8ToString(useGoogle)
+        UTF8ToString(authOptions)
       )
       .then((address) => {
         if (address) {

@@ -76,11 +76,6 @@ namespace Thirdweb
             public string[] appIcons;
 
             /// <summary>
-            /// The API key for Magic Link authentication.
-            /// </summary>
-            public string magicLinkApiKey;
-
-            /// <summary>
             /// The project ID for WalletConnect authentication.
             /// </summary>
             public string walletConnectProjectId;
@@ -89,11 +84,6 @@ namespace Thirdweb
             /// Wallets to display in the WC modal (https://walletconnect.com/explorer)
             /// </summary>
             public string[] walletConnectExplorerRecommendedWalletIds;
-
-            /// <summary>
-            /// The client ID for Paper authentication.
-            /// </summary>
-            public string paperClientId;
 
             /// <summary>
             /// When using OAuth2 (e.g. Google) to login on mobile, you can provide a redirect URL such as 'myapp://'.
@@ -243,7 +233,7 @@ namespace Thirdweb
 
         public ThirdwebSession session;
 
-        internal const string version = "3.4.0";
+        internal const string version = "4.0.0";
 
         /// <summary>
         /// Create an instance of the Thirdweb SDK.

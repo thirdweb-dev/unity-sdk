@@ -10,7 +10,6 @@ using Nethereum.ABI.EIP712;
 using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
-using Nethereum.Web3;
 
 namespace Thirdweb
 {
@@ -515,35 +514,33 @@ namespace Thirdweb
     /// <summary>
     /// Represents the connection details for a wallet.
     /// </summary>
+    [System.Serializable]
     public class WalletConnection
     {
         public WalletProvider provider;
-
         public BigInteger chainId;
-
         public string password;
-
         public string email;
-
         public WalletProvider personalWallet;
-
-        public bool useGoogle;
+        public AuthOptions authOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WalletConnection"/> class with the specified parameters.
         /// </summary>
         /// <param name="provider">The wallet provider to connect to.</param>
         /// <param name="chainId">The chain ID.</param>
-        /// <param name="password">The wallet password if using local wallets.</param>
+        /// <param name="password">Optional wallet encryption password</param>
         /// <param name="email">The email to login with if using email based providers.</param>
         /// <param name="personalWallet">The personal wallet provider if using smart wallets.</param>
+        /// <param name="authOptions">The authentication options if using embedded wallets.</param>
+        /// <returns>A new instance of the <see cref="WalletConnection"/> class.</returns>
         public WalletConnection(
             WalletProvider provider,
             BigInteger chainId,
             string password = null,
             string email = null,
             WalletProvider personalWallet = WalletProvider.LocalWallet,
-            bool useGoogle = false
+            AuthOptions authOptions = null
         )
         {
             this.provider = provider;
@@ -551,7 +548,29 @@ namespace Thirdweb
             this.password = password;
             this.email = email;
             this.personalWallet = personalWallet;
-            this.useGoogle = useGoogle;
+            this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.EmailOTP, authToken: null);
+        }
+    }
+
+    /// <summary>
+    /// Embedded Wallet Authentication Options.
+    /// </summary>
+    [System.Serializable]
+    public class AuthOptions
+    {
+        public AuthProvider authProvider;
+        public string authToken;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthOptions"/> class with the specified parameters.
+        /// </summary>
+        /// <param name="authProvider">The authentication provider to use.</param>
+        /// <param name="authToken">The auth token to use for validation e.g. jwt</param>
+        /// <returns>A new instance of the <see cref="AuthOptions"/> class.</returns>
+        public AuthOptions(AuthProvider authProvider, string authToken = null)
+        {
+            this.authProvider = authProvider;
+            this.authToken = authToken;
         }
     }
 
@@ -565,11 +584,31 @@ namespace Thirdweb
         Coinbase,
         WalletConnect,
         Injected,
-        MagicLink,
         LocalWallet,
         SmartWallet,
-        Paper,
         Hyperplay,
         EmbeddedWallet
+    }
+
+    /// <summary>
+    /// Represents the available auth providers for Embedded Wallet.
+    /// </summary>
+    [System.Serializable]
+    public enum AuthProvider
+    {
+        /// <summary>
+        /// Email OTP Flow.
+        /// </summary>
+        EmailOTP,
+
+        /// <summary>
+        /// Google OAuth2 Flow.
+        /// </summary>
+        Google,
+
+        /// <summary>
+        /// Bring your own auth.
+        /// </summary>
+        CustomAuth
     }
 }

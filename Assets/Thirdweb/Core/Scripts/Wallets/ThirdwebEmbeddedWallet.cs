@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Paper;
+using Thirdweb.EWS;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
@@ -32,7 +32,7 @@ namespace Thirdweb.Wallets
                 GameObject.Instantiate(ThirdwebManager.Instance.EmbeddedWalletPrefab);
             }
 
-            _account = (await EmbeddedWalletUI.Instance.Connect(_embeddedWallet, walletConnection.email, walletConnection.useGoogle)).Account;
+            _account = (await EmbeddedWalletUI.Instance.Connect(_embeddedWallet, walletConnection.email, walletConnection.authOptions)).Account;
             _web3 = new Web3(_account, rpc);
 
             return await GetAddress();

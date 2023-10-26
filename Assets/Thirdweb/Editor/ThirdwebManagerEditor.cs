@@ -23,10 +23,8 @@ namespace Thirdweb
         private SerializedProperty forwarderAddressProperty;
         private SerializedProperty forwarderDomainOverrideProperty;
         private SerializedProperty forwaderVersionOverrideProperty;
-        private SerializedProperty magicLinkApiKeyProperty;
         private SerializedProperty walletConnectProjectIdProperty;
         private SerializedProperty walletConnectExplorerRecommendedWalletIdsProperty;
-        private SerializedProperty paperClientIdProperty;
         private SerializedProperty factoryAddressProperty;
         private SerializedProperty gaslessProperty;
         private SerializedProperty bundlerUrlProperty;
@@ -34,7 +32,6 @@ namespace Thirdweb
         private SerializedProperty entryPointAddressProperty;
         private SerializedProperty WalletConnectPrefabProperty;
         private SerializedProperty MetamaskPrefabProperty;
-        private SerializedProperty PaperPrefabProperty;
         private SerializedProperty EmbeddedWalletPrefabProperty;
 
         private ReorderableList supportedChainsList;
@@ -46,7 +43,7 @@ namespace Thirdweb
         private GUIContent warningIcon;
         private Texture2D bannerImage;
 
-        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_3.4.0";
+        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_4.0.0";
 
         private void OnEnable()
         {
@@ -66,10 +63,8 @@ namespace Thirdweb
             forwarderAddressProperty = serializedObject.FindProperty("forwarderAddress");
             forwarderDomainOverrideProperty = serializedObject.FindProperty("forwarderDomainOverride");
             forwaderVersionOverrideProperty = serializedObject.FindProperty("forwaderVersionOverride");
-            magicLinkApiKeyProperty = serializedObject.FindProperty("magicLinkApiKey");
             walletConnectProjectIdProperty = serializedObject.FindProperty("walletConnectProjectId");
             walletConnectExplorerRecommendedWalletIdsProperty = serializedObject.FindProperty("walletConnectExplorerRecommendedWalletIds");
-            paperClientIdProperty = serializedObject.FindProperty("paperClientId");
             factoryAddressProperty = serializedObject.FindProperty("factoryAddress");
             gaslessProperty = serializedObject.FindProperty("gasless");
             bundlerUrlProperty = serializedObject.FindProperty("bundlerUrl");
@@ -77,7 +72,6 @@ namespace Thirdweb
             entryPointAddressProperty = serializedObject.FindProperty("entryPointAddress");
             WalletConnectPrefabProperty = serializedObject.FindProperty("WalletConnectPrefab");
             MetamaskPrefabProperty = serializedObject.FindProperty("MetamaskPrefab");
-            PaperPrefabProperty = serializedObject.FindProperty("PaperPrefab");
             EmbeddedWalletPrefabProperty = serializedObject.FindProperty("EmbeddedWalletPrefab");
 
             supportedChainsList = new ReorderableList(serializedObject, supportedChainsProperty, true, true, true, true);
@@ -276,24 +270,10 @@ namespace Thirdweb
 
             EditorGUILayout.Space();
 
-            // Magic Link Options
-            sectionExpanded[4] = DrawSectionWithExpand(
-                "Magic Link Options",
-                sectionExpanded[4],
-                () =>
-                {
-                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                    EditorGUILayout.PropertyField(magicLinkApiKeyProperty);
-                    EditorGUILayout.EndVertical();
-                }
-            );
-
-            EditorGUILayout.Space();
-
             // Wallet Connect Options
-            sectionExpanded[5] = DrawSectionWithExpand(
+            sectionExpanded[4] = DrawSectionWithExpand(
                 "Wallet Connect Options",
-                sectionExpanded[5],
+                sectionExpanded[4],
                 () =>
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -305,24 +285,10 @@ namespace Thirdweb
 
             EditorGUILayout.Space();
 
-            // Paper Options
-            sectionExpanded[6] = DrawSectionWithExpand(
-                "Paper Options",
-                sectionExpanded[6],
-                () =>
-                {
-                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                    EditorGUILayout.PropertyField(paperClientIdProperty);
-                    EditorGUILayout.EndVertical();
-                }
-            );
-
-            EditorGUILayout.Space();
-
             // Smart Wallet Options
-            sectionExpanded[7] = DrawSectionWithExpand(
+            sectionExpanded[5] = DrawSectionWithExpand(
                 "Smart Wallet Options",
-                sectionExpanded[7],
+                sectionExpanded[5],
                 () =>
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -381,7 +347,6 @@ namespace Thirdweb
                     {
                         EditorGUILayout.PropertyField(WalletConnectPrefabProperty);
                         EditorGUILayout.PropertyField(MetamaskPrefabProperty);
-                        EditorGUILayout.PropertyField(PaperPrefabProperty);
                         EditorGUILayout.PropertyField(EmbeddedWalletPrefabProperty);
                     }
 
@@ -457,7 +422,7 @@ namespace Thirdweb
             }
             else
             {
-                var states = new bool[8];
+                var states = new bool[6];
                 states[0] = true;
                 return states;
             }

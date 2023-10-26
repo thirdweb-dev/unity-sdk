@@ -88,17 +88,11 @@ namespace Thirdweb
         [Tooltip("Forwarder Version (Defaults to 0.0.1 if left empty)")]
         public string forwaderVersionOverride = null;
 
-        [Tooltip("Magic Link API Key (https://dashboard.magic.link)")]
-        public string magicLinkApiKey = null;
-
         [Tooltip("WalletConnect Project ID (https://cloud.walletconnect.com/app)")]
         public string walletConnectProjectId = null;
 
         [Tooltip("Wallets to show in the WalletConnect Modal (https://walletconnect.com/explorer)")]
         public string[] walletConnectExplorerRecommendedWalletIds = new string[] { };
-
-        [Tooltip("Paper Client ID (https://withpaper.com/dashboard)")]
-        public string paperClientId = null;
 
         [Tooltip("Factory Contract Address")]
         public string factoryAddress;
@@ -120,9 +114,6 @@ namespace Thirdweb
 
         [Tooltip("Instantiates the Metamask SDK for Native platforms.")]
         public GameObject MetamaskPrefab;
-
-        [Tooltip("Instantiates the Paper SDK for Native platforms.")]
-        public GameObject PaperPrefab;
 
         [Tooltip("Instantiates the EmbeddedWallet SDK for Native platforms.")]
         public GameObject EmbeddedWalletPrefab;
@@ -234,7 +225,6 @@ namespace Thirdweb
                 appDescription = string.IsNullOrEmpty(appDescription) ? "thirdweb powered dApp" : appDescription,
                 appIcons = (appIcons == null || appIcons.Length == 0 || string.IsNullOrEmpty(appIcons[0])) ? new string[] { "https://thirdweb.com/favicon.ico" } : appIcons,
                 appUrl = string.IsNullOrEmpty(appUrl) ? "https://thirdweb.com" : appUrl,
-                magicLinkApiKey = string.IsNullOrEmpty(magicLinkApiKey) ? null : magicLinkApiKey,
                 walletConnectProjectId = string.IsNullOrEmpty(walletConnectProjectId) ? "145769e410f16970a79ff77b2d89a1e0" : walletConnectProjectId,
                 walletConnectExplorerRecommendedWalletIds =
                     (walletConnectExplorerRecommendedWalletIds == null || walletConnectExplorerRecommendedWalletIds.Length == 0 || string.IsNullOrEmpty(walletConnectExplorerRecommendedWalletIds[0]))
@@ -283,7 +273,6 @@ namespace Thirdweb
                             "b956da9052132e3dabdcd78feb596d5194c99b7345d8c4bd7a47cabdcb69a25f", // abc wallet
                         }
                         : walletConnectExplorerRecommendedWalletIds,
-                paperClientId = string.IsNullOrEmpty(paperClientId) ? null : paperClientId,
                 customScheme = string.IsNullOrEmpty(thirdwebConfig.customScheme) ? null : thirdwebConfig.customScheme,
             };
 
