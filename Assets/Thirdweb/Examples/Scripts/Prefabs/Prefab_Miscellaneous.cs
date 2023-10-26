@@ -102,18 +102,17 @@ namespace Thirdweb.Examples
             }
         }
 
-        public async void Deploy()
+        public async void Sign()
         {
             try
             {
-                string address = await ThirdwebManager.Instance.SDK.deployer.DeployNFTCollection(
-                    new NFTContractDeployMetadata { name = "Unity Collection", primary_sale_recipient = await ThirdwebManager.Instance.SDK.wallet.GetAddress(), }
-                );
-                Debugger.Instance.Log("[Deploy] Successful", $"Address: {address}");
+                string message = "Hello World";
+                string sig = await ThirdwebManager.Instance.SDK.wallet.Sign(message);
+                Debugger.Instance.Log("[Sign] Successful", $"Signature: {sig}");
             }
             catch (System.Exception e)
             {
-                Debugger.Instance.Log("[Deploy] Error", e.Message);
+                Debugger.Instance.Log("[Sign] Error", e.Message);
             }
         }
 
