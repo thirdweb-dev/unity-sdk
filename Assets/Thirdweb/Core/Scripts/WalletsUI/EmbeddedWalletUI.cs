@@ -148,9 +148,9 @@ namespace Thirdweb.Wallets
             try
             {
                 string otp = OTPInput.text;
-                var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
+                (var res, bool? wasEmailed) = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
                 _user = res.User;
-                if (res.MainRecoveryCode != null)
+                if (res.MainRecoveryCode != null && wasEmailed.HasValue && wasEmailed.Value == false)
                 {
                     List<string> recoveryCodes = new() { res.MainRecoveryCode };
                     if (res.BackupRecoveryCodes != null)
@@ -235,7 +235,14 @@ namespace Thirdweb.Wallets
 
         private async Task<User> LoginWithCustomJwt(string jwtToken)
         {
-            return await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken);
+            try
+            {
+                return await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken);
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         #endregion
