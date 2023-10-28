@@ -28,9 +28,7 @@ PluginImporter:
       Android: Android
     second:
       enabled: 1
-      settings:
-        AndroidSharedLibraryType: Executable
-        CPU: ARMv7
+      settings: {}
   - first:
       Any: 
     second:
@@ -83,11 +81,7 @@ PluginImporter:
       iPhone: iOS
     second:
       enabled: 1
-      settings:
-        AddToEmbeddedBinaries: false
-        CPU: AnyCPU
-        CompileFlags: 
-        FrameworkDependencies: 
+      settings: {}
   userData: 
   assetBundleName: 
   assetBundleVariant: 
