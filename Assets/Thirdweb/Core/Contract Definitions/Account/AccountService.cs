@@ -72,34 +72,6 @@ namespace Thirdweb.Contracts.Account
             return ContractHandler.SendRequestAndWaitForReceiptAsync<AddDepositFunction>(null, cancellationToken);
         }
 
-        public Task<string> ChangeRoleRequestAsync(ChangeRoleFunction changeRoleFunction)
-        {
-            return ContractHandler.SendRequestAsync(changeRoleFunction);
-        }
-
-        public Task<TransactionReceipt> ChangeRoleRequestAndWaitForReceiptAsync(ChangeRoleFunction changeRoleFunction, CancellationTokenSource cancellationToken = null)
-        {
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(changeRoleFunction, cancellationToken);
-        }
-
-        public Task<string> ChangeRoleRequestAsync(RoleRequest req, byte[] signature)
-        {
-            var changeRoleFunction = new ChangeRoleFunction();
-            changeRoleFunction.Req = req;
-            changeRoleFunction.Signature = signature;
-
-            return ContractHandler.SendRequestAsync(changeRoleFunction);
-        }
-
-        public Task<TransactionReceipt> ChangeRoleRequestAndWaitForReceiptAsync(RoleRequest req, byte[] signature, CancellationTokenSource cancellationToken = null)
-        {
-            var changeRoleFunction = new ChangeRoleFunction();
-            changeRoleFunction.Req = req;
-            changeRoleFunction.Signature = signature;
-
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(changeRoleFunction, cancellationToken);
-        }
-
         public Task<string> ContractURIQueryAsync(ContractURIFunction contractURIFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<ContractURIFunction, string>(contractURIFunction, blockParameter);
@@ -190,27 +162,34 @@ namespace Thirdweb.Contracts.Account
             return ContractHandler.QueryAsync<FactoryFunction, string>(null, blockParameter);
         }
 
-        public Task<List<string>> GetAllRoleMembersQueryAsync(GetAllRoleMembersFunction getAllRoleMembersFunction, BlockParameter blockParameter = null)
+        public Task<GetAllActiveSignersOutputDTO> GetAllActiveSignersQueryAsync(GetAllActiveSignersFunction getAllActiveSignersFunction, BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryAsync<GetAllRoleMembersFunction, List<string>>(getAllRoleMembersFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<GetAllActiveSignersFunction, GetAllActiveSignersOutputDTO>(getAllActiveSignersFunction, blockParameter);
         }
 
-        public Task<List<string>> GetAllRoleMembersQueryAsync(byte[] role, BlockParameter blockParameter = null)
+        public Task<GetAllActiveSignersOutputDTO> GetAllActiveSignersQueryAsync(BlockParameter blockParameter = null)
         {
-            var getAllRoleMembersFunction = new GetAllRoleMembersFunction();
-            getAllRoleMembersFunction.Role = role;
-
-            return ContractHandler.QueryAsync<GetAllRoleMembersFunction, List<string>>(getAllRoleMembersFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<GetAllActiveSignersFunction, GetAllActiveSignersOutputDTO>(null, blockParameter);
         }
 
-        public Task<BigInteger> GetDepositQueryAsync(GetDepositFunction getDepositFunction, BlockParameter blockParameter = null)
+        public Task<List<string>> GetAllAdminsQueryAsync(GetAllAdminsFunction getAllAdminsFunction, BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryAsync<GetDepositFunction, BigInteger>(getDepositFunction, blockParameter);
+            return ContractHandler.QueryAsync<GetAllAdminsFunction, List<string>>(getAllAdminsFunction, blockParameter);
         }
 
-        public Task<BigInteger> GetDepositQueryAsync(BlockParameter blockParameter = null)
+        public Task<List<string>> GetAllAdminsQueryAsync(BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryAsync<GetDepositFunction, BigInteger>(null, blockParameter);
+            return ContractHandler.QueryAsync<GetAllAdminsFunction, List<string>>(null, blockParameter);
+        }
+
+        public Task<GetAllSignersOutputDTO> GetAllSignersQueryAsync(GetAllSignersFunction getAllSignersFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetAllSignersFunction, GetAllSignersOutputDTO>(getAllSignersFunction, blockParameter);
+        }
+
+        public Task<GetAllSignersOutputDTO> GetAllSignersQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<GetAllSignersFunction, GetAllSignersOutputDTO>(null, blockParameter);
         }
 
         public Task<BigInteger> GetNonceQueryAsync(GetNonceFunction getNonceFunction, BlockParameter blockParameter = null)
@@ -223,39 +202,17 @@ namespace Thirdweb.Contracts.Account
             return ContractHandler.QueryAsync<GetNonceFunction, BigInteger>(null, blockParameter);
         }
 
-        public Task<GetRoleRestrictionsOutputDTO> GetRoleRestrictionsQueryAsync(GetRoleRestrictionsFunction getRoleRestrictionsFunction, BlockParameter blockParameter = null)
+        public Task<GetPermissionsForSignerOutputDTO> GetPermissionsForSignerQueryAsync(GetPermissionsForSignerFunction getPermissionsForSignerFunction, BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<GetRoleRestrictionsFunction, GetRoleRestrictionsOutputDTO>(getRoleRestrictionsFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<GetPermissionsForSignerFunction, GetPermissionsForSignerOutputDTO>(getPermissionsForSignerFunction, blockParameter);
         }
 
-        public Task<GetRoleRestrictionsOutputDTO> GetRoleRestrictionsQueryAsync(byte[] role, BlockParameter blockParameter = null)
+        public Task<GetPermissionsForSignerOutputDTO> GetPermissionsForSignerQueryAsync(string signer, BlockParameter blockParameter = null)
         {
-            var getRoleRestrictionsFunction = new GetRoleRestrictionsFunction();
-            getRoleRestrictionsFunction.Role = role;
+            var getPermissionsForSignerFunction = new GetPermissionsForSignerFunction();
+            getPermissionsForSignerFunction.Signer = signer;
 
-            return ContractHandler.QueryDeserializingToObjectAsync<GetRoleRestrictionsFunction, GetRoleRestrictionsOutputDTO>(getRoleRestrictionsFunction, blockParameter);
-        }
-
-        public Task<GetRoleRestrictionsForAccountOutputDTO> GetRoleRestrictionsForAccountQueryAsync(
-            GetRoleRestrictionsForAccountFunction getRoleRestrictionsForAccountFunction,
-            BlockParameter blockParameter = null
-        )
-        {
-            return ContractHandler.QueryDeserializingToObjectAsync<GetRoleRestrictionsForAccountFunction, GetRoleRestrictionsForAccountOutputDTO>(
-                getRoleRestrictionsForAccountFunction,
-                blockParameter
-            );
-        }
-
-        public Task<GetRoleRestrictionsForAccountOutputDTO> GetRoleRestrictionsForAccountQueryAsync(string account, BlockParameter blockParameter = null)
-        {
-            var getRoleRestrictionsForAccountFunction = new GetRoleRestrictionsForAccountFunction();
-            getRoleRestrictionsForAccountFunction.Account = account;
-
-            return ContractHandler.QueryDeserializingToObjectAsync<GetRoleRestrictionsForAccountFunction, GetRoleRestrictionsForAccountOutputDTO>(
-                getRoleRestrictionsForAccountFunction,
-                blockParameter
-            );
+            return ContractHandler.QueryDeserializingToObjectAsync<GetPermissionsForSignerFunction, GetPermissionsForSignerOutputDTO>(getPermissionsForSignerFunction, blockParameter);
         }
 
         public Task<string> InitializeRequestAsync(InitializeFunction initializeFunction)
@@ -268,22 +225,37 @@ namespace Thirdweb.Contracts.Account
             return ContractHandler.SendRequestAndWaitForReceiptAsync(initializeFunction, cancellationToken);
         }
 
-        public Task<string> InitializeRequestAsync(string defaultAdmin, byte[] returnValue2)
+        public Task<string> InitializeRequestAsync(string defaultAdmin, string factory, byte[] data)
         {
             var initializeFunction = new InitializeFunction();
             initializeFunction.DefaultAdmin = defaultAdmin;
-            initializeFunction.ReturnValue2 = returnValue2;
+            initializeFunction.Factory = factory;
+            initializeFunction.Data = data;
 
             return ContractHandler.SendRequestAsync(initializeFunction);
         }
 
-        public Task<TransactionReceipt> InitializeRequestAndWaitForReceiptAsync(string defaultAdmin, byte[] returnValue2, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> InitializeRequestAndWaitForReceiptAsync(string defaultAdmin, string factory, byte[] data, CancellationTokenSource cancellationToken = null)
         {
             var initializeFunction = new InitializeFunction();
             initializeFunction.DefaultAdmin = defaultAdmin;
-            initializeFunction.ReturnValue2 = returnValue2;
+            initializeFunction.Factory = factory;
+            initializeFunction.Data = data;
 
             return ContractHandler.SendRequestAndWaitForReceiptAsync(initializeFunction, cancellationToken);
+        }
+
+        public Task<bool> IsActiveSignerQueryAsync(IsActiveSignerFunction isActiveSignerFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<IsActiveSignerFunction, bool>(isActiveSignerFunction, blockParameter);
+        }
+
+        public Task<bool> IsActiveSignerQueryAsync(string signer, BlockParameter blockParameter = null)
+        {
+            var isActiveSignerFunction = new IsActiveSignerFunction();
+            isActiveSignerFunction.Signer = signer;
+
+            return ContractHandler.QueryAsync<IsActiveSignerFunction, bool>(isActiveSignerFunction, blockParameter);
         }
 
         public Task<bool> IsAdminQueryAsync(IsAdminFunction isAdminFunction, BlockParameter blockParameter = null)
@@ -476,34 +448,6 @@ namespace Thirdweb.Contracts.Account
             return ContractHandler.SendRequestAndWaitForReceiptAsync(onERC721ReceivedFunction, cancellationToken);
         }
 
-        public Task<string> SetAdminRequestAsync(SetAdminFunction setAdminFunction)
-        {
-            return ContractHandler.SendRequestAsync(setAdminFunction);
-        }
-
-        public Task<TransactionReceipt> SetAdminRequestAndWaitForReceiptAsync(SetAdminFunction setAdminFunction, CancellationTokenSource cancellationToken = null)
-        {
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(setAdminFunction, cancellationToken);
-        }
-
-        public Task<string> SetAdminRequestAsync(string account, bool isAdmin)
-        {
-            var setAdminFunction = new SetAdminFunction();
-            setAdminFunction.Account = account;
-            setAdminFunction.IsAdmin = isAdmin;
-
-            return ContractHandler.SendRequestAsync(setAdminFunction);
-        }
-
-        public Task<TransactionReceipt> SetAdminRequestAndWaitForReceiptAsync(string account, bool isAdmin, CancellationTokenSource cancellationToken = null)
-        {
-            var setAdminFunction = new SetAdminFunction();
-            setAdminFunction.Account = account;
-            setAdminFunction.IsAdmin = isAdmin;
-
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(setAdminFunction, cancellationToken);
-        }
-
         public Task<string> SetContractURIRequestAsync(SetContractURIFunction setContractURIFunction)
         {
             return ContractHandler.SendRequestAsync(setContractURIFunction);
@@ -530,30 +474,64 @@ namespace Thirdweb.Contracts.Account
             return ContractHandler.SendRequestAndWaitForReceiptAsync(setContractURIFunction, cancellationToken);
         }
 
-        public Task<string> SetRoleRestrictionsRequestAsync(SetRoleRestrictionsFunction setRoleRestrictionsFunction)
+        public Task<string> SetEntrypointOverrideRequestAsync(SetEntrypointOverrideFunction setEntrypointOverrideFunction)
         {
-            return ContractHandler.SendRequestAsync(setRoleRestrictionsFunction);
+            return ContractHandler.SendRequestAsync(setEntrypointOverrideFunction);
         }
 
-        public Task<TransactionReceipt> SetRoleRestrictionsRequestAndWaitForReceiptAsync(SetRoleRestrictionsFunction setRoleRestrictionsFunction, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> SetEntrypointOverrideRequestAndWaitForReceiptAsync(
+            SetEntrypointOverrideFunction setEntrypointOverrideFunction,
+            CancellationTokenSource cancellationToken = null
+        )
         {
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(setRoleRestrictionsFunction, cancellationToken);
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(setEntrypointOverrideFunction, cancellationToken);
         }
 
-        public Task<string> SetRoleRestrictionsRequestAsync(RoleRestrictions restrictions)
+        public Task<string> SetEntrypointOverrideRequestAsync(string entrypointOverride)
         {
-            var setRoleRestrictionsFunction = new SetRoleRestrictionsFunction();
-            setRoleRestrictionsFunction.Restrictions = restrictions;
+            var setEntrypointOverrideFunction = new SetEntrypointOverrideFunction();
+            setEntrypointOverrideFunction.EntrypointOverride = entrypointOverride;
 
-            return ContractHandler.SendRequestAsync(setRoleRestrictionsFunction);
+            return ContractHandler.SendRequestAsync(setEntrypointOverrideFunction);
         }
 
-        public Task<TransactionReceipt> SetRoleRestrictionsRequestAndWaitForReceiptAsync(RoleRestrictions restrictions, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> SetEntrypointOverrideRequestAndWaitForReceiptAsync(string entrypointOverride, CancellationTokenSource cancellationToken = null)
         {
-            var setRoleRestrictionsFunction = new SetRoleRestrictionsFunction();
-            setRoleRestrictionsFunction.Restrictions = restrictions;
+            var setEntrypointOverrideFunction = new SetEntrypointOverrideFunction();
+            setEntrypointOverrideFunction.EntrypointOverride = entrypointOverride;
 
-            return ContractHandler.SendRequestAndWaitForReceiptAsync(setRoleRestrictionsFunction, cancellationToken);
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(setEntrypointOverrideFunction, cancellationToken);
+        }
+
+        public Task<string> SetPermissionsForSignerRequestAsync(SetPermissionsForSignerFunction setPermissionsForSignerFunction)
+        {
+            return ContractHandler.SendRequestAsync(setPermissionsForSignerFunction);
+        }
+
+        public Task<TransactionReceipt> SetPermissionsForSignerRequestAndWaitForReceiptAsync(
+            SetPermissionsForSignerFunction setPermissionsForSignerFunction,
+            CancellationTokenSource cancellationToken = null
+        )
+        {
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(setPermissionsForSignerFunction, cancellationToken);
+        }
+
+        public Task<string> SetPermissionsForSignerRequestAsync(SignerPermissionRequest req, byte[] signature)
+        {
+            var setPermissionsForSignerFunction = new SetPermissionsForSignerFunction();
+            setPermissionsForSignerFunction.Req = req;
+            setPermissionsForSignerFunction.Signature = signature;
+
+            return ContractHandler.SendRequestAsync(setPermissionsForSignerFunction);
+        }
+
+        public Task<TransactionReceipt> SetPermissionsForSignerRequestAndWaitForReceiptAsync(SignerPermissionRequest req, byte[] signature, CancellationTokenSource cancellationToken = null)
+        {
+            var setPermissionsForSignerFunction = new SetPermissionsForSignerFunction();
+            setPermissionsForSignerFunction.Req = req;
+            setPermissionsForSignerFunction.Signature = signature;
+
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(setPermissionsForSignerFunction, cancellationToken);
         }
 
         public Task<bool> SupportsInterfaceQueryAsync(SupportsInterfaceFunction supportsInterfaceFunction, BlockParameter blockParameter = null)
@@ -604,18 +582,27 @@ namespace Thirdweb.Contracts.Account
             return ContractHandler.SendRequestAndWaitForReceiptAsync(validateUserOpFunction, cancellationToken);
         }
 
-        public Task<VerifyRoleRequestOutputDTO> VerifyRoleRequestQueryAsync(VerifyRoleRequestFunction verifyRoleRequestFunction, BlockParameter blockParameter = null)
+        public Task<VerifySignerPermissionRequestOutputDTO> VerifySignerPermissionRequestQueryAsync(
+            VerifySignerPermissionRequestFunction verifySignerPermissionRequestFunction,
+            BlockParameter blockParameter = null
+        )
         {
-            return ContractHandler.QueryDeserializingToObjectAsync<VerifyRoleRequestFunction, VerifyRoleRequestOutputDTO>(verifyRoleRequestFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<VerifySignerPermissionRequestFunction, VerifySignerPermissionRequestOutputDTO>(
+                verifySignerPermissionRequestFunction,
+                blockParameter
+            );
         }
 
-        public Task<VerifyRoleRequestOutputDTO> VerifyRoleRequestQueryAsync(RoleRequest req, byte[] signature, BlockParameter blockParameter = null)
+        public Task<VerifySignerPermissionRequestOutputDTO> VerifySignerPermissionRequestQueryAsync(SignerPermissionRequest req, byte[] signature, BlockParameter blockParameter = null)
         {
-            var verifyRoleRequestFunction = new VerifyRoleRequestFunction();
-            verifyRoleRequestFunction.Req = req;
-            verifyRoleRequestFunction.Signature = signature;
+            var verifySignerPermissionRequestFunction = new VerifySignerPermissionRequestFunction();
+            verifySignerPermissionRequestFunction.Req = req;
+            verifySignerPermissionRequestFunction.Signature = signature;
 
-            return ContractHandler.QueryDeserializingToObjectAsync<VerifyRoleRequestFunction, VerifyRoleRequestOutputDTO>(verifyRoleRequestFunction, blockParameter);
+            return ContractHandler.QueryDeserializingToObjectAsync<VerifySignerPermissionRequestFunction, VerifySignerPermissionRequestOutputDTO>(
+                verifySignerPermissionRequestFunction,
+                blockParameter
+            );
         }
 
         public Task<string> WithdrawDepositToRequestAsync(WithdrawDepositToFunction withdrawDepositToFunction)

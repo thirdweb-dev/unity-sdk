@@ -32,7 +32,7 @@ namespace Thirdweb.Wallets
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
         {
             _smartWallet = new SmartWallet(await _personalWallet.GetWeb3(), _config);
-            await _smartWallet.Initialize();
+            await _smartWallet.Initialize(walletConnection.smartWalletAccountOverride);
             _web3 = _smartWallet.CreateWeb3();
             return await GetAddress();
         }

@@ -16,6 +16,7 @@ using Nethereum.Hex.HexConvertors.Extensions;
 using Thirdweb.Redcode.Awaiting;
 using System.Threading;
 using System.Collections.Concurrent;
+using Thirdweb.Contracts.Account.ContractDefinition;
 
 namespace Thirdweb.AccountAbstraction
 {
@@ -70,19 +71,23 @@ namespace Thirdweb.AccountAbstraction
             return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(accounts[0]);
         }
 
-        internal async Task Initialize()
+        internal async Task Initialize(string smartWalletOverride = null)
         {
             if (_initialized)
                 return;
 
             PersonalAddress = await GetPersonalAddress();
 
-            var predictedAccount = await TransactionManager.ThirdwebRead<FactoryContract.GetAddressFunction, FactoryContract.GetAddressOutputDTO>(
-                Config.factoryAddress,
-                new FactoryContract.GetAddressFunction() { AdminSigner = PersonalAddress, Data = new byte[] { } }
-            );
+            var predictedAccount =
+                smartWalletOverride
+                ?? (
+                    await TransactionManager.ThirdwebRead<FactoryContract.GetAddressFunction, FactoryContract.GetAddressOutputDTO>(
+                        Config.factoryAddress,
+                        new FactoryContract.GetAddressFunction() { AdminSigner = PersonalAddress, Data = new byte[] { } }
+                    )
+                ).ReturnValue1;
 
-            Accounts = new List<string>() { predictedAccount.ReturnValue1 };
+            Accounts = new List<string>() { predictedAccount };
 
             await UpdateDeploymentStatus();
 
@@ -97,17 +102,20 @@ namespace Thirdweb.AccountAbstraction
             _deployed = bytecode != "0x";
         }
 
+        internal async Task<TransactionResult> SetPermissionsForSigner(SignerPermissionRequest signerPermissionRequest, byte[] signature)
+        {
+            return await TransactionManager.ThirdwebWrite(Accounts[0], new SetPermissionsForSignerFunction() { Req = signerPermissionRequest, Signature = signature });
+        }
+
         internal async Task ForceDeploy()
         {
             if (_deployed)
                 return;
 
-            _deploying = true;
             var input = new TransactionInput("0x", Accounts[0], new HexBigInteger(0));
             var txHash = await Request(new RpcRequestMessage(1, "eth_sendTransaction", input));
             await Transaction.WaitForTransactionResult(txHash.Result.ToString());
             await UpdateDeploymentStatus();
-            _deploying = false;
         }
 
         internal async Task<bool> VerifySignature(byte[] hash, byte[] signature)
