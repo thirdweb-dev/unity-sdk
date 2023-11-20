@@ -81,6 +81,8 @@ namespace Thirdweb.Wallets
                 {
                     AuthProvider.EmailOTP => "EmailOTP",
                     AuthProvider.Google => "Google",
+                    AuthProvider.Apple => "Apple",
+                    AuthProvider.Facebook => "Facebook",
                     AuthProvider.CustomAuth => "CustomAuth",
                     _ => throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}"),
                 };
@@ -99,7 +101,13 @@ namespace Thirdweb.Wallets
                         await LoginWithOTP();
                         break;
                     case AuthProvider.Google:
-                        await LoginWithGoogle();
+                        await LoginWithOauth("Google");
+                        break;
+                    case AuthProvider.Apple:
+                        await LoginWithOauth("Apple");
+                        break;
+                    case AuthProvider.Facebook:
+                        await LoginWithOauth("Facebook");
                         break;
                     case AuthProvider.CustomAuth:
                         await LoginWithCustomJwt(authOptions.authToken, authOptions.recoveryCode);
@@ -182,18 +190,18 @@ namespace Thirdweb.Wallets
 
         #region OAuth2 Flow
 
-        private async Task LoginWithGoogle()
+        private async Task LoginWithOauth(string authProviderStr)
         {
             if (Application.isMobilePlatform && string.IsNullOrEmpty(_customScheme))
                 throw new UnityException("No custom scheme provided for mobile deeplinks, please set one in your ThirdwebConfig (found in ThirdwebManager)");
 
-            string loginUrl = await GetLoginLink();
+            string loginUrl = await GetLoginLink(authProviderStr);
 
             string redirectUrl = Application.isMobilePlatform ? _customScheme : "http://localhost:8789/";
             CrossPlatformBrowser browser = new();
             var browserResult = await browser.Login(loginUrl, redirectUrl);
             if (browserResult.status != BrowserStatus.Success)
-                _exception = new UnityException($"Failed to login with Google: {browserResult.status} | {browserResult.error}");
+                _exception = new UnityException($"Failed to login with {authProviderStr}: {browserResult.status} | {browserResult.error}");
             else
                 _callbackUrl = browserResult.callbackUrl;
 
@@ -209,14 +217,14 @@ namespace Thirdweb.Wallets
 
             if (needsRecoveryCode)
             {
-                SubmitButton.onClick.AddListener(() => OnSubmitRecoveryGoogle(authResultJson));
+                SubmitButton.onClick.AddListener(() => OnSubmitRecoveryOauth(authProviderStr, authResultJson));
                 DisplayRecoveryInput(true);
             }
             else
             {
                 try
                 {
-                    var res = await _embeddedWallet.SignInWithGoogleAsync(authResultJson, null);
+                    var res = await _embeddedWallet.SignInWithOauth(authProviderStr, authResultJson, null);
                     _user = res.User;
                 }
                 catch (Exception e)
@@ -226,12 +234,12 @@ namespace Thirdweb.Wallets
             }
         }
 
-        private async void OnSubmitRecoveryGoogle(string authResult)
+        private async void OnSubmitRecoveryOauth(string authProviderStr, string authResult)
         {
             try
             {
                 string recoveryCode = RecoveryInput.text;
-                var res = await _embeddedWallet.SignInWithGoogleAsync(authResult, recoveryCode);
+                var res = await _embeddedWallet.SignInWithOauth(authProviderStr, authResult, recoveryCode);
                 _user = res.User;
                 ShowRecoveryCodes(res);
             }
@@ -241,13 +249,19 @@ namespace Thirdweb.Wallets
             }
         }
 
-        private async Task<string> GetLoginLink(string authProvider = "Google")
+        private async Task<string> GetLoginLink(string authProvider)
         {
             string loginUrl = await _embeddedWallet.FetchHeadlessOauthLoginLinkAsync(authProvider);
             string platform = "unity";
             string redirectUrl = UnityWebRequest.EscapeURL(Application.isMobilePlatform ? _customScheme : "http://localhost:8789/");
             string developerClientId = UnityWebRequest.EscapeURL(ThirdwebManager.Instance.SDK.session.Options.clientId);
-            return $"{loginUrl}?platform={platform}&redirectUrl={redirectUrl}&developerClientId={developerClientId}";
+            string base_uri = "https://embedded-wallet.thirdweb.com/sdk/2022-08-12/embedded-wallet/auth/headless-oauth-login-redirect";
+            string redirect_uri = $"{base_uri}?platform={platform}&redirectUrl={redirectUrl}&developerClientId={developerClientId}";
+            var uriBuilder = new UriBuilder(loginUrl);
+            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            query["redirect_uri"] = HttpUtility.UrlEncode(redirect_uri);
+            uriBuilder.Query = query.ToString();
+            return uriBuilder.ToString();
         }
 
         #endregion

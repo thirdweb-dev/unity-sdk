@@ -730,6 +730,16 @@ namespace Thirdweb
         Google,
 
         /// <summary>
+        /// Apple OAuth2 Flow.
+        /// </summary>
+        Apple,
+
+        /// <summary>
+        /// Facebook OAuth2 Flow.
+        /// </summary>
+        Facebook,
+
+        /// <summary>
         /// Bring your own auth.
         /// </summary>
         CustomAuth

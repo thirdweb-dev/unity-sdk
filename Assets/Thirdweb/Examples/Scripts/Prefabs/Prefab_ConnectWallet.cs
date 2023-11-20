@@ -6,6 +6,7 @@ using RotaryHeart.Lib.SerializableDictionary;
 using TMPro;
 using System.Numerics;
 using UnityEngine.Events;
+using System;
 
 namespace Thirdweb.Examples
 {
@@ -164,14 +165,10 @@ namespace Thirdweb.Examples
             ConnectPanel.SetActive(active);
         }
 
-        public void GoogleLogin()
+        public void OAuthLogin(string authProvider)
         {
-            // if (!Utils.IsWebGLBuild())
-            // {
-            //     ThirdwebDebug.LogWarning("Google login is only available on WebGL builds!");
-            //     return;
-            // }
-            ConnectWallet(WalletProvider.EmbeddedWallet, null, null, personalWallet, true);
+            AuthProvider provider = Enum.Parse<AuthProvider>(authProvider);
+            ConnectWallet(WalletProvider.EmbeddedWallet, null, null, personalWallet, provider);
         }
 
         private void ValidateConnection(WalletProvider walletProvider)
@@ -253,7 +250,7 @@ namespace Thirdweb.Examples
                 ToggleConnectPanel(true);
         }
 
-        private async void ConnectWallet(WalletProvider walletProvider, string password, string email, WalletProvider personalWallet, bool useGoogle = false)
+        private async void ConnectWallet(WalletProvider walletProvider, string password, string email, WalletProvider personalWallet, AuthProvider authProvider = AuthProvider.EmailOTP)
         {
             ThirdwebDebug.Log($"Connecting to Wallet Provider: {walletProvider}...");
 
@@ -269,7 +266,7 @@ namespace Thirdweb.Examples
                         password,
                         email,
                         personalWallet,
-                        new AuthOptions(authProvider: useGoogle ? AuthProvider.Google : AuthProvider.EmailOTP, authToken: null, recoveryCode: null)
+                        new AuthOptions(authProvider, authToken: null, recoveryCode: null)
                     )
                 );
                 LoadingPanel.SetActive(false);
