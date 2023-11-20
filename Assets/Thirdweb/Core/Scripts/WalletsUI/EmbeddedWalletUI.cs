@@ -255,13 +255,9 @@ namespace Thirdweb.Wallets
             string platform = "unity";
             string redirectUrl = UnityWebRequest.EscapeURL(Application.isMobilePlatform ? _customScheme : "http://localhost:8789/");
             string developerClientId = UnityWebRequest.EscapeURL(ThirdwebManager.Instance.SDK.session.Options.clientId);
-            string base_uri = "https://embedded-wallet.thirdweb.com/sdk/2022-08-12/embedded-wallet/auth/headless-oauth-login-redirect";
-            string redirect_uri = $"{base_uri}?platform={platform}&redirectUrl={redirectUrl}&developerClientId={developerClientId}";
-            var uriBuilder = new UriBuilder(loginUrl);
-            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query["redirect_uri"] = HttpUtility.UrlEncode(redirect_uri);
-            uriBuilder.Query = query.ToString();
-            return uriBuilder.ToString();
+            string finalLink = $"{loginUrl}?platform={platform}&redirectUrl={redirectUrl}&developerClientId={developerClientId}&authOption={authProvider}";
+            Debug.Log($"finalLink: {finalLink}");
+            return finalLink;
         }
 
         #endregion
