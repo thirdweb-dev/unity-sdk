@@ -680,17 +680,20 @@ namespace Thirdweb
     {
         public AuthProvider authProvider;
         public string authToken;
+        public string recoveryCode;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthOptions"/> class with the specified parameters.
         /// </summary>
         /// <param name="authProvider">The authentication provider to use.</param>
         /// <param name="authToken">The auth token to use for validation e.g. jwt</param>
+        /// <param name="recoveryCode">The recovery code used for CustomAuth when recovery is User Managed</param>
         /// <returns>A new instance of the <see cref="AuthOptions"/> class.</returns>
-        public AuthOptions(AuthProvider authProvider, string authToken = null)
+        public AuthOptions(AuthProvider authProvider, string authToken = null, string recoveryCode = null)
         {
             this.authProvider = authProvider;
             this.authToken = authToken;
+            this.recoveryCode = recoveryCode;
         }
     }
 
@@ -725,6 +728,16 @@ namespace Thirdweb
         /// Google OAuth2 Flow.
         /// </summary>
         Google,
+
+        /// <summary>
+        /// Apple OAuth2 Flow.
+        /// </summary>
+        Apple,
+
+        /// <summary>
+        /// Facebook OAuth2 Flow.
+        /// </summary>
+        Facebook,
 
         /// <summary>
         /// Bring your own auth.
