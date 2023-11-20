@@ -467,6 +467,122 @@ namespace Thirdweb
         }
 
         /// <summary>
+        /// Smart Wallet only: Add an admin to the connected smart account.
+        /// </summary>
+        /// <param name="admin">Address of the admin to add.</param>
+        /// <returns>The result of the transaction as a TransactionResult object.</returns>
+        /// <exception cref="UnityException"></exception>
+        public async Task<TransactionResult> AddAdmin(string admin)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
+            else
+            {
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                    throw new UnityException("This functionality is only available for SmartWallets.");
+                var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
+                {
+                    Signer = admin,
+                    IsAdmin = 1,
+                    ApprovedTargets = new List<string>(),
+                    NativeTokenLimitPerTransaction = 0,
+                    PermissionStartTimestamp = Utils.GetUnixTimeStampNow() - 3600,
+                    PermissionEndTimestamp = Utils.GetUnixTimeStampIn10Years(),
+                    ReqValidityStartTimestamp = Utils.GetUnixTimeStampNow() - 3600,
+                    ReqValidityEndTimestamp = Utils.GetUnixTimeStampIn10Years(),
+                    Uid = Guid.NewGuid().ToByteArray()
+                };
+                string signature = await EIP712.GenerateSignature_SmartAccount("Account", "1", await GetChainId(), await GetAddress(), request);
+                return await smartWallet.SmartWallet.SetPermissionsForSigner(request, signature.HexToByteArray());
+            }
+        }
+
+        /// <summary>
+        /// Smart Wallet only: Remove an admin from the connected smart account.
+        /// </summary>
+        /// <param name="admin">Address of the admin to remove.</param>
+        /// <returns>The result of the transaction as a TransactionResult object.</returns>
+        /// <exception cref="UnityException"></exception>
+        public async Task<TransactionResult> RemoveAdmin(string admin)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
+            else
+            {
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                    throw new UnityException("This functionality is only available for SmartWallets.");
+                var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
+                {
+                    Signer = admin,
+                    IsAdmin = 2,
+                    ApprovedTargets = new List<string>(),
+                    NativeTokenLimitPerTransaction = 0,
+                    PermissionStartTimestamp = Utils.GetUnixTimeStampNow() - 3600,
+                    PermissionEndTimestamp = Utils.GetUnixTimeStampIn10Years(),
+                    ReqValidityStartTimestamp = Utils.GetUnixTimeStampNow() - 3600,
+                    ReqValidityEndTimestamp = Utils.GetUnixTimeStampIn10Years(),
+                    Uid = Guid.NewGuid().ToByteArray()
+                };
+                string signature = await EIP712.GenerateSignature_SmartAccount("Account", "1", await GetChainId(), await GetAddress(), request);
+                return await smartWallet.SmartWallet.SetPermissionsForSigner(request, signature.HexToByteArray());
+            }
+        }
+
+        /// <summary>
+        /// Smart Wallet only: Create a new signer for the connected smart account.
+        /// </summary>
+        /// <param name="signerAddress">Address of the wallet to add as a signer for the connected smart account.</param>
+        /// <param name="approvedTargets">List of contract addresses that the signer is approved to interact with.</param>
+        /// <param name="nativeTokenLimitPerTransactionInWei">The maximum amount of native token that can be transferred in a single transaction.</param>
+        /// <param name="permissionStartTimestamp">UNIX timestamp of when the signer's permissions start.</param>
+        /// <param name="permissionEndTimestamp">UNIX timestamp of when the signer's permissions end.</param>
+        /// <param name="reqValidityStartTimestamp">UNIX timestamp of when the signer's permissions request validity starts.</param>
+        /// <param name="reqValidityEndTimestamp">UNIX timestamp of when the signer's permissions request validity ends.</param>
+        /// <returns>The result of the transaction as a TransactionResult object.</returns>
+        /// <exception cref="UnityException"></exception>
+        public async Task<TransactionResult> CreateSessionKey(
+            string signerAddress,
+            List<string> approvedTargets,
+            string nativeTokenLimitPerTransactionInWei,
+            string permissionStartTimestamp,
+            string permissionEndTimestamp,
+            string reqValidityStartTimestamp,
+            string reqValidityEndTimestamp
+        )
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+            }
+            else
+            {
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                    throw new UnityException("This functionality is only available for SmartWallets.");
+                var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
+                {
+                    Signer = signerAddress,
+                    IsAdmin = 0,
+                    ApprovedTargets = approvedTargets,
+                    NativeTokenLimitPerTransaction = BigInteger.Parse(nativeTokenLimitPerTransactionInWei),
+                    PermissionStartTimestamp = BigInteger.Parse(permissionStartTimestamp),
+                    PermissionEndTimestamp = BigInteger.Parse(permissionEndTimestamp),
+                    ReqValidityStartTimestamp = BigInteger.Parse(reqValidityStartTimestamp),
+                    ReqValidityEndTimestamp = BigInteger.Parse(reqValidityEndTimestamp),
+                    Uid = Guid.NewGuid().ToByteArray()
+                };
+                string signature = await EIP712.GenerateSignature_SmartAccount("Account", "1", await GetChainId(), await GetAddress(), request);
+                return await smartWallet.SmartWallet.SetPermissionsForSigner(request, signature.HexToByteArray());
+            }
+        }
+
+        /// <summary>
         /// Sends a raw transaction from the connected wallet.
         /// </summary>
         /// <param name="transactionRequest">The transaction request object containing transaction details.</param>
@@ -523,6 +639,7 @@ namespace Thirdweb
         public string email;
         public WalletProvider personalWallet;
         public AuthOptions authOptions;
+        public string smartWalletAccountOverride;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WalletConnection"/> class with the specified parameters.
@@ -533,6 +650,7 @@ namespace Thirdweb
         /// <param name="email">The email to login with if using email based providers.</param>
         /// <param name="personalWallet">The personal wallet provider if using smart wallets.</param>
         /// <param name="authOptions">The authentication options if using embedded wallets.</param>
+        /// <param name="smartWalletAccountOverride">Optionally choose to connect to a smart account the personal wallet is not an admin of.</param>
         /// <returns>A new instance of the <see cref="WalletConnection"/> class.</returns>
         public WalletConnection(
             WalletProvider provider,
@@ -540,7 +658,8 @@ namespace Thirdweb
             string password = null,
             string email = null,
             WalletProvider personalWallet = WalletProvider.LocalWallet,
-            AuthOptions authOptions = null
+            AuthOptions authOptions = null,
+            string smartWalletAccountOverride = null
         )
         {
             this.provider = provider;
@@ -549,6 +668,7 @@ namespace Thirdweb
             this.email = email;
             this.personalWallet = personalWallet;
             this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.EmailOTP, authToken: null);
+            this.smartWalletAccountOverride = smartWalletAccountOverride;
         }
     }
 

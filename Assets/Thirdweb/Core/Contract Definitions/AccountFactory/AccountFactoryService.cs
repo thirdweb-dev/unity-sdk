@@ -114,6 +114,30 @@ namespace Thirdweb.Contracts.AccountFactory
             return ContractHandler.SendRequestAndWaitForReceiptAsync(createAccountFunction, cancellationToken);
         }
 
+        public Task<string> EntrypointQueryAsync(EntrypointFunction entrypointFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<EntrypointFunction, string>(entrypointFunction, blockParameter);
+        }
+
+        public Task<string> EntrypointQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<EntrypointFunction, string>(null, blockParameter);
+        }
+
+        public Task<List<string>> GetAccountsQueryAsync(GetAccountsFunction getAccountsFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<GetAccountsFunction, List<string>>(getAccountsFunction, blockParameter);
+        }
+
+        public Task<List<string>> GetAccountsQueryAsync(BigInteger start, BigInteger end, BlockParameter blockParameter = null)
+        {
+            var getAccountsFunction = new GetAccountsFunction();
+            getAccountsFunction.Start = start;
+            getAccountsFunction.End = end;
+
+            return ContractHandler.QueryAsync<GetAccountsFunction, List<string>>(getAccountsFunction, blockParameter);
+        }
+
         public Task<List<string>> GetAccountsOfSignerQueryAsync(GetAccountsOfSignerFunction getAccountsOfSignerFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<GetAccountsOfSignerFunction, List<string>>(getAccountsOfSignerFunction, blockParameter);
@@ -139,6 +163,16 @@ namespace Thirdweb.Contracts.AccountFactory
             getAddressFunction.Data = data;
 
             return ContractHandler.QueryAsync<GetAddressFunction, string>(getAddressFunction, blockParameter);
+        }
+
+        public Task<List<string>> GetAllAccountsQueryAsync(GetAllAccountsFunction getAllAccountsFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<GetAllAccountsFunction, List<string>>(getAllAccountsFunction, blockParameter);
+        }
+
+        public Task<List<string>> GetAllAccountsQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<GetAllAccountsFunction, List<string>>(null, blockParameter);
         }
 
         public Task<byte[]> GetRoleAdminQueryAsync(GetRoleAdminFunction getRoleAdminFunction, BlockParameter blockParameter = null)
@@ -179,19 +213,6 @@ namespace Thirdweb.Contracts.AccountFactory
             getRoleMemberCountFunction.Role = role;
 
             return ContractHandler.QueryAsync<GetRoleMemberCountFunction, BigInteger>(getRoleMemberCountFunction, blockParameter);
-        }
-
-        public Task<List<string>> GetSignersOfAccountQueryAsync(GetSignersOfAccountFunction getSignersOfAccountFunction, BlockParameter blockParameter = null)
-        {
-            return ContractHandler.QueryAsync<GetSignersOfAccountFunction, List<string>>(getSignersOfAccountFunction, blockParameter);
-        }
-
-        public Task<List<string>> GetSignersOfAccountQueryAsync(string account, BlockParameter blockParameter = null)
-        {
-            var getSignersOfAccountFunction = new GetSignersOfAccountFunction();
-            getSignersOfAccountFunction.Account = account;
-
-            return ContractHandler.QueryAsync<GetSignersOfAccountFunction, List<string>>(getSignersOfAccountFunction, blockParameter);
         }
 
         public Task<string> GrantRoleRequestAsync(GrantRoleFunction grantRoleFunction)
@@ -250,6 +271,47 @@ namespace Thirdweb.Contracts.AccountFactory
             return ContractHandler.QueryAsync<HasRoleWithSwitchFunction, bool>(hasRoleWithSwitchFunction, blockParameter);
         }
 
+        public Task<string> InitializeRequestAsync(InitializeFunction initializeFunction)
+        {
+            return ContractHandler.SendRequestAsync(initializeFunction);
+        }
+
+        public Task<TransactionReceipt> InitializeRequestAndWaitForReceiptAsync(InitializeFunction initializeFunction, CancellationTokenSource cancellationToken = null)
+        {
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(initializeFunction, cancellationToken);
+        }
+
+        public Task<string> InitializeRequestAsync(string defaultAdmin, string contractURI)
+        {
+            var initializeFunction = new InitializeFunction();
+            initializeFunction.DefaultAdmin = defaultAdmin;
+            initializeFunction.ContractURI = contractURI;
+
+            return ContractHandler.SendRequestAsync(initializeFunction);
+        }
+
+        public Task<TransactionReceipt> InitializeRequestAndWaitForReceiptAsync(string defaultAdmin, string contractURI, CancellationTokenSource cancellationToken = null)
+        {
+            var initializeFunction = new InitializeFunction();
+            initializeFunction.DefaultAdmin = defaultAdmin;
+            initializeFunction.ContractURI = contractURI;
+
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(initializeFunction, cancellationToken);
+        }
+
+        public Task<bool> IsRegisteredQueryAsync(IsRegisteredFunction isRegisteredFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<IsRegisteredFunction, bool>(isRegisteredFunction, blockParameter);
+        }
+
+        public Task<bool> IsRegisteredQueryAsync(string account, BlockParameter blockParameter = null)
+        {
+            var isRegisteredFunction = new IsRegisteredFunction();
+            isRegisteredFunction.Account = account;
+
+            return ContractHandler.QueryAsync<IsRegisteredFunction, bool>(isRegisteredFunction, blockParameter);
+        }
+
         public Task<string> MulticallRequestAsync(MulticallFunction multicallFunction)
         {
             return ContractHandler.SendRequestAsync(multicallFunction);
@@ -276,6 +338,32 @@ namespace Thirdweb.Contracts.AccountFactory
             return ContractHandler.SendRequestAndWaitForReceiptAsync(multicallFunction, cancellationToken);
         }
 
+        public Task<string> OnRegisterRequestAsync(OnRegisterFunction onRegisterFunction)
+        {
+            return ContractHandler.SendRequestAsync(onRegisterFunction);
+        }
+
+        public Task<TransactionReceipt> OnRegisterRequestAndWaitForReceiptAsync(OnRegisterFunction onRegisterFunction, CancellationTokenSource cancellationToken = null)
+        {
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(onRegisterFunction, cancellationToken);
+        }
+
+        public Task<string> OnRegisterRequestAsync(byte[] salt)
+        {
+            var onRegisterFunction = new OnRegisterFunction();
+            onRegisterFunction.Salt = salt;
+
+            return ContractHandler.SendRequestAsync(onRegisterFunction);
+        }
+
+        public Task<TransactionReceipt> OnRegisterRequestAndWaitForReceiptAsync(byte[] salt, CancellationTokenSource cancellationToken = null)
+        {
+            var onRegisterFunction = new OnRegisterFunction();
+            onRegisterFunction.Salt = salt;
+
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(onRegisterFunction, cancellationToken);
+        }
+
         public Task<string> OnSignerAddedRequestAsync(OnSignerAddedFunction onSignerAddedFunction)
         {
             return ContractHandler.SendRequestAsync(onSignerAddedFunction);
@@ -286,18 +374,20 @@ namespace Thirdweb.Contracts.AccountFactory
             return ContractHandler.SendRequestAndWaitForReceiptAsync(onSignerAddedFunction, cancellationToken);
         }
 
-        public Task<string> OnSignerAddedRequestAsync(string signer)
+        public Task<string> OnSignerAddedRequestAsync(string signer, byte[] salt)
         {
             var onSignerAddedFunction = new OnSignerAddedFunction();
             onSignerAddedFunction.Signer = signer;
+            onSignerAddedFunction.Salt = salt;
 
             return ContractHandler.SendRequestAsync(onSignerAddedFunction);
         }
 
-        public Task<TransactionReceipt> OnSignerAddedRequestAndWaitForReceiptAsync(string signer, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> OnSignerAddedRequestAndWaitForReceiptAsync(string signer, byte[] salt, CancellationTokenSource cancellationToken = null)
         {
             var onSignerAddedFunction = new OnSignerAddedFunction();
             onSignerAddedFunction.Signer = signer;
+            onSignerAddedFunction.Salt = salt;
 
             return ContractHandler.SendRequestAndWaitForReceiptAsync(onSignerAddedFunction, cancellationToken);
         }
@@ -312,18 +402,20 @@ namespace Thirdweb.Contracts.AccountFactory
             return ContractHandler.SendRequestAndWaitForReceiptAsync(onSignerRemovedFunction, cancellationToken);
         }
 
-        public Task<string> OnSignerRemovedRequestAsync(string signer)
+        public Task<string> OnSignerRemovedRequestAsync(string signer, byte[] salt)
         {
             var onSignerRemovedFunction = new OnSignerRemovedFunction();
             onSignerRemovedFunction.Signer = signer;
+            onSignerRemovedFunction.Salt = salt;
 
             return ContractHandler.SendRequestAsync(onSignerRemovedFunction);
         }
 
-        public Task<TransactionReceipt> OnSignerRemovedRequestAndWaitForReceiptAsync(string signer, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> OnSignerRemovedRequestAndWaitForReceiptAsync(string signer, byte[] salt, CancellationTokenSource cancellationToken = null)
         {
             var onSignerRemovedFunction = new OnSignerRemovedFunction();
             onSignerRemovedFunction.Signer = signer;
+            onSignerRemovedFunction.Salt = salt;
 
             return ContractHandler.SendRequestAndWaitForReceiptAsync(onSignerRemovedFunction, cancellationToken);
         }
@@ -408,6 +500,16 @@ namespace Thirdweb.Contracts.AccountFactory
             setContractURIFunction.Uri = uri;
 
             return ContractHandler.SendRequestAndWaitForReceiptAsync(setContractURIFunction, cancellationToken);
+        }
+
+        public Task<BigInteger> TotalAccountsQueryAsync(TotalAccountsFunction totalAccountsFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<TotalAccountsFunction, BigInteger>(totalAccountsFunction, blockParameter);
+        }
+
+        public Task<BigInteger> TotalAccountsQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<TotalAccountsFunction, BigInteger>(null, blockParameter);
         }
     }
 }
