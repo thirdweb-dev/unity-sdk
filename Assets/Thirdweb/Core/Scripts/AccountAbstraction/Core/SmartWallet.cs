@@ -152,6 +152,14 @@ namespace Thirdweb.AccountAbstraction
                 var chainId = await PersonalWeb3.Eth.ChainId.SendRequestAsync();
                 return new RpcResponseMessage(requestMessage.Id, chainId.HexValue);
             }
+            else if (requestMessage.Method == "eth_estimateGas")
+            {
+                var web3 = Utils.GetWeb3();
+                var parameters = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(requestMessage.RawParameters));
+                var txInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(parameters[0]));
+                var result = await web3.Eth.Transactions.EstimateGas.SendRequestAsync(txInput);
+                return new RpcResponseMessage(requestMessage.Id, result.HexValue);
+            }
             else
             {
                 throw new NotImplementedException("Method not supported: " + requestMessage.Method);

@@ -196,7 +196,7 @@ namespace Thirdweb
                 if (this.abi == null)
                     throw new UnityException("You must pass an ABI for native platform custom calls");
 
-                var contract = Utils.GetWeb3().Eth.GetContract(this.abi, this.address);
+                var contract = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetContract(this.abi, this.address);
 
                 var function = contract.GetFunction(functionName);
 
@@ -209,15 +209,14 @@ namespace Thirdweb
 
                 var gasPrice = transactionOverrides?.gasPrice != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasPrice)) : null;
 
-                var receipt = await function.SendTransactionAndWaitForReceiptAsync(
+                var hash = await function.SendTransactionAsync(
                     from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
                     gas: gas,
                     gasPrice: gasPrice,
                     value: value,
-                    receiptRequestCancellationToken: null,
                     args
                 );
-                return receipt.ToTransactionResult();
+                return await Transaction.WaitForTransactionResult(hash);
             }
         }
 
