@@ -196,7 +196,7 @@ namespace Thirdweb
                 if (this.abi == null)
                     throw new UnityException("You must pass an ABI for native platform custom calls");
 
-                var contract = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetContract(this.abi, this.address);
+                var contract = Utils.GetWeb3().Eth.GetContract(this.abi, this.address);
 
                 var function = contract.GetFunction(functionName);
 
