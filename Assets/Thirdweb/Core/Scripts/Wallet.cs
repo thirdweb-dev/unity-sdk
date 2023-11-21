@@ -10,6 +10,7 @@ using Nethereum.ABI.EIP712;
 using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
+using Newtonsoft.Json;
 
 namespace Thirdweb
 {
@@ -476,7 +477,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return await Bridge.SmartWalletAddAdmin<TransactionResult>(admin);
             }
             else
             {
@@ -510,7 +511,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return await Bridge.SmartWalletRemoveAdmin<TransactionResult>(admin);
             }
             else
             {
@@ -558,7 +559,20 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
+                return await Bridge.SmartWalletCreateSessionKey<TransactionResult>(
+                    Utils.ToJson(
+                        new
+                        {
+                            signerAddress,
+                            approvedCallTargets = approvedTargets,
+                            nativeTokenLimitPerTransactionInWei,
+                            startDate = permissionStartTimestamp,
+                            expirationDate = permissionEndTimestamp,
+                            reqValidityStartTimestamp,
+                            reqValidityEndTimestamp
+                        }
+                    )
+                );
             }
             else
             {
