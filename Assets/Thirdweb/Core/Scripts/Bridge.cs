@@ -208,6 +208,57 @@ namespace Thirdweb
             return result;
         }
 
+        public static async Task<T> SmartWalletAddAdmin<T>(string admin)
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return default;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebSmartWalletAddAdmin(taskId, admin, jsCallback);
+#endif
+            string result = await task.Task;
+            return JsonConvert.DeserializeObject<Result<T>>(result).result;
+        }
+
+        public static async Task<T> SmartWalletRemoveAdmin<T>(string admin)
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return default;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebSmartWalletRemoveAdmin(taskId, admin, jsCallback);
+#endif
+            string result = await task.Task;
+            return JsonConvert.DeserializeObject<Result<T>>(result).result;
+        }
+
+        public static async Task<T> SmartWalletCreateSessionKey<T>(string options)
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return default;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebSmartWalletCreateSessionKey(taskId, options, jsCallback);
+#endif
+            string result = await task.Task;
+            return JsonConvert.DeserializeObject<Result<T>>(result).result;
+        }
+
 #if UNITY_WEBGL
         [DllImport("__Internal")]
         private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
@@ -225,6 +276,12 @@ namespace Thirdweb
         private static extern string ThirdwebFundWallet(string taskId, string payload, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebExportWallet(string taskId, string password, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebSmartWalletAddAdmin(string taskId, string admin, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebSmartWalletRemoveAdmin(string taskId, string admin, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebSmartWalletCreateSessionKey(string taskId, string options, Action<string, string, string> cb);
 #endif
     }
 }
