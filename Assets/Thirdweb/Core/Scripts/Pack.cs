@@ -311,7 +311,7 @@ namespace Thirdweb
                         Contents = pack.ToPackTokenList(),
                         NumOfRewardUnits = pack.ToPackRewardUnitsList(),
                         PackUri = uri.IpfsHash.CidToIpfsUrl(),
-                        OpenStartTimestamp = await Utils.GetCurrentBlockTimeStamp(),
+                        OpenStartTimestamp = await Blocks.GetLatestBlockTimestamp(),
                         AmountDistributedPerOpen = BigInteger.Parse(pack.rewardsPerPack),
                         Recipient = receiverAddress
                     }

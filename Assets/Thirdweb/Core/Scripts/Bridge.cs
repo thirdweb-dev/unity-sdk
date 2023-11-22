@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Nethereum.RPC.Eth.DTOs;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -260,6 +262,74 @@ namespace Thirdweb
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
         }
 
+        public static async Task<TransactionReceipt> WaitForTransactionResult(string txHash)
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return default;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebWaitForTransactionResult(taskId, txHash, jsCallback);
+#endif
+            string result = await task.Task;
+            return JsonConvert.DeserializeObject<Result<TransactionReceipt>>(result).result;
+        }
+
+        public static async Task<BigInteger> GetLatestBlockNumber()
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return BigInteger.Zero;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebGetLatestBlockNumber(taskId, jsCallback);
+#endif
+            string result = await task.Task;
+            return JsonConvert.DeserializeObject<Result<BigInteger>>(result).result;
+        }
+
+        public static async Task<BlockWithTransactionHashes> GetBlock(BigInteger blockNumber)
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return null;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebGetBlock(taskId, blockNumber.ToString(), jsCallback);
+#endif
+            string result = await task.Task;
+            return JsonConvert.DeserializeObject<Result<BlockWithTransactionHashes>>(result).result;
+        }
+
+        public static async Task<BlockWithTransactions> GetBlockWithTransactions(BigInteger blockNumber)
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return null;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebGetBlockWithTransactions(taskId, blockNumber.ToString(), jsCallback);
+#endif
+            string result = await task.Task;
+            return JsonConvert.DeserializeObject<Result<BlockWithTransactions>>(result).result;
+        }
+
 #if UNITY_WEBGL
         [DllImport("__Internal")]
         private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
@@ -283,6 +353,15 @@ namespace Thirdweb
         private static extern string ThirdwebSmartWalletRemoveAdmin(string taskId, string admin, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebSmartWalletCreateSessionKey(string taskId, string options, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebWaitForTransactionResult(string taskId, string txHash, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebGetLatestBlockNumber(string taskId, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebGetBlock(string taskId, string blockNumber, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebGetBlockWithTransactions(string taskId, string blockNumber, Action<string, string, string> cb);
+
 #endif
     }
 }
