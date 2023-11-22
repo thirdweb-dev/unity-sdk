@@ -182,7 +182,7 @@ namespace Thirdweb.AccountAbstraction
 
             var paramList = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(requestMessage.RawParameters));
             var transactionInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(paramList[0]));
-            var latestBlock = await Utils.GetBlockByNumber(await Utils.GetLatestBlockNumber());
+            var latestBlock = await Blocks.GetBlock(await Blocks.GetLatestBlockNumber());
             var dummySig = new byte[Constants.DUMMY_SIG_LENGTH];
             for (int i = 0; i < Constants.DUMMY_SIG_LENGTH; i++)
                 dummySig[i] = 0x01;

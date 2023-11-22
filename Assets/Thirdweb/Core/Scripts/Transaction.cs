@@ -1,10 +1,8 @@
-using System;
 using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.RPC.Eth.Transactions;
-using Nethereum.Web3;
 using Newtonsoft.Json;
 using UnityEngine;
 using MinimalForwarder = Thirdweb.Contracts.Forwarder.ContractDefinition;
@@ -374,17 +372,21 @@ namespace Thirdweb
         public static async Task<TransactionReceipt> WaitForTransactionResultRaw(string txHash)
         {
             if (Utils.IsWebGLBuild())
-                throw new UnityException("WaitForTransactionResult is not supported in WebGL builds.");
-
-            var web3 = Utils.GetWeb3();
-            var receipt = await web3.TransactionReceiptPolling.PollForReceiptAsync(txHash);
-            if (receipt.Failed())
             {
-                var reason = await web3.Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
-                if (!string.IsNullOrEmpty(reason))
-                    throw new UnityException($"Transaction failed: {reason}");
+                return await Bridge.WaitForTransactionResult(txHash);
             }
-            return receipt;
+            else
+            {
+                var web3 = Utils.GetWeb3();
+                var receipt = await web3.TransactionReceiptPolling.PollForReceiptAsync(txHash);
+                if (receipt.Failed())
+                {
+                    var reason = await web3.Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
+                    if (!string.IsNullOrEmpty(reason))
+                        throw new UnityException($"Transaction failed: {reason}");
+                }
+                return receipt;
+            }
         }
 
         private async Task<string> Send()

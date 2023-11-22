@@ -279,7 +279,7 @@ namespace Thirdweb
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
                             Currency = input.currencyContractAddress ?? Utils.NativeTokenAddress,
                             PricePerToken = BigInteger.Parse(input.pricePerToken),
-                            StartTimestamp = (BigInteger)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp() + 60),
+                            StartTimestamp = input.startTimestamp ?? await Blocks.GetLatestBlockTimestamp() + 60,
                             EndTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
                             Reserved = input.isReservedListing ?? false,
                         }
@@ -687,7 +687,7 @@ namespace Thirdweb
                             BuyoutBidAmount = BigInteger.Parse(input.buyoutBidAmount.ToWei()),
                             TimeBufferInSeconds = ulong.Parse(input.timeBufferInSeconds ?? "900"),
                             BidBufferBps = ulong.Parse(input.bidBufferBps ?? "500"),
-                            StartTimestamp = (ulong)(input.startTimestamp ?? await Utils.GetCurrentBlockTimeStamp() + 60),
+                            StartTimestamp = (ulong)(input.startTimestamp ?? await Blocks.GetLatestBlockTimestamp() + 60),
                             EndTimestamp = (ulong)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
                         }
                     }

@@ -267,24 +267,6 @@ namespace Thirdweb
             return BigInteger.Parse("115792089237316195423570985008687907853269984665640564039457584007913129639935");
         }
 
-        public async static Task<BigInteger> GetCurrentBlockTimeStamp()
-        {
-            var blockNumber = await GetLatestBlockNumber();
-            var block = await GetBlockByNumber(blockNumber);
-            return block.Timestamp.Value;
-        }
-
-        public async static Task<BigInteger> GetLatestBlockNumber()
-        {
-            var hex = await Utils.GetWeb3().Eth.Blocks.GetBlockNumber.SendRequestAsync();
-            return hex.Value;
-        }
-
-        public async static Task<Nethereum.RPC.Eth.DTOs.BlockWithTransactionHashes> GetBlockByNumber(BigInteger blockNumber)
-        {
-            return await Utils.GetWeb3().Eth.Blocks.GetBlockWithTransactionsHashesByNumber.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(blockNumber));
-        }
-
         public static string GetDeviceIdentifier()
         {
             return SystemInfo.deviceUniqueIdentifier;
