@@ -7,6 +7,9 @@ namespace Thirdweb
 {
     public static class Blocks
     {
+        /// <summary>
+        /// Returns the latest block number
+        /// </summary>
         public static async Task<BigInteger> GetLatestBlockNumber()
         {
             if (Utils.IsWebGLBuild())
@@ -20,12 +23,19 @@ namespace Thirdweb
             }
         }
 
+        /// <summary>
+        /// Returns the latest block timestamp
+        /// </summary>
         public static async Task<BigInteger> GetLatestBlockTimestamp()
         {
             var block = await GetBlock(await GetLatestBlockNumber());
             return block.Timestamp.Value;
         }
 
+        /// <summary>
+        /// Returns the latest block (with transaction hashes)
+        /// </summary>
+        /// <param name="blockNumber">Number of the block to retrieve</param>
         public static async Task<BlockWithTransactionHashes> GetBlock(BigInteger blockNumber)
         {
             if (Utils.IsWebGLBuild())
@@ -38,6 +48,10 @@ namespace Thirdweb
             }
         }
 
+        /// <summary>
+        /// Returns the latest block with transaction data
+        /// </summary>
+        /// <param name="blockNumber">Number of the block to retrieve</param>
         public static async Task<BlockWithTransactions> GetBlockWithTransactions(BigInteger blockNumber)
         {
             if (Utils.IsWebGLBuild())
