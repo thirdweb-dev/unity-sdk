@@ -266,7 +266,7 @@ namespace Thirdweb.Examples
                         password,
                         email,
                         personalWallet,
-                        new AuthOptions(authProvider, authToken: null, recoveryCode: null)
+                        new AuthOptions(authProvider, authToken: null, encryptionKey: null)
                     )
                 );
                 LoadingPanel.SetActive(false);

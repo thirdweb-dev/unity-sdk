@@ -110,7 +110,7 @@ namespace Thirdweb.Wallets
                         await LoginWithOauth("Facebook");
                         break;
                     case AuthProvider.CustomAuth:
-                        await LoginWithCustomJwt(authOptions.authToken, authOptions.recoveryCode);
+                        await LoginWithCustomAuth(authOptions.authToken, authOptions.encryptionKey);
                         break;
                     default:
                         throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}");
@@ -260,11 +260,15 @@ namespace Thirdweb.Wallets
 
         #endregion
 
-        #region Custom JWT Flow
+        #region Custom Auth Flow
 
-        private async Task LoginWithCustomJwt(string jwtToken, string recoveryCode)
+        private async Task LoginWithCustomAuth(string authToken, string encryptionKey)
         {
-            var res = await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken, recoveryCode);
+            if (string.IsNullOrEmpty(authToken))
+                throw new UnityException("An auth token (such as JWT) is required for custom auth login");
+            if (string.IsNullOrEmpty(encryptionKey))
+                throw new UnityException("An encryption key is required for custom auth login");
+            var res = await _embeddedWallet.SignInWithJwtAuthAsync(authToken, encryptionKey);
             _user = res.User;
             ShowRecoveryCodes(res);
         }
