@@ -11,6 +11,7 @@ using UnityEngine;
 using Nethereum.Signer;
 using Nethereum.Web3;
 using Newtonsoft.Json.Linq;
+using System.Globalization;
 
 namespace Thirdweb
 {
@@ -65,7 +66,7 @@ namespace Thirdweb
 
         public static string ToWei(this string eth)
         {
-            if (!double.TryParse(eth, out double ethDouble))
+            if (!double.TryParse(eth, NumberStyles.Number, CultureInfo.InvariantCulture, out double ethDouble))
                 throw new ArgumentException("Invalid eth value.");
             BigInteger wei = (BigInteger)(ethDouble * DECIMALS_18);
             return wei.ToString();
