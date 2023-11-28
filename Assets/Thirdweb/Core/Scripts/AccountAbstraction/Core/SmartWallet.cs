@@ -149,8 +149,15 @@ namespace Thirdweb.AccountAbstraction
             }
             else if (requestMessage.Method == "eth_chainId")
             {
-                var chainId = await PersonalWeb3.Eth.ChainId.SendRequestAsync();
-                return new RpcResponseMessage(requestMessage.Id, chainId.HexValue);
+                try
+                {
+                    var chainId = await PersonalWeb3.Eth.ChainId.SendRequestAsync();
+                    return new RpcResponseMessage(requestMessage.Id, chainId.HexValue);
+                }
+                catch
+                {
+                    return new RpcResponseMessage(requestMessage.Id, ThirdwebManager.Instance.SDK.session.CurrentChainData.chainId);
+                }
             }
             else if (requestMessage.Method == "eth_estimateGas")
             {

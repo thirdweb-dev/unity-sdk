@@ -431,7 +431,16 @@ namespace Thirdweb
 
                 var messageObject = jsonObject.GetValue("message") as JObject;
                 foreach (var property in messageObject.Properties())
-                    property.Value = property.Value.ToString();
+                {
+                    if (property.Value.Type == JTokenType.Array)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        property.Value = property.Value.ToString();
+                    }
+                }
 
                 string safeJson = jsonObject.ToString();
                 return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTypedData_v4", await GetSignerAddress(), safeJson);
