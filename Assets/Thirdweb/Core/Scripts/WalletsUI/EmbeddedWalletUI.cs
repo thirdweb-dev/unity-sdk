@@ -262,13 +262,13 @@ namespace Thirdweb.Wallets
 
         #region Custom Auth Flow
 
-        private async Task LoginWithCustomAuth(string authToken, string encryptionKey)
+        private async Task LoginWithCustomAuth(string authToken, string encryptionKey, string recoveryCode = null)
         {
             if (string.IsNullOrEmpty(authToken))
                 throw new UnityException("An auth token (such as JWT) is required for custom auth login");
             if (string.IsNullOrEmpty(encryptionKey))
                 throw new UnityException("An encryption key is required for custom auth login");
-            var res = await _embeddedWallet.SignInWithJwtAuthAsync(authToken, encryptionKey);
+            var res = await _embeddedWallet.SignInWithJwtAuthAsync(authToken, encryptionKey, recoveryCode);
             _user = res.User;
             ShowRecoveryCodes(res);
         }
