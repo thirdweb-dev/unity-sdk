@@ -278,7 +278,7 @@ namespace Thirdweb
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
                             Currency = input.currencyContractAddress ?? Utils.NativeTokenAddress,
-                            PricePerToken = BigInteger.Parse(input.pricePerToken),
+                            PricePerToken = BigInteger.Parse(input.pricePerToken.ToWei()),
                             StartTimestamp = input.startTimestamp ?? await Blocks.GetLatestBlockTimestamp() + 60,
                             EndTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * 7),
                             Reserved = input.isReservedListing ?? false,

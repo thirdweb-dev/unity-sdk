@@ -63,7 +63,15 @@ namespace Thirdweb
                     ActiveWallet = new ThirdwebMetamask();
                     break;
                 case WalletProvider.SmartWallet:
-                    await Connect(new WalletConnection(walletConnection.personalWallet, walletConnection.chainId, walletConnection.password, walletConnection.email));
+                    await Connect(
+                        new WalletConnection(
+                            provider: walletConnection.personalWallet,
+                            chainId: walletConnection.chainId,
+                            password: walletConnection.password,
+                            email: walletConnection.email,
+                            authOptions: walletConnection.authOptions
+                        )
+                    );
                     if (Options.smartWalletConfig == null)
                         throw new UnityException("Smart wallet config is required for smart wallet connection method!");
                     ActiveWallet = new ThirdwebSmartWallet(ActiveWallet, Options.smartWalletConfig.Value);
