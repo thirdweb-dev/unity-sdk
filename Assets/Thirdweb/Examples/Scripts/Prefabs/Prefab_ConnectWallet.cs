@@ -9,7 +9,7 @@ using UnityEngine.UI;
 using System.Numerics;
 using RotaryHeart.Lib.SerializableDictionary;
 
-public class Prefab_ConnectWallet : MonoBehaviour
+public class Prefab_ThirdwebConnect : MonoBehaviour
 {
     [Serializable]
     public class NetworkIcon
