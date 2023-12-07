@@ -6,6 +6,7 @@ using UnityEngine;
 using Newtonsoft.Json;
 using TokenERC1155Contract = Thirdweb.Contracts.TokenERC1155.ContractDefinition;
 using DropERC1155Contract = Thirdweb.Contracts.DropERC1155.ContractDefinition;
+using System.Linq;
 
 namespace Thirdweb
 {
@@ -263,6 +264,37 @@ namespace Thirdweb
                         To = to,
                         Id = BigInteger.Parse(tokenId),
                         Amount = amount,
+                        Data = new byte[0]
+                    }
+                );
+            }
+        }
+
+        /// <summary>
+        /// Batch transfer NFTs to the given address
+        /// </summary>
+        /// <param name="to">Address to transfer to</param>
+        /// <param name="tokenIds">ERC1155 token ids to transfer</param>
+        /// <param name="amounts">ERC1155 token id amounts to transfer</param>
+        /// <returns>The transaction result as a <see cref="TransactionResult"/> object</returns>
+        public async Task<TransactionResult> TransferBatch(string to, BigInteger[] tokenIds, BigInteger[] amounts)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+                // WEN WEBGL
+                // return await Bridge.InvokeRoute<TransactionResult>(getRoute("transferBatch"), Utils.ToJsonStringArray(to, tokenIds, amounts));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new TokenERC1155Contract.SafeBatchTransferFromFunction()
+                    {
+                        From = await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                        To = to,
+                        Ids = tokenIds.ToList(),
+                        Amounts = amounts.ToList(),
                         Data = new byte[0]
                     }
                 );
