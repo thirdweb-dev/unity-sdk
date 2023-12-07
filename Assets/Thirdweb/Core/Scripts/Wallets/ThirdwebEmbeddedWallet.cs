@@ -14,6 +14,7 @@ namespace Thirdweb.Wallets
         private readonly WalletProvider _signerProvider;
         private readonly EmbeddedWallet _embeddedWallet;
         private Account _account;
+        private string _email;
 
         public ThirdwebEmbeddedWallet(string clientId, string bundleId)
         {
@@ -32,7 +33,9 @@ namespace Thirdweb.Wallets
                 GameObject.Instantiate(ThirdwebManager.Instance.EmbeddedWalletPrefab);
             }
 
-            _account = (await EmbeddedWalletUI.Instance.Connect(_embeddedWallet, walletConnection.email, walletConnection.authOptions)).Account;
+            var user = await EmbeddedWalletUI.Instance.Connect(_embeddedWallet, walletConnection.email, walletConnection.authOptions);
+            _account = user.Account;
+            _email = user.EmailAddress;
             _web3 = new Web3(_account, rpc);
 
             return await GetAddress();
@@ -56,6 +59,11 @@ namespace Thirdweb.Wallets
             if (addy != null)
                 addy = addy.ToChecksumAddress();
             return Task.FromResult(addy);
+        }
+
+        public Task<string> GetEmail()
+        {
+            return Task.FromResult(_email);
         }
 
         public async Task<string> GetSignerAddress()

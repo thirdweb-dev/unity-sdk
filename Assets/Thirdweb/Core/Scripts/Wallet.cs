@@ -249,6 +249,24 @@ namespace Thirdweb
         }
 
         /// <summary>
+        /// Gets the connected embedded wallet email if any.
+        /// </summary>
+        public async Task<string> GetEmail()
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.GetEmail();
+            }
+            else
+            {
+                if (!await IsConnected())
+                    throw new Exception("No account connected!");
+
+                return await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetEmail();
+            }
+        }
+
+        /// <summary>
         /// Gets the address of the signer associated with the connected wallet.
         /// </summary>
         /// <returns>The address of the signer as a string.</returns>

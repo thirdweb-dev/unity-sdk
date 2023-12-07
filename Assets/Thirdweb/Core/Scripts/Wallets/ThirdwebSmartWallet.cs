@@ -57,6 +57,11 @@ namespace Thirdweb.Wallets
             return Task.FromResult(addy);
         }
 
+        public async Task<string> GetEmail()
+        {
+            return await _personalWallet.GetEmail();
+        }
+
         public async Task<string> GetSignerAddress()
         {
             var addy = await _smartWallet.GetPersonalAddress();

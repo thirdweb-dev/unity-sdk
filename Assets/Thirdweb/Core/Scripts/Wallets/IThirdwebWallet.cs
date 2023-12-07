@@ -36,6 +36,12 @@ namespace Thirdweb.Wallets
         Task<string> GetAddress();
 
         /// <summary>
+        /// Return the email of the main account (if any, otherwise return an empty string).
+        /// </summary>
+        /// <returns>The email of the main account or an empty string.</returns>
+        Task<string> GetEmail();
+
+        /// <summary>
         /// Return the address of the signer account (if any, otherwise return GetAddress).
         /// </summary>
         /// <returns>The address of the signer account.</returns>
