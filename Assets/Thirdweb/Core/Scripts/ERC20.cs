@@ -205,6 +205,31 @@ namespace Thirdweb
         }
 
         /// <summary>
+        /// Transfer a given amount of currency from the given wallet (if permission is granted) to another wallet
+        /// </summary>
+        public async Task<TransactionResult> TransferFrom(string from, string to, string amount)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transferFrom"), Utils.ToJsonStringArray(from, to, amount));
+            }
+            else
+            {
+                var currency = await Get();
+                var rawAmountToTransfer = BigInteger.Parse(amount.ToWei()).AdjustDecimals(18, int.Parse(currency.decimals));
+                return await TransactionManager.ThirdwebWrite(
+                    contractAddress,
+                    new TokenERC20Contract.TransferFromFunction()
+                    {
+                        From = from,
+                        To = to,
+                        Amount = rawAmountToTransfer
+                    }
+                );
+            }
+        }
+
+        /// <summary>
         /// Burn a given amount of currency
         /// </summary>
         public async Task<TransactionResult> Burn(string amount)
