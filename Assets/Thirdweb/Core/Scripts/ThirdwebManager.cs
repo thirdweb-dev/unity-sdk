@@ -170,7 +170,7 @@ namespace Thirdweb
                     throw new UnityException($"Could not add {chainData.identifier} to supported chains, RPC overrides must start with https:// or be left empty to use thirdweb RPCs!");
 
                 string rpc = string.IsNullOrEmpty(chainData.rpcOverride)
-                    ? (string.IsNullOrEmpty(clientId) ? $"https://{chainData.identifier}.rpc.thirdweb.com/" : $"https://{chainData.identifier}.rpc.thirdweb.com/{clientId}")
+                    ? (string.IsNullOrEmpty(clientId) ? $"https://{chainData.chainId}.rpc.thirdweb.com/" : $"https://{chainData.chainId}.rpc.thirdweb.com/{clientId}")
                     : chainData.rpcOverride;
 
                 if (new System.Uri(rpc).Host.EndsWith(".thirdweb.com"))
@@ -282,8 +282,8 @@ namespace Thirdweb
                 {
                     factoryAddress = factoryAddress,
                     gasless = gasless,
-                    bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{activeChain}.bundler.thirdweb.com" : bundlerUrl,
-                    paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{activeChain}.bundler.thirdweb.com" : paymasterUrl,
+                    bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : bundlerUrl,
+                    paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : paymasterUrl,
                     entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
                 };
 
