@@ -194,6 +194,8 @@ namespace Thirdweb
 
         private async Task AddNetwork(ThirdwebChainData newChainData)
         {
+            var sanitizedRpcs = newChainData.rpcUrls.Select(x => x.Contains("rpc.thirdweb.com") ? x[..(x.IndexOf(".com") + 4)] : x).ToArray();
+            newChainData.rpcUrls = sanitizedRpcs;
             await Request<object>("wallet_addEthereumChain", new object[] { newChainData });
         }
 
