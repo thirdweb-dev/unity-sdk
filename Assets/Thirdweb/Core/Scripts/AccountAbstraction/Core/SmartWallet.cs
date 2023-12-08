@@ -213,7 +213,7 @@ namespace Thirdweb.AccountAbstraction
                 Nonce = await GetNonce(),
                 InitCode = initCode,
                 CallData = executeInput.Data.HexStringToByteArray(),
-                CallGasLimit = transactionInput.Gas != null ? (transactionInput.Gas.Value < 21000 ? 100000 : transactionInput.Gas.Value) : 100000,
+                CallGasLimit = 50000 + (transactionInput.Gas != null ? (transactionInput.Gas.Value < 21000 ? 100000 : transactionInput.Gas.Value) : 100000),
                 VerificationGasLimit = 100000 + gas,
                 PreVerificationGas = 21000,
                 MaxFeePerGas = latestBlock.BaseFeePerGas.Value * 2 + BigInteger.Parse("1500000000"),
