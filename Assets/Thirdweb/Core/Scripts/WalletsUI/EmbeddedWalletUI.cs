@@ -83,7 +83,7 @@ namespace Thirdweb.Wallets
                     AuthProvider.Google => "Google",
                     AuthProvider.Apple => "Apple",
                     AuthProvider.Facebook => "Facebook",
-                    AuthProvider.CustomAuth => "CustomAuth",
+                    AuthProvider.JWT => "CustomAuth",
                     _ => throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}"),
                 };
                 return await _embeddedWallet.GetUserAsync(_email, authProvider);
@@ -109,8 +109,11 @@ namespace Thirdweb.Wallets
                     case AuthProvider.Facebook:
                         await LoginWithOauth("Facebook");
                         break;
-                    case AuthProvider.CustomAuth:
-                        await LoginWithCustomJwt(authOptions.authToken, authOptions.recoveryCode);
+                    case AuthProvider.JWT:
+                        await LoginWithJWT(authOptions.jwtOrPayload, authOptions.encryptionKey);
+                        break;
+                    case AuthProvider.AuthEndpoint:
+                        await LoginWithAuthEndpoint(authOptions.jwtOrPayload, authOptions.encryptionKey);
                         break;
                     default:
                         throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}");
@@ -224,7 +227,7 @@ namespace Thirdweb.Wallets
             {
                 try
                 {
-                    var res = await _embeddedWallet.SignInWithOauth(authProviderStr, authResultJson, null);
+                    var res = await _embeddedWallet.SignInWithOauthAsync(authProviderStr, authResultJson, null);
                     _user = res.User;
                 }
                 catch (Exception e)
@@ -239,7 +242,7 @@ namespace Thirdweb.Wallets
             try
             {
                 string recoveryCode = RecoveryInput.text;
-                var res = await _embeddedWallet.SignInWithOauth(authProviderStr, authResult, recoveryCode);
+                var res = await _embeddedWallet.SignInWithOauthAsync(authProviderStr, authResult, recoveryCode);
                 _user = res.User;
                 ShowRecoveryCodes(res);
             }
@@ -260,11 +263,32 @@ namespace Thirdweb.Wallets
 
         #endregion
 
-        #region Custom JWT Flow
+        #region JWT Flow
 
-        private async Task LoginWithCustomJwt(string jwtToken, string recoveryCode)
+        private async Task LoginWithJWT(string jwtToken, string encryptionKey, string recoveryCode = null)
         {
-            var res = await _embeddedWallet.SignInWithJwtAuthAsync(jwtToken, recoveryCode);
+            if (string.IsNullOrEmpty(jwtToken))
+                throw new UnityException("JWT token is required for JWT login!");
+            if (string.IsNullOrEmpty(encryptionKey))
+                throw new UnityException("Encryption key is required for JWT login!");
+
+            var res = await _embeddedWallet.SignInWithJwtAsync(jwtToken, encryptionKey, recoveryCode);
+            _user = res.User;
+            ShowRecoveryCodes(res);
+        }
+
+        #endregion
+
+        #region Auth Endpoint Flow
+
+        private async Task LoginWithAuthEndpoint(string payload, string encryptionKey, string recoveryCode = null)
+        {
+            if (string.IsNullOrEmpty(payload))
+                throw new UnityException("Auth payload is required for Auth Endpoint login!");
+            if (string.IsNullOrEmpty(encryptionKey))
+                throw new UnityException("Encryption key is required for Auth Endpoint login!");
+
+            var res = await _embeddedWallet.SignInWithAuthEndpointAsync(payload, encryptionKey, recoveryCode);
             _user = res.User;
             ShowRecoveryCodes(res);
         }

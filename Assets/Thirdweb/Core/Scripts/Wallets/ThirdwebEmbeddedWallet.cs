@@ -21,7 +21,7 @@ namespace Thirdweb.Wallets
             _web3 = null;
             _provider = WalletProvider.EmbeddedWallet;
             _signerProvider = WalletProvider.LocalWallet;
-            _embeddedWallet = new EmbeddedWallet(clientId, bundleId);
+            _embeddedWallet = new EmbeddedWallet(clientId, bundleId, "unity", ThirdwebSDK.version);
         }
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
