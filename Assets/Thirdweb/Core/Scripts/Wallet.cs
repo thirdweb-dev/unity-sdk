@@ -708,7 +708,7 @@ namespace Thirdweb
             this.password = password;
             this.email = email;
             this.personalWallet = personalWallet;
-            this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.EmailOTP, authToken: null);
+            this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.EmailOTP, jwtOrPayload: null, encryptionKey: null);
             this.smartWalletAccountOverride = smartWalletAccountOverride;
         }
     }
@@ -720,21 +720,21 @@ namespace Thirdweb
     public class AuthOptions
     {
         public AuthProvider authProvider;
-        public string authToken;
-        public string recoveryCode;
+        public string jwtOrPayload;
+        public string encryptionKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthOptions"/> class with the specified parameters.
         /// </summary>
         /// <param name="authProvider">The authentication provider to use.</param>
-        /// <param name="authToken">The auth token to use for validation e.g. jwt</param>
-        /// <param name="recoveryCode">The recovery code used for CustomAuth when recovery is User Managed</param>
+        /// <param name="jwtOrPayload">Used for custom JWT or AuthEndpoint methods, pass JWT or auth payload respectively.</param>
+        /// <param name="encryptionKey">Used for custom JWT or AuthEndpoint methods, developer-manaed recovery encryption key.</param>
         /// <returns>A new instance of the <see cref="AuthOptions"/> class.</returns>
-        public AuthOptions(AuthProvider authProvider, string authToken = null, string recoveryCode = null)
+        public AuthOptions(AuthProvider authProvider, string jwtOrPayload = null, string encryptionKey = null)
         {
             this.authProvider = authProvider;
-            this.authToken = authToken;
-            this.recoveryCode = recoveryCode;
+            this.jwtOrPayload = jwtOrPayload;
+            this.encryptionKey = encryptionKey;
         }
     }
 
@@ -781,8 +781,13 @@ namespace Thirdweb
         Facebook,
 
         /// <summary>
-        /// Bring your own auth.
+        /// JWT-Based Authentication Flow, checks JWT against developer-set JWKS URI.
         /// </summary>
-        CustomAuth
+        JWT,
+
+        /// <summary>
+        /// Custom Authentication Flow, checks payload against developer-set Auth Endpoint.
+        /// </summary>
+        AuthEndpoint,
     }
 }
