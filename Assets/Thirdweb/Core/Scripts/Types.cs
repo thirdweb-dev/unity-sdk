@@ -530,4 +530,35 @@ namespace Thirdweb
                 + $"\n>eventSignature: {eventSignature}";
         }
     }
+
+    [System.Serializable]
+    public struct SignerWithPermissions
+    {
+        public bool? isAdmin;
+        public string signer;
+        public SignerPermissions permissions;
+
+        public override readonly string ToString()
+        {
+            return $"SignerWithPermissions:" + $"\n>isAdmin: {isAdmin}" + $"\n>signer: {signer}" + $"\n>permissions: {permissions}";
+        }
+    }
+
+    [System.Serializable]
+    public struct SignerPermissions
+    {
+        public string startDate;
+        public string expirationDate;
+        public string nativeTokenLimitPerTransaction;
+        public List<string> approvedCallTargets;
+
+        public override readonly string ToString()
+        {
+            return $"SignerPermissions:"
+                + $"\n>startDate: {startDate}"
+                + $"\n>expirationDate: {expirationDate}"
+                + $"\n>nativeTokenLimitPerTransaction: {nativeTokenLimitPerTransaction}"
+                + $"\n>approvedCallTargets: {approvedCallTargets}";
+        }
+    }
 }
