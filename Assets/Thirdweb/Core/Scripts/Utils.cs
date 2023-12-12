@@ -457,5 +457,13 @@ namespace Thirdweb
                     return true;
             }
         }
+
+        public static string JSDateToUnixTimestamp(string dateString)
+        {
+            DateTime dateTime = DateTime.Parse(dateString, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+            DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            long unixTimestamp = (long)(dateTime - unixEpoch).TotalSeconds;
+            return unixTimestamp.ToString();
+        }
     }
 }

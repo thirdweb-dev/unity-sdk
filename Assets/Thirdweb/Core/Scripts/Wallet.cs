@@ -573,7 +573,6 @@ namespace Thirdweb
         /// <param name="reqValidityStartTimestamp">UNIX timestamp of when the signer's permissions request validity starts.</param>
         /// <param name="reqValidityEndTimestamp">UNIX timestamp of when the signer's permissions request validity ends.</param>
         /// <returns>The result of the transaction as a TransactionResult object.</returns>
-        /// <exception cref="UnityException"></exception>
         public async Task<TransactionResult> CreateSessionKey(
             string signerAddress,
             List<string> approvedTargets,
@@ -603,8 +602,6 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
-                    throw new UnityException("This functionality is only available for SmartWallets.");
                 var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
                 {
@@ -620,6 +617,99 @@ namespace Thirdweb
                 };
                 string signature = await EIP712.GenerateSignature_SmartAccount("Account", "1", await GetChainId(), await GetAddress(), request);
                 return await smartWallet.SmartWallet.SetPermissionsForSigner(request, signature.HexToByteArray());
+            }
+        }
+
+        /// <summary>
+        /// Smart Wallet only: Revoke a signer for the connected smart account.
+        /// </summary>
+        /// <param name="signerAddress">Address of the signer to revoke.</param>
+        /// <returns>The result of the transaction as a TransactionResult object.</returns>
+        public async Task<TransactionResult> RevokeSessionKey(string signerAddress)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.SmartWalletRevokeSessionKey<TransactionResult>(signerAddress);
+            }
+            else
+            {
+                var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
+                {
+                    Signer = signerAddress,
+                    IsAdmin = 0,
+                    ApprovedTargets = new List<string>(),
+                    NativeTokenLimitPerTransaction = 0,
+                    PermissionStartTimestamp = 0,
+                    PermissionEndTimestamp = 0,
+                    ReqValidityStartTimestamp = 0,
+                    ReqValidityEndTimestamp = Utils.GetUnixTimeStampIn10Years(),
+                    Uid = Guid.NewGuid().ToByteArray()
+                };
+                string signature = await EIP712.GenerateSignature_SmartAccount("Account", "1", await GetChainId(), await GetAddress(), request);
+                return await smartWallet.SmartWallet.SetPermissionsForSigner(request, signature.HexToByteArray());
+            }
+        }
+
+        /// <summary>
+        /// Smart Wallet only: Get all active signers for the connected smart account.
+        /// </summary>
+        /// <returns>A list of SignerWithPermissions objects.</returns>
+        public async Task<List<SignerWithPermissions>> GetAllActiveSigners()
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                var activeSigners = await Bridge.SmartWalletGetAllActiveSigners<List<SignerWithPermissions>>();
+                for (int i = 0; i < activeSigners.Count; i++)
+                {
+                    var signer = activeSigners[i];
+                    signer.permissions.startDate = signer.permissions.startDate == "0" ? "0" : Utils.JSDateToUnixTimestamp(signer.permissions.startDate);
+                    signer.permissions.expirationDate = signer.permissions.expirationDate == "0" ? "0" : Utils.JSDateToUnixTimestamp(signer.permissions.expirationDate);
+                    activeSigners[i] = signer;
+                }
+                return activeSigners;
+            }
+            else
+            {
+                string address = await GetAddress();
+                var raw = await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetAllActiveSignersFunction, Contracts.Account.ContractDefinition.GetAllActiveSignersOutputDTO>(
+                    address,
+                    new Contracts.Account.ContractDefinition.GetAllActiveSignersFunction()
+                );
+                var signers = new List<SignerWithPermissions>();
+                foreach (var rawSigner in raw.Signers)
+                {
+                    bool? isAdmin;
+                    try
+                    {
+                        isAdmin = (
+                            await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.IsAdminFunction, Contracts.Account.ContractDefinition.IsAdminOutputDTO>(
+                                address,
+                                new Contracts.Account.ContractDefinition.IsAdminFunction() { Account = rawSigner.Signer }
+                            )
+                        ).ReturnValue1;
+                    }
+                    catch
+                    {
+                        isAdmin = null;
+                    }
+
+                    signers.Add(
+                        new SignerWithPermissions()
+                        {
+                            isAdmin = isAdmin,
+                            signer = rawSigner.Signer,
+                            permissions = new SignerPermissions()
+                            {
+                                approvedCallTargets = rawSigner.ApprovedTargets,
+                                nativeTokenLimitPerTransaction = rawSigner.NativeTokenLimitPerTransaction.ToString(),
+                                startDate = rawSigner.StartTimestamp.ToString(),
+                                expirationDate = rawSigner.EndTimestamp.ToString(),
+                            }
+                        }
+                    );
+                }
+                return signers;
             }
         }
 

@@ -262,6 +262,23 @@ namespace Thirdweb
             return JsonConvert.DeserializeObject<Result<T>>(result).result;
         }
 
+        public static async Task<T> SmartWalletRevokeSessionKey<T>(string signer)
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return default;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebSmartWalletRevokeSessionKey(taskId, signer, jsCallback);
+#endif
+            string result = await task.Task;
+            return JsonConvert.DeserializeObject<Result<T>>(result).result;
+        }
+
         public static async Task<TransactionReceipt> WaitForTransactionResult(string txHash)
         {
             if (!Utils.IsWebGLBuild())
@@ -277,6 +294,23 @@ namespace Thirdweb
 #endif
             string result = await task.Task;
             return JsonConvert.DeserializeObject<Result<TransactionReceipt>>(result).result;
+        }
+
+        public static async Task<T> SmartWalletGetAllActiveSigners<T>()
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return default;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebSmartWalletGetAllActiveSigners(taskId, jsCallback);
+#endif
+            string result = await task.Task;
+            return JsonConvert.DeserializeObject<Result<T>>(result).result;
         }
 
         public static async Task<BigInteger> GetLatestBlockNumber()
@@ -370,6 +404,10 @@ namespace Thirdweb
         private static extern string ThirdwebSmartWalletRemoveAdmin(string taskId, string admin, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebSmartWalletCreateSessionKey(string taskId, string options, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebSmartWalletRevokeSessionKey(string taskId, string signer, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebSmartWalletGetAllActiveSigners(string taskId, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebWaitForTransactionResult(string taskId, string txHash, Action<string, string, string> cb);
         [DllImport("__Internal")]
