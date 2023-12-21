@@ -204,7 +204,7 @@ namespace Thirdweb.AccountAbstraction
 
             // Create the user operation and its safe (hexified) version
 
-            var gasPrices = await Utils.GetGasPriceAsync((await PersonalWeb3.Eth.ChainId.SendRequestAsync()).Value);
+            var gasPrices = await Utils.GetGasPriceAsync(ThirdwebManager.Instance.SDK.session.ChainId);
 
             var partialUserOp = new EntryPointContract.UserOperation()
             {
