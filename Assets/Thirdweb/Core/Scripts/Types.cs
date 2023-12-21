@@ -561,4 +561,35 @@ namespace Thirdweb
                 + $"\n>approvedCallTargets: {approvedCallTargets}";
         }
     }
+
+    [System.Serializable]
+    public class GasPriceParameters
+    {
+        public BigInteger MaxFeePerGas { get; private set; }
+        public BigInteger MaxPriorityFeePerGas { get; private set; }
+
+        public GasPriceParameters(BigInteger maxFeePerGas, BigInteger maxPriorityFeePerGas)
+        {
+            MaxFeePerGas = maxFeePerGas;
+            MaxPriorityFeePerGas = maxPriorityFeePerGas;
+        }
+    }
+
+    [System.Serializable]
+    public class PolygonGasStationResult
+    {
+        public GasStationResult safeLow;
+        public GasStationResult standard;
+        public GasStationResult fast;
+        public BigInteger estimatedBaseFee;
+        public int blockTime;
+        public BigInteger blockNumber;
+    }
+
+    [System.Serializable]
+    public class GasStationResult
+    {
+        public double maxPriorityFee;
+        public double maxFee;
+    }
 }
