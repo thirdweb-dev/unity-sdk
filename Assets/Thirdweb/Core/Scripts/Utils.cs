@@ -12,6 +12,8 @@ using Nethereum.Signer;
 using Nethereum.Web3;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
+using System.Linq;
+using System.Net.Http;
 
 namespace Thirdweb
 {
@@ -409,9 +411,9 @@ namespace Thirdweb
             return uri;
         }
 
-        public static Web3 GetWeb3()
+        public static Web3 GetWeb3(BigInteger? chainId = null)
         {
-            return new Web3(new ThirdwebClient(new Uri(ThirdwebManager.Instance.SDK.session.RPC)));
+            return new Web3(new ThirdwebClient(new Uri(chainId == null ? ThirdwebManager.Instance.SDK.session.RPC : $"https://{chainId}.rpc.thirdweb.com")));
         }
 
         public static string GetNativeTokenWrapper(BigInteger chainId)
@@ -464,6 +466,103 @@ namespace Thirdweb
             DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             long unixTimestamp = (long)(dateTime - unixEpoch).TotalSeconds;
             return unixTimestamp.ToString();
+        }
+
+        public async static Task<GasPriceParameters> GetGasPriceAsync(BigInteger chainId)
+        {
+            if (chainId == 137 || chainId == 80001)
+            {
+                return await GetPolygonGasPriceParameters((int)chainId);
+            }
+
+            var web3 = GetWeb3(chainId);
+            var gasPrice = (await web3.Eth.GasPrice.SendRequestAsync()).Value;
+
+            if (chainId == 42220) // celo mainnet
+            {
+                gasPrice = BigInteger.Multiply(gasPrice, 3) / 2;
+                return new GasPriceParameters(gasPrice, gasPrice);
+            }
+
+            if (
+                chainId == 1 // mainnet
+                || chainId == 11155111 // sepolia
+                || chainId == 42161 // arbitrum
+                || chainId == 421613 // arbitrum goerli
+                || chainId == 534352 // scroll
+                || chainId == 534351 // scroll sepolia
+                || chainId == 5000 // mantle
+                || chainId == 22222 // nautilus
+                || chainId == 8453 // base
+                || chainId == 53935 // dfk
+                || chainId == 44787 // celo alfajores
+                || chainId == 43114 // avalanche
+                || chainId == 43113 // avalanche fuji
+            )
+            {
+                gasPrice = BigInteger.Multiply(gasPrice, 10) / 9;
+                return new GasPriceParameters(gasPrice, gasPrice);
+            }
+
+            var maxPriorityFeePerGas = new BigInteger(2000000000) > gasPrice ? gasPrice : new BigInteger(2000000000);
+
+            var feeHistory = await web3.Eth.FeeHistory.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(20), Nethereum.RPC.Eth.DTOs.BlockParameter.CreateLatest(), new double[] { 20 });
+
+            if (feeHistory.Reward == null)
+            {
+                gasPrice = BigInteger.Multiply(gasPrice, 3) / 2;
+                maxPriorityFeePerGas = gasPrice;
+            }
+            else
+            {
+                var feeAverage = feeHistory.Reward.Select(r => r[0]).Aggregate(BigInteger.Zero, (acc, cur) => cur + acc) / 10;
+                if (feeAverage > gasPrice)
+                {
+                    gasPrice = feeAverage;
+                }
+                maxPriorityFeePerGas = gasPrice;
+            }
+
+            return new GasPriceParameters(gasPrice, maxPriorityFeePerGas);
+        }
+
+        public async static Task<GasPriceParameters> GetPolygonGasPriceParameters(int chainId)
+        {
+            using var httpClient = new HttpClient();
+            string gasStationUrl;
+            BigInteger minGasPrice = 1;
+            switch (chainId)
+            {
+                case 137:
+                    gasStationUrl = "https://gasstation.polygon.technology/v2";
+                    minGasPrice = 31;
+                    break;
+                case 80001:
+                    gasStationUrl = "https://gasstation-testnet.polygon.technology/v2";
+                    minGasPrice = 1;
+                    break;
+                default:
+                    throw new UnityException("Unsupported chain id");
+            }
+            try
+            {
+                var response = await httpClient.GetAsync(gasStationUrl);
+                response.EnsureSuccessStatusCode();
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var data = JsonConvert.DeserializeObject<PolygonGasStationResult>(responseBody);
+                return new GasPriceParameters(GweiToWei(data.fast.maxFee), GweiToWei(data.fast.maxPriorityFee));
+            }
+            catch (Exception e)
+            {
+                ThirdwebDebug.LogWarning($"Failed to get gas price from Polygon gas station, using default: {e.Message}");
+            }
+            var gasPrice = await GetWeb3().Eth.GasPrice.SendRequestAsync();
+            return new GasPriceParameters(gasPrice, minGasPrice);
+        }
+
+        public static BigInteger GweiToWei(double gweiAmount)
+        {
+            return new BigInteger(gweiAmount * 1e9);
         }
     }
 }

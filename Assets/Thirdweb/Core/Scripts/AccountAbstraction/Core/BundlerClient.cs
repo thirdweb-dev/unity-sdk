@@ -41,7 +41,7 @@ namespace Thirdweb.AccountAbstraction
         private static async Task<RpcResponseMessage> BundlerRequest(string url, string apiKey, object requestId, string method, params object[] args)
         {
             using HttpClient client = new HttpClient();
-            ThirdwebDebug.Log($"Bundler Request: {method}({string.Join(", ", args)})");
+            ThirdwebDebug.Log($"Bundler Request: {method}({JsonConvert.SerializeObject(args)}");
             var requestMessage = new RpcRequestMessage(requestId, method, args);
             string requestMessageJson = JsonConvert.SerializeObject(requestMessage);
 

@@ -63,17 +63,24 @@ namespace Thirdweb
                     ActiveWallet = new ThirdwebMetamask();
                     break;
                 case WalletProvider.SmartWallet:
-                    await Connect(
-                        new WalletConnection(
-                            provider: walletConnection.personalWallet,
-                            chainId: walletConnection.chainId,
-                            password: walletConnection.password,
-                            email: walletConnection.email,
-                            authOptions: walletConnection.authOptions
-                        )
-                    );
                     if (Options.smartWalletConfig == null)
                         throw new UnityException("Smart wallet config is required for smart wallet connection method!");
+                    if (ActiveWallet?.GetProvider() != walletConnection.personalWallet)
+                    {
+                        await Connect(
+                            new WalletConnection(
+                                provider: walletConnection.personalWallet,
+                                chainId: walletConnection.chainId,
+                                password: walletConnection.password,
+                                email: walletConnection.email,
+                                authOptions: walletConnection.authOptions
+                            )
+                        );
+                    }
+                    else
+                    {
+                        ThirdwebDebug.Log("Already connected to personal wallet, skipping connection.");
+                    }
                     ActiveWallet = new ThirdwebSmartWallet(ActiveWallet, Options.smartWalletConfig.Value);
                     break;
                 case WalletProvider.Hyperplay:
