@@ -27,6 +27,7 @@ namespace Thirdweb
         private SerializedProperty walletConnectExplorerRecommendedWalletIdsProperty;
         private SerializedProperty factoryAddressProperty;
         private SerializedProperty gaslessProperty;
+        private SerializedProperty erc20PaymasterAddressProperty;
         private SerializedProperty bundlerUrlProperty;
         private SerializedProperty paymasterUrlProperty;
         private SerializedProperty entryPointAddressProperty;
@@ -67,6 +68,7 @@ namespace Thirdweb
             walletConnectExplorerRecommendedWalletIdsProperty = serializedObject.FindProperty("walletConnectExplorerRecommendedWalletIds");
             factoryAddressProperty = serializedObject.FindProperty("factoryAddress");
             gaslessProperty = serializedObject.FindProperty("gasless");
+            erc20PaymasterAddressProperty = serializedObject.FindProperty("erc20PaymasterAddress");
             bundlerUrlProperty = serializedObject.FindProperty("bundlerUrl");
             paymasterUrlProperty = serializedObject.FindProperty("paymasterUrl");
             entryPointAddressProperty = serializedObject.FindProperty("entryPointAddress");
@@ -304,6 +306,7 @@ namespace Thirdweb
 
                     if (showSmartWalletOptionalFields)
                     {
+                        EditorGUILayout.PropertyField(erc20PaymasterAddressProperty);
                         EditorGUILayout.PropertyField(bundlerUrlProperty);
                         EditorGUILayout.PropertyField(paymasterUrlProperty);
                         EditorGUILayout.PropertyField(entryPointAddressProperty);

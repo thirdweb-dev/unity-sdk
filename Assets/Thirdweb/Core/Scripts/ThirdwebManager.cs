@@ -100,6 +100,9 @@ namespace Thirdweb
         [Tooltip("Whether it should use a paymaster for gasless transactions or not")]
         public bool gasless;
 
+        [Tooltip("Optional - If you want to use a custom erc20 paymaster, you can provide the contract address here")]
+        public string erc20PaymasterAddress;
+
         [Tooltip("Optional - If you want to use a custom relayer, you can provide the URL here")]
         public string bundlerUrl;
 
@@ -282,6 +285,7 @@ namespace Thirdweb
                 {
                     factoryAddress = factoryAddress,
                     gasless = gasless,
+                    erc20PaymasterAddress = string.IsNullOrEmpty(erc20PaymasterAddress) ? null : erc20PaymasterAddress,
                     bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : bundlerUrl,
                     paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : paymasterUrl,
                     entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
