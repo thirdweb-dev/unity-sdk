@@ -154,6 +154,9 @@ namespace Thirdweb
 
         // WRITE FUNCTIONS
 
+        /// <summary>
+        /// Set how much allowance the given address is allowed to spend on behalf of the connected wallet
+        /// </summary>
         public async Task<TransactionResult> Approve(string spender, string amount)
         {
             if (Utils.IsWebGLBuild())
