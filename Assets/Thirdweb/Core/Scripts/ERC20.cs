@@ -154,6 +154,20 @@ namespace Thirdweb
 
         // WRITE FUNCTIONS
 
+        public async Task<TransactionResult> Approve(string spender, string amount)
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                throw new UnityException("This functionality is not yet available on your current platform.");
+                // WEN WEBGL
+                // return await Bridge.InvokeRoute<TransactionResult>(getRoute("approve"), Utils.ToJsonStringArray(spender, amount));
+            }
+            else
+            {
+                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.ApproveFunction() { Spender = spender, Amount = BigInteger.Parse(amount.ToWei()) });
+            }
+        }
+
         /// <summary>
         /// Set how much allowance the given address is allowed to spend on behalf of the connected wallet
         /// </summary>

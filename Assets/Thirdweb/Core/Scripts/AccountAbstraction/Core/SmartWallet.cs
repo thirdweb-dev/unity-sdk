@@ -225,7 +225,7 @@ namespace Thirdweb.AccountAbstraction
                 if (BigInteger.Parse(approvedAmount.value) == 0)
                 {
                     ThirdwebDebug.Log($"Approving tokens for ERC20Paymaster spending");
-                    await tokenContract.ERC20.SetAllowance(Config.erc20PaymasterAddress, "9223372036854775807");
+                    await tokenContract.ERC20.Approve(Config.erc20PaymasterAddress, (BigInteger.Pow(2, 96) - 1).ToString().ToEth());
                 }
                 _approved = true;
                 _approving = false;
