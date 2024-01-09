@@ -6,8 +6,8 @@ namespace evm.net.Models
     public class JsonRpcRequest<T> : JsonRpcPayload
     {
         [JsonProperty("method")]
-        public new string Method { get; }
-
+        public string Method { get; }
+        
         [JsonProperty("params")]
         public T Parameters { get; }
 

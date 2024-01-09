@@ -24,8 +24,6 @@ namespace MetaMask.Transports.Unity
         }
         public abstract event EventHandler<MetaMaskUnityRequestEventArgs> Requesting;
 
-        public abstract string UserAgent { get; }
-
         public abstract void Initialize();
 
         public abstract void UpdateUrls(string universalLink, string deepLink);

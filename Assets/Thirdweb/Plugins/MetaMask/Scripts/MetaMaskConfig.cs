@@ -4,7 +4,7 @@ namespace MetaMask.Unity
 {
 
     [CreateAssetMenu(menuName = "MetaMask/Config")]
-    public class MetaMaskConfig : ScriptableObject
+    public class MetaMaskConfig : ScriptableObject, IAppConfig
     {
 
         #region Constants
@@ -36,6 +36,16 @@ namespace MetaMask.Unity
         /// <remarks>This is used to determine whether the app is running in the foreground.</remarks>
         [SerializeField]
         protected string appUrl = "example.com";
+        
+        /// <summary>The URL of the app icon.</summary>
+        /// <remarks>This is used to determine where the app icon should be fetched from.</remarks>
+        [SerializeField]
+        protected string appIcon = "";
+
+        /// <summary>The user agent to use when making requests.</summary>
+        /// <remarks>This is used to identify the application when making requests.</remarks>
+        [SerializeField]
+        protected string userAgent = "UnityUGUITransport/1.0.0";
 
         [Header("Persistent Data")]
         [Tooltip("Whether to encrypt the persistent data.")]
@@ -86,6 +96,14 @@ namespace MetaMask.Unity
         /// <summary>Gets the URL of the app.</summary>
         /// <returns>The URL of the app.</returns>
         public virtual string AppUrl => this.appUrl;
+        
+        /// <summary>Gets the URL of the app.</summary>
+        /// <returns>The URL of the app.</returns>
+        public virtual string AppIcon => this.appIcon;
+
+        /// <summary>The user agent to use when making requests.</summary>
+        /// <remarks>This is used to identify the application when making requests.</remarks>
+        public virtual string UserAgent => this.userAgent;
 
         /// <summary>Gets whether to encrypt the data.</summary>
         /// <returns>Whether to encrypt the data.</returns>

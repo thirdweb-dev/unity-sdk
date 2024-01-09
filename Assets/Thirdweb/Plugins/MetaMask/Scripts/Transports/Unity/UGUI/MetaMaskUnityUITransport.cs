@@ -32,11 +32,7 @@ namespace MetaMask.Transports.Unity.UI
 
         /// <summary>The default instance.</summary>
         protected static MetaMaskUnityUITransport defaultInstance;
-
-        /// <summary>The user agent to use when making requests.</summary>
-        /// <remarks>This is used to identify the application when making requests.</remarks>
-        [SerializeField]
-        protected string userAgent = "UnityUGUITransport/1.0.0";
+        
         /// <summary>Whether to use the deeplink to open the app.</summary>
         /// <remarks>This is only used when the app is launched from a deeplink.</remarks>
         //[FormerlySerializedAs("useDeeplink")] [SerializeField]
@@ -47,6 +43,9 @@ namespace MetaMask.Transports.Unity.UI
         /// <summary>The canvas that contains the MetaMask UI.</summary>
         [SerializeField]
         protected GameObject metaMaskCanvas;
+
+        [SerializeField]
+        protected bool useUniversalLinks = false;
 
         /// <summary>The instance of the MetaMask canvas.</summary>
         protected GameObject metaMaskCanvasInstance;
@@ -73,16 +72,6 @@ namespace MetaMask.Transports.Unity.UI
             }
         }
 
-        /// <summary>Gets the user agent string.</summary>
-        /// <returns>The user agent string.</returns>
-        public override string UserAgent
-        {
-            get
-            {
-                return this.userAgent;
-            }
-        }
-        
         public bool UseDeeplink => IsMobile;
 
         #endregion
@@ -123,7 +112,6 @@ namespace MetaMask.Transports.Unity.UI
         {
             this.connectionDeepLinkUrl = deepLink;
             this.connectionUniversalLinkUrl = universalLink;
-            
         }
 
         public override void OnConnectRequest()
@@ -136,8 +124,9 @@ namespace MetaMask.Transports.Unity.UI
 
         public void OpenConnectionDeepLink()
         {
-            Debug.Log("Opening Connection URL: " + this.connectionUniversalLinkUrl);
-            OpenDeeplinkURL(this.connectionUniversalLinkUrl);
+            var url = useUniversalLinks ? this.connectionUniversalLinkUrl : this.connectionDeepLinkUrl;
+            Debug.Log("Opening Connection URL: " + url);
+            OpenDeeplinkURL(url);
         }
 
         /// <summary>Called when the application fails to retrieve the content of the request.</summary>

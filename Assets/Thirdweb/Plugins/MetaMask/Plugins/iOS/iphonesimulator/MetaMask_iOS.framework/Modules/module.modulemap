@@ -1,7 +1,7 @@
 framework module MetaMask_iOS {
   umbrella header "MetaMask_iOS.h"
-
   export *
+
   module * { export * }
 }
 

@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -197,7 +197,7 @@ namespace evm.net
             if (methodInfo.DeclaringType != null)
             {
                 var possibleMethod = methodInfo.DeclaringType.GetInterfaces().Select(i =>
-                        i.GetMethod(methodInfo.Name, methodInfo.GetParameters().Select(p => p.ParameterType).ToArray()))
+                        i.GetMethod(methodInfo.Name, GetParametersNoOptions(methodInfo).Select(p => p.ParameterType).ToArray()))
                     .Where(m => m != null)
                     .FirstOrDefault(m => m.GetCustomAttribute<T>()  != null);
 
@@ -253,7 +253,7 @@ namespace evm.net
         {
             List<Parameter> inputParameters = new List<Parameter>();
             int order = 1;
-            foreach (var parameter in correctMethod.GetParameters())
+            foreach (var parameter in GetParametersNoOptions(correctMethod))
             {
                 var evmAbiType = ParameterToAbiType(parameter);
                 var evmParamterAttribute = parameter.GetCustomAttributes<EvmParameterInfoAttribute>()
@@ -671,7 +671,7 @@ namespace evm.net
             var requestMethod = (from m in _provider.GetType().GetMethods()
                 where m.Name == "Request" && m.IsGenericMethodDefinition
                 let typeParams = m.GetGenericArguments()
-                let normalParams = m.GetParameters()
+                let normalParams = GetParametersNoOptions(m)
 
                 where typeParams.Length == 1 && normalParams.Length == 2
                 select m).FirstOrDefault();
@@ -700,7 +700,7 @@ namespace evm.net
                 // then try using ILegacyProvider
                 requestMethod = (from m in _provider.GetType().GetMethods()
                     where m.Name == "Request" && !m.IsGenericMethodDefinition
-                    let normalParams = m.GetParameters()
+                    let normalParams = GetParametersNoOptions(m)
 
                     where normalParams.Length == 2
                     select m).FirstOrDefault();
@@ -951,6 +951,11 @@ namespace evm.net
 
             result = null;
             return false;
+        }
+
+        private ParameterInfo[] GetParametersNoOptions(MethodBase m)
+        {
+            return m.GetParameters().Where(p => p.ParameterType != typeof(CallOptions)).ToArray();
         }
 
         private bool RunInvokeMethod(MethodBase methodInfo, object[] args, out object result)

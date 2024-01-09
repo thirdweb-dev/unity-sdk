@@ -67,7 +67,7 @@ namespace MetaMask.SocketIOClient.Transport
         {
             if (!_disposed)
             {
-                this._textSubject.OnError(new WebSocketException("Received a Close message"));
+                this._textSubject.OnError(new WebSocketException("Received a Close message: " + closeCode));
             }
         }
 

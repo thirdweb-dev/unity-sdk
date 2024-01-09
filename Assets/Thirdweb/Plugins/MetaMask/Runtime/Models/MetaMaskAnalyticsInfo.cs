@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-
 using Newtonsoft.Json;
 
 namespace MetaMask.Models
@@ -9,22 +8,23 @@ namespace MetaMask.Models
 
         [JsonProperty("id")]
         [JsonPropertyName("id")]
-        public string Id { get; set; }
+        public string Id = "sdk";
 
-        [JsonProperty("event")]
-        [JsonPropertyName("event")]
-        public string Event { get; set; }
+        [JsonProperty("event")] [JsonPropertyName("event")]
+        public string Event;
 
-        [JsonProperty("communicationLayerPreference")]
-        [JsonPropertyName("communicationLayerPreference")]
-        public string CommunicationLayerPreference { get; set; }
+        [JsonProperty("commLayer")]
+        [JsonPropertyName("commLayer")]
+        public string CommunicationLayerPreference = "socket";
 
         [JsonProperty("sdkVersion")]
         [JsonPropertyName("sdkVersion")]
-        public string SdkVersion { get; set; }
+        public string SdkVersion = MetaMaskWallet.Version;
 
-        [JsonProperty("originatorInfo")]
-        [JsonPropertyName("originatorInfo")]
-        public MetaMaskOriginatorInfo OriginatorInfo { get; set; }
+        [JsonProperty("originatorInfo")] [JsonPropertyName("originatorInfo")]
+        public MetaMaskOriginatorInfo OriginatorInfo;
+        
+        [JsonProperty("platform")] [JsonPropertyName("platform")]
+        public string Platform;
     }
 }

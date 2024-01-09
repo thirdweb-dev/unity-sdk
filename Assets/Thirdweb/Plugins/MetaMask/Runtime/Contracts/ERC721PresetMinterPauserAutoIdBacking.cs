@@ -21,7 +21,7 @@ namespace MetaMask.Contracts
 {
 	public class ERC721PresetMinterPauserAutoIdBacking : Contract, ERC721PresetMinterPauserAutoId
 	{
-		public new string Address
+		public string Address
 		{
 			get => base.Address;
 		}

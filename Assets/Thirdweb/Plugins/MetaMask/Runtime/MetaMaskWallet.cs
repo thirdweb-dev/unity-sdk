@@ -22,6 +22,9 @@ namespace MetaMask
     /// </summary>
     public class MetaMaskWallet : IProvider, IEvents, IMetaMaskEventsHandler, IDisposable
     {
+        public const string Version = "1.2.2";
+        public const int AppIconMaxSize = 10_000;
+        
         private static readonly JsonConverter[] Converters = {
             new BigIntegerHexConverter()
         };
@@ -69,10 +72,10 @@ namespace MetaMask
 
         /// <summary>The URL of the MetaMask app.</summary>
         public const string MetaMaskUniversalLinkUrl = "https://metamask.app.link";
-        public const string MetaMaskDeepLinkUrl = "`metamask://";
+        public const string MetaMaskDeepLinkUrl = "metamask://";
 
         /// <summary>The URL of the socket.io server.</summary>
-        public const string SocketUrl = "https://socket.codefi.network";
+        public const string SocketUrl = "https://metamask-sdk-socket.metafi.codefi.network";
 
         /// <summary>The name of the event that is fired when a message is received.</summary>
         protected const string MessageEventName = "message";
@@ -89,8 +92,11 @@ namespace MetaMask
 
         protected const string ClientsReadyEventName = "clients_ready";
 
-        protected const string TrackingEventRequest = "sdk_connect_request_started";
+        protected const string TrackingEventConnectionStarted = "sdk_connect_request_started";
+        protected const string TrackingEventReconnectionStarted = "sdk_reconnect_request_started";
         protected const string TrackingEventConnected = "sdk_connection_established";
+        protected const string TrackingEventConnectionAuthorized = "sdk_connection_authorized";
+        protected const string TrackingEventConnectionRejected = "sdk_connection_rejected";
         protected const string TrackingEventDisconnected = "sdk_disconnected";
 
         #endregion
@@ -112,6 +118,17 @@ namespace MetaMask
         
         protected static List<string> MethodsToSendToFallback = new List<string>() {
             "eth_call",
+            "eth_blockNumber",
+            "eth_estimateGas",
+            "eth_gasPrice",
+            "eth_getBlockByNumber",
+            "eth_getBlockTransactionCountByHash",
+            "eth_getBlockTransactionCountByNumber",
+            "eth_getCode",
+            "eth_getTransactionByBlockHashAndIndex",
+            "eth_getTransactionByHash",
+            "eth_getTransactionCount",
+            "eth_getTransactionReceipt",
         };
         /// <summary>The users wallet session.</summary>
         protected MetaMaskSession session;
@@ -176,6 +193,8 @@ namespace MetaMask
 
         protected bool sessionEnded;
 
+        protected bool isResume;
+
         protected Queue<object> queuedMessage = new Queue<object>();
 
         protected IProvider fallbackProvider;
@@ -208,6 +227,10 @@ namespace MetaMask
             set => this.fallbackProvider = value;
         }
 
+        public string UserAgent { get; set; } = "UnityUGUITransport/1.0.0";
+
+        public DateTime LastActive => this.session.LastActive;
+
         /// <summary>Gets the currently selected address.</summary>
         /// <returns>The currently selected address.</returns>
         public string SelectedAddress => this.selectedAddress;
@@ -228,6 +251,16 @@ namespace MetaMask
         /// <summary>Gets a value indicating whether the client is connected to the server.</summary>
         /// <returns>true if the client is connected to the server; otherwise, false.</returns>
         public bool IsConnected => this.connected;
+
+        public string AppIcon => $"data:image/png;base64,{this.session.Data.AppIcon}";
+
+        public MetaMaskOriginatorInfo OriginatorInfo =>
+            new()
+            {
+                Title = this.session.Data.AppName,
+                Url = this.session.Data.AppUrl,
+                // Source = this.analyticsPlatform, TODO Figure out what source to default to
+            };
 
         /// <summary>Gets a value indicating whether the application is paused.</summary>
         /// <returns>true if the application is paused; otherwise, false.</returns>
@@ -266,14 +299,14 @@ namespace MetaMask
 
         #region Constructors
 
-        public MetaMaskWallet(MetaMaskDataManager dataManager, string appName, string appUrl,
+        public MetaMaskWallet(MetaMaskDataManager dataManager, IAppConfig appConfig,
             string sessionId, IEciesProvider eciesProvider, IMetaMaskTransport transport, 
             IMetaMaskSocketWrapper socket, string socketUrl = SocketUrl)
         {
             this.sessionId = sessionId;
             this._dataManager = dataManager;
 
-            LoadOrCreateSession(appName, appUrl, eciesProvider);
+            LoadOrCreateSession(appConfig, eciesProvider);
 
             this.transport = transport;
             this.socket = socket;
@@ -281,8 +314,6 @@ namespace MetaMask
 
             this.socket.Connected += OnSocketConnected;
             this.socket.Disconnected += OnSocketDisconnected;
-
-            _eventDelegator = new EventDelegator(this.session.Data.ChannelId);
         }
 
         /// <summary>Creates a new instance of the MetaMaskWallet class.</summary>
@@ -299,8 +330,6 @@ namespace MetaMask
 
             this.socket.Connected += OnSocketConnected;
             this.socket.Disconnected += OnSocketDisconnected;
-            
-            _eventDelegator = new EventDelegator(this.session.Data.ChannelId);
         }
 
         #endregion
@@ -309,12 +338,12 @@ namespace MetaMask
 
         protected void ReloadNewSession()
         {
-            LoadOrCreateSession(session.Data.AppName, session.Data.AppUrl, session.EciesProvider);
+            LoadOrCreateSession(session.Data, session.EciesProvider);
         }
 
-        protected void LoadOrCreateSession(string appName, string appUrl, IEciesProvider eciesProvider)
+        protected void LoadOrCreateSession(IAppConfig appConfig, IEciesProvider eciesProvider)
         {
-            var sessionData = new MetaMaskSessionData(appName, appUrl);
+            var sessionData = new MetaMaskSessionData(appConfig);
             this._dataManager.LoadInto(this.sessionId, sessionData);
             this.session = new MetaMaskSession(eciesProvider, sessionData);
         }
@@ -366,50 +395,54 @@ namespace MetaMask
         }
 
         /// <summary>Sends analytics data to Socket.io server.</summary>
-        /// <param name="analyticsInfo">JSON string with parameters</param>
-        public async void SendAnalytics(MetaMaskAnalyticsInfo analyticsInfo)
+        /// <param name="eventId">The event to send to analytics</param>
+        public async void SendAnalytics(string eventId)
         {
+            MetaMaskOriginatorInfo originatorInfo = OriginatorInfo;
+            if (eventId == "sdk_connect_request_started")
+            {
+                if (AppIcon.Length <= AppIconMaxSize)
+                    originatorInfo.Icon = AppIcon;
+                else
+                    MetaMaskDebug.LogWarning("The app icon provided is over the 8k limit. Excluding app icon");
+            }
+
+            var analyticsInfo = new MetaMaskAnalyticsInfo
+            {
+                Id = this.session.Data.ChannelId,
+                Event = eventId,
+                OriginatorInfo = originatorInfo,
+                Platform = this.analyticsPlatform,
+            };
+
             string jsonString = JsonConvert.SerializeObject(analyticsInfo);
             MetaMaskDebug.Log("Sending Analytics: " + jsonString);
 
-            var response = await this.socket.SendWebRequest(this.socketUrl.EndsWith("/") ? this.socketUrl + "debug" : this.socketUrl + "/debug", jsonString, new Dictionary<string, string> { { "Content-Type", "application/json" } });
+            var url = this.socketUrl.EndsWith("/") ? this.socketUrl + "debug" : this.socketUrl + "/debug";
+
+            var response = await this.socket.SendWebRequest(url, jsonString,
+                new Dictionary<string, string> {{"Content-Type", "application/json"}});
             if (response.IsSuccessful)
             {
-                MetaMaskDebug.Log("Analytics sent successfully!");
+                var r = JsonConvert.DeserializeObject<AnalyticsResponse>(response.Response);
+                if (r != null && r.Success) return;
             }
-            else
-            {
-                MetaMaskDebug.LogWarning("Sending analytics has failed:");
-                MetaMaskDebug.LogWarning(response.Response);
-                MetaMaskDebug.LogWarning(response.Error);
-            }
+
+            MetaMaskDebug.LogWarning("Sending analytics has failed:");
+            MetaMaskDebug.LogWarning(response.Response);
+            MetaMaskDebug.LogWarning(response.Error);
         }
 
         /// <summary>Sends the originator information to the clipboard.</summary>
         protected void SendOriginatorInfo()
         {
-            var originatorInfo = new MetaMaskOriginatorInfo
-            {
-                Title = this.session.Data.AppName,
-                Url = this.session.Data.AppUrl,
-                Platform = this.analyticsPlatform
-            };
+            var info = OriginatorInfo;
             var requestInfo = new MetaMaskRequestInfo
             {
                 Type = "originator_info",
-                OriginatorInfo = originatorInfo
+                OriginatorInfo = info
             };
             SendMessage(requestInfo, true);
-
-            var analyticsInfo = new MetaMaskAnalyticsInfo
-            {
-                Id = this.session.Data.ChannelId,
-                Event = TrackingEventRequest,
-                CommunicationLayerPreference = "socket",
-                SdkVersion = "0.2.0",
-                OriginatorInfo = originatorInfo
-            };
-            SendAnalytics(analyticsInfo);
         }
 
         /// <summary>Called when the wallet is paused.</summary>
@@ -432,11 +465,17 @@ namespace MetaMask
             SaveSession();
         }
         
+        /// <summary>
+        /// A function that completes when the wallet has successfully exchanged keys. This occurs
+        /// when a valid response is gotten from the wallet. 
+        /// </summary>
         protected async Task ValidateKeyExchange()
         {
             MetaMaskDebug.Log("Key validation requested");
+            // If we already have a task waiting for a reply
             if (this.validateKeyTcs != null)
             {
+                // Join the line, and wait for the original task
                 MetaMaskDebug.Log("Key validation already pending");
                 await this.validateKeyTcs.Task;
                 return;
@@ -458,36 +497,47 @@ namespace MetaMask
                 Method = request.Method,
             };
             
+            // Listen for an error response for this request
             _eventDelegator.ListenForOnce<MetaMaskTypedDataMessage<JsonRpcError>>($"{id}-error", (sender, @event) =>
             {
+                // Set exception to connection task
                 this.connectionTcs.TrySetException(new Exception(@event.EventData.Data.Error.Message));
             });
             
+            // Listen for a valid response for this request
             _eventDelegator.ListenForOnce<string>($"{id}-result", (sender, @event) =>
             {
+                // Deserialize the response and complete the connection task
                 var data =
                     JsonConvert.DeserializeObject<MetaMaskTypedDataMessage<JsonRpcResult<string[]>>>(@event.EventData, Converters);
                 this.connectionTcs.TrySetResult(data.Data.Result);
             });
 
+            // Send it
             MetaMaskDebug.Log("Sending eth_requestAccounts for key validation");
             this.submittedRequests.Add(id, submittedRequest);
             SendEthereumRequest(id, request, false);
             
             try
             {
+                // Wait for the connection task to complete (above)
                 await this.connectionTcs.Task;
                 MetaMaskDebug.Log("Response for eth_requestAccounts during key validation");
+                
+                // If (somehow) someone else already completed this task
                 if (this.validateKeyTcs.Task.IsCompleted)
                 {
+                    // Log a warning, possible race condition.
                     MetaMaskDebug.LogWarning("Response for eth_requestAccounts during key validation, but validation task already completed!");
                     return;
                 }
 
+                // Attempt to complete the validation task (everyone else waiting for this task at start of function)
                 this.validateKeyTcs.TrySetResult(this.connectionTcs.Task.IsCompletedSuccessfully);
             }
             catch (Exception e)
             {
+                // Let everyone else know the task failed with the original exception
                 this.validateKeyTcs.SetException(e);
                 MetaMaskDebug.Log("Key validation completed failed");
                 return;
@@ -513,6 +563,8 @@ namespace MetaMask
 
                 if (!this.authorized)
                 {
+                    SendAnalytics(TrackingEventConnectionAuthorized);
+                    
                     MetaMaskDebug.Log("Invoking authorized event");
                     this.authorized = true;
                     this.WalletAuthorizedHandler?.Invoke(this, EventArgs.Empty);
@@ -590,6 +642,8 @@ namespace MetaMask
         {
             MetaMaskDebug.Log("Leaving channel");
             this.socket.Emit(LeaveChannelEventName, channelId);
+            
+            SendAnalytics(TrackingEventDisconnected);
         }
 
         /// <summary>Called when a message is received.</summary>
@@ -598,6 +652,9 @@ namespace MetaMask
         {
             MetaMaskDebug.Log("Message received");
             MetaMaskDebug.Log(response);
+            
+            // Update last active time through internal property setter
+            this.session.Data.LastActive = DateTime.Now;
             
             if (response.StartsWith("{"))
                 await HandleResponseWithTypes<MetaMaskMessage<KeyExchangeMessage>, MetaMaskMessage<string>>(response,
@@ -702,6 +759,10 @@ namespace MetaMask
             {
                 // Key exchange successful
                 this.handshakeCompleted = true;
+                
+                // If completed the handshake, send some analytics
+                SendAnalytics(TrackingEventConnected);
+                
                 // Test key exchange by sending eth_requestAccounts
                 await ValidateKeyExchange();
                 if (!transport.IsMobile) return;
@@ -815,6 +876,8 @@ namespace MetaMask
         {
             MetaMaskDebug.Log("Clients connected");
 
+             SendAnalytics(isResume ? TrackingEventReconnectionStarted : TrackingEventConnectionStarted);
+
             if (this.paused)
             {
                 MetaMaskDebug.Log("Wallet Un-paused");
@@ -830,6 +893,7 @@ namespace MetaMask
                 
                 //WalletReady?.Invoke(this, EventArgs.Empty);
             }
+            
             
             //ExchangeKeys();
         }
@@ -850,6 +914,8 @@ namespace MetaMask
         protected void OnClientsDisconnected(string response)
         {
             MetaMaskDebug.Log("Clients disconnected");
+            
+            SendAnalytics(TrackingEventDisconnected);
 
             if (!this.paused)
             {
@@ -860,6 +926,7 @@ namespace MetaMask
         protected void OnWalletUnauthorized()
         {
             this.authorized = false;
+            SendAnalytics(TrackingEventConnectionRejected);
             WalletUnauthorizedHandler?.Invoke(this, EventArgs.Empty);
             EndSession();
         }
@@ -1158,16 +1225,20 @@ namespace MetaMask
             
             this.connectionTcs = new TaskCompletionSource<string[]>();
             ClearValidateTask();
-            
-            if (string.IsNullOrWhiteSpace(this.session.Data.ChannelId))
+
+            isResume = !string.IsNullOrWhiteSpace(this.session.Data.ChannelId);
+            if (!isResume)
                 this.session.Data.ChannelId = Guid.NewGuid().ToString();
+            
+            if (_eventDelegator == null || _eventDelegator.Context != this.session.Data.ChannelId)
+                _eventDelegator = new EventDelegator(this.session.Data.ChannelId);
 
             // Initialize the socket
             this.socket.Initialize(this.socketUrl, new MetaMaskSocketOptions()
             {
                 ExtraHeaders = new Dictionary<string, string>
                 {
-                    {"User-Agent", this.transport.UserAgent}
+                    {"User-Agent", this.UserAgent}
                 }
             });
             this.socket.ConnectAsync();
