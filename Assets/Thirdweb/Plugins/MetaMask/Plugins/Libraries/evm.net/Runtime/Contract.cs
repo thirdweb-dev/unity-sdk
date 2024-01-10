@@ -52,7 +52,7 @@ namespace evm.net
 
         public ParameterConverter ParameterConverter { get; set; } = new();
 
-        public EvmAddress Address
+        public virtual EvmAddress Address
         {
             get { return _address; }
         }

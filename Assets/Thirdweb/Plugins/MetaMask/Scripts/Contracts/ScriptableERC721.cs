@@ -10,8 +10,6 @@ namespace MetaMask.Unity.Contracts
     [CreateAssetMenu(menuName = "MetaMask/Contract Templates/ERC721")]
     public class ScriptableERC721 : ScriptableContract<ERC721PresetMinterPauserAutoId>, ERC721PresetMinterPauserAutoId
     {
-        public string Address => CurrentContract.Address;
-
         public Task<ERC721PresetMinterPauserAutoId> DeployNew(string name, string symbol, string baseTokenURI)
         {
             return CurrentContract.DeployNew(name, symbol, baseTokenURI);

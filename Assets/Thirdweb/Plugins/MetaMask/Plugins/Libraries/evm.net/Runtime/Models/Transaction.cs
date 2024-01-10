@@ -68,7 +68,7 @@ namespace evm.net.Models
                 receipt._provider = provider;
                 return receipt;
             }
-            catch (NotImplementedException e)
+            catch (NotImplementedException)
             {
                 // try with legacy provider
                 var rawResult = provider.Request("eth_getTransactionReceipt", requestParameters);
@@ -102,7 +102,7 @@ namespace evm.net.Models
                 receipt.TransactionData = this;
                 return receipt;
             }
-            catch (NotImplementedException e)
+            catch (NotImplementedException)
             {
                 // try with legacy provider
                 var rawResult = _provider.Request("eth_getTransactionReceipt", requestParameters);

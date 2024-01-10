@@ -26,8 +26,6 @@ namespace MetaMask.Transports.Unity.UI
         /// <summary>Gets a value indicating whether the application is currently animating.</summary>
         /// <returns>true if the application is currently animating; otherwise, false.</returns>
         private bool _isAnimating = false;
-        /// <summary>Gets or sets a value indicating whether the QRSwitch is on.</summary>
-        private bool _QRSwitch = false;
         /// <summary>Gets the last URL that was copied to the script.</summary>
         /// <returns>The last URL that was copied to the script.</returns>
         private string _lastUrl = string.Empty;

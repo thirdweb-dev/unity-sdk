@@ -238,7 +238,7 @@ namespace MetaMask
         /// <summary>
         /// Gets the currently selected chain as a long.
         /// </summary>
-        public long ChainId => !string.IsNullOrWhiteSpace(this.selectedChainId) ? Convert.ToInt32(this.selectedChainId, 16) : 0x0;
+        public long ChainId => !string.IsNullOrWhiteSpace(this.selectedChainId) ? Convert.ToInt64(this.selectedChainId, 16) : 0x0;
 
         /// <summary>Gets the ID of the currently selected chain.</summary>
         /// <returns>The ID of the currently selected chain.</returns>

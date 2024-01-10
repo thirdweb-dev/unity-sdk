@@ -21,10 +21,6 @@ namespace MetaMask.Contracts
 {
 	public class ERC1155Backing : Contract, ERC1155
 	{
-		public string Address
-		{
-			get => base.Address;
-		}
 		public ERC1155Backing(IProvider provider, EvmAddress address, Type interfaceType) : base(provider, address, interfaceType)
 		{
 		}

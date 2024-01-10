@@ -11,7 +11,7 @@
             Value = value;
         }
 
-        public static implicit operator string?(EvmAddress d) => d?.Value;
+        public static implicit operator string(EvmAddress d) => d?.Value;
         public static implicit operator EvmAddress(string b) => new EvmAddress(b);
 
         public override string ToString() => Value.StartsWith("0x") ? Value : $"0x{Value}";

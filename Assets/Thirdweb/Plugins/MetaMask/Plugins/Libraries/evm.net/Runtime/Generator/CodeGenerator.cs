@@ -141,18 +141,18 @@ namespace evm.net.Generator
         public Dictionary<string, string> GenerateAll()
         {
             var dict = new Dictionary<string, string>();
-            dict.Add(Filename, ToString());
+            dict.Add(Filename, GenerateString());
             
             // Add any additional files
             foreach (var generator in _context.Generators)
             {
-                dict.Add(generator.Filename, generator.ToString());
+                dict.Add(generator.Filename, generator.GenerateString());
             }
 
             return dict;
         }
 
-        public string ToString()
+        public string GenerateString()
         {
             return Write();
         }

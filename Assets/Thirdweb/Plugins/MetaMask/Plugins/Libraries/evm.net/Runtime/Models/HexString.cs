@@ -16,7 +16,7 @@ namespace evm.net.Models
             return Value.HexToByteArray();
         }
 
-        public static implicit operator string?(HexString d) => d?.Value;
+        public static implicit operator string(HexString d) => d?.Value;
         public static implicit operator HexString(string b) => new HexString(b);
 
         public override string ToString() => Value.StartsWith("0x") ? Value : $"0x{Value}";
