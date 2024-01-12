@@ -11,6 +11,7 @@ using UnityEngine.Networking;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 namespace Thirdweb.Wallets
 {
@@ -25,6 +26,9 @@ namespace Thirdweb.Wallets
         public GameObject RecoveryCodesCanvas;
         public TMP_Text RecoveryCodesText;
         public Button RecoveryCodesCopy;
+
+        [Tooltip("Invoked when the user submits an invalid OTP and can retry.")]
+        public UnityEvent OnEmailOTPVerificationFailed;
 
         private EmbeddedWallet _embeddedWallet;
         private string _email;
@@ -174,6 +178,16 @@ namespace Thirdweb.Wallets
             {
                 string otp = OTPInput.text;
                 var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
+                if (res.User == null)
+                {
+                    if (res.CanRetry && OnEmailOTPVerificationFailed.GetPersistentEventCount() > 0)
+                    {
+                        OnEmailOTPVerificationFailed.Invoke();
+                        return;
+                    }
+                    _exception = new UnityException("User OTP Verification Failed.");
+                    return;
+                }
                 _user = res.User;
                 ShowRecoveryCodes(res);
             }
