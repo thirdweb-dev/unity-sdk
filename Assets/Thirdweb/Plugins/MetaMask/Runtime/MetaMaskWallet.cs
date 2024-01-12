@@ -259,7 +259,7 @@ namespace MetaMask
             {
                 Title = this.session.Data.AppName,
                 Url = this.session.Data.AppUrl,
-                // Source = this.analyticsPlatform, TODO Figure out what source to default to
+                Source = "Thirdweb",
             };
 
         /// <summary>Gets a value indicating whether the application is paused.</summary>
