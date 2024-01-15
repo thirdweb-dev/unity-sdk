@@ -8,21 +8,17 @@ namespace MetaMask.Models
     public class MetaMaskOriginatorInfo
     {
 
-        [JsonProperty("title")]
-        [JsonPropertyName("title")]
-        public string Title { get; set; }
+        [JsonProperty("title")] [JsonPropertyName("title")]
+        public string Title;
 
-        [JsonProperty("url")]
-        [JsonPropertyName("url")]
-        public string Url { get; set; }
+        [JsonProperty("url")] [JsonPropertyName("url")]
+        public string Url;
 
-        [JsonProperty("platform")]
-        [JsonPropertyName("platform")]
-        public string Platform { get; set; }
+        [JsonProperty("source")]
+        [JsonPropertyName("source")]
+        public string Source = "";
 
-        [JsonProperty("apiVersion")]
-        [JsonPropertyName("apiVersion")]
-        public string ApiVersion { get; set; } = Application.version;
-
+        [JsonProperty("icon")] [JsonPropertyName("icon")]
+        public string Icon;
     }
 }

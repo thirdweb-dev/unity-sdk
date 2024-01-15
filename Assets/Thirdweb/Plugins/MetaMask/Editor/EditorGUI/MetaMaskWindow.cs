@@ -1,8 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using MetaMask.IO;
 using UnityEditor;
 
 using UnityEngine;
 
 using MetaMask.Transports.Unity.UI;
+using UnityEngine.Experimental.Rendering;
 
 namespace MetaMask.Unity
 {
@@ -60,6 +65,8 @@ namespace MetaMask.Unity
         private string _appNameText = "App Name";
         /// <summary>The text to display in the app URL field.</summary>
         private string _appUrlText = "App Url";
+        /// <summary>The text to display in the app URL field.</summary>
+        private Texture2D _appIconTexture;
         /// <summary>Gets the user agent string for the current application.</summary>
         /// <returns>The user agent string for the current application.</returns>
         private string _appUserAgentText = "User Agent";
@@ -67,10 +74,6 @@ namespace MetaMask.Unity
         private string _encryptionPasswordText = "Encryption Password";
         /// <summary>The text to display in the Session Identifier field.</summary>
         private string _sessionIdentifierText = "Session Identifier";
-        /// <summary>The text to display in the Socket URL field.</summary>
-        private string _socketURLText = "Socket Url";
-        /// <summary>Gets or sets a value indicating whether the application is in deep linking mode.</summary>
-        private bool _deepLinking;
         /// <summary>Gets or sets a value indicating whether the application is in debug mode.</summary>
         private bool _logsEnabled;
 
@@ -78,12 +81,13 @@ namespace MetaMask.Unity
 
         #region Editor Methods
 
-        [MenuItem("Window/MetaMask/Setup Window")]
+        [MenuItem("Tools/MetaMask/Setup Window")]
         /// <summary>Shows the window.</summary>
         public static void ShowWindow()
         {
             var window = GetWindow<MetaMaskWindow>("MetaMask Setup");
-            LoadSettings(MetaMaskConfig.DefaultInstance, MetaMaskUnityUITransport.DefaultInstance, window);
+            
+            LoadSettings(FindCurrentConfig(), window);
         }
 
         /// <summary>The main GUI function.</summary>
@@ -120,11 +124,34 @@ namespace MetaMask.Unity
             GUILayout.Box(
                 "Thank you for configuring the MetaMask SDK. You can now use the MetaMask SDK to connect to the MetaMask Wallet.",
                 _bodyTextStyle);
-            GUILayout.BeginArea(new Rect((EditorGUIUtility.currentViewWidth / 2) - 85, _lastYPosition + 120, 165, 100));
-            if (GUILayout.Button("Thank You!", _buttonStyle))
+            GUILayout.BeginArea(new Rect((EditorGUIUtility.currentViewWidth / 2) - 70, _lastYPosition + 120, 165, 80));
+            if (GUILayout.Button("Spawn Instance", new GUIStyle(_buttonStyle)
+            {
+                fixedWidth = 135
+            }))
+            {
+                var obj = FindObjectOfType<MetaMaskUnity>();
+                if (obj != null)
+                {
+                    Debug.LogError("An instance of MetaMaskUnity already exists in the currently open scene");
+                }
+                else
+                {
+                    var newObj = new GameObject();
+                    var mmu = newObj.AddComponent<MetaMaskUnity>();
+                    
+                    // set default transport
+                    var fieldInfo = mmu.GetType().GetField("_transport", BindingFlags.Instance | BindingFlags.NonPublic);
+                    fieldInfo?.SetValue(mmu, MetaMaskUnityUITransport.DefaultInstance);
+                }
+            }
+
+            GUILayout.EndArea();
+            StoreYPosition();
+            GUILayout.BeginArea(new Rect((EditorGUIUtility.currentViewWidth / 2) - 65, _lastYPosition + 180, 165, 100));
+            if (GUILayout.Button("Main Menu", _buttonStyle))
             {
                 _state = MetaMaskState.main;
-                Repaint();
             }
 
             GUILayout.EndArea();
@@ -140,7 +167,7 @@ namespace MetaMask.Unity
             GUILayout.Box(
                 "Welcome to the MetaMask SDK Installer Window, Below you will find our documentation as well as a section to modify the SDK configuration!",
                 _bodyTextStyle);
-            GUILayout.BeginArea(new Rect((EditorGUIUtility.currentViewWidth / 2) - 85, _lastYPosition + 100, 165, 100));
+            GUILayout.BeginArea(new Rect((EditorGUIUtility.currentViewWidth / 2) - 65, _lastYPosition + 120, 165, 80));
             if (GUILayout.Button("Documentation", _buttonStyle))
             {
                 Application.OpenURL("https://docs.metamask.io/guide/");
@@ -148,7 +175,7 @@ namespace MetaMask.Unity
 
             GUILayout.EndArea();
             StoreYPosition();
-            GUILayout.BeginArea(new Rect((EditorGUIUtility.currentViewWidth / 2) - 85, _lastYPosition + 170, 165, 100));
+            GUILayout.BeginArea(new Rect((EditorGUIUtility.currentViewWidth / 2) - 65, _lastYPosition + 180, 165, 100));
             if (GUILayout.Button("Credentials", _buttonStyle))
             {
                 _state = MetaMaskState.install;
@@ -158,37 +185,50 @@ namespace MetaMask.Unity
             StoreYPosition();
         }
 
+        private Dictionary<string, Vector2> scrollPositions = new();
+        private string MakeTextField(string label, string value)
+        {
+            EditorGUILayout.LabelField(label, this._smallHeaderStyle);
+            if (!scrollPositions.ContainsKey(label))
+                scrollPositions.Add(label, new Vector2());
+
+            var scrollPosition = scrollPositions[label];
+            scrollPositions[label] = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.ExpandHeight(true));
+            var newValue = GUILayout.TextField(value, _inputFieldStyle, GUILayout.ExpandWidth(true));
+            GUILayout.EndScrollView();
+            return newValue;
+        }
+
         /// <summary>Displays the credentials screen which allows the configuration of the MetaMask SDK.</summary>
         private void Credentials()
         {
             GUILayout.Box(Resources.Load<Texture>(_headerImagePath), _headerStyle);
             GUILayout.Box("App Configuration", _higherTextStyle);
             GUILayout.Box("Please enter your application configuration data below!", _bodyTextStyle);
-            EditorGUILayout.LabelField("App Name", this._smallHeaderStyle);
-            _appNameText = GUILayout.TextField(_appNameText, 25, _inputFieldStyle);
-            EditorGUILayout.LabelField("App Url", this._smallHeaderStyle);
-            _appUrlText = GUILayout.TextField(_appUrlText, 25, _inputFieldStyle);
-            EditorGUILayout.LabelField("User Agent", this._smallHeaderStyle);
-            _appUserAgentText = GUILayout.TextField(_appUserAgentText, 25, _inputFieldStyle);
-            _deepLinking = GUILayout.Toggle(_deepLinking, "Deep Linking", _inputToggleStyle);
+            _appNameText = MakeTextField("App Name", _appNameText);
+            _appUrlText = MakeTextField("App Url", _appUrlText);
+            
+            GUILayout.BeginVertical();
+            EditorGUILayout.LabelField("App Icon", this._smallHeaderStyle);
+            _appIconTexture = EditorGUILayout.ObjectField("", _appIconTexture, typeof(Texture2D), true, GUILayout.Width(90), GUILayout.Height(70)) as Texture2D;
+            EditorGUILayout.EndVertical();
+            
+            //_appIconUrlText = MakeTextField("App Icon Url", _appIconUrlText);
+            _appUserAgentText = MakeTextField("User Agent", _appUserAgentText);
+            var oc = GUI.contentColor;
+            GUI.contentColor = _inputToggleStyle.normal.textColor;
             _logsEnabled = GUILayout.Toggle(_logsEnabled, "Logs Enabled", _inputToggleStyle);
-            GUILayout.Box("Persistent Data", _h2TextStyle);
-            EditorGUILayout.LabelField("Encryption Password", this._smallHeaderStyle);
-            _encryptionPasswordText = GUILayout.TextField(_encryptionPasswordText, 25, _inputFieldStyle);
-            EditorGUILayout.LabelField("Session Identifier", this._smallHeaderStyle);
-            _sessionIdentifierText = GUILayout.TextField(_sessionIdentifierText, 25, _inputFieldStyle);
-            GUILayout.Space(2);
-            GUILayout.Box("Advanced", _h2TextStyle);
-            EditorGUILayout.LabelField("Socket Url", this._smallHeaderStyle);
-            _socketURLText = GUILayout.TextField(_socketURLText, 80, _inputFieldStyle);
+            GUI.contentColor = oc;
             GUILayout.BeginHorizontal(_sidebySideStyle);
             if (GUILayout.Button("Back", _buttonStyle))
             {
                 _state = MetaMaskState.main;
                 Repaint();
             }
+            
+            GUILayout.Space(25);
 
-            if (GUILayout.Button("Apply Settings", _buttonStyle))
+            if (GUILayout.Button("Apply", _buttonStyle))
             {
                 _state = MetaMaskState.connect;
                 Repaint();
@@ -196,6 +236,7 @@ namespace MetaMask.Unity
             }
 
             GUILayout.EndHorizontal();
+            GUILayout.Space(15);
             StoreYPosition();
         }
 
@@ -203,57 +244,60 @@ namespace MetaMask.Unity
 
         #region Private Methods
 
+        private static MetaMaskConfig FindCurrentConfig()
+        {
+            var metamaskUnity = FindObjectOfType<MetaMaskUnity>();
+            if (metamaskUnity == null)
+            {
+                metamaskUnity = MetaMaskUnity.Instance;
+            }
+
+            // We cannot use ?. because it may bypass Unity.Object custom null conditional check
+            return metamaskUnity != null ? metamaskUnity.Config : MetaMaskConfig.DefaultInstance;
+        }
+
         /// <summary>Applies the current settings to the SDK.</summary>
         private void ApplySettings()
         {
-            var metaMaskConfig = MetaMaskConfig.DefaultInstance;
-            var metaMaskConfigUI = MetaMaskUnityUITransport.DefaultInstance;
+            var metaMaskConfig = FindCurrentConfig();
             SerializedObject soMetaMaskConfig = new SerializedObject(metaMaskConfig);
-            SerializedObject spMetaMaskUIConfig = new SerializedObject(metaMaskConfigUI);
-            SerializedProperty spDeeplink = spMetaMaskUIConfig.FindProperty("useDeeplink");
             SerializedProperty spLoggingEnabled = soMetaMaskConfig.FindProperty("log");
-            SerializedProperty spUserAgent = spMetaMaskUIConfig.FindProperty("userAgent");
+            SerializedProperty spUserAgent = soMetaMaskConfig.FindProperty("userAgent");
             SerializedProperty spAppName = soMetaMaskConfig.FindProperty("appName");
             SerializedProperty spAppUrl = soMetaMaskConfig.FindProperty("appUrl");
+            SerializedProperty spAppIconUrl = soMetaMaskConfig.FindProperty("appIcon");
             SerializedProperty spEncryptionPassword = soMetaMaskConfig.FindProperty("encryptionPassword");
             SerializedProperty spSessionIdentifier = soMetaMaskConfig.FindProperty("sessionIdentifier");
-            SerializedProperty spSocketUrl = soMetaMaskConfig.FindProperty("socketUrl");
             spAppName.stringValue = this._appNameText;
             spAppUrl.stringValue = this._appUrlText;
+            spAppIconUrl.stringValue = TextureToBase64(this._appIconTexture);
             spEncryptionPassword.stringValue = this._appUserAgentText;
             spSessionIdentifier.stringValue = this._sessionIdentifierText;
-            spSocketUrl.stringValue = this._socketURLText;
-            spDeeplink.boolValue = this._deepLinking;
             spLoggingEnabled.boolValue = this._logsEnabled;
             spUserAgent.stringValue = this._appUserAgentText;
             soMetaMaskConfig.ApplyModifiedProperties();
-            spMetaMaskUIConfig.ApplyModifiedProperties();
         }
 
         /// <summary>Loads the settings from the SDK's settings .</summary>
         /// <param name="metaMaskConfig">The configuration to load the settings into.</param>
         /// <param name="metaMaskUIConfig">The configuration to load the settings into.</param>
         /// <param name="window">The window to load the settings into.</param>
-        private static void LoadSettings(MetaMaskConfig metaMaskConfig, MetaMaskUnityUITransport metaMaskUIConfig,
-            MetaMaskWindow window)
+        private static void LoadSettings(MetaMaskConfig metaMaskConfig, MetaMaskWindow window)
         {
             SerializedObject soMetaMaskConfig = new SerializedObject(metaMaskConfig);
-            SerializedObject soMetaMaskUIConfig = new SerializedObject(metaMaskUIConfig);
-            SerializedProperty spDeepLinking = soMetaMaskUIConfig.FindProperty("useDeeplink");
             SerializedProperty spLoggingEnabled = soMetaMaskConfig.FindProperty("log");
-            SerializedProperty spUserAgent = soMetaMaskUIConfig.FindProperty("userAgent");
+            SerializedProperty spUserAgent = soMetaMaskConfig.FindProperty("userAgent");
             SerializedProperty spAppName = soMetaMaskConfig.FindProperty("appName");
             SerializedProperty spAppUrl = soMetaMaskConfig.FindProperty("appUrl");
+            SerializedProperty spAppIcon = soMetaMaskConfig.FindProperty("appIcon");
             SerializedProperty spEncryptionPassword = soMetaMaskConfig.FindProperty("encryptionPassword");
             SerializedProperty spSessionIdentifier = soMetaMaskConfig.FindProperty("sessionIdentifier");
-            SerializedProperty spSocketUrl = soMetaMaskConfig.FindProperty("socketUrl");
             window._appNameText = spAppName.stringValue;
             window._appUrlText = spAppUrl.stringValue;
+            window._appIconTexture = Base64ToTexture(spAppIcon.stringValue);
             window._appUserAgentText = spUserAgent.stringValue;
-            window._deepLinking = spDeepLinking.boolValue;
             window._encryptionPasswordText = spEncryptionPassword.stringValue;
             window._sessionIdentifierText = spSessionIdentifier.stringValue;
-            window._socketURLText = spSocketUrl.stringValue;
             window._logsEnabled = spLoggingEnabled.boolValue;
         }
 
@@ -324,18 +368,18 @@ namespace MetaMask.Unity
             {
                 _buttonStyle = new GUIStyle();
                 _buttonStyle.normal.background = Resources.Load<Texture2D>(_buttonImagePath);
-                _buttonStyle.fontSize = 16;
+                _buttonStyle.fontSize = 14;
                 _buttonStyle.fontStyle = FontStyle.Bold;
                 _buttonStyle.border = new RectOffset(0, 0, 0, 0);
                 _buttonStyle.normal.textColor = Color.white;
                 _buttonStyle.alignment = TextAnchor.MiddleCenter;
-                _buttonStyle.fixedWidth = 165;
-                _buttonStyle.fixedHeight = 65;
+                _buttonStyle.fixedWidth = 125;
+                _buttonStyle.fixedHeight = 45;
             }
 
             if (_inputFieldStyle == null)
             {
-                _inputFieldStyle = new GUIStyle();
+                _inputFieldStyle = new GUIStyle(GUI.skin.textField);
                 _inputFieldStyle.normal.background = MakeTexture(2, 2, Color.black);
                 _inputFieldStyle.fontSize = 16;
                 _inputFieldStyle.normal.textColor = Color.white;
@@ -346,7 +390,7 @@ namespace MetaMask.Unity
 
             if (_inputToggleStyle == null)
             {
-                _inputToggleStyle = new GUIStyle("Toggle");
+                _inputToggleStyle = new GUIStyle(GUI.skin.toggle);
                 _inputToggleStyle.fontSize = 20;
                 _inputToggleStyle.normal.textColor = Color.black;
                 _inputToggleStyle.fontStyle = FontStyle.Bold;
@@ -359,12 +403,14 @@ namespace MetaMask.Unity
                 _smallHeaderStyle = new GUIStyle("miniLabel");
                 _smallHeaderStyle.margin = new RectOffset(20, 0, 0, 0);
                 _smallHeaderStyle.padding = new RectOffset(20, 0, 0, 0);
+                _smallHeaderStyle.normal.textColor = Color.black;
+                _smallHeaderStyle.fontStyle = FontStyle.Bold;
             }
 
             if (_sidebySideStyle == null)
             {
                 _sidebySideStyle = new GUIStyle();
-                _sidebySideStyle.margin = new RectOffset(20, 0, 0, 0);
+                _sidebySideStyle.margin = new RectOffset(42, 0, 0, 0);
                 _sidebySideStyle.padding = new RectOffset(0, 0, 5, 0);
             }
         }
@@ -382,16 +428,16 @@ namespace MetaMask.Unity
         /// <summary>Sets the window to its maximum size.</summary>
         private void MaximumWindow()
         {
-            if (_state == MetaMaskState.install)
+            /*if (_state == MetaMaskState.install)
             {
                 this.maxSize = new Vector2(365, 825);
                 this.minSize = new Vector2(365, 825);
             }
             else
-            {
+            {*/
                 this.maxSize = new Vector2(365, 615);
                 this.minSize = new Vector2(365, 615);
-            }
+            //}
         }
 
         /// <summary>Draws the background image.</summary>
@@ -418,6 +464,72 @@ namespace MetaMask.Unity
             backgroundTexture.SetPixels(pixels);
             backgroundTexture.Apply();
             return backgroundTexture;
+        }
+
+        private string TextureToBase64(Texture2D texture2D)
+        {
+            // resize the texture
+            if (texture2D.width > 64 || texture2D.height > 64)
+            {
+                var source = texture2D;
+                var newWidth = 64;
+                var newHeight = 64;
+                
+                RenderTexture rt = RenderTexture.GetTemporary(newWidth, newHeight);
+                rt.filterMode = source.filterMode;
+                RenderTexture.active = rt;
+                Graphics.Blit(source, rt);
+                Texture2D nTex = new Texture2D(newWidth, newHeight);
+                nTex.ReadPixels(new Rect(0, 0, newWidth, newHeight), 0,0);
+                nTex.Apply();
+                RenderTexture.active = null;
+                RenderTexture.ReleaseTemporary(rt);
+
+                texture2D = nTex;
+            }
+            
+            // Always copy the pixels to a in-memory texture
+            // Since this texture may not support reading or encoding
+            Texture2D newTexture = new Texture2D(texture2D.width, texture2D.height, TextureFormat.RGBAFloat, false);
+            newTexture.SetPixels(0,0, texture2D.width, texture2D.height, texture2D.GetPixels(0, 0, texture2D.width, texture2D.height));
+            newTexture.Apply();
+
+            byte[] imageData = newTexture.EncodeToPNG();
+            return Convert.ToBase64String(imageData);
+        }
+
+        private static Texture2D Base64ToTexture(string encodedData)
+        {
+            try
+            {
+                byte[] imageData = Convert.FromBase64String(encodedData);
+
+                int width, height;
+                GetImageSize(imageData, out width, out height);
+
+                Texture2D texture = new Texture2D(width, height, TextureFormat.RGBAFloat, false);
+                texture.hideFlags = HideFlags.HideAndDontSave;
+                //texture.filterMode = FilterMode.Point;
+                texture.LoadImage(imageData, true);
+
+                return texture;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                return null;
+            }
+        }
+        
+        private static void GetImageSize(byte[] imageData, out int width, out int height)
+        {
+            width = ReadInt(imageData, 3 + 15);
+            height = ReadInt(imageData, 3 + 19);
+        }
+		
+        private static int ReadInt(byte[] imageData, int offset)
+        {
+            return (imageData[offset] << 8) | imageData[offset + 1];
         }
 
         #endregion

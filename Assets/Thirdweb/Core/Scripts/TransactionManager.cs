@@ -8,8 +8,11 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Thirdweb.Contracts.Forwarder.ContractDefinition;
 using Nethereum.RPC.Eth.Transactions;
-using Nethereum.Web3;
 using Thirdweb.Redcode.Awaiting;
+using Nethereum.ABI.FunctionEncoding.Attributes;
+using Nethereum.Contracts.QueryHandlers.MultiCall;
+using System.Collections.Generic;
+using System.Linq;
 
 #pragma warning disable CS0618
 
@@ -37,6 +40,20 @@ namespace Thirdweb
 
             var queryHandler = Utils.GetWeb3().Eth.GetContractQueryHandler<TWFunction>();
             return await queryHandler.QueryAsync<TWResult>(contractAddress, functionMessage);
+        }
+
+        public static async Task<TWResult[]> ThirdwebMulticallRead<TWFunction, TWResult>(string contractAddress, TWFunction[] functionMessages)
+            where TWFunction : FunctionMessage, new()
+            where TWResult : IFunctionOutputDTO, new()
+        {
+            MultiQueryHandler multiqueryHandler = Utils.GetWeb3().Eth.GetMultiQueryHandler();
+            var calls = new List<MulticallInputOutput<TWFunction, TWResult>>();
+            for (int i = 0; i < functionMessages.Length; i++)
+            {
+                calls.Add(new MulticallInputOutput<TWFunction, TWResult>(functionMessages[i], contractAddress));
+            }
+            var results = await multiqueryHandler.MultiCallAsync(MultiQueryHandler.DEFAULT_CALLS_PER_REQUEST, calls.ToArray()).ConfigureAwait(false);
+            return calls.Select(x => x.Output).ToArray();
         }
 
         public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null, BigInteger? gasOverride = null)

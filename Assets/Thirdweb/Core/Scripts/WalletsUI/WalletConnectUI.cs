@@ -42,7 +42,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        public async Task<(WalletConnectSignClient, string, string)> Connect(string walletConnectProjectId, BigInteger chainId)
+        public virtual async Task<(WalletConnectSignClient, string, string)> Connect(string walletConnectProjectId, BigInteger chainId)
         {
             WalletConnectCanvas.SetActive(true);
 
@@ -135,7 +135,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        private static Texture2D GenerateQRTexture(string text)
+        public virtual Texture2D GenerateQRTexture(string text)
         {
             Texture2D encoded = new Texture2D(256, 256);
             var color32 = EncodeToQR(text, encoded.width, encoded.height);
@@ -144,7 +144,7 @@ namespace Thirdweb.Wallets
             return encoded;
         }
 
-        private static Color32[] EncodeToQR(string textForEncoding, int width, int height)
+        public virtual Color32[] EncodeToQR(string textForEncoding, int width, int height)
         {
             var writer = new BarcodeWriter
             {

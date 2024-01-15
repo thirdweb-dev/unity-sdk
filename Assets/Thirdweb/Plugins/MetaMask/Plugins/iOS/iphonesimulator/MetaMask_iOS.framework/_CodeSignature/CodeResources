@@ -4,13 +4,37 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/Frameworks/Starscream.framework/Info.plist</key>
+		<data>
+		nw1wGOLd7DLuaxO5Yr+EObSsZkU=
+		</data>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/Frameworks/Starscream.framework/Starscream</key>
+		<data>
+		QGA/Lx9qaJpjw2WO1eS09LfUUrI=
+		</data>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/Frameworks/Starscream.framework/_CodeSignature/CodeResources</key>
+		<data>
+		BN3ICukufRkvZU26ybJPxh2MdZ8=
+		</data>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/Info.plist</key>
+		<data>
+		r0or5bz53O5KUDzm5AfRKjkY5uA=
+		</data>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/Pods_MetaMask_iOS</key>
+		<data>
+		qwqlo6A4sD46HgPRY0g1NC8uvus=
+		</data>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/_CodeSignature/CodeResources</key>
+		<data>
+		oV1R7vMjtQ039QiMW0GNXCv7OXo=
+		</data>
 		<key>Headers/MetaMaskAppController.h</key>
 		<data>
 		/j+PQLS2oPmmwemS9pdNGOYTc/g=
 		</data>
 		<key>Headers/MetaMask_iOS-Swift.h</key>
 		<data>
-		jpK9QacfyE1lSjHE8lexqZkdFmk=
+		gfm+XpEp5uaqWIR+pwkCoF+S5uY=
 		</data>
 		<key>Headers/MetaMask_iOS.h</key>
 		<data>
@@ -22,73 +46,95 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		BuOEYoucTON/1+GiHmG6cs3efHc=
+		81U6GMamIFnD7Bf1klKVMIp+Dzc=
 		</data>
 		<key>Modules/MetaMask_iOS.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		IZauc6J4zrl3CPrx/NroymcOUQI=
+		cbR+FOCrscoz0YFidAMv4WKzNek=
 		</data>
 		<key>Modules/MetaMask_iOS.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		fR0pNn75MMYElnicF7fZKhOQPYA=
+		LCcF0i5/oQNW8Zd6xnZrtBu7Og8=
 		</data>
 		<key>Modules/MetaMask_iOS.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		lAWJRE8KV0CQfkkY56dqUOyCyRk=
-		</data>
-		<key>Modules/MetaMask_iOS.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
-		<data>
-		/IyCtr+kNYaq6R3Em6tRmZtbI9g=
+		FSPnLbho3G+LL9smI3XgVOqBIQ4=
 		</data>
 		<key>Modules/MetaMask_iOS.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		n/xU7631i2R6ag7rG5lbgTPbjkE=
-		</data>
-		<key>Modules/MetaMask_iOS.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
-		<data>
-		/IyCtr+kNYaq6R3Em6tRmZtbI9g=
+		enIaS5pBeCZEN8z1zhWljno0VCc=
 		</data>
 		<key>Modules/MetaMask_iOS.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		ZohKThY9n92ZuaNFOE2SBYXWpPk=
+		ksQcornZdHlSGjbI+FjTiDt6Ero=
 		</data>
 		<key>Modules/MetaMask_iOS.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		lAWJRE8KV0CQfkkY56dqUOyCyRk=
-		</data>
-		<key>Modules/MetaMask_iOS.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
-		<data>
-		OZRspn3hmQ0+sx3B2HhPGHU0T/4=
+		FSPnLbho3G+LL9smI3XgVOqBIQ4=
 		</data>
 		<key>Modules/MetaMask_iOS.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		+aupmNpjK3ehOKwuRKj6KjbSkjs=
-		</data>
-		<key>Modules/MetaMask_iOS.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
-		<data>
-		OZRspn3hmQ0+sx3B2HhPGHU0T/4=
+		CcSw8IeNbwQCJgQ/hqu9bKeyqqo=
 		</data>
 		<key>Modules/MetaMask_iOS.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		oodIrnhUB1QPHZY8stJAh4Zv7NI=
+		GqQsSlVUDaI2Px+cfcxRkzFSXco=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
-		K4NMVIni0F5e2wQi8MRDLUgrnYk=
+		ElT7VOmCbjMGMNs7LBZTPlSjr/0=
 		</data>
 		<key>Podfile</key>
 		<data>
-		mn3saliw5cluH4+rplu1Ae2LrPY=
+		rLiiP1jjyOYXRS/fiH6rRX3oal4=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/Frameworks/Starscream.framework/Info.plist</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			V9JJgNnC78Up4Bnf56gyvVB/nUogCVUtmKethMyHPnE=
+			</data>
+		</dict>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/Frameworks/Starscream.framework/Starscream</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			r4fDAApTerFFXRkmO9vV7x2FbZoKeis16G3jvKZTJhI=
+			</data>
+		</dict>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/Frameworks/Starscream.framework/_CodeSignature/CodeResources</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Wnl2jtUYxHq7zsx+rj7jzgkWCV1QRhpjJ3i5CuytcAc=
+			</data>
+		</dict>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/Info.plist</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			2PehXfdWIy77YHatglcG9JJGCztG3yDPhySx3ocPhL4=
+			</data>
+		</dict>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/Pods_MetaMask_iOS</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			DHTXKbo47Hsw4FVX5imUPbxtBd1/+dpZyELTFJ/cmJs=
+			</data>
+		</dict>
+		<key>Frameworks/Pods_MetaMask_iOS.framework/_CodeSignature/CodeResources</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			zGFBSHoMIlUhrCwnjCPNgKNmP8SS7WV9ppGyij7u3vA=
+			</data>
+		</dict>
 		<key>Headers/MetaMaskAppController.h</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			/j+PQLS2oPmmwemS9pdNGOYTc/g=
-			</data>
 			<key>hash2</key>
 			<data>
 			Q9bG/09jnBIzrTlaNBuRTQyVOX1BQmUNlE/ADciMj0M=
@@ -96,21 +142,13 @@
 		</dict>
 		<key>Headers/MetaMask_iOS-Swift.h</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			jpK9QacfyE1lSjHE8lexqZkdFmk=
-			</data>
 			<key>hash2</key>
 			<data>
-			8qc1MXWcEilODUS/qyQOSG37kj4TCdw04YwQtYQBw/s=
+			9f5E2L4ghf/uFCwHTG7EvLs8NcGeipzBnDL1iEJweWs=
 			</data>
 		</dict>
 		<key>Headers/MetaMask_iOS.h</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			YH9KJx/weev/4HkN/lMvYr9Ji3U=
-			</data>
 			<key>hash2</key>
 			<data>
 			dEf+okRErpZk1vuYx4DO8TqeYyvu2nwZ5HGkJbQhtHs=
@@ -118,10 +156,6 @@
 		</dict>
 		<key>Headers/WebSocketProvider.h</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			dDclkR6x2N/apeQpkzjb/1PTeFQ=
-			</data>
 			<key>hash2</key>
 			<data>
 			7brVGGYKkfAMHS/V8je/u+HleU5DgPDSn0rn9dgTZB8=
@@ -129,156 +163,72 @@
 		</dict>
 		<key>Modules/MetaMask_iOS.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			IZauc6J4zrl3CPrx/NroymcOUQI=
-			</data>
 			<key>hash2</key>
 			<data>
-			oBDSXkyaXPgmrtfcgSPjTuOEH8ykhI2CCXwOlBvaSSc=
+			BecAyT8z2P5JWKOLzKWfMmKEiY8BJT8sobk8pJ0TuHw=
 			</data>
 		</dict>
 		<key>Modules/MetaMask_iOS.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			fR0pNn75MMYElnicF7fZKhOQPYA=
-			</data>
 			<key>hash2</key>
 			<data>
-			VJIQU+pO3TBjd4pfjSyAhOPcsV88cqyRQlFxvDk/lDA=
+			pkaQg7tVlzPrWp6zXr8Nwuru7XKAOvFysh3TgHt/UWE=
 			</data>
 		</dict>
 		<key>Modules/MetaMask_iOS.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			lAWJRE8KV0CQfkkY56dqUOyCyRk=
-			</data>
 			<key>hash2</key>
 			<data>
-			LoPoagULsoTP+l1lAF4+BQ4lYsw7UA3o5LsOUKST7/4=
-			</data>
-		</dict>
-		<key>Modules/MetaMask_iOS.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			/IyCtr+kNYaq6R3Em6tRmZtbI9g=
-			</data>
-			<key>hash2</key>
-			<data>
-			UKmd/LxPAQ/HYWhchDuRzN5BnWwR7q56SkOMqNCYYBk=
+			KnRdWE4y6t4QM5zi5JDptPdHFgJy1Tku+7GLkZS2aNM=
 			</data>
 		</dict>
 		<key>Modules/MetaMask_iOS.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			n/xU7631i2R6ag7rG5lbgTPbjkE=
-			</data>
 			<key>hash2</key>
 			<data>
-			owshlnCbn+Pnpj+Xlh3gTHfkEOgeofQlLXqec4SCiGM=
-			</data>
-		</dict>
-		<key>Modules/MetaMask_iOS.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			/IyCtr+kNYaq6R3Em6tRmZtbI9g=
-			</data>
-			<key>hash2</key>
-			<data>
-			UKmd/LxPAQ/HYWhchDuRzN5BnWwR7q56SkOMqNCYYBk=
+			cju/ZuYTxgtM5oEEd2xvkDMfxg/krYCYeQRi0XSLPIo=
 			</data>
 		</dict>
 		<key>Modules/MetaMask_iOS.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			ZohKThY9n92ZuaNFOE2SBYXWpPk=
-			</data>
 			<key>hash2</key>
 			<data>
-			2GsQijZJzqPWDH/dRSNwVGONZB/Y5nbUmUOmu7iDtSM=
+			G/imFCrUKGmdVSKn9SXmfkDsD0Y57ZIEQjTyxHf2uYw=
 			</data>
 		</dict>
 		<key>Modules/MetaMask_iOS.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			lAWJRE8KV0CQfkkY56dqUOyCyRk=
-			</data>
 			<key>hash2</key>
 			<data>
-			LoPoagULsoTP+l1lAF4+BQ4lYsw7UA3o5LsOUKST7/4=
-			</data>
-		</dict>
-		<key>Modules/MetaMask_iOS.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			OZRspn3hmQ0+sx3B2HhPGHU0T/4=
-			</data>
-			<key>hash2</key>
-			<data>
-			5loB9pHcpiY3dzeVP7pK4TZgUWOcTaJFR2Ny96aiiYw=
+			KnRdWE4y6t4QM5zi5JDptPdHFgJy1Tku+7GLkZS2aNM=
 			</data>
 		</dict>
 		<key>Modules/MetaMask_iOS.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			+aupmNpjK3ehOKwuRKj6KjbSkjs=
-			</data>
 			<key>hash2</key>
 			<data>
-			FJ7q+ysNeK/DMqrKKlIgSjxHL2p8c3xbw/jY0WpAi/s=
-			</data>
-		</dict>
-		<key>Modules/MetaMask_iOS.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			OZRspn3hmQ0+sx3B2HhPGHU0T/4=
-			</data>
-			<key>hash2</key>
-			<data>
-			5loB9pHcpiY3dzeVP7pK4TZgUWOcTaJFR2Ny96aiiYw=
+			68tT0uEoJGIscWzDG7HGvpVEpBt1AvDfQgFol16+LtM=
 			</data>
 		</dict>
 		<key>Modules/MetaMask_iOS.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			oodIrnhUB1QPHZY8stJAh4Zv7NI=
-			</data>
 			<key>hash2</key>
 			<data>
-			lBMJUyKC+gX6pCE9qr4CsC6KleEPxzFjrEc0H+AH/eQ=
+			N99fA+mEjLJp+ozt1IJdoHHqCxZzCZcZCNoOKW2XsxE=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			K4NMVIni0F5e2wQi8MRDLUgrnYk=
-			</data>
 			<key>hash2</key>
 			<data>
-			vIKxO5mCbZuV4Q28Ggn6r3eTIFWyR3kmnvM2slTWdt8=
+			diFBrlUKk/7kKdc2YPMfBydNt8hr8ZQrXJfoNGHsti8=
 			</data>
 		</dict>
 		<key>Podfile</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			mn3saliw5cluH4+rplu1Ae2LrPY=
-			</data>
 			<key>hash2</key>
 			<data>
-			dFYIcYZYvD9RkMGL4IgavOC7bnI+HNBRyePncPDWtuw=
+			V6rg/EIpVNSL6s8p5gwBtncdxW0SjSdlDlLr5wA0RuI=
 			</data>
 		</dict>
 	</dict>

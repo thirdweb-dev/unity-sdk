@@ -10,7 +10,6 @@ namespace MetaMask.Unity.Contracts
     [CreateAssetMenu(menuName = "MetaMask/Contract Templates/ERC1155")]
     public class ScriptableERC1155 : ScriptableContract<ERC1155>, ERC1155
     {
-        public string Address => CurrentContract.Address;
         public Task<ERC1155> DeployNew(string uri_)
         {
             return CurrentContract.DeployNew(uri_);

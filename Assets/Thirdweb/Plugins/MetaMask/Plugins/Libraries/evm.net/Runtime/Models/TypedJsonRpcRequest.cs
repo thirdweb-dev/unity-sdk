@@ -7,7 +7,7 @@ namespace evm.net.Models
     {
         [JsonProperty("method")]
         public new string Method { get; }
-
+        
         [JsonProperty("params")]
         public T Parameters { get; }
 
