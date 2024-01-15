@@ -8,6 +8,7 @@ using TokenERC721Contract = Thirdweb.Contracts.TokenERC721.ContractDefinition;
 using DropERC721Contract = Thirdweb.Contracts.DropERC721.ContractDefinition;
 using ERC721AQueryable = Thirdweb.Contracts.ERC721AQueryableUpgradeable.ContractDefinition;
 using SignatureDropContract = Thirdweb.Contracts.SignatureDrop.ContractDefinition;
+using System.Linq;
 
 namespace Thirdweb
 {
@@ -85,23 +86,48 @@ namespace Thirdweb
             }
             else
             {
-                int totalSupply = await TotalCount();
-                int start;
-                int end;
-                if (queryParams != null)
+                int totalCount = await TotalCount();
+                int start = queryParams?.start ?? 0;
+                int count = queryParams?.count + 1 ?? totalCount;
+                int end = Math.Min(start + count, totalCount);
+                List<NFT> allNfts = new();
+                try
                 {
-                    start = queryParams.start;
-                    end = queryParams.start + queryParams.count;
-                }
-                else
-                {
-                    start = 0;
-                    end = totalSupply - 1;
-                }
+                    var uriFunctions = Enumerable.Range(start, end - start).Select(i => new TokenERC721Contract.TokenURIFunction() { TokenId = new BigInteger(i) }).ToArray();
+                    var uriResults = await TransactionManager.ThirdwebMulticallRead<TokenERC721Contract.TokenURIFunction, TokenERC721Contract.TokenURIOutputDTO>(contractAddress, uriFunctions);
+                    var metadataFetchTasks = new List<Task<NFTMetadata>>();
+                    for (int i = 0; i < uriResults.Length; i++)
+                    {
+                        var tokenUri = uriResults[i].ReturnValue1.Replace("0x{id}", uriFunctions[i].TokenId.ToString()).ReplaceIPFS();
+                        metadataFetchTasks.Add(ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenUri));
+                    }
+                    var metadataResults = await Task.WhenAll(metadataFetchTasks);
+                    allNfts = new List<NFT>();
+                    for (int i = 0; i < metadataResults.Length; i++)
+                    {
+                        var tokenId = uriFunctions[i].TokenId.ToString();
+                        var metadata = metadataResults[i];
+                        metadata.image = metadata.image.ReplaceIPFS();
+                        metadata.id = tokenId;
+                        metadata.uri = uriResults[i].ReturnValue1.ReplaceIPFS();
+                        var nft = new NFT
+                        {
+                            owner = await OwnerOf(tokenId),
+                            type = "ERC721",
+                            supply = 1,
+                            quantityOwned = 1,
+                            metadata = metadata
+                        };
 
-                var allNfts = new List<NFT>();
-                for (int i = start; i <= end; i++)
-                    allNfts.Add(await Get(i.ToString()));
+                        allNfts.Add(nft);
+                    }
+                }
+                catch
+                {
+                    ThirdwebDebug.LogWarning("Unable to fetch using Multicall3, likely not deployed on this chain, falling back to single queries.");
+                    for (int i = start; i <= end; i++)
+                        allNfts.Add(await Get(i.ToString()));
+                }
                 return allNfts;
             }
         }

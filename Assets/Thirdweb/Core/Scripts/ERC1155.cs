@@ -85,21 +85,49 @@ namespace Thirdweb
             else
             {
                 int totalCount = await TotalCount();
-                int start;
-                int end;
-                if (queryParams != null)
+                int start = queryParams?.start ?? 0;
+                int count = queryParams?.count + 1 ?? totalCount;
+                int end = Math.Min(start + count, totalCount);
+                List<NFT> allNfts = new();
+                try
                 {
-                    start = queryParams.start;
-                    end = queryParams.start + queryParams.count;
+                    var uriFunctions = Enumerable.Range(start, end - start).Select(i => new TokenERC1155Contract.UriFunction() { TokenId = new BigInteger(i) }).ToArray();
+                    var uriResults = await TransactionManager.ThirdwebMulticallRead<TokenERC1155Contract.UriFunction, TokenERC1155Contract.UriOutputDTO>(contractAddress, uriFunctions);
+                    var metadataFetchTasks = new List<Task<NFTMetadata>>();
+                    for (int i = 0; i < uriResults.Length; i++)
+                    {
+                        var tokenUri = uriResults[i].ReturnValue1.Replace("0x{id}", uriFunctions[i].TokenId.ToString()).ReplaceIPFS();
+                        metadataFetchTasks.Add(ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenUri));
+                    }
+                    var metadataResults = await Task.WhenAll(metadataFetchTasks);
+                    allNfts = new List<NFT>();
+                    for (int i = 0; i < uriResults.Length; i++)
+                    {
+                        var tokenId = uriFunctions[i].TokenId.ToString();
+                        var metadata = metadataResults[i];
+                        metadata.image = metadata.image.ReplaceIPFS();
+                        metadata.id = tokenId;
+                        metadata.uri = uriResults[i].ReturnValue1.ReplaceIPFS();
+
+                        var nft = new NFT
+                        {
+                            owner = "",
+                            type = "ERC1155",
+                            supply = await TotalSupply(tokenId),
+                            quantityOwned = 404,
+                            metadata = metadata
+                        };
+
+                        allNfts.Add(nft);
+                    }
                 }
-                else
+                catch
                 {
-                    start = 0;
-                    end = totalCount - 1;
+                    ThirdwebDebug.LogWarning("Unable to fetch using Multicall3, likely not deployed on this chain, falling back to single queries.");
+                    allNfts = new List<NFT>();
+                    for (int i = start; i <= end; i++)
+                        allNfts.Add(await Get(i.ToString()));
                 }
-                var allNfts = new List<NFT>();
-                for (int i = start; i <= end; i++)
-                    allNfts.Add(await Get(i.ToString()));
                 return allNfts;
             }
         }
@@ -118,20 +146,59 @@ namespace Thirdweb
             {
                 string owner = address ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
                 int totalCount = await TotalCount();
-                var ownedNfts = new List<NFT>();
-                for (int i = 0; i < totalCount; i++)
+                List<NFT> ownedNfts = new();
+
+                try
                 {
-                    BigInteger ownedBalance = BigInteger.Parse(await BalanceOf(owner, i.ToString()));
-                    if (ownedBalance == 0)
+                    var balanceFunctions = Enumerable.Range(0, totalCount).Select(i => new TokenERC1155Contract.BalanceOfFunction() { Account = owner, Id = new BigInteger(i) }).ToArray();
+                    var balanceResults = await TransactionManager.ThirdwebMulticallRead<TokenERC1155Contract.BalanceOfFunction, TokenERC1155Contract.BalanceOfOutputDTO>(
+                        contractAddress,
+                        balanceFunctions
+                    );
+                    var nonZeroBalanceTokenIds = balanceResults.Select((result, index) => (Balance: result.ReturnValue1, TokenId: index)).Where(x => x.Balance > 0).ToList();
+                    var uriFunctions = nonZeroBalanceTokenIds.Select(x => new TokenERC1155Contract.UriFunction() { TokenId = new BigInteger(x.TokenId) }).ToArray();
+                    var uriResults = await TransactionManager.ThirdwebMulticallRead<TokenERC1155Contract.UriFunction, TokenERC1155Contract.UriOutputDTO>(contractAddress, uriFunctions);
+                    var metadataFetchTasks = uriResults.Select(uriResult => ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(uriResult.ReturnValue1.ReplaceIPFS())).ToList();
+                    var metadataResults = await Task.WhenAll(metadataFetchTasks);
+                    ownedNfts = new List<NFT>();
+                    for (int i = 0; i < nonZeroBalanceTokenIds.Count; i++)
                     {
-                        continue;
+                        var tokenId = nonZeroBalanceTokenIds[i].TokenId.ToString();
+                        var balance = nonZeroBalanceTokenIds[i].Balance;
+                        var metadata = metadataResults[i];
+                        metadata.image = metadata.image.ReplaceIPFS();
+                        metadata.id = tokenId;
+                        metadata.uri = uriResults[i].ReturnValue1.ReplaceIPFS();
+
+                        ownedNfts.Add(
+                            new NFT
+                            {
+                                owner = owner,
+                                type = "ERC1155",
+                                supply = await TotalSupply(tokenId),
+                                quantityOwned = (int)balance,
+                                metadata = metadata
+                            }
+                        );
                     }
-                    else
+                }
+                catch
+                {
+                    ThirdwebDebug.LogWarning("Unable to fetch using Multicall3, likely not deployed on this chain, falling back to single queries.");
+                    for (int i = 0; i < totalCount; i++)
                     {
-                        NFT tempNft = await Get(i.ToString());
-                        tempNft.owner = owner;
-                        tempNft.quantityOwned = (int)ownedBalance;
-                        ownedNfts.Add(tempNft);
+                        BigInteger ownedBalance = BigInteger.Parse(await BalanceOf(owner, i.ToString()));
+                        if (ownedBalance == 0)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            NFT tempNft = await Get(i.ToString());
+                            tempNft.owner = owner;
+                            tempNft.quantityOwned = (int)ownedBalance;
+                            ownedNfts.Add(tempNft);
+                        }
                     }
                 }
                 return ownedNfts;
