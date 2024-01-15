@@ -14,13 +14,7 @@ using UnityEngine;
 using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Thirdweb.Redcode.Awaiting;
-using System.Threading;
-using System.Collections.Concurrent;
 using Thirdweb.Contracts.Account.ContractDefinition;
-using Org.BouncyCastle.Utilities.Encoders;
-using System.Linq;
-using Nethereum.Util;
-using Nethereum.RLP;
 
 namespace Thirdweb.AccountAbstraction
 {
