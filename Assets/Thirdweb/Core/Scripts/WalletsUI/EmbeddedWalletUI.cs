@@ -61,7 +61,7 @@ namespace Thirdweb.Wallets
 
         #region Connection Flow
 
-        public async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions)
+        public virtual async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions)
         {
             var config = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
             _customScheme = config != null ? config.customScheme : null;
@@ -135,7 +135,7 @@ namespace Thirdweb.Wallets
             return _user;
         }
 
-        public void Cancel()
+        public virtual void Cancel()
         {
             _exception = new UnityException("User cancelled");
         }
@@ -144,7 +144,7 @@ namespace Thirdweb.Wallets
 
         #region Email OTP Flow
 
-        private async Task LoginWithOTP()
+        public virtual async Task LoginWithOTP()
         {
             if (_email == null)
                 throw new UnityException("Email is required for OTP login");
@@ -154,7 +154,7 @@ namespace Thirdweb.Wallets
             EmbeddedWalletCanvas.SetActive(true);
         }
 
-        private async Task OnSendOTP()
+        public virtual async Task OnSendOTP()
         {
             try
             {
@@ -169,7 +169,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        private async void OnSubmitOTP()
+        public virtual async void OnSubmitOTP()
         {
             OTPInput.interactable = false;
             RecoveryInput.interactable = false;
@@ -207,7 +207,7 @@ namespace Thirdweb.Wallets
 
         #region OAuth2 Flow
 
-        private async Task LoginWithOauth(string authProviderStr)
+        public virtual async Task LoginWithOauth(string authProviderStr)
         {
             if (Application.isMobilePlatform && string.IsNullOrEmpty(_customScheme))
                 throw new UnityException("No custom scheme provided for mobile deeplinks, please set one in your ThirdwebConfig (found in ThirdwebManager)");
@@ -251,7 +251,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        private async void OnSubmitRecoveryOauth(string authProviderStr, string authResult)
+        public virtual async void OnSubmitRecoveryOauth(string authProviderStr, string authResult)
         {
             try
             {
@@ -266,7 +266,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        private async Task<string> GetLoginLink(string authProvider)
+        public virtual async Task<string> GetLoginLink(string authProvider)
         {
             string loginUrl = await _embeddedWallet.FetchHeadlessOauthLoginLinkAsync(authProvider);
             string platform = "unity";
@@ -279,7 +279,7 @@ namespace Thirdweb.Wallets
 
         #region JWT Flow
 
-        private async Task LoginWithJWT(string jwtToken, string encryptionKey, string recoveryCode = null)
+        public virtual async Task LoginWithJWT(string jwtToken, string encryptionKey, string recoveryCode = null)
         {
             if (string.IsNullOrEmpty(jwtToken))
                 throw new UnityException("JWT token is required for JWT login!");
@@ -295,7 +295,7 @@ namespace Thirdweb.Wallets
 
         #region Auth Endpoint Flow
 
-        private async Task LoginWithAuthEndpoint(string payload, string encryptionKey, string recoveryCode = null)
+        public virtual async Task LoginWithAuthEndpoint(string payload, string encryptionKey, string recoveryCode = null)
         {
             if (string.IsNullOrEmpty(payload))
                 throw new UnityException("Auth payload is required for Auth Endpoint login!");
@@ -311,7 +311,7 @@ namespace Thirdweb.Wallets
 
         #region Common
 
-        private void DisplayRecoveryInput(bool hideOtpInput)
+        public virtual void DisplayRecoveryInput(bool hideOtpInput)
         {
             if (hideOtpInput)
                 OTPInput.gameObject.SetActive(false);
@@ -319,7 +319,7 @@ namespace Thirdweb.Wallets
             EmbeddedWalletCanvas.SetActive(true);
         }
 
-        private void ShowRecoveryCodes(EmbeddedWallet.VerifyResult res)
+        public virtual void ShowRecoveryCodes(EmbeddedWallet.VerifyResult res)
         {
             if (res.MainRecoveryCode != null && res.WasEmailed.HasValue && res.WasEmailed.Value == false)
             {

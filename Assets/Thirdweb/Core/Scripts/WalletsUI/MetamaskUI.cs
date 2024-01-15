@@ -43,7 +43,7 @@ namespace Thirdweb.Wallets
 
         // Core
 
-        public async Task<string> Connect()
+        public virtual async Task<string> Connect()
         {
             OTPPanel.SetActive(false);
 
@@ -78,14 +78,14 @@ namespace Thirdweb.Wallets
             return MetaMaskUnity.Instance.Wallet.SelectedAddress;
         }
 
-        public void Cancel()
+        public virtual void Cancel()
         {
             _exception = new UnityException("User cancelled");
         }
 
         // QR
 
-        private void ShowQR(string universalLink, string deepLink)
+        public virtual void ShowQR(string universalLink, string deepLink)
         {
             var qrCodeAsTexture2D = GenerateQRTexture(universalLink);
             QRCodeImage.sprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new Vector2(0.5f, 0.5f));
@@ -94,7 +94,7 @@ namespace Thirdweb.Wallets
             QRCodeImage.mainTexture.filterMode = FilterMode.Point;
         }
 
-        private Texture2D GenerateQRTexture(string text)
+        public virtual Texture2D GenerateQRTexture(string text)
         {
             Texture2D encoded = new Texture2D(256, 256);
             var color32 = EncodeToQR(text, encoded.width, encoded.height);
@@ -103,7 +103,7 @@ namespace Thirdweb.Wallets
             return encoded;
         }
 
-        private Color32[] EncodeToQR(string textForEncoding, int width, int height)
+        public virtual Color32[] EncodeToQR(string textForEncoding, int width, int height)
         {
             var writer = new BarcodeWriter
             {
@@ -115,40 +115,40 @@ namespace Thirdweb.Wallets
 
         // Top level Event Listeners
 
-        private void OnWalletConnected(object sender, EventArgs e)
+        public virtual void OnWalletConnected(object sender, EventArgs e)
         {
             _connected = true;
         }
 
-        private void OnWalletAuthorized(object sender, EventArgs e)
+        public virtual void OnWalletAuthorized(object sender, EventArgs e)
         {
             _authorized = true;
         }
 
         // IMetaMaskUnityTransportListener
 
-        public void OnMetaMaskConnectRequest(string universalLink, string deepLink)
+        public virtual void OnMetaMaskConnectRequest(string universalLink, string deepLink)
         {
             ShowQR(universalLink, deepLink);
         }
 
-        public void OnMetaMaskRequest(string id, MetaMaskEthereumRequest request)
+        public virtual void OnMetaMaskRequest(string id, MetaMaskEthereumRequest request)
         {
             return;
         }
 
-        public void OnMetaMaskFailure(Exception error)
+        public virtual void OnMetaMaskFailure(Exception error)
         {
             _exception = error;
         }
 
-        public void OnMetaMaskSuccess()
+        public virtual void OnMetaMaskSuccess()
         {
             _connected = true;
             _authorized = true;
         }
 
-        public void OnMetaMaskOTP(int otp)
+        public virtual void OnMetaMaskOTP(int otp)
         {
             OTPPanel.SetActive(true);
 
@@ -156,7 +156,7 @@ namespace Thirdweb.Wallets
 
             // They simply need to press resume in the app
             OTPText.gameObject.SetActive(shouldShowOtpCode);
-            
+
             if (shouldShowOtpCode)
             {
                 OTPText.text = otp.ToString();
@@ -167,7 +167,7 @@ namespace Thirdweb.Wallets
             }
         }
 
-        public void OnMetaMaskDisconnected()
+        public virtual void OnMetaMaskDisconnected()
         {
             if (!MetaMaskUnity.Instance.Wallet.Transport.IsMobile || !MetaMaskUnity.Instance.Wallet.HasSession)
             {
