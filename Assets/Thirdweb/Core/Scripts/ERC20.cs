@@ -165,25 +165,7 @@ namespace Thirdweb
             }
             else
             {
-                CurrencyValue currentAllowance = await Allowance(spender);
-                BigInteger diff = BigInteger.Parse(amount.ToWei()) - BigInteger.Parse(currentAllowance.value);
-
-                var result = new TransactionResult();
-                if (diff == 0)
-                {
-                    ThirdwebDebug.LogWarning($"Allowance is already of amount {amount} - Skipping request...");
-                    result = null;
-                }
-                else if (diff < 0)
-                {
-                    return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.DecreaseAllowanceFunction() { Spender = spender, SubtractedValue = diff * -1 });
-                }
-                else
-                {
-                    return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.IncreaseAllowanceFunction() { Spender = spender, AddedValue = diff });
-                }
-
-                return result;
+                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.ApproveFunction() { Spender = spender, Amount = BigInteger.Parse(amount.ToWei()) });
             }
         }
 
