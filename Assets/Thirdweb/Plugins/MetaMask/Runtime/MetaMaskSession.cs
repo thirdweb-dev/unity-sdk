@@ -37,6 +37,8 @@ namespace MetaMask
         /// </summary>
         public string PublicKey => this.publicKey;
 
+        public DateTime LastActive => this.data.LastActive;
+
         private readonly string _privateKey;
 
         #endregion
@@ -114,7 +116,7 @@ namespace MetaMask
     /// <summary>
     /// The session's persistent data.
     /// </summary>
-    public class MetaMaskSessionData
+    public class MetaMaskSessionData : IAppConfig
     {
 
         /// <summary>
@@ -128,12 +130,24 @@ namespace MetaMask
         /// </summary>
         [JsonProperty("app_url")]
         public string AppUrl { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the client's Application URL.
+        /// </summary>
+        [JsonProperty("app_icon")]
+        public string AppIcon { get; set; }
 
         /// <summary>
         /// Gets or sets the Channel ID used for communication between MetaMask and the client.
         /// </summary>
         [JsonProperty("channel_id")]
-        public string ChannelId { get; set; } = Guid.NewGuid().ToString();
+        public string ChannelId { get; set; }
+        
+        /// <summary>
+        /// The date and time this session was last active
+        /// </summary>
+        [JsonProperty("last_active")]
+        public DateTime LastActive { get; internal set; } = DateTime.Now;
 
         /// <summary>
         /// Initializes a new instance of <see cref="MetaMaskSessionData"/>.
@@ -145,8 +159,11 @@ namespace MetaMask
         /// </summary>
         /// <param name="appName">The client's application name</param>
         /// <param name="appUrl">The client's application URL</param>
-        public MetaMaskSessionData(string appName, string appUrl)
+        public MetaMaskSessionData(IAppConfig appConfig)
         {
+            var appName = appConfig.AppName;
+            var appUrl = appConfig.AppUrl;
+            
             if (string.IsNullOrWhiteSpace(appName))
                 throw new ArgumentException(
                     "MetaMask app name cannot be null, please update app name in Window > MetaMask > Setup Window under Credentials");
@@ -157,6 +174,7 @@ namespace MetaMask
 
             AppName = appName;
             AppUrl = appUrl;
+            AppIcon = appConfig.AppIcon;
         }
     }
 }

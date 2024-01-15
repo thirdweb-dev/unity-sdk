@@ -69,10 +69,5 @@ namespace MetaMask.Unity.Contracts
         {
             return CurrentContract.Allowance(owner, spender);
         }
-
-        public string Address
-        {
-            get => CurrentContract.Address;
-        }
     }
 }

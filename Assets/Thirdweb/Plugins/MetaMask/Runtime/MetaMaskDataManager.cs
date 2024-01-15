@@ -25,8 +25,6 @@ namespace MetaMask
         protected int saltSize = 12;
         protected int iterations = 10000;
 
-        protected string algorithmName = "aes";
-
         protected PaddingMode paddingMode = PaddingMode.PKCS7;
         protected CipherMode cipherMode = CipherMode.CBC;
 
@@ -71,12 +69,7 @@ namespace MetaMask
             {
                 if (this.algorithm == null)
                 {
-                    if (string.IsNullOrEmpty(this.algorithmName))
-                    {
-                        this.algorithmName = "aes";
-                    }
-
-                    this.algorithm = SymmetricAlgorithm.Create(this.algorithmName);
+                    this.algorithm = Aes.Create();
                     this.algorithm.Mode = this.cipherMode;
                     this.algorithm.Padding = this.paddingMode;
                 }

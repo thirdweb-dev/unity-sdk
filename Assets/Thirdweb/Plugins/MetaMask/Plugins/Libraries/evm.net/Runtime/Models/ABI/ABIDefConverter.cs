@@ -6,17 +6,12 @@ namespace evm.net.Models.ABI
 {
     public class ABIDefConverter : JsonConverter
     {
-#nullable enable
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             serializer.Serialize(writer, value);
         }
 
-#nullable disable
-
-#pragma warning disable CS8632
-
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
             {
@@ -24,12 +19,11 @@ namespace evm.net.Models.ABI
             }
 
             var obj = JObject.Load(reader);
-
-            if (obj["type"] == null)
-                return serializer.Deserialize(reader, objectType);
+            
+            if (obj["type"] == null) return serializer.Deserialize(reader, objectType);
             var typeName = obj["type"].ToString();
 
-            ABIDefType type = (ABIDefType)Enum.Parse(typeof(ABIDefType), typeName, true);
+            ABIDefType type = (ABIDefType) Enum.Parse(typeof(ABIDefType), typeName, true);
 
             switch (type)
             {
@@ -48,7 +42,7 @@ namespace evm.net.Models.ABI
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
+            
             ABIDef result = (existingValue as ABIDef ?? (ABIDef)serializer.ContractResolver.ResolveContract(objectType).DefaultCreator()); // Reuse existingValue if present
             // the structure of the object matches the first format,
             // so just deserialize it directly using the serializer
@@ -57,8 +51,6 @@ namespace evm.net.Models.ABI
 
             return result;
         }
-
-#pragma warning restore CS8632
 
         public override bool CanConvert(Type objectType)
         {

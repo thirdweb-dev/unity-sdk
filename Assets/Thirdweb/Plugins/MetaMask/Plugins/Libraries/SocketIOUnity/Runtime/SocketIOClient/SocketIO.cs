@@ -10,7 +10,6 @@ using MetaMask.SocketIOClient.JsonSerializer;
 using MetaMask.SocketIOClient.Messages;
 using MetaMask.SocketIOClient.Transport;
 using MetaMask.SocketIOClient.UriConverters;
-
 using UnityEngine.Networking;
 
 namespace MetaMask.SocketIOClient
@@ -459,6 +458,7 @@ namespace MetaMask.SocketIOClient
 
         private void OnErrorReceived(Exception ex)
         {
+            UnityEngine.Debug.LogException(ex);
             InvokeDisconnect(DisconnectReason.TransportClose);
         }
 

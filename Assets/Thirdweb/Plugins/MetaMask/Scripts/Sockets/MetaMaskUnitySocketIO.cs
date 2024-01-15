@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System.Threading.Tasks;
 
 using MetaMask.SocketIOClient;
+using UnityEngine;
 
 using UnityEngine.Networking;
 
@@ -127,6 +128,7 @@ namespace MetaMask.Sockets
 
         private void OnSocketDisconnected(object sender, string e)
         {
+            Debug.Log(e);
             Disconnected?.Invoke(this, EventArgs.Empty);
         }
 

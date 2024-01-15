@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using evm.net.Network;
 using MetaMask.Unity;
+using UnityEngine;
 using UnityEngine.Networking;
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System;
@@ -204,7 +205,11 @@ namespace MetaMask.IO
                     uwr.SetRequestHeader(authHeaderKey, authHeaderValue);
                 }
 
-                uwr.SetRequestHeader("X-Infura-User-Agent", "metamask/sdk-csharp 1.2.0");
+                if (Infura.IsUrl(url))
+                {
+                    uwr.SetRequestHeader("X-Infura-User-Agent", $"metamask/sdk-csharp {MetaMaskUnity.Version}");
+                    uwr.SetRequestHeader("Metamask-Sdk-Info", $"Sdk/Unity SdkVersion/{MetaMaskUnity.Version} Platform/{SystemInfo.operatingSystem} dApp/{MetaMaskUnity.Instance.Config.AppUrl}");
+                }
 
                 if (!string.IsNullOrWhiteSpace(@params))
                 {

@@ -8,6 +8,8 @@ namespace MetaMask.Unity.Contracts
 {
     public abstract class ScriptableContract<T> : ScriptableObject where T : class, IContract
     {
+        public EvmAddress Address => CurrentContract.Address;
+        
         [Serializable]
         public enum ChainId : int
         {
@@ -32,7 +34,7 @@ namespace MetaMask.Unity.Contracts
         public List<AddressByChain> ContractAddresses = new List<AddressByChain>();
 
         private MetaMaskWallet connectedProvider;
-        private Dictionary<int, T> contractInstances = new Dictionary<int, T>();
+        private Dictionary<long, T> contractInstances = new Dictionary<long, T>();
 
         public T CurrentContract
         {
@@ -46,7 +48,7 @@ namespace MetaMask.Unity.Contracts
                         throw new InvalidOperationException("MetaMask is not currently connected");
                 }
 
-                var chainId = Convert.ToInt32(connectedProvider.SelectedChainId, 16);
+                var chainId = Convert.ToInt64(connectedProvider.SelectedChainId, 16);
                 if (!contractInstances.ContainsKey(chainId))
                     throw new InvalidOperationException($"There is no contract instance setup for chainId {chainId}");
 
@@ -66,7 +68,7 @@ namespace MetaMask.Unity.Contracts
                         throw new InvalidOperationException("MetaMask is not currently connected");
                 }
 
-                var chainId = Convert.ToInt32(connectedProvider.SelectedChainId, 16);
+                var chainId = Convert.ToInt64(connectedProvider.SelectedChainId, 16);
 
                 return contractInstances.ContainsKey(chainId);
             }

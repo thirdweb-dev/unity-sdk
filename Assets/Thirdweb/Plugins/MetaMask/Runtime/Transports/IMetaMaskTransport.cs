@@ -11,12 +11,6 @@ namespace MetaMask.Transports
     /// </summary>
     public interface IMetaMaskTransport
     {
-
-        /// <summary>
-        /// Gets the transport's user agent to be used in headers.
-        /// </summary>
-        string UserAgent { get; }
-        
         /// <summary>
         /// Whether the transport (device) is a mobile device and supports deeplinking
         /// </summary>

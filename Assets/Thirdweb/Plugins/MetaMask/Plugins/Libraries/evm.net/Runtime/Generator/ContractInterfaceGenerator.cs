@@ -175,7 +175,7 @@ namespace evm.net.Generator
         {
             if (parameters.Length == 0)
                 return string.Empty;
-            return string.Join(", ", parameters.Select(BuildParameter));
+            return string.Join(", ", parameters.Select(BuildParameter).Append(CallOptionsParameter));
         }
 
         public string BuildNamedTuple(ABIParameter parameter)
@@ -190,6 +190,8 @@ namespace evm.net.Generator
             _context.GenerateTuple(typeName, parameter);
             return typeName;
         }
+
+        public const string CallOptionsParameter = "CallOptions options = default";
 
         public string BuildParameter(ABIParameter parameter)
         {

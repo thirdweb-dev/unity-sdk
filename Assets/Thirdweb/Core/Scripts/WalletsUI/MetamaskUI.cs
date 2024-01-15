@@ -19,6 +19,7 @@ namespace Thirdweb.Wallets
         public Button DeepLinkButton;
         public GameObject OTPPanel;
         public TMP_Text OTPText;
+        public TMP_Text OTPHeaderText;
 
         public static MetamaskUI Instance;
 
@@ -150,7 +151,20 @@ namespace Thirdweb.Wallets
         public void OnMetaMaskOTP(int otp)
         {
             OTPPanel.SetActive(true);
-            OTPText.text = otp.ToString();
+
+            var shouldShowOtpCode = DateTime.Now - MetaMaskUnity.Instance.Wallet.LastActive >= TimeSpan.FromHours(1);
+
+            // They simply need to press resume in the app
+            OTPText.gameObject.SetActive(shouldShowOtpCode);
+            
+            if (shouldShowOtpCode)
+            {
+                OTPText.text = otp.ToString();
+            }
+            else
+            {
+                OTPHeaderText.text = "Open the MetaMask app to continue with your session.";
+            }
         }
 
         public void OnMetaMaskDisconnected()
