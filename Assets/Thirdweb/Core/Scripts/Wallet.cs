@@ -389,7 +389,10 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                if (
+                    ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet
+                    && !ThirdwebManager.Instance.SDK.session.Options.smartWalletConfig.Value.doNotDeployOnSignMessage
+                )
                 {
                     var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                     if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
@@ -417,7 +420,10 @@ namespace Thirdweb
             if (!await IsConnected())
                 throw new Exception("No account connected!");
 
-            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+            if (
+                ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet
+                && !ThirdwebManager.Instance.SDK.session.Options.smartWalletConfig.Value.doNotDeployOnSignMessage
+            )
             {
                 var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
