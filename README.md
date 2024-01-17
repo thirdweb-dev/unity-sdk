@@ -17,6 +17,10 @@
 </p>
 
 
+# Documentation
+
+See full documentation on the [thirdweb portal](https://portal.thirdweb.com/unity).
+
 # Supported platforms
 
 Build games for WebGL, Standalone and Mobile using 1000+ supported chains.
@@ -27,17 +31,15 @@ Build games for WebGL, Standalone and Mobile using 1000+ supported chains.
 
 Head over to the [releases](https://github.com/thirdweb-dev/unity-sdk/releases) page and download the latest `.unitypackage` file.
 
-Drag and drop the file into your project.
+Follow our [Getting Started Guide](https://portal.thirdweb.com/unity/getting-started).
 
-The package comes with a sample Scene and Prefab examples showcasing the different capabilities of the SDK.
+All you need is a [ThirdwebManager](https://portal.thirdweb.com/unity/thirdwebmanager) prefab in your scene to interact with the SDK from anywhere!
 
-All you need is a ThirdwebManager prefab in your scene. See [documentation](https://portal.thirdweb.com/unity) for more information.
-
-The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS. We recommend using 2022 LTS.
-
-The example scenes are built using Unity 2022 LTS.
+Various blockchain interaction examples are available in our `Scene_Prefabs` scene.
 
 Notes: 
+- The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS. We recommend using 2022 LTS.
+- The example scenes are built using Unity 2022 LTS.
 - The Newtonsoft DLL is included as part of the Unity Package, feel free to deselect it if you already have it installed as a dependency to avoid conflicts.
 - If using .NET Framework and encountering an error related to HttpUtility, create a file `csc.rsp` that includes `-r:System.Web.dll` and save it under `Assets`.
 
@@ -49,7 +51,7 @@ Notes:
 - Use IL2CPP over Mono when possible in the Player Settings.
 - Using the SDK in the editor (pressing Play) is an accurate reflection of what you can expect to see on native platforms.
 - In order to communicate with the SDK on WebGL, you need to `Build and run` your project so it runs in a browser context.
-- In some cases, setting `Managed Stripping Level` to minimal when using IL2CPP is also helpful - you can find it under `Player Settings` > `Other Settings` > `Optimization`
+- In most cases, setting `Managed Stripping Level` to minimal when using IL2CPP is also helpful - you can find it under `Player Settings` > `Other Settings` > `Optimization`
 
 ## WebGL
 
@@ -59,10 +61,10 @@ Notes:
 
 If you're uploading your build, set `Compression Format` to `Disabled` in `Player Settings` > `Publishing Settings`.
 
-## Other Platforms
+## Mobile
 
-- If building to mobile and running into issues, it is best to run Force Resolve from the `Assets` menu > `External Dependency Manager` > `Android Resolver` > `Force Resolve` for example.
-- If building for iOS and missing a Metamask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder
+- For Android, it is best to run Force Resolve from the `Assets` menu > `External Dependency Manager` > `Android Resolver` > `Force Resolve` before building your game.
+- For iOS, if you are missing a MetaMask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder
 
 # Usage
 
@@ -108,7 +110,9 @@ var txRes = await contract.Write("myWriteFunction", arg1, arg2, ...);
 
 # Prefab Examples
 
-The `Examples` folder contains a demo scene using our user-friendly prefabs, check it out!
+![image](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/a213b668-0273-400f-a6c1-92a582a35535)
+
+The `Examples` folder contains a demo scene `Scene_Prefabs` using our user-friendly prefabs - they include script examples to get inspired and are entirely optional.
 
 All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Core/Scripts/ThirdwebManager.cs) prefab to get the SDK Instance, drag and drop it into your scene and select the networks you want to support from the Inspector.
 
@@ -116,7 +120,7 @@ All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-
 
 - Drag and drop it into your scene.
 - Set up the networks you want to support from the ThirdwebManager prefab.
-- You can add callbacks from the inspector for when the wallet is connected, disconnected, fails to connect or disconnect, as well as callbacks when the network is switched or fails to do so.
+- You can add listeners from the inspector for various wallet events.
 
 [NFT Loader](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_NFTLoader.cs) - Standalone drag & drop grid/scroll view of NFTs you ask it to display!
 
@@ -168,6 +172,42 @@ nftPrefabScript.LoadNFT(nft);
 - Get (Native) Balance.
 - Custom Contract Read/Write Calls.
 - Authentication.
-- Deployment.
+- Message Signing.
+
+[Smart Wallet](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_SmartWallet.cs)
+- Adding admins to your smart wallet.
+- Removing admins from your smart wallet.
+- Creating session keys to grant temporary/restricted access to additional signers.
 
 See full documentation on the [thirdweb portal](https://portal.thirdweb.com/unity).
+
+# Contributing to thirdweb Unity SDK
+
+We warmly welcome contributions to the thirdweb Unity SDK! If you're looking to contribute, here's how you can get started.
+
+## How to Contribute
+
+1. Fork the Repository: Click the "Fork" button at the top right of this page to create your own copy of the repository.
+2. Clone Your Fork: Clone your fork to your local machine for development.
+3. Create a Feature Branch: Make a new branch for your changes. This helps keep contributions organized.
+4. Make Your Changes: Work on your changes. Make sure they are well-tested and don't break existing functionality.
+5. Commit Your Changes: Commit your changes with a clear and descriptive commit message.
+6. Push to Your Fork: Push your changes to your forked repository.
+7. Submit a Pull Request: From your fork, submit a pull request to our main repository. Provide a clear description of your changes and any relevant issue numbers.
+
+Notes: 
+- For WebGL-specific contributions, you may contribute to our [JS](https://github.com/thirdweb-dev/js/) package as well. The bulk of WebGL-specific behavior goes through its Unity bridge.
+- For new Wallet Provider contributions, see our guide to [Submit your Wallet](https://portal.thirdweb.com/unity/wallets/submission).
+
+## Guidelines
+
+- Keep It Simple: Try to keep your contributions small and simple. This makes them easier to review and merge.
+- Supported Platforms: Make sure your changes work on either WebGL only, Native platforms only, or both. A good test is to build `Scene_Prefabs` to test your changes there. 
+- Test Your Code: Ensure your code works as expected and doesn't introduce new issues.
+- Be Respectful: When discussing changes, always be respectful and constructive.
+
+# Need Help?
+
+If you're unsure about something or need help, feel free to reach out to us on [Discord](https://discord.gg/thirdweb).
+
+Thank you for contributing to the thirdweb Unity SDK!
