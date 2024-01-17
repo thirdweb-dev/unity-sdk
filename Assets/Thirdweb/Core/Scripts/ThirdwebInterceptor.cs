@@ -68,6 +68,11 @@ namespace Thirdweb
 
                 switch (_thirdwebWallet.GetProvider())
                 {
+                    case WalletProvider.WalletConnect:
+                        var data = request.RawParameters[1].ToString();
+                        var account = request.RawParameters[0].ToString();
+                        var ethSignTypedDataV4 = new EthSignTypedDataV4(account, data);
+                        return await WalletConnect.Instance.RequestAsync<EthSignTypedDataV4, string>(ethSignTypedDataV4);
                     case WalletProvider.LocalWallet:
                     case WalletProvider.EmbeddedWallet:
                         throw new Exception("Please use Wallet.SignTypedDataV4 instead.");
@@ -156,6 +161,11 @@ namespace Thirdweb
 
                 switch (_thirdwebWallet.GetProvider())
                 {
+                    case WalletProvider.WalletConnect:
+                        var msg = paramList[0].ToString();
+                        var acc = paramList[1].ToString();
+                        var ethSignTypedDataV4 = new EthSignTypedDataV4(acc, msg);
+                        return await WalletConnect.Instance.RequestAsync<EthSignTypedDataV4, string>(ethSignTypedDataV4);
                     case WalletProvider.LocalWallet:
                     case WalletProvider.EmbeddedWallet:
                         throw new Exception("Please use Wallet.SignTypedDataV4 instead.");
@@ -235,6 +245,17 @@ namespace Thirdweb
 
             [Preserve]
             public PersonalSign() { }
+        }
+
+        [RpcMethod("eth_signTypedData_v4")]
+        [RpcRequestOptions(Clock.ONE_MINUTE, 99999)]
+        public class EthSignTypedDataV4 : List<string>
+        {
+            public EthSignTypedDataV4(string account, string data)
+                : base(new[] { account, data }) { }
+
+            [Preserve]
+            public EthSignTypedDataV4() { }
         }
     }
 }
