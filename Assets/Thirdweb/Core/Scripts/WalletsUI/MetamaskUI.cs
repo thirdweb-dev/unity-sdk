@@ -23,9 +23,9 @@ namespace Thirdweb.Wallets
 
         public static MetamaskUI Instance;
 
-        private bool _connected;
-        private bool _authorized;
-        private Exception _exception;
+        protected bool _connected;
+        protected bool _authorized;
+        protected Exception _exception;
 
         private void Awake()
         {

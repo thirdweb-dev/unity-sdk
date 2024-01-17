@@ -26,7 +26,7 @@ namespace Thirdweb.Wallets
 
         public static WalletConnectUI Instance { get; private set; }
 
-        private WCWebSocketBuilder _builder;
+        protected WCWebSocketBuilder _builder;
 
         private void Awake()
         {

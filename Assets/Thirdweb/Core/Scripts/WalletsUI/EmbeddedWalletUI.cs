@@ -30,12 +30,12 @@ namespace Thirdweb.Wallets
         [Tooltip("Invoked when the user submits an invalid OTP and can retry.")]
         public UnityEvent OnEmailOTPVerificationFailed;
 
-        private EmbeddedWallet _embeddedWallet;
-        private string _email;
-        private User _user;
-        private Exception _exception;
-        private string _callbackUrl;
-        private string _customScheme;
+        protected EmbeddedWallet _embeddedWallet;
+        protected string _email;
+        protected User _user;
+        protected Exception _exception;
+        protected string _callbackUrl;
+        protected string _customScheme;
 
         #endregion
 
