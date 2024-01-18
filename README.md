@@ -21,6 +21,10 @@
 
 See full documentation on the [thirdweb portal](https://portal.thirdweb.com/unity).
 
+# Technical Demo
+
+Try out out multichain game that leverages Embedded and Smart Wallets to create seamless experiences - [Web3 Warriors](https://web3warriors.thirdweb.com/).
+
 # Supported platforms
 
 Build games for WebGL, Standalone and Mobile using 1000+ supported chains.
