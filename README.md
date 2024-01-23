@@ -71,7 +71,8 @@ If you're uploading your build, set `Compression Format` to `Disabled` in `Playe
 ## Mobile
 
 - For Android, it is best to run Force Resolve from the `Assets` menu > `External Dependency Manager` > `Android Resolver` > `Force Resolve` before building your game.
-- For iOS, if you are missing a MetaMask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder
+- For iOS, if you are missing a MetaMask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder.
+- If you are having trouble building in XCode, make sure ENABLE_BITCODE is disabled, MetaMask and Embedded Frameworks in your Build Phases contain potentially missing frameworks like MetaMask or Starscream. You may also need to remove the `Thirdweb/Plugins/MetaMask/Plugins/iOS/iphoneos/MetaMask_iOS.framework/Frameworks` folder in some cases.
 
 # Usage
 
