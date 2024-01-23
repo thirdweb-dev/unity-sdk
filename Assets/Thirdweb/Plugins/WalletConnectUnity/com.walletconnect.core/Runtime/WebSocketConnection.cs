@@ -30,7 +30,6 @@ namespace WalletConnectUnity.Core
         public event EventHandler Closed;
         public event EventHandler<Exception> ErrorReceived;
         public event EventHandler<object> Opened;
-
 #pragma warning disable 0067
         public event EventHandler<Exception> RegisterErrored;
 #pragma warning restore 0067

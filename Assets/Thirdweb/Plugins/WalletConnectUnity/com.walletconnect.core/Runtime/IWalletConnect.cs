@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
@@ -8,6 +9,8 @@ namespace WalletConnectUnity.Core
 {
     public interface IWalletConnect : IDisposable
     {
+        public static SynchronizationContext UnitySyncContext { get; }
+        
         public ISignClient SignClient { get; }
 
         public Linker Linker { get; }
@@ -19,6 +22,9 @@ namespace WalletConnectUnity.Core
         public bool IsConnected { get; }
 
         public event EventHandler<SessionStruct> ActiveSessionChanged;
+        public event EventHandler<SessionStruct> SessionConnected;
+        public event EventHandler<SessionStruct> SessionUpdated;
+        public event EventHandler SessionDisconnected;
 
         public Task<IWalletConnect> InitializeAsync();
 

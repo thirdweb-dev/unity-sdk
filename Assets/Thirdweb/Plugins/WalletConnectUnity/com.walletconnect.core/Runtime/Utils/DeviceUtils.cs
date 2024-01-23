@@ -38,11 +38,11 @@ namespace WalletConnectUnity.Core.Utils
 
 #endif
 
-#if !UNITY_EDITOR && UNITY_WEBGL
+#if UNITY_WEBGL
             return DeviceType.Web;
-#else
-            return DeviceType.Desktop;
 #endif
+
+            return DeviceType.Desktop;
         }
     }
 

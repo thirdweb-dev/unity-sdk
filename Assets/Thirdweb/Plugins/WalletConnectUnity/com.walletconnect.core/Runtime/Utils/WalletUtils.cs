@@ -23,6 +23,9 @@ namespace WalletConnectUnity.Core.Utils
 
         public static void SetRecentWallet(Wallet wallet)
         {
+            if (wallet == null)
+                return;
+
             PlayerPrefs.SetString("WC_RECENT_WALLET", JsonConvert.SerializeObject(wallet));
         }
 
@@ -37,7 +40,7 @@ namespace WalletConnectUnity.Core.Utils
 
             wallet = JsonConvert.DeserializeObject<Wallet>(recentWalletJson);
 
-            return true;
+            return wallet != null;
         }
     }
 }

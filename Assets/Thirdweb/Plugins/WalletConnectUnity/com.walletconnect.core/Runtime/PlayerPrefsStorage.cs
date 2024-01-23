@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -62,7 +62,7 @@ namespace WalletConnectUnity.Core
                         var json = PlayerPrefs.GetString(StorageKey);
                         try
                         {
-                            Entries = JsonConvert.DeserializeObject<Dictionary<string, object>>(
+                            Entries = JsonConvert.DeserializeObject<ConcurrentDictionary<string, object>>(
                                 json,
                                 _jsonSerializerLoadSettings
                             );
@@ -71,7 +71,7 @@ namespace WalletConnectUnity.Core
                         {
                             WCLogger.LogError(e);
                             WCLogger.LogError("Cannot load JSON from PlayerPrefs, starting fresh");
-                            Entries = new Dictionary<string, object>();
+                            Entries = new ConcurrentDictionary<string, object>();
                         }
                     }
 

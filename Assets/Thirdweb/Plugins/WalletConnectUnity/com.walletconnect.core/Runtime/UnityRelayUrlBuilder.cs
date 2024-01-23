@@ -7,7 +7,7 @@ namespace WalletConnectUnity.Core
     public class UnityRelayUrlBuilder : RelayUrlBuilder
     {
         // TODO: Update this from CI
-        public const string PackageVersion = "3.0.3";
+        public const string PackageVersion = "3.0.5";
 
         public override (string name, string version) GetOsInfo()
         {
