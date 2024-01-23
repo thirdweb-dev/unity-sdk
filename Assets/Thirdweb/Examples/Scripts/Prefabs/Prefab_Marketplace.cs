@@ -12,7 +12,7 @@ namespace Thirdweb.Examples
         private const string DROP_ERC721_CONTRACT = "0x8ED1C3618d70785d23E5fdE767058FA6cA6D9E43";
         private const string TOKEN_ERC1155_CONTRACT = "0x82c488a1BC64ab3b91B927380cca9Db7bF347879";
         private const string DROP_ERC1155_CONTRACT = "0x408308c85D7073192deEAcC1703E234A783fFfF1";
-        private const string MARKETPLACE_CONTRACT = "0x3Dd51b530e9DBdD93087C321cbD9350f435f742C";
+        private const string MARKETPLACE_CONTRACT = "0x60b97Bf8C7b6dF9Ff6ebCE8536fB359A1985D8fe";
         private const string PACK_CONTRACT = "0xC04104DE55dEC5d63542f7ADCf8171278942048E";
 
         // Fetching
@@ -23,7 +23,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 var contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.directListings.GetListing("0");
+                var result = await contract.marketplace.directListings.GetListing("1");
                 Debugger.Instance.Log("[Fetch_DirectListing] Sucess", result.ToString());
             }
             catch (System.Exception e)
