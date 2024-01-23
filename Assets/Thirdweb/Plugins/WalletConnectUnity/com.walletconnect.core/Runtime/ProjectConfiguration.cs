@@ -1,4 +1,5 @@
 using System.Text;
+using Thirdweb;
 using UnityEngine;
 using WalletConnectSharp.Core;
 
@@ -7,19 +8,32 @@ namespace WalletConnectUnity.Core
     [CreateAssetMenu(fileName = "WalletConnectProjectConfig", menuName = "WalletConnect/Project Configuration")]
     public sealed class ProjectConfiguration : ScriptableObject
     {
-        [field: SerializeField, Header("Application")] public string Id { get; private set; }
-        
-        [field: SerializeField] public Metadata Metadata { get; private set; }
-        
-        [field: SerializeField, Header ("Debug")] public bool LoggingEnabled { get; private set; }
-        
+        [field: SerializeField, Header("Application")]
+        public string Id { get; private set; }
+
+        [field: SerializeField]
+        public Metadata Metadata { get; private set; }
+
+        [field: SerializeField, Header("Debug")]
+        public bool LoggingEnabled { get; private set; }
+
         private const string ConfigName = "WalletConnectProjectConfig";
 
         public static readonly string ConfigPath = $"Assets/WalletConnectUnity/Resources/{ConfigName}.asset";
 
         public static ProjectConfiguration Load(string path = null)
         {
-            return Resources.Load<ProjectConfiguration>(path ?? ConfigName);
+            var config = Resources.Load<ProjectConfiguration>(path ?? ConfigName);
+            if (ThirdwebManager.Instance != null && ThirdwebManager.Instance.SDK != null && ThirdwebManager.Instance.SDK.session?.Options.wallet?.appName != null)
+            {
+                ThirdwebDebug.Log($"[WalletConnect] Using project configuration from ThirdwebManager: {ThirdwebManager.Instance.SDK.session.Options.wallet?.appName}");
+                config.Id = ThirdwebManager.Instance.SDK.session.Options.wallet?.walletConnectProjectId;
+                config.Metadata.Name = ThirdwebManager.Instance.SDK.session.Options.wallet?.appName;
+                config.Metadata.Description = ThirdwebManager.Instance.SDK.session.Options.wallet?.appDescription;
+                config.Metadata.Url = ThirdwebManager.Instance.SDK.session.Options.wallet?.appUrl;
+                config.Metadata.Icons = ThirdwebManager.Instance.SDK.session.Options.wallet?.appIcons;
+            }
+            return config;
         }
 
 #if UNITY_EDITOR
