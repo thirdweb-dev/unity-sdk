@@ -54,8 +54,9 @@ namespace WalletConnectUnity.Core
 #if UNITY_ANDROID || UNITY_IOS || UNITY_STANDALONE_OSX
             origin = Application.identifier;
             return true;
-#endif
+#else
             return base.TryGetOrigin(out origin);
+#endif
         }
     }
 }

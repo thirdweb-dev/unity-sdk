@@ -39,13 +39,12 @@ namespace WalletConnectUnity.Core
             // In editor we cannot open _mobile_ deep links, so we just log the uri
             Debug.Log($"[Linker] Requested to open mobile deep link. The uri: {uri}");
             return;
-#endif
+#else
 
             var link = Application.isMobilePlatform ? wallet.MobileLink : wallet.DesktopLink;
 
             if (string.IsNullOrWhiteSpace(link))
-                throw new Exception(
-                    $"[Linker] No link found for {Application.platform} platform in wallet {wallet.Name}.");
+                throw new Exception($"[Linker] No link found for {Application.platform} platform in wallet {wallet.Name}.");
 
             if (!link.EndsWith("//"))
                 link = $"{link}//";
@@ -55,6 +54,7 @@ namespace WalletConnectUnity.Core
             WCLogger.Log($"[Linker] Opening URL {url}");
 
             Application.OpenURL(url);
+#endif
         }
 
         public static void OpenSessionRequestDeepLink(in SessionStruct session)
@@ -68,8 +68,7 @@ namespace WalletConnectUnity.Core
             }
             else
             {
-                WCLogger.LogError(
-                    $"[Linker] No redirect found for {session.Peer.Metadata.Name}. Cannot open deep link.");
+                WCLogger.LogError($"[Linker] No redirect found for {session.Peer.Metadata.Name}. Cannot open deep link.");
             }
         }
 
@@ -87,8 +86,7 @@ namespace WalletConnectUnity.Core
 
         protected virtual void OnPublisherPublishedMessage(object sender, PublishParams publishParams)
         {
-            WCLogger.Log(
-                $"[Linker] OnPublisherPublishedMessage. Topic: {publishParams.Topic}. Topics in counter: {_sessionMessagesCounter.Count}");
+            WCLogger.Log($"[Linker] OnPublisherPublishedMessage. Topic: {publishParams.Topic}. Topics in counter: {_sessionMessagesCounter.Count}");
             if (string.IsNullOrWhiteSpace(publishParams.Topic))
                 return;
 
@@ -155,7 +153,8 @@ namespace WalletConnectUnity.Core
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed) return;
+            if (disposed)
+                return;
 
             if (disposing)
             {

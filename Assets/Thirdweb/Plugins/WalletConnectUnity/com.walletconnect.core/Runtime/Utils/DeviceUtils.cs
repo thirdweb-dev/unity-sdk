@@ -12,9 +12,7 @@ namespace WalletConnectUnity.Core.Utils
             return UnityEngine.iOS.Device.generation.ToString().Contains("iPad")
                 ? DeviceType.Tablet
                 : DeviceType.Phone;
-#elif UNITY_ANDROID
-
-#if !UNITY_EDITOR
+#elif UNITY_ANDROID && !UNITY_EDITOR
             try
             {
                 var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
@@ -32,17 +30,13 @@ namespace WalletConnectUnity.Core.Utils
                 Debug.LogException(e);
                 return DeviceType.Phone;
             }
-#else
+#elif UNITY_ANDROID && UNITY_EDITOR
             return DeviceType.Phone;
-#endif
-
-#endif
-
-#if UNITY_WEBGL
+#elif UNITY_WEBGL
             return DeviceType.Web;
-#endif
-
+#else
             return DeviceType.Desktop;
+#endif
         }
     }
 
