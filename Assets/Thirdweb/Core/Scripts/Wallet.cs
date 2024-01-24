@@ -11,6 +11,7 @@ using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace Thirdweb
 {
@@ -91,8 +92,8 @@ namespace Thirdweb
                 var siwe = ThirdwebManager.Instance.SDK.session.SiweSession;
                 var siweMsg = new SiweMessage()
                 {
-                    Resources = new List<string>(),
-                    Uri = $"https://{domain}",
+                    Resources = null,
+                    Uri = null,
                     Statement = "Please ensure that the domain above matches the URL of the current website.",
                     Address = await GetAddress(),
                     Domain = domain,
@@ -109,7 +110,20 @@ namespace Thirdweb
                 siweMsg.SetNotBefore(DateTime.UtcNow);
                 siweMsg = siwe.AssignNewNonce(siweMsg);
 
-                var finalMsg = SiweMessageStringBuilder.BuildMessage(siweMsg);
+                var resourcesString = siweMsg.Resources != null ? "\nResources:" + string.Join("", siweMsg.Resources.Select(r => $"\n- {r}")) : string.Empty;
+                var finalMsg =
+                    $"{siweMsg.Domain} wants you to sign in with your Ethereum account:"
+                    + $"\n{siweMsg.Address}\n\n"
+                    + $"{(string.IsNullOrEmpty(siweMsg.Statement) ? "" : $"{siweMsg.Statement}\n")}"
+                    + $"{(string.IsNullOrEmpty(siweMsg.Uri) ? "" : $"\nURI: {siweMsg.Uri}")}"
+                    + $"\nVersion: {siweMsg.Version}"
+                    + $"\nChain ID: {siweMsg.ChainId}"
+                    + $"\nNonce: {siweMsg.Nonce}"
+                    + $"\nIssued At: {siweMsg.IssuedAt}"
+                    + $"{(string.IsNullOrEmpty(siweMsg.ExpirationTime) ? "" : $"\nExpiration Time: {siweMsg.ExpirationTime}")}"
+                    + $"{(string.IsNullOrEmpty(siweMsg.NotBefore) ? "" : $"\nNot Before: {siweMsg.NotBefore}")}"
+                    + $"{(string.IsNullOrEmpty(siweMsg.RequestId) ? "" : $"\nRequest ID: {siweMsg.RequestId}")}"
+                    + resourcesString;
                 var signature = await Sign(finalMsg);
 
                 return new LoginPayload()
@@ -117,17 +131,17 @@ namespace Thirdweb
                     signature = signature,
                     payload = new LoginPayloadData()
                     {
-                        domain = siweMsg.Domain,
-                        address = siweMsg.Address,
-                        statement = siweMsg.Statement,
-                        uri = siweMsg.Uri,
-                        version = siweMsg.Version,
-                        chain_id = siweMsg.ChainId,
-                        nonce = siweMsg.Nonce,
-                        issued_at = siweMsg.IssuedAt,
-                        expiration_time = siweMsg.ExpirationTime,
-                        invalid_before = siweMsg.NotBefore,
-                        resources = siweMsg.Resources,
+                        Domain = siweMsg.Domain,
+                        Address = siweMsg.Address,
+                        Statement = siweMsg.Statement,
+                        Uri = siweMsg.Uri,
+                        Version = siweMsg.Version,
+                        ChainId = siweMsg.ChainId,
+                        Nonce = siweMsg.Nonce,
+                        IssuedAt = siweMsg.IssuedAt,
+                        ExpirationTime = siweMsg.ExpirationTime,
+                        InvalidBefore = siweMsg.NotBefore,
+                        Resources = siweMsg.Resources,
                     }
                 };
             }
@@ -149,22 +163,35 @@ namespace Thirdweb
                 var siwe = ThirdwebManager.Instance.SDK.session.SiweSession;
                 var siweMessage = new SiweMessage()
                 {
-                    Domain = payload.payload.domain,
-                    Address = payload.payload.address,
-                    Statement = payload.payload.statement,
-                    Uri = payload.payload.uri,
-                    Version = payload.payload.version,
-                    ChainId = payload.payload.chain_id,
-                    Nonce = payload.payload.nonce,
-                    IssuedAt = payload.payload.issued_at,
-                    ExpirationTime = payload.payload.expiration_time,
-                    NotBefore = payload.payload.invalid_before,
-                    Resources = payload.payload.resources,
+                    Domain = payload.payload.Domain,
+                    Address = payload.payload.Address,
+                    Statement = payload.payload.Statement,
+                    Uri = payload.payload.Uri,
+                    Version = payload.payload.Version,
+                    ChainId = payload.payload.ChainId,
+                    Nonce = payload.payload.Nonce,
+                    IssuedAt = payload.payload.IssuedAt,
+                    ExpirationTime = payload.payload.ExpirationTime,
+                    NotBefore = payload.payload.InvalidBefore,
+                    Resources = payload.payload.Resources,
                     RequestId = null
                 };
                 var signature = payload.signature;
                 var validUser = await siwe.IsUserAddressRegistered(siweMessage);
-                var msg = SiweMessageStringBuilder.BuildMessage(siweMessage);
+                var resourcesString = siweMessage.Resources != null ? "\nResources:" + string.Join("", siweMessage.Resources.Select(r => $"\n- {r}")) : string.Empty;
+                var msg =
+                    $"{siweMessage.Domain} wants you to sign in with your Ethereum account:"
+                    + $"\n{siweMessage.Address}\n\n"
+                    + $"{(string.IsNullOrEmpty(siweMessage.Statement) ? "" : $"{siweMessage.Statement}\n")}"
+                    + $"{(string.IsNullOrEmpty(siweMessage.Uri) ? "" : $"\nURI: {siweMessage.Uri}")}"
+                    + $"\nVersion: {siweMessage.Version}"
+                    + $"\nChain ID: {siweMessage.ChainId}"
+                    + $"\nNonce: {siweMessage.Nonce}"
+                    + $"\nIssued At: {siweMessage.IssuedAt}"
+                    + $"{(string.IsNullOrEmpty(siweMessage.ExpirationTime) ? "" : $"\nExpiration Time: {siweMessage.ExpirationTime}")}"
+                    + $"{(string.IsNullOrEmpty(siweMessage.NotBefore) ? "" : $"\nNot Before: {siweMessage.NotBefore}")}"
+                    + $"{(string.IsNullOrEmpty(siweMessage.RequestId) ? "" : $"\nRequest ID: {siweMessage.RequestId}")}"
+                    + resourcesString;
                 if (validUser)
                 {
                     string recoveredAddress = await RecoverAddress(msg, signature);
