@@ -409,10 +409,10 @@ namespace Thirdweb
                     return "webgl";
                 case RuntimePlatform.WindowsPlayer:
                 case RuntimePlatform.WindowsEditor:
-                    return "windows";
+                    return "win";
                 case RuntimePlatform.OSXPlayer:
                 case RuntimePlatform.OSXEditor:
-                    return "macos";
+                    return "mac";
                 case RuntimePlatform.LinuxPlayer:
                 case RuntimePlatform.LinuxEditor:
                     return "linux";
