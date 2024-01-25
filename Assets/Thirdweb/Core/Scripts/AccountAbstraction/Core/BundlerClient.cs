@@ -55,8 +55,9 @@ namespace Thirdweb.AccountAbstraction
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, url) { Content = new StringContent(requestMessageJson, System.Text.Encoding.UTF8, "application/json") };
             if (new Uri(url).Host.EndsWith(".thirdweb.com"))
             {
-                httpRequestMessage.Headers.Add("x-sdk-name", "UnitySDK");
-                httpRequestMessage.Headers.Add("x-sdk-platform", Utils.GetRuntimePlatform());
+                httpRequestMessage.Headers.Add("x-sdk-name", "unity");
+                httpRequestMessage.Headers.Add("x-sdk-os", Utils.GetRuntimePlatform());
+                httpRequestMessage.Headers.Add("x-sdk-platform", "unity");
                 httpRequestMessage.Headers.Add("x-sdk-version", ThirdwebSDK.version);
                 httpRequestMessage.Headers.Add("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
                 if (!Utils.IsWebGLBuild())
