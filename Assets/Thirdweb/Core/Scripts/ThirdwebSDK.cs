@@ -115,7 +115,7 @@ namespace Thirdweb
             /// <summary>
             /// Indicates whether to deploy the smart wallet upon signing any type of message.
             /// </summary>
-            public bool doNotDeployOnSignMessage;
+            public bool deployOnSign;
 
             /// <summary>
             /// The URL of the bundler service.

@@ -100,7 +100,7 @@ namespace Thirdweb
         public bool gasless;
 
         [Tooltip("Indicates whether to deploy the smart wallet upon signing any type of message.")]
-        public bool doNotDeployOnSignMessage;
+        public bool deployOnSign;
 
         [Tooltip("Optional - If you want to use a custom relayer, you can provide the URL here")]
         public string bundlerUrl;
@@ -284,7 +284,7 @@ namespace Thirdweb
                 {
                     factoryAddress = factoryAddress,
                     gasless = gasless,
-                    doNotDeployOnSignMessage = doNotDeployOnSignMessage,
+                    deployOnSign = deployOnSign,
                     bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : bundlerUrl,
                     paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : paymasterUrl,
                     entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
