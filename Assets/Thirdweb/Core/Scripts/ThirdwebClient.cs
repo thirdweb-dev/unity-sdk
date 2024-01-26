@@ -236,7 +236,8 @@ namespace Thirdweb
         private void InitialiseHttpClient(HttpClient httpClient)
         {
             httpClient.DefaultRequestHeaders.Add("x-sdk-name", "UnitySDK");
-            httpClient.DefaultRequestHeaders.Add("x-sdk-platform", Utils.GetRuntimePlatform());
+            httpClient.DefaultRequestHeaders.Add("x-sdk-os", Utils.GetRuntimePlatform());
+            httpClient.DefaultRequestHeaders.Add("x-sdk-platform", "unity");
             httpClient.DefaultRequestHeaders.Add("x-sdk-version", ThirdwebSDK.version);
             httpClient.BaseAddress = _baseUrl;
         }
