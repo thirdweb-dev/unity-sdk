@@ -2,11 +2,13 @@ using System.Threading.Tasks;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
-using WalletConnectSharp.Sign;
 using System;
-using Thirdweb.WalletConnect;
 using System.Numerics;
 using Thirdweb.Redcode.Awaiting;
+using WalletConnectUnity.Core;
+using System.Linq;
+using System.Collections.Generic;
+using WalletConnectSharp.Sign.Models;
 
 namespace Thirdweb.Wallets
 {
@@ -16,9 +18,7 @@ namespace Thirdweb.Wallets
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
         private string _walletConnectProjectId;
-        private string _address;
-
-        private WalletConnect.WalletConnect _walletConnect;
+        private KeyValuePair<string, Namespace> _namespace;
 
         public ThirdwebWalletConnect(string walletConnectProjectId)
         {
@@ -36,24 +36,20 @@ namespace Thirdweb.Wallets
                 await new WaitForSeconds(0.5f);
             }
 
-            string topic = null;
-            string eipChainId = null;
-            WalletConnectSignClient client = null;
-            (client, _address, eipChainId) = await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
-
-            Debug.Log($"Connected to {_address} with topic {topic} and chainId {eipChainId}");
-
-            var accounts = new string[] { await GetAddress() };
-            _walletConnect = new WalletConnect.WalletConnect(accounts, eipChainId, client);
-            _web3 = _walletConnect.CreateWeb3();
-            return accounts[0];
+            await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
+            _namespace = WalletConnect.Instance.ActiveSession.Namespaces.First();
+            var config = ProjectConfiguration.Load();
+            // Using WalletConnect Blockchain API: https://docs.walletconnect.com/cloud/blockchain-api
+            var url = $"https://rpc.walletconnect.com/v1?chainId={_namespace.Value.Chains[0]}&projectId={config.Id}";
+            _web3 = new Web3(url);
+            return await GetAddress();
         }
 
         public async Task Disconnect()
         {
             try
             {
-                await _walletConnect.Disconnect();
+                await WalletConnect.Instance.DisconnectAsync();
             }
             catch (Exception e)
             {
@@ -70,7 +66,7 @@ namespace Thirdweb.Wallets
 
         public Task<string> GetAddress()
         {
-            var ethAccs = new string[] { _address };
+            var ethAccs = new string[] { WalletConnect.Instance.ActiveSession.CurrentAddress(_namespace.Key).Address };
             var addy = ethAccs[0];
             if (addy != null)
                 addy = addy.ToChecksumAddress();
@@ -114,7 +110,7 @@ namespace Thirdweb.Wallets
 
         public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
         {
-            return Task.FromResult(NetworkSwitchAction.Unsupported);
+            return Task.FromResult(NetworkSwitchAction.ContinueSwitch);
         }
     }
 }

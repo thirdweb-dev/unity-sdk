@@ -399,7 +399,26 @@ namespace Thirdweb
 
         public static string GetRuntimePlatform()
         {
-            return Application.platform.ToString();
+            switch (Application.platform)
+            {
+                case RuntimePlatform.Android:
+                    return "android";
+                case RuntimePlatform.IPhonePlayer:
+                    return "ios";
+                case RuntimePlatform.WebGLPlayer:
+                    return "webgl";
+                case RuntimePlatform.WindowsPlayer:
+                case RuntimePlatform.WindowsEditor:
+                    return "win";
+                case RuntimePlatform.OSXPlayer:
+                case RuntimePlatform.OSXEditor:
+                    return "mac";
+                case RuntimePlatform.LinuxPlayer:
+                case RuntimePlatform.LinuxEditor:
+                    return "linux";
+                default:
+                    return Application.platform.ToString().ToLower();
+            }
         }
 
         public static string AppendBundleIdQueryParam(this string uri)

@@ -26,7 +26,8 @@ namespace Thirdweb
             if (isThirdwebRequest)
             {
                 req.SetRequestHeader("x-sdk-name", "UnitySDK");
-                req.SetRequestHeader("x-sdk-platform", Utils.GetRuntimePlatform());
+                req.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
+                req.SetRequestHeader("x-sdk-platform", "unity");
                 req.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
                 req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
             }
@@ -58,7 +59,8 @@ namespace Thirdweb
             if (isThirdwebRequest)
             {
                 req.SetRequestHeader("x-sdk-name", "UnitySDK");
-                req.SetRequestHeader("x-sdk-platform", Utils.GetRuntimePlatform());
+                req.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
+                req.SetRequestHeader("x-sdk-platform", "unity");
                 req.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
                 req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
             }

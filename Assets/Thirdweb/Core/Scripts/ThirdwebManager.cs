@@ -1,5 +1,4 @@
 using UnityEngine;
-using Thirdweb;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -100,6 +99,9 @@ namespace Thirdweb
         [Tooltip("Whether it should use a paymaster for gasless transactions or not")]
         public bool gasless;
 
+        [Tooltip("Indicates whether to deploy the smart wallet upon signing any type of message.")]
+        public bool deployOnSign;
+        
         [Tooltip("Optional - If you want to use a custom erc20 paymaster, you can provide the contract address here")]
         public string erc20PaymasterAddress;
 
@@ -288,6 +290,7 @@ namespace Thirdweb
                 {
                     factoryAddress = factoryAddress,
                     gasless = gasless,
+                    deployOnSign = deployOnSign,
                     erc20PaymasterAddress = string.IsNullOrEmpty(erc20PaymasterAddress) ? null : erc20PaymasterAddress,
                     erc20TokenAddress = string.IsNullOrEmpty(erc20TokenAddress) ? null : erc20TokenAddress,
                     bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : bundlerUrl,

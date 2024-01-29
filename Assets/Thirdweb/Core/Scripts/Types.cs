@@ -422,39 +422,62 @@ namespace Thirdweb
     [System.Serializable]
     public class LoginPayloadData
     {
-        public string type;
-        public string domain;
-        public string address;
-        public string statement;
-        public string uri;
-        public string version;
-        public string chain_id;
-        public string nonce;
-        public string issued_at;
-        public string expiration_time;
-        public string invalid_before;
-        public List<string> resources;
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        [JsonProperty("domain")]
+        public string Domain { get; set; }
+
+        [JsonProperty("address")]
+        public string Address { get; set; }
+
+        [JsonProperty("statement")]
+        public string Statement { get; set; }
+
+        [JsonProperty("uri", NullValueHandling = NullValueHandling.Ignore)]
+        public string Uri { get; set; }
+
+        [JsonProperty("version", NullValueHandling = NullValueHandling.Ignore)]
+        public string Version { get; set; }
+
+        [JsonProperty("chain_id", NullValueHandling = NullValueHandling.Ignore)]
+        public string ChainId { get; set; }
+
+        [JsonProperty("nonce", NullValueHandling = NullValueHandling.Ignore)]
+        public string Nonce { get; set; }
+
+        [JsonProperty("issued_at", NullValueHandling = NullValueHandling.Ignore)]
+        public string IssuedAt { get; set; }
+
+        [JsonProperty("expiration_time", NullValueHandling = NullValueHandling.Ignore)]
+        public string ExpirationTime { get; set; }
+
+        [JsonProperty("invalid_before", NullValueHandling = NullValueHandling.Ignore)]
+        public string InvalidBefore { get; set; }
+
+        [JsonProperty("resources", NullValueHandling = NullValueHandling.Ignore)]
+        public List<string> Resources { get; set; }
 
         public LoginPayloadData()
         {
-            type = "evm";
+            Type = "evm";
         }
 
         public override string ToString()
         {
             return $"LoginPayloadData:"
-                + $"\n>type: {type}"
-                + $"\n>domain: {domain}"
-                + $"\n>address: {address}"
-                + $"\n>statement: {statement}"
-                + $"\n>uri: {uri}"
-                + $"\n>version: {version}"
-                + $"\n>chain_id: {chain_id}"
-                + $"\n>nonce: {nonce}"
-                + $"\n>issued_at: {issued_at}"
-                + $"\n>expiration_time: {expiration_time}"
-                + $"\n>invalid_before: {invalid_before}"
-                + $"\n>resources: {resources}";
+                + $"\n>type: {Type}"
+                + $"\n>domain: {Domain}"
+                + $"\n>address: {Address}"
+                + $"\n>statement: {Statement}"
+                + $"\n>uri: {Uri}"
+                + $"\n>version: {Version}"
+                + $"\n>chain_id: {ChainId}"
+                + $"\n>nonce: {Nonce}"
+                + $"\n>issued_at: {IssuedAt}"
+                + $"\n>expiration_time: {ExpirationTime}"
+                + $"\n>invalid_before: {InvalidBefore}"
+                + $"\n>resources: {Resources}";
         }
     }
 

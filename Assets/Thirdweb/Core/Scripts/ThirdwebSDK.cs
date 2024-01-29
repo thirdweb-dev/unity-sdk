@@ -111,6 +111,11 @@ namespace Thirdweb
             /// Indicates whether gasless transactions are enabled for smart wallets.
             /// </summary>
             public bool gasless;
+          
+            /// <summary>
+            /// Indicates whether to deploy the smart wallet upon signing any type of message.
+            /// </summary>
+            public bool deployOnSign;
 
             /// <summary>
             /// The address of your ERC20 paymaster contract if used.
@@ -243,7 +248,7 @@ namespace Thirdweb
 
         public ThirdwebSession session;
 
-        internal const string version = "4.3.1";
+        internal const string version = "4.5.0";
 
         /// <summary>
         /// Create an instance of the Thirdweb SDK.

@@ -33,7 +33,14 @@ namespace Thirdweb.AccountAbstraction
         public static async Task<PMSponsorOperationResponse> PMSponsorUserOperation(string paymasterUrl, string apiKey, object requestId, UserOperationHexified userOp, string entryPoint)
         {
             var response = await BundlerRequest(paymasterUrl, apiKey, requestId, "pm_sponsorUserOperation", userOp, new EntryPointWrapper() { entryPoint = entryPoint });
-            return JsonConvert.DeserializeObject<PMSponsorOperationResponse>(response.Result.ToString());
+            try
+            {
+                return JsonConvert.DeserializeObject<PMSponsorOperationResponse>(response.Result.ToString());
+            }
+            catch
+            {
+                return new PMSponsorOperationResponse() { paymasterAndData = response.Result.ToString() };
+            }
         }
 
         // Request
@@ -49,7 +56,8 @@ namespace Thirdweb.AccountAbstraction
             if (new Uri(url).Host.EndsWith(".thirdweb.com"))
             {
                 httpRequestMessage.Headers.Add("x-sdk-name", "UnitySDK");
-                httpRequestMessage.Headers.Add("x-sdk-platform", Utils.GetRuntimePlatform());
+                httpRequestMessage.Headers.Add("x-sdk-os", Utils.GetRuntimePlatform());
+                httpRequestMessage.Headers.Add("x-sdk-platform", "unity");
                 httpRequestMessage.Headers.Add("x-sdk-version", ThirdwebSDK.version);
                 httpRequestMessage.Headers.Add("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
                 if (!Utils.IsWebGLBuild())

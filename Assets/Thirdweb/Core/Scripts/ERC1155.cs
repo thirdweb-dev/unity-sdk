@@ -348,9 +348,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
-                // WEN WEBGL
-                // return await Bridge.InvokeRoute<TransactionResult>(getRoute("transferBatch"), Utils.ToJsonStringArray(to, tokenIds, amounts));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transferBatch"), Utils.ToJsonStringArray(to, tokenIds, amounts));
             }
             else
             {

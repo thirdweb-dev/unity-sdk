@@ -112,7 +112,7 @@ namespace Thirdweb.Examples
             }
             catch (System.Exception e)
             {
-                Debugger.Instance.Log("[Sign] Error", e.Message);
+                Debugger.Instance.Log("[Sign] Error", e.ToString());
             }
         }
 
