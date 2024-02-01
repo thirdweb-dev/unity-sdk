@@ -396,7 +396,7 @@ MonoBehaviour:
     loadMultipleNfts:
     - contractAddress: 0x5350e0662D1BAB9f8843690B91C363aFD3e0cFe7
       startID: 0
-      count: 2
+      count: 3
       type: 0
     loadOwnedNfts:
     - contractAddress: 0x5350e0662D1BAB9f8843690B91C363aFD3e0cFe7
