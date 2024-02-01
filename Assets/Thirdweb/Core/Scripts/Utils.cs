@@ -402,20 +402,20 @@ namespace Thirdweb
             switch (Application.platform)
             {
                 case RuntimePlatform.Android:
-                    return "android";
+                    return "Android OS";
                 case RuntimePlatform.IPhonePlayer:
-                    return "ios";
+                    return "iOS";
                 case RuntimePlatform.WebGLPlayer:
-                    return "webgl";
+                    return "WebGL";
                 case RuntimePlatform.WindowsPlayer:
                 case RuntimePlatform.WindowsEditor:
-                    return "win";
+                    return "Windows";
                 case RuntimePlatform.OSXPlayer:
                 case RuntimePlatform.OSXEditor:
-                    return "mac";
+                    return "Mac OS";
                 case RuntimePlatform.LinuxPlayer:
                 case RuntimePlatform.LinuxEditor:
-                    return "linux";
+                    return "Linux";
                 default:
                     return Application.platform.ToString().ToLower();
             }
