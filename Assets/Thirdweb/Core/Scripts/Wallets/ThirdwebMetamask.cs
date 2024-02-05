@@ -30,7 +30,7 @@ namespace Thirdweb.Wallets
                 this.appUrl = appUrl;
             }
         }
-        
+
         private Web3 _web3;
         private readonly WalletProvider _provider;
         private readonly WalletProvider _signerProvider;
@@ -65,13 +65,13 @@ namespace Thirdweb.Wallets
             var appName = ThirdwebManager.Instance.SDK.session.Options.wallet?.appName;
             var appUrl = ThirdwebManager.Instance.SDK.session.Options.wallet?.appUrl;
             config.UpdateConfig(appName, appUrl);
-            
+
             MetaMaskUnity.Instance.Initialize(config);
         }
 
-        public Task Disconnect()
+        public Task Disconnect(bool endSession = true)
         {
-            MetaMaskUnity.Instance.Disconnect(true);
+            MetaMaskUnity.Instance.Disconnect(endSession);
             _web3 = null;
             return Task.CompletedTask;
         }

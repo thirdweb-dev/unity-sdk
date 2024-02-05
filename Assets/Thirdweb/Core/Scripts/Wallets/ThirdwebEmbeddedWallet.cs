@@ -41,9 +41,10 @@ namespace Thirdweb.Wallets
             return await GetAddress();
         }
 
-        public async Task Disconnect()
+        public async Task Disconnect(bool endSession = true)
         {
-            await _embeddedWallet.SignOutAsync();
+            if (endSession)
+                await _embeddedWallet.SignOutAsync();
             _account = null;
             _web3 = null;
         }

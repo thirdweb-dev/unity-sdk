@@ -44,7 +44,7 @@ namespace Thirdweb
         /// Disconnects the user's wallet.
         /// </summary>
         /// <returns>A task representing the disconnection process.</returns>
-        public async Task Disconnect()
+        public async Task Disconnect(bool endSession = false)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -52,7 +52,7 @@ namespace Thirdweb
             }
             else
             {
-                await ThirdwebManager.Instance.SDK.session.Disconnect();
+                await ThirdwebManager.Instance.SDK.session.Disconnect(endSession);
             }
         }
 

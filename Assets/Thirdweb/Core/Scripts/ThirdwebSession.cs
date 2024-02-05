@@ -124,11 +124,11 @@ namespace Thirdweb
             return addy;
         }
 
-        internal async Task Disconnect()
+        internal async Task Disconnect(bool endSession = true)
         {
             if (ActiveWallet != null)
             {
-                await ActiveWallet.Disconnect();
+                await ActiveWallet.Disconnect(endSession);
             }
             else
             {

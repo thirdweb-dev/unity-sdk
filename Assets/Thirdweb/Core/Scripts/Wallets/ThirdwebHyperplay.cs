@@ -28,7 +28,7 @@ namespace Thirdweb.Wallets
             return _hyperPlay.Accounts[0];
         }
 
-        public Task Disconnect()
+        public Task Disconnect(bool endSession = true)
         {
             _web3 = null;
             return Task.CompletedTask;

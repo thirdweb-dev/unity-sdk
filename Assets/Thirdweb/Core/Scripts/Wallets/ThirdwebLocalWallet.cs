@@ -27,7 +27,7 @@ namespace Thirdweb.Wallets
             return Task.FromResult(_account.Address);
         }
 
-        public Task Disconnect()
+        public Task Disconnect(bool endSession = true)
         {
             _account = null;
             _web3 = null;

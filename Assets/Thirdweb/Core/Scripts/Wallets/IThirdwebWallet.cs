@@ -21,7 +21,7 @@ namespace Thirdweb.Wallets
         /// <summary>
         /// Main Disconnect call - should fully disconnect from the wallet and reset any variables.
         /// </summary>
-        Task Disconnect();
+        Task Disconnect(bool endSession = true);
 
         /// <summary>
         /// Get the local account if any, return null otherwise.

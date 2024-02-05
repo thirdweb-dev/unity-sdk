@@ -45,15 +45,18 @@ namespace Thirdweb.Wallets
             return await GetAddress();
         }
 
-        public async Task Disconnect()
+        public async Task Disconnect(bool endSession = true)
         {
-            try
+            if (endSession)
             {
-                await WalletConnect.Instance.DisconnectAsync();
-            }
-            catch (Exception e)
-            {
-                Debug.Log("Error disconnecting sign client: " + e.Message);
+                try
+                {
+                    await WalletConnect.Instance.DisconnectAsync();
+                }
+                catch (Exception e)
+                {
+                    ThirdwebDebug.LogWarning($"Error disconnecting WalletConnect: {e.Message}");
+                }
             }
 
             _web3 = null;
