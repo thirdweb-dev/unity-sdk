@@ -5,14 +5,14 @@ namespace Thirdweb.Examples
 {
     public class Prefab_Reading : MonoBehaviour
     {
-        private const string TOKEN_ERC20_CONTRACT = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F";
-        private const string DROP_ERC20_CONTRACT = "0x450b943729Ddba196Ab58b589Cea545551DF71CC";
-        private const string TOKEN_ERC721_CONTRACT = "0x45c498Dfc0b4126605DD91eB1850fd6b5BCe9efC";
-        private const string DROP_ERC721_CONTRACT = "0x8ED1C3618d70785d23E5fdE767058FA6cA6D9E43";
-        private const string TOKEN_ERC1155_CONTRACT = "0x82c488a1BC64ab3b91B927380cca9Db7bF347879";
-        private const string DROP_ERC1155_CONTRACT = "0x408308c85D7073192deEAcC1703E234A783fFfF1";
-        private const string MARKETPLACE_CONTRACT = "0x3Dd51b530e9DBdD93087C321cbD9350f435f742C";
-        private const string PACK_CONTRACT = "0xC04104DE55dEC5d63542f7ADCf8171278942048E";
+        private const string TOKEN_ERC20_CONTRACT = "0x81ebd23aA79bCcF5AaFb9c9c5B0Db4223c39102e";
+        private const string DROP_ERC20_CONTRACT = "0xEBB8a39D865465F289fa349A67B3391d8f910da9";
+        private const string TOKEN_ERC721_CONTRACT = "0x345E7B4CCA26725197f1Bed802A05691D8EF7770";
+        private const string DROP_ERC721_CONTRACT = "0xD811CB13169C175b64bf8897e2Fd6a69C6343f5C";
+        private const string TOKEN_ERC1155_CONTRACT = "0x83b5851134DAA0E28d855E7fBbdB6B412b46d26B";
+        private const string DROP_ERC1155_CONTRACT = "0x6A7a26c9a595E6893C255C9dF0b593e77518e0c3";
+        private const string MARKETPLACE_CONTRACT = "0xc9671F631E8313D53ec0b5358e1a499c574fCe6A";
+        private const string PACK_CONTRACT = "0xE33653ce510Ee767d8824b5EcDeD27125D49889D";
 
         public async void FetchERC20()
         {
