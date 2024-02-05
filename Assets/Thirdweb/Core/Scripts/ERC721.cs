@@ -125,7 +125,7 @@ namespace Thirdweb
                 catch
                 {
                     ThirdwebDebug.LogWarning("Unable to fetch using Multicall3, likely not deployed on this chain, falling back to single queries.");
-                    for (int i = start; i <= end; i++)
+                    for (int i = start; i < end; i++)
                         allNfts.Add(await Get(i.ToString()));
                 }
                 return allNfts;
