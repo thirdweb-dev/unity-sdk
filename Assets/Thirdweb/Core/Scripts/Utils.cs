@@ -583,5 +583,42 @@ namespace Thirdweb
         {
             return new BigInteger(gweiAmount * 1e9);
         }
+
+        public static async void TrackWalletAnalytics(string clientId, string source, string action, string walletType, string walletAddress)
+        {
+            try
+            {
+                var body = new
+                {
+                    source,
+                    action,
+                    walletAddress,
+                    walletType,
+                };
+                var headers = new Dictionary<string, string>
+                {
+                    { "x-client-id", clientId },
+                    { "x-sdk-platform", "unity" },
+                    { "x-sdk-name", "UnitySDK" },
+                    { "x-sdk-version", ThirdwebSDK.version },
+                    { "x-sdk-os", GetRuntimePlatform() },
+                    { "x-bundle-id", GetBundleId() },
+                };
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://c.thirdweb.com/event")
+                {
+                    Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json")
+                };
+                foreach (var header in headers)
+                {
+                    request.Headers.Add(header.Key, header.Value);
+                }
+                using var client = new HttpClient();
+                await client.SendAsync(request);
+            }
+            catch (System.Exception e)
+            {
+                ThirdwebDebug.LogWarning($"Failed to send wallet analytics: {e}");
+            }
+        }
     }
 }

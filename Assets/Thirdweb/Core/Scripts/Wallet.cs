@@ -36,7 +36,15 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection);
+                string address = await ThirdwebManager.Instance.SDK.session.Connect(walletConnection);
+                Utils.TrackWalletAnalytics(
+                    ThirdwebManager.Instance.SDK.session.Options.clientId,
+                    "connectWallet",
+                    "connect",
+                    walletConnection.provider.ToString()[..1].ToLower() + walletConnection.provider.ToString()[1..],
+                    address
+                );
+                return address;
             }
         }
 
