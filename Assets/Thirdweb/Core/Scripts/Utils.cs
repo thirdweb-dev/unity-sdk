@@ -440,24 +440,34 @@ namespace Thirdweb
             string id = chainId.ToString();
             return id switch
             {
-                "1" => "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-                "4" => "0xc778417E063141139Fce010982780140Aa0cD5Ab", // rinkeby
+                "1" => "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // mainnet
                 "5" => "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6", // goerli
-                "137" => "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
-                "80001" => "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
-                "43114" => "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
-                "43113" => "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
-                "250" => "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83",
-                "4002" => "0xf1277d1Ed8AD466beddF92ef448A132661956621",
+                "11155111" => "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9", // sepolia
+                "137" => "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270", // polygon
+                "1101" => "0x4f9a0e7fd2bf6067db6994cf12e4495df938e6e9", // polygon zkevm
+                "80001" => "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889", // mumbai
+                "43114" => "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7", // avalanche
+                "43113" => "0xd00ae08403B9bbb9124bB305C09058E32C39A48c", // avalanche fuji
+                "250" => "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83", // fantom
+                "4002" => "0xf1277d1Ed8AD466beddF92ef448A132661956621", // fantom testnet
                 "10" => "0x4200000000000000000000000000000000000006", // optimism
                 "69" => "0xbC6F6b680bc61e30dB47721c6D1c5cde19C1300d", // optimism kovan
                 "420" => "0x4200000000000000000000000000000000000006", // optimism goerli
                 "42161" => "0x82af49447d8a07e3bd95bd0d56f35241523fbab1", // arbitrum
                 "421611" => "0xEBbc3452Cc911591e4F18f3b36727Df45d6bd1f9", // arbitrum rinkeby
                 "421613" => "0xe39Ab88f8A4777030A534146A9Ca3B52bd5D43A3", // arbitrum goerli
-                "56" => "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", // binance mainnet
+                "42170" => "0x722e8bdd2ce80a4422e880164f2079488e115365", // arbitrum nova
+                "56" => "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c", // binance
                 "97" => "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd", // binance testnet
-                _ => throw new UnityException("Native Token Wrapper Unavailable For This Chain!"),
+                "84533" => "0x4200000000000000000000000000000000000006", // base
+                "84531" => "0x4200000000000000000000000000000000000006", // base goerli
+                "84532" => "0x4200000000000000000000000000000000000006", // base sepolia
+                "324" => "0x5aea5775959fbc2557cc8789bc1bf90a239d9a91", // zksync era
+                "280" => "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91", // zksync era testnet
+                "59144" => "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f", // linea
+                "534352" => "0x5300000000000000000000000000000000000004", // scroll
+                "1030" => "0xa47f43de2f9623acb395ca4905746496d2014d57", // conflux
+                _ => throw new UnityException($"WETH (or equivalent) contract address not known for chain id {id}."),
             };
         }
 
