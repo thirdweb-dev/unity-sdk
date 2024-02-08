@@ -7,22 +7,24 @@ namespace Thirdweb
     {
         public static bool IsEnabled => ThirdwebManager.Instance != null && ThirdwebManager.Instance.showDebugLogs;
 
+        private const string PREFIX = "[Thirdweb] ";
+
         public static void Log(object message)
         {
             if (IsEnabled)
-                Debug.Log(message);
+                Debug.Log(PREFIX + message);
         }
 
         public static void LogWarning(object message)
         {
             if (IsEnabled)
-                Debug.LogWarning(message);
+                Debug.LogWarning(PREFIX + message);
         }
 
         public static void LogError(object message)
         {
             if (IsEnabled)
-                Debug.LogError(message);
+                Debug.LogError(PREFIX + message);
         }
 
         public static void LogException(Exception exception)
