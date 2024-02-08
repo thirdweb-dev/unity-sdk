@@ -11,7 +11,7 @@ using RotaryHeart.Lib.SerializableDictionary;
 
 namespace Thirdweb.Examples
 {
-    public class Prefab_ThirdwebConnect : MonoBehaviour
+    public class Prefab_ConnectWallet : MonoBehaviour
     {
         [Serializable]
         public class NetworkIcon
