@@ -44,8 +44,8 @@ Various blockchain interaction examples are available in our `Scene_Prefabs` sce
 
 Notes:
 
-- The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS. We recommend using 2022 LTS.
-- The example scenes are built using Unity 2022 LTS.
+- The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS. We highly recommend using 2022 LTS.
+- The example scenes are built using Unity 2022 LTS, it may look off in previous versions of Unity.
 - The Newtonsoft DLL is included as part of the Unity Package, feel free to deselect it if you already have it installed as a dependency to avoid conflicts.
 - If using .NET Framework and encountering an error related to HttpUtility, create a file `csc.rsp` that includes `-r:System.Web.dll` and save it under `Assets`.
 
