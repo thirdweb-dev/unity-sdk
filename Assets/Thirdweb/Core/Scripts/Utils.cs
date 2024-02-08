@@ -501,7 +501,14 @@ namespace Thirdweb
         {
             if (chainId == 137 || chainId == 80001)
             {
-                return await GetPolygonGasPriceParameters((int)chainId);
+                try
+                {
+                    return await GetPolygonGasPriceParameters((int)chainId);
+                }
+                catch (System.Exception e)
+                {
+                    ThirdwebDebug.LogWarning($"Failed to get gas price from Polygon gas station, using default method: {e.Message}");
+                }
             }
 
             var web3 = GetWeb3(chainId);
