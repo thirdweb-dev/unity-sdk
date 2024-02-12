@@ -189,6 +189,11 @@ nftPrefabScript.LoadNFT(nft);
 
 See full documentation on the [thirdweb portal](https://portal.thirdweb.com/unity).
 
+# Additional Links
+
+- [Documentation](https://portal.thirdweb.com/unity)
+- [Enhancing Unity IAP with Blockchain Interactions](https://discord.com/channels/834227967404146718/1154487390107349023/1206674338405683252)
+
 # Contributing to thirdweb Unity SDK
 
 We warmly welcome contributions to the thirdweb Unity SDK! If you're looking to contribute, here's how you can get started.
