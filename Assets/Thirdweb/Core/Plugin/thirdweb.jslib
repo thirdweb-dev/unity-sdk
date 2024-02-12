@@ -413,6 +413,29 @@ var plugin = {
         dynCall_viii(cb, idPtr, null, buffer);
       });
   },
+  ThirdwebGetSignerAddress: async function (taskId, cb) {
+    // convert taskId from pointer to str and allocate it to keep in memory
+    var id = UTF8ToString(taskId);
+    var idSize = lengthBytesUTF8(id) + 1;
+    var idPtr = _malloc(idSize);
+    stringToUTF8(id, idPtr, idSize);
+    // execute bridge call
+    window.bridge
+      .getSignerAddress()
+      .then((returnStr) => {
+        var bufferSize = lengthBytesUTF8(returnStr) + 1;
+        var buffer = _malloc(bufferSize);
+        stringToUTF8(returnStr, buffer, bufferSize);
+        dynCall_viii(cb, idPtr, buffer, null);
+      })
+      .catch((err) => {
+        var msg = err.message;
+        var bufferSize = lengthBytesUTF8(msg) + 1;
+        var buffer = _malloc(bufferSize);
+        stringToUTF8(msg, buffer, bufferSize);
+        dynCall_viii(cb, idPtr, null, buffer);
+      });
+  },
 };
 
 mergeInto(LibraryManager.library, plugin);

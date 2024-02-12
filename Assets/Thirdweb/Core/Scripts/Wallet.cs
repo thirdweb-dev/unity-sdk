@@ -309,7 +309,18 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await GetAddress();
+                try
+                {
+                    var signer = await Bridge.GetSigner();
+                    if (string.IsNullOrEmpty(signer))
+                        return await GetAddress();
+                    else
+                        return signer;
+                }
+                catch
+                {
+                    return await GetAddress();
+                }
             }
             else
             {
