@@ -115,6 +115,12 @@ var res = await contract.Read<string>("myReadFunction", arg1, arg2, ...);
 var txRes = await contract.Write("myWriteFunction", arg1, arg2, ...);
 ```
 
+# Additional Links
+
+- [Documentation](https://portal.thirdweb.com/unity)
+- [Enhancing Unity IAP with Blockchain Interactions](https://discord.com/channels/834227967404146718/1154487390107349023/1206674338405683252)
+- [Starter Template: Take Flight!](https://github.com/thirdweb-example/take-flight)
+
 # Prefab Examples
 
 ![image](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/a213b668-0273-400f-a6c1-92a582a35535)
@@ -188,11 +194,6 @@ nftPrefabScript.LoadNFT(nft);
 - Creating session keys to grant temporary/restricted access to additional signers.
 
 See full documentation on the [thirdweb portal](https://portal.thirdweb.com/unity).
-
-# Additional Links
-
-- [Documentation](https://portal.thirdweb.com/unity)
-- [Enhancing Unity IAP with Blockchain Interactions](https://discord.com/channels/834227967404146718/1154487390107349023/1206674338405683252)
 
 # Contributing to thirdweb Unity SDK
 
