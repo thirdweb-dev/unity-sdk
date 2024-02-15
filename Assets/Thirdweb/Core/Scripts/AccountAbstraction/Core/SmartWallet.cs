@@ -254,8 +254,7 @@ namespace Thirdweb.AccountAbstraction
 
             // Update paymaster data if any
 
-            if (Config.gasless && (string.IsNullOrEmpty(Config.erc20PaymasterAddress) || _approving)) // TODO: remove once simulation with minimal ERC20 amounts is in
-                partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestMessage.Id, partialUserOp.EncodeUserOperation(), apiKey);
+            partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestMessage.Id, partialUserOp.EncodeUserOperation(), apiKey);
 
             // Estimate gas
 
