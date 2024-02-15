@@ -16,7 +16,6 @@
   </p>
 </p>
 
-
 # Documentation
 
 See full documentation on the [thirdweb portal](https://portal.thirdweb.com/unity).
@@ -26,7 +25,6 @@ See full documentation on the [thirdweb portal](https://portal.thirdweb.com/unit
 Try out our multichain game that leverages Embedded and Smart Wallets to create seamless experiences, built in 3 weeks - [Web3 Warriors](https://web3warriors.thirdweb.com/).
 
 ![image](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/171198b2-83e7-4c8a-951b-79126dd47abb)
-
 
 # Supported platforms
 
@@ -44,9 +42,10 @@ All you need is a [ThirdwebManager](https://portal.thirdweb.com/unity/thirdwebma
 
 Various blockchain interaction examples are available in our `Scene_Prefabs` scene.
 
-Notes: 
-- The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS. We recommend using 2022 LTS.
-- The example scenes are built using Unity 2022 LTS.
+Notes:
+
+- The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS. We highly recommend using 2022 LTS.
+- The example scenes are built using Unity 2022 LTS, it may look off in previous versions of Unity.
 - The Newtonsoft DLL is included as part of the Unity Package, feel free to deselect it if you already have it installed as a dependency to avoid conflicts.
 - If using .NET Framework and encountering an error related to HttpUtility, create a file `csc.rsp` that includes `-r:System.Web.dll` and save it under `Assets`.
 
@@ -72,7 +71,7 @@ If you're uploading your build, set `Compression Format` to `Disabled` in `Playe
 
 - For Android, it is best to run Force Resolve from the `Assets` menu > `External Dependency Manager` > `Android Resolver` > `Force Resolve` before building your game.
 - For iOS, if you are missing a MetaMask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder.
-- If you are having trouble building in XCode, make sure `ENABLE_BITCODE` is disabled and that the `Embedded Frameworks` in your `Build Phases` contain potentially missing frameworks like `MetaMask` or `Starscream`. You may also need to remove the `Thirdweb/Plugins/MetaMask/Plugins/iOS/iphoneos/MetaMask_iOS.framework/Frameworks` folder in some cases.
+- If you are having trouble building in XCode, make sure `ENABLE_BITCODE` is disabled and that the `Embedded Frameworks` in your `Build Phases` contain potentially missing frameworks like `MetaMask` or `Starscream`. You may also need to remove the `Thirdweb/Core/Plugins/MetaMask/Plugins/iOS/iphoneos/MetaMask_iOS.framework/Frameworks` folder in some cases.
 
 # Usage
 
@@ -115,6 +114,12 @@ await marketplace.BuyListing(listingId, quantity);
 var res = await contract.Read<string>("myReadFunction", arg1, arg2, ...);
 var txRes = await contract.Write("myWriteFunction", arg1, arg2, ...);
 ```
+
+# Additional Links
+
+- [Documentation](https://portal.thirdweb.com/unity)
+- [Enhancing Unity IAP with Blockchain Interactions](https://discord.com/channels/834227967404146718/1154487390107349023/1206674338405683252)
+- [Starter Template: Take Flight!](https://github.com/thirdweb-example/take-flight)
 
 # Prefab Examples
 
@@ -183,6 +188,7 @@ nftPrefabScript.LoadNFT(nft);
 - Message Signing.
 
 [Smart Wallet](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Examples/Scripts/Prefabs/Prefab_SmartWallet.cs)
+
 - Adding admins to your smart wallet.
 - Removing admins from your smart wallet.
 - Creating session keys to grant temporary/restricted access to additional signers.
@@ -203,14 +209,15 @@ We warmly welcome contributions to the thirdweb Unity SDK! If you're looking to 
 6. Push to Your Fork: Push your changes to your forked repository.
 7. Submit a Pull Request: From your fork, submit a pull request to our main repository. Provide a clear description of your changes and any relevant issue numbers.
 
-Notes: 
+Notes:
+
 - For WebGL-specific contributions, you may contribute to our [JS](https://github.com/thirdweb-dev/js/) package as well. The bulk of WebGL-specific behavior goes through its Unity bridge.
 - For new Wallet Provider contributions, see our guide to [Submit your Wallet](https://portal.thirdweb.com/unity/wallets/submission).
 
 ## Guidelines
 
 - Keep It Simple: Try to keep your contributions small and simple. This makes them easier to review and merge.
-- Supported Platforms: Make sure your changes work on either WebGL only, Native platforms only, or both. A good test is to build `Scene_Prefabs` to test your changes there. 
+- Supported Platforms: Make sure your changes work on either WebGL only, Native platforms only, or both. A good test is to build `Scene_Prefabs` to test your changes there.
 - Test Your Code: Ensure your code works as expected and doesn't introduce new issues.
 - Be Respectful: When discussing changes, always be respectful and constructive.
 

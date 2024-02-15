@@ -243,7 +243,7 @@ namespace Thirdweb
                         Currency = listing.currencyContractAddress,
                         ExpectedTotalPrice = BigInteger.Parse(listing.pricePerToken) * BigInteger.Parse(quantity),
                     },
-                    BigInteger.Parse(listing.pricePerToken) * BigInteger.Parse(quantity)
+                    listing.currencyContractAddress.ToLower() == Utils.NativeTokenAddress.ToLower() ? BigInteger.Parse(listing.pricePerToken) * BigInteger.Parse(quantity) : 0
                 );
             }
         }

@@ -337,7 +337,7 @@ namespace Thirdweb
         /// <summary>
         /// Open a pack and transfer the rewards to the connected wallet
         /// </summary>
-        public async Task<PackRewards> Open(string packId, string amount = "1", int gasLimit = 500000)
+        public async Task<PackRewards> Open(string packId, string amount = "1", int gasLimit = 1000000)
         {
             if (Utils.IsWebGLBuild())
             {

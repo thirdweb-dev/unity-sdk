@@ -381,6 +381,23 @@ namespace Thirdweb
             return JsonConvert.DeserializeObject<Result<string>>(result).result;
         }
 
+        public static async Task<string> GetSigner()
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return "";
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebGetSignerAddress(taskId, jsCallback);
+#endif
+            string result = await task.Task;
+            return JsonConvert.DeserializeObject<Result<string>>(result).result;
+        }
+
 #if UNITY_WEBGL
         [DllImport("__Internal")]
         private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
@@ -418,6 +435,8 @@ namespace Thirdweb
         private static extern string ThirdwebGetBlockWithTransactions(string taskId, string blockNumber, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebGetEmail(string taskId, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebGetSignerAddress(string taskId, Action<string, string, string> cb);
 #endif
     }
 }

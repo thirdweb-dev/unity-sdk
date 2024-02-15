@@ -88,7 +88,7 @@ namespace Thirdweb
             {
                 int totalCount = await TotalCount();
                 int start = queryParams?.start ?? 0;
-                int count = queryParams?.count + 1 ?? totalCount;
+                int count = queryParams?.count ?? totalCount;
                 int end = Math.Min(start + count, totalCount);
                 List<NFT> allNfts = new();
                 try
@@ -125,7 +125,7 @@ namespace Thirdweb
                 catch
                 {
                     ThirdwebDebug.LogWarning("Unable to fetch using Multicall3, likely not deployed on this chain, falling back to single queries.");
-                    for (int i = start; i <= end; i++)
+                    for (int i = start; i < end; i++)
                         allNfts.Add(await Get(i.ToString()));
                 }
                 return allNfts;

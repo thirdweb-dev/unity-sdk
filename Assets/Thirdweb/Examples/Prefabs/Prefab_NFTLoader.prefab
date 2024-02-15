@@ -383,25 +383,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   query:
-    loadOneNft:
-    - contractAddress: 0x5350e0662D1BAB9f8843690B91C363aFD3e0cFe7
-      tokenID: 2
-      type: 0
-    - contractAddress: 0x5350e0662D1BAB9f8843690B91C363aFD3e0cFe7
-      tokenID: 1
-      type: 0
-    - contractAddress: 0x5350e0662D1BAB9f8843690B91C363aFD3e0cFe7
-      tokenID: 0
-      type: 0
+    loadOneNft: []
     loadMultipleNfts:
-    - contractAddress: 0x5350e0662D1BAB9f8843690B91C363aFD3e0cFe7
+    - contractAddress: 0x94894F65d93eb124839C667Fc04F97723e5C4544
       startID: 0
-      count: 2
-      type: 0
-    loadOwnedNfts:
-    - contractAddress: 0x5350e0662D1BAB9f8843690B91C363aFD3e0cFe7
-      owner: 0xa3841994009B4fEabb01ebcC62062F9E56F701CD
-      type: 0
+      count: 12
+      type: 1
+    loadOwnedNfts: []
   contentParent: {fileID: 7702873693523111848}
   nftPrefab: {fileID: 7568917608122384971, guid: 41381d62941a9e74c92c44c6ff55ad50, type: 3}
   loadingPanel: {fileID: 1500719425}
@@ -1177,7 +1165,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6901059056735359879}
   m_HandleRect: {fileID: 7216536800389251089}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

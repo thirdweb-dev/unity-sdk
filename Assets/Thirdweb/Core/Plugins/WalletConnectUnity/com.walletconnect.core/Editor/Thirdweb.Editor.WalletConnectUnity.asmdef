@@ -1,0 +1,18 @@
+{
+    "name": "Thirdweb.Editor.WalletConnectUnity",
+    "rootNamespace": "",
+    "references": [
+        "GUID:0f2166a81877b6f4b81956d2a579e6f7"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

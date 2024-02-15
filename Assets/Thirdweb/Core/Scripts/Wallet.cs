@@ -36,7 +36,15 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.session.Connect(walletConnection);
+                string address = await ThirdwebManager.Instance.SDK.session.Connect(walletConnection);
+                Utils.TrackWalletAnalytics(
+                    ThirdwebManager.Instance.SDK.session.Options.clientId,
+                    "connectWallet",
+                    "connect",
+                    walletConnection.provider.ToString()[..1].ToLower() + walletConnection.provider.ToString()[1..],
+                    address
+                );
+                return address;
             }
         }
 
@@ -44,7 +52,7 @@ namespace Thirdweb
         /// Disconnects the user's wallet.
         /// </summary>
         /// <returns>A task representing the disconnection process.</returns>
-        public async Task Disconnect()
+        public async Task Disconnect(bool endSession = false)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -52,7 +60,7 @@ namespace Thirdweb
             }
             else
             {
-                await ThirdwebManager.Instance.SDK.session.Disconnect();
+                await ThirdwebManager.Instance.SDK.session.Disconnect(endSession);
             }
         }
 
@@ -301,7 +309,18 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await GetAddress();
+                try
+                {
+                    var signer = await Bridge.GetSigner();
+                    if (string.IsNullOrEmpty(signer))
+                        return await GetAddress();
+                    else
+                        return signer;
+                }
+                catch
+                {
+                    return await GetAddress();
+                }
             }
             else
             {

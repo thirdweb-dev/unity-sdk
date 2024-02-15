@@ -1,0 +1,19 @@
+{
+    "name": "Thirdweb.Editor.RotaryHeart.SerializableDictionary",
+    "rootNamespace": "",
+    "references": [
+        "GUID:0f2166a81877b6f4b81956d2a579e6f7",
+        "GUID:e7793d95b055f4f48af3792f8500744c"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
