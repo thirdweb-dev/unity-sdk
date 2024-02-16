@@ -22,6 +22,12 @@ namespace Thirdweb.AccountAbstraction
             return response.Result.ToString();
         }
 
+        public static async Task<string> EthSendCompressedUserOperation(string bundlerUrl, string apiKey, object requestId, string compressedUserOpHex, string inflatorAddress, string entryPoint)
+        {
+            var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "pimlico_sendCompressedUserOperation", compressedUserOpHex, inflatorAddress, entryPoint);
+            return response.Result.ToString();
+        }
+
         public static async Task<EthEstimateUserOperationGasResponse> EthEstimateUserOperationGas(string bundlerUrl, string apiKey, object requestId, UserOperationHexified userOp, string entryPoint)
         {
             var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "eth_estimateUserOperationGas", userOp, entryPoint);

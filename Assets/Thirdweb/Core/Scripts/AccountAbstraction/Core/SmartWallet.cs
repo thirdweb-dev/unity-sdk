@@ -244,8 +244,41 @@ namespace Thirdweb.AccountAbstraction
 
             ThirdwebDebug.Log("Valid UserOp: " + JsonConvert.SerializeObject(partialUserOp));
             ThirdwebDebug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(partialUserOp.EncodeUserOperation()));
-            var userOpHash = await BundlerClient.EthSendUserOperation(Config.bundlerUrl, apiKey, requestMessage.Id, partialUserOp.EncodeUserOperation(), Config.entryPointAddress);
-            ThirdwebDebug.Log("UserOp Hash: " + userOpHash);
+
+            string userOpHash = null;
+
+            if (new Uri(Config.bundlerUrl).Host.EndsWith("thirdweb.com"))
+            {
+                try
+                {
+                    ThirdwebDebug.Log("Compressing...");
+                    var inflatorContract = ThirdwebManager.Instance.SDK.GetContract(
+                        "0x564c7dC50f8293d070F490Fc31fEc3A0A091b9bB",
+                        "[{\"inputs\": [{\"components\": [{\"internalType\": \"address\",\"name\": \"sender\",\"type\": \"address\"},{\"internalType\": \"uint256\",\"name\": \"nonce\",\"type\": \"uint256\"},{\"internalType\": \"bytes\",\"name\": \"initCode\",\"type\": \"bytes\"},{\"internalType\": \"bytes\",\"name\": \"callData\",\"type\": \"bytes\"},{\"internalType\": \"uint256\",\"name\": \"callGasLimit\",\"type\": \"uint256\"},{\"internalType\": \"uint256\",\"name\": \"verificationGasLimit\",\"type\": \"uint256\"},{\"internalType\": \"uint256\",\"name\": \"preVerificationGas\",\"type\": \"uint256\"},{\"internalType\": \"uint256\",\"name\": \"maxFeePerGas\",\"type\": \"uint256\"},{\"internalType\": \"uint256\",\"name\": \"maxPriorityFeePerGas\",\"type\": \"uint256\"},{\"internalType\": \"bytes\",\"name\": \"paymasterAndData\",\"type\": \"bytes\"},{\"internalType\": \"bytes\",\"name\": \"signature\",\"type\": \"bytes\"}],\"internalType\": \"struct UserOperation\",\"name\": \"op\",\"type\": \"tuple\"}],\"name\": \"compress\",\"outputs\": [{\"internalType\": \"bytes\",\"name\": \"compressed\",\"type\": \"bytes\"}],\"stateMutability\": \"pure\",\"type\": \"function\"},{\"inputs\": [{\"internalType\": \"bytes\",\"name\": \"compressed\",\"type\": \"bytes\"}],\"name\": \"inflate\",\"outputs\": [{\"components\": [{\"internalType\": \"address\",\"name\": \"sender\",\"type\": \"address\"},{\"internalType\": \"uint256\",\"name\": \"nonce\",\"type\": \"uint256\"},{\"internalType\": \"bytes\",\"name\": \"initCode\",\"type\": \"bytes\"},{\"internalType\": \"bytes\",\"name\": \"callData\",\"type\": \"bytes\"},{\"internalType\": \"uint256\",\"name\": \"callGasLimit\",\"type\": \"uint256\"},{\"internalType\": \"uint256\",\"name\": \"verificationGasLimit\",\"type\": \"uint256\"},{\"internalType\": \"uint256\",\"name\": \"preVerificationGas\",\"type\": \"uint256\"},{\"internalType\": \"uint256\",\"name\": \"maxFeePerGas\",\"type\": \"uint256\"},{\"internalType\": \"uint256\",\"name\": \"maxPriorityFeePerGas\",\"type\": \"uint256\"},{\"internalType\": \"bytes\",\"name\": \"paymasterAndData\",\"type\": \"bytes\"},{\"internalType\": \"bytes\",\"name\": \"signature\",\"type\": \"bytes\"}],\"internalType\": \"struct UserOperation\",\"name\": \"op\",\"type\": \"tuple\"}],\"stateMutability\": \"pure\",\"type\": \"function\"}]"
+                    );
+                    byte[] compressedUserOp = await inflatorContract.Read<byte[]>("compress", partialUserOp);
+                    userOpHash = await BundlerClient.EthSendCompressedUserOperation(
+                        Config.bundlerUrl,
+                        apiKey,
+                        requestMessage.Id,
+                        compressedUserOp.ByteArrayToHexString(),
+                        inflatorContract.address,
+                        Config.entryPointAddress
+                    );
+                    ThirdwebDebug.Log("Compressed successfully");
+                }
+                catch (Exception e)
+                {
+                    ThirdwebDebug.LogWarning($"Compression failed, sending uncompressed. Error: {e.Message}");
+                    userOpHash = null;
+                }
+            }
+
+            if (userOpHash == null)
+            {
+                userOpHash = await BundlerClient.EthSendUserOperation(Config.bundlerUrl, apiKey, requestMessage.Id, partialUserOp.EncodeUserOperation(), Config.entryPointAddress);
+                ThirdwebDebug.Log("UserOp Hash: " + userOpHash);
+            }
 
             // Wait for the transaction to be mined
 
