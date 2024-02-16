@@ -10,10 +10,16 @@ namespace Thirdweb.AccountAbstraction
     {
         // Bundler requests
 
-        public static async Task<EthGetUserOperationByHasResponse> EthGetUserOperationByHash(string bundlerUrl, string apiKey, object requestId, string userOpHash)
+        public static async Task<EthGetUserOperationByHashResponse> EthGetUserOperationByHash(string bundlerUrl, string apiKey, object requestId, string userOpHash)
         {
             var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "eth_getUserOperationByHash", userOpHash);
-            return JsonConvert.DeserializeObject<EthGetUserOperationByHasResponse>(response.Result.ToString());
+            return JsonConvert.DeserializeObject<EthGetUserOperationByHashResponse>(response.Result.ToString());
+        }
+
+        public static async Task<EthGetUserOperationReceiptResponse> EthGetUserOperationReceipt(string bundlerUrl, string apiKey, object requestId, string userOpHash)
+        {
+            var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "eth_getUserOperationReceipt", userOpHash);
+            return JsonConvert.DeserializeObject<EthGetUserOperationReceiptResponse>(response.Result.ToString());
         }
 
         public static async Task<string> EthSendUserOperation(string bundlerUrl, string apiKey, object requestId, UserOperationHexified userOp, string entryPoint)

@@ -285,8 +285,8 @@ namespace Thirdweb.AccountAbstraction
             string txHash = null;
             while (txHash == null)
             {
-                var getUserOpResponse = await BundlerClient.EthGetUserOperationByHash(Config.bundlerUrl, apiKey, requestMessage.Id, userOpHash);
-                txHash = getUserOpResponse?.transactionHash;
+                var userOpReceipt = await BundlerClient.EthGetUserOperationReceipt(Config.bundlerUrl, apiKey, requestMessage.Id, userOpHash);
+                txHash = userOpReceipt?.receipt?.TransactionHash;
                 await new WaitForSecondsRealtime(1f);
             }
             ThirdwebDebug.Log("Tx Hash: " + txHash);
