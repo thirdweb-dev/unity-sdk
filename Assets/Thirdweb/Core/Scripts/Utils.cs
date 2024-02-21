@@ -637,5 +637,11 @@ namespace Thirdweb
                 ThirdwebDebug.LogWarning($"Failed to send wallet analytics: {e}");
             }
         }
+
+        public static byte[] HashMessage(this byte[] messageBytes)
+        {
+            var sha3 = new Nethereum.Util.Sha3Keccack();
+            return sha3.CalculateHash(messageBytes);
+        }
     }
 }
