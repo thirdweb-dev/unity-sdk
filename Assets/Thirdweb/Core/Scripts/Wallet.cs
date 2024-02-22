@@ -444,15 +444,28 @@ namespace Thirdweb
                     }
                     if (sw.SmartWallet.IsDeployed)
                     {
-                        var sig = await EIP712.GenerateSignature_SmartAccount_AccountMessage("Account", "1", await GetChainId(), await GetAddress(), System.Text.Encoding.UTF8.GetBytes(message));
-                        bool isValid = await RecoverAddress(message, sig) == await GetAddress();
-                        if (isValid)
+                        try
                         {
-                            return sig;
+                            var sig = await EIP712.GenerateSignature_SmartAccount_AccountMessage(
+                                "Account",
+                                "1",
+                                await GetChainId(),
+                                await GetAddress(),
+                                System.Text.Encoding.UTF8.GetBytes(message).HashMessage()
+                            );
+                            bool isValid = await RecoverAddress(message, sig) == await GetAddress();
+                            if (isValid)
+                            {
+                                return sig;
+                            }
+                            else
+                            {
+                                throw new Exception("Unable to verify signature on smart account, please make sure the smart account is deployed and the signature is valid.");
+                            }
                         }
-                        else
+                        catch (Exception e)
                         {
-                            throw new Exception("Unable to verify signature on smart account, please make sure the smart account is deployed and the signature is valid.");
+                            ThirdwebDebug.LogWarning("Error signing message with smart account typed data, falling back to personal sign: " + e.Message);
                         }
                     }
                     else
@@ -460,10 +473,8 @@ namespace Thirdweb
                         throw new Exception("Smart account could not be deployed, unable to sign message.");
                     }
                 }
-                else
-                {
-                    return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetAddress());
-                }
+
+                return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
             }
         }
 
@@ -502,7 +513,6 @@ namespace Thirdweb
                 var json = typedData.ToJson(data);
                 var jsonObject = JObject.Parse(json);
 
-                // Payloads
                 var uidToken = jsonObject.SelectToken("$.message.uid");
                 if (uidToken != null)
                 {
@@ -515,13 +525,13 @@ namespace Thirdweb
                 if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                 {
                     // Smart accounts
-                    var messageToken = jsonObject.SelectToken("$.message.message");
-                    if (messageToken != null)
+                    var hashToken = jsonObject.SelectToken("$.message.hash");
+                    if (hashToken != null)
                     {
-                        var messageBase64 = messageToken.Value<string>();
-                        var messageBytes = Convert.FromBase64String(messageBase64);
-                        var messageString = System.Text.Encoding.UTF8.GetString(messageBytes);
-                        messageToken.Replace(messageString);
+                        var hashBase64 = hashToken.Value<string>();
+                        var hashBytes = Convert.FromBase64String(hashBase64);
+                        var hashHex = hashBytes.ByteArrayToHexString();
+                        hashToken.Replace(hashHex);
                     }
                 }
 
@@ -561,10 +571,7 @@ namespace Thirdweb
                 if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                 {
                     var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
-                    var typedData = EIP712.GetTypedDefinition_SmartAccount_AccountMessage("Account", "1", await GetChainId(), await GetAddress());
-                    var accountMessage = new AccountMessage { Message = System.Text.Encoding.UTF8.GetBytes(message) };
-                    var encodedMessage = Eip712TypedDataEncoder.Current.EncodeTypedData(accountMessage, typedData);
-                    bool isSigValid = await sw.SmartWallet.VerifySignature(encodedMessage.HashMessage(), signature.HexStringToByteArray());
+                    bool isSigValid = await sw.SmartWallet.VerifySignature(System.Text.Encoding.UTF8.GetBytes(message).HashMessage(), signature.HexStringToByteArray());
                     if (isSigValid)
                     {
                         return await GetAddress();
