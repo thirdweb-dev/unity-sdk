@@ -446,7 +446,7 @@ namespace Thirdweb
                     {
                         try
                         {
-                            byte[] originalMsgHash = System.Text.Encoding.UTF8.GetBytes(message).HashMessage();
+                            byte[] originalMsgHash = System.Text.Encoding.UTF8.GetBytes(message).HashPrefixedMessage();
 
                             // if this fails it's a pre 712 factory
                             await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetMessageHashFunction, Contracts.Account.ContractDefinition.GetMessageHashOutputDTO>(
@@ -477,7 +477,13 @@ namespace Thirdweb
                     }
                 }
 
-                return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
+                var sig2 = await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
+                var verify = await RecoverAddress(message, sig2) == await GetAddress();
+                if (!verify)
+                {
+                    throw new Exception("Unable to verify signature, please make sure the wallet is unlocked and the signature is valid.");
+                }
+                return sig2;
             }
         }
 
@@ -574,7 +580,7 @@ namespace Thirdweb
                 if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                 {
                     var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
-                    bool isSigValid = await sw.SmartWallet.VerifySignature(message.HashMessage().HexStringToByteArray(), signature.HexStringToByteArray());
+                    bool isSigValid = await sw.SmartWallet.VerifySignature(message.HashPrefixedMessage().HexStringToByteArray(), signature.HexStringToByteArray());
                     if (isSigValid)
                     {
                         return await GetAddress();

@@ -638,6 +638,18 @@ namespace Thirdweb
             }
         }
 
+        public static byte[] HashPrefixedMessage(this byte[] messageBytes)
+        {
+            var signer = new EthereumMessageSigner();
+            return signer.HashPrefixedMessage(messageBytes);
+        }
+
+        public static string HashPrefixedMessage(this string message)
+        {
+            var signer = new EthereumMessageSigner();
+            return signer.HashPrefixedMessage(System.Text.Encoding.UTF8.GetBytes(message)).ByteArrayToHexString();
+        }
+
         public static byte[] HashMessage(this byte[] messageBytes)
         {
             var sha3 = new Nethereum.Util.Sha3Keccack();
