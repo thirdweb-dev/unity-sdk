@@ -444,32 +444,35 @@ namespace Thirdweb
                     }
                     if (sw.SmartWallet.IsDeployed)
                     {
+                        byte[] originalMsgHash = System.Text.Encoding.UTF8.GetBytes(message).HashPrefixedMessage();
+                        string swAddress = await GetAddress();
+                        bool factorySupports712;
+                        string signature = null;
                         try
                         {
-                            byte[] originalMsgHash = System.Text.Encoding.UTF8.GetBytes(message).HashPrefixedMessage();
-
                             // if this fails it's a pre 712 factory
                             await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetMessageHashFunction, Contracts.Account.ContractDefinition.GetMessageHashOutputDTO>(
-                                await GetAddress(),
+                                swAddress,
                                 new Contracts.Account.ContractDefinition.GetMessageHashFunction() { Hash = originalMsgHash }
                             );
-
-                            string sig = await EIP712.GenerateSignature_SmartAccount_AccountMessage("Account", "1", await GetChainId(), await GetAddress(), originalMsgHash);
-
-                            bool isValid = await RecoverAddress(message, sig) == await GetAddress();
-                            if (isValid)
-                            {
-                                return sig;
-                            }
-                            else
-                            {
-                                throw new Exception("Unable to verify signature on smart account, please make sure the smart account is deployed and the signature is valid.");
-                            }
+                            factorySupports712 = true;
                         }
-                        catch (Exception e)
+                        catch
                         {
-                            ThirdwebDebug.LogWarning("Error signing message with smart account typed data, falling back to personal sign: " + e.Message);
+                            ThirdwebDebug.Log("Account does not support 712 signing, using personal_sign");
+                            factorySupports712 = false;
                         }
+
+                        if (factorySupports712)
+                            signature = await EIP712.GenerateSignature_SmartAccount_AccountMessage("Account", "1", await GetChainId(), swAddress, originalMsgHash);
+                        else
+                            signature = await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
+
+                        bool isValid = await RecoverAddress(message, signature) == swAddress;
+                        if (isValid)
+                            return signature;
+                        else
+                            throw new Exception("Unable to verify signature on smart account, please make sure the smart account is deployed and the signature is valid.");
                     }
                     else
                     {
@@ -477,13 +480,7 @@ namespace Thirdweb
                     }
                 }
 
-                var sig2 = await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
-                var verify = await RecoverAddress(message, sig2) == await GetAddress();
-                if (!verify)
-                {
-                    throw new Exception("Unable to verify signature, please make sure the wallet is unlocked and the signature is valid.");
-                }
-                return sig2;
+                return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
             }
         }
 
