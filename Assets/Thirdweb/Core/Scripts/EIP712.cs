@@ -135,10 +135,10 @@ namespace Thirdweb
             }
         }
 
-        public async static Task<string> GenerateSignature_SmartAccount_AccountMessage(string domainName, string version, BigInteger chainId, string verifyingContract, byte[] hash)
+        public async static Task<string> GenerateSignature_SmartAccount_AccountMessage(string domainName, string version, BigInteger chainId, string verifyingContract, byte[] message)
         {
             var typedData = GetTypedDefinition_SmartAccount_AccountMessage(domainName, version, chainId, verifyingContract);
-            var accountMessage = new AccountMessage { Hash = hash };
+            var accountMessage = new AccountMessage { Message = message };
             return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(accountMessage, typedData);
         }
 
@@ -248,7 +248,7 @@ namespace Thirdweb
 
     public class AccountMessageBase
     {
-        [Nethereum.ABI.FunctionEncoding.Attributes.Parameter("bytes32", "hash", 1)]
-        public virtual byte[] Hash { get; set; }
+        [Nethereum.ABI.FunctionEncoding.Attributes.Parameter("bytes", "message", 1)]
+        public virtual byte[] Message { get; set; }
     }
 }

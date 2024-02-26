@@ -643,5 +643,11 @@ namespace Thirdweb
             var sha3 = new Nethereum.Util.Sha3Keccack();
             return sha3.CalculateHash(messageBytes);
         }
+
+        public static string HashMessage(this string message)
+        {
+            var sha3 = new Nethereum.Util.Sha3Keccack();
+            return sha3.CalculateHash(message);
+        }
     }
 }

@@ -446,13 +446,16 @@ namespace Thirdweb
                     {
                         try
                         {
-                            var sig = await EIP712.GenerateSignature_SmartAccount_AccountMessage(
-                                "Account",
-                                "1",
-                                await GetChainId(),
+                            byte[] originalMsgHash = System.Text.Encoding.UTF8.GetBytes(message).HashMessage();
+
+                            // if this fails it's a pre 712 factory
+                            await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetMessageHashFunction, Contracts.Account.ContractDefinition.GetMessageHashOutputDTO>(
                                 await GetAddress(),
-                                System.Text.Encoding.UTF8.GetBytes(message).HashMessage()
+                                new Contracts.Account.ContractDefinition.GetMessageHashFunction() { Hash = originalMsgHash }
                             );
+
+                            string sig = await EIP712.GenerateSignature_SmartAccount_AccountMessage("Account", "1", await GetChainId(), await GetAddress(), originalMsgHash);
+
                             bool isValid = await RecoverAddress(message, sig) == await GetAddress();
                             if (isValid)
                             {
@@ -525,7 +528,7 @@ namespace Thirdweb
                 if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                 {
                     // Smart accounts
-                    var hashToken = jsonObject.SelectToken("$.message.hash");
+                    var hashToken = jsonObject.SelectToken("$.message.message");
                     if (hashToken != null)
                     {
                         var hashBase64 = hashToken.Value<string>();
@@ -571,7 +574,7 @@ namespace Thirdweb
                 if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                 {
                     var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
-                    bool isSigValid = await sw.SmartWallet.VerifySignature(System.Text.Encoding.UTF8.GetBytes(message).HashMessage(), signature.HexStringToByteArray());
+                    bool isSigValid = await sw.SmartWallet.VerifySignature(message.HashMessage().HexStringToByteArray(), signature.HexStringToByteArray());
                     if (isSigValid)
                     {
                         return await GetAddress();
