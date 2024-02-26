@@ -113,11 +113,6 @@ namespace Thirdweb
             public bool gasless;
 
             /// <summary>
-            /// Indicates whether to deploy the smart wallet upon signing any type of message.
-            /// </summary>
-            public bool deployOnSign;
-
-            /// <summary>
             /// The URL of the bundler service.
             /// </summary>
             public string bundlerUrl;

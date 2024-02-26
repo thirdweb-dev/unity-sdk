@@ -192,6 +192,19 @@ namespace Thirdweb.Contracts.Account
             return ContractHandler.QueryDeserializingToObjectAsync<GetAllSignersFunction, GetAllSignersOutputDTO>(null, blockParameter);
         }
 
+        public Task<byte[]> GetMessageHashQueryAsync(GetMessageHashFunction getMessageHashFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<GetMessageHashFunction, byte[]>(getMessageHashFunction, blockParameter);
+        }
+
+        public Task<byte[]> GetMessageHashQueryAsync(byte[] hash, BlockParameter blockParameter = null)
+        {
+            var getMessageHashFunction = new GetMessageHashFunction();
+            getMessageHashFunction.Hash = hash;
+
+            return ContractHandler.QueryAsync<GetMessageHashFunction, byte[]>(getMessageHashFunction, blockParameter);
+        }
+
         public Task<BigInteger> GetNonceQueryAsync(GetNonceFunction getNonceFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<GetNonceFunction, BigInteger>(getNonceFunction, blockParameter);
@@ -225,21 +238,19 @@ namespace Thirdweb.Contracts.Account
             return ContractHandler.SendRequestAndWaitForReceiptAsync(initializeFunction, cancellationToken);
         }
 
-        public Task<string> InitializeRequestAsync(string defaultAdmin, string factory, byte[] data)
+        public Task<string> InitializeRequestAsync(string defaultAdmin, byte[] data)
         {
             var initializeFunction = new InitializeFunction();
             initializeFunction.DefaultAdmin = defaultAdmin;
-            initializeFunction.Factory = factory;
             initializeFunction.Data = data;
 
             return ContractHandler.SendRequestAsync(initializeFunction);
         }
 
-        public Task<TransactionReceipt> InitializeRequestAndWaitForReceiptAsync(string defaultAdmin, string factory, byte[] data, CancellationTokenSource cancellationToken = null)
+        public Task<TransactionReceipt> InitializeRequestAndWaitForReceiptAsync(string defaultAdmin, byte[] data, CancellationTokenSource cancellationToken = null)
         {
             var initializeFunction = new InitializeFunction();
             initializeFunction.DefaultAdmin = defaultAdmin;
-            initializeFunction.Factory = factory;
             initializeFunction.Data = data;
 
             return ContractHandler.SendRequestAndWaitForReceiptAsync(initializeFunction, cancellationToken);
