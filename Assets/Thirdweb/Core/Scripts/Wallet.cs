@@ -459,7 +459,6 @@ namespace Thirdweb
                         }
                         catch
                         {
-                            ThirdwebDebug.Log("Account does not support 712 signing, using personal_sign");
                             factorySupports712 = false;
                         }
 
