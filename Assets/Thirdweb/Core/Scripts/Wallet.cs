@@ -29,13 +29,15 @@ namespace Thirdweb
         /// <returns>A task representing the connection result.</returns>
         public async Task<string> Connect(WalletConnection walletConnection)
         {
+            string address = null;
+
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.Connect(walletConnection);
+                address = await Bridge.Connect(walletConnection);
             }
             else
             {
-                string address = await ThirdwebManager.Instance.SDK.session.Connect(walletConnection);
+                address = await ThirdwebManager.Instance.SDK.session.Connect(walletConnection);
                 Utils.TrackWalletAnalytics(
                     ThirdwebManager.Instance.SDK.session.Options.clientId,
                     "connectWallet",
@@ -45,6 +47,17 @@ namespace Thirdweb
                 );
                 return address;
             }
+
+            try
+            {
+                await SwitchNetwork(walletConnection.chainId);
+            }
+            catch
+            {
+                // no-op
+            }
+
+            return address;
         }
 
         /// <summary>
