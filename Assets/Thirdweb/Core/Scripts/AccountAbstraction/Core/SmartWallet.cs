@@ -38,6 +38,8 @@ namespace Thirdweb.AccountAbstraction
         private bool _deployed;
         private bool _deploying;
         private bool _initialized;
+        private bool _approved;
+        private bool _approving;
 
         public List<string> Accounts { get; internal set; }
         public string PersonalAddress { get; internal set; }
@@ -53,6 +55,8 @@ namespace Thirdweb.AccountAbstraction
             {
                 factoryAddress = config.factoryAddress,
                 gasless = config.gasless,
+                erc20PaymasterAddress = config.erc20PaymasterAddress,
+                erc20TokenAddress = config.erc20TokenAddress,
                 bundlerUrl = string.IsNullOrEmpty(config.bundlerUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.bundlerUrl,
                 paymasterUrl = string.IsNullOrEmpty(config.paymasterUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.paymasterUrl,
                 entryPointAddress = string.IsNullOrEmpty(config.entryPointAddress) ? Constants.DEFAULT_ENTRYPOINT_ADDRESS : config.entryPointAddress,
@@ -61,6 +65,8 @@ namespace Thirdweb.AccountAbstraction
             _deployed = false;
             _initialized = false;
             _deploying = false;
+            _approved = false;
+            _approving = false;
         }
 
         internal async Task<string> GetPersonalAddress()
@@ -197,8 +203,6 @@ namespace Thirdweb.AccountAbstraction
             var transactionInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(paramList[0]));
             var dummySig = Constants.DUMMY_SIG;
 
-            var (initCode, gas) = await GetInitCode();
-
             var executeFn = new AccountContract.ExecuteFunction
             {
                 Target = transactionInput.To,
@@ -208,7 +212,36 @@ namespace Thirdweb.AccountAbstraction
             };
             var executeInput = executeFn.CreateTransactionInput(Accounts[0]);
 
+            // Approve ERC20 tokens if any
+
+            if (!string.IsNullOrEmpty(Config.erc20PaymasterAddress) && !_approved && !_approving)
+            {
+                try
+                {
+                    _approving = true;
+                    var tokenContract = ThirdwebManager.Instance.SDK.GetContract(Config.erc20TokenAddress);
+                    var approvedAmount = await tokenContract.ERC20.AllowanceOf(Accounts[0], Config.erc20PaymasterAddress);
+                    if (BigInteger.Parse(approvedAmount.value) == 0)
+                    {
+                        ThirdwebDebug.Log($"Approving tokens for ERC20Paymaster spending");
+                        _deploying = false;
+                        await tokenContract.ERC20.SetAllowance(Config.erc20PaymasterAddress, (BigInteger.Pow(2, 96) - 1).ToString().ToEth());
+                    }
+                    _approved = true;
+                    _approving = false;
+                    await UpdateDeploymentStatus();
+                }
+                catch (Exception e)
+                {
+                    _approving = false;
+                    _approved = false;
+                    throw new Exception($"Approving tokens for ERC20Paymaster spending failed: {e.Message}");
+                }
+            }
+
             // Create the user operation and its safe (hexified) version
+
+            var (initCode, gas) = await GetInitCode();
 
             var gasPrices = await Utils.GetGasPriceAsync(ThirdwebManager.Instance.SDK.session.ChainId);
 
@@ -235,7 +268,9 @@ namespace Thirdweb.AccountAbstraction
 
             var gasEstimates = await BundlerClient.EthEstimateUserOperationGas(Config.bundlerUrl, apiKey, requestMessage.Id, partialUserOp.EncodeUserOperation(), Config.entryPointAddress);
             partialUserOp.CallGasLimit = 50000 + new HexBigInteger(gasEstimates.CallGasLimit).Value;
-            partialUserOp.VerificationGasLimit = new HexBigInteger(gasEstimates.VerificationGas).Value;
+            partialUserOp.VerificationGasLimit = string.IsNullOrEmpty(Config.erc20PaymasterAddress)
+                ? new HexBigInteger(gasEstimates.VerificationGas).Value
+                : new HexBigInteger(gasEstimates.VerificationGas).Value * 3;
             partialUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value;
 
             // Update paymaster data if any
@@ -258,8 +293,8 @@ namespace Thirdweb.AccountAbstraction
             string txHash = null;
             while (txHash == null)
             {
-                var getUserOpResponse = await BundlerClient.EthGetUserOperationByHash(Config.bundlerUrl, apiKey, requestMessage.Id, userOpHash);
-                txHash = getUserOpResponse?.transactionHash;
+                var userOpReceipt = await BundlerClient.EthGetUserOperationReceipt(Config.bundlerUrl, apiKey, requestMessage.Id, userOpHash);
+                txHash = userOpReceipt?.receipt?.TransactionHash;
                 await new WaitForSecondsRealtime(1f);
             }
             ThirdwebDebug.Log("Tx Hash: " + txHash);
@@ -297,9 +332,19 @@ namespace Thirdweb.AccountAbstraction
 
         private async Task<byte[]> GetPaymasterAndData(object requestId, UserOperationHexified userOp, string apiKey)
         {
-            return Config.gasless
-                ? (await BundlerClient.PMSponsorUserOperation(Config.paymasterUrl, apiKey, requestId, userOp, Config.entryPointAddress)).paymasterAndData.HexStringToByteArray()
-                : new byte[] { };
+            if (!string.IsNullOrEmpty(Config.erc20PaymasterAddress) && !_approving)
+            {
+                return Config.erc20PaymasterAddress.HexToByteArray();
+            }
+            else if (Config.gasless)
+            {
+                var paymasterAndData = await BundlerClient.PMSponsorUserOperation(Config.paymasterUrl, apiKey, requestId, userOp, Config.entryPointAddress);
+                return paymasterAndData.paymasterAndData.HexToByteArray();
+            }
+            else
+            {
+                return new byte[] { };
+            }
         }
     }
 }

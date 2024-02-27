@@ -113,6 +113,16 @@ namespace Thirdweb
             public bool gasless;
 
             /// <summary>
+            /// The address of your ERC20 paymaster contract if used.
+            /// </summary>
+            public string erc20PaymasterAddress;
+
+            /// <summary>
+            /// The address of your ERC20 token if using ERC20 paymaster.
+            /// </summary>
+            public string erc20TokenAddress;
+
+            /// <summary>
             /// The URL of the bundler service.
             /// </summary>
             public string bundlerUrl;

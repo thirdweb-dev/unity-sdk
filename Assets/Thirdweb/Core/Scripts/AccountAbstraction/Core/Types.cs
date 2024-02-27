@@ -1,3 +1,5 @@
+using Nethereum.RPC.Eth.DTOs;
+
 namespace Thirdweb.AccountAbstraction
 {
     public class EthEstimateUserOperationGasResponse
@@ -7,12 +9,17 @@ namespace Thirdweb.AccountAbstraction
         public string CallGasLimit { get; set; }
     }
 
-    public class EthGetUserOperationByHasResponse
+    public class EthGetUserOperationByHashResponse
     {
         public string entryPoint { get; set; }
         public string transactionHash { get; set; }
         public string blockHash { get; set; }
         public string blockNumber { get; set; }
+    }
+
+    public class EthGetUserOperationReceiptResponse
+    {
+        public TransactionReceipt receipt { get; set; }
     }
 
     public class EntryPointWrapper
