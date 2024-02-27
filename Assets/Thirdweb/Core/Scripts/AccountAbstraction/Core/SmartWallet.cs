@@ -124,11 +124,19 @@ namespace Thirdweb.AccountAbstraction
 
         internal async Task<bool> VerifySignature(byte[] hash, byte[] signature)
         {
-            var verifyRes = await TransactionManager.ThirdwebRead<AccountContract.IsValidSignatureFunction, AccountContract.IsValidSignatureOutputDTO>(
-                Accounts[0],
-                new AccountContract.IsValidSignatureFunction() { Hash = hash, Signature = signature }
-            );
-            return verifyRes.MagicValue.ToHex(true) == new byte[] { 0x16, 0x26, 0xba, 0x7e }.ToHex(true);
+            try
+            {
+                var verifyRes = await TransactionManager.ThirdwebRead<AccountContract.IsValidSignatureFunction, AccountContract.IsValidSignatureOutputDTO>(
+                    Accounts[0],
+                    new AccountContract.IsValidSignatureFunction() { Hash = hash, Signature = signature }
+                );
+                return verifyRes.MagicValue.ToHex(true) == new byte[] { 0x16, 0x26, 0xba, 0x7e }.ToHex(true);
+            }
+            catch (Exception e)
+            {
+                ThirdwebDebug.LogWarning("isValidSignature call failed: " + e.Message);
+                return false;
+            }
         }
 
         internal async Task<(byte[] initCode, BigInteger gas)> GetInitCode()

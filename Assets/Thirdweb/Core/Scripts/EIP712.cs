@@ -8,7 +8,6 @@ using TokenERC721Contract = Thirdweb.Contracts.TokenERC721.ContractDefinition;
 using TokenERC1155Contract = Thirdweb.Contracts.TokenERC1155.ContractDefinition;
 using MinimalForwarder = Thirdweb.Contracts.Forwarder.ContractDefinition;
 using AccountContract = Thirdweb.Contracts.Account.ContractDefinition;
-using Nethereum.Model;
 
 namespace Thirdweb
 {
@@ -136,6 +135,13 @@ namespace Thirdweb
             }
         }
 
+        public async static Task<string> GenerateSignature_SmartAccount_AccountMessage(string domainName, string version, BigInteger chainId, string verifyingContract, byte[] message)
+        {
+            var typedData = GetTypedDefinition_SmartAccount_AccountMessage(domainName, version, chainId, verifyingContract);
+            var accountMessage = new AccountMessage { Message = message };
+            return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(accountMessage, typedData);
+        }
+
         #region Typed Data Definitions
 
         public static TypedData<Domain> GetTypedDefinition_TokenERC20(string domainName, string version, BigInteger chainId, string verifyingContract)
@@ -218,6 +224,31 @@ namespace Thirdweb
             };
         }
 
+        public static TypedData<Domain> GetTypedDefinition_SmartAccount_AccountMessage(string domainName, string version, BigInteger chainId, string verifyingContract)
+        {
+            return new TypedData<Domain>
+            {
+                Domain = new Domain
+                {
+                    Name = domainName,
+                    Version = version,
+                    ChainId = chainId,
+                    VerifyingContract = verifyingContract,
+                },
+                Types = MemberDescriptionFactory.GetTypesMemberDescription(typeof(Domain), typeof(AccountMessage)),
+                PrimaryType = nameof(AccountMessage),
+            };
+        }
+    }
+
         #endregion
+
+
+    public partial class AccountMessage : AccountMessageBase { }
+
+    public class AccountMessageBase
+    {
+        [Nethereum.ABI.FunctionEncoding.Attributes.Parameter("bytes", "message", 1)]
+        public virtual byte[] Message { get; set; }
     }
 }

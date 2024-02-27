@@ -111,11 +111,6 @@ namespace Thirdweb
             /// Indicates whether gasless transactions are enabled for smart wallets.
             /// </summary>
             public bool gasless;
-          
-            /// <summary>
-            /// Indicates whether to deploy the smart wallet upon signing any type of message.
-            /// </summary>
-            public bool deployOnSign;
 
             /// <summary>
             /// The address of your ERC20 paymaster contract if used.

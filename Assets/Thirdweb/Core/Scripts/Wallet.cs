@@ -10,7 +10,6 @@ using Nethereum.ABI.EIP712;
 using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
-using Newtonsoft.Json;
 using System.Linq;
 
 namespace Thirdweb
@@ -435,13 +434,48 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet && ThirdwebManager.Instance.SDK.session.Options.smartWalletConfig.Value.deployOnSign)
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                 {
                     var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                     if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
                     {
                         ThirdwebDebug.Log("SmartWallet not deployed, deploying before signing...");
                         await sw.SmartWallet.ForceDeploy();
+                    }
+                    if (sw.SmartWallet.IsDeployed)
+                    {
+                        byte[] originalMsgHash = System.Text.Encoding.UTF8.GetBytes(message).HashPrefixedMessage();
+                        string swAddress = await GetAddress();
+                        bool factorySupports712;
+                        string signature = null;
+                        try
+                        {
+                            // if this fails it's a pre 712 factory
+                            await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetMessageHashFunction, Contracts.Account.ContractDefinition.GetMessageHashOutputDTO>(
+                                swAddress,
+                                new Contracts.Account.ContractDefinition.GetMessageHashFunction() { Hash = originalMsgHash }
+                            );
+                            factorySupports712 = true;
+                        }
+                        catch
+                        {
+                            factorySupports712 = false;
+                        }
+
+                        if (factorySupports712)
+                            signature = await EIP712.GenerateSignature_SmartAccount_AccountMessage("Account", "1", await GetChainId(), swAddress, originalMsgHash);
+                        else
+                            signature = await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
+
+                        bool isValid = await RecoverAddress(message, signature) == swAddress;
+                        if (isValid)
+                            return signature;
+                        else
+                            throw new Exception("Unable to verify signature on smart account, please make sure the smart account is deployed and the signature is valid.");
+                    }
+                    else
+                    {
+                        throw new Exception("Smart account could not be deployed, unable to sign message.");
                     }
                 }
 
@@ -463,7 +497,7 @@ namespace Thirdweb
             if (!await IsConnected())
                 throw new Exception("No account connected!");
 
-            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet && ThirdwebManager.Instance.SDK.session.Options.smartWalletConfig.Value.deployOnSign)
+            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
             {
                 var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
@@ -491,6 +525,19 @@ namespace Thirdweb
                     var uidBytes = Convert.FromBase64String(uidBase64);
                     var uidHex = uidBytes.ByteArrayToHexString();
                     uidToken.Replace(uidHex);
+                }
+
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                {
+                    // Smart accounts
+                    var hashToken = jsonObject.SelectToken("$.message.message");
+                    if (hashToken != null)
+                    {
+                        var hashBase64 = hashToken.Value<string>();
+                        var hashBytes = Convert.FromBase64String(hashBase64);
+                        var hashHex = hashBytes.ByteArrayToHexString();
+                        hashToken.Replace(hashHex);
+                    }
                 }
 
                 var messageObject = jsonObject.GetValue("message") as JObject;
@@ -529,7 +576,7 @@ namespace Thirdweb
                 if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                 {
                     var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
-                    bool isSigValid = await sw.SmartWallet.VerifySignature(signer.HashPrefixedMessage(System.Text.Encoding.UTF8.GetBytes(message)), signature.HexStringToByteArray());
+                    bool isSigValid = await sw.SmartWallet.VerifySignature(message.HashPrefixedMessage().HexStringToByteArray(), signature.HexStringToByteArray());
                     if (isSigValid)
                     {
                         return await GetAddress();

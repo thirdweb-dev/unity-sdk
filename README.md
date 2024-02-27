@@ -118,8 +118,10 @@ var txRes = await contract.Write("myWriteFunction", arg1, arg2, ...);
 # Additional Links
 
 - [Documentation](https://portal.thirdweb.com/unity)
-- [Enhancing Unity IAP with Blockchain Interactions](https://discord.com/channels/834227967404146718/1154487390107349023/1206674338405683252)
 - [Starter Template: Take Flight!](https://github.com/thirdweb-example/take-flight)
+- [Starter Template: Blockventure](https://github.com/thirdweb-example/blockventure)
+- [Example Template: Enhancing Unity IAP with Blockchain Interactions](https://blog.thirdweb.com/guides/enhancing-unity-iap-with-blockchain-interactions/)
+- [Example Template: Pioneer](https://github.com/thirdweb-example/pioneer)
 
 # Prefab Examples
 

@@ -42,7 +42,11 @@ namespace Thirdweb.AccountAbstraction
             }
             else
             {
-                var sig = await ThirdwebManager.Instance.SDK.wallet.Sign(userOpHash.ReturnValue1.ByteArrayToHexString());
+                var sig = await ThirdwebManager.Instance.SDK.session.Request<string>(
+                    "personal_sign",
+                    userOpHash.ReturnValue1.ByteArrayToHexString(),
+                    await ThirdwebManager.Instance.SDK.wallet.GetSignerAddress()
+                );
                 return sig.HexStringToByteArray();
             }
         }
