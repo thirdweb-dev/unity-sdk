@@ -32,8 +32,13 @@ namespace Thirdweb
                 {
                     continue;
                 }
+                // if bytes, make hex
+                if (args[i] is byte[])
+                {
+                    stringArgs.Add(ByteArrayToHexString(args[i] as byte[]));
+                }
                 // if value type, convert to string otherwise serialize to json
-                if (args[i].GetType().IsPrimitive || args[i] is string)
+                else if (args[i].GetType().IsPrimitive || args[i] is string)
                 {
                     stringArgs.Add(args[i].ToString());
                 }
