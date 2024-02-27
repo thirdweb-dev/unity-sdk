@@ -524,7 +524,7 @@ namespace Thirdweb
                 chainId == 1 // mainnet
                 || chainId == 11155111 // sepolia
                 || chainId == 42161 // arbitrum
-                || chainId == 421613 // arbitrum goerli
+                || chainId == 421614 // arbitrum sepolia
                 || chainId == 534352 // scroll
                 || chainId == 534351 // scroll sepolia
                 || chainId == 5000 // mantle
@@ -534,6 +534,8 @@ namespace Thirdweb
                 || chainId == 44787 // celo alfajores
                 || chainId == 43114 // avalanche
                 || chainId == 43113 // avalanche fuji
+                || chainId == 8453 // base
+                || chainId == 84532 // base sepolia
             )
             {
                 gasPrice = BigInteger.Multiply(gasPrice, 10) / 9;
