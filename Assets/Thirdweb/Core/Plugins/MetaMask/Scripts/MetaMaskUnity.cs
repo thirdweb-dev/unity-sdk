@@ -278,16 +278,16 @@ namespace MetaMask.Unity
                 
                 // Configure persistent data manager
                 this.dataManager = new MetaMaskDataManager(MetaMaskUnityStorage.Instance, this.config.Encrypt, this.config.EncryptionPassword);
-
-                #if UNITY_WEBGL && !UNITY_EDITOR
-                var providerEngine = new MetaMask.Unity.Providers.JsSDKProvider(this);
-                this.wallet = new MetaMaskWallet(this.dataManager, transport, providerEngine);
-                #else
+                
+                //#if UNITY_WEBGL && !UNITY_EDITOR
+                //var providerEngine = new MetaMask.Unity.Providers.JsSDKProvider(this);
+                //this.wallet = new MetaMaskWallet(this.dataManager, transport, providerEngine);
+                //#else
                 // Setup the wallet
                 this.wallet = new MetaMaskWallet(this.dataManager, this.config, 
                     UnityEciesProvider.Singleton, 
                     transport, socket, this.config.SocketUrl);
-                #endif
+                //#endif
 
                 if (!string.IsNullOrWhiteSpace(this.config.UserAgent))
                     this.wallet.UserAgent = this.config.UserAgent;
