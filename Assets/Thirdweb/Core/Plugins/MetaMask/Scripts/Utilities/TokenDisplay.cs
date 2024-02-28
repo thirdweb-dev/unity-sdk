@@ -21,7 +21,7 @@ public class TokenDisplay : MonoBehaviour
             DisplayBalance();
         }
 
-        _metaMask.Wallet.Events.AccountChanged += (_, _) => DisplayBalance();
+        _metaMask.Wallet.Events.AccountChanged += (_, __) => DisplayBalance();
     }
 
     private async void DisplayBalance()

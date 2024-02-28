@@ -153,31 +153,6 @@ namespace MetaMask.Transports.Unity.UI
         {
         }
 
-        /// <summary>Switches the mode of the application.</summary>
-        public void SwitchMode()
-        {
-            if(!Application.isMobilePlatform)
-            {
-                return;
-            }
-            
-            if (this._lastUrl != "")
-            {
-                
-                if (this.showQrCodeOnDeeplink)
-                {
-                    this.showQrCodeOnDeeplink = false;
-                    ShowQR(this._lastUrl);
-                }
-                else
-                {
-                    this.showQrCodeOnDeeplink = true;
-                    ShowQR(this._lastUrl);
-                }
-            }
-            
-        }
-
         #endregion
 
         #region Coroutine

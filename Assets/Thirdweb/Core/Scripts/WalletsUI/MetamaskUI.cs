@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using MetaMask.Models;
+using MetaMask.Transports;
 using MetaMask.Transports.Unity;
 using MetaMask.Unity;
 using UnityEngine;
@@ -169,7 +170,8 @@ namespace Thirdweb.Wallets
 
         public virtual void OnMetaMaskDisconnected()
         {
-            if (!MetaMaskUnity.Instance.Wallet.Transport.IsMobile || !MetaMaskUnity.Instance.Wallet.HasSession)
+            var isMobile = MetaMaskUnity.Instance.Wallet.Transport.ConnectionMode == TransportMode.Deeplink;
+            if (!isMobile || !MetaMaskUnity.Instance.Wallet.HasSession)
             {
                 _exception = new UnityException("User disconnected");
             }

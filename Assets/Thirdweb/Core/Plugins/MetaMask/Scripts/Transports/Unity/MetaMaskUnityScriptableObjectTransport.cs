@@ -10,21 +10,17 @@ namespace MetaMask.Transports.Unity
 
     public abstract class MetaMaskUnityScriptableObjectTransport : ScriptableObject, IMetaMaskTransport
     {
-        public bool isWebGL
-        {
-            get
-            {
-#if UNITY_WEBGL
-                return true;
-#else
-                return false;
-
-#endif
-            }
-        }
         public abstract event EventHandler<MetaMaskUnityRequestEventArgs> Requesting;
 
-        public abstract void Initialize();
+        public void Initialize()
+        {
+            DoInitialize();
+            
+            // if we are on mobile, set the connection mode to deeplink
+            ConnectionMode = IsMobile ? TransportMode.Deeplink : TransportMode.QRCode;
+        }
+        
+        public abstract void DoInitialize();
 
         public abstract void UpdateUrls(string universalLink, string deepLink);
 
@@ -59,6 +55,8 @@ namespace MetaMask.Transports.Unity
             }
         }
         public abstract void OnDisconnect();
+
+        public virtual TransportMode ConnectionMode { get; set; }
 
         protected void OpenDeeplinkURL(string url)
         {

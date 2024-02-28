@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using evm.net;
+using evm.net.Factory;
 using evm.net.Models;
 
 namespace MetaMask.Unity.Contracts
 {
     public abstract class ScriptableContract<T> : ScriptableObject where T : class, IContract
     {
-        public EvmAddress Address => CurrentContract.Address;
+        #if ENABLE_MONO
+        static ScriptableContract()
+        {
+            Contract.ContractFactory = new ImpromptuContractFactory();
+        }
+        #endif
         
         [Serializable]
         public enum ChainId : int
@@ -44,13 +51,15 @@ namespace MetaMask.Unity.Contracts
                 {
                     // We need to setup
                     var success = Setup();
-                    if (!success)
+                    if (!success || connectedProvider == null)
                         throw new InvalidOperationException("MetaMask is not currently connected");
                 }
 
                 var chainId = Convert.ToInt64(connectedProvider.SelectedChainId, 16);
                 if (!contractInstances.ContainsKey(chainId))
-                    throw new InvalidOperationException($"There is no contract instance setup for chainId {chainId}");
+                    throw new InvalidOperationException(
+                        $"There is no contract instance setup for chainId {chainId}. " +
+                        $"Chains available: {string.Join(',', contractInstances.Keys.Select(cid => $"0x{cid:X}"))}");
 
                 return contractInstances[chainId];
             }
@@ -88,7 +97,7 @@ namespace MetaMask.Unity.Contracts
             }
             else
             {
-                metaMask.Wallet.Events.WalletAuthorized += (_, _) => SetupContract(metaMask.Wallet);
+                metaMask.Wallet.Events.WalletAuthorized += (_, __) => SetupContract(metaMask.Wallet);
                 return false;
             }
         }
@@ -130,13 +139,19 @@ namespace MetaMask.Unity.Contracts
 
         private void SetupContract(MetaMaskWallet provider)
         {
-            connectedProvider = provider;
-            
-            foreach (var addressDetails in ContractAddresses)
+            try
             {
-                var instance = Contract.Attach<T>(connectedProvider, addressDetails.Address);
-                
-                contractInstances.Add((int)addressDetails.ChainId, instance);
+                connectedProvider = provider;
+                foreach (var addressDetails in ContractAddresses)
+                {
+                    var instance = Contract.Attach<T>(connectedProvider, addressDetails.Address);
+                    contractInstances.Add((long)addressDetails.ChainId, instance);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Could not create contract instances");
+                Debug.LogException(e);
             }
         }
     }

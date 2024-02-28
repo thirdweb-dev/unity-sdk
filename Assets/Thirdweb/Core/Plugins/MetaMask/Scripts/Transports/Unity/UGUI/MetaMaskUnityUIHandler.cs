@@ -1,7 +1,8 @@
 using System;
 using System.Collections;
 using MetaMask.Models;
-
+using MetaMask.Unity;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -44,6 +45,11 @@ namespace MetaMask.Transports.Unity.UI
         [SerializeField]
         protected float fadeDuration = 0.5f;
 
+        [SerializeField]
+        protected TextMeshProUGUI description;
+
+        private bool isFading;
+
         #endregion
 
         #region Properties
@@ -59,13 +65,23 @@ namespace MetaMask.Transports.Unity.UI
         protected virtual void OnQRCodeOpenStateChanged()
         {
             this.qrCodePanel.SetActive(this.isOpen);
+            if (MetaMaskUnity.Instance.Wallet.Transport.ConnectionMode == TransportMode.External)
+            {
+                ShowExternalModeUI();
+            }
+
             this.canvasGroup.interactable = this.isOpen;
             this.canvasGroup.blocksRaycasts = this.isOpen;
             this.canvasGroup.alpha = this.isOpen ? 1f : 0f;
-
             StartCoroutine(FadeBackground(this.canvasGroup.alpha));
 
             OpenStateChanged?.Invoke(this, null);
+        }
+
+        protected virtual void ShowExternalModeUI()
+        {
+            this.canvasGroup.gameObject.SetActive(false);
+            description.text = "Please check the external modal window";
         }
 
         #endregion
@@ -129,6 +145,15 @@ namespace MetaMask.Transports.Unity.UI
             if (otpPanel != null)
             {
                 otpPanel.gameObject.SetActive(false);
+                
+                var image = background.GetComponent<Image>();
+                if (!this.isOpen && BackgroundAlpha > 0f && !this.isFading)
+                {
+                    // If we have a background visible, and
+                    // CloseQRCode did not trigger the background to 
+                    // begin fading, lets fade it now
+                    StartCoroutine(FadeBackground(0f));
+                }
             }
         }
 
@@ -162,8 +187,25 @@ namespace MetaMask.Transports.Unity.UI
 
         #region Private Methods
 
+        private float BackgroundAlpha
+        {
+            get
+            {
+                var image = background.GetComponent<Image>();
+                var canvasGroup = background.GetComponent<CanvasGroup>();
+
+                if (image)
+                    return image.color.a;
+                else if (canvasGroup)
+                    return canvasGroup.alpha;
+                else
+                    return 0f;
+            }
+        }
+
         private IEnumerator FadeBackground(float targetAlpha)
         {
+            this.isFading = true;
             if (targetAlpha == 1f)
             {
                 targetAlpha = 0.75f;
@@ -173,12 +215,14 @@ namespace MetaMask.Transports.Unity.UI
             var canvasGroup = background.GetComponent<CanvasGroup>();
 
             if (image)
-                return FadeBackgroundImage(targetAlpha, image);
-            if (canvasGroup)
-                return FadeBackgroundCanvasGroup(targetAlpha, canvasGroup);
-            
-            throw new Exception("Supplied background gameObject " + background.name +
+                yield return FadeBackgroundImage(targetAlpha, image);
+            else if (canvasGroup)
+                yield return FadeBackgroundCanvasGroup(targetAlpha, canvasGroup); 
+            else 
+                throw new Exception("Supplied background gameObject " + background.name +
                                 " has no Image or CanvasGroup component");
+
+            this.isFading = false;
         }
 
         private IEnumerator FadeBackgroundCanvasGroup(float targetAlpha, CanvasGroup backgroundCanvasGroup)

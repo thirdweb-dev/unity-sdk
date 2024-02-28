@@ -20,7 +20,6 @@ namespace Thirdweb.Wallets
                 this.log = defaults.Log;
                 this.encryptionPassword = defaults.EncryptionPassword;
                 this.userAgent = defaults.UserAgent;
-                this.sessionIdentifier = defaults.SessionIdentifier;
                 this.socketUrl = defaults.SocketUrl;
             }
 

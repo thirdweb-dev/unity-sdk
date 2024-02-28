@@ -34,41 +34,100 @@ namespace MetaMask.Unity
             if (_eventHandler == null)
                 UnityBinder.Inject(this);
             
-            // 1. Unity Event
-            // 2. Getter for .NET Event Handler
-            // 3. Getter for Unity Event Handler
-            // 4. Function to update .NET Event Handler
-            var allEvents = new (UnityEvent, Func<EventHandler>, Action<EventHandler>)[]
+            var allEvents = new (UnityEvent, Action<EventHandler, bool>)[]
             {
-                (MetaMaskConnected, () => this._eventHandler.WalletConnectedHandler, (eh) => _eventHandler.WalletConnectedHandler = eh),
-                (MetaMaskWalletReady, () => this._eventHandler.WalletReadyHandler, (eh) => this._eventHandler.WalletReadyHandler = eh),
-                (MetaMaskWalletPaused, () => this._eventHandler.WalletPausedHandler, (eh) => this._eventHandler.WalletPausedHandler = eh),
-                (MetaMaskWalletDisconnected, () => this._eventHandler.WalletDisconnectedHandler, (eh) => this._eventHandler.WalletDisconnectedHandler = eh),
-                (MetaMaskWalletAccountChanged, () => this._eventHandler.AccountChangedHandler, (eh) => this._eventHandler.AccountChangedHandler = eh),
-                (MetaMaskChainIdChanged, () => this._eventHandler.ChainIdChangedHandler, (eh) => this._eventHandler.ChainIdChangedHandler = eh),
-                (MetaMaskWalletAuthorized, () => this._eventHandler.WalletAuthorizedHandler, (eh) => this._eventHandler.WalletAuthorizedHandler = eh),
-                (MetaMaskWalletUnauthorized, () => this._eventHandler.WalletUnauthorizedHandler, (eh) => this._eventHandler.WalletUnauthorizedHandler = eh),
+                (MetaMaskConnected, (eh, set) =>
+                {
+                    if (set)
+                        this._eventHandler.WalletConnected += eh;
+                    else
+                        this._eventHandler.WalletConnected -= eh;
+                }),
+                (MetaMaskWalletReady, (eh, set) =>
+                {
+                    if (set)
+                        this._eventHandler.WalletReady += eh;
+                    else
+                        this._eventHandler.WalletReady -= eh;
+                }),
+                (MetaMaskWalletPaused, (eh, set) =>
+                {
+                    if (set)
+                        this._eventHandler.WalletPaused += eh;
+                    else
+                        this._eventHandler.WalletPaused -= eh;
+                }),
+                (MetaMaskWalletDisconnected, (eh, set) =>
+                {
+                    if (set)
+                        this._eventHandler.WalletDisconnected += eh;
+                    else
+                        this._eventHandler.WalletDisconnected -= eh;
+                }),
+                (MetaMaskWalletAccountChanged, (eh, set) =>
+                {
+                    if (set)
+                        this._eventHandler.AccountChanged += eh;
+                    else
+                        this._eventHandler.AccountChanged -= eh;
+                }),
+                (MetaMaskChainIdChanged, (eh, set) =>
+                {
+                    if (set)
+                        this._eventHandler.ChainIdChanged += eh;
+                    else
+                        this._eventHandler.ChainIdChanged -= eh;
+                }),
+                (MetaMaskWalletAuthorized, (eh, set) =>
+                {
+                    if (set)
+                        this._eventHandler.WalletAuthorized += eh;
+                    else
+                        this._eventHandler.WalletAuthorized -= eh;
+                }),
+                (MetaMaskWalletUnauthorized, (eh, set) =>
+                {
+                    if (set)
+                        this._eventHandler.WalletUnauthorized += eh;
+                    else
+                        this._eventHandler.WalletUnauthorized -= eh;
+                }),
             };
 
-            TeardownActions = allEvents.Select((e) => SetupEvent(e.Item1, e.Item2, e.Item3)).ToList();
+            TeardownActions = allEvents.Select((e) => SetupEvent(e.Item1, e.Item2)).ToList();
 
             TeardownActions.Add(SetupEvent(
                 MetaMaskWalletStartConnecting,
-                () => this._eventHandler.StartConnectingHandler,
-                (eh) => this._eventHandler.StartConnectingHandler = eh));
+                (eh, set) =>
+                {
+                    if (set)
+                        this._eventHandler.StartConnecting += eh;
+                    else
+                        this._eventHandler.StartConnecting -= eh;
+                }));
 
             TeardownActions.Add(SetupEvent(
                 MetaMaskWalletEthereumRequestResult,
-                () => this._eventHandler.EthereumRequestResultReceivedHandler,
-                (eh) => this._eventHandler.EthereumRequestResultReceivedHandler = eh));
+                (eh, set) =>
+                {
+                    if (set)
+                        this._eventHandler.EthereumRequestResultReceived += eh;
+                    else
+                        this._eventHandler.EthereumRequestResultReceived -= eh;
+                }));
 
             TeardownActions.Add(SetupEvent(
                 MetaMaskWalletRequestFailed,
-                () => _eventHandler.EthereumRequestFailedHandler,
-                (eh) => _eventHandler.EthereumRequestFailedHandler = eh));
+                (eh, set) =>
+                {
+                    if (set)
+                        this._eventHandler.EthereumRequestFailed += eh;
+                    else
+                        this._eventHandler.EthereumRequestFailed -= eh;
+                }));
         }
         
-        private Action SetupEvent(UnityEvent @event, Func<EventHandler> sourceGetter, Action<EventHandler> setter)
+        private Action SetupEvent(UnityEvent @event, Action<EventHandler, bool> sourceUpdater)
         {
             void EventTriggered(object sender, EventArgs e)
             {
@@ -78,20 +137,15 @@ namespace MetaMask.Unity
                 });
             }
 
-            var source = sourceGetter();
-            source += EventTriggered;
-
-            setter(source);
+            sourceUpdater(EventTriggered, true);
 
             return () =>
             {
-                var currentSource = sourceGetter();
-                currentSource -= EventTriggered;
-                setter(currentSource);
+                sourceUpdater(EventTriggered, false);
             };
         }
         
-        private Action SetupEvent<T>(UnityEvent<T> @event, Func<EventHandler<T>> sourceGetter, Action<EventHandler<T>> setter) where T : EventArgs
+        private Action SetupEvent<T>(UnityEvent<T> @event, Action<EventHandler<T>, bool> sourceUpdater) where T : EventArgs
         {
             void EventTriggered(object sender, T e)
             {
@@ -101,16 +155,11 @@ namespace MetaMask.Unity
                 });
             }
 
-            var source = sourceGetter();
-            source += EventTriggered;
-
-            setter(source);
+            sourceUpdater(EventTriggered, true);
 
             return () =>
             {
-                var currentSource = sourceGetter();
-                currentSource -= EventTriggered;
-                setter(currentSource);
+                sourceUpdater(EventTriggered, false);
             };
         }
         

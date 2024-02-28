@@ -132,7 +132,7 @@ namespace MetaMask.IO
             }
         }
 
-        private Queue<UnityHttpServiceRequest> requests = new();
+        private Queue<UnityHttpServiceRequest> requests = new Queue<UnityHttpServiceRequest>();
         private bool isCheckingQueue;
 
         private void Awake()
@@ -208,7 +208,7 @@ namespace MetaMask.IO
                 if (Infura.IsUrl(url))
                 {
                     uwr.SetRequestHeader("X-Infura-User-Agent", $"metamask/sdk-csharp {MetaMaskUnity.Version}");
-                    uwr.SetRequestHeader("Metamask-Sdk-Info", $"Sdk/Unity SdkVersion/{MetaMaskUnity.Version} Platform/{SystemInfo.operatingSystem} dApp/{MetaMaskUnity.Instance.Config.AppUrl}");
+                    uwr.SetRequestHeader("Metamask-Sdk-Info", $"Sdk/Unity SdkVersion/{MetaMaskUnity.Version} Platform/{SystemInfo.operatingSystem} dApp/{MetaMaskUnity.Instance.Config.AppUrl} dAppTitle/{MetaMaskUnity.Instance.Config.AppName}");
                 }
 
                 if (!string.IsNullOrWhiteSpace(@params))

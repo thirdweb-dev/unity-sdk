@@ -3,10 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using evm.net;
 using System.Threading;
+using System.Threading.Tasks;
+using EventEmitter.NET;
+using evm.net.Models;
+using MetaMask.Contracts;
 using MetaMask.Cryptography;
 using MetaMask.IO;
 using MetaMask.Logging;
 using MetaMask.Models;
+using MetaMask.Providers;
 using MetaMask.SocketIOClient;
 using MetaMask.Sockets;
 using MetaMask.Transports;
@@ -15,6 +20,7 @@ using MetaMask.Transports.Unity.UI;
 using MetaMask.Unity.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Scripting;
 using UnityEngine.Serialization;
 
 namespace MetaMask.Unity
@@ -72,13 +78,31 @@ namespace MetaMask.Unity
         /// The Infura Project Id to use for connecting to an RPC endpoint. This can be used instead of
         /// RpcUrl
         /// </summary>
-        [SerializeField]
-        protected string InfuraProjectId;
+        [FormerlySerializedAs("InfuraProjectId")] [SerializeField]
+        protected string _infuraProjectId;
+
+        public string InfuraProjectId
+        {
+            get
+            {
+                return _infuraProjectId;
+            }
+        }
+        
         /// <summary>
         /// The RPC URL to use for web3 query requests when the MetaMask wallet is paused
         /// </summary>
-        [SerializeField]
-        protected List<MetaMaskUnityRpcUrlConfig> RpcUrl;
+        [FormerlySerializedAs("RpcUrl")] [SerializeField]
+        protected List<MetaMaskUnityRpcUrlConfig> _rpcUrl;
+
+        public List<MetaMaskUnityRpcUrlConfig> RpcUrl
+        {
+            get
+            {
+                return _rpcUrl;
+            }
+        }
+        
         internal Thread unityThread;
 
         #endregion
@@ -255,13 +279,15 @@ namespace MetaMask.Unity
                 // Configure persistent data manager
                 this.dataManager = new MetaMaskDataManager(MetaMaskUnityStorage.Instance, this.config.Encrypt, this.config.EncryptionPassword);
                 
-                // Grab app name, app url and session id
-                var sessionId = this.config.SessionIdentifier;
-
+                //#if UNITY_WEBGL && !UNITY_EDITOR
+                //var providerEngine = new MetaMask.Unity.Providers.JsSDKProvider(this);
+                //this.wallet = new MetaMaskWallet(this.dataManager, transport, providerEngine);
+                //#else
                 // Setup the wallet
                 this.wallet = new MetaMaskWallet(this.dataManager, this.config, 
-                    sessionId, UnityEciesProvider.Singleton, 
+                    UnityEciesProvider.Singleton, 
                     transport, socket, this.config.SocketUrl);
+                //#endif
 
                 if (!string.IsNullOrWhiteSpace(this.config.UserAgent))
                     this.wallet.UserAgent = this.config.UserAgent;
@@ -270,27 +296,29 @@ namespace MetaMask.Unity
                 this.session = this.wallet.Session;
                 this.sessionData = this.wallet.Session.Data;
                 
-                this.wallet.AnalyticsPlatform = "unity";
+                this.wallet.ProviderEngine.AnalyticsPlatform = "unity";
+                
+                if (!string.IsNullOrWhiteSpace(_infuraProjectId))
+                {
+                    _rpcUrl ??= new List<MetaMaskUnityRpcUrlConfig>();
+
+                    foreach (var chainId in Infura.ChainIdToName.Keys)
+                    {
+                        var chainName = Infura.ChainIdToName[chainId];
+
+                        _rpcUrl = _rpcUrl.Where(r => r.ChainId != chainId).ToList();
+                        _rpcUrl.Add(new MetaMaskUnityRpcUrlConfig()
+                        {
+                            ChainId = chainId,
+                            RpcUrl = Infura.Url(_infuraProjectId, chainName)
+                        });
+                    }
+                }
                 
                 // Setup the fallback provider, if set
-                if (RpcUrl != null && RpcUrl.Count > 0)
+                if (_rpcUrl != null && _rpcUrl.Count > 0)
                 {
-                    if (!string.IsNullOrWhiteSpace(InfuraProjectId))
-                    {
-                        foreach (var chainId in Infura.ChainIdToName.Keys)
-                        {
-                            var chainName = Infura.ChainIdToName[chainId];
-
-                            RpcUrl = RpcUrl.Where(r => r.ChainId != chainId).ToList();
-                            RpcUrl.Add(new MetaMaskUnityRpcUrlConfig()
-                            {
-                                ChainId = chainId,
-                                RpcUrl = Infura.Url(InfuraProjectId, chainName)
-                            });
-                        }
-                    }
-                    
-                    var rpcUrlMap = RpcUrl.ToDictionary(
+                    var rpcUrlMap = _rpcUrl.ToDictionary(
                         c => c.ChainId,
                         c => c.RpcUrl
                     );
@@ -328,6 +356,11 @@ namespace MetaMask.Unity
             this.wallet.Connect();
         }
 
+        public Task<string> ConnectAndSign(string message)
+        {
+            return this.wallet.ConnectAndSign(message);
+        }
+
         /// <summary>Disconnects the wallet.</summary>
         public void Disconnect(bool endSession = false)
         {
@@ -360,7 +393,7 @@ namespace MetaMask.Unity
                 if (this.dataManager == null)
                     this.dataManager = new MetaMaskDataManager(MetaMaskUnityStorage.Instance, this.config.Encrypt, this.config.EncryptionPassword);
                     
-                this.dataManager.Delete(this.config.SessionIdentifier);
+                this.dataManager.Delete(EncryptedProvider.SessionId);
             }
         }
 
@@ -381,10 +414,19 @@ namespace MetaMask.Unity
                 clearSessionData = false;
             }
 
-            if (RpcUrl != null && RpcUrl.Count > 0 && !string.IsNullOrWhiteSpace(InfuraProjectId))
+            if (_rpcUrl != null && _rpcUrl.Count > 0 && !string.IsNullOrWhiteSpace(_infuraProjectId))
             {
                 Debug.LogWarning("The InfuraProjectId will be used over the RpcUrl list if it can. Please set only one.");
             }
+        }
+
+        public bool IsWebGL()
+        {
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            return true;
+            #else
+            return false;
+            #endif
         }
 
         #endregion
@@ -404,6 +446,54 @@ namespace MetaMask.Unity
         protected void Release()
         {
             this.wallet.Dispose();
+        }
+
+        [Preserve]
+        public void AotStopCodeStrip()
+        {
+            var eventDelegator = new EventDelegator();
+            eventDelegator.ListenFor<string>("test", (sender, @event) =>
+            {
+                Debug.Log(@event.EventData);
+            });
+            eventDelegator.Trigger("test", "hi");
+            
+            var obj = new JsonRpcPayload();
+            Debug.Log(obj.Id);
+            Debug.Log(obj.Method);
+
+            // we only need 1 generic type, in IL2CPP land, all reference types
+            // use the same type (smart pointer type) (MetaMaskTypedDataMessage<Ptr>)
+            var obj2 = new MetaMaskTypedDataMessage<string>();
+            Debug.Log(obj2.Data);
+            Debug.Log(obj2.Name);
+
+            var obj3 = new JsonRpcResult<string>();
+            Debug.Log(obj3.Result);
+            Debug.Log(obj3.Id);
+
+            var obj4 = new GenericError();
+            Debug.Log(obj4.Message);
+            Debug.Log(obj4.Code);
+
+            var obj5 = new JsonRpcError();
+            Debug.Log(obj5.Error);
+
+            var obj6 = new MetaMaskMessage<string>();
+            Debug.Log(obj6.Id);
+            Debug.Log(obj6.Message);
+            
+            
+            
+            // All contract types
+            Debug.Log(new ERC20Backing(null, null, null));
+            Debug.Log(new ERC721Backing(null, null, null));
+            Debug.Log(new ERC1155Backing(null, null, null));
+            Debug.Log(new ERC20PresetFixedSupplyBacking(null, null, null));
+            Debug.Log(new ERC20PresetMinterPauserBacking(null, null, null));
+            Debug.Log(new ERC721PresetMinterPauserAutoIdBacking(null, null, null));
+            
+            throw new Exception("This method should not be ran at runtime");
         }
 
         #endregion
