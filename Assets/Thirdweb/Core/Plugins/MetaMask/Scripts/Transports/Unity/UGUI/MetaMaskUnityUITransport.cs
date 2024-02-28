@@ -79,7 +79,7 @@ namespace MetaMask.Transports.Unity.UI
         #region Public Methods
 
         /// <summary>Initializes the transport manager.</summary>
-        public override void Initialize()
+        public override void DoInitialize()
         {
             if (this.spawnCanvas)
             {

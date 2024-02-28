@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
-using UnityEngine;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 #endif
 using System.Threading.Tasks;
 
 using MetaMask.SocketIOClient;
-using UnityEngine;
-
+using MetaMask.SocketIOClient.Transport;
 using UnityEngine.Networking;
 
 namespace MetaMask.Sockets
@@ -79,20 +77,23 @@ namespace MetaMask.Sockets
             this.socketId = LastSocketId;
         }
 
-        public async Task<(string Response, bool IsSuccessful, string Error)> SendWebRequest(string url, string data, Dictionary<string, string> headers)
+        public async Task<(string, bool, string)> SendWebRequest(string url, string data, Dictionary<string, string> headers)
         {
-            using var uwr = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST, new DownloadHandlerBuffer(), new UploadHandlerRaw(Encoding.UTF8.GetBytes(data)));
-
-            if (headers != null)
+            using (var uwr = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST, new DownloadHandlerBuffer(),
+                       new UploadHandlerRaw(Encoding.UTF8.GetBytes(data))))
             {
-                foreach (var header in headers)
+                if (headers != null)
                 {
-                    uwr.SetRequestHeader(header.Key, header.Value);
+                    foreach (var header in headers)
+                    {
+                        uwr.SetRequestHeader(header.Key, header.Value);
+                    }
                 }
-            }
-            await uwr.SendWebRequest();
 
-            return (uwr.downloadHandler.text, uwr.result == UnityWebRequest.Result.Success, uwr.error);
+                await uwr.SendWebRequest();
+
+                return (uwr.downloadHandler.text, uwr.result == UnityWebRequest.Result.Success, uwr.error);
+            }
         }
 
         /// <summary>Initializes the socket.</summary>0
@@ -102,6 +103,8 @@ namespace MetaMask.Sockets
         {
             var socketOptions = new SocketIOOptions();
             socketOptions.ExtraHeaders = options.ExtraHeaders;
+            socketOptions.Transport = TransportProtocol.WebSocket;
+            socketOptions.AutoUpgrade = true;
 
             this.socket = new SocketIOUnity(url, socketOptions);
 

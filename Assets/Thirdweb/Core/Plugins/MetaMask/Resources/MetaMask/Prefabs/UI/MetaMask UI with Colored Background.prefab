@@ -586,6 +586,7 @@ MonoBehaviour:
   otpPanel: {fileID: 4990485137583038978}
   background: {fileID: 2203544183764163577}
   fadeDuration: 0.5
+  description: {fileID: 5504587220700742623}
 --- !u!1 &8801738631881413888
 GameObject:
   m_ObjectHideFlags: 0
@@ -1097,7 +1098,8 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 289.12238
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4519065099083792754, guid: 9fd24752cf4fec04f9071b0a3c24fd9e, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

@@ -185,7 +185,7 @@ namespace MetaMask.Unity
             StoreYPosition();
         }
 
-        private Dictionary<string, Vector2> scrollPositions = new();
+        private Dictionary<string, Vector2> scrollPositions = new Dictionary<string, Vector2>();
         private string MakeTextField(string label, string value)
         {
             EditorGUILayout.LabelField(label, this._smallHeaderStyle);
