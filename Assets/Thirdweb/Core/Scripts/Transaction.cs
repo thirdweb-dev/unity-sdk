@@ -299,6 +299,28 @@ namespace Thirdweb
         }
 
         /// <summary>
+        /// Signs the transaction asynchronously, if the wallet supports it. Useful for smart wallet user op delayed broadcasting through thirdweb Engine. Otherwise not recommended.
+        /// </summary>
+        /// <returns>The signed transaction a string.</returns>
+        public async Task<string> Sign()
+        {
+            if (Input.Value == null)
+                Input.Value = new HexBigInteger(0);
+
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("sign"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+            }
+            else
+            {
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet && ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount() != null)
+                    return await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount().TransactionManager.SignTransactionAsync(Input);
+                else
+                    return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTransaction", Input);
+            }
+        }
+
+        /// <summary>
         /// Sends the transaction asynchronously.
         /// </summary>
         /// <param name="gasless">Specifies whether to send the transaction as a gasless transaction. Default is null (uses gasless if set up).</param>

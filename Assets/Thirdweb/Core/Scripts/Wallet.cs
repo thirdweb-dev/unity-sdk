@@ -510,16 +510,6 @@ namespace Thirdweb
             if (!await IsConnected())
                 throw new Exception("No account connected!");
 
-            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
-            {
-                var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
-                if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
-                {
-                    ThirdwebDebug.Log("SmartWallet not deployed, deploying before signing...");
-                    await sw.SmartWallet.ForceDeploy();
-                }
-            }
-
             if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount() != null)
             {
                 var signer = new Eip712TypedDataSigner();
