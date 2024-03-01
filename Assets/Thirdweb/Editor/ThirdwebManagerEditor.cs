@@ -45,7 +45,7 @@ namespace Thirdweb
         private GUIContent warningIcon;
         private Texture2D bannerImage;
 
-        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_4.7.1";
+        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_4.7.2";
 
         private void OnEnable()
         {
