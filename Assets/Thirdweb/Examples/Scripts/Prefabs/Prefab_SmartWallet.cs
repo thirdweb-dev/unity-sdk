@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -59,6 +60,20 @@ namespace Thirdweb.Examples
             }
         }
 
+        [System.Serializable]
+        public class SignerPermissionRequestWebGL
+        {
+            public string signer;
+            public byte isAdmin;
+            public List<string> approvedTargets;
+            public BigInteger nativeTokenLimitPerTransaction;
+            public BigInteger permissionStartTimestamp;
+            public BigInteger permissionEndTimestamp;
+            public BigInteger reqValidityStartTimestamp;
+            public BigInteger reqValidityEndTimestamp;
+            public string uid;
+        }
+
         public async void PreSignSessionKeyTxAsUserOpForLaterBroadcastingThroughThirdwebEngine()
         {
             try
@@ -87,6 +102,8 @@ namespace Thirdweb.Examples
                     Uid = Guid.NewGuid().ToByteArray()
                 };
 
+                Debug.Log(JsonConvert.SerializeObject(request));
+
                 // Sign the typed data related to session keys
                 var signature = await EIP712.GenerateSignature_SmartAccount(
                     "Account",
@@ -96,8 +113,21 @@ namespace Thirdweb.Examples
                     request
                 );
 
+                var requestWebGL = new SignerPermissionRequestWebGL()
+                {
+                    signer = request.Signer,
+                    isAdmin = request.IsAdmin,
+                    approvedTargets = request.ApprovedTargets,
+                    nativeTokenLimitPerTransaction = request.NativeTokenLimitPerTransaction,
+                    permissionStartTimestamp = request.PermissionStartTimestamp,
+                    permissionEndTimestamp = request.PermissionEndTimestamp,
+                    reqValidityStartTimestamp = request.ReqValidityStartTimestamp,
+                    reqValidityEndTimestamp = request.ReqValidityEndTimestamp,
+                    uid = Utils.ToBytes32HexString(request.Uid)
+                };
+
                 // Prepare the transaction
-                var tx = await accountContract.Prepare("setPermissionsForSigner", request, signature.HexStringToByteArray());
+                var tx = await accountContract.Prepare("setPermissionsForSigner", Utils.IsWebGLBuild() ? requestWebGL : request, signature.HexStringToByteArray());
 
                 // Set gas limit to avoid any potential estimation/simulation namely in WebGL
                 tx.SetGasLimit("1500000");
