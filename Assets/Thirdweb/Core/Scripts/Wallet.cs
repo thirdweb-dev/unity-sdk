@@ -11,6 +11,7 @@ using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Thirdweb
 {
@@ -510,54 +511,90 @@ namespace Thirdweb
             if (!await IsConnected())
                 throw new Exception("No account connected!");
 
-            if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount() != null)
+            if (Utils.IsWebGLBuild())
             {
-                var signer = new Eip712TypedDataSigner();
-                var key = new EthECKey(ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount().PrivateKey);
-                return signer.SignTypedDataV4(data, typedData, key);
+                var domainType = typedData.Domain.GetType();
+                var domain = new
+                {
+                    name = domainType.GetProperty("Name").GetValue(typedData.Domain).ToString(),
+                    version = domainType.GetProperty("Version").GetValue(typedData.Domain).ToString(),
+                    chainId = domainType.GetProperty("ChainId").GetValue(typedData.Domain).ToString(),
+                    verifyingContract = domainType.GetProperty("VerifyingContract").GetValue(typedData.Domain).ToString()
+                };
+
+                var types = new Dictionary<string, object>();
+                foreach (var type in typedData.Types)
+                {
+                    if (type.Key.Contains("EIP712Domain"))
+                        continue;
+
+                    types.Add(type.Key, type.Value);
+                }
+
+                var message = new Dictionary<string, object>();
+                foreach (var member in data.GetType().GetProperties())
+                {
+                    string n = char.ToLower(member.Name[0]) + member.Name.Substring(1);
+                    object v = member.GetValue(data);
+                    // hexify bytes to avoid base64 json serialization, mostly useful for bytes32 uid
+                    if (member.PropertyType == typeof(byte[]))
+                        v = Utils.ToBytes32HexString((byte[])v);
+                    message.Add(n, v);
+                }
+                var result = await Bridge.InvokeRoute<JToken>(getRoute("signTypedData"), Utils.ToJsonStringArray(domain, types, message));
+                return result["signature"].Value<string>();
             }
             else
             {
-                var json = typedData.ToJson(data);
-                var jsonObject = JObject.Parse(json);
-
-                var uidToken = jsonObject.SelectToken("$.message.uid");
-                if (uidToken != null)
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount() != null)
                 {
-                    var uidBase64 = uidToken.Value<string>();
-                    var uidBytes = Convert.FromBase64String(uidBase64);
-                    var uidHex = uidBytes.ByteArrayToHexString();
-                    uidToken.Replace(uidHex);
+                    var signer = new Eip712TypedDataSigner();
+                    var key = new EthECKey(ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount().PrivateKey);
+                    return signer.SignTypedDataV4(data, typedData, key);
                 }
-
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                else
                 {
-                    // Smart accounts
-                    var hashToken = jsonObject.SelectToken("$.message.message");
-                    if (hashToken != null)
-                    {
-                        var hashBase64 = hashToken.Value<string>();
-                        var hashBytes = Convert.FromBase64String(hashBase64);
-                        var hashHex = hashBytes.ByteArrayToHexString();
-                        hashToken.Replace(hashHex);
-                    }
-                }
+                    var json = typedData.ToJson(data);
+                    var jsonObject = JObject.Parse(json);
 
-                var messageObject = jsonObject.GetValue("message") as JObject;
-                foreach (var property in messageObject.Properties())
-                {
-                    if (property.Value.Type == JTokenType.Array)
+                    var uidToken = jsonObject.SelectToken("$.message.uid");
+                    if (uidToken != null)
                     {
-                        continue;
+                        var uidBase64 = uidToken.Value<string>();
+                        var uidBytes = Convert.FromBase64String(uidBase64);
+                        var uidHex = uidBytes.ByteArrayToHexString();
+                        uidToken.Replace(uidHex);
                     }
-                    else
-                    {
-                        property.Value = property.Value.ToString();
-                    }
-                }
 
-                string safeJson = jsonObject.ToString();
-                return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTypedData_v4", await GetSignerAddress(), safeJson);
+                    if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                    {
+                        // Smart accounts
+                        var hashToken = jsonObject.SelectToken("$.message.message");
+                        if (hashToken != null)
+                        {
+                            var hashBase64 = hashToken.Value<string>();
+                            var hashBytes = Convert.FromBase64String(hashBase64);
+                            var hashHex = hashBytes.ByteArrayToHexString();
+                            hashToken.Replace(hashHex);
+                        }
+                    }
+
+                    var messageObject = jsonObject.GetValue("message") as JObject;
+                    foreach (var property in messageObject.Properties())
+                    {
+                        if (property.Value.Type == JTokenType.Array)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            property.Value = property.Value.ToString();
+                        }
+                    }
+
+                    string safeJson = jsonObject.ToString();
+                    return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTypedData_v4", await GetSignerAddress(), safeJson);
+                }
             }
         }
 

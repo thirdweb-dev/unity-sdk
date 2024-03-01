@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Thirdweb.Examples
@@ -62,11 +63,16 @@ namespace Thirdweb.Examples
         {
             try
             {
+                // Get smart account predicted address
                 var accountAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+
+                // Treat it as a contract, abi can be full or just contain setPermissionsForSigner for this use case
                 var accountContract = ThirdwebManager.Instance.SDK.GetContract(
                     accountAddress,
                     "[{\"type\": \"function\",\"name\": \"setPermissionsForSigner\",\"inputs\": [{\"type\": \"tuple\",\"name\": \"_req\",\"components\": [{\"type\": \"address\",\"name\": \"signer\",\"internalType\": \"address\"},{\"type\": \"uint8\",\"name\": \"isAdmin\",\"internalType\": \"uint8\"},{\"type\": \"address[]\",\"name\": \"approvedTargets\",\"internalType\": \"address[]\"},{\"type\": \"uint256\",\"name\": \"nativeTokenLimitPerTransaction\",\"internalType\": \"uint256\"},{\"type\": \"uint128\",\"name\": \"permissionStartTimestamp\",\"internalType\": \"uint128\"},{\"type\": \"uint128\",\"name\": \"permissionEndTimestamp\",\"internalType\": \"uint128\"},{\"type\": \"uint128\",\"name\": \"reqValidityStartTimestamp\",\"internalType\": \"uint128\"},{\"type\": \"uint128\",\"name\": \"reqValidityEndTimestamp\",\"internalType\": \"uint128\"},{\"type\": \"bytes32\",\"name\": \"uid\",\"internalType\": \"bytes32\"}],\"internalType\": \"struct IAccountPermissions.SignerPermissionRequest\"},{\"type\": \"bytes\",\"name\": \"_signature\",\"internalType\": \"bytes\"}],\"outputs\": [],\"stateMutability\": \"nonpayable\"}]"
                 );
+
+                // Setup the request using the correct types and values
                 var contractsAllowedForInteraction = new List<string>() { "0x450b943729Ddba196Ab58b589Cea545551DF71CC" };
                 var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
                 {
@@ -80,6 +86,8 @@ namespace Thirdweb.Examples
                     ReqValidityEndTimestamp = Utils.GetUnixTimeStampIn10Years(),
                     Uid = Guid.NewGuid().ToByteArray()
                 };
+
+                // Sign the typed data related to session keys
                 var signature = await EIP712.GenerateSignature_SmartAccount(
                     "Account",
                     "1",
@@ -87,8 +95,17 @@ namespace Thirdweb.Examples
                     await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
                     request
                 );
+
+                // Prepare the transaction
                 var tx = await accountContract.Prepare("setPermissionsForSigner", request, signature.HexStringToByteArray());
+
+                // Set gas limit to avoid any potential estimation/simulation namely in WebGL
+                tx.SetGasLimit("1500000");
+
+                // Sign the transaction, since a smart wallet is connected this returns a stringified and hexified user op ready for bundling
                 var signedTx = await tx.Sign();
+
+                // You can use engine's send-signed-user-op endpoint to broadcast or directly call eth_sendUserOperation on a bundler
                 Debugger.Instance.Log("[Pre-Sign Session Key User Op] Sucess", signedTx.ToString());
             }
             catch (System.Exception e)
