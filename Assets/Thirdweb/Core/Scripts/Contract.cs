@@ -112,7 +112,12 @@ namespace Thirdweb
         public async Task<Transaction> Prepare(string functionName, string from = null, params object[] args)
         {
             var initialInput = new TransactionInput();
-            if (!Utils.IsWebGLBuild())
+            if (Utils.IsWebGLBuild())
+            {
+                initialInput.From = from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+                initialInput.To = address;
+            }
+            else
             {
                 var contract = Utils.GetWeb3().Eth.GetContract(this.abi, this.address);
                 var function = contract.GetFunction(functionName);

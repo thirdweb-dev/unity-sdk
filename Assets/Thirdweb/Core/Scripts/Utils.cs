@@ -14,6 +14,7 @@ using Newtonsoft.Json.Linq;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Collections;
 
 namespace Thirdweb
 {
@@ -32,8 +33,26 @@ namespace Thirdweb
                 {
                     continue;
                 }
+                // if array or list, check if bytes and convert to hex
+                if (args[i].GetType().IsArray || args[i] is IList)
+                {
+                    var enumerable = args[i] as IEnumerable;
+                    var enumerableArgs = new List<object>();
+                    foreach (var item in enumerable)
+                    {
+                        if (item is byte[])
+                        {
+                            enumerableArgs.Add(ByteArrayToHexString(item as byte[]));
+                        }
+                        else
+                        {
+                            enumerableArgs.Add(item);
+                        }
+                    }
+                    stringArgs.Add(ToJson(enumerableArgs));
+                }
                 // if bytes, make hex
-                if (args[i] is byte[])
+                else if (args[i] is byte[])
                 {
                     stringArgs.Add(ByteArrayToHexString(args[i] as byte[]));
                 }
@@ -44,7 +63,7 @@ namespace Thirdweb
                 }
                 else
                 {
-                    stringArgs.Add(Utils.ToJson(args[i]));
+                    stringArgs.Add(ToJson(args[i]));
                 }
             }
             return stringArgs.ToArray();
