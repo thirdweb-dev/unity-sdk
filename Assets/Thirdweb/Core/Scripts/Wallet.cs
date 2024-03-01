@@ -867,8 +867,8 @@ namespace Thirdweb
                     new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
                     new HexBigInteger(transactionRequest.value)
                 );
-                var receipt = await ThirdwebManager.Instance.SDK.session.Web3.Eth.TransactionManager.SendTransactionAndWaitForReceiptAsync(input);
-                return receipt.ToTransactionResult();
+                var hash = await ThirdwebManager.Instance.SDK.session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
+                return await Transaction.WaitForTransactionResult(hash);
             }
         }
 
