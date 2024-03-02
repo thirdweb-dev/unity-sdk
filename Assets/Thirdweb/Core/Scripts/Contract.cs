@@ -253,8 +253,6 @@ namespace Thirdweb
             else
                 rawResults.AddRange(result.Select(item => item.Result));
 
-            ThirdwebDebug.Log("Raw Result: " + JsonConvert.SerializeObject(rawResults));
-
             // Single
             if (rawResults.Count == 1)
             {
