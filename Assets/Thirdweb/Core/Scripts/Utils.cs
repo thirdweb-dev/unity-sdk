@@ -687,5 +687,11 @@ namespace Thirdweb
             var sha3 = new Nethereum.Util.Sha3Keccack();
             return sha3.CalculateHash(message);
         }
+
+        public static bool IsValidEmail(string email)
+        {
+            var emailRegex = new System.Text.RegularExpressions.Regex(@"^\S+@\S+\.\S+$");
+            return emailRegex.IsMatch(email.Replace("+", ""));
+        }
     }
 }

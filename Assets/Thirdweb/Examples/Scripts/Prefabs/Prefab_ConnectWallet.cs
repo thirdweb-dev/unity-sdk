@@ -108,20 +108,46 @@ namespace Thirdweb.Examples
 
         public void ConnectEmail()
         {
-            var wc = useSmartWallets
-                ? new WalletConnection(
-                    provider: WalletProvider.SmartWallet,
-                    chainId: BigInteger.Parse(_currentChainData.chainId),
-                    email: emailInput.text,
-                    authOptions: new AuthOptions(AuthProvider.EmailOTP),
-                    personalWallet: WalletProvider.EmbeddedWallet
-                )
-                : new WalletConnection(
-                    provider: WalletProvider.EmbeddedWallet,
-                    chainId: BigInteger.Parse(_currentChainData.chainId),
-                    email: emailInput.text,
-                    authOptions: new AuthOptions(AuthProvider.EmailOTP)
-                );
+            string input = emailInput.text;
+            bool isEmail = Utils.IsValidEmail(input);
+
+            WalletConnection wc;
+            if (isEmail)
+            {
+                wc = useSmartWallets
+                    ? new WalletConnection(
+                        provider: WalletProvider.SmartWallet,
+                        chainId: BigInteger.Parse(_currentChainData.chainId),
+                        email: emailInput.text,
+                        authOptions: new AuthOptions(AuthProvider.EmailOTP),
+                        personalWallet: WalletProvider.EmbeddedWallet
+                    )
+                    : new WalletConnection(
+                        provider: WalletProvider.EmbeddedWallet,
+                        chainId: BigInteger.Parse(_currentChainData.chainId),
+                        email: emailInput.text,
+                        authOptions: new AuthOptions(AuthProvider.EmailOTP)
+                    );
+                Connect(wc);
+            }
+            else
+            {
+                wc = useSmartWallets
+                    ? new WalletConnection(
+                        provider: WalletProvider.SmartWallet,
+                        chainId: BigInteger.Parse(_currentChainData.chainId),
+                        phoneNumber: input,
+                        authOptions: new AuthOptions(AuthProvider.PhoneOTP),
+                        personalWallet: WalletProvider.EmbeddedWallet
+                    )
+                    : new WalletConnection(
+                        provider: WalletProvider.EmbeddedWallet,
+                        chainId: BigInteger.Parse(_currentChainData.chainId),
+                        phoneNumber: input,
+                        authOptions: new AuthOptions(AuthProvider.PhoneOTP)
+                    );
+            }
+
             Connect(wc);
         }
 
@@ -140,7 +166,7 @@ namespace Thirdweb.Examples
             {
                 _address = null;
                 _password = null;
-                await ThirdwebManager.Instance.SDK.wallet.Disconnect();
+                await ThirdwebManager.Instance.SDK.wallet.Disconnect(true);
                 onDisconnected.Invoke();
             }
             catch (System.Exception e)

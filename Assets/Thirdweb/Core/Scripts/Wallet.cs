@@ -901,6 +901,7 @@ namespace Thirdweb
         public BigInteger chainId;
         public string password;
         public string email;
+        public string phoneNumber;
         public WalletProvider personalWallet;
         public AuthOptions authOptions;
         public string smartWalletAccountOverride;
@@ -921,6 +922,7 @@ namespace Thirdweb
             BigInteger chainId,
             string password = null,
             string email = null,
+            string phoneNumber = null,
             WalletProvider personalWallet = WalletProvider.LocalWallet,
             AuthOptions authOptions = null,
             string smartWalletAccountOverride = null
@@ -930,6 +932,7 @@ namespace Thirdweb
             this.chainId = chainId;
             this.password = password;
             this.email = email;
+            this.phoneNumber = phoneNumber;
             this.personalWallet = personalWallet;
             this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.EmailOTP, jwtOrPayload: null, encryptionKey: null);
             this.smartWalletAccountOverride = smartWalletAccountOverride;
@@ -1012,5 +1015,10 @@ namespace Thirdweb
         /// Custom Authentication Flow, checks payload against developer-set Auth Endpoint.
         /// </summary>
         AuthEndpoint,
+
+        /// <summary>
+        /// Phone Number OTP Flow.
+        /// </summary>
+        PhoneOTP
     }
 }
