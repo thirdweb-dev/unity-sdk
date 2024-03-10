@@ -56,16 +56,36 @@ Notes:
 - Use `Smaller (faster) Builds` in the Build Settings (IL2CPP Code Generation in Unity 2022).
 - Use IL2CPP over Mono when possible in the Player Settings.
 - Using the SDK in the editor (pressing Play) is an accurate reflection of what you can expect to see on native platforms.
-- In order to communicate with the SDK on WebGL, you need to `Build and run` your project so it runs in a browser context.
 - In most cases, setting `Managed Stripping Level` to minimal when using IL2CPP is also helpful - you can find it under `Player Settings` > `Other Settings` > `Optimization`
 
 ## WebGL
 
+- In order to communicate with the SDK on WebGL, you need to `Build and run` your project so it runs in a browser context.
 - Open your `Build settings`, select `WebGL` as the target platform.
 - Open `Player settings` > `Resolution and Presentation` and under `WebGLTemplate` choose `Thirdweb`.
 - Save and click `Build and Run` to test out your game in a browser.
 
-If you're uploading your build, set `Compression Format` to `Disabled` in `Player Settings` > `Publishing Settings`.
+Important: If you're uploading your build, set `Compression Format` to `Disabled` in `Player Settings` > `Publishing Settings`.
+
+Please note that Embedded Wallets (OAuth version) may not work when testing locally using Unity's default Build and Run feature for WebGL.
+
+You must host the build or run it locally yourself after adding the `Cross-Origin-Opener-Policy` header and setting it to `same-origin-allow-popups`. 
+
+Here's a simple way to do so, assuming you are in your WebGL build output folder:
+```csharp
+const express = require('express');
+const app = express();
+const port = 8000;
+
+app.use(function(req, res, next) {
+  res.header('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
+});
+
+app.use(express.static('.'));
+app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
+```
+Once again, please note that no action is needed for hosted builds.
 
 ## Mobile
 
