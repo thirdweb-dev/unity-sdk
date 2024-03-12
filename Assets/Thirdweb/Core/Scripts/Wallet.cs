@@ -643,6 +643,7 @@ namespace Thirdweb
             {
                 if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
                     throw new UnityException("This functionality is only available for SmartWallets.");
+
                 var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
                 {
@@ -677,6 +678,7 @@ namespace Thirdweb
             {
                 if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
                     throw new UnityException("This functionality is only available for SmartWallets.");
+
                 var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
                 {
@@ -735,6 +737,9 @@ namespace Thirdweb
             }
             else
             {
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                    throw new UnityException("This functionality is only available for SmartWallets.");
+
                 var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
                 {
@@ -766,6 +771,9 @@ namespace Thirdweb
             }
             else
             {
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                    throw new UnityException("This functionality is only available for SmartWallets.");
+
                 var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
                 {
@@ -804,6 +812,9 @@ namespace Thirdweb
             }
             else
             {
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                    throw new UnityException("This functionality is only available for SmartWallets.");
+
                 string address = await GetAddress();
                 var raw = await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetAllActiveSignersFunction, Contracts.Account.ContractDefinition.GetAllActiveSignersOutputDTO>(
                     address,
@@ -843,6 +854,26 @@ namespace Thirdweb
                     );
                 }
                 return signers;
+            }
+        }
+
+        /// <summary>
+        /// Smart Wallet only: check if the account is deployed.
+        /// </summary>
+        /// <returns>True if the account is deployed, false otherwise.</returns>
+        public async Task<bool> IsDeployed()
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.SmartWalletIsDeployed();
+            }
+            else
+            {
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                    throw new UnityException("This functionality is only available for SmartWallets.");
+
+                var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                return smartWallet.SmartWallet.IsDeployed;
             }
         }
 
