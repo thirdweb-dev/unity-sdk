@@ -40,8 +40,8 @@ namespace Thirdweb.AccountAbstraction
             _isV6 = entryPointAddress == Constants.ENTRYPOINT_ADDRESS_V6;
 
             PersonalWeb3 = personalWeb3;
-            string chainName = ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName;
-            string defaultBundlerUrl = $"https://{chainName}.bundler.thirdweb.com" + (_isV6 ? "" : "/v2");
+            BigInteger chainId = ThirdwebManager.Instance.SDK.session.ChainId;
+            string defaultBundlerUrl = $"https://{chainId}.bundler.thirdweb.com" + (_isV6 ? "" : "/v2");
 
             Config = new ThirdwebSDK.SmartWalletConfig
             {
@@ -53,6 +53,8 @@ namespace Thirdweb.AccountAbstraction
                 paymasterUrl = string.IsNullOrEmpty(config.paymasterUrl) ? defaultBundlerUrl : config.paymasterUrl,
                 entryPointAddress = entryPointAddress,
             };
+
+            ThirdwebDebug.Log($"SmartWallet created with config: {JsonConvert.SerializeObject(Config)}");
 
             _deployed = false;
             _initialized = false;

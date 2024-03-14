@@ -289,9 +289,9 @@ namespace Thirdweb
                     gasless = gasless,
                     erc20PaymasterAddress = string.IsNullOrEmpty(erc20PaymasterAddress) ? null : erc20PaymasterAddress,
                     erc20TokenAddress = string.IsNullOrEmpty(erc20TokenAddress) ? null : erc20TokenAddress,
-                    bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : bundlerUrl,
-                    paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : paymasterUrl,
-                    entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.ENTRYPOINT_ADDRESS_V6 : entryPointAddress,
+                    bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? null : bundlerUrl,
+                    paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? null : paymasterUrl,
+                    entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? null : entryPointAddress,
                 };
 
             // Pass active chain rpc and chainId
