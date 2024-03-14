@@ -18,21 +18,6 @@ using Thirdweb.Contracts.Account.ContractDefinition;
 
 namespace Thirdweb.AccountAbstraction
 {
-    public class UserOperationHexified
-    {
-        public string sender { get; set; }
-        public string nonce { get; set; }
-        public string initCode { get; set; }
-        public string callData { get; set; }
-        public string callGasLimit { get; set; }
-        public string verificationGasLimit { get; set; }
-        public string preVerificationGas { get; set; }
-        public string maxFeePerGas { get; set; }
-        public string maxPriorityFeePerGas { get; set; }
-        public string paymasterAndData { get; set; }
-        public string signature { get; set; }
-    }
-
     public class SmartWallet
     {
         private bool _deployed;
@@ -40,6 +25,7 @@ namespace Thirdweb.AccountAbstraction
         private bool _initialized;
         private bool _approved;
         private bool _approving;
+        private bool _isV6;
 
         public List<string> Accounts { get; internal set; }
         public string PersonalAddress { get; internal set; }
@@ -50,16 +36,22 @@ namespace Thirdweb.AccountAbstraction
 
         public SmartWallet(Web3 personalWeb3, ThirdwebSDK.SmartWalletConfig config)
         {
+            string entryPointAddress = string.IsNullOrEmpty(config.entryPointAddress) ? Constants.ENTRYPOINT_ADDRESS_V6 : config.entryPointAddress;
+            _isV6 = entryPointAddress == Constants.ENTRYPOINT_ADDRESS_V6;
+
             PersonalWeb3 = personalWeb3;
-            Config = new ThirdwebSDK.SmartWalletConfig()
+            string chainName = ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName;
+            string defaultBundlerUrl = $"https://{chainName}.bundler.thirdweb.com" + (_isV6 ? "" : "/v2");
+
+            Config = new ThirdwebSDK.SmartWalletConfig
             {
                 factoryAddress = config.factoryAddress,
                 gasless = config.gasless,
                 erc20PaymasterAddress = config.erc20PaymasterAddress,
                 erc20TokenAddress = config.erc20TokenAddress,
-                bundlerUrl = string.IsNullOrEmpty(config.bundlerUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.bundlerUrl,
-                paymasterUrl = string.IsNullOrEmpty(config.paymasterUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.paymasterUrl,
-                entryPointAddress = string.IsNullOrEmpty(config.entryPointAddress) ? Constants.DEFAULT_ENTRYPOINT_ADDRESS : config.entryPointAddress,
+                bundlerUrl = string.IsNullOrEmpty(config.bundlerUrl) ? defaultBundlerUrl : config.bundlerUrl,
+                paymasterUrl = string.IsNullOrEmpty(config.paymasterUrl) ? defaultBundlerUrl : config.paymasterUrl,
+                entryPointAddress = entryPointAddress,
             };
 
             _deployed = false;
@@ -139,16 +131,16 @@ namespace Thirdweb.AccountAbstraction
             }
         }
 
-        internal async Task<(byte[] initCode, BigInteger gas)> GetInitCode()
+        internal async Task<(byte[] initCode, string factory, string factoryData)> GetInitCode()
         {
             if (_deployed)
-                return (new byte[] { }, 0);
+                return (new byte[] { }, null, null);
 
             var fn = new FactoryContract.CreateAccountFunction() { Admin = PersonalAddress, Data = new byte[] { } };
             var deployHandler = Utils.GetWeb3().Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
             var txInput = await deployHandler.CreateTransactionInputEstimatingGasAsync(Config.factoryAddress, fn);
-            var data = Utils.HexConcat(Config.factoryAddress, txInput.Data);
-            return (data.HexStringToByteArray(), txInput.Gas.Value);
+            var initCode = Utils.HexConcat(Config.factoryAddress, txInput.Data);
+            return (initCode.HexStringToByteArray(), Config.factoryAddress, txInput.Data);
         }
 
         internal async Task<RpcResponseMessage> Request(RpcRequestMessage requestMessage)
@@ -159,7 +151,7 @@ namespace Thirdweb.AccountAbstraction
             {
                 var parameters = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(requestMessage.RawParameters));
                 var txInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(parameters[0]));
-                var partialUserOp = await SignTransactionAsUserOp(txInput, requestMessage.Id);
+                var partialUserOp = await SignTransactionAsUserOpV0_6(txInput, requestMessage.Id);
                 return new RpcResponseMessage(requestMessage.Id, JsonConvert.SerializeObject(partialUserOp.EncodeUserOperation()));
             }
             else if (requestMessage.Method == "eth_sendTransaction")
@@ -192,7 +184,7 @@ namespace Thirdweb.AccountAbstraction
             }
         }
 
-        private async Task<EntryPointContract.UserOperation> SignTransactionAsUserOp(TransactionInput transactionInput, object requestId = null)
+        private async Task<UserOperationV0_6> SignTransactionAsUserOpV0_6(TransactionInput transactionInput, object requestId = null)
         {
             requestId ??= SmartWalletClient.GenerateRpcId();
 
@@ -209,11 +201,11 @@ namespace Thirdweb.AccountAbstraction
             };
             var executeInput = executeFn.CreateTransactionInput(Accounts[0]);
 
-            var (initCode, gas) = await GetInitCode();
+            var (initCode, _, _) = await GetInitCode();
 
             var gasPrices = await Utils.GetGasPriceAsync(ThirdwebManager.Instance.SDK.session.ChainId);
 
-            var partialUserOp = new EntryPointContract.UserOperation()
+            var partialUserOp = new UserOperationV0_6()
             {
                 Sender = Accounts[0],
                 Nonce = await GetNonce(),
@@ -230,20 +222,140 @@ namespace Thirdweb.AccountAbstraction
 
             // Update paymaster data if any
 
-            partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestId, partialUserOp.EncodeUserOperation(), apiKey);
+            if (!string.IsNullOrEmpty(Config.erc20PaymasterAddress) && !_approving)
+            {
+                partialUserOp.PaymasterAndData = Config.erc20PaymasterAddress.HexToByteArray();
+            }
+            else
+            {
+                var res = await GetPaymasterAndData(requestId, partialUserOp.EncodeUserOperation(), apiKey);
+                if (res.paymasterAndData != null)
+                    partialUserOp.PaymasterAndData = res.paymasterAndData.HexStringToByteArray();
+                else
+                    partialUserOp.PaymasterAndData = new byte[] { };
+            }
 
             // Estimate gas
 
             var gasEstimates = await BundlerClient.EthEstimateUserOperationGas(Config.bundlerUrl, apiKey, requestId, partialUserOp.EncodeUserOperation(), Config.entryPointAddress);
-            partialUserOp.CallGasLimit = 50000 + new HexBigInteger(gasEstimates.CallGasLimit).Value;
+            partialUserOp.CallGasLimit = 21000 + new HexBigInteger(gasEstimates.callGasLimit).Value;
             partialUserOp.VerificationGasLimit = string.IsNullOrEmpty(Config.erc20PaymasterAddress)
-                ? new HexBigInteger(gasEstimates.VerificationGas).Value
-                : new HexBigInteger(gasEstimates.VerificationGas).Value * 3;
-            partialUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value;
+                ? new HexBigInteger(gasEstimates.verificationGasLimit).Value
+                : new HexBigInteger(gasEstimates.verificationGasLimit).Value * 3;
+            partialUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.preVerificationGas).Value;
 
             // Update paymaster data if any
 
-            partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestId, partialUserOp.EncodeUserOperation(), apiKey);
+            if (!string.IsNullOrEmpty(Config.erc20PaymasterAddress) && !_approving)
+            {
+                partialUserOp.PaymasterAndData = Config.erc20PaymasterAddress.HexToByteArray();
+            }
+            else
+            {
+                var res = await GetPaymasterAndData(requestId, partialUserOp.EncodeUserOperation(), apiKey);
+                if (res.paymasterAndData != null)
+                    partialUserOp.PaymasterAndData = res.paymasterAndData.HexStringToByteArray();
+                else
+                    partialUserOp.PaymasterAndData = new byte[] { };
+            }
+
+            // Hash, sign and encode the user operation
+
+            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(Config.entryPointAddress);
+
+            return partialUserOp;
+        }
+
+        private async Task<UserOperationV0_7> SignTransactionAsUserOpV0_7(TransactionInput transactionInput, object requestId = null)
+        {
+            requestId ??= SmartWalletClient.GenerateRpcId();
+
+            string apiKey = ThirdwebManager.Instance.SDK.session.Options.clientId;
+
+            // Create the user operation and its safe (hexified) version
+
+            var executeFn = new AccountContract.ExecuteFunction
+            {
+                Target = transactionInput.To,
+                Value = transactionInput.Value.Value,
+                Calldata = transactionInput.Data.HexStringToByteArray(),
+                FromAddress = Accounts[0]
+            };
+            var executeInput = executeFn.CreateTransactionInput(Accounts[0]);
+
+            var (_, factory, factoryData) = await GetInitCode();
+
+            var gasPrices = await Utils.GetGasPriceAsync(ThirdwebManager.Instance.SDK.session.ChainId);
+
+            var partialUserOp = new UserOperationV0_7()
+            {
+                Sender = Accounts[0],
+                Nonce = await GetNonce(),
+                Factory = factory,
+                FactoryData = factoryData.HexStringToByteArray(),
+                CallData = executeInput.Data.HexStringToByteArray(),
+                CallGasLimit = 0,
+                VerificationGasLimit = 0,
+                PreVerificationGas = 0,
+                MaxFeePerGas = gasPrices.MaxFeePerGas,
+                MaxPriorityFeePerGas = gasPrices.MaxPriorityFeePerGas,
+                Paymaster = null,
+                PaymasterVerificationGasLimit = 0,
+                PaymasterPostOpGasLimit = 0,
+                PaymasterData = new byte[] { },
+                Signature = Constants.DUMMY_SIG.HexStringToByteArray(),
+            };
+
+            // Update paymaster data if any
+
+            if (!string.IsNullOrEmpty(Config.erc20PaymasterAddress) && !_approving)
+            {
+                partialUserOp.Paymaster = Config.erc20PaymasterAddress;
+            }
+            else
+            {
+                var res = await GetPaymasterAndData(requestId, partialUserOp.EncodeUserOperation(), apiKey);
+                partialUserOp.Paymaster = res.paymaster;
+                partialUserOp.PaymasterData = res.paymasterData.HexStringToByteArray();
+                partialUserOp.PreVerificationGas = new HexBigInteger(res.preVerificationGas).Value;
+                partialUserOp.VerificationGasLimit = new HexBigInteger(res.verificationGasLimit).Value;
+                partialUserOp.CallGasLimit = new HexBigInteger(res.callGasLimit).Value;
+                partialUserOp.PaymasterVerificationGasLimit = new HexBigInteger(res.paymasterVerificationGasLimit).Value;
+                partialUserOp.PaymasterPostOpGasLimit = new HexBigInteger(res.paymasterPostOpGasLimit).Value;
+            }
+
+            // Estimate gas
+
+            if (
+                partialUserOp.PreVerificationGas.IsZero
+                || partialUserOp.VerificationGasLimit.IsZero
+                || partialUserOp.CallGasLimit.IsZero
+                || partialUserOp.PaymasterVerificationGasLimit.IsZero
+                || partialUserOp.PaymasterPostOpGasLimit.IsZero
+            )
+            {
+                var gasEstimates = await BundlerClient.EthEstimateUserOperationGas(Config.bundlerUrl, apiKey, requestId, partialUserOp.EncodeUserOperation(), Config.entryPointAddress);
+                partialUserOp.CallGasLimit = 21000 + new HexBigInteger(gasEstimates.callGasLimit).Value;
+                partialUserOp.VerificationGasLimit = string.IsNullOrEmpty(Config.erc20PaymasterAddress)
+                    ? new HexBigInteger(gasEstimates.verificationGasLimit).Value
+                    : new HexBigInteger(gasEstimates.verificationGasLimit).Value * 3;
+                partialUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.preVerificationGas).Value;
+                partialUserOp.PaymasterVerificationGasLimit = new HexBigInteger(gasEstimates.paymasterVerificationGasLimit).Value;
+                partialUserOp.PaymasterPostOpGasLimit = new HexBigInteger(gasEstimates.paymasterPostOpGasLimit).Value;
+
+                // Update paymaster data if any
+
+                if (!string.IsNullOrEmpty(Config.erc20PaymasterAddress) && !_approving)
+                {
+                    partialUserOp.Paymaster = Config.erc20PaymasterAddress;
+                }
+                else
+                {
+                    var res = await GetPaymasterAndData(requestId, partialUserOp.EncodeUserOperation(), apiKey);
+                    partialUserOp.Paymaster = res.paymaster;
+                    partialUserOp.PaymasterData = res.paymasterData.HexStringToByteArray();
+                }
+            }
 
             // Hash, sign and encode the user operation
 
@@ -298,13 +410,14 @@ namespace Thirdweb.AccountAbstraction
 
             // Create and sign the user operation
 
-            var partialUserOp = await SignTransactionAsUserOp(transactionInput, requestMessage.Id);
+            object partialUserOp = _isV6 ? await SignTransactionAsUserOpV0_6(transactionInput, requestMessage.Id) : await SignTransactionAsUserOpV0_7(transactionInput, requestMessage.Id);
+            object encodedPartialUserOp = _isV6 ? ((UserOperationV0_6)partialUserOp).EncodeUserOperation() : ((UserOperationV0_7)partialUserOp).EncodeUserOperation();
 
             // Send the user operation
 
             ThirdwebDebug.Log("Valid UserOp: " + JsonConvert.SerializeObject(partialUserOp));
-            ThirdwebDebug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(partialUserOp.EncodeUserOperation()));
-            var userOpHash = await BundlerClient.EthSendUserOperation(Config.bundlerUrl, apiKey, requestMessage.Id, partialUserOp.EncodeUserOperation(), Config.entryPointAddress);
+            ThirdwebDebug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(encodedPartialUserOp));
+            var userOpHash = await BundlerClient.EthSendUserOperation(Config.bundlerUrl, apiKey, requestMessage.Id, encodedPartialUserOp, Config.entryPointAddress);
             ThirdwebDebug.Log("UserOp Hash: " + userOpHash);
 
             // Wait for the transaction to be mined
@@ -349,20 +462,15 @@ namespace Thirdweb.AccountAbstraction
             return nonce.Nonce;
         }
 
-        private async Task<byte[]> GetPaymasterAndData(object requestId, UserOperationHexified userOp, string apiKey)
+        private async Task<PMSponsorOperationResponse> GetPaymasterAndData(object requestId, object userOp, string apiKey)
         {
-            if (!string.IsNullOrEmpty(Config.erc20PaymasterAddress) && !_approving)
+            if (Config.gasless)
             {
-                return Config.erc20PaymasterAddress.HexToByteArray();
-            }
-            else if (Config.gasless)
-            {
-                var paymasterAndData = await BundlerClient.PMSponsorUserOperation(Config.paymasterUrl, apiKey, requestId, userOp, Config.entryPointAddress);
-                return paymasterAndData.paymasterAndData.HexToByteArray();
+                return await BundlerClient.PMSponsorUserOperation(Config.paymasterUrl, apiKey, requestId, userOp, Config.entryPointAddress);
             }
             else
             {
-                return new byte[] { };
+                return default;
             }
         }
     }
