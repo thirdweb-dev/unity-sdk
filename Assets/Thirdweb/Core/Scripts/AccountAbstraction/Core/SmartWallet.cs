@@ -196,7 +196,7 @@ namespace Thirdweb.AccountAbstraction
         {
             requestId ??= SmartWalletClient.GenerateRpcId();
 
-            string apiKey = ThirdwebManager.Instance.SDK.session.Options.clientId;
+            string apiKey = Utils.GetClientId();
 
             // Create the user operation and its safe (hexified) version
 
@@ -262,7 +262,7 @@ namespace Thirdweb.AccountAbstraction
                 _deploying = true;
             }
 
-            string apiKey = ThirdwebManager.Instance.SDK.session.Options.clientId;
+            string apiKey = Utils.GetClientId();
 
             // Deserialize the transaction input from the request message
 

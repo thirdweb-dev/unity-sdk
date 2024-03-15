@@ -415,6 +415,11 @@ namespace Thirdweb
             return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address);
         }
 
+        public static string GetClientId()
+        {
+            return ThirdwebManager.Instance.SDK?.session?.Options.clientId ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.clientId) ? null : ThirdwebManager.Instance.clientId);
+        }
+
         public static string GetBundleId()
         {
             return ThirdwebManager.Instance.SDK?.session?.Options.bundleId

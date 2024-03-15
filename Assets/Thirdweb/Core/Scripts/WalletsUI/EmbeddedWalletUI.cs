@@ -271,7 +271,7 @@ namespace Thirdweb.Wallets
             string loginUrl = await _embeddedWallet.FetchHeadlessOauthLoginLinkAsync(authProvider);
             string platform = "unity";
             string redirectUrl = UnityWebRequest.EscapeURL(Application.isMobilePlatform ? _customScheme : "http://localhost:8789/");
-            string developerClientId = UnityWebRequest.EscapeURL(ThirdwebManager.Instance.SDK.session.Options.clientId);
+            string developerClientId = UnityWebRequest.EscapeURL(Utils.GetClientId());
             return $"{loginUrl}?platform={platform}&redirectUrl={redirectUrl}&developerClientId={developerClientId}&authOption={authProvider}";
         }
 
