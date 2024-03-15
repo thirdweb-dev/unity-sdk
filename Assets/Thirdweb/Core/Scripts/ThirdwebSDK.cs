@@ -262,7 +262,7 @@ namespace Thirdweb
                 ? (string.IsNullOrEmpty(options.clientId) ? $"https://{chainOrRPC}.rpc.thirdweb.com/" : $"https://{chainOrRPC}.rpc.thirdweb.com/{options.clientId}")
                 : chainOrRPC;
 
-            if (new System.Uri(rpc).Host.EndsWith(".thirdweb.com") && !rpc.Contains("bundleId="))
+            if (options.clientId != null && new System.Uri(rpc).Host.EndsWith(".thirdweb.com") && !rpc.Contains("bundleId="))
                 rpc = rpc.AppendBundleIdQueryParam();
 
             if (Utils.IsWebGLBuild())
