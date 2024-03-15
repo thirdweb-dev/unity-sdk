@@ -394,19 +394,53 @@ namespace Thirdweb
             return useGateway ? ipfsRaw.ReplaceIPFS() : ipfsRaw;
         }
 
-        public async static Task<string> GetENSName(string address)
+        public async static Task<string> ResolveAddressFromENS(string ens)
         {
+            if (string.IsNullOrEmpty(ens) || !ens.EndsWith(".eth"))
+                return ens;
+
             try
             {
-                var ensService = new Nethereum.Contracts.Standards.ENS.ENSService(
-                    new Nethereum.Web3.Web3("https://ethereum.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3").Eth,
-                    "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e"
-                );
-                return await ensService.ReverseResolveAsync(address);
+                string address = null;
+                if (IsWebGLBuild())
+                {
+                    address = await Bridge.ResolveAddressFromENS(ens);
+                }
+                else
+                {
+                    var ensService = new Nethereum.Contracts.Standards.ENS.ENSService(new Web3("https://1.rpc.thirdweb.com/").Eth, "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e");
+                    address = await ensService.ResolveAddressAsync(ens);
+                }
+                return string.IsNullOrEmpty(address) ? ens : address;
             }
             catch
             {
-                return null;
+                return ens;
+            }
+        }
+
+        public async static Task<string> ResolveENSFromAddress(string address)
+        {
+            if (string.IsNullOrEmpty(address) || address.Length != 42 || !address.StartsWith("0x"))
+                return address;
+
+            try
+            {
+                string ens = null;
+                if (IsWebGLBuild())
+                {
+                    ens = await Bridge.ResolveENSFromAddress(address);
+                }
+                else
+                {
+                    var ensService = new Nethereum.Contracts.Standards.ENS.ENSService(new Web3("https://1.rpc.thirdweb.com/").Eth, "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e");
+                    ens = await ensService.ReverseResolveAsync(address);
+                }
+                return string.IsNullOrEmpty(ens) ? address : ens;
+            }
+            catch
+            {
+                return address;
             }
         }
 
