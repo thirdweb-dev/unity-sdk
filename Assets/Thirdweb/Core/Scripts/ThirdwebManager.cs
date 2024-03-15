@@ -298,5 +298,10 @@ namespace Thirdweb
 
             SDK = new ThirdwebSDK(activeChainRpc, BigInteger.Parse(activeChainId), options);
         }
+
+        public void Initialize(string activeChainRpc, BigInteger activeChainId, ThirdwebSDK.Options options)
+        {
+            SDK = new ThirdwebSDK(activeChainRpc, activeChainId, options);
+        }
     }
 }
