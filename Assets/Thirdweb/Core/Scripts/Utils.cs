@@ -668,6 +668,9 @@ namespace Thirdweb
 
         public static async void TrackWalletAnalytics(string clientId, string source, string action, string walletType, string walletAddress)
         {
+            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(source) || string.IsNullOrEmpty(action) || string.IsNullOrEmpty(walletType) || string.IsNullOrEmpty(walletAddress))
+                return;
+
             try
             {
                 var body = new
