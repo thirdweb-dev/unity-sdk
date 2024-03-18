@@ -225,6 +225,23 @@ namespace Thirdweb
             allChainsData.AddRange(additionalChainsData);
 
             ChainIDNetworkData currentNetwork = allChainsData.Find(x => x.chainId == chainId.ToString());
+            if (currentNetwork == null)
+            {
+                return new ThirdwebChainData()
+                {
+                    chainId = chainId.ToHex(false, true),
+                    blockExplorerUrls = new string[] { "https://etherscan.io" },
+                    chainName = $"Unknown Chain - {chainId}",
+                    iconUrls = new string[] { "ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt" },
+                    nativeCurrency = new ThirdwebNativeCurrency()
+                    {
+                        name = "Ether",
+                        symbol = "ETH",
+                        decimals = 18
+                    },
+                    rpcUrls = rpcOverride != null ? new string[] { rpcOverride } : new string[] { $"https://{chainId}.rpc.thirdweb.com" }
+                };
+            }
 
             var explorerUrls = new List<string>();
             if (currentNetwork.explorers != null)
