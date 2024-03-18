@@ -24,7 +24,12 @@ namespace Thirdweb
         private SerializedProperty forwarderDomainOverrideProperty;
         private SerializedProperty forwaderVersionOverrideProperty;
         private SerializedProperty walletConnectProjectIdProperty;
+        private SerializedProperty walletConnectEnableExplorerProperty;
         private SerializedProperty walletConnectExplorerRecommendedWalletIdsProperty;
+        private SerializedProperty walletConnectWalletImagesProperty;
+        private SerializedProperty walletConnectDesktopWalletsProperty;
+        private SerializedProperty walletConnectMobileWalletsProperty;
+        private SerializedProperty walletConnectThemeModeProperty;
         private SerializedProperty factoryAddressProperty;
         private SerializedProperty gaslessProperty;
         private SerializedProperty erc20PaymasterAddressProperty;
@@ -66,7 +71,12 @@ namespace Thirdweb
             forwarderDomainOverrideProperty = serializedObject.FindProperty("forwarderDomainOverride");
             forwaderVersionOverrideProperty = serializedObject.FindProperty("forwaderVersionOverride");
             walletConnectProjectIdProperty = serializedObject.FindProperty("walletConnectProjectId");
+            walletConnectEnableExplorerProperty = serializedObject.FindProperty("walletConnectEnableExplorer");
             walletConnectExplorerRecommendedWalletIdsProperty = serializedObject.FindProperty("walletConnectExplorerRecommendedWalletIds");
+            walletConnectWalletImagesProperty = serializedObject.FindProperty("walletConnectWalletImages");
+            walletConnectDesktopWalletsProperty = serializedObject.FindProperty("walletConnectDesktopWallets");
+            walletConnectMobileWalletsProperty = serializedObject.FindProperty("walletConnectMobileWallets");
+            walletConnectThemeModeProperty = serializedObject.FindProperty("walletConnectThemeMode");
             factoryAddressProperty = serializedObject.FindProperty("factoryAddress");
             gaslessProperty = serializedObject.FindProperty("gasless");
             erc20PaymasterAddressProperty = serializedObject.FindProperty("erc20PaymasterAddress");
@@ -282,7 +292,12 @@ namespace Thirdweb
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                     EditorGUILayout.PropertyField(walletConnectProjectIdProperty);
+                    EditorGUILayout.PropertyField(walletConnectEnableExplorerProperty);
                     EditorGUILayout.PropertyField(walletConnectExplorerRecommendedWalletIdsProperty);
+                    EditorGUILayout.PropertyField(walletConnectWalletImagesProperty, true);
+                    EditorGUILayout.PropertyField(walletConnectDesktopWalletsProperty, true);
+                    EditorGUILayout.PropertyField(walletConnectMobileWalletsProperty, true);
+                    EditorGUILayout.PropertyField(walletConnectThemeModeProperty);
                     EditorGUILayout.EndVertical();
                 }
             );

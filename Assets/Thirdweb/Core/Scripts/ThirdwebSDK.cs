@@ -76,14 +76,39 @@ namespace Thirdweb
             public string[] appIcons;
 
             /// <summary>
-            /// The project ID for WalletConnect authentication.
+            /// WalletConnect Project ID (https://cloud.walletconnect.com/app).
             /// </summary>
             public string walletConnectProjectId;
 
             /// <summary>
-            /// Wallets to display in the WC modal (https://walletconnect.com/explorer)
+            /// WalletConnect WebGL QR Modal: enable recommended explorer wallet buttons.
+            /// </summary>
+            public bool walletConnectEnableExplorer;
+
+            /// <summary>
+            /// WalletConnect WebGL QR Modal: wallets to display in the WC modal (https://walletconnect.com/explorer).
             /// </summary>
             public string[] walletConnectExplorerRecommendedWalletIds;
+
+            /// <summary>
+            /// WalletConnect WebGL QR Modal: mapping of wallet id to wallet image.
+            /// </summary>
+            public Dictionary<string, string> walletConnectWalletImages;
+
+            /// <summary>
+            /// WalletConnect WebGL QR Modal: custom desktop wallets to display.
+            /// </summary>
+            public WalletConnectWalletOptions[] walletConnectDesktopWallets;
+
+            /// <summary>
+            /// WalletConnect WebGL QR Modal: custom mobile wallets to display.
+            /// </summary>
+            public WalletConnectWalletOptions[] walletConnectMobileWallets;
+
+            /// <summary>
+            /// WalletConnect WebGL QR Modal: set theme to 'light' or 'dark'.
+            /// </summary>
+            public string walletConnectThemeMode;
 
             /// <summary>
             /// When using OAuth2 (e.g. Google) to login on mobile, you can provide a redirect URL such as 'myapp://'.
@@ -94,6 +119,24 @@ namespace Thirdweb
             /// Additional data to pass to the wallet provider.
             /// </summary>
             public Dictionary<string, object> extras;
+        }
+
+        /// <summary>
+        /// Optional wallet configuration options for WalletConnect wallets, useful for displaying specific wallets only.
+        /// </summary>
+        [System.Serializable]
+        public struct WalletConnectWalletOptions
+        {
+            public string id;
+            public string name;
+            public WalletConnectWalletLinks links;
+        }
+
+        [System.Serializable]
+        public class WalletConnectWalletLinks
+        {
+            public string native;
+            public string universal;
         }
 
         /// <summary>
