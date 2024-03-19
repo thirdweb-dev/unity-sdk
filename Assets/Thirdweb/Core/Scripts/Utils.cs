@@ -15,6 +15,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Collections;
+using Nethereum.Hex.HexTypes;
 
 namespace Thirdweb
 {
@@ -664,6 +665,11 @@ namespace Thirdweb
         public static BigInteger GweiToWei(double gweiAmount)
         {
             return new BigInteger(gweiAmount * 1e9);
+        }
+
+        public static string BigIntToHex(this BigInteger number)
+        {
+            return new HexBigInteger(number).HexValue;
         }
 
         public static async void TrackWalletAnalytics(string clientId, string source, string action, string walletType, string walletAddress)

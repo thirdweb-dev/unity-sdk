@@ -18,16 +18,16 @@ namespace Thirdweb
         #region Properties
 
 
-        internal ThirdwebSDK.Options Options { get; private set; }
-        internal BigInteger ChainId { get; private set; }
-        internal string RPC { get; private set; }
-        internal SiweMessageService SiweSession { get; private set; }
-        internal Web3 Web3 { get; private set; }
-        internal ThirdwebChainData CurrentChainData { get; private set; }
+        public ThirdwebSDK.Options Options { get; private set; }
+        public BigInteger ChainId { get; private set; }
+        public string RPC { get; private set; }
+        public SiweMessageService SiweSession { get; private set; }
+        public Web3 Web3 { get; private set; }
+        public ThirdwebChainData CurrentChainData { get; private set; }
 
-        internal IThirdwebWallet ActiveWallet { get; private set; }
+        public IThirdwebWallet ActiveWallet { get; private set; }
 
-        internal static int Nonce = 0;
+        public static int Nonce { get; private set; } = 0;
 
         #endregion
 
