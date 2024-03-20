@@ -1,6 +1,6 @@
 {
-    "name": "PlayModeTests",
-    "rootNamespace": "",
+    "name": "Thirdweb.Test",
+    "rootNamespace": "Thirdweb.Test",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",

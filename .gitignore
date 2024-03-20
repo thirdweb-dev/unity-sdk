@@ -71,3 +71,5 @@ releases/
 Documentation/
 
 !docs/**
+Assets/Tests/config.json
+Assets/Tests/config.json.meta

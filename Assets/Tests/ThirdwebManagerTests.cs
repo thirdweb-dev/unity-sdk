@@ -7,7 +7,7 @@ using Thirdweb;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-public class ThirdwebManagerTests
+public class ThirdwebManagerTests : ConfigManager
 {
     private GameObject _go;
 
