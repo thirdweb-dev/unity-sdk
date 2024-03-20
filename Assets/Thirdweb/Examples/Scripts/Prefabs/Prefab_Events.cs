@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Nethereum.ABI.FunctionEncoding.Attributes;
 using System.Numerics;
-using Newtonsoft.Json;
 
 namespace Thirdweb.Examples
 {

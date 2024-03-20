@@ -47,7 +47,7 @@ namespace Thirdweb
                     owner = "",
                     type = "ERC1155",
                     supply = await TotalSupply(tokenId),
-                    quantityOwned = 404,
+                    quantityOwned = null,
                     metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1)
                 };
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
@@ -91,34 +91,28 @@ namespace Thirdweb
         /// <summary>
         /// Get the balance of the given NFT for the connected wallet
         /// </summary>
-        public async Task<string> Balance(string tokenId)
+        public async Task<BigInteger> Balance(string tokenId)
         {
-            if (Utils.IsWebGLBuild())
-            {
-                return await Bridge.InvokeRoute<string>(getRoute("balance"), new string[] { });
-            }
-            else
-            {
-                return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), tokenId);
-            }
+            return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), tokenId);
         }
 
         /// <summary>
         /// Get the balance of the given NFT for the given wallet address
         /// </summary>
-        public async Task<string> BalanceOf(string address, string tokenId)
+        public async Task<BigInteger> BalanceOf(string address, string tokenId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("balanceOf"), Utils.ToJsonStringArray(address, tokenId));
+                var val = await Bridge.InvokeRoute<string>(getRoute("balanceOf"), Utils.ToJsonStringArray(address, tokenId));
+                return BigInteger.Parse(val);
             }
             else
             {
                 var tokenURI = await TransactionManager.ThirdwebRead<PackContract.BalanceOfFunction, PackContract.BalanceOfOutputDTO>(
                     contractAddress,
-                    new PackContract.BalanceOfFunction() { Id = BigInteger.Parse(tokenId) }
+                    new PackContract.BalanceOfFunction() { Account = address, Id = BigInteger.Parse(tokenId) }
                 );
-                return tokenURI.ReturnValue1.ToString();
+                return tokenURI.ReturnValue1;
             }
         }
 
@@ -143,11 +137,12 @@ namespace Thirdweb
             }
         }
 
-        public async Task<int> TotalCount()
+        public async Task<BigInteger> TotalCount()
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("totalCount"), new string[] { });
+                var val = await Bridge.InvokeRoute<string>(getRoute("totalCount"), new string[] { });
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -158,11 +153,12 @@ namespace Thirdweb
         /// <summary>
         /// Get the total suppply in circulation for thge given NFT
         /// </summary>
-        public async Task<int> TotalSupply(string tokenId)
+        public async Task<BigInteger> TotalSupply(string tokenId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("totalSupply"), Utils.ToJsonStringArray(tokenId));
+                var val = await Bridge.InvokeRoute<string>(getRoute("totalSupply"), Utils.ToJsonStringArray(tokenId));
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -170,7 +166,7 @@ namespace Thirdweb
                     contractAddress,
                     new PackContract.TotalSupplyFunction() { ReturnValue1 = BigInteger.Parse(tokenId) }
                 );
-                return (int)totalSupply.ReturnValue1;
+                return totalSupply.ReturnValue1;
             }
         }
 

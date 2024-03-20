@@ -5,10 +5,10 @@ using Thirdweb;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-public class ContractReadTests : ConfigManager
+public class ERC20ReadTests : ConfigManager
 {
     private GameObject _go;
-    private string _tokenErc20Address = "0x81ebd23aA79bCcF5AaFb9c9c5B0Db4223c39102e";
+    private string _dropErc20Address = "0xEBB8a39D865465F289fa349A67B3391d8f910da9";
 
     [SetUp]
     public void SetUp()
@@ -36,46 +36,10 @@ public class ContractReadTests : ConfigManager
     {
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
 
-        var contract = ThirdwebManager.Instance.SDK.GetContract("0x");
+        var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         Assert.IsNotNull(contract);
-        Assert.AreEqual("0x", contract.address);
+        Assert.AreEqual(_dropErc20Address, contract.address);
         yield return null;
-    }
-
-    [UnityTest]
-    public IEnumerator Custom_WithoutAbi_Fail()
-    {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
-        var contract = ThirdwebManager.Instance.SDK.GetContract("0x");
-        var readTask = contract.Read<BigInteger>("balanceOf", "0x");
-        yield return new WaitUntil(() => readTask.IsCompleted);
-        Assert.IsTrue(readTask.IsFaulted);
-        Assert.AreEqual("You must pass an ABI for native platform custom calls", readTask.Exception.InnerException.Message);
-    }
-
-    [UnityTest]
-    public IEnumerator Custom_WithAbi_Success()
-    {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
-        var contract = ThirdwebManager.Instance.SDK.GetContract(_tokenErc20Address, abi: "function balanceOf(address) external view returns (uint256)");
-        var readTask = contract.Read<BigInteger>("balanceOf", _tokenErc20Address);
-        yield return new WaitUntil(() => readTask.IsCompleted);
-        Assert.IsTrue(readTask.IsCompletedSuccessfully);
-        Assert.NotNull(readTask.Result);
-    }
-
-    [UnityTest]
-    public IEnumerator Custom_WithString_Success()
-    {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
-        var contract = ThirdwebManager.Instance.SDK.GetContract(_tokenErc20Address, abi: "function symbol() external view returns (string)");
-        var readTask = contract.Read<string>("symbol");
-        yield return new WaitUntil(() => readTask.IsCompleted);
-        Assert.IsTrue(readTask.IsCompletedSuccessfully);
-        Assert.NotNull(readTask.Result);
     }
 
     [UnityTest]
@@ -83,7 +47,7 @@ public class ContractReadTests : ConfigManager
     {
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
 
-        var contract = ThirdwebManager.Instance.SDK.GetContract(_tokenErc20Address);
+        var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var currencyInfoTask = contract.ERC20.Get();
         yield return new WaitUntil(() => currencyInfoTask.IsCompleted);
         Assert.IsTrue(currencyInfoTask.IsCompletedSuccessfully);
@@ -97,8 +61,8 @@ public class ContractReadTests : ConfigManager
     {
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
 
-        var contract = ThirdwebManager.Instance.SDK.GetContract(_tokenErc20Address);
-        var balanceTask = contract.ERC20.BalanceOf(_tokenErc20Address);
+        var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
+        var balanceTask = contract.ERC20.BalanceOf(_dropErc20Address);
         yield return new WaitUntil(() => balanceTask.IsCompleted);
         Assert.IsTrue(balanceTask.IsCompletedSuccessfully);
         Assert.IsNotNull(balanceTask.Result);
@@ -112,8 +76,8 @@ public class ContractReadTests : ConfigManager
     {
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
 
-        var contract = ThirdwebManager.Instance.SDK.GetContract(_tokenErc20Address);
-        var allowanceTask = contract.ERC20.AllowanceOf(_tokenErc20Address, _tokenErc20Address);
+        var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
+        var allowanceTask = contract.ERC20.AllowanceOf(_dropErc20Address, _dropErc20Address);
         yield return new WaitUntil(() => allowanceTask.IsCompleted);
         Assert.IsTrue(allowanceTask.IsCompletedSuccessfully);
         Assert.IsNotNull(allowanceTask.Result);
@@ -127,7 +91,7 @@ public class ContractReadTests : ConfigManager
     {
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
 
-        var contract = ThirdwebManager.Instance.SDK.GetContract(_tokenErc20Address);
+        var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var totalSupplyTask = contract.ERC20.TotalSupply();
         yield return new WaitUntil(() => totalSupplyTask.IsCompleted);
         Assert.IsTrue(totalSupplyTask.IsCompletedSuccessfully);

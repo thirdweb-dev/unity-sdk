@@ -169,10 +169,10 @@ public class StorageTests : ConfigManager
     {
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
 
-        string path = Application.temporaryCachePath + "/myImage.png";
+        string path = Application.persistentDataPath + "/myObject.json";
         if (System.IO.File.Exists(path))
             System.IO.File.Delete(path);
-        ScreenCapture.CaptureScreenshot(path);
+        System.IO.File.WriteAllText(path, "{\"name\":\"John Doe\",\"age\":30,\"city\":\"New York\"}");
 
         yield return new WaitForSeconds(3f);
 
@@ -187,7 +187,7 @@ public class StorageTests : ConfigManager
         ThirdwebManager.Instance.clientId = GetClientId();
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
 
-        string path = Application.temporaryCachePath + "/myObject.json";
+        string path = Application.persistentDataPath + "/myObject.json";
         if (System.IO.File.Exists(path))
             System.IO.File.Delete(path);
         System.IO.File.WriteAllText(path, "{\"name\":\"John Doe\",\"age\":30,\"city\":\"New York\"}");

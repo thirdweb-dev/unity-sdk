@@ -218,7 +218,8 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<BigInteger>(GetTxBuilderRoute("getGasPrice"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("getGasPrice"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -239,7 +240,8 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<BigInteger>(GetTxBuilderRoute("estimateGasLimit"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("estimateGasLimit"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return BigInteger.Parse(val);
             }
             else
             {

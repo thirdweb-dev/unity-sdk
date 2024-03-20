@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using System.Numerics;
 using UnityEngine;
 using Nethereum.Hex.HexTypes;
-using Nethereum.Web3;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using Nethereum.ABI.FunctionEncoding;

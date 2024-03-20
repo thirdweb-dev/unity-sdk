@@ -86,7 +86,7 @@ namespace Thirdweb
             }
             else
             {
-                int totalCount = await TotalCount();
+                int totalCount = (int)await TotalCount();
                 int start = queryParams?.start ?? 0;
                 int count = queryParams?.count ?? totalCount;
                 int end = Math.Min(start + count, totalCount);
@@ -145,7 +145,7 @@ namespace Thirdweb
             else
             {
                 string owner = address ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
-                var balanceOfOwner = int.Parse(await BalanceOf(owner));
+                var balanceOfOwner = await BalanceOf(owner);
                 var ownedNfts = new List<NFT>();
 
                 try
@@ -225,26 +225,20 @@ namespace Thirdweb
         /// <summary>
         /// Get the balance of NFTs in this contract for the connected wallet
         /// </summary>
-        public async Task<string> Balance()
+        public async Task<BigInteger> Balance()
         {
-            if (Utils.IsWebGLBuild())
-            {
-                return await Bridge.InvokeRoute<string>(getRoute("balance"), new string[] { });
-            }
-            else
-            {
-                return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
-            }
+            return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
         }
 
         /// <summary>
         /// Get the balance of NFTs in this contract for the given wallet address
         /// </summary>
-        public async Task<string> BalanceOf(string address)
+        public async Task<BigInteger> BalanceOf(string address)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("balanceOf"), Utils.ToJsonStringArray(address));
+                var val = await Bridge.InvokeRoute<string>(getRoute("balanceOf"), Utils.ToJsonStringArray(address));
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -252,7 +246,7 @@ namespace Thirdweb
                     contractAddress,
                     new TokenERC721Contract.BalanceOfFunction() { Owner = address }
                 );
-                return balance.ReturnValue1.ToString();
+                return balance.ReturnValue1;
             }
         }
 
@@ -280,11 +274,12 @@ namespace Thirdweb
         /// <summary>
         /// Get the total suppply in circulation
         /// </summary>
-        public async Task<int> TotalCount()
+        public async Task<BigInteger> TotalCount()
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("totalCount"), new string[] { });
+                var val = await Bridge.InvokeRoute<string>(getRoute("totalCount"), new string[] { });
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -292,18 +287,19 @@ namespace Thirdweb
                     contractAddress,
                     new TokenERC721Contract.TotalSupplyFunction() { }
                 );
-                return (int)totalCount.ReturnValue1;
+                return totalCount.ReturnValue1;
             }
         }
 
         /// <summary>
         /// Get the total claimed suppply for Drop contracts
         /// </summary>
-        public async Task<int> TotalClaimedSupply()
+        public async Task<BigInteger> TotalClaimedSupply()
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("totalClaimedSupply"), new string[] { });
+                var val = await Bridge.InvokeRoute<string>(getRoute("totalClaimedSupply"), new string[] { });
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -314,11 +310,12 @@ namespace Thirdweb
         /// <summary>
         /// Get the total unclaimed suppply for Drop contracts
         /// </summary>
-        public async Task<int> TotalUnclaimedSupply()
+        public async Task<BigInteger> TotalUnclaimedSupply()
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("totalUnclaimedSupply"), new string[] { });
+                var val = await Bridge.InvokeRoute<string>(getRoute("totalUnclaimedSupply"), new string[] { });
+                return BigInteger.Parse(val);
             }
             else
             {
