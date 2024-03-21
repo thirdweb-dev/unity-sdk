@@ -9,7 +9,7 @@ on:
 jobs:
   buildAndTestForLinuxBasedPlatforms:
     name: Test for ${{ matrix.targetPlatform }}
-    runs-on: ubuntu-latest-32
+    runs-on: ubuntu-latest-16
     concurrency:
       group: Unity-Test-${{ matrix.targetPlatform }}-${{ github.ref }}
       cancel-in-progress: true
