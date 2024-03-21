@@ -40,15 +40,16 @@ jobs:
             Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-
             Library-${{ matrix.projectPath }}-
             Library-
-      - name: Setup config.json
+      - name: Setup Config
         env:
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
         run: |
           mkdir -p Assets/Tests/Resources
           echo '{"clientId": "${{ secrets.CLIENT_ID }}"}' > Assets/Tests/Resources/config.json
         shell: bash
-      - uses: game-ci/unity-test-runner@v4
-        id: TestRunner/${{ matrix.targetPlatform }}
+      - name: Run Tests
+        uses: game-ci/unity-test-runner@v4
+        id: Artifacts-${{ matrix.targetPlatform }}
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
