@@ -136,7 +136,7 @@ public class ERC721ReadTests : ConfigManager
         yield return new WaitUntil(() => totalSupplyTask.IsCompleted);
         Assert.IsTrue(totalSupplyTask.IsCompletedSuccessfully);
         Assert.IsNotNull(totalSupplyTask.Result);
-        Assert.GreaterOrEqual(totalSupplyTask.Result, 0);
+        Assert.GreaterOrEqual(totalSupplyTask.Result, BigInteger.Zero);
         yield return null;
     }
 }

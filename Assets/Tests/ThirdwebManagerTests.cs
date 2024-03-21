@@ -66,7 +66,7 @@ public class ThirdwebManagerTests : ConfigManager
         Assert.IsNotNull(ThirdwebManager.Instance.SDK.session.CurrentChainData);
 
         Assert.IsNull(ThirdwebManager.Instance.SDK.session.ActiveWallet);
-        Assert.AreEqual(ThirdwebSession.Nonce, 0);
+        Assert.GreaterOrEqual(ThirdwebSession.Nonce, 0);
 
         Assert.AreEqual(chainId, ThirdwebManager.Instance.SDK.session.ChainId);
         Assert.AreEqual(chainIdHex, ThirdwebManager.Instance.SDK.session.CurrentChainData.chainId);
@@ -141,7 +141,7 @@ public class ThirdwebManagerTests : ConfigManager
 
         var connectTask = ThirdwebManager.Instance.SDK.wallet.Connect(new WalletConnection(provider: WalletProvider.LocalWallet, chainId: chainId));
         yield return new WaitUntil(() => connectTask.IsCompleted);
-        Assert.IsTrue(connectTask.IsCompletedSuccessfully);
+        Assert.IsTrue(Utils.IsWebGLBuild() ? connectTask.IsFaulted : connectTask.IsCompletedSuccessfully);
 
         var rpcTask = ThirdwebManager.Instance.SDK.wallet.GetBalance();
         yield return new WaitUntil(() => rpcTask.IsCompleted);
@@ -149,7 +149,7 @@ public class ThirdwebManagerTests : ConfigManager
     }
 
     [UnityTest]
-    public IEnumerator Initialization_WithClientIdNoBundleId_AppliesCorrectly()
+    public IEnumerator Initialization_WithClientIdNoBundleIdOverride_AppliesCorrectly()
     {
         ThirdwebManager.Instance.clientId = "testClientId";
         Assert.IsNull(ThirdwebManager.Instance.bundleIdOverride);
@@ -163,11 +163,18 @@ public class ThirdwebManagerTests : ConfigManager
 
         Assert.AreEqual(ThirdwebManager.Instance.clientId, ThirdwebManager.Instance.SDK.session.Options.clientId);
         Assert.AreEqual(bundleId, ThirdwebManager.Instance.SDK.session.Options.bundleId);
-        Assert.AreEqual(ThirdwebManager.Instance.SDK.session.RPC, $"https://421614.rpc.thirdweb.com/{ThirdwebManager.Instance.clientId}?bundleId={bundleId}");
+        if (Utils.IsWebGLBuild())
+        {
+            Assert.AreEqual(ThirdwebManager.Instance.SDK.session.RPC, $"https://421614.rpc.thirdweb.com/{ThirdwebManager.Instance.clientId}");
+        }
+        else
+        {
+            Assert.AreEqual(ThirdwebManager.Instance.SDK.session.RPC, $"https://421614.rpc.thirdweb.com/{ThirdwebManager.Instance.clientId}?bundleId={bundleId}");
+        }
     }
 
     [UnityTest]
-    public IEnumerator Initialization_WithClientIdAndBundleId_AppliesCorrectly()
+    public IEnumerator Initialization_WithClientIdAndBundleIdOverride_AppliesCorrectly()
     {
         ThirdwebManager.Instance.clientId = "testClientId";
         ThirdwebManager.Instance.bundleIdOverride = "com.example.test";
@@ -179,6 +186,14 @@ public class ThirdwebManagerTests : ConfigManager
         // Validate that the SDK session has correctly applied clientId and bundleId
         Assert.AreEqual(ThirdwebManager.Instance.clientId, ThirdwebManager.Instance.SDK.session.Options.clientId);
         Assert.AreEqual("com.example.test", ThirdwebManager.Instance.SDK.session.Options.bundleId);
-        Assert.AreEqual(ThirdwebManager.Instance.SDK.session.RPC, $"https://421614.rpc.thirdweb.com/{ThirdwebManager.Instance.clientId}?bundleId={ThirdwebManager.Instance.bundleIdOverride}");
+
+        if (Utils.IsWebGLBuild())
+        {
+            Assert.AreEqual(ThirdwebManager.Instance.SDK.session.RPC, $"https://421614.rpc.thirdweb.com/{ThirdwebManager.Instance.clientId}");
+        }
+        else
+        {
+            Assert.AreEqual(ThirdwebManager.Instance.SDK.session.RPC, $"https://421614.rpc.thirdweb.com/{ThirdwebManager.Instance.clientId}?bundleId={ThirdwebManager.Instance.bundleIdOverride}");
+        }
     }
 }

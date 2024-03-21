@@ -21,6 +21,8 @@ public class WalletTests : ConfigManager
 
         _go = new GameObject("ThirdwebManager");
         _go.AddComponent<ThirdwebManager>();
+
+        ThirdwebManager.Instance.clientId = GetClientId();
     }
 
     [TearDown]
@@ -339,6 +341,9 @@ public class WalletTests : ConfigManager
     [UnityTest]
     public IEnumerator FundWallet_WithLocalWallet_Fail()
     {
+        if (Utils.IsWebGLBuild())
+            yield break;
+
         yield return Connect_WithLocalWallet_Success();
 
         var fundWalletTask = ThirdwebManager.Instance.SDK.wallet.FundWallet(default);

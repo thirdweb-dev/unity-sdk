@@ -78,13 +78,15 @@ public class StorageTests : ConfigManager
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
 
         string url = "https://www.gutenberg.org/files/11/11-0.txt";
+        if (Utils.IsWebGLBuild())
+            url = "https://thingproxy.freeboard.io/fetch/" + url;
 
         var downloadTask = ThirdwebManager.Instance.SDK.storage.DownloadText<string>(url);
         yield return new WaitUntil(() => downloadTask.IsCompleted);
         Assert.IsTrue(downloadTask.IsCompletedSuccessfully);
         Assert.IsNotNull(downloadTask.Result);
         Assert.IsTrue(downloadTask.Result.Length > 0);
-        Assert.IsTrue(downloadTask.Result.StartsWith("*** START OF THE PROJECT GUTENBERG EBOOK"));
+        Assert.IsTrue(downloadTask.Result.Contains("*** START OF THE PROJECT GUTENBERG EBOOK"));
     }
 
     [UnityTest]

@@ -21,6 +21,13 @@ public class EventsTests : ConfigManager
         public BigInteger TokenId { get; set; }
     }
 
+    public struct TransferEvent
+    {
+        public string from;
+        public string to;
+        public string tokenId;
+    }
+
     private GameObject _go;
     private string _dropErc721Address = "0xD811CB13169C175b64bf8897e2Fd6a69C6343f5C";
 
@@ -51,11 +58,23 @@ public class EventsTests : ConfigManager
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
 
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc721Address);
-        var transferEvents = contract.GetEventLogs<TransferEventDTO>();
-        yield return new WaitUntil(() => transferEvents.IsCompleted);
-        Assert.IsTrue(transferEvents.IsCompletedSuccessfully);
-        Assert.IsNotNull(transferEvents.Result);
-        Assert.Greater(transferEvents.Result.Count, 0);
-        yield return null;
+        if (Utils.IsWebGLBuild())
+        {
+            var transferEvents = contract.events.Get<TransferEvent>("Transfer");
+            yield return new WaitUntil(() => transferEvents.IsCompleted);
+            Assert.IsTrue(transferEvents.IsCompletedSuccessfully);
+            Assert.IsNotNull(transferEvents.Result);
+            Assert.Greater(transferEvents.Result.Count, 0);
+            yield return null;
+        }
+        else
+        {
+            var transferEvents = contract.GetEventLogs<TransferEventDTO>();
+            yield return new WaitUntil(() => transferEvents.IsCompleted);
+            Assert.IsTrue(transferEvents.IsCompletedSuccessfully);
+            Assert.IsNotNull(transferEvents.Result);
+            Assert.Greater(transferEvents.Result.Count, 0);
+            yield return null;
+        }
     }
 }

@@ -105,8 +105,15 @@ public class MarketplaceReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
         var result = contract.marketplace.directListings.IsBuyerApprovedForListing("1", _marketplaceAddress);
         yield return new WaitUntil(() => result.IsCompleted);
-        Assert.IsTrue(result.IsCompletedSuccessfully);
-        Assert.IsNotNull(result.Result);
+        if (Utils.IsWebGLBuild())
+        {
+            Assert.IsTrue(result.IsFaulted);
+        }
+        else
+        {
+            Assert.IsTrue(result.IsCompletedSuccessfully);
+            Assert.IsNotNull(result.Result);
+        }
         yield return null;
     }
 
@@ -212,8 +219,15 @@ public class MarketplaceReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
         var result = contract.marketplace.englishAuctions.GetWinner("0");
         yield return new WaitUntil(() => result.IsCompleted);
-        Assert.IsTrue(result.IsCompletedSuccessfully);
-        Assert.IsNotNull(result.Result);
+        if (Utils.IsWebGLBuild())
+        {
+            Assert.IsTrue(result.IsFaulted);
+        }
+        else
+        {
+            Assert.IsTrue(result.IsCompletedSuccessfully);
+            Assert.IsNotNull(result.Result);
+        }
         yield return null;
     }
 

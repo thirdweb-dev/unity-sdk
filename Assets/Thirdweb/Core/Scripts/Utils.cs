@@ -310,18 +310,10 @@ namespace Thirdweb
             return Application.persistentDataPath + "/account.json";
         }
 
-        public static bool DeleteLocalAccount()
+        public static void DeleteLocalAccount()
         {
-            try
-            {
+            if (File.Exists(GetAccountPath()))
                 File.Delete(GetAccountPath());
-                return true;
-            }
-            catch (System.Exception e)
-            {
-                ThirdwebDebug.LogWarning("Error deleting account: " + e.Message);
-                return false;
-            }
         }
 
         public static Account UnlockOrGenerateLocalAccount(BigInteger chainId, string password = null, string privateKey = null)
