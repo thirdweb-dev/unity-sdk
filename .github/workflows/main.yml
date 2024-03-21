@@ -48,6 +48,7 @@ jobs:
           echo '{"clientId": "${{ secrets.CLIENT_ID }}"}' > Assets/Tests/Resources/config.json
         shell: bash
       - name: Run Tests
+        if: ${{ matrix.packages.enabled == 'true' }}
         uses: game-ci/unity-test-runner@v4
         id: ${{ matrix.targetPlatform }}-Artifacts
         env:
