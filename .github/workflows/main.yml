@@ -58,11 +58,11 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           testMode: PlayMode # Run PlayMode tests.
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: Test results-${{ matrix.targetPlatform }}-${{ github.run_number }}
-          path: ${{ steps.testRunner.outputs.artifactsPath }}
+      # - uses: actions/upload-artifact@v3
+      #   if: always()
+      #   with:
+      #     name: Test results-${{ matrix.targetPlatform }}-${{ github.run_number }}
+      #     path: ${{ steps.testRunner.outputs.artifactsPath }}
       - name: Publish Unit Test Results for ${{ matrix.targetPlatform }}
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
