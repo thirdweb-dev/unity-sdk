@@ -10,9 +10,9 @@ jobs:
   buildAndTestForLinuxBasedPlatforms:
     name: Test for ${{ matrix.targetPlatform }}
     runs-on: ubuntu-latest-32
-    concurrency:
-      group: Unity-Test-${{ matrix.targetPlatform }}-${{ github.ref }}
-      cancel-in-progress: true
+    # concurrency:
+    #   group: Unity-Test-${{ matrix.targetPlatform }}-${{ github.ref }}
+    #   cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
@@ -48,7 +48,6 @@ jobs:
           echo '{"clientId": "${{ secrets.CLIENT_ID }}"}' > Assets/Tests/Resources/config.json
         shell: bash
       - name: Run Tests
-        if: ${{ matrix.packages.enabled == 'true' }}
         uses: game-ci/unity-test-runner@v4
         id: ${{ matrix.targetPlatform }}-Artifacts
         env:
