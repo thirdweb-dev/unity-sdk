@@ -9,6 +9,7 @@ using DropERC721Contract = Thirdweb.Contracts.DropERC721.ContractDefinition;
 using ERC721AQueryable = Thirdweb.Contracts.ERC721AQueryableUpgradeable.ContractDefinition;
 using SignatureDropContract = Thirdweb.Contracts.SignatureDrop.ContractDefinition;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace Thirdweb
 {
@@ -674,18 +675,21 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var signedPayload = await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+                if (string.IsNullOrEmpty(privateKeyOverride))
+                    return await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
 
-                if (privateKeyOverride == "")
-                    return signedPayload;
+                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
+                var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
+                var primarySaleRecipient = await contract.Read<string>("primarySaleRecipient");
+                var royaltyInfo = await contract.Read<object[]>("getDefaultRoyaltyInfo");
 
                 var req = new TokenERC721Contract.MintRequest()
                 {
                     To = payloadToSign.to,
-                    RoyaltyRecipient = signedPayload.payload.royaltyRecipient,
-                    RoyaltyBps = signedPayload.payload.royaltyBps,
-                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
-                    Uri = signedPayload.payload.uri,
+                    RoyaltyRecipient = royaltyInfo[0].ToString(),
+                    RoyaltyBps = BigInteger.Parse(royaltyInfo[1].ToString()),
+                    PrimarySaleRecipient = primarySaleRecipient,
+                    Uri = uri.IpfsHash.CidToIpfsUrl(),
                     Price = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
                     ValidityStartTimestamp = payloadToSign.mintStartTime,
@@ -702,13 +706,13 @@ namespace Thirdweb
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
 
-                signedPayload = new ERC721SignedPayload()
+                var signedPayload = new ERC721SignedPayload()
                 {
                     signature = signature,
                     payload = new ERC721SignedPayloadOutput()
                     {
                         to = req.To,
-                        price = req.Price.ToString(),
+                        price = req.Price.ToString().ToEth(18, false),
                         currencyAddress = req.Currency,
                         primarySaleRecipient = req.PrimarySaleRecipient,
                         royaltyRecipient = req.RoyaltyRecipient,

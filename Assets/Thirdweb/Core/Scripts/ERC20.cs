@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using TokenERC20Contract = Thirdweb.Contracts.TokenERC20.ContractDefinition;
 using DropERC20Contract = Thirdweb.Contracts.DropERC20.ContractDefinition;
+using Nethereum.Hex.HexConvertors.Extensions;
 
 namespace Thirdweb
 {
@@ -489,16 +490,16 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var signedPayload = await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+                if (string.IsNullOrEmpty(privateKeyOverride))
+                    return await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
 
-                if (privateKeyOverride == "")
-                    return signedPayload;
+                var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
+                var primarySaleRecipient = await contract.Read<string>("primarySaleRecipient");
 
-                var name = await ThirdwebManager.Instance.SDK.GetContract(contractAddress).Read<string>("name");
                 var req = new TokenERC20Contract.MintRequest()
                 {
                     To = payloadToSign.to,
-                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
+                    PrimarySaleRecipient = primarySaleRecipient,
                     Quantity = BigInteger.Parse(payloadToSign.quantity.ToWei()),
                     Price = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
@@ -506,18 +507,28 @@ namespace Thirdweb
                     ValidityEndTimestamp = payloadToSign.mintEndTime,
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
-                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(name, "1", await ThirdwebManager.Instance.SDK.wallet.GetChainId(), contractAddress, req, privateKeyOverride);
 
-                signedPayload = new ERC20SignedPayload()
+                var name = await contract.Read<string>("name");
+
+                string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(
+                    name,
+                    "1",
+                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    contractAddress,
+                    req,
+                    string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
+                );
+
+                var signedPayload = new ERC20SignedPayload()
                 {
                     signature = signature,
                     payload = new ERC20SignedPayloadOutput()
                     {
                         to = req.To,
-                        price = req.Price.ToString(),
+                        price = req.Price.ToString().ToEth(18, false),
                         currencyAddress = req.Currency,
                         primarySaleRecipient = req.PrimarySaleRecipient,
-                        quantity = req.Quantity.ToString(),
+                        quantity = req.Quantity.ToString().ToEth(18, false),
                         uid = req.Uid.ByteArrayToHexString(),
                         mintStartTime = (long)req.ValidityStartTimestamp,
                         mintEndTime = (long)req.ValidityEndTimestamp

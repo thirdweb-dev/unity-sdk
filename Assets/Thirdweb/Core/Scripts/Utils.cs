@@ -735,5 +735,13 @@ namespace Thirdweb
             var sha3 = new Nethereum.Util.Sha3Keccack();
             return sha3.CalculateHash(message);
         }
+
+        public static string GenerateRandomString(int v)
+        {
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new System.Random();
+            var result = new string(Enumerable.Repeat(chars, v).Select(s => s[random.Next(s.Length)]).ToArray());
+            return result;
+        }
     }
 }

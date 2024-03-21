@@ -742,19 +742,22 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var signedPayload = await Bridge.InvokeRoute<ERC1155SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+                if (string.IsNullOrEmpty(privateKeyOverride))
+                    return await Bridge.InvokeRoute<ERC1155SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
 
-                if (privateKeyOverride == "")
-                    return signedPayload;
+                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
+                var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
+                var primarySaleRecipient = await contract.Read<string>("primarySaleRecipient");
+                var royaltyInfo = await contract.Read<object[]>("getDefaultRoyaltyInfo");
 
                 var req = new TokenERC1155Contract.MintRequest()
                 {
                     To = payloadToSign.to,
-                    RoyaltyRecipient = signedPayload.payload.royaltyRecipient,
-                    RoyaltyBps = signedPayload.payload.royaltyBps,
-                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
+                    RoyaltyRecipient = royaltyInfo[0].ToString(),
+                    RoyaltyBps = BigInteger.Parse(royaltyInfo[1].ToString()),
+                    PrimarySaleRecipient = primarySaleRecipient,
                     TokenId = Utils.GetMaxUint256(),
-                    Uri = signedPayload.payload.uri,
+                    Uri = uri.IpfsHash.CidToIpfsUrl(),
                     Quantity = payloadToSign.quantity,
                     PricePerToken = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
@@ -772,14 +775,14 @@ namespace Thirdweb
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
 
-                signedPayload = new ERC1155SignedPayload()
+                var signedPayload = new ERC1155SignedPayload()
                 {
                     signature = signature,
                     payload = new ERC1155SignedPayloadOutput()
                     {
                         to = req.To,
                         tokenId = req.TokenId.ToString(),
-                        price = req.PricePerToken.ToString(),
+                        price = req.PricePerToken.ToString().ToEth(18, false),
                         currencyAddress = req.Currency,
                         primarySaleRecipient = req.PrimarySaleRecipient,
                         royaltyRecipient = req.RoyaltyRecipient,
@@ -859,26 +862,30 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var signedPayload = await Bridge.InvokeRoute<ERC1155SignedPayload>(getRoute("generateFromTokenId"), Utils.ToJsonStringArray(payloadToSign));
+                if (string.IsNullOrEmpty(privateKeyOverride))
+                    return await Bridge.InvokeRoute<ERC1155SignedPayload>(getRoute("generateFromTokenId"), Utils.ToJsonStringArray(payloadToSign));
 
-                if (privateKeyOverride == "")
-                    return signedPayload;
+                var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
+                var uri = await contract.Read<string>("uri", int.Parse(payloadToSign.tokenId));
+                var primarySaleRecipient = await contract.Read<string>("primarySaleRecipient");
+                var royaltyInfo = await contract.Read<object[]>("getDefaultRoyaltyInfo");
 
                 var req = new TokenERC1155Contract.MintRequest()
                 {
                     To = payloadToSign.to,
-                    RoyaltyRecipient = signedPayload.payload.royaltyRecipient,
-                    RoyaltyBps = (BigInteger)signedPayload.payload.royaltyBps,
-                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
+                    RoyaltyRecipient = royaltyInfo[0].ToString(),
+                    RoyaltyBps = BigInteger.Parse(royaltyInfo[1].ToString()),
+                    PrimarySaleRecipient = primarySaleRecipient,
                     TokenId = BigInteger.Parse(payloadToSign.tokenId),
-                    Uri = signedPayload.payload.uri,
+                    Uri = uri,
                     Quantity = payloadToSign.quantity,
-                    PricePerToken = BigInteger.Parse(payloadToSign.price),
+                    PricePerToken = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
                     ValidityStartTimestamp = payloadToSign.mintStartTime,
                     ValidityEndTimestamp = payloadToSign.mintEndTime,
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
+
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC1155(
                     "TokenERC1155",
                     "1",
@@ -888,14 +895,14 @@ namespace Thirdweb
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
 
-                signedPayload = new ERC1155SignedPayload()
+                var signedPayload = new ERC1155SignedPayload()
                 {
                     signature = signature,
                     payload = new ERC1155SignedPayloadOutput()
                     {
                         to = req.To,
                         tokenId = req.TokenId.ToString(),
-                        price = req.PricePerToken.ToString(),
+                        price = req.PricePerToken.ToString().ToEth(18, false),
                         currencyAddress = req.Currency,
                         primarySaleRecipient = req.PrimarySaleRecipient,
                         royaltyRecipient = req.RoyaltyRecipient,
@@ -907,6 +914,7 @@ namespace Thirdweb
                         mintEndTime = (long)req.ValidityEndTimestamp
                     }
                 };
+
                 return signedPayload;
             }
             else
