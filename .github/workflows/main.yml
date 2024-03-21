@@ -9,7 +9,7 @@ on:
 jobs:
   buildAndTestForLinuxBasedPlatforms:
     name: Build and Test for ${{ matrix.targetPlatform }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-16
     strategy:
       fail-fast: false
       matrix:
@@ -60,7 +60,11 @@ jobs:
         with:
           name: Test results-${{ matrix.targetPlatform }}-${{ github.run_number }}
           path: ${{ steps.testRunner.outputs.artifactsPath }}
-      # - if: matrix.targetPlatform == 'Android'
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: ${{ steps.testRunner.outputs.artifactsPath }}/**/*.xml
       - uses: jlumbroso/free-disk-space@v1.3.1
       - uses: game-ci/unity-builder@v4
         env:
@@ -76,6 +80,31 @@ jobs:
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ github.run_number }}
           path: build
+
+  # deploy-webgl-to-gh-pages:
+  #   needs: buildAndTestForLinuxBasedPlatforms
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Download WebGL Build Artifact
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: Build-WebGL-${{ github.run_number }}
+  #         path: webgl-build
+
+  #     - name: Deploy to GitHub Pages
+  #       uses: JamesIves/github-pages-deploy-action@4.5.0
+  #       with:
+  #         branch: main
+  #         folder: webgl-build
+  #         target-folder: docs
+  #         clean: true
+  #         commit-message: "Deploy WebGL build to GitHub Pages"
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   buildForWindowsBasedPlatforms:
     name: Build for ${{ matrix.targetPlatform }}
@@ -117,7 +146,7 @@ jobs:
           allowDirtyBuild: true
       - uses: actions/upload-artifact@v3
         with:
-          name: Build
+          name: Build-${{ matrix.targetPlatform }}-${{ github.run_number }}
           path: build
 
   buildForMacOSBasedPlatforms:
@@ -163,5 +192,5 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: Build
+          name: Build-${{ matrix.targetPlatform }}-${{ github.run_number }}
           path: build
