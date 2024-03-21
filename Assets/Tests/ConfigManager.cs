@@ -16,17 +16,15 @@ public class ConfigManager
         if (_config != null)
             return _config.clientId;
 
-        string path = Path.Combine(Application.dataPath, "Tests/config.json");
-        if (File.Exists(path))
+        try
         {
-            string jsonContents = File.ReadAllText(path);
+            string jsonContents = Resources.Load<TextAsset>("config").text;
             _config = JsonUtility.FromJson<ConfigData>(jsonContents);
+            return _config?.clientId;
         }
-        else
+        catch (System.Exception e)
         {
-            throw new System.Exception($"Config file not found at path: {path}");
+            throw new System.Exception("Failed to load config file from Resources: " + e.Message);
         }
-
-        return _config?.clientId;
     }
 }
