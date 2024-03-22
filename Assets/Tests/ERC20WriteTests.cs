@@ -42,6 +42,8 @@ public class ERC20WriteTests : ConfigManager
         var connection = new WalletConnection(provider: WalletProvider.SmartWallet, chainId: 421614, personalWallet: WalletProvider.LocalWallet);
         var connectTask = ThirdwebManager.Instance.SDK.wallet.Connect(connection);
         yield return new WaitUntil(() => connectTask.IsCompleted);
+        if (connectTask.IsFaulted)
+            throw connectTask.Exception;
         Assert.IsTrue(connectTask.IsCompletedSuccessfully);
     }
 
@@ -53,6 +55,8 @@ public class ERC20WriteTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var task = contract.ERC20.SetAllowance(_dropErc20Address, "42");
         yield return new WaitUntil(() => task.IsCompleted);
+        if (task.IsFaulted)
+            throw task.Exception;
         Assert.IsTrue(task.IsCompletedSuccessfully);
         Assert.IsNotNull(task.Result);
         Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);
@@ -66,6 +70,8 @@ public class ERC20WriteTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var task = contract.ERC20.Claim("42");
         yield return new WaitUntil(() => task.IsCompleted);
+        if (task.IsFaulted)
+            throw task.Exception;
         Assert.IsTrue(task.IsCompletedSuccessfully);
         Assert.IsNotNull(task.Result);
         Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);
@@ -79,6 +85,8 @@ public class ERC20WriteTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var task = contract.ERC20.Transfer(_dropErc20Address, "4.2");
         yield return new WaitUntil(() => task.IsCompleted);
+        if (task.IsFaulted)
+            throw task.Exception;
         Assert.IsTrue(task.IsCompletedSuccessfully);
         Assert.IsNotNull(task.Result);
         Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);
@@ -92,6 +100,8 @@ public class ERC20WriteTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var task = contract.ERC20.Burn("4.2");
         yield return new WaitUntil(() => task.IsCompleted);
+        if (task.IsFaulted)
+            throw task.Exception;
         Assert.IsTrue(task.IsCompletedSuccessfully);
         Assert.IsNotNull(task.Result);
         Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);

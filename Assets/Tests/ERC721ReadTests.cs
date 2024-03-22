@@ -50,6 +50,8 @@ public class ERC721ReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc721Address);
         var currencyInfoTask = contract.ERC721.Get("1");
         yield return new WaitUntil(() => currencyInfoTask.IsCompleted);
+        if (currencyInfoTask.IsFaulted)
+            throw currencyInfoTask.Exception;
         Assert.IsTrue(currencyInfoTask.IsCompletedSuccessfully);
         Assert.IsNotNull(currencyInfoTask.Result);
         Assert.AreEqual("1", currencyInfoTask.Result.metadata.id);
@@ -64,6 +66,8 @@ public class ERC721ReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc721Address);
         var currencyInfoTask = contract.ERC721.GetAll();
         yield return new WaitUntil(() => currencyInfoTask.IsCompleted);
+        if (currencyInfoTask.IsFaulted)
+            throw currencyInfoTask.Exception;
         Assert.IsTrue(currencyInfoTask.IsCompletedSuccessfully);
         Assert.IsNotNull(currencyInfoTask.Result);
         Assert.GreaterOrEqual(currencyInfoTask.Result.Count, 0);
@@ -78,6 +82,8 @@ public class ERC721ReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc721Address);
         var currencyInfoTask = contract.ERC721.GetOwned(_dropErc721Address);
         yield return new WaitUntil(() => currencyInfoTask.IsCompleted);
+        if (currencyInfoTask.IsFaulted)
+            throw currencyInfoTask.Exception;
         Assert.IsTrue(currencyInfoTask.IsCompletedSuccessfully);
         Assert.IsNotNull(currencyInfoTask.Result);
         Assert.GreaterOrEqual(currencyInfoTask.Result.Count, 0);
@@ -92,6 +98,8 @@ public class ERC721ReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc721Address);
         var ownerTask = contract.ERC721.OwnerOf("1");
         yield return new WaitUntil(() => ownerTask.IsCompleted);
+        if (ownerTask.IsFaulted)
+            throw ownerTask.Exception;
         Assert.IsTrue(ownerTask.IsCompletedSuccessfully);
         Assert.IsNotNull(ownerTask.Result);
         Assert.IsTrue(ownerTask.Result.Length == 42);
@@ -106,6 +114,8 @@ public class ERC721ReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc721Address);
         var balanceTask = contract.ERC721.BalanceOf(_dropErc721Address);
         yield return new WaitUntil(() => balanceTask.IsCompleted);
+        if (balanceTask.IsFaulted)
+            throw balanceTask.Exception;
         Assert.IsTrue(balanceTask.IsCompletedSuccessfully);
         Assert.IsNotNull(balanceTask.Result);
         Assert.GreaterOrEqual(balanceTask.Result, BigInteger.Zero);
@@ -120,6 +130,8 @@ public class ERC721ReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc721Address);
         var allowanceTask = contract.ERC721.IsApprovedForAll(_dropErc721Address, _dropErc721Address);
         yield return new WaitUntil(() => allowanceTask.IsCompleted);
+        if (allowanceTask.IsFaulted)
+            throw allowanceTask.Exception;
         Assert.IsTrue(allowanceTask.IsCompletedSuccessfully);
         Assert.IsNotNull(allowanceTask.Result);
         Assert.IsTrue(allowanceTask.Result == true || allowanceTask.Result == false);
@@ -134,6 +146,8 @@ public class ERC721ReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc721Address);
         var totalSupplyTask = contract.ERC721.TotalCount();
         yield return new WaitUntil(() => totalSupplyTask.IsCompleted);
+        if (totalSupplyTask.IsFaulted)
+            throw totalSupplyTask.Exception;
         Assert.IsTrue(totalSupplyTask.IsCompletedSuccessfully);
         Assert.IsNotNull(totalSupplyTask.Result);
         Assert.GreaterOrEqual(totalSupplyTask.Result, BigInteger.Zero);

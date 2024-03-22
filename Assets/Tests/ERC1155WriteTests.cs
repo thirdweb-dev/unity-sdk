@@ -42,6 +42,8 @@ public class ERC1155WriteTests : ConfigManager
         var connection = new WalletConnection(provider: WalletProvider.SmartWallet, chainId: 421614, personalWallet: WalletProvider.LocalWallet);
         var connectTask = ThirdwebManager.Instance.SDK.wallet.Connect(connection);
         yield return new WaitUntil(() => connectTask.IsCompleted);
+        if (connectTask.IsFaulted)
+            throw connectTask.Exception;
         Assert.IsTrue(connectTask.IsCompletedSuccessfully);
     }
 
@@ -53,6 +55,8 @@ public class ERC1155WriteTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         var task = contract.ERC1155.SetApprovalForAll(_dropErc1155Address, true);
         yield return new WaitUntil(() => task.IsCompleted);
+        if (task.IsFaulted)
+            throw task.Exception;
         Assert.IsTrue(task.IsCompletedSuccessfully);
         Assert.IsNotNull(task.Result);
         Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);
@@ -66,6 +70,8 @@ public class ERC1155WriteTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         var task = contract.ERC1155.Claim("1", 1);
         yield return new WaitUntil(() => task.IsCompleted);
+        if (task.IsFaulted)
+            throw task.Exception;
         Assert.IsTrue(task.IsCompletedSuccessfully);
         Assert.IsNotNull(task.Result);
         Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);
@@ -78,11 +84,15 @@ public class ERC1155WriteTests : ConfigManager
 
         var addressTask = ThirdwebManager.Instance.SDK.wallet.GetAddress();
         yield return new WaitUntil(() => addressTask.IsCompleted);
+        if (addressTask.IsFaulted)
+            throw addressTask.Exception;
         Assert.IsTrue(addressTask.IsCompletedSuccessfully);
 
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         var task = contract.ERC1155.Transfer(addressTask.Result, "1", 1);
         yield return new WaitUntil(() => task.IsCompleted);
+        if (task.IsFaulted)
+            throw task.Exception;
         Assert.IsTrue(task.IsCompletedSuccessfully);
         Assert.IsNotNull(task.Result);
         Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);
@@ -96,10 +106,8 @@ public class ERC1155WriteTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         var task = contract.ERC1155.Burn("1", 1);
         yield return new WaitUntil(() => task.IsCompleted);
-        if (!task.IsCompletedSuccessfully)
-        {
-            Debug.LogException(task.Exception);
-        }
+        if (task.IsFaulted)
+            throw task.Exception;
         Assert.IsTrue(task.IsCompletedSuccessfully);
         Assert.IsNotNull(task.Result);
         Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);

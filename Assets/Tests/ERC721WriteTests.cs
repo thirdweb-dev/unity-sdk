@@ -42,6 +42,8 @@ public class ERC721WriteTests : ConfigManager
         var connection = new WalletConnection(provider: WalletProvider.SmartWallet, chainId: 421614, personalWallet: WalletProvider.LocalWallet);
         var connectTask = ThirdwebManager.Instance.SDK.wallet.Connect(connection);
         yield return new WaitUntil(() => connectTask.IsCompleted);
+        if (connectTask.IsFaulted)
+            throw connectTask.Exception;
         Assert.IsTrue(connectTask.IsCompletedSuccessfully);
     }
 
@@ -53,6 +55,8 @@ public class ERC721WriteTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc712Address);
         var task = contract.ERC721.SetApprovalForAll(_dropErc712Address, false);
         yield return new WaitUntil(() => task.IsCompleted);
+        if (task.IsFaulted)
+            throw task.Exception;
         Assert.IsTrue(task.IsCompletedSuccessfully);
         Assert.IsNotNull(task.Result);
         Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);
@@ -66,6 +70,8 @@ public class ERC721WriteTests : ConfigManager
     //     var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc712Address);
     //     var task = contract.ERC721.Claim(1);
     //     yield return new WaitUntil(() => task.IsCompleted);
+    //     if (task.IsFaulted)
+    //         throw task.Exception;
     //     Assert.IsTrue(task.IsCompletedSuccessfully);
     //     Assert.IsNotNull(task.Result);
     //     Assert.IsTrue(task.Result[0].receipt.transactionHash.Length == 66);
@@ -80,16 +86,22 @@ public class ERC721WriteTests : ConfigManager
 
     //     var addressTask = ThirdwebManager.Instance.SDK.wallet.GetAddress();
     //     yield return new WaitUntil(() => addressTask.IsCompleted);
+    //     if (addressTask.IsFaulted)
+    //         throw addressTask.Exception;
     //     Assert.IsTrue(addressTask.IsCompletedSuccessfully);
 
     //     var latestTokenIdTask = contract.ERC721.TotalCount();
     //     yield return new WaitUntil(() => latestTokenIdTask.IsCompleted);
+    //     if (latestTokenIdTask.IsFaulted)
+    //         throw latestTokenIdTask.Exception;
     //     Assert.IsTrue(latestTokenIdTask.IsCompletedSuccessfully);
     //     Assert.IsNotNull(latestTokenIdTask.Result);
     //     var latestTokenId = latestTokenIdTask.Result - 1;
 
     //     var task = contract.ERC721.Transfer(addressTask.Result, latestTokenId.ToString());
     //     yield return new WaitUntil(() => task.IsCompleted);
+    //     if (task.IsFaulted)
+    //         throw task.Exception;
     //     Assert.IsTrue(task.IsCompletedSuccessfully);
     //     Assert.IsNotNull(task.Result);
     //     Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);
@@ -104,12 +116,16 @@ public class ERC721WriteTests : ConfigManager
 
     //     var latestTokenIdTask = contract.ERC721.TotalCount();
     //     yield return new WaitUntil(() => latestTokenIdTask.IsCompleted);
+    //     if (latestTokenIdTask.IsFaulted)
+    //         throw latestTokenIdTask.Exception;
     //     Assert.IsTrue(latestTokenIdTask.IsCompletedSuccessfully);
     //     Assert.IsNotNull(latestTokenIdTask.Result);
     //     var latestTokenId = latestTokenIdTask.Result - 1;
 
     //     var task = contract.ERC721.Burn(latestTokenId.ToString());
     //     yield return new WaitUntil(() => task.IsCompleted);
+    //     if (task.IsFaulted)
+    //         throw task.Exception;
     //     Assert.IsTrue(task.IsCompletedSuccessfully);
     //     Assert.IsNotNull(task.Result);
     //     Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);

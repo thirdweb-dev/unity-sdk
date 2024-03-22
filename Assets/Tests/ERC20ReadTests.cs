@@ -50,6 +50,8 @@ public class ERC20ReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var currencyInfoTask = contract.ERC20.Get();
         yield return new WaitUntil(() => currencyInfoTask.IsCompleted);
+        if (currencyInfoTask.IsFaulted)
+            throw currencyInfoTask.Exception;
         Assert.IsTrue(currencyInfoTask.IsCompletedSuccessfully);
         Assert.IsNotNull(currencyInfoTask.Result);
         Assert.AreEqual("18", currencyInfoTask.Result.decimals);
@@ -64,6 +66,8 @@ public class ERC20ReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var balanceTask = contract.ERC20.BalanceOf(_dropErc20Address);
         yield return new WaitUntil(() => balanceTask.IsCompleted);
+        if (balanceTask.IsFaulted)
+            throw balanceTask.Exception;
         Assert.IsTrue(balanceTask.IsCompletedSuccessfully);
         Assert.IsNotNull(balanceTask.Result);
         Assert.IsNotNull(balanceTask.Result.value);
@@ -79,6 +83,8 @@ public class ERC20ReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var allowanceTask = contract.ERC20.AllowanceOf(_dropErc20Address, _dropErc20Address);
         yield return new WaitUntil(() => allowanceTask.IsCompleted);
+        if (allowanceTask.IsFaulted)
+            throw allowanceTask.Exception;
         Assert.IsTrue(allowanceTask.IsCompletedSuccessfully);
         Assert.IsNotNull(allowanceTask.Result);
         Assert.IsNotNull(allowanceTask.Result.value);
@@ -94,6 +100,8 @@ public class ERC20ReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var totalSupplyTask = contract.ERC20.TotalSupply();
         yield return new WaitUntil(() => totalSupplyTask.IsCompleted);
+        if (totalSupplyTask.IsFaulted)
+            throw totalSupplyTask.Exception;
         Assert.IsTrue(totalSupplyTask.IsCompletedSuccessfully);
         Assert.IsNotNull(totalSupplyTask.Result);
         Assert.IsNotNull(totalSupplyTask.Result.value);

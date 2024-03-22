@@ -62,6 +62,8 @@ public class EventsTests : ConfigManager
         {
             var transferEvents = contract.events.Get<TransferEvent>("Transfer");
             yield return new WaitUntil(() => transferEvents.IsCompleted);
+            if (transferEvents.IsFaulted)
+                throw transferEvents.Exception;
             Assert.IsTrue(transferEvents.IsCompletedSuccessfully);
             Assert.IsNotNull(transferEvents.Result);
             Assert.Greater(transferEvents.Result.Count, 0);
@@ -71,6 +73,8 @@ public class EventsTests : ConfigManager
         {
             var transferEvents = contract.GetEventLogs<TransferEventDTO>();
             yield return new WaitUntil(() => transferEvents.IsCompleted);
+            if (transferEvents.IsFaulted)
+                throw transferEvents.Exception;
             Assert.IsTrue(transferEvents.IsCompletedSuccessfully);
             Assert.IsNotNull(transferEvents.Result);
             Assert.Greater(transferEvents.Result.Count, 0);

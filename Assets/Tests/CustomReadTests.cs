@@ -54,6 +54,8 @@ public class CustomReadTests : ConfigManager
         yield return new WaitUntil(() => readTask.IsCompleted);
         if (Utils.IsWebGLBuild())
         {
+            if (readTask.IsFaulted)
+                throw readTask.Exception;
             Assert.IsTrue(readTask.IsCompletedSuccessfully);
             Assert.NotNull(readTask.Result);
         }
@@ -72,6 +74,8 @@ public class CustomReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address, _dropErc20Abi);
         var readTask = contract.Read<BigInteger>("balanceOf", _dropErc20Address);
         yield return new WaitUntil(() => readTask.IsCompleted);
+        if (readTask.IsFaulted)
+            throw readTask.Exception;
         Assert.IsTrue(readTask.IsCompletedSuccessfully);
         Assert.NotNull(readTask.Result);
     }
@@ -84,6 +88,8 @@ public class CustomReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address, _dropErc20Abi);
         var readTask = contract.Read<string>("symbol");
         yield return new WaitUntil(() => readTask.IsCompleted);
+        if (readTask.IsFaulted)
+            throw readTask.Exception;
         Assert.IsTrue(readTask.IsCompletedSuccessfully);
         Assert.NotNull(readTask.Result);
     }

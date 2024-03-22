@@ -205,6 +205,8 @@ public class MarketplaceReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
         var result = contract.marketplace.englishAuctions.GetTotalCount();
         yield return new WaitUntil(() => result.IsCompleted);
+        if (result.IsFaulted)
+            throw result.Exception;
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
         Assert.Greater(int.Parse(result.Result), 0);
@@ -225,6 +227,8 @@ public class MarketplaceReadTests : ConfigManager
         }
         else
         {
+            if (result.IsFaulted)
+                throw result.Exception;
             Assert.IsTrue(result.IsCompletedSuccessfully);
             Assert.IsNotNull(result.Result);
         }
@@ -239,6 +243,8 @@ public class MarketplaceReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
         var result = contract.marketplace.englishAuctions.GetWinningBid("0");
         yield return new WaitUntil(() => result.IsCompleted);
+        if (result.IsFaulted)
+            throw result.Exception;
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
         yield return null;
@@ -252,6 +258,8 @@ public class MarketplaceReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
         var result = contract.marketplace.englishAuctions.IsWinningBid("0", "1");
         yield return new WaitUntil(() => result.IsCompleted);
+        if (result.IsFaulted)
+            throw result.Exception;
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
         yield return null;
@@ -265,6 +273,8 @@ public class MarketplaceReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
         var result = contract.marketplace.offers.GetAll();
         yield return new WaitUntil(() => result.IsCompleted);
+        if (result.IsFaulted)
+            throw result.Exception;
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
         Assert.Greater(result.Result.Count, 0);
@@ -279,6 +289,8 @@ public class MarketplaceReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
         var result = contract.marketplace.offers.GetAllValid();
         yield return new WaitUntil(() => result.IsCompleted);
+        if (result.IsFaulted)
+            throw result.Exception;
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
         Assert.GreaterOrEqual(result.Result.Count, 0);
@@ -293,6 +305,8 @@ public class MarketplaceReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
         var result = contract.marketplace.offers.GetOffer("0");
         yield return new WaitUntil(() => result.IsCompleted);
+        if (result.IsFaulted)
+            throw result.Exception;
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
         yield return null;
@@ -306,6 +320,8 @@ public class MarketplaceReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
         var result = contract.marketplace.offers.GetTotalCount();
         yield return new WaitUntil(() => result.IsCompleted);
+        if (result.IsFaulted)
+            throw result.Exception;
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
         Assert.Greater(int.Parse(result.Result), 0);
