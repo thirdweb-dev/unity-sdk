@@ -73,6 +73,7 @@ jobs:
 
       - name: Download Test Results
         uses: actions/download-artifact@v3
+        if: always()
         with:
           name: TestResults-${{ matrix.targetPlatform }}-${{ github.run_number }}
           path: ${{ matrix.projectPath }}/TestResults-${{ matrix.targetPlatform }}
