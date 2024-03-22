@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         projectPath:
-          - ""
+          - "unity-sdk"
         unityVersion:
           - 2022.3.17f1
         targetPlatform:
@@ -65,7 +65,7 @@ jobs:
       #     name: Test results-${{ matrix.targetPlatform }}-${{ github.run_number }}
       #     path: ${{ steps.testRunner.outputs.artifactsPath }}
       - name: Publish Test Results for ${{ matrix.targetPlatform }}
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
         if: always()
         with:
           files: ${{ steps.testRunner.outputs.artifactsPath }}/playmode-tests.xml
