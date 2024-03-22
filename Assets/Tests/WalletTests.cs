@@ -39,7 +39,7 @@ public class WalletTests : ConfigManager
     [UnityTest]
     public IEnumerator Connect_WithLocalWallet_Success()
     {
-        Utils.DeleteLocalAccount(); // cleanup existing account
+        Utils.DeleteLocalAccount();
         var connection = new WalletConnection(provider: WalletProvider.LocalWallet, chainId: _chainId, password: null); // device uid
         var connectTask = ThirdwebManager.Instance.SDK.wallet.Connect(connection);
         yield return new WaitUntil(() => connectTask.IsCompleted);
