@@ -21,6 +21,9 @@ public class CustomReadTests : ConfigManager
 
         _go = new GameObject("ThirdwebManager");
         _go.AddComponent<ThirdwebManager>();
+
+        ThirdwebManager.Instance.clientId = GetClientId();
+        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
     }
 
     [TearDown]
@@ -36,8 +39,6 @@ public class CustomReadTests : ConfigManager
     [UnityTest]
     public IEnumerator GetContract_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract("0x");
         Assert.IsNotNull(contract);
         Assert.AreEqual("0x", contract.address);
@@ -47,8 +48,6 @@ public class CustomReadTests : ConfigManager
     [UnityTest]
     public IEnumerator Custom_WithoutAbi_FailNativeSucceedWebGL()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var readTask = contract.Read<BigInteger>("balanceOf", _dropErc20Address);
         yield return new WaitUntil(() => readTask.IsCompleted);
@@ -69,8 +68,6 @@ public class CustomReadTests : ConfigManager
     [UnityTest]
     public IEnumerator Custom_WithAbi_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address, _dropErc20Abi);
         var readTask = contract.Read<BigInteger>("balanceOf", _dropErc20Address);
         yield return new WaitUntil(() => readTask.IsCompleted);
@@ -83,8 +80,6 @@ public class CustomReadTests : ConfigManager
     [UnityTest]
     public IEnumerator Custom_WithString_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address, _dropErc20Abi);
         var readTask = contract.Read<string>("symbol");
         yield return new WaitUntil(() => readTask.IsCompleted);

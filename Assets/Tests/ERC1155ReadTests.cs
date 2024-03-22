@@ -19,6 +19,9 @@ public class ERC1155ReadTests : ConfigManager
 
         _go = new GameObject("ThirdwebManager");
         _go.AddComponent<ThirdwebManager>();
+
+        ThirdwebManager.Instance.clientId = GetClientId();
+        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
     }
 
     [TearDown]
@@ -34,8 +37,6 @@ public class ERC1155ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator GetContract_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         Assert.IsNotNull(contract);
         Assert.AreEqual(_dropErc1155Address, contract.address);
@@ -45,8 +46,6 @@ public class ERC1155ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator ERC1155_Get_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         var currencyInfoTask = contract.ERC1155.Get("1");
         yield return new WaitUntil(() => currencyInfoTask.IsCompleted);
@@ -61,8 +60,6 @@ public class ERC1155ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator ERC1155_GetAll_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         var currencyInfoTask = contract.ERC1155.GetAll();
         yield return new WaitUntil(() => currencyInfoTask.IsCompleted);
@@ -77,8 +74,6 @@ public class ERC1155ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator ERC1155_GetOwned_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         var currencyInfoTask = contract.ERC1155.GetOwned(_dropErc1155Address);
         yield return new WaitUntil(() => currencyInfoTask.IsCompleted);
@@ -93,8 +88,6 @@ public class ERC1155ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator ERC1155_BalanceOf_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         var balanceTask = contract.ERC1155.BalanceOf(_dropErc1155Address, "1");
         yield return new WaitUntil(() => balanceTask.IsCompleted);
@@ -109,8 +102,6 @@ public class ERC1155ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator ERC1155_IsApprovedForAll_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         var allowanceTask = contract.ERC1155.IsApprovedForAll(_dropErc1155Address, _dropErc1155Address);
         yield return new WaitUntil(() => allowanceTask.IsCompleted);
@@ -125,8 +116,6 @@ public class ERC1155ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator ERC1155_TotalCount_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         var totalSupplyTask = contract.ERC1155.TotalCount();
         yield return new WaitUntil(() => totalSupplyTask.IsCompleted);
@@ -141,8 +130,6 @@ public class ERC1155ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator ERC1155_TotalSupply_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc1155Address);
         var totalSupplyTask = contract.ERC1155.TotalSupply("1");
         yield return new WaitUntil(() => totalSupplyTask.IsCompleted);

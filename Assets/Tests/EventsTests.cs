@@ -40,6 +40,9 @@ public class EventsTests : ConfigManager
 
         _go = new GameObject("ThirdwebManager");
         _go.AddComponent<ThirdwebManager>();
+
+        ThirdwebManager.Instance.clientId = GetClientId();
+        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
     }
 
     [TearDown]
@@ -55,8 +58,6 @@ public class EventsTests : ConfigManager
     [UnityTest]
     public IEnumerator GetEventLogs_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc721Address);
         if (Utils.IsWebGLBuild())
         {

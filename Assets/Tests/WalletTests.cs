@@ -23,6 +23,7 @@ public class WalletTests : ConfigManager
         _go.AddComponent<ThirdwebManager>();
 
         ThirdwebManager.Instance.clientId = GetClientId();
+        ThirdwebManager.Instance.Initialize(_chain);
     }
 
     [TearDown]
@@ -39,7 +40,6 @@ public class WalletTests : ConfigManager
     public IEnumerator Connect_WithLocalWallet_Success()
     {
         Utils.DeleteLocalAccount(); // cleanup existing account
-        ThirdwebManager.Instance.Initialize(_chain);
         var connection = new WalletConnection(provider: WalletProvider.LocalWallet, chainId: _chainId, password: null); // device uid
         var connectTask = ThirdwebManager.Instance.SDK.wallet.Connect(connection);
         yield return new WaitUntil(() => connectTask.IsCompleted);
@@ -53,7 +53,12 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        ThirdwebManager.Instance.Initialize(_chain);
+        var disconnectTask = ThirdwebManager.Instance.SDK.wallet.Disconnect();
+        yield return new WaitUntil(() => disconnectTask.IsCompleted);
+        if (disconnectTask.IsFaulted)
+            throw disconnectTask.Exception;
+        Assert.IsTrue(disconnectTask.IsCompletedSuccessfully);
+
         var connection = new WalletConnection(provider: WalletProvider.LocalWallet, chainId: _chainId, password: "wrongpassword");
         var connectTask = ThirdwebManager.Instance.SDK.wallet.Connect(connection);
         yield return new WaitUntil(() => connectTask.IsCompleted);
@@ -171,7 +176,6 @@ public class WalletTests : ConfigManager
     [UnityTest]
     public IEnumerator IsConnected_WithLocalWallet_Fail()
     {
-        ThirdwebManager.Instance.Initialize(_chain);
         var isConnectedTask = ThirdwebManager.Instance.SDK.wallet.IsConnected();
         yield return new WaitUntil(() => isConnectedTask.IsCompleted);
         Assert.IsTrue(isConnectedTask.IsCompletedSuccessfully);

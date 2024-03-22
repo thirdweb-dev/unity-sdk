@@ -19,6 +19,9 @@ public class ERC20ReadTests : ConfigManager
 
         _go = new GameObject("ThirdwebManager");
         _go.AddComponent<ThirdwebManager>();
+
+        ThirdwebManager.Instance.clientId = GetClientId();
+        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
     }
 
     [TearDown]
@@ -34,8 +37,6 @@ public class ERC20ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator GetContract_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         Assert.IsNotNull(contract);
         Assert.AreEqual(_dropErc20Address, contract.address);
@@ -45,8 +46,6 @@ public class ERC20ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator ERC20_Get_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var currencyInfoTask = contract.ERC20.Get();
         yield return new WaitUntil(() => currencyInfoTask.IsCompleted);
@@ -61,8 +60,6 @@ public class ERC20ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator ERC20_BalanceOf_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var balanceTask = contract.ERC20.BalanceOf(_dropErc20Address);
         yield return new WaitUntil(() => balanceTask.IsCompleted);
@@ -78,8 +75,6 @@ public class ERC20ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator ERC20_AllowanceOf_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var allowanceTask = contract.ERC20.AllowanceOf(_dropErc20Address, _dropErc20Address);
         yield return new WaitUntil(() => allowanceTask.IsCompleted);
@@ -95,8 +90,6 @@ public class ERC20ReadTests : ConfigManager
     [UnityTest]
     public IEnumerator ERC20_TotalSupply_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var totalSupplyTask = contract.ERC20.TotalSupply();
         yield return new WaitUntil(() => totalSupplyTask.IsCompleted);

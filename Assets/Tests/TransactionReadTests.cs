@@ -18,6 +18,9 @@ public class TransactionReadTests : ConfigManager
 
         _go = new GameObject("ThirdwebManager");
         _go.AddComponent<ThirdwebManager>();
+
+        ThirdwebManager.Instance.clientId = GetClientId();
+        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
     }
 
     [TearDown]
@@ -33,8 +36,6 @@ public class TransactionReadTests : ConfigManager
     [UnityTest]
     public IEnumerator Static_WaitForTransactionResult_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         string txHash = "0x52b79681f549d7b01b12b8be5fa9dd88f7fee1411f965cbe7ec6e157ccb48af1";
         var task = Transaction.WaitForTransactionResult(txHash);
         yield return new WaitUntil(() => task.IsCompleted);

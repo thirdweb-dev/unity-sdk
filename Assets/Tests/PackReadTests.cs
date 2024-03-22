@@ -19,6 +19,9 @@ public class PackReadTests : ConfigManager
 
         _go = new GameObject("ThirdwebManager");
         _go.AddComponent<ThirdwebManager>();
+
+        ThirdwebManager.Instance.clientId = GetClientId();
+        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
     }
 
     [TearDown]
@@ -34,8 +37,6 @@ public class PackReadTests : ConfigManager
     [UnityTest]
     public IEnumerator Get_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_packAddress);
         var packTask = contract.pack.Get("0");
         yield return new WaitUntil(() => packTask.IsCompleted);
@@ -46,8 +47,6 @@ public class PackReadTests : ConfigManager
     [UnityTest]
     public IEnumerator BalanceOf_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_packAddress);
         var packTask = contract.pack.BalanceOf(_packAddress, "0");
         yield return new WaitUntil(() => packTask.IsCompleted);
@@ -58,8 +57,6 @@ public class PackReadTests : ConfigManager
     [UnityTest]
     public IEnumerator IsApprovedForAll_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_packAddress);
         var packTask = contract.pack.IsApprovedForAll(_packAddress, _packAddress);
         yield return new WaitUntil(() => packTask.IsCompleted);
@@ -70,8 +67,6 @@ public class PackReadTests : ConfigManager
     [UnityTest]
     public IEnumerator TotalSupply_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_packAddress);
         var packTask = contract.pack.TotalSupply("0");
         yield return new WaitUntil(() => packTask.IsCompleted);
@@ -83,8 +78,6 @@ public class PackReadTests : ConfigManager
     [UnityTest]
     public IEnumerator GetPackContents_Success()
     {
-        ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-
         var contract = ThirdwebManager.Instance.SDK.GetContract(_packAddress);
         var packTask = contract.pack.GetPackContents("0");
         yield return new WaitUntil(() => packTask.IsCompleted);
