@@ -34,7 +34,7 @@ namespace Thirdweb
         public bool initializeOnAwake = false;
 
         [Tooltip("Whether to show thirdweb sdk debug logs")]
-        public bool showDebugLogs = true;
+        public bool showDebugLogs = false;
 
         [Tooltip("Optional Bundle ID override for thirdweb services")]
         public string bundleIdOverride = null;
