@@ -31,7 +31,7 @@ jobs:
 
       - uses: actions/cache@v3
         with:
-          path: ${{ matrix.projectPath }}/Library
+          path: Library
           key:
             Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-${{
             hashFiles(matrix.projectPath) }}
@@ -79,7 +79,7 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          files: TestResults-${{ matrix.targetPlatform }}/**/*.xml
+          files: TestResults-${{ matrix.targetPlatform }}/playmode-tests.xml
           check_name: "Test Results for ${{ matrix.targetPlatform }}"
           comment_title: "Test Results for ${{ matrix.targetPlatform }}"
 
