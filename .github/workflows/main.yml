@@ -1,4 +1,4 @@
-name: Unity Cross-Platform Build and Test Workflow
+name: Unity Cross-Platform Test Workflow
 
 on:
   push:
