@@ -75,13 +75,13 @@ jobs:
             cp -Lpr ${{ steps.testRunner.outputs.artifactsPath }} test-results
           shell: bash
 
-        - name: Publish Test Results
-          uses: EnricoMi/publish-unit-test-result-action@v2
-          if: always()
-          with:
-            files: test-results/**/*.xml
-            check_name: "Test Results for ${{ matrix.targetPlatform }}"
-            comment_title: "Test Results for ${{ matrix.targetPlatform }}"
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: test-results/**/*.xml
+          check_name: "Test Results for ${{ matrix.targetPlatform }}"
+          comment_title: "Test Results for ${{ matrix.targetPlatform }}"
 
       # - uses: jlumbroso/free-disk-space@v1.3.1
 
