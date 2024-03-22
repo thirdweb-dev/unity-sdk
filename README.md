@@ -90,8 +90,8 @@ Once again, please note that no action is needed for hosted builds.
 ## Mobile
 
 - For Android, it is best to run Force Resolve from the `Assets` menu > `External Dependency Manager` > `Android Resolver` > `Force Resolve` before building your game.
-~~- For iOS, if you are missing a MetaMask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder.~~ Recent versions should no longer require this.
-~~- If you are having trouble building in XCode, make sure `ENABLE_BITCODE` is disabled and that the `Embedded Frameworks` in your `Build Phases` contain potentially missing frameworks like `MetaMask` or `Starscream`. You may also need to remove the `Thirdweb/Core/Plugins/MetaMask/Plugins/iOS/iphoneos/MetaMask_iOS.framework/Frameworks` folder in some cases.~~ Recent versions should no longer require this.
+- ~~For iOS, if you are missing a MetaMask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder.~~ Recent versions should no longer require this.
+- ~~If you are having trouble building in XCode, make sure `ENABLE_BITCODE` is disabled and that the `Embedded Frameworks` in your `Build Phases` contain potentially missing frameworks like `MetaMask` or `Starscream`. You may also need to remove the `Thirdweb/Core/Plugins/MetaMask/Plugins/iOS/iphoneos/MetaMask_iOS.framework/Frameworks` folder in some cases.~~ Recent versions should no longer require this.
 
 # Usage
 
