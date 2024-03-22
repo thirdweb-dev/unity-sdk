@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         projectPath:
-          - "unity-sdk"
+          - ""
         unityVersion:
           - 2022.3.17f1
         targetPlatform:
@@ -28,8 +28,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          # fetch-depth: 0
           lfs: false
+
       - uses: actions/cache@v3
         with:
           path: ${{ matrix.projectPath }}/Library
@@ -40,6 +41,7 @@ jobs:
             Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-
             Library-${{ matrix.projectPath }}-
             Library-
+            
       - name: Setup Config
         env:
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
@@ -47,6 +49,7 @@ jobs:
           mkdir -p Assets/Tests/Resources
           echo '{"clientId": "${{ secrets.CLIENT_ID }}"}' > Assets/Tests/Resources/config.json
         shell: bash
+
       - name: Run Tests
         uses: game-ci/unity-test-runner@v4
         env:
@@ -59,19 +62,29 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           testMode: PlayMode # Run PlayMode tests.
+
       # - uses: actions/upload-artifact@v3
       #   if: always()
       #   with:
       #     name: Test results-${{ matrix.targetPlatform }}-${{ github.run_number }}
       #     path: ${{ steps.testRunner.outputs.artifactsPath }}
-      - name: Publish Test Results for ${{ matrix.targetPlatform }}
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
-        if: always()
-        with:
-          files: ${{ steps.testRunner.outputs.artifactsPath }}/playmode-tests.xml
-          check_name: "Test Results for ${{ matrix.targetPlatform }}"
-          comment_title: "Test Results for ${{ matrix.targetPlatform }}"
+
+      - name: Copy Test Results
+          if: always()
+          run: |
+            cp -Lpr ${{ steps.testRunner.outputs.artifactsPath }} test-results
+          shell: bash
+
+        - name: Publish Test Results
+          uses: EnricoMi/publish-unit-test-result-action@v2
+          if: always()
+          with:
+            files: test-results/**/*.xml
+            check_name: "Test Results for ${{ matrix.targetPlatform }}"
+            comment_title: "Test Results for ${{ matrix.targetPlatform }}"
+
       # - uses: jlumbroso/free-disk-space@v1.3.1
+
       # - uses: game-ci/unity-builder@v4
       #   env:
       #     UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -82,6 +95,7 @@ jobs:
       #     unityVersion: ${{ matrix.unityVersion }}
       #     targetPlatform: ${{ matrix.targetPlatform }}
       #     allowDirtyBuild: true
+
       # - uses: actions/upload-artifact@v3
       #   with:
       #     name: Build-${{ matrix.targetPlatform }}-${{ github.run_number }}
