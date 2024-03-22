@@ -39,7 +39,23 @@ namespace Thirdweb
                 return default;
             }
             string json = req.downloadHandler.text;
-            return JsonConvert.DeserializeObject<T>(json);
+
+            try
+            {
+                return JsonConvert.DeserializeObject<T>(json);
+            }
+            catch
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    return (T)(object)json;
+                }
+                else
+                {
+                    ThirdwebDebug.LogWarning($"Unable to parse text uri {textURI} data to {typeof(T).Name}!");
+                    return default;
+                }
+            }
         }
 
         public async Task<Sprite> DownloadImage(string imageURI)

@@ -26,7 +26,17 @@ namespace Thirdweb
         public async Task<IPFSUploadResult> UploadText(string text)
         {
             var path = Application.temporaryCachePath + "/uploadedText.txt";
-            await System.IO.File.WriteAllTextAsync(path, text);
+            if (System.IO.File.Exists(path))
+                System.IO.File.Delete(path);
+            if (Utils.IsWebGLBuild())
+            {
+                System.IO.File.WriteAllText(path, text); // WebGL doesn't support async file writing
+                await new WaitForSeconds(3f);
+            }
+            else
+            {
+                await System.IO.File.WriteAllTextAsync(path, text);
+            }
             return await UploadFromPath(path);
         }
 

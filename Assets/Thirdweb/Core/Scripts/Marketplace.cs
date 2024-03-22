@@ -500,11 +500,12 @@ namespace Thirdweb
             }
         }
 
-        public async Task<int> GetBidBufferBps(string auctionId)
+        public async Task<BigInteger> GetBidBufferBps(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("getBidBufferBps"), Utils.ToJsonStringArray(auctionId));
+                var val = await Bridge.InvokeRoute<string>(getRoute("getBidBufferBps"), Utils.ToJsonStringArray(auctionId));
+                return BigInteger.Parse(val);
             }
             else
             {

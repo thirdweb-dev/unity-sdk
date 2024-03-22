@@ -369,7 +369,8 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<BigInteger>(getRoute("getChainId"), new string[] { });
+                var val = await Bridge.InvokeRoute<string>(getRoute("getChainId"), new string[] { });
+                return BigInteger.Parse(val);
             }
             else
             {

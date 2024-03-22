@@ -9,6 +9,7 @@ using DropERC721Contract = Thirdweb.Contracts.DropERC721.ContractDefinition;
 using ERC721AQueryable = Thirdweb.Contracts.ERC721AQueryableUpgradeable.ContractDefinition;
 using SignatureDropContract = Thirdweb.Contracts.SignatureDrop.ContractDefinition;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace Thirdweb
 {
@@ -86,14 +87,14 @@ namespace Thirdweb
             }
             else
             {
-                int totalCount = await TotalCount();
-                int start = queryParams?.start ?? 0;
-                int count = queryParams?.count ?? totalCount;
-                int end = Math.Min(start + count, totalCount);
+                BigInteger totalCount = await TotalCount();
+                BigInteger start = queryParams?.start ?? 0;
+                BigInteger count = queryParams?.count ?? totalCount;
+                BigInteger end = start + count > totalCount ? totalCount : start + count;
                 List<NFT> allNfts = new();
                 try
                 {
-                    var uriFunctions = Enumerable.Range(start, end - start).Select(i => new TokenERC721Contract.TokenURIFunction() { TokenId = new BigInteger(i) }).ToArray();
+                    var uriFunctions = Enumerable.Range((int)start, (int)(end - start)).Select(i => new TokenERC721Contract.TokenURIFunction() { TokenId = new BigInteger(i) }).ToArray();
                     var uriResults = await TransactionManager.ThirdwebMulticallRead<TokenERC721Contract.TokenURIFunction, TokenERC721Contract.TokenURIOutputDTO>(contractAddress, uriFunctions);
                     var metadataFetchTasks = new List<Task<NFTMetadata>>();
                     for (int i = 0; i < uriResults.Length; i++)
@@ -125,7 +126,7 @@ namespace Thirdweb
                 catch
                 {
                     ThirdwebDebug.LogWarning("Unable to fetch using Multicall3, likely not deployed on this chain, falling back to single queries.");
-                    for (int i = start; i < end; i++)
+                    for (BigInteger i = start; i < end; i++)
                         allNfts.Add(await Get(i.ToString()));
                 }
                 return allNfts;
@@ -145,7 +146,7 @@ namespace Thirdweb
             else
             {
                 string owner = address ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
-                var balanceOfOwner = int.Parse(await BalanceOf(owner));
+                var balanceOfOwner = await BalanceOf(owner);
                 var ownedNfts = new List<NFT>();
 
                 try
@@ -225,26 +226,20 @@ namespace Thirdweb
         /// <summary>
         /// Get the balance of NFTs in this contract for the connected wallet
         /// </summary>
-        public async Task<string> Balance()
+        public async Task<BigInteger> Balance()
         {
-            if (Utils.IsWebGLBuild())
-            {
-                return await Bridge.InvokeRoute<string>(getRoute("balance"), new string[] { });
-            }
-            else
-            {
-                return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
-            }
+            return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
         }
 
         /// <summary>
         /// Get the balance of NFTs in this contract for the given wallet address
         /// </summary>
-        public async Task<string> BalanceOf(string address)
+        public async Task<BigInteger> BalanceOf(string address)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(getRoute("balanceOf"), Utils.ToJsonStringArray(address));
+                var val = await Bridge.InvokeRoute<string>(getRoute("balanceOf"), Utils.ToJsonStringArray(address));
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -252,7 +247,7 @@ namespace Thirdweb
                     contractAddress,
                     new TokenERC721Contract.BalanceOfFunction() { Owner = address }
                 );
-                return balance.ReturnValue1.ToString();
+                return balance.ReturnValue1;
             }
         }
 
@@ -280,11 +275,12 @@ namespace Thirdweb
         /// <summary>
         /// Get the total suppply in circulation
         /// </summary>
-        public async Task<int> TotalCount()
+        public async Task<BigInteger> TotalCount()
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("totalCount"), new string[] { });
+                var val = await Bridge.InvokeRoute<string>(getRoute("totalCount"), new string[] { });
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -292,18 +288,19 @@ namespace Thirdweb
                     contractAddress,
                     new TokenERC721Contract.TotalSupplyFunction() { }
                 );
-                return (int)totalCount.ReturnValue1;
+                return totalCount.ReturnValue1;
             }
         }
 
         /// <summary>
         /// Get the total claimed suppply for Drop contracts
         /// </summary>
-        public async Task<int> TotalClaimedSupply()
+        public async Task<BigInteger> TotalClaimedSupply()
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("totalClaimedSupply"), new string[] { });
+                var val = await Bridge.InvokeRoute<string>(getRoute("totalClaimedSupply"), new string[] { });
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -314,11 +311,12 @@ namespace Thirdweb
         /// <summary>
         /// Get the total unclaimed suppply for Drop contracts
         /// </summary>
-        public async Task<int> TotalUnclaimedSupply()
+        public async Task<BigInteger> TotalUnclaimedSupply()
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("totalUnclaimedSupply"), new string[] { });
+                var val = await Bridge.InvokeRoute<string>(getRoute("totalUnclaimedSupply"), new string[] { });
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -677,18 +675,21 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var signedPayload = await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
+                if (string.IsNullOrEmpty(privateKeyOverride))
+                    return await Bridge.InvokeRoute<ERC721SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
 
-                if (privateKeyOverride == "")
-                    return signedPayload;
+                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
+                var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
+                var primarySaleRecipient = await contract.Read<string>("primarySaleRecipient");
+                var royaltyInfo = await contract.Read<object[]>("getDefaultRoyaltyInfo");
 
                 var req = new TokenERC721Contract.MintRequest()
                 {
                     To = payloadToSign.to,
-                    RoyaltyRecipient = signedPayload.payload.royaltyRecipient,
-                    RoyaltyBps = signedPayload.payload.royaltyBps,
-                    PrimarySaleRecipient = signedPayload.payload.primarySaleRecipient,
-                    Uri = signedPayload.payload.uri,
+                    RoyaltyRecipient = royaltyInfo[0].ToString(),
+                    RoyaltyBps = BigInteger.Parse(royaltyInfo[1].ToString()),
+                    PrimarySaleRecipient = primarySaleRecipient,
+                    Uri = uri.IpfsHash.CidToIpfsUrl(),
                     Price = BigInteger.Parse(payloadToSign.price.ToWei()),
                     Currency = payloadToSign.currencyAddress,
                     ValidityStartTimestamp = payloadToSign.mintStartTime,
@@ -705,13 +706,13 @@ namespace Thirdweb
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
 
-                signedPayload = new ERC721SignedPayload()
+                var signedPayload = new ERC721SignedPayload()
                 {
                     signature = signature,
                     payload = new ERC721SignedPayloadOutput()
                     {
                         to = req.To,
-                        price = req.Price.ToString(),
+                        price = req.Price.ToString().ToEth(18, false),
                         currencyAddress = req.Currency,
                         primarySaleRecipient = req.PrimarySaleRecipient,
                         royaltyRecipient = req.RoyaltyRecipient,

@@ -71,3 +71,12 @@ releases/
 Documentation/
 
 !docs/**
+Assets/Tests/config.json
+Assets/Tests/config.json.meta
+Assets/Tests/Resources.meta
+Assets/Tests/Resources/config.json
+Assets/Tests/Resources/config.json.meta
+
+# Ignore temporaries from GameCI
+/[Aa]rtifacts/
+/[Cc]odeCoverage/

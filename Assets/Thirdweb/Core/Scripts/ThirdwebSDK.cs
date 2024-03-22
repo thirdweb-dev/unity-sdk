@@ -294,7 +294,7 @@ namespace Thirdweb
         /// <param name="chainOrRPC">The chain name or RPC URL to connect to.</param>
         /// <param name="chainId">The chain ID.</param>
         /// <param name="options">Configuration options.</param>
-        public ThirdwebSDK(string chainOrRPC, BigInteger? chainId = null, Options options = new Options())
+        public ThirdwebSDK(string chainOrRPC, BigInteger chainId, Options options)
         {
             this.chainOrRPC = chainOrRPC;
             this.wallet = new Wallet();
@@ -311,12 +311,13 @@ namespace Thirdweb
             if (Utils.IsWebGLBuild())
             {
                 Bridge.Initialize(rpc, options);
+                this.session = new ThirdwebSession(options, chainId, rpc);
             }
             else
             {
                 if (chainId == null)
                     throw new UnityException("Chain ID override required for native platforms!");
-                this.session = new ThirdwebSession(options, chainId.Value, rpc);
+                this.session = new ThirdwebSession(options, chainId, rpc);
             }
 
             if (string.IsNullOrEmpty(options.clientId))

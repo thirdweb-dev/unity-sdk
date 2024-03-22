@@ -15,6 +15,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Collections;
+using Nethereum.Hex.HexTypes;
 
 namespace Thirdweb
 {
@@ -309,18 +310,10 @@ namespace Thirdweb
             return Application.persistentDataPath + "/account.json";
         }
 
-        public static bool DeleteLocalAccount()
+        public static void DeleteLocalAccount()
         {
-            try
-            {
+            if (File.Exists(GetAccountPath()))
                 File.Delete(GetAccountPath());
-                return true;
-            }
-            catch (System.Exception e)
-            {
-                ThirdwebDebug.LogWarning("Error deleting account: " + e.Message);
-                return false;
-            }
         }
 
         public static Account UnlockOrGenerateLocalAccount(BigInteger chainId, string password = null, string privateKey = null)
@@ -666,6 +659,11 @@ namespace Thirdweb
             return new BigInteger(gweiAmount * 1e9);
         }
 
+        public static string BigIntToHex(this BigInteger number)
+        {
+            return new HexBigInteger(number).HexValue;
+        }
+
         public static async void TrackWalletAnalytics(string clientId, string source, string action, string walletType, string walletAddress)
         {
             if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(source) || string.IsNullOrEmpty(action) || string.IsNullOrEmpty(walletType) || string.IsNullOrEmpty(walletAddress))
@@ -728,6 +726,14 @@ namespace Thirdweb
         {
             var sha3 = new Nethereum.Util.Sha3Keccack();
             return sha3.CalculateHash(message);
+        }
+
+        public static string GenerateRandomString(int v)
+        {
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new System.Random();
+            var result = new string(Enumerable.Repeat(chars, v).Select(s => s[random.Next(s.Length)]).ToArray());
+            return result;
         }
     }
 }
