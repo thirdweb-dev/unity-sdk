@@ -69,9 +69,10 @@ Important: If you're uploading your build, set `Compression Format` to `Disabled
 
 Please note that Embedded Wallets (OAuth version) may not work when testing locally using Unity's default Build and Run feature for WebGL.
 
-You must host the build or run it locally yourself after adding the `Cross-Origin-Opener-Policy` header and setting it to `same-origin-allow-popups`. 
+You must host the build or run it locally yourself after adding the `Cross-Origin-Opener-Policy` header and setting it to `same-origin-allow-popups`.
 
 Here's a simple way to do so, assuming you are in your WebGL build output folder:
+
 ```csharp
 const express = require('express');
 const app = express();
@@ -85,6 +86,7 @@ app.use(function(req, res, next) {
 app.use(express.static('.'));
 app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
 ```
+
 Once again, please note that no action is needed for hosted builds.
 
 ## Mobile
@@ -98,9 +100,6 @@ Once again, please note that no action is needed for hosted builds.
 In order to access the SDK, you only need to have a [ThirdwebManager](https://portal.thirdweb.com/unity/thirdwebmanager) in your scene.
 
 ```csharp
-// Reference to your Thirdweb SDK
-var sdk = ThirdwebManager.Instance.SDK;
-
 // Configure the connection
 var connection = new WalletConnection(
   provider: WalletProvider.EmbeddedWallet, // The wallet provider you want to connect to (Required)
@@ -109,26 +108,26 @@ var connection = new WalletConnection(
 );
 
 // Connect the wallet
-string address = await sdk.wallet.Connect(connection);
+string address = await ThirdwebManager.Instance.SDK.Wallet.Connect(connection);
 
 // Interact with the wallet
-CurrencyValue balance = await sdk.wallet.GetBalance();
-var signature = await sdk.wallet.Sign("message to sign");
+CurrencyValue balance = await ThirdwebManager.Instance.SDK.Wallet.GetBalance();
+var signature = await ThirdwebManager.Instance.SDK.Wallet.Sign("message to sign");
 
 // Get an instance of a deployed contract (no ABI required!)
-var contract = sdk.GetContract("0x...");
+var contract = ThirdwebManager.Instance.SDK.GetContract("0x...");
 
-// Fetch data from any ERC20/721/1155 or marketplace contract
+// Fetch data from any ERC20/721/1155 or Marketplace contract
 CurrencyValue currencyValue = await contract.ERC20.TotalSupply();
 NFT erc721NFT = await contract.ERC721.Get(tokenId);
 List<NFT> erc1155NFTs = await contract.ERC1155.GetAll();
-List<Listing> listings = await marketplace.GetAllListings();
+List<Listing> listings = await contract.Marketplace.DirectListings.GetAllListings();
 
 // Execute transactions from the connected wallet
 await contract.ERC20.Mint("1.2");
-await contract.ERC721.signature.Mint(signedPayload);
+await contract.ERC721.Signature.Mint(signedPayload);
 await contract.ERC1155.Claim(tokenId, quantity);
-await marketplace.BuyListing(listingId, quantity);
+await contract.Marketplace.DirectListings.BuyListing(listingId, quantity);
 
 // Custom interactions
 var res = await contract.Read<string>("myReadFunction", arg1, arg2, ...);
