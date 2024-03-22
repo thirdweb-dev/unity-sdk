@@ -22,13 +22,13 @@ namespace Thirdweb.AccountAbstraction
             return JsonConvert.DeserializeObject<EthGetUserOperationReceiptResponse>(response.Result.ToString());
         }
 
-        public static async Task<string> EthSendUserOperation(string bundlerUrl, string apiKey, object requestId, UserOperationHexified userOp, string entryPoint)
+        public static async Task<string> EthSendUserOperation(string bundlerUrl, string apiKey, object requestId, object userOp, string entryPoint)
         {
             var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "eth_sendUserOperation", userOp, entryPoint);
             return response.Result.ToString();
         }
 
-        public static async Task<EthEstimateUserOperationGasResponse> EthEstimateUserOperationGas(string bundlerUrl, string apiKey, object requestId, UserOperationHexified userOp, string entryPoint)
+        public static async Task<EthEstimateUserOperationGasResponse> EthEstimateUserOperationGas(string bundlerUrl, string apiKey, object requestId, object userOp, string entryPoint)
         {
             var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "eth_estimateUserOperationGas", userOp, entryPoint);
             return JsonConvert.DeserializeObject<EthEstimateUserOperationGasResponse>(response.Result.ToString());
@@ -36,9 +36,16 @@ namespace Thirdweb.AccountAbstraction
 
         // Paymaster requests
 
-        public static async Task<PMSponsorOperationResponse> PMSponsorUserOperation(string paymasterUrl, string apiKey, object requestId, UserOperationHexified userOp, string entryPoint)
+        public static async Task<PMSponsorOperationResponse> PMSponsorUserOperation(string paymasterUrl, string apiKey, object requestId, object userOp, string entryPoint)
         {
-            var response = await BundlerRequest(paymasterUrl, apiKey, requestId, "pm_sponsorUserOperation", userOp, new EntryPointWrapper() { entryPoint = entryPoint });
+            var response = await BundlerRequest(
+                paymasterUrl,
+                apiKey,
+                requestId,
+                "pm_sponsorUserOperation",
+                userOp,
+                entryPoint == Constants.ENTRYPOINT_ADDRESS_V6 ? new EntryPointWrapper() { entryPoint = entryPoint } : entryPoint
+            );
             try
             {
                 return JsonConvert.DeserializeObject<PMSponsorOperationResponse>(response.Result.ToString());
