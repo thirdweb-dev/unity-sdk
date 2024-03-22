@@ -28,10 +28,11 @@ namespace Thirdweb.Wallets
         public Button RecoveryCodesCopy;
 
         [Tooltip("Invoked when the user submits an invalid OTP and can retry.")]
-        public UnityEvent OnEmailOTPVerificationFailed;
+        public UnityEvent OnOTPVerificationFailed;
 
         protected EmbeddedWallet _embeddedWallet;
         protected string _email;
+        protected string _phone;
         protected User _user;
         protected Exception _exception;
         protected string _callbackUrl;
@@ -61,7 +62,7 @@ namespace Thirdweb.Wallets
 
         #region Connection Flow
 
-        public virtual async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions)
+        public virtual async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, string phoneNumber, AuthOptions authOptions)
         {
             var config = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
             _customScheme = config != null ? config.customScheme : null;
@@ -69,6 +70,7 @@ namespace Thirdweb.Wallets
                 _customScheme = _customScheme.EndsWith("://") ? _customScheme : $"{_customScheme}://";
             _embeddedWallet = embeddedWallet;
             _email = email;
+            _phone = phoneNumber;
             _user = null;
             _exception = null;
             OTPInput.text = "";
@@ -88,6 +90,7 @@ namespace Thirdweb.Wallets
                     AuthProvider.Apple => "Apple",
                     AuthProvider.Facebook => "Facebook",
                     AuthProvider.JWT => "CustomAuth",
+                    AuthProvider.PhoneOTP => "PhoneOTP",
                     _ => throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}"),
                 };
                 return await _embeddedWallet.GetUserAsync(_email, authProvider);
@@ -118,6 +121,9 @@ namespace Thirdweb.Wallets
                         break;
                     case AuthProvider.AuthEndpoint:
                         await LoginWithAuthEndpoint(authOptions.jwtOrPayload, authOptions.encryptionKey);
+                        break;
+                    case AuthProvider.PhoneOTP:
+                        await LoginWithPhoneNumber();
                         break;
                     default:
                         throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}");
@@ -180,9 +186,72 @@ namespace Thirdweb.Wallets
                 var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
                 if (res.User == null)
                 {
-                    if (res.CanRetry && OnEmailOTPVerificationFailed.GetPersistentEventCount() > 0)
+                    if (res.CanRetry && OnOTPVerificationFailed.GetPersistentEventCount() > 0)
                     {
-                        OnEmailOTPVerificationFailed.Invoke();
+                        OnOTPVerificationFailed.Invoke();
+                        return;
+                    }
+                    _exception = new UnityException("User OTP Verification Failed.");
+                    return;
+                }
+                _user = res.User;
+                ShowRecoveryCodes(res);
+            }
+            catch (Exception e)
+            {
+                _exception = e;
+            }
+            finally
+            {
+                OTPInput.interactable = true;
+                RecoveryInput.interactable = true;
+                SubmitButton.interactable = true;
+            }
+        }
+
+        #endregion
+
+        #region Phone Number Flow
+
+        public virtual async Task LoginWithPhoneNumber()
+        {
+            if (_phone == null)
+                throw new UnityException("Phone number is required!");
+
+            SubmitButton.onClick.AddListener(OnSubmitPhoneOTP);
+            await OnSendPhoneOTP();
+            EmbeddedWalletCanvas.SetActive(true);
+        }
+
+        public virtual async Task OnSendPhoneOTP()
+        {
+            try
+            {
+                (bool isNewUser, bool isNewDevice, bool needsRecoveryCode) = await _embeddedWallet.SendOtpPhoneAsync(_phone);
+                if (needsRecoveryCode && !isNewUser && isNewDevice)
+                    DisplayRecoveryInput(false);
+                ThirdwebDebug.Log($"finished sending OTP:  isNewUser {isNewUser}, isNewDevice {isNewDevice}");
+            }
+            catch (Exception e)
+            {
+                _exception = e;
+            }
+        }
+
+        public virtual async void OnSubmitPhoneOTP()
+        {
+            OTPInput.interactable = false;
+            RecoveryInput.interactable = false;
+            SubmitButton.interactable = false;
+            try
+            {
+                string otp = OTPInput.text;
+                var res = await _embeddedWallet.VerifyPhoneOtpAsync(_phone, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
+                if (res.User == null)
+                {
+                    if (res.CanRetry && OnOTPVerificationFailed.GetPersistentEventCount() > 0)
+                    {
+                        OnOTPVerificationFailed.Invoke();
                         return;
                     }
                     _exception = new UnityException("User OTP Verification Failed.");

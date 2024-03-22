@@ -33,7 +33,7 @@ namespace Thirdweb.Wallets
                 GameObject.Instantiate(ThirdwebManager.Instance.EmbeddedWalletPrefab);
             }
 
-            var user = await EmbeddedWalletUI.Instance.Connect(_embeddedWallet, walletConnection.email, walletConnection.authOptions);
+            var user = await EmbeddedWalletUI.Instance.Connect(_embeddedWallet, walletConnection.email, walletConnection.phoneNumber, walletConnection.authOptions);
             _account = user.Account;
             _email = user.EmailAddress;
             _web3 = new Web3(_account, rpc);

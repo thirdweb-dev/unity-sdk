@@ -1377,7 +1377,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1834539732908528857
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1647,6 +1647,9 @@ MonoBehaviour:
   RecoveryCodesCanvas: {fileID: 3065337689055971296}
   RecoveryCodesText: {fileID: 4840930599477263590}
   RecoveryCodesCopy: {fileID: 7908066674043299061}
+  OnEmailOTPVerificationFailed:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &3462065987877024667
 GameObject:
   m_ObjectHideFlags: 0
@@ -2440,7 +2443,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Enter the code sent to your email
+  m_text: Enter the code sent to you
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2467,7 +2470,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40.75
+  m_fontSize: 44.75
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
