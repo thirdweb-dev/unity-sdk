@@ -1,0 +1,123 @@
+[
+  {
+    "name": "Xai Goerli Orbit",
+    "title": "Xai Goerli Orbit Testnet",
+    "chain": "ETH",
+    "rpc": ["https://testnet.xai-chain.net/rpc"],
+    "faucets": [],
+    "nativeCurrency": {
+      "name": "Xai Goerli Ether",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "infoURL": "https://xai.games/",
+    "shortName": "xai-goerli",
+    "chainId": 47279324479,
+    "networkId": 47279324479,
+    "explorers": [
+      {
+        "name": "Xai Goerli Testnet Explorer",
+        "url": "https://testnet-explorer.xai-chain.net",
+        "standard": "EIP3091"
+      }
+    ],
+    "parent": {
+      "type": "L2",
+      "chain": "eip155-421613",
+      "bridges": [
+        {
+          "url": "https://bridge.arbitrum.io"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Xai Mainnet",
+    "title": "Xai Mainnet",
+    "chain": "Xai Mainnet",
+    "rpc": ["https://xai-chain.net/rpc"],
+    "nativeCurrency": {
+      "name": "XAI token",
+      "symbol": "XAI",
+      "decimals": 18
+    },
+    "shortName": "xai",
+    "chainId": 660279,
+    "networkId": 660279,
+    "infoURL": "https://xai.games/",
+    "icon": "ipfs://QmZKFekbHxDkB8gFmmmjWz89SLhwg38GkALmAKo3gn753N/2024-01-10%2012.50.15.jpg",
+    "features": [],
+    "faucets": [],
+    "explorers": [
+      {
+        "name": "blockscout",
+        "url": "https://explorer.xai-chain.net/",
+        "standard": "EIP3091"
+      }
+    ],
+    "testnet": false,
+    "redFlags": [],
+    "slug": "xai"
+  },
+  {
+    "name": "Xai Sepolia",
+    "title": "Xai Sepolia",
+    "chain": "Xai Sepolia",
+    "rpc": ["https://testnet-v2.xai-chain.net/rpc"],
+    "nativeCurrency": {
+      "name": "sXAI",
+      "symbol": "sXAI",
+      "decimals": 18
+    },
+    "shortName": "xai-sepolia",
+    "chainId": 37714555429,
+    "networkId": 37714555429,
+    "infoURL": "https://xai.games",
+    "icon": "ipfs://QmZKFekbHxDkB8gFmmmjWz89SLhwg38GkALmAKo3gn753N/2024-01-10%2012.50.15.jpg",
+    "features": [],
+    "faucets": [],
+    "explorers": [
+      {
+        "name": "blockscout",
+        "url": "https://testnet-explorer-v2.xai-chain.net/",
+        "standard": "EIP3091"
+      }
+    ],
+    "testnet": true,
+    "redFlags": [],
+    "parent": {
+      "type": "L3",
+      "chain": "eip155-1",
+      "bridges": []
+    },
+    "slug": "xai-sepolia"
+  },
+  {
+    "name": "Berachain Artio",
+    "chain": "Berachain Artio",
+    "rpc": [
+      "https://artio.rpc.berachain.com",
+      "https://rpc.ankr.com/berachain_testnet"
+    ],
+    "faucets": ["https://artio.faucet.berachain.com"],
+    "nativeCurrency": {
+      "name": "BERA Token",
+      "symbol": "BERA",
+      "decimals": 18
+    },
+    "infoURL": "https://www.berachain.com",
+    "shortName": "berachainArtio",
+    "chainId": 80085,
+    "networkId": 80085,
+    "icon": "berachain",
+    "explorers": [
+      {
+        "name": "Beratrail",
+        "url": "https://artio.beratrail.io",
+        "icon": "berachain",
+        "standard": "none"
+      }
+    ],
+    "slug": "berachain-artio"
+  }
+]

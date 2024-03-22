@@ -1,0 +1,109 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4404896360829706407
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4404896360829706405}
+  - component: {fileID: 4404896360829706404}
+  m_Layer: 0
+  m_Name: ThirdwebManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4404896360829706405
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4404896360829706407}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4404896360829706404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4404896360829706407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56d9559a79e304f44b5ac4d726f1ee68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  activeChain: arbitrum-sepolia
+  supportedChains:
+  - identifier: ethereum
+    chainId: 1
+    rpcOverride: 
+  - identifier: sepolia
+    chainId: 11155111
+    rpcOverride: 
+  - identifier: polygon
+    chainId: 137
+    rpcOverride: 
+  - identifier: mumbai
+    chainId: 80001
+    rpcOverride: 
+  - identifier: fantom
+    chainId: 250
+    rpcOverride: 
+  - identifier: fantom-testnet
+    chainId: 4002
+    rpcOverride: 
+  - identifier: avalanche
+    chainId: 43114
+    rpcOverride: 
+  - identifier: avalanche-fuji
+    chainId: 43113
+    rpcOverride: 
+  - identifier: arbitrum
+    chainId: 42161
+    rpcOverride: 
+  - identifier: arbitrum-sepolia
+    chainId: 421614
+    rpcOverride: 
+  - identifier: binance
+    chainId: 56
+    rpcOverride: 
+  - identifier: binance-testnet
+    chainId: 97
+    rpcOverride: 
+  clientId: 
+  initializeOnAwake: 1
+  showDebugLogs: 1
+  bundleIdOverride: 
+  thirdwebConfig: {fileID: 0}
+  appName: 
+  appDescription: 
+  appIcons: []
+  appUrl: 
+  storageIpfsGatewayUrl: 
+  relayerUrl: 
+  forwarderAddress: 
+  forwarderDomainOverride: 
+  forwaderVersionOverride: 
+  walletConnectProjectId: 
+  walletConnectExplorerRecommendedWalletIds: []
+  factoryAddress: 
+  gasless: 0
+  deployOnSign: 0
+  bundlerUrl: 
+  paymasterUrl: 
+  entryPointAddress: 
+  WalletConnectPrefab: {fileID: 3202619366221042887, guid: c8c0099339b6ef54f87b1f049c5eb74f, type: 3}
+  MetamaskPrefab: {fileID: 3503421935870801903, guid: f09c6d17b08bed346bec9906a7f17092, type: 3}
+  EmbeddedWalletPrefab: {fileID: 3202619366221042887, guid: bef3cf6334b95f14883fb1b8095a0960, type: 3}
