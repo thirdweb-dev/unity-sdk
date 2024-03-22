@@ -98,6 +98,34 @@ public class SmartWalletTests : ConfigManager
     }
 
     [UnityTest]
+    public IEnumerator RevokeSessionKey_WithValidSignerCheck_Success()
+    {
+        yield return CreateSessionKey_WithValidSignerCheck_Success();
+
+        var task = ThirdwebManager.Instance.SDK.wallet.RevokeSessionKey(signerAddress: "0x22b79AD6c6009525933ac2FF40bC9F30dF14Ecfb");
+        yield return new WaitUntil(() => task.IsCompleted);
+        Assert.IsTrue(task.IsCompletedSuccessfully);
+        Assert.IsNotNull(task.Result);
+        Assert.IsTrue(task.Result.receipt.transactionHash.Length == 66);
+
+        var getAllActiveSignersTask = ThirdwebManager.Instance.SDK.wallet.GetAllActiveSigners();
+        yield return new WaitUntil(() => getAllActiveSignersTask.IsCompleted);
+        Assert.IsTrue(getAllActiveSignersTask.IsCompletedSuccessfully);
+        Assert.IsNotNull(getAllActiveSignersTask.Result);
+
+        bool exists = false;
+        foreach (var signer in getAllActiveSignersTask.Result)
+        {
+            if (signer.signer == "0x22b79AD6c6009525933ac2FF40bC9F30dF14Ecfb")
+            {
+                exists = true;
+                break;
+            }
+        }
+        Assert.IsFalse(exists);
+    }
+
+    [UnityTest]
     public IEnumerator IsDeployed_Success()
     {
         yield return Deploy_WithSign_Success();

@@ -371,19 +371,41 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("burn"), Utils.ToJsonStringArray(tokenId, amount));
+                try
+                {
+                    return await Bridge.InvokeRoute<TransactionResult>(getRoute("burn"), Utils.ToJsonStringArray(tokenId, amount));
+                }
+                catch
+                {
+                    return await Bridge.InvokeRoute<TransactionResult>(getRoute("burnBatch"), Utils.ToJsonStringArray(new string[] { tokenId }, new int[] { amount }));
+                }
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
-                    new TokenERC1155Contract.BurnFunction()
-                    {
-                        Account = await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
-                        Id = BigInteger.Parse(tokenId),
-                        Value = amount
-                    }
-                );
+                try
+                {
+                    return await TransactionManager.ThirdwebWrite(
+                        contractAddress,
+                        new TokenERC1155Contract.BurnFunction()
+                        {
+                            Account = await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                            Id = BigInteger.Parse(tokenId),
+                            Value = amount
+                        }
+                    );
+                }
+                catch
+                {
+                    return await TransactionManager.ThirdwebWrite(
+                        contractAddress,
+                        new TokenERC1155Contract.BurnBatchFunction()
+                        {
+                            Account = await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                            Ids = new List<BigInteger> { BigInteger.Parse(tokenId) },
+                            Values = new List<BigInteger> { amount }
+                        }
+                    );
+                }
             }
         }
 
