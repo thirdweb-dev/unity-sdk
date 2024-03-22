@@ -41,7 +41,7 @@ public class WalletTests : ConfigManager
     {
         Utils.DeleteLocalAccount();
         var connection = new WalletConnection(provider: WalletProvider.LocalWallet, chainId: _chainId, password: null); // device uid
-        var connectTask = ThirdwebManager.Instance.SDK.wallet.Connect(connection);
+        var connectTask = ThirdwebManager.Instance.SDK.Wallet.Connect(connection);
         yield return new WaitUntil(() => connectTask.IsCompleted);
         Assert.IsTrue(connectTask.IsCompletedSuccessfully);
         Assert.IsNotNull(connectTask.Result);
@@ -53,14 +53,14 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var disconnectTask = ThirdwebManager.Instance.SDK.wallet.Disconnect();
+        var disconnectTask = ThirdwebManager.Instance.SDK.Wallet.Disconnect();
         yield return new WaitUntil(() => disconnectTask.IsCompleted);
         if (disconnectTask.IsFaulted)
             throw disconnectTask.Exception;
         Assert.IsTrue(disconnectTask.IsCompletedSuccessfully);
 
         var connection = new WalletConnection(provider: WalletProvider.LocalWallet, chainId: _chainId, password: "wrongpassword");
-        var connectTask = ThirdwebManager.Instance.SDK.wallet.Connect(connection);
+        var connectTask = ThirdwebManager.Instance.SDK.Wallet.Connect(connection);
         yield return new WaitUntil(() => connectTask.IsCompleted);
         Assert.IsTrue(connectTask.IsFaulted);
     }
@@ -70,11 +70,11 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var disconnectTask = ThirdwebManager.Instance.SDK.wallet.Disconnect();
+        var disconnectTask = ThirdwebManager.Instance.SDK.Wallet.Disconnect();
         yield return new WaitUntil(() => disconnectTask.IsCompleted);
         Assert.IsTrue(disconnectTask.IsCompletedSuccessfully);
 
-        var getAddressTask = ThirdwebManager.Instance.SDK.wallet.GetAddress();
+        var getAddressTask = ThirdwebManager.Instance.SDK.Wallet.GetAddress();
         yield return new WaitUntil(() => getAddressTask.IsCompleted);
         Assert.IsTrue(getAddressTask.IsFaulted);
     }
@@ -84,7 +84,7 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var exportTask = ThirdwebManager.Instance.SDK.wallet.Export(null);
+        var exportTask = ThirdwebManager.Instance.SDK.Wallet.Export(null);
         yield return new WaitUntil(() => exportTask.IsCompleted);
         Assert.IsTrue(exportTask.IsCompletedSuccessfully);
         Assert.IsNotNull(exportTask.Result);
@@ -96,7 +96,7 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var authenticateTask = ThirdwebManager.Instance.SDK.wallet.Authenticate("example.com");
+        var authenticateTask = ThirdwebManager.Instance.SDK.Wallet.Authenticate("example.com");
         yield return new WaitUntil(() => authenticateTask.IsCompleted);
         Assert.IsTrue(authenticateTask.IsCompletedSuccessfully);
         Assert.IsNotNull(authenticateTask.Result);
@@ -108,17 +108,17 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var authenticateTask = ThirdwebManager.Instance.SDK.wallet.Authenticate("example.com");
+        var authenticateTask = ThirdwebManager.Instance.SDK.Wallet.Authenticate("example.com");
         yield return new WaitUntil(() => authenticateTask.IsCompleted);
         Assert.IsTrue(authenticateTask.IsCompletedSuccessfully);
         Assert.IsNotNull(authenticateTask.Result);
         Assert.IsTrue(authenticateTask.Result.signature.Length == 132);
 
-        var verifyTask = ThirdwebManager.Instance.SDK.wallet.Verify(authenticateTask.Result);
+        var verifyTask = ThirdwebManager.Instance.SDK.Wallet.Verify(authenticateTask.Result);
         yield return new WaitUntil(() => verifyTask.IsCompleted);
         Assert.IsTrue(verifyTask.IsCompletedSuccessfully);
 
-        var getAddressTask = ThirdwebManager.Instance.SDK.wallet.GetAddress();
+        var getAddressTask = ThirdwebManager.Instance.SDK.Wallet.GetAddress();
         yield return new WaitUntil(() => getAddressTask.IsCompleted);
         Assert.IsTrue(getAddressTask.IsCompletedSuccessfully);
         Assert.AreEqual(verifyTask.Result, getAddressTask.Result);
@@ -129,7 +129,7 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var getBalanceTask = ThirdwebManager.Instance.SDK.wallet.GetBalance();
+        var getBalanceTask = ThirdwebManager.Instance.SDK.Wallet.GetBalance();
         yield return new WaitUntil(() => getBalanceTask.IsCompleted);
         Assert.IsTrue(getBalanceTask.IsCompletedSuccessfully);
         Assert.IsNotNull(getBalanceTask.Result);
@@ -141,7 +141,7 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var getAddressTask = ThirdwebManager.Instance.SDK.wallet.GetAddress();
+        var getAddressTask = ThirdwebManager.Instance.SDK.Wallet.GetAddress();
         yield return new WaitUntil(() => getAddressTask.IsCompleted);
         Assert.IsTrue(getAddressTask.IsCompletedSuccessfully);
         Assert.IsNotNull(getAddressTask.Result);
@@ -153,11 +153,11 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var disconnectTask = ThirdwebManager.Instance.SDK.wallet.Disconnect();
+        var disconnectTask = ThirdwebManager.Instance.SDK.Wallet.Disconnect();
         yield return new WaitUntil(() => disconnectTask.IsCompleted);
         Assert.IsTrue(disconnectTask.IsCompletedSuccessfully);
 
-        var getAddressTask = ThirdwebManager.Instance.SDK.wallet.GetAddress();
+        var getAddressTask = ThirdwebManager.Instance.SDK.Wallet.GetAddress();
         yield return new WaitUntil(() => getAddressTask.IsCompleted);
         Assert.IsTrue(getAddressTask.IsFaulted);
     }
@@ -167,7 +167,7 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var isConnectedTask = ThirdwebManager.Instance.SDK.wallet.IsConnected();
+        var isConnectedTask = ThirdwebManager.Instance.SDK.Wallet.IsConnected();
         yield return new WaitUntil(() => isConnectedTask.IsCompleted);
         Assert.IsTrue(isConnectedTask.IsCompletedSuccessfully);
         Assert.IsTrue(isConnectedTask.Result);
@@ -176,7 +176,7 @@ public class WalletTests : ConfigManager
     [UnityTest]
     public IEnumerator IsConnected_WithLocalWallet_Fail()
     {
-        var isConnectedTask = ThirdwebManager.Instance.SDK.wallet.IsConnected();
+        var isConnectedTask = ThirdwebManager.Instance.SDK.Wallet.IsConnected();
         yield return new WaitUntil(() => isConnectedTask.IsCompleted);
         Assert.IsTrue(isConnectedTask.IsCompletedSuccessfully);
         Assert.IsFalse(isConnectedTask.Result);
@@ -187,7 +187,7 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var getChainIdTask = ThirdwebManager.Instance.SDK.wallet.GetChainId();
+        var getChainIdTask = ThirdwebManager.Instance.SDK.Wallet.GetChainId();
         yield return new WaitUntil(() => getChainIdTask.IsCompleted);
         Assert.IsTrue(getChainIdTask.IsCompletedSuccessfully);
         Assert.AreEqual(getChainIdTask.Result, _chainId);
@@ -199,7 +199,7 @@ public class WalletTests : ConfigManager
         yield return Connect_WithLocalWallet_Success();
 
         var randomAddress = "0x0C741CBb712708b866764C82096dDfA7976B8e0c";
-        var transferTask = ThirdwebManager.Instance.SDK.wallet.Transfer(to: randomAddress, amount: "0");
+        var transferTask = ThirdwebManager.Instance.SDK.Wallet.Transfer(to: randomAddress, amount: "0");
         yield return new WaitUntil(() => transferTask.IsCompleted);
         Assert.IsTrue(transferTask.IsFaulted);
     }
@@ -210,7 +210,7 @@ public class WalletTests : ConfigManager
         yield return Connect_WithLocalWallet_Success();
 
         var message = "Hello World!";
-        var signTask = ThirdwebManager.Instance.SDK.wallet.Sign(message);
+        var signTask = ThirdwebManager.Instance.SDK.Wallet.Sign(message);
         yield return new WaitUntil(() => signTask.IsCompleted);
         Assert.IsTrue(signTask.IsCompletedSuccessfully);
         Assert.IsNotNull(signTask.Result);
@@ -224,11 +224,11 @@ public class WalletTests : ConfigManager
 
         var randomAddress = "0x0C741CBb712708b866764C82096dDfA7976B8e0c";
 
-        var addressTask = ThirdwebManager.Instance.SDK.wallet.GetAddress();
+        var addressTask = ThirdwebManager.Instance.SDK.Wallet.GetAddress();
         yield return new WaitUntil(() => addressTask.IsCompleted);
         Assert.IsTrue(addressTask.IsCompletedSuccessfully);
 
-        var sendRawTransactionTask = ThirdwebManager.Instance.SDK.wallet.SendRawTransaction(
+        var sendRawTransactionTask = ThirdwebManager.Instance.SDK.Wallet.SendRawTransaction(
             new TransactionRequest()
             {
                 from = addressTask.Result,

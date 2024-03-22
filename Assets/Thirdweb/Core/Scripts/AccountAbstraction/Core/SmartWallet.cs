@@ -57,8 +57,8 @@ namespace Thirdweb.AccountAbstraction
                 gasless = config.gasless,
                 erc20PaymasterAddress = config.erc20PaymasterAddress,
                 erc20TokenAddress = config.erc20TokenAddress,
-                bundlerUrl = string.IsNullOrEmpty(config.bundlerUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.bundlerUrl,
-                paymasterUrl = string.IsNullOrEmpty(config.paymasterUrl) ? $"https://{ThirdwebManager.Instance.SDK.session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.paymasterUrl,
+                bundlerUrl = string.IsNullOrEmpty(config.bundlerUrl) ? $"https://{ThirdwebManager.Instance.SDK.Session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.bundlerUrl,
+                paymasterUrl = string.IsNullOrEmpty(config.paymasterUrl) ? $"https://{ThirdwebManager.Instance.SDK.Session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.paymasterUrl,
                 entryPointAddress = string.IsNullOrEmpty(config.entryPointAddress) ? Constants.DEFAULT_ENTRYPOINT_ADDRESS : config.entryPointAddress,
             };
 
@@ -175,7 +175,7 @@ namespace Thirdweb.AccountAbstraction
                 }
                 catch
                 {
-                    return new RpcResponseMessage(requestMessage.Id, ThirdwebManager.Instance.SDK.session.CurrentChainData.chainId);
+                    return new RpcResponseMessage(requestMessage.Id, ThirdwebManager.Instance.SDK.Session.CurrentChainData.chainId);
                 }
             }
             else if (requestMessage.Method == "eth_estimateGas")
@@ -211,7 +211,7 @@ namespace Thirdweb.AccountAbstraction
 
             var (initCode, gas) = await GetInitCode();
 
-            var gasPrices = await Utils.GetGasPriceAsync(ThirdwebManager.Instance.SDK.session.ChainId);
+            var gasPrices = await Utils.GetGasPriceAsync(ThirdwebManager.Instance.SDK.Session.ChainId);
 
             var partialUserOp = new EntryPointContract.UserOperation()
             {

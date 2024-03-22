@@ -17,12 +17,12 @@ namespace Thirdweb
         /// <summary>
         /// Handle signature minting functionality
         /// </summary>
-        public ERC20Signature signature;
+        public ERC20Signature Signature;
 
         /// <summary>
         /// Query claim conditions
         /// </summary>
-        public ERC20ClaimConditions claimConditions;
+        public ERC20ClaimConditions ClaimConditions;
 
         private readonly string contractAddress;
 
@@ -33,8 +33,8 @@ namespace Thirdweb
             : base(Routable.append(parentRoute, "erc20"))
         {
             this.contractAddress = contractAddress;
-            this.signature = new ERC20Signature(baseRoute, contractAddress);
-            this.claimConditions = new ERC20ClaimConditions(baseRoute, contractAddress);
+            this.Signature = new ERC20Signature(baseRoute, contractAddress);
+            this.ClaimConditions = new ERC20ClaimConditions(baseRoute, contractAddress);
         }
 
         // READ FUNCTIONS
@@ -74,7 +74,7 @@ namespace Thirdweb
             }
             else
             {
-                return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress());
+                return await BalanceOf(await ThirdwebManager.Instance.SDK.Wallet.GetAddress());
             }
         }
 
@@ -109,7 +109,7 @@ namespace Thirdweb
             }
             else
             {
-                return await AllowanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), spender);
+                return await AllowanceOf(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), spender);
             }
         }
 
@@ -238,7 +238,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ClaimTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), amount);
+                return await ClaimTo(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), amount);
             }
         }
 
@@ -253,7 +253,7 @@ namespace Thirdweb
             }
             else
             {
-                var claimCondition = await claimConditions.GetActive();
+                var claimCondition = await ClaimConditions.GetActive();
                 var decimals = await TransactionManager.ThirdwebRead<TokenERC20Contract.DecimalsFunction, TokenERC20Contract.DecimalsOutputDTO>(
                     contractAddress,
                     new TokenERC20Contract.DecimalsFunction()
@@ -293,7 +293,7 @@ namespace Thirdweb
             }
             else
             {
-                return await MintTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), amount);
+                return await MintTo(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), amount);
             }
         }
 
@@ -513,7 +513,7 @@ namespace Thirdweb
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(
                     name,
                     "1",
-                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    await ThirdwebManager.Instance.SDK.Wallet.GetChainId(),
                     contractAddress,
                     req,
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
@@ -561,7 +561,7 @@ namespace Thirdweb
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(
                     name.ReturnValue1,
                     "1",
-                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    await ThirdwebManager.Instance.SDK.Wallet.GetChainId(),
                     contractAddress,
                     req,
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride

@@ -34,7 +34,7 @@ namespace Thirdweb.AccountAbstraction
                 new EntryPointContract.GetUserOpHashFunction() { UserOp = userOp }
             );
 
-            var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet;
+            var smartWallet = ThirdwebManager.Instance.SDK.Session.ActiveWallet;
             if (smartWallet.GetLocalAccount() != null)
             {
                 var localWallet = smartWallet.GetLocalAccount();
@@ -42,10 +42,10 @@ namespace Thirdweb.AccountAbstraction
             }
             else
             {
-                var sig = await ThirdwebManager.Instance.SDK.session.Request<string>(
+                var sig = await ThirdwebManager.Instance.SDK.Session.Request<string>(
                     "personal_sign",
                     userOpHash.ReturnValue1.ByteArrayToHexString(),
-                    await ThirdwebManager.Instance.SDK.wallet.GetSignerAddress()
+                    await ThirdwebManager.Instance.SDK.Wallet.GetSignerAddress()
                 );
                 return sig.HexStringToByteArray();
             }

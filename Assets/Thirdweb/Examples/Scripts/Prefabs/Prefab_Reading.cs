@@ -77,7 +77,7 @@ namespace Thirdweb.Examples
             {
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(PACK_CONTRACT);
 
-                PackContents packContents = await contract.pack.GetPackContents("0");
+                PackContents packContents = await contract.Pack.GetPackContents("0");
                 Debugger.Instance.Log("[Fetch Pack Contents] Pack #0", packContents.ToString());
             }
             catch (System.Exception e)

@@ -275,16 +275,14 @@ namespace Thirdweb
         /// <summary>
         /// Connect and interact with a user's wallet.
         /// </summary>
-        public Wallet wallet;
+        public Wallet Wallet { get; internal set; }
 
         /// <summary>
-        /// Deploy new contracts.
+        /// Download files from anywhere, upload files to IPFS.
         /// </summary>
-        public Deployer deployer;
+        public Storage Storage { get; internal set; }
 
-        public Storage storage;
-
-        public ThirdwebSession session;
+        public ThirdwebSession Session { get; internal set; }
 
         internal const string version = "4.7.11";
 
@@ -297,9 +295,8 @@ namespace Thirdweb
         public ThirdwebSDK(string chainOrRPC, BigInteger chainId, Options options)
         {
             this.chainOrRPC = chainOrRPC;
-            this.wallet = new Wallet();
-            this.deployer = new Deployer();
-            this.storage = new Storage(options.storage, options.clientId);
+            this.Wallet = new Wallet();
+            this.Storage = new Storage(options.storage, options.clientId);
 
             string rpc = !chainOrRPC.StartsWith("https://")
                 ? (string.IsNullOrEmpty(options.clientId) ? $"https://{chainOrRPC}.rpc.thirdweb.com/" : $"https://{chainOrRPC}.rpc.thirdweb.com/{options.clientId}")
@@ -311,13 +308,13 @@ namespace Thirdweb
             if (Utils.IsWebGLBuild())
             {
                 Bridge.Initialize(rpc, options);
-                this.session = new ThirdwebSession(options, chainId, rpc);
+                this.Session = new ThirdwebSession(options, chainId, rpc);
             }
             else
             {
                 if (chainId == null)
                     throw new UnityException("Chain ID override required for native platforms!");
-                this.session = new ThirdwebSession(options, chainId, rpc);
+                this.Session = new ThirdwebSession(options, chainId, rpc);
             }
 
             if (string.IsNullOrEmpty(options.clientId))

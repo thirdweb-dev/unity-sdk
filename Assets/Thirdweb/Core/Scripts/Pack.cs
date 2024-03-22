@@ -48,7 +48,7 @@ namespace Thirdweb
                     type = "ERC1155",
                     supply = await TotalSupply(tokenId),
                     quantityOwned = null,
-                    metadata = await ThirdwebManager.Instance.SDK.storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1)
+                    metadata = await ThirdwebManager.Instance.SDK.Storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1)
                 };
                 nft.metadata.image = nft.metadata.image.ReplaceIPFS();
                 nft.metadata.id = tokenId;
@@ -93,7 +93,7 @@ namespace Thirdweb
         /// </summary>
         public async Task<BigInteger> Balance(string tokenId)
         {
-            return await BalanceOf(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), tokenId);
+            return await BalanceOf(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), tokenId);
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace Thirdweb
                     contractAddress,
                     new PackContract.SafeTransferFromFunction()
                     {
-                        From = await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                        From = await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
                         To = to,
                         Id = BigInteger.Parse(tokenId),
                         Amount = amount,
@@ -284,7 +284,7 @@ namespace Thirdweb
             }
             else
             {
-                return await CreateTo(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), pack);
+                return await CreateTo(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), pack);
             }
         }
 
@@ -299,7 +299,7 @@ namespace Thirdweb
             }
             else
             {
-                var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(pack.packMetadata));
+                var uri = await ThirdwebManager.Instance.SDK.Storage.UploadText(JsonConvert.SerializeObject(pack.packMetadata));
                 return await TransactionManager.ThirdwebWrite(
                     contractAddress,
                     new PackContract.CreatePackFunction()

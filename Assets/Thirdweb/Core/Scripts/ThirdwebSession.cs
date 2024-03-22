@@ -134,7 +134,7 @@ namespace Thirdweb
             {
                 ThirdwebDebug.LogWarning("No active wallet detected, unable to disconnect.");
             }
-            ThirdwebManager.Instance.SDK.session = new ThirdwebSession(Options, ChainId, RPC);
+            ThirdwebManager.Instance.SDK.Session = new ThirdwebSession(Options, ChainId, RPC);
         }
 
         internal async Task<T> Request<T>(string method, params object[] parameters)

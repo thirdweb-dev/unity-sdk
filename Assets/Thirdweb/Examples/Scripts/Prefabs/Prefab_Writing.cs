@@ -26,14 +26,14 @@ namespace Thirdweb.Examples
                 // Debugger.Instance.Log("[Mint ERC20] Successful", transactionResult.ToString());
 
                 // Signature Minting
-                // var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+                // var receiverAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
                 // var payload = new ERC20MintPayload(receiverAddress, "3.2");
-                // var signedPayload = await contract.ERC20.signature.Generate(payload);
-                // bool isValid = await contract.ERC20.signature.Verify(signedPayload);
+                // var signedPayload = await contract.ERC20.Signature.Generate(payload);
+                // bool isValid = await contract.ERC20.Signature.Verify(signedPayload);
                 // if (isValid)
                 // {
                 //     Debugger.Instance.Log("Sign minting ERC20...", $"Signature: {signedPayload.signature}");
-                //     var result = await contract.ERC20.signature.Mint(signedPayload);
+                //     var result = await contract.ERC20.Signature.Mint(signedPayload);
                 //     Debugger.Instance.Log("[Mint (Signature) ERC20] Successful", result.ToString());
                 // }
                 // else
@@ -72,14 +72,14 @@ namespace Thirdweb.Examples
                 // Debugger.Instance.Log("[Mint ERC721] Successful", result.ToString());
 
                 // Signature Minting
-                // var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+                // var receiverAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
                 // var payload = new ERC721MintPayload(receiverAddress, meta);
-                // var signedPayload = await contract.ERC721.signature.Generate(payload);
-                // bool isValid = await contract.ERC721.signature.Verify(signedPayload);
+                // var signedPayload = await contract.ERC721.Signature.Generate(payload);
+                // bool isValid = await contract.ERC721.Signature.Verify(signedPayload);
                 // if (isValid)
                 // {
                 //     Debugger.Instance.Log("Sign minting ERC721...", $"Signature: {signedPayload.signature}");
-                //     var result = await contract.ERC721.signature.Mint(signedPayload);
+                //     var result = await contract.ERC721.Signature.Mint(signedPayload);
                 //     Debugger.Instance.Log("[Mint (Signature) ERC721] Successful", result.ToString());
                 // }
                 // else
@@ -120,17 +120,17 @@ namespace Thirdweb.Examples
                 // Debugger.Instance.Log("[Mint Additional Supply ERC1155] Successful", result.ToString());
 
                 // Signature Minting
-                // var receiverAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+                // var receiverAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
                 // var payload = new ERC1155MintPayload(receiverAddress, meta, 1000);
                 // var signedPayload = await contract.ERC1155.signature.Generate(payload);
                 // You can use an existing token ID to signature mint additional supply
                 // var payloadWithSupply = new ERC1155MintAdditionalPayload(receiverAddress, "0", 1000);
-                // var signedPayload = await contract.ERC1155.signature.GenerateFromTokenId(payloadWithSupply);
-                // bool isValid = await contract.ERC1155.signature.Verify(signedPayload);
+                // var signedPayload = await contract.ERC1155.Signature.GenerateFromTokenId(payloadWithSupply);
+                // bool isValid = await contract.ERC1155.Signature.Verify(signedPayload);
                 // if (isValid)
                 // {
                 //     Debugger.Instance.Log("Sign minting ERC1155...", $"Signature: {signedPayload.signature}");
-                //     var result = await contract.ERC1155.signature.Mint(signedPayload);
+                //     var result = await contract.ERC1155.Signature.Mint(signedPayload);
                 //     Debugger.Instance.Log("[Mint (Signature) ERC1155] Successful", result.ToString());
                 // }
                 // else
@@ -139,7 +139,7 @@ namespace Thirdweb.Examples
                 // }
 
                 // Edition Drop - Claiming
-                // bool canClaim = await contract.ERC1155.claimConditions.CanClaim("0", 1);
+                // bool canClaim = await contract.ERC1155.ClaimConditions.CanClaim("0", 1);
                 // if (!canClaim)
                 // {
                 //     Debugger.Instance.Log("[Mint ERC1155] Cannot Claim", "Connected wallet not eligible to claim.");
@@ -170,7 +170,7 @@ namespace Thirdweb.Examples
             try
             {
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(PACK_CONTRACT);
-                Pack pack = contract.pack;
+                Pack pack = contract.Pack;
 
                 // NewPackInput newPackInput = new NewPackInput()
                 // {

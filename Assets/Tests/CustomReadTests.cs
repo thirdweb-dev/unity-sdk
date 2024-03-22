@@ -41,7 +41,7 @@ public class CustomReadTests : ConfigManager
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract("0x");
         Assert.IsNotNull(contract);
-        Assert.AreEqual("0x", contract.address);
+        Assert.AreEqual("0x", contract.Address);
         yield return null;
     }
 

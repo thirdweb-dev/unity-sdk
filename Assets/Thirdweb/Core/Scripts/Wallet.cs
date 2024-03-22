@@ -38,7 +38,7 @@ namespace Thirdweb
             }
             else
             {
-                address = await ThirdwebManager.Instance.SDK.session.Connect(walletConnection);
+                address = await ThirdwebManager.Instance.SDK.Session.Connect(walletConnection);
                 Utils.TrackWalletAnalytics(Utils.GetClientId(), "connectWallet", "connect", walletConnection.provider.ToString()[..1].ToLower() + walletConnection.provider.ToString()[1..], address);
                 return address;
             }
@@ -67,7 +67,7 @@ namespace Thirdweb
             }
             else
             {
-                await ThirdwebManager.Instance.SDK.session.Disconnect(endSession);
+                await ThirdwebManager.Instance.SDK.Session.Disconnect(endSession);
             }
         }
 
@@ -86,7 +86,7 @@ namespace Thirdweb
             }
             else
             {
-                var localAccount = ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount() ?? throw new Exception("No local account found");
+                var localAccount = ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetLocalAccount() ?? throw new Exception("No local account found");
                 return Utils.EncryptAndGenerateKeyStore(new EthECKey(localAccount.PrivateKey), password);
             }
         }
@@ -104,7 +104,7 @@ namespace Thirdweb
             }
             else
             {
-                var siwe = ThirdwebManager.Instance.SDK.session.SiweSession;
+                var siwe = ThirdwebManager.Instance.SDK.Session.SiweSession;
                 var siweMsg = new SiweMessage()
                 {
                     Resources = null,
@@ -175,7 +175,7 @@ namespace Thirdweb
             }
             else
             {
-                var siwe = ThirdwebManager.Instance.SDK.session.SiweSession;
+                var siwe = ThirdwebManager.Instance.SDK.Session.SiweSession;
                 var siweMessage = new SiweMessage()
                 {
                     Domain = payload.payload.Domain,
@@ -265,7 +265,7 @@ namespace Thirdweb
                 {
                     string address = await GetAddress();
                     HexBigInteger balance = await Utils.GetWeb3().Eth.GetBalance.SendRequestAsync(address);
-                    var nativeCurrency = ThirdwebManager.Instance.SDK.session.CurrentChainData.nativeCurrency;
+                    var nativeCurrency = ThirdwebManager.Instance.SDK.Session.CurrentChainData.nativeCurrency;
                     return new CurrencyValue(nativeCurrency.name, nativeCurrency.symbol, nativeCurrency.decimals.ToString(), balance.Value.ToString(), balance.Value.ToString().ToEth());
                 }
             }
@@ -286,7 +286,7 @@ namespace Thirdweb
                 if (!await IsConnected())
                     throw new Exception("No account connected!");
 
-                return await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetAddress();
+                return await ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetAddress();
             }
         }
 
@@ -304,7 +304,7 @@ namespace Thirdweb
                 if (!await IsConnected())
                     throw new Exception("No account connected!");
 
-                return await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetEmail();
+                return await ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetEmail();
             }
         }
 
@@ -334,7 +334,7 @@ namespace Thirdweb
                 if (!await IsConnected())
                     throw new Exception("No account connected!");
 
-                return await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerAddress();
+                return await ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetSignerAddress();
             }
         }
 
@@ -352,7 +352,7 @@ namespace Thirdweb
             {
                 try
                 {
-                    return await ThirdwebManager.Instance.SDK.session.ActiveWallet.IsConnected();
+                    return await ThirdwebManager.Instance.SDK.Session.ActiveWallet.IsConnected();
                 }
                 catch
                 {
@@ -374,7 +374,7 @@ namespace Thirdweb
             }
             else
             {
-                var hexChainId = await ThirdwebManager.Instance.SDK.session.Request<string>("eth_chainId");
+                var hexChainId = await ThirdwebManager.Instance.SDK.Session.Request<string>("eth_chainId");
                 return hexChainId.HexToBigInteger(false);
             }
         }
@@ -395,7 +395,7 @@ namespace Thirdweb
             }
             else
             {
-                await ThirdwebManager.Instance.SDK.session.EnsureCorrectNetwork(chainId);
+                await ThirdwebManager.Instance.SDK.Session.EnsureCorrectNetwork(chainId);
             }
         }
 
@@ -421,7 +421,7 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var txHash = await ThirdwebManager.Instance.SDK.session.Web3.Eth.GetEtherTransferService().TransferEtherAsync(to, decimal.Parse(amount));
+                    var txHash = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.GetEtherTransferService().TransferEtherAsync(to, decimal.Parse(amount));
                     return await Transaction.WaitForTransactionResult(txHash);
                 }
             }
@@ -443,9 +443,9 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                if (ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                 {
-                    var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                    var sw = ThirdwebManager.Instance.SDK.Session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                     if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
                     {
                         ThirdwebDebug.Log("SmartWallet not deployed, deploying before signing...");
@@ -474,7 +474,7 @@ namespace Thirdweb
                         if (factorySupports712)
                             signature = await EIP712.GenerateSignature_SmartAccount_AccountMessage("Account", "1", await GetChainId(), swAddress, originalMsgHash);
                         else
-                            signature = await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
+                            signature = await ThirdwebManager.Instance.SDK.Session.Request<string>("personal_sign", message, await GetSignerAddress());
 
                         bool isValid = await RecoverAddress(message, signature) == swAddress;
                         if (isValid)
@@ -488,7 +488,7 @@ namespace Thirdweb
                     }
                 }
 
-                return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, await GetSignerAddress());
+                return await ThirdwebManager.Instance.SDK.Session.Request<string>("personal_sign", message, await GetSignerAddress());
             }
         }
 
@@ -541,10 +541,10 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount() != null)
+                if (ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetLocalAccount() != null)
                 {
                     var signer = new Eip712TypedDataSigner();
-                    var key = new EthECKey(ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount().PrivateKey);
+                    var key = new EthECKey(ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetLocalAccount().PrivateKey);
                     return signer.SignTypedDataV4(data, typedData, key);
                 }
                 else
@@ -561,7 +561,7 @@ namespace Thirdweb
                         uidToken.Replace(uidHex);
                     }
 
-                    if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                    if (ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                     {
                         // Smart accounts
                         var hashToken = jsonObject.SelectToken("$.message.message");
@@ -588,7 +588,7 @@ namespace Thirdweb
                     }
 
                     string safeJson = jsonObject.ToString();
-                    return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTypedData_v4", await GetSignerAddress(), safeJson);
+                    return await ThirdwebManager.Instance.SDK.Session.Request<string>("eth_signTypedData_v4", await GetSignerAddress(), safeJson);
                 }
             }
         }
@@ -608,9 +608,9 @@ namespace Thirdweb
             else
             {
                 var signer = new EthereumMessageSigner();
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                if (ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                 {
-                    var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                    var sw = ThirdwebManager.Instance.SDK.Session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                     bool isSigValid = await sw.SmartWallet.VerifySignature(message.HashPrefixedMessage().HexStringToByteArray(), signature.HexStringToByteArray());
                     if (isSigValid)
                     {
@@ -636,10 +636,10 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                if (ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
                     throw new UnityException("This functionality is only available for SmartWallets.");
 
-                var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                var smartWallet = ThirdwebManager.Instance.SDK.Session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
                 {
                     Signer = admin,
@@ -671,10 +671,10 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                if (ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
                     throw new UnityException("This functionality is only available for SmartWallets.");
 
-                var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                var smartWallet = ThirdwebManager.Instance.SDK.Session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
                 {
                     Signer = admin,
@@ -732,10 +732,10 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                if (ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
                     throw new UnityException("This functionality is only available for SmartWallets.");
 
-                var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                var smartWallet = ThirdwebManager.Instance.SDK.Session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
                 {
                     Signer = signerAddress,
@@ -766,10 +766,10 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                if (ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
                     throw new UnityException("This functionality is only available for SmartWallets.");
 
-                var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                var smartWallet = ThirdwebManager.Instance.SDK.Session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 var request = new Contracts.Account.ContractDefinition.SignerPermissionRequest()
                 {
                     Signer = signerAddress,
@@ -807,7 +807,7 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                if (ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
                     throw new UnityException("This functionality is only available for SmartWallets.");
 
                 string address = await GetAddress();
@@ -864,10 +864,10 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
+                if (ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
                     throw new UnityException("This functionality is only available for SmartWallets.");
 
-                var smartWallet = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                var smartWallet = ThirdwebManager.Instance.SDK.Session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                 return smartWallet.SmartWallet.IsDeployed;
             }
         }
@@ -893,7 +893,7 @@ namespace Thirdweb
                     new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
                     new HexBigInteger(BigInteger.Parse(transactionRequest.value))
                 );
-                var hash = await ThirdwebManager.Instance.SDK.session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
+                var hash = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
                 return await Transaction.WaitForTransactionResult(hash);
             }
         }

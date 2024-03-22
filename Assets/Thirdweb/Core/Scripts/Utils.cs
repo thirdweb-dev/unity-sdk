@@ -152,7 +152,7 @@ namespace Thirdweb
 
         public static string ReplaceIPFS(this string uri)
         {
-            string gateway = ThirdwebManager.Instance.SDK.storage.IPFSGateway;
+            string gateway = ThirdwebManager.Instance.SDK.Storage.IPFSGateway;
             if (!string.IsNullOrEmpty(uri) && uri.StartsWith("ipfs://"))
                 return uri.Replace("ipfs://", gateway);
             else
@@ -444,12 +444,12 @@ namespace Thirdweb
 
         public static string GetClientId()
         {
-            return ThirdwebManager.Instance.SDK?.session?.Options.clientId ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.clientId) ? null : ThirdwebManager.Instance.clientId);
+            return ThirdwebManager.Instance.SDK?.Session?.Options.clientId ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.clientId) ? null : ThirdwebManager.Instance.clientId);
         }
 
         public static string GetBundleId()
         {
-            return ThirdwebManager.Instance.SDK?.session?.Options.bundleId
+            return ThirdwebManager.Instance.SDK?.Session?.Options.bundleId
                 ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.bundleIdOverride) ? Application.identifier.ToLower() : ThirdwebManager.Instance.bundleIdOverride);
         }
 
@@ -488,7 +488,7 @@ namespace Thirdweb
 
         public static Web3 GetWeb3(BigInteger? chainId = null)
         {
-            return new Web3(new ThirdwebClient(new Uri(chainId == null ? ThirdwebManager.Instance.SDK.session.RPC : $"https://{chainId}.rpc.thirdweb.com")));
+            return new Web3(new ThirdwebClient(new Uri(chainId == null ? ThirdwebManager.Instance.SDK.Session.RPC : $"https://{chainId}.rpc.thirdweb.com")));
         }
 
         public static string GetNativeTokenWrapper(BigInteger chainId)
