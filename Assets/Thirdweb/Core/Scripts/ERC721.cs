@@ -87,14 +87,14 @@ namespace Thirdweb
             }
             else
             {
-                int totalCount = (int)await TotalCount();
-                int start = queryParams?.start ?? 0;
-                int count = queryParams?.count ?? totalCount;
-                int end = Math.Min(start + count, totalCount);
+                BigInteger totalCount = await TotalCount();
+                BigInteger start = queryParams?.start ?? 0;
+                BigInteger count = queryParams?.count ?? totalCount;
+                BigInteger end = start + count > totalCount ? totalCount : start + count;
                 List<NFT> allNfts = new();
                 try
                 {
-                    var uriFunctions = Enumerable.Range(start, end - start).Select(i => new TokenERC721Contract.TokenURIFunction() { TokenId = new BigInteger(i) }).ToArray();
+                    var uriFunctions = Enumerable.Range((int)start, (int)(end - start)).Select(i => new TokenERC721Contract.TokenURIFunction() { TokenId = new BigInteger(i) }).ToArray();
                     var uriResults = await TransactionManager.ThirdwebMulticallRead<TokenERC721Contract.TokenURIFunction, TokenERC721Contract.TokenURIOutputDTO>(contractAddress, uriFunctions);
                     var metadataFetchTasks = new List<Task<NFTMetadata>>();
                     for (int i = 0; i < uriResults.Length; i++)
@@ -126,7 +126,7 @@ namespace Thirdweb
                 catch
                 {
                     ThirdwebDebug.LogWarning("Unable to fetch using Multicall3, likely not deployed on this chain, falling back to single queries.");
-                    for (int i = start; i < end; i++)
+                    for (BigInteger i = start; i < end; i++)
                         allNfts.Add(await Get(i.ToString()));
                 }
                 return allNfts;
