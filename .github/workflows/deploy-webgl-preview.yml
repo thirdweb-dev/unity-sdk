@@ -21,3 +21,4 @@ jobs:
         with:
           branch: gh-pages
           folder: Preview
+          clean: true
