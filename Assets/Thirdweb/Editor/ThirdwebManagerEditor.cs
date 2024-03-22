@@ -51,6 +51,7 @@ namespace Thirdweb
         private Texture2D bannerImage;
 
         private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_4.7.11";
+        private static readonly string OptionalStateKey = "ThirdwebManagerEditor_OptionalState_4.7.11";
 
         private void OnEnable()
         {
@@ -135,11 +136,16 @@ namespace Thirdweb
             bannerImage = Resources.Load<Texture2D>("EditorBanner");
 
             sectionExpanded = GetExpandedState();
+
+            showGaslessOptionalFields = EditorPrefs.GetBool($"{OptionalStateKey}_showGaslessOptionalFields", false);
+            showSmartWalletOptionalFields = EditorPrefs.GetBool($"{OptionalStateKey}_showSmartWalletOptionalFields", false);
         }
 
         private void OnDisable()
         {
             SetExpandedState(sectionExpanded);
+            EditorPrefs.SetBool($"{OptionalStateKey}_showGaslessOptionalFields", showGaslessOptionalFields);
+            EditorPrefs.SetBool($"{OptionalStateKey}_showSmartWalletOptionalFields", showSmartWalletOptionalFields);
         }
 
         public override void OnInspectorGUI()
