@@ -23,7 +23,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 var contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.directListings.GetListing("1");
+                var result = await contract.Marketplace.DirectListings.GetListing("1");
                 Debugger.Instance.Log("[Fetch_DirectListing] Sucess", result.ToString());
             }
             catch (System.Exception e)
@@ -38,7 +38,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 var contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.englishAuctions.GetAuction("0");
+                var result = await contract.Marketplace.EnglishAuctions.GetAuction("0");
                 Debugger.Instance.Log("[Fetch_Auction] Sucess", result.ToString());
             }
             catch (System.Exception e)
@@ -53,7 +53,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 var contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.offers.GetOffer("0");
+                var result = await contract.Marketplace.Offers.GetOffer("0");
                 Debugger.Instance.Log("[Fetch_Offer] Sucess", result.ToString());
             }
             catch (System.Exception e)
@@ -70,7 +70,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.directListings.CreateListing(
+                var result = await contract.Marketplace.DirectListings.CreateListing(
                     new CreateListingInput()
                     {
                         assetContractAddress = TOKEN_ERC1155_CONTRACT,
@@ -93,7 +93,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.englishAuctions.CreateAuction(
+                var result = await contract.Marketplace.EnglishAuctions.CreateAuction(
                     new CreateAuctionInput()
                     {
                         assetContractAddress = TOKEN_ERC1155_CONTRACT,
@@ -116,7 +116,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.offers.MakeOffer(
+                var result = await contract.Marketplace.Offers.MakeOffer(
                     new MakeOfferInput()
                     {
                         assetContractAddress = TOKEN_ERC1155_CONTRACT,
@@ -140,7 +140,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.directListings.BuyFromListing("2", "1", await ThirdwebManager.Instance.SDK.wallet.GetAddress());
+                var result = await contract.Marketplace.DirectListings.BuyFromListing("2", "1", await ThirdwebManager.Instance.SDK.Wallet.GetAddress());
                 Debugger.Instance.Log("[Buy_Listing] Success", result.ToString());
             }
             catch (System.Exception e)
@@ -155,7 +155,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.englishAuctions.BuyoutAuction("0");
+                var result = await contract.Marketplace.EnglishAuctions.BuyoutAuction("0");
                 Debugger.Instance.Log("[Buyout_Auction] Success", result.ToString());
             }
             catch (System.Exception e)
@@ -170,7 +170,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.offers.AcceptOffer("0");
+                var result = await contract.Marketplace.Offers.AcceptOffer("0");
                 Debugger.Instance.Log("[Accept_Offer] Success", result.ToString());
             }
             catch (System.Exception e)
@@ -187,7 +187,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.directListings.CancelListing("2");
+                var result = await contract.Marketplace.DirectListings.CancelListing("2");
                 Debugger.Instance.Log("[Cancel_Listing] Success", result.ToString());
             }
             catch (System.Exception e)
@@ -202,7 +202,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.englishAuctions.CancelAuction("0");
+                var result = await contract.Marketplace.EnglishAuctions.CancelAuction("0");
                 Debugger.Instance.Log("[Cancel_Auction] Success", result.ToString());
             }
             catch (System.Exception e)
@@ -217,7 +217,7 @@ namespace Thirdweb.Examples
             {
                 Debugger.Instance.Log("Request Sent", "Pending confirmation...");
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(MARKETPLACE_CONTRACT);
-                var result = await contract.marketplace.offers.CancelOffer("0");
+                var result = await contract.Marketplace.Offers.CancelOffer("0");
                 Debugger.Instance.Log("[Cancel_Offer] Success", result.ToString());
             }
             catch (System.Exception e)

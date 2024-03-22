@@ -140,7 +140,7 @@ namespace Thirdweb.Examples
             {
                 _address = null;
                 _password = null;
-                await ThirdwebManager.Instance.SDK.wallet.Disconnect();
+                await ThirdwebManager.Instance.SDK.Wallet.Disconnect();
                 onDisconnected.Invoke();
             }
             catch (System.Exception e)
@@ -159,7 +159,7 @@ namespace Thirdweb.Examples
 
             try
             {
-                _address = await ThirdwebManager.Instance.SDK.wallet.Connect(wc);
+                _address = await ThirdwebManager.Instance.SDK.Wallet.Connect(wc);
                 exportButton.SetActive(wc.provider == WalletProvider.LocalWallet);
             }
             catch (Exception e)
@@ -181,7 +181,7 @@ namespace Thirdweb.Examples
             foreach (var addressText in addressTexts)
                 addressText.text = addy;
 
-            var bal = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
+            var bal = await ThirdwebManager.Instance.SDK.Wallet.GetBalance();
             var balStr = $"{bal.value.ToEth()} {bal.symbol}";
             foreach (var balanceText in balanceTexts)
                 balanceText.text = balStr;
@@ -227,7 +227,7 @@ namespace Thirdweb.Examples
             ThirdwebDebug.Log($"Switching to network: {chainData.identifier}...");
             try
             {
-                await ThirdwebManager.Instance.SDK.wallet.SwitchNetwork(BigInteger.Parse(chainData.chainId));
+                await ThirdwebManager.Instance.SDK.Wallet.SwitchNetwork(BigInteger.Parse(chainData.chainId));
                 ThirdwebManager.Instance.activeChain = chainData.identifier;
                 _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
                 ThirdwebDebug.Log($"Switched to network: {chainData.identifier}");
@@ -245,7 +245,7 @@ namespace Thirdweb.Examples
         public async void ExportWallet()
         {
             ThirdwebDebug.Log("Exporting wallet...");
-            string json = await ThirdwebManager.Instance.SDK.wallet.Export(_password);
+            string json = await ThirdwebManager.Instance.SDK.Wallet.Export(_password);
             GUIUtility.systemCopyBuffer = json;
             ThirdwebDebug.Log($"Copied wallet to clipboard: {json}");
         }

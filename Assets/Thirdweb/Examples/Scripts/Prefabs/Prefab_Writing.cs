@@ -170,7 +170,7 @@ namespace Thirdweb.Examples
             try
             {
                 Contract contract = ThirdwebManager.Instance.SDK.GetContract(PACK_CONTRACT);
-                Pack pack = contract.pack;
+                Pack pack = contract.Pack;
 
                 // NewPackInput newPackInput = new NewPackInput()
                 // {

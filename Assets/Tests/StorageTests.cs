@@ -33,8 +33,8 @@ public class StorageTests : ConfigManager
     public IEnumerator Gateway_WithoutClientId_Success()
     {
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-        Assert.IsNotNull(ThirdwebManager.Instance.SDK.storage);
-        Assert.AreEqual(ThirdwebManager.Instance.SDK.storage.IPFSGateway, "https://cloudflare-ipfs.com/ipfs/");
+        Assert.IsNotNull(ThirdwebManager.Instance.SDK.Storage);
+        Assert.AreEqual(ThirdwebManager.Instance.SDK.Storage.IPFSGateway, "https://cloudflare-ipfs.com/ipfs/");
 
         string testIpfsRawUrl = "ipfs://Qblabla";
         Assert.AreEqual(Utils.ReplaceIPFS(testIpfsRawUrl), "https://cloudflare-ipfs.com/ipfs/Qblabla");
@@ -48,8 +48,8 @@ public class StorageTests : ConfigManager
         string clientId = "hello";
         ThirdwebManager.Instance.clientId = clientId;
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-        Assert.IsNotNull(ThirdwebManager.Instance.SDK.storage);
-        Assert.AreEqual(ThirdwebManager.Instance.SDK.storage.IPFSGateway, $"https://{clientId}.ipfscdn.io/ipfs/");
+        Assert.IsNotNull(ThirdwebManager.Instance.SDK.Storage);
+        Assert.AreEqual(ThirdwebManager.Instance.SDK.Storage.IPFSGateway, $"https://{clientId}.ipfscdn.io/ipfs/");
 
         string testIpfsRawUrl = "ipfs://Qblabla";
         Assert.AreEqual(Utils.ReplaceIPFS(testIpfsRawUrl), $"https://{clientId}.ipfscdn.io/ipfs/Qblabla");
@@ -63,8 +63,8 @@ public class StorageTests : ConfigManager
         string ipfsGatewayUrl = "https://ipfs.io/ipfs/";
         ThirdwebManager.Instance.storageIpfsGatewayUrl = ipfsGatewayUrl;
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
-        Assert.IsNotNull(ThirdwebManager.Instance.SDK.storage);
-        Assert.AreEqual(ThirdwebManager.Instance.SDK.storage.IPFSGateway, ipfsGatewayUrl);
+        Assert.IsNotNull(ThirdwebManager.Instance.SDK.Storage);
+        Assert.AreEqual(ThirdwebManager.Instance.SDK.Storage.IPFSGateway, ipfsGatewayUrl);
 
         string testIpfsRawUrl = "ipfs://Qblabla";
         Assert.AreEqual(Utils.ReplaceIPFS(testIpfsRawUrl), "https://ipfs.io/ipfs/Qblabla");
@@ -81,7 +81,7 @@ public class StorageTests : ConfigManager
         if (Utils.IsWebGLBuild())
             url = "https://thingproxy.freeboard.io/fetch/" + url;
 
-        var downloadTask = ThirdwebManager.Instance.SDK.storage.DownloadText<string>(url);
+        var downloadTask = ThirdwebManager.Instance.SDK.Storage.DownloadText<string>(url);
         yield return new WaitUntil(() => downloadTask.IsCompleted);
         Assert.IsTrue(downloadTask.IsCompletedSuccessfully);
         Assert.IsNotNull(downloadTask.Result);
@@ -96,7 +96,7 @@ public class StorageTests : ConfigManager
 
         string url = "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png";
 
-        var downloadTask = ThirdwebManager.Instance.SDK.storage.DownloadImage(url);
+        var downloadTask = ThirdwebManager.Instance.SDK.Storage.DownloadImage(url);
         yield return new WaitUntil(() => downloadTask.IsCompleted);
         Assert.IsTrue(downloadTask.IsCompletedSuccessfully);
         Assert.IsNotNull(downloadTask.Result);
@@ -111,7 +111,7 @@ public class StorageTests : ConfigManager
 
         string url = "ipfs://QmNQ2djT2u4my5xpKPgJMnQEpoNjYZE8ugpLndvgEJBb3X";
 
-        var downloadTask = ThirdwebManager.Instance.SDK.storage.DownloadText<string>(url);
+        var downloadTask = ThirdwebManager.Instance.SDK.Storage.DownloadText<string>(url);
         yield return new WaitUntil(() => downloadTask.IsCompleted);
         Assert.IsTrue(downloadTask.IsCompletedSuccessfully);
         Assert.IsNotNull(downloadTask.Result);
@@ -126,7 +126,7 @@ public class StorageTests : ConfigManager
 
         string url = "ipfs://QmfNyxShuV6Nrt3CLLdgaBPXfVr5MAbeWTHFCt8TZFsxgW/6.png";
 
-        var downloadTask = ThirdwebManager.Instance.SDK.storage.DownloadImage(url);
+        var downloadTask = ThirdwebManager.Instance.SDK.Storage.DownloadImage(url);
         yield return new WaitUntil(() => downloadTask.IsCompleted);
         Assert.IsTrue(downloadTask.IsCompletedSuccessfully);
         Assert.IsNotNull(downloadTask.Result);
@@ -140,7 +140,7 @@ public class StorageTests : ConfigManager
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
 
         string text = "Hello World!";
-        var uploadTask = ThirdwebManager.Instance.SDK.storage.UploadText(text);
+        var uploadTask = ThirdwebManager.Instance.SDK.Storage.UploadText(text);
         yield return new WaitUntil(() => uploadTask.IsCompleted);
         Assert.IsTrue(uploadTask.IsFaulted);
     }
@@ -152,14 +152,14 @@ public class StorageTests : ConfigManager
         ThirdwebManager.Instance.Initialize("arbitrum-sepolia");
 
         string text = "Hello World!";
-        var uploadTask = ThirdwebManager.Instance.SDK.storage.UploadText(text);
+        var uploadTask = ThirdwebManager.Instance.SDK.Storage.UploadText(text);
         yield return new WaitUntil(() => uploadTask.IsCompleted);
         Assert.IsTrue(uploadTask.IsCompletedSuccessfully);
         Assert.IsNotNull(uploadTask.Result);
         Assert.IsNotNull(uploadTask.Result.IpfsHash);
 
         string url = "ipfs://" + uploadTask.Result.IpfsHash;
-        var downloadTask = ThirdwebManager.Instance.SDK.storage.DownloadText<string>(url);
+        var downloadTask = ThirdwebManager.Instance.SDK.Storage.DownloadText<string>(url);
         yield return new WaitUntil(() => downloadTask.IsCompleted);
         Assert.IsTrue(downloadTask.IsCompletedSuccessfully);
         Assert.IsNotNull(downloadTask.Result);
@@ -178,7 +178,7 @@ public class StorageTests : ConfigManager
 
         yield return new WaitForSeconds(3f);
 
-        var uploadTask = ThirdwebManager.Instance.SDK.storage.UploadFromPath(path);
+        var uploadTask = ThirdwebManager.Instance.SDK.Storage.UploadFromPath(path);
         yield return new WaitUntil(() => uploadTask.IsCompleted);
         Assert.IsTrue(uploadTask.IsFaulted);
     }
@@ -194,7 +194,7 @@ public class StorageTests : ConfigManager
             System.IO.File.Delete(path);
         System.IO.File.WriteAllText(path, "{\"name\":\"John Doe\",\"age\":30,\"city\":\"New York\"}");
 
-        var uploadTask = ThirdwebManager.Instance.SDK.storage.UploadFromPath(path);
+        var uploadTask = ThirdwebManager.Instance.SDK.Storage.UploadFromPath(path);
         yield return new WaitUntil(() => uploadTask.IsCompleted);
         Assert.IsTrue(uploadTask.IsCompletedSuccessfully);
         Assert.IsNotNull(uploadTask.Result);

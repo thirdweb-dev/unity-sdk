@@ -39,7 +39,7 @@ public class ERC721ReadTests : ConfigManager
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc721Address);
         Assert.IsNotNull(contract);
-        Assert.AreEqual(_dropErc721Address, contract.address);
+        Assert.AreEqual(_dropErc721Address, contract.Address);
         yield return null;
     }
 

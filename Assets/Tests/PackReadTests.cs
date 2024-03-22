@@ -38,7 +38,7 @@ public class PackReadTests : ConfigManager
     public IEnumerator Get_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_packAddress);
-        var packTask = contract.pack.Get("0");
+        var packTask = contract.Pack.Get("0");
         yield return new WaitUntil(() => packTask.IsCompleted);
         Assert.IsTrue(packTask.IsCompletedSuccessfully);
         Assert.IsNotNull(packTask.Result);
@@ -48,7 +48,7 @@ public class PackReadTests : ConfigManager
     public IEnumerator BalanceOf_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_packAddress);
-        var packTask = contract.pack.BalanceOf(_packAddress, "0");
+        var packTask = contract.Pack.BalanceOf(_packAddress, "0");
         yield return new WaitUntil(() => packTask.IsCompleted);
         Assert.IsTrue(packTask.IsCompletedSuccessfully);
         Assert.IsNotNull(packTask.Result);
@@ -58,7 +58,7 @@ public class PackReadTests : ConfigManager
     public IEnumerator IsApprovedForAll_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_packAddress);
-        var packTask = contract.pack.IsApprovedForAll(_packAddress, _packAddress);
+        var packTask = contract.Pack.IsApprovedForAll(_packAddress, _packAddress);
         yield return new WaitUntil(() => packTask.IsCompleted);
         Assert.IsTrue(packTask.IsCompletedSuccessfully);
         Assert.IsNotNull(packTask.Result);
@@ -68,7 +68,7 @@ public class PackReadTests : ConfigManager
     public IEnumerator TotalSupply_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_packAddress);
-        var packTask = contract.pack.TotalSupply("0");
+        var packTask = contract.Pack.TotalSupply("0");
         yield return new WaitUntil(() => packTask.IsCompleted);
         Assert.IsTrue(packTask.IsCompletedSuccessfully);
         Assert.IsNotNull(packTask.Result);
@@ -79,7 +79,7 @@ public class PackReadTests : ConfigManager
     public IEnumerator GetPackContents_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_packAddress);
-        var packTask = contract.pack.GetPackContents("0");
+        var packTask = contract.Pack.GetPackContents("0");
         yield return new WaitUntil(() => packTask.IsCompleted);
         Assert.IsTrue(packTask.IsCompletedSuccessfully);
         Assert.IsNotNull(packTask.Result);

@@ -8,7 +8,7 @@ namespace Thirdweb.Examples
         {
             try
             {
-                CurrencyValue balance = await ThirdwebManager.Instance.SDK.wallet.GetBalance();
+                CurrencyValue balance = await ThirdwebManager.Instance.SDK.Wallet.GetBalance();
                 Debugger.Instance.Log("[Get Balance] Native Balance", balance.ToString());
             }
             catch (System.Exception e)
@@ -89,10 +89,10 @@ namespace Thirdweb.Examples
             try
             {
                 // Generate and sign
-                LoginPayload data = await ThirdwebManager.Instance.SDK.wallet.Authenticate("example.com");
+                LoginPayload data = await ThirdwebManager.Instance.SDK.Wallet.Authenticate("example.com");
                 // Verify
-                string resultAddressOrError = await ThirdwebManager.Instance.SDK.wallet.Verify(data);
-                if (await ThirdwebManager.Instance.SDK.wallet.GetAddress() == resultAddressOrError)
+                string resultAddressOrError = await ThirdwebManager.Instance.SDK.Wallet.Verify(data);
+                if (await ThirdwebManager.Instance.SDK.Wallet.GetAddress() == resultAddressOrError)
                 {
                     Debugger.Instance.Log("[Authenticate] Successful", resultAddressOrError);
                 }
@@ -112,7 +112,7 @@ namespace Thirdweb.Examples
             try
             {
                 string message = "Hello World";
-                string sig = await ThirdwebManager.Instance.SDK.wallet.Sign(message);
+                string sig = await ThirdwebManager.Instance.SDK.Wallet.Sign(message);
                 Debugger.Instance.Log("[Sign] Successful", $"Signature: {sig}");
             }
             catch (System.Exception e)

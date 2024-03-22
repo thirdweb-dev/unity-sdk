@@ -39,7 +39,7 @@ public class MarketplaceReadTests : ConfigManager
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
         Assert.IsNotNull(contract);
-        Assert.AreEqual(_marketplaceAddress, contract.address);
+        Assert.AreEqual(_marketplaceAddress, contract.Address);
         yield return null;
     }
 
@@ -47,7 +47,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator DirectListings_GetAll_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.directListings.GetAll();
+        var result = contract.Marketplace.DirectListings.GetAll();
         yield return new WaitUntil(() => result.IsCompleted);
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
@@ -59,7 +59,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator DirectListings_GetAllValid_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.directListings.GetAllValid();
+        var result = contract.Marketplace.DirectListings.GetAllValid();
         yield return new WaitUntil(() => result.IsCompleted);
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
@@ -71,7 +71,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator DirectListings_GetListing_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.directListings.GetListing("1");
+        var result = contract.Marketplace.DirectListings.GetListing("1");
         yield return new WaitUntil(() => result.IsCompleted);
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
@@ -82,7 +82,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator DirectListings_GetTotalCount_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.directListings.GetTotalCount();
+        var result = contract.Marketplace.DirectListings.GetTotalCount();
         yield return new WaitUntil(() => result.IsCompleted);
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
@@ -94,7 +94,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator DirectListings_IsBuyerApprovedForListing_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.directListings.IsBuyerApprovedForListing("1", _marketplaceAddress);
+        var result = contract.Marketplace.DirectListings.IsBuyerApprovedForListing("1", _marketplaceAddress);
         yield return new WaitUntil(() => result.IsCompleted);
         if (Utils.IsWebGLBuild())
         {
@@ -112,7 +112,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator DirectListings_IsCurrencyApprovedForListing_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.directListings.IsCurrencyApprovedForListing("1", _marketplaceAddress);
+        var result = contract.Marketplace.DirectListings.IsCurrencyApprovedForListing("1", _marketplaceAddress);
         yield return new WaitUntil(() => result.IsCompleted);
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
@@ -123,7 +123,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator EnglishAuctions_GetAll_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.englishAuctions.GetAll();
+        var result = contract.Marketplace.EnglishAuctions.GetAll();
         yield return new WaitUntil(() => result.IsCompleted);
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
@@ -135,7 +135,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator EnglishAuctions_GetAllValid_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.englishAuctions.GetAllValid();
+        var result = contract.Marketplace.EnglishAuctions.GetAllValid();
         yield return new WaitUntil(() => result.IsCompleted);
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
@@ -147,7 +147,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator EnglishAuctions_GetAuction_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.englishAuctions.GetAuction("0");
+        var result = contract.Marketplace.EnglishAuctions.GetAuction("0");
         yield return new WaitUntil(() => result.IsCompleted);
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
@@ -158,7 +158,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator EnglishAuctions_GetBidBufferBps_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.englishAuctions.GetBidBufferBps("0");
+        var result = contract.Marketplace.EnglishAuctions.GetBidBufferBps("0");
         yield return new WaitUntil(() => result.IsCompleted);
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
@@ -169,7 +169,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator EnglishAuctions_GetMinimumNextBid_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.englishAuctions.GetMinimumNextBid("0");
+        var result = contract.Marketplace.EnglishAuctions.GetMinimumNextBid("0");
         yield return new WaitUntil(() => result.IsCompleted);
         Assert.IsTrue(result.IsCompletedSuccessfully);
         Assert.IsNotNull(result.Result);
@@ -180,7 +180,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator EnglishAuctions_GetTotalCount_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.englishAuctions.GetTotalCount();
+        var result = contract.Marketplace.EnglishAuctions.GetTotalCount();
         yield return new WaitUntil(() => result.IsCompleted);
         if (result.IsFaulted)
             throw result.Exception;
@@ -194,7 +194,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator EnglishAuctions_GetWinner_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.englishAuctions.GetWinner("0");
+        var result = contract.Marketplace.EnglishAuctions.GetWinner("0");
         yield return new WaitUntil(() => result.IsCompleted);
         if (Utils.IsWebGLBuild())
         {
@@ -214,7 +214,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator EnglishAuctions_GetWinningBid_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.englishAuctions.GetWinningBid("0");
+        var result = contract.Marketplace.EnglishAuctions.GetWinningBid("0");
         yield return new WaitUntil(() => result.IsCompleted);
         if (result.IsFaulted)
             throw result.Exception;
@@ -227,7 +227,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator EnglishAuctions_IsWinningBid_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.englishAuctions.IsWinningBid("0", "1");
+        var result = contract.Marketplace.EnglishAuctions.IsWinningBid("0", "1");
         yield return new WaitUntil(() => result.IsCompleted);
         if (result.IsFaulted)
             throw result.Exception;
@@ -240,7 +240,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator Offers_GetAll_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.offers.GetAll();
+        var result = contract.Marketplace.Offers.GetAll();
         yield return new WaitUntil(() => result.IsCompleted);
         if (result.IsFaulted)
             throw result.Exception;
@@ -254,7 +254,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator Offers_GetAllValid_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.offers.GetAllValid();
+        var result = contract.Marketplace.Offers.GetAllValid();
         yield return new WaitUntil(() => result.IsCompleted);
         if (result.IsFaulted)
             throw result.Exception;
@@ -268,7 +268,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator Offers_GetOffer_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.offers.GetOffer("0");
+        var result = contract.Marketplace.Offers.GetOffer("0");
         yield return new WaitUntil(() => result.IsCompleted);
         if (result.IsFaulted)
             throw result.Exception;
@@ -281,7 +281,7 @@ public class MarketplaceReadTests : ConfigManager
     public IEnumerator Offers_GetTotalCount_Success()
     {
         var contract = ThirdwebManager.Instance.SDK.GetContract(_marketplaceAddress);
-        var result = contract.marketplace.offers.GetTotalCount();
+        var result = contract.Marketplace.Offers.GetTotalCount();
         yield return new WaitUntil(() => result.IsCompleted);
         if (result.IsFaulted)
             throw result.Exception;

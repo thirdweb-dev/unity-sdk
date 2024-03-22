@@ -61,7 +61,7 @@ public class EventsTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc721Address);
         if (Utils.IsWebGLBuild())
         {
-            var transferEvents = contract.events.Get<TransferEvent>("Transfer");
+            var transferEvents = contract.Events.Get<TransferEvent>("Transfer");
             yield return new WaitUntil(() => transferEvents.IsCompleted);
             if (transferEvents.IsFaulted)
                 throw transferEvents.Exception;

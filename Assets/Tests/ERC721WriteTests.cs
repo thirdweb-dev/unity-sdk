@@ -40,7 +40,7 @@ public class ERC721WriteTests : ConfigManager
     {
         Utils.DeleteLocalAccount();
         var connection = new WalletConnection(provider: WalletProvider.SmartWallet, chainId: 421614, personalWallet: WalletProvider.LocalWallet);
-        var connectTask = ThirdwebManager.Instance.SDK.wallet.Connect(connection);
+        var connectTask = ThirdwebManager.Instance.SDK.Wallet.Connect(connection);
         yield return new WaitUntil(() => connectTask.IsCompleted);
         if (connectTask.IsFaulted)
             throw connectTask.Exception;
