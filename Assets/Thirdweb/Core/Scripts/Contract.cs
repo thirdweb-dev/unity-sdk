@@ -213,13 +213,30 @@ namespace Thirdweb
 
                 var gasPrice = transactionOverrides?.gasPrice != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasPrice)) : null;
 
-                var hash = await function.SendTransactionAsync(
-                    from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
-                    gas: gas,
-                    gasPrice: gasPrice,
-                    value: value,
-                    args
-                );
+                string hash;
+                if (gasPrice == null)
+                {
+                    var gasFees = await Utils.GetGasPriceAsync(await ThirdwebManager.Instance.SDK.wallet.GetChainId());
+                    hash = await function.SendTransactionAsync(
+                        from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                        gas: gas,
+                        value: value,
+                        maxFeePerGas: new HexBigInteger(gasFees.MaxFeePerGas),
+                        maxPriorityFeePerGas: new HexBigInteger(gasFees.MaxPriorityFeePerGas),
+                        args
+                    );
+                }
+                else
+                {
+                    hash = await function.SendTransactionAsync(
+                        from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                        gas: gas,
+                        gasPrice: gasPrice,
+                        value: value,
+                        args
+                    );
+                }
+
                 return await Transaction.WaitForTransactionResult(hash);
             }
         }

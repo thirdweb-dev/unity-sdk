@@ -94,6 +94,14 @@ namespace Thirdweb
 
             if (!isGasless)
             {
+                if (functionMessage.GasPrice == null && functionMessage.MaxFeePerGas == null && functionMessage.MaxPriorityFeePerGas == null)
+                {
+                    var gasPrice = await Utils.GetGasPriceAsync(await ThirdwebManager.Instance.SDK.wallet.GetChainId());
+                    functionMessage.GasPrice = gasPrice.MaxFeePerGas;
+                    functionMessage.MaxFeePerGas = gasPrice.MaxFeePerGas;
+                    functionMessage.MaxPriorityFeePerGas = gasPrice.MaxPriorityFeePerGas;
+                }
+
                 if (
                     ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
                     && ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
