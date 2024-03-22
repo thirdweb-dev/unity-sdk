@@ -50,6 +50,7 @@ jobs:
 
       - name: Run Tests
         uses: game-ci/unity-test-runner@v4
+        id: testRunner
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -61,23 +62,24 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           testMode: PlayMode # Run PlayMode tests.
 
-      # - uses: actions/upload-artifact@v3
-      #   if: always()
-      #   with:
-      #     name: Test results-${{ matrix.targetPlatform }}-${{ github.run_number }}
-      #     path: ${{ steps.testRunner.outputs.artifactsPath }}
-
-      - name: Copy Test Results
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
         if: always()
-        run: |
-          cp -Lpr ${{ steps.testRunner.outputs.artifactsPath }} test-results
-        shell: bash
+        with:
+          name: TestResults-${{ matrix.targetPlatform }}-${{ github.run_number }}
+          path: ${{ steps.testRunner.outputs.artifactsPath }}
+
+      - name: Download Test Results
+        uses: actions/download-artifact@v3
+        with:
+          name: TestResults-${{ matrix.targetPlatform }}-${{ github.run_number }}
+          path: TestResults-${{ matrix.targetPlatform }}
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          files: test-results/**/*.xml
+          files: TestResults-${{ matrix.targetPlatform }}/**/*.xml
           check_name: "Test Results for ${{ matrix.targetPlatform }}"
           comment_title: "Test Results for ${{ matrix.targetPlatform }}"
 

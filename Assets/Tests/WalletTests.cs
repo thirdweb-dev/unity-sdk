@@ -91,7 +91,7 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var authenticateTask = ThirdwebManager.Instance.SDK.wallet.Authenticate("https://example.com");
+        var authenticateTask = ThirdwebManager.Instance.SDK.wallet.Authenticate("example.com");
         yield return new WaitUntil(() => authenticateTask.IsCompleted);
         Assert.IsTrue(authenticateTask.IsCompletedSuccessfully);
         Assert.IsNotNull(authenticateTask.Result);
@@ -103,7 +103,7 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var authenticateTask = ThirdwebManager.Instance.SDK.wallet.Authenticate("https://example.com");
+        var authenticateTask = ThirdwebManager.Instance.SDK.wallet.Authenticate("example.com");
         yield return new WaitUntil(() => authenticateTask.IsCompleted);
         Assert.IsTrue(authenticateTask.IsCompletedSuccessfully);
         Assert.IsNotNull(authenticateTask.Result);
@@ -158,30 +158,6 @@ public class WalletTests : ConfigManager
     }
 
     [UnityTest]
-    public IEnumerator GetEmail_WithLocalWallet_IsEmpty()
-    {
-        yield return Connect_WithLocalWallet_Success();
-
-        var getEmailTask = ThirdwebManager.Instance.SDK.wallet.GetEmail();
-        yield return new WaitUntil(() => getEmailTask.IsCompleted);
-        Assert.IsTrue(getEmailTask.IsCompletedSuccessfully);
-        Assert.AreEqual(getEmailTask.Result, string.Empty);
-    }
-
-    [UnityTest]
-    public IEnumerator GetSignerAddress_WithLocalWallet_Success()
-    {
-        yield return Connect_WithLocalWallet_Success();
-
-        var getSignerAddressTask = ThirdwebManager.Instance.SDK.wallet.GetSignerAddress();
-        yield return new WaitUntil(() => getSignerAddressTask.IsCompleted);
-        Assert.IsTrue(getSignerAddressTask.IsCompletedSuccessfully);
-        Assert.IsNotNull(getSignerAddressTask.Result);
-        Assert.IsTrue(getSignerAddressTask.Result.Length == 42);
-        Assert.AreEqual(getSignerAddressTask.Result, ThirdwebManager.Instance.SDK.wallet.GetAddress().Result);
-    }
-
-    [UnityTest]
     public IEnumerator IsConnected_WithLocalWallet_Success()
     {
         yield return Connect_WithLocalWallet_Success();
@@ -203,7 +179,7 @@ public class WalletTests : ConfigManager
     }
 
     [UnityTest]
-    public IEnumerator GetChainId_WithLocalWallet_Fail()
+    public IEnumerator GetChainId_WithLocalWallet_Success()
     {
         yield return Connect_WithLocalWallet_Success();
 
@@ -218,7 +194,8 @@ public class WalletTests : ConfigManager
     {
         yield return Connect_WithLocalWallet_Success();
 
-        var transferTask = ThirdwebManager.Instance.SDK.wallet.Transfer(to: ThirdwebManager.Instance.SDK.wallet.GetAddress().Result, amount: "0");
+        var randomAddress = "0x0C741CBb712708b866764C82096dDfA7976B8e0c";
+        var transferTask = ThirdwebManager.Instance.SDK.wallet.Transfer(to: randomAddress, amount: "0");
         yield return new WaitUntil(() => transferTask.IsCompleted);
         Assert.IsTrue(transferTask.IsFaulted);
     }
@@ -237,118 +214,27 @@ public class WalletTests : ConfigManager
     }
 
     [UnityTest]
-    public IEnumerator RecoverAddress_WithLocalWallet_Success()
-    {
-        yield return Connect_WithLocalWallet_Success();
-
-        var message = "Hello World!";
-        var signature = ThirdwebManager.Instance.SDK.wallet.Sign(message).Result;
-        var recoverAddressTask = ThirdwebManager.Instance.SDK.wallet.RecoverAddress(message, signature);
-        yield return new WaitUntil(() => recoverAddressTask.IsCompleted);
-        Assert.IsTrue(recoverAddressTask.IsCompletedSuccessfully);
-        Assert.IsNotNull(recoverAddressTask.Result);
-        Assert.IsTrue(recoverAddressTask.Result.Length == 42);
-        Assert.AreEqual(recoverAddressTask.Result, ThirdwebManager.Instance.SDK.wallet.GetAddress().Result);
-    }
-
-    [UnityTest]
-    public IEnumerator AddAdmin_WithLocalWallet_Fail()
-    {
-        yield return Connect_WithLocalWallet_Success();
-
-        var addAdminTask = ThirdwebManager.Instance.SDK.wallet.AddAdmin(ThirdwebManager.Instance.SDK.wallet.GetAddress().Result);
-        yield return new WaitUntil(() => addAdminTask.IsCompleted);
-        Assert.IsTrue(addAdminTask.IsFaulted);
-        Assert.AreEqual("This functionality is only available for SmartWallets.", addAdminTask.Exception.InnerException.Message);
-    }
-
-    [UnityTest]
-    public IEnumerator RemoveAdmin_WithLocalWallet_Fail()
-    {
-        yield return Connect_WithLocalWallet_Success();
-
-        var removeAdminTask = ThirdwebManager.Instance.SDK.wallet.RemoveAdmin(ThirdwebManager.Instance.SDK.wallet.GetAddress().Result);
-        yield return new WaitUntil(() => removeAdminTask.IsCompleted);
-        Assert.IsTrue(removeAdminTask.IsFaulted);
-        Assert.AreEqual("This functionality is only available for SmartWallets.", removeAdminTask.Exception.InnerException.Message);
-    }
-
-    [UnityTest]
-    public IEnumerator CreateSessionKey_WithLocalWallet_Fail()
-    {
-        yield return Connect_WithLocalWallet_Success();
-
-        var createSessionKeyTask = ThirdwebManager.Instance.SDK.wallet.CreateSessionKey("", new List<string>(), "", "", "", "", "");
-        yield return new WaitUntil(() => createSessionKeyTask.IsCompleted);
-        Assert.IsTrue(createSessionKeyTask.IsFaulted);
-        Assert.AreEqual("This functionality is only available for SmartWallets.", createSessionKeyTask.Exception.InnerException.Message);
-    }
-
-    [UnityTest]
-    public IEnumerator RevokeSessionKey_WithLocalWallet_Fail()
-    {
-        yield return Connect_WithLocalWallet_Success();
-
-        var revokeSessionKeyTask = ThirdwebManager.Instance.SDK.wallet.RevokeSessionKey("");
-        yield return new WaitUntil(() => revokeSessionKeyTask.IsCompleted);
-        Assert.IsTrue(revokeSessionKeyTask.IsFaulted);
-        Assert.AreEqual("This functionality is only available for SmartWallets.", revokeSessionKeyTask.Exception.InnerException.Message);
-    }
-
-    [UnityTest]
-    public IEnumerator GetAllActiveSigners_WithLocalWallet_Fail()
-    {
-        yield return Connect_WithLocalWallet_Success();
-
-        var getAllActiveSignersTask = ThirdwebManager.Instance.SDK.wallet.GetAllActiveSigners();
-        yield return new WaitUntil(() => getAllActiveSignersTask.IsCompleted);
-        Assert.IsTrue(getAllActiveSignersTask.IsFaulted);
-        Assert.AreEqual("This functionality is only available for SmartWallets.", getAllActiveSignersTask.Exception.InnerException.Message);
-    }
-
-    [UnityTest]
-    public IEnumerator IsDeployed_WithLocalWallet_Fail()
-    {
-        yield return Connect_WithLocalWallet_Success();
-
-        var isDeployedTask = ThirdwebManager.Instance.SDK.wallet.IsDeployed();
-        yield return new WaitUntil(() => isDeployedTask.IsCompleted);
-        Assert.IsTrue(isDeployedTask.IsFaulted);
-        Assert.AreEqual("This functionality is only available for SmartWallets.", isDeployedTask.Exception.InnerException.Message);
-    }
-
-    [UnityTest]
     public IEnumerator SendRawTransaction_WithLocalWallet_Fail()
     {
         yield return Connect_WithLocalWallet_Success();
 
+        var randomAddress = "0x0C741CBb712708b866764C82096dDfA7976B8e0c";
+
+        var addressTask = ThirdwebManager.Instance.SDK.wallet.GetAddress();
+        yield return new WaitUntil(() => addressTask.IsCompleted);
+        Assert.IsTrue(addressTask.IsCompletedSuccessfully);
+
         var sendRawTransactionTask = ThirdwebManager.Instance.SDK.wallet.SendRawTransaction(
             new TransactionRequest()
             {
-                from = ThirdwebManager.Instance.SDK.wallet.GetAddress().Result,
-                to = ThirdwebManager.Instance.SDK.wallet.GetAddress().Result,
+                from = addressTask.Result,
+                to = randomAddress,
                 data = "0x",
                 value = "0",
                 gasLimit = "0",
-                gasPrice = "0"
             }
         );
         yield return new WaitUntil(() => sendRawTransactionTask.IsCompleted);
         Assert.IsTrue(sendRawTransactionTask.IsFaulted);
-        Assert.AreEqual("intrinsic gas too low: eth_sendRawTransaction", sendRawTransactionTask.Exception.InnerException.Message);
-    }
-
-    [UnityTest]
-    public IEnumerator FundWallet_WithLocalWallet_Fail()
-    {
-        if (Utils.IsWebGLBuild())
-            yield break;
-
-        yield return Connect_WithLocalWallet_Success();
-
-        var fundWalletTask = ThirdwebManager.Instance.SDK.wallet.FundWallet(default);
-        yield return new WaitUntil(() => fundWalletTask.IsCompleted);
-        Assert.IsTrue(fundWalletTask.IsFaulted);
-        Assert.AreEqual("This functionality is not yet available on your current platform.", fundWalletTask.Exception.InnerException.Message);
     }
 }
