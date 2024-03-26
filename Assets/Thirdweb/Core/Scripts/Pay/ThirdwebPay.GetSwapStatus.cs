@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
+using UnityEngine.Networking;
 using Newtonsoft.Json;
+using System.Linq;
+using System.Threading.Tasks;
+using Thirdweb.Redcode.Awaiting;
 
 namespace Thirdweb.Pay
 {
@@ -21,22 +22,23 @@ namespace Thirdweb.Pay
             var queryStringFormatted = string.Join("&", queryString.Where(kv => kv.Value != null).Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
             var url = $"{Constants.THIRDWEB_PAY_STATUS_ENDPOINT}?{queryStringFormatted}";
 
-            using var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("x-sdk-name", "UnitySDK");
-            httpClient.DefaultRequestHeaders.Add("x-sdk-os", Utils.GetRuntimePlatform());
-            httpClient.DefaultRequestHeaders.Add("x-sdk-platform", "unity");
-            httpClient.DefaultRequestHeaders.Add("x-sdk-version", ThirdwebSDK.version);
-            httpClient.DefaultRequestHeaders.Add("x-client-id", ThirdwebManager.Instance.SDK.Session.Options.clientId);
-            httpClient.DefaultRequestHeaders.Add("x-bundle-id", ThirdwebManager.Instance.SDK.Session.Options.bundleId);
+            using var request = UnityWebRequest.Get(url);
 
-            var response = await httpClient.GetAsync(url);
+            request.SetRequestHeader("x-sdk-name", "UnitySDK");
+            request.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
+            request.SetRequestHeader("x-sdk-platform", "unity");
+            request.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
+            request.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.Session.Options.clientId);
+            request.SetRequestHeader("x-bundle-id", ThirdwebManager.Instance.SDK.Session.Options.bundleId);
 
-            if (!response.IsSuccessStatusCode)
+            await request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
             {
                 ErrorResponse error;
                 try
                 {
-                    error = JsonConvert.DeserializeObject<ErrorResponse>(await response.Content.ReadAsStringAsync());
+                    error = JsonConvert.DeserializeObject<ErrorResponse>(request.downloadHandler.text);
                 }
                 catch
                 {
@@ -48,7 +50,7 @@ namespace Thirdweb.Pay
                             Reason = "Unknown",
                             Code = "Unknown",
                             Stack = "Unknown",
-                            StatusCode = (int)response.StatusCode
+                            StatusCode = (int)request.responseCode
                         }
                     };
                 }
@@ -58,7 +60,7 @@ namespace Thirdweb.Pay
                 );
             }
 
-            var content = await response.Content.ReadAsStringAsync();
+            var content = request.downloadHandler.text;
             var data = JsonConvert.DeserializeObject<SwapStatusResponse>(content);
             return data.Result;
         }

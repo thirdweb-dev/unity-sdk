@@ -877,11 +877,12 @@ namespace Thirdweb
         /// </summary>
         /// <param name="transactionRequest">The transaction request object containing transaction details.</param>
         /// <returns>The result of the transaction as a TransactionResult object.</returns>
-        public async Task<TransactionResult> SendRawTransaction(TransactionRequest transactionRequest)
+        public async Task<string> SendRawTransaction(TransactionRequest transactionRequest)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("sendRawTransaction"), Utils.ToJsonStringArray(transactionRequest));
+                var res = await Bridge.InvokeRoute<JObject>(getRoute("sendRawTransaction"), Utils.ToJsonStringArray(transactionRequest));
+                return res["hash"].Value<string>();
             }
             else
             {
@@ -893,9 +894,19 @@ namespace Thirdweb
                     new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
                     new HexBigInteger(BigInteger.Parse(transactionRequest.value))
                 );
-                var hash = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
-                return await Transaction.WaitForTransactionResult(hash);
+                return await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
             }
+        }
+
+        /// <summary>
+        /// Sends a raw transaction from the connected wallet and waits for the transaction to be mined.
+        /// </summary>
+        /// <param name="transactionRequest">The transaction request object containing transaction details.</param>
+        /// <returns>The result of the transaction as a TransactionResult object.</returns>
+        public async Task<TransactionResult> ExecuteRawTransaction(TransactionRequest transactionRequest)
+        {
+            var hash = await SendRawTransaction(transactionRequest);
+            return await Transaction.WaitForTransactionResult(hash);
         }
 
         /// <summary>

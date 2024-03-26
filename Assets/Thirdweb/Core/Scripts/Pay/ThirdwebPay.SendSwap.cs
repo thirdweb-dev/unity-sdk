@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace Thirdweb.Pay
 {
@@ -23,7 +17,7 @@ namespace Thirdweb.Pay
             }
 
             ThirdwebDebug.Log("Sending swap transaction...");
-            var sendRes = await sdk.Wallet.SendRawTransaction(
+            var hash = await sdk.Wallet.SendRawTransaction(
                 new Thirdweb.TransactionRequest()
                 {
                     from = swapRoute.TransactionRequest.From,
@@ -34,9 +28,9 @@ namespace Thirdweb.Pay
                     gasPrice = swapRoute.TransactionRequest.GasPrice,
                 }
             );
-            ThirdwebDebug.Log($"Swap transaction receipt: {sendRes.receipt.transactionHash}");
+            ThirdwebDebug.Log($"Swap transaction hash: {hash}");
 
-            return sendRes.receipt.transactionHash;
+            return hash;
         }
     }
 }
