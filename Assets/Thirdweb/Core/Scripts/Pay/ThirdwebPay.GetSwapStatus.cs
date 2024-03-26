@@ -12,6 +12,11 @@ namespace Thirdweb.Pay
     {
         public static async Task<SwapStatusResult> GetSwapStatus(string transactionHash)
         {
+            if (string.IsNullOrEmpty(Utils.GetClientId()))
+            {
+                throw new Exception("Client ID is not set. Please set it in the ThirdwebManager.");
+            }
+
             if (string.IsNullOrEmpty(transactionHash))
             {
                 throw new ArgumentNullException(nameof(transactionHash));
@@ -29,7 +34,8 @@ namespace Thirdweb.Pay
             request.SetRequestHeader("x-sdk-platform", "unity");
             request.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
             request.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.Session.Options.clientId);
-            request.SetRequestHeader("x-bundle-id", ThirdwebManager.Instance.SDK.Session.Options.bundleId);
+            if (!Utils.IsWebGLBuild())
+                request.SetRequestHeader("x-bundle-id", ThirdwebManager.Instance.SDK.Session.Options.bundleId);
 
             await request.SendWebRequest();
 

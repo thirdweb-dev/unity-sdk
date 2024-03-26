@@ -61,4 +61,14 @@ public class Prefab_BuyWithCrypto : MonoBehaviour
 
         ThirdwebDebug.Log($"Status: {JsonConvert.SerializeObject(status, Formatting.Indented)}");
     }
+
+    public async void GetSwapHistory()
+    {
+        string connectedAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
+        var history = await ThirdwebPay.GetSwapHistory(connectedAddress, 0, 1);
+        ThirdwebDebug.Log($"History: {JsonConvert.SerializeObject(history, Formatting.Indented)}");
+
+        var historyNext = await ThirdwebPay.GetSwapHistory(connectedAddress, 1, 10, history.NextCursor);
+        ThirdwebDebug.Log($"History Next: {JsonConvert.SerializeObject(historyNext, Formatting.Indented)}");
+    }
 }

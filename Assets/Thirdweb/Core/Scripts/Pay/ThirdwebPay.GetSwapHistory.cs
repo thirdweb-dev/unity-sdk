@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
-using System.Linq;
-using Thirdweb.Redcode.Awaiting;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Thirdweb.Pay
 {
     public static partial class ThirdwebPay
     {
-        public static async Task<SwapQuoteResult> GetSwapQuote(SwapQuoteParams swapParams)
+        public static async Task<SwapHistoryResult> GetSwapHistory(string walletAddress, int start, int count, string cursor = null, int? pageSize = null)
         {
             if (string.IsNullOrEmpty(Utils.GetClientId()))
             {
@@ -19,21 +18,15 @@ namespace Thirdweb.Pay
 
             var queryString = new Dictionary<string, string>
             {
-                { "fromAddress", swapParams.FromAddress },
-                { "fromChainId", swapParams.FromChainId?.ToString() },
-                { "fromTokenAddress", swapParams.FromTokenAddress },
-                { "fromAmount", swapParams.FromAmount },
-                { "fromAmountWei", swapParams.FromAmountWei },
-                { "toAddress", swapParams.ToAddress },
-                { "toChainId", swapParams.ToChainId?.ToString() },
-                { "toTokenAddress", swapParams.ToTokenAddress },
-                { "toAmount", swapParams.ToAmount },
-                { "toAmountWei", swapParams.ToAmountWei },
-                { "maxSlippageBPS", swapParams.MaxSlippageBPS?.ToString() }
+                { "walletAddress", walletAddress },
+                { "start", start.ToString() },
+                { "count", count.ToString() },
+                { "cursor", cursor },
+                { "pageSize", pageSize?.ToString() }
             };
 
             var queryStringFormatted = string.Join("&", queryString.Where(kv => kv.Value != null).Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
-            var url = $"{Constants.THIRDWEB_PAY_QUOTE_ENDPOINT}?{queryStringFormatted}";
+            var url = $"{Constants.THIRDWEB_PAY_HISTORY_ENDPOINT}?{queryStringFormatted}";
 
             using var request = UnityWebRequest.Get(url);
 
@@ -45,7 +38,12 @@ namespace Thirdweb.Pay
             if (!Utils.IsWebGLBuild())
                 request.SetRequestHeader("x-bundle-id", Utils.GetBundleId());
 
-            await request.SendWebRequest();
+            var operation = request.SendWebRequest();
+
+            while (!operation.isDone)
+            {
+                await Task.Delay(100);
+            }
 
             if (request.result != UnityWebRequest.Result.Success)
             {
@@ -75,7 +73,7 @@ namespace Thirdweb.Pay
             }
 
             var content = request.downloadHandler.text;
-            var data = JsonConvert.DeserializeObject<GetSwapQuoteResponse>(content);
+            var data = JsonConvert.DeserializeObject<SwapHistoryResponse>(content);
             return data.Result;
         }
     }

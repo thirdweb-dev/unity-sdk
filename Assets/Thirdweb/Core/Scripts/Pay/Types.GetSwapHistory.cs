@@ -1,27 +1,44 @@
 using System;
+using System.Numerics;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Thirdweb.Pay
 {
-    public class SwapStatusResponse
+    public class SwapHistoryResponse
     {
         [JsonProperty("result")]
-        public SwapStatusResult Result { get; set; }
+        public SwapHistoryResult Result { get; set; }
     }
 
-    public class SwapStatusResult
+    public class SwapHistoryResult
+    {
+        [JsonProperty("walletAddress")]
+        public string WalletAddress { get; set; }
+
+        [JsonProperty("page")]
+        public List<SwapPage> Page { get; set; }
+
+        [JsonProperty("nextCursor")]
+        public string NextCursor { get; set; }
+
+        [JsonProperty("pageSize")]
+        public int PageSize { get; set; }
+    }
+
+    public class SwapPage
     {
         [JsonProperty("quote")]
-        public Quote Quote { get; set; }
+        public SwapQuote Quote { get; set; }
 
         [JsonProperty("swapType")]
         public string SwapType { get; set; }
 
         [JsonProperty("source")]
-        public TransactionDetails Source { get; set; }
+        public SourceDestinationDetails Source { get; set; }
 
         [JsonProperty("destination")]
-        public TransactionDetails Destination { get; set; }
+        public SourceDestinationDetails Destination { get; set; }
 
         [JsonProperty("status")]
         public string Status { get; set; }
@@ -42,7 +59,7 @@ namespace Thirdweb.Pay
         public string Bridge { get; set; }
     }
 
-    public class Quote
+    public class SwapQuote
     {
         [JsonProperty("fromToken")]
         public Token FromToken { get; set; }
@@ -75,7 +92,7 @@ namespace Thirdweb.Pay
         public DateTime CreatedAt { get; set; }
     }
 
-    public class TransactionDetails
+    public class SourceDestinationDetails
     {
         [JsonProperty("transactionHash")]
         public string TransactionHash { get; set; }
@@ -97,30 +114,5 @@ namespace Thirdweb.Pay
 
         [JsonProperty("explorerLink")]
         public string ExplorerLink { get; set; }
-    }
-
-    public enum SwapStatus
-    {
-        NOT_FOUND,
-        NONE,
-        PENDING,
-        FAILED,
-        COMPLETED
-    }
-
-    public enum SwapSubStatus
-    {
-        NONE,
-        WAITING_BRIDGE,
-        REVERTED_ON_CHAIN,
-        SUCCESS,
-        PARTIAL_SUCCESS,
-        UNKNOWN_ERROR
-    }
-
-    public enum SwapType
-    {
-        SAME_CHAIN,
-        CROSS_CHAIN
     }
 }
