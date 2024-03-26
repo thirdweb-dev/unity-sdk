@@ -10,6 +10,12 @@ namespace Thirdweb.Pay
 {
     public static partial class ThirdwebPay
     {
+        /// <summary>
+        /// Get a quote containing a TransactionRequest for swapping any token pair.
+        /// </summary>
+        /// <param name="swapParams">Swap parameters <see cref="SwapQuoteParams"/></param>
+        /// <returns>Swap quote object <see cref="SwapQuoteResult"/></returns>
+        /// <exception cref="Exception"></exception>
         public static async Task<SwapQuoteResult> GetSwapQuote(SwapQuoteParams swapParams)
         {
             if (string.IsNullOrEmpty(Utils.GetClientId()))

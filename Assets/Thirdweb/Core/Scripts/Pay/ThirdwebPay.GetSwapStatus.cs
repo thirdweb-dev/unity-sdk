@@ -10,6 +10,11 @@ namespace Thirdweb.Pay
 {
     public static partial class ThirdwebPay
     {
+        /// <summary>
+        /// Get swap status for a transaction hash.
+        /// </summary>
+        /// <param name="transactionHash">Transaction hash to get swap status for</param>
+        /// <returns>Swap status object <see cref="SwapStatusResult"/></returns>
         public static async Task<SwapStatusResult> GetSwapStatus(string transactionHash)
         {
             if (string.IsNullOrEmpty(Utils.GetClientId()))
