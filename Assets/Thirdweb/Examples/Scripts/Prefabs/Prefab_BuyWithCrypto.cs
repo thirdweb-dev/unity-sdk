@@ -22,7 +22,7 @@ public class Prefab_BuyWithCrypto : MonoBehaviour
             toAmount: "2"
         );
 
-        _quote = await ThirdwebPay.GetSwapQuoteAsync(swapQuoteParams);
+        _quote = await ThirdwebPay.GetSwapQuote(swapQuoteParams);
         ThirdwebDebug.Log($"Quote: {JsonConvert.SerializeObject(_quote, Formatting.Indented)}");
     }
 

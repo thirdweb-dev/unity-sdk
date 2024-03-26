@@ -10,7 +10,7 @@ namespace Thirdweb.Pay
 {
     public static partial class ThirdwebPay
     {
-        public static async Task<SwapQuoteResult> GetSwapQuoteAsync(SwapQuoteParams swapParams)
+        public static async Task<SwapQuoteResult> GetSwapQuote(SwapQuoteParams swapParams)
         {
             var queryString = new Dictionary<string, string>
             {
