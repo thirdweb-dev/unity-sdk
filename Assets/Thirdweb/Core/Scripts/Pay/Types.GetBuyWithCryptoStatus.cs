@@ -6,10 +6,10 @@ namespace Thirdweb.Pay
     public class SwapStatusResponse
     {
         [JsonProperty("result")]
-        public SwapStatusResult Result { get; set; }
+        public BuyWithCryptoStatusResult Result { get; set; }
     }
 
-    public class SwapStatusResult
+    public class BuyWithCryptoStatusResult
     {
         [JsonProperty("quote")]
         public Quote Quote { get; set; }

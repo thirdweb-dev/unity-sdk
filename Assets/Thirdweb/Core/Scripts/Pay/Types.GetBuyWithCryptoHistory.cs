@@ -8,10 +8,10 @@ namespace Thirdweb.Pay
     public class SwapHistoryResponse
     {
         [JsonProperty("result")]
-        public SwapHistoryResult Result { get; set; }
+        public BuyWithCryptoHistoryResult Result { get; set; }
     }
 
-    public class SwapHistoryResult
+    public class BuyWithCryptoHistoryResult
     {
         [JsonProperty("walletAddress")]
         public string WalletAddress { get; set; }

@@ -14,8 +14,8 @@ namespace Thirdweb.Pay
         /// Get swap status for a transaction hash.
         /// </summary>
         /// <param name="transactionHash">Transaction hash to get swap status for</param>
-        /// <returns>Swap status object <see cref="SwapStatusResult"/></returns>
-        public static async Task<SwapStatusResult> GetSwapStatus(string transactionHash)
+        /// <returns>Swap status object <see cref="BuyWithCryptoStatusResult"/></returns>
+        public static async Task<BuyWithCryptoStatusResult> GetBuyWithCryptoStatus(string transactionHash)
         {
             if (string.IsNullOrEmpty(Utils.GetClientId()))
             {

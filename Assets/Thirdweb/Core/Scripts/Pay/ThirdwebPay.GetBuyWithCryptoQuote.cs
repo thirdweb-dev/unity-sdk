@@ -13,10 +13,10 @@ namespace Thirdweb.Pay
         /// <summary>
         /// Get a quote containing a TransactionRequest for swapping any token pair.
         /// </summary>
-        /// <param name="swapParams">Swap parameters <see cref="SwapQuoteParams"/></param>
-        /// <returns>Swap quote object <see cref="SwapQuoteResult"/></returns>
+        /// <param name="buyWithCryptoParams">Swap parameters <see cref="BuyWithCryptoQuoteParams"/></param>
+        /// <returns>Swap quote object <see cref="BuyWithCryptoQuoteResult"/></returns>
         /// <exception cref="Exception"></exception>
-        public static async Task<SwapQuoteResult> GetSwapQuote(SwapQuoteParams swapParams)
+        public static async Task<BuyWithCryptoQuoteResult> GetBuyWithCryptoQuote(BuyWithCryptoQuoteParams buyWithCryptoParams)
         {
             if (string.IsNullOrEmpty(Utils.GetClientId()))
             {
@@ -25,17 +25,17 @@ namespace Thirdweb.Pay
 
             var queryString = new Dictionary<string, string>
             {
-                { "fromAddress", swapParams.FromAddress },
-                { "fromChainId", swapParams.FromChainId?.ToString() },
-                { "fromTokenAddress", swapParams.FromTokenAddress },
-                { "fromAmount", swapParams.FromAmount },
-                { "fromAmountWei", swapParams.FromAmountWei },
-                { "toAddress", swapParams.ToAddress },
-                { "toChainId", swapParams.ToChainId?.ToString() },
-                { "toTokenAddress", swapParams.ToTokenAddress },
-                { "toAmount", swapParams.ToAmount },
-                { "toAmountWei", swapParams.ToAmountWei },
-                { "maxSlippageBPS", swapParams.MaxSlippageBPS?.ToString() }
+                { "fromAddress", buyWithCryptoParams.FromAddress },
+                { "fromChainId", buyWithCryptoParams.FromChainId?.ToString() },
+                { "fromTokenAddress", buyWithCryptoParams.FromTokenAddress },
+                { "fromAmount", buyWithCryptoParams.FromAmount },
+                { "fromAmountWei", buyWithCryptoParams.FromAmountWei },
+                { "toAddress", buyWithCryptoParams.ToAddress },
+                { "toChainId", buyWithCryptoParams.ToChainId?.ToString() },
+                { "toTokenAddress", buyWithCryptoParams.ToTokenAddress },
+                { "toAmount", buyWithCryptoParams.ToAmount },
+                { "toAmountWei", buyWithCryptoParams.ToAmountWei },
+                { "maxSlippageBPS", buyWithCryptoParams.MaxSlippageBPS?.ToString() }
             };
 
             var queryStringFormatted = string.Join("&", queryString.Where(kv => kv.Value != null).Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));

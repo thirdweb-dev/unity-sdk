@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Thirdweb.Pay
 {
-    public class SwapQuoteParams
+    public class BuyWithCryptoQuoteParams
     {
         [JsonProperty("fromAddress")]
         public string FromAddress { get; set; }
@@ -39,7 +39,7 @@ namespace Thirdweb.Pay
         [JsonProperty("maxSlippageBPS")]
         public int? MaxSlippageBPS { get; set; }
 
-        public SwapQuoteParams(
+        public BuyWithCryptoQuoteParams(
             string fromAddress,
             BigInteger? fromChainId,
             string fromTokenAddress,
@@ -136,7 +136,7 @@ namespace Thirdweb.Pay
         public int AmountUSDCents { get; set; }
     }
 
-    public class SwapQuoteResult
+    public class BuyWithCryptoQuoteResult
     {
         [JsonProperty("quoteId")]
         public string QuoteId { get; set; }
@@ -196,6 +196,6 @@ namespace Thirdweb.Pay
     public class GetSwapQuoteResponse
     {
         [JsonProperty("result")]
-        public SwapQuoteResult Result { get; set; }
+        public BuyWithCryptoQuoteResult Result { get; set; }
     }
 }

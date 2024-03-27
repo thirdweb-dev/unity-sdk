@@ -17,9 +17,9 @@ namespace Thirdweb.Pay
         /// <param name="count">Number of records to retrieve</param>
         /// <param name="cursor">Cursor for paging through the history</param>
         /// <param name="pageSize">Swap statuses to query for</param>
-        /// <returns>Swap history object <see cref="SwapHistoryResult"/></returns>
+        /// <returns>Swap history object <see cref="BuyWithCryptoHistoryResult"/></returns>
         /// <exception cref="Exception"></exception>
-        public static async Task<SwapHistoryResult> GetSwapHistory(string walletAddress, int start, int count, string cursor = null, int? pageSize = null)
+        public static async Task<BuyWithCryptoHistoryResult> GetBuyWithCryptoHistory(string walletAddress, int start, int count, string cursor = null, int? pageSize = null)
         {
             if (string.IsNullOrEmpty(Utils.GetClientId()))
             {
