@@ -118,7 +118,7 @@ namespace Thirdweb.Pay
         public string Amount { get; set; }
 
         [JsonProperty("amountUSDCents")]
-        public int AmountUSDCents { get; set; }
+        public double AmountUSDCents { get; set; }
     }
 
     public class ProcessingFee
@@ -133,7 +133,7 @@ namespace Thirdweb.Pay
         public string Amount { get; set; }
 
         [JsonProperty("amountUSDCents")]
-        public int AmountUSDCents { get; set; }
+        public double AmountUSDCents { get; set; }
     }
 
     public class BuyWithCryptoQuoteResult

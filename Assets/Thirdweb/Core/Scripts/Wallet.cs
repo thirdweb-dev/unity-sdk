@@ -11,7 +11,7 @@ using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
 using System.Linq;
-using Newtonsoft.Json;
+using Nethereum.RPC.Eth.Transactions;
 
 namespace Thirdweb
 {
@@ -421,8 +421,18 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var txHash = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.GetEtherTransferService().TransferEtherAsync(to, decimal.Parse(amount));
-                    return await Transaction.WaitForTransactionResult(txHash);
+                    BigInteger gasPrice = (await Utils.GetWeb3().Eth.GasPrice.SendRequestAsync()).Value;
+                    gasPrice = BigInteger.Multiply(gasPrice, 10) / 9;
+                    var txRequest = new TransactionRequest()
+                    {
+                        from = await GetAddress(),
+                        to = to,
+                        data = "0x",
+                        value = amount.ToWei(),
+                        gasLimit = "21000",
+                        gasPrice = gasPrice.ToString()
+                    };
+                    return await ExecuteRawTransaction(txRequest);
                 }
             }
         }
@@ -894,7 +904,19 @@ namespace Thirdweb
                     new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
                     new HexBigInteger(BigInteger.Parse(transactionRequest.value))
                 );
-                return await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
+
+                if (
+                    ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
+                    && ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
+                )
+                {
+                    return await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
+                }
+                else
+                {
+                    var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.Session.Web3.Client);
+                    return await ethSendTx.SendRequestAsync(input);
+                }
             }
         }
 
