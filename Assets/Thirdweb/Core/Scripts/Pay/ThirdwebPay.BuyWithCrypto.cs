@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Thirdweb.Pay
@@ -18,8 +19,16 @@ namespace Thirdweb.Pay
             {
                 ThirdwebDebug.Log("Approving ERC20...");
                 var erc20ToApprove = sdk.GetContract(buyWithCryptoQuote.Approval.TokenAddress);
-                var approvalRes = await erc20ToApprove.ERC20.SetAllowance(buyWithCryptoQuote.Approval.SpenderAddress, buyWithCryptoQuote.Approval.AmountWei.ToEth());
-                ThirdwebDebug.Log($"Approval transaction receipt: {approvalRes}");
+                var currentAllowance = await erc20ToApprove.ERC20.Allowance(buyWithCryptoQuote.Approval.SpenderAddress);
+                if (BigInteger.Parse(currentAllowance.value) >= BigInteger.Parse(buyWithCryptoQuote.Approval.AmountWei))
+                {
+                    ThirdwebDebug.Log("Already approved");
+                }
+                else
+                {
+                    var approvalRes = await erc20ToApprove.ERC20.SetAllowance(buyWithCryptoQuote.Approval.SpenderAddress, buyWithCryptoQuote.Approval.AmountWei.ToEth());
+                    ThirdwebDebug.Log($"Approval transaction receipt: {approvalRes}");
+                }
             }
 
             ThirdwebDebug.Log("Sending swap transaction...");
