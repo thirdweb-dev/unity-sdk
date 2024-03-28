@@ -1,7 +1,7 @@
 <p align="center">
   <br />
   <a href="https://thirdweb.com">
-    <img src="https://github.com/thirdweb-dev/js/blob/main/packages/sdk/logo.svg?raw=true" width="200" alt=""/>
+    <img src="https://github.com/thirdweb-dev/js/blob/main/legacy_packages/sdk/logo.svg?raw=true" width="200" alt=""/>
   </a>
   <br />
   <h1 align="center">thirdweb Unity SDK</h1>
@@ -41,6 +41,8 @@ Follow our [Getting Started Guide](https://portal.thirdweb.com/unity/getting-sta
 All you need is a [ThirdwebManager](https://portal.thirdweb.com/unity/thirdwebmanager) prefab in your scene to interact with the SDK from anywhere!
 
 Various blockchain interaction examples are available in our `Scene_Prefabs` scene.
+
+Payment related interaction examples are available in our `Scene_Pay` scene.
 
 Notes:
 
