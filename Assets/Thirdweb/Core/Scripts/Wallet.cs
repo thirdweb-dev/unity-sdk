@@ -882,7 +882,7 @@ namespace Thirdweb
         /// Sends a raw transaction from the connected wallet.
         /// </summary>
         /// <param name="transactionRequest">The transaction request object containing transaction details.</param>
-        /// <returns>The result of the transaction as a TransactionResult object.</returns>
+        /// <returns>The transaction hash.</returns>
         public async Task<string> SendRawTransaction(TransactionRequest transactionRequest)
         {
             if (Utils.IsWebGLBuild())
