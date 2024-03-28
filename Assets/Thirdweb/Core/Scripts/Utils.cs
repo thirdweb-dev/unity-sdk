@@ -555,6 +555,7 @@ namespace Thirdweb
 
         public async static Task<GasPriceParameters> GetGasPriceAsync(BigInteger chainId)
         {
+            BigInteger? priorityOverride = null;
             if (chainId == 137 || chainId == 80001)
             {
                 try
@@ -564,6 +565,7 @@ namespace Thirdweb
                 catch (System.Exception e)
                 {
                     ThirdwebDebug.LogWarning($"Failed to get gas price from Polygon gas station, using default method: {e.Message}");
+                    priorityOverride = GweiToWei(chainId == 137 ? 40 : 1);
                 }
             }
 
@@ -595,7 +597,7 @@ namespace Thirdweb
             )
             {
                 gasPrice = BigInteger.Multiply(gasPrice, 10) / 9;
-                return new GasPriceParameters(gasPrice, gasPrice);
+                return new GasPriceParameters(gasPrice, priorityOverride ?? gasPrice);
             }
 
             var maxPriorityFeePerGas = new BigInteger(2000000000) > gasPrice ? gasPrice : new BigInteger(2000000000);
@@ -617,41 +619,30 @@ namespace Thirdweb
                 maxPriorityFeePerGas = gasPrice;
             }
 
-            return new GasPriceParameters(gasPrice, maxPriorityFeePerGas);
+            return new GasPriceParameters(gasPrice, priorityOverride ?? maxPriorityFeePerGas);
         }
 
         public async static Task<GasPriceParameters> GetPolygonGasPriceParameters(int chainId)
         {
             using var httpClient = new HttpClient();
             string gasStationUrl;
-            BigInteger minGasPrice = 1;
             switch (chainId)
             {
                 case 137:
                     gasStationUrl = "https://gasstation.polygon.technology/v2";
-                    minGasPrice = 31;
                     break;
                 case 80001:
                     gasStationUrl = "https://gasstation-testnet.polygon.technology/v2";
-                    minGasPrice = 1;
                     break;
                 default:
                     throw new UnityException("Unsupported chain id");
             }
-            try
-            {
-                var response = await httpClient.GetAsync(gasStationUrl);
-                response.EnsureSuccessStatusCode();
-                string responseBody = await response.Content.ReadAsStringAsync();
-                var data = JsonConvert.DeserializeObject<PolygonGasStationResult>(responseBody);
-                return new GasPriceParameters(GweiToWei(data.fast.maxFee), GweiToWei(data.fast.maxPriorityFee));
-            }
-            catch (Exception e)
-            {
-                ThirdwebDebug.LogWarning($"Failed to get gas price from Polygon gas station, using default: {e.Message}");
-            }
-            var gasPrice = await GetWeb3().Eth.GasPrice.SendRequestAsync();
-            return new GasPriceParameters(gasPrice, minGasPrice);
+
+            var response = await httpClient.GetAsync(gasStationUrl);
+            response.EnsureSuccessStatusCode();
+            string responseBody = await response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<PolygonGasStationResult>(responseBody);
+            return new GasPriceParameters(GweiToWei(data.fast.maxFee), GweiToWei(data.fast.maxPriorityFee));
         }
 
         public static BigInteger GweiToWei(double gweiAmount)

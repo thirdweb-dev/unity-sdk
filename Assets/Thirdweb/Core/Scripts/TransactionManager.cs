@@ -97,7 +97,6 @@ namespace Thirdweb
                 if (functionMessage.GasPrice == null && functionMessage.MaxFeePerGas == null && functionMessage.MaxPriorityFeePerGas == null)
                 {
                     var gasPrice = await Utils.GetGasPriceAsync(await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
-                    functionMessage.GasPrice = gasPrice.MaxFeePerGas;
                     functionMessage.MaxFeePerGas = gasPrice.MaxFeePerGas;
                     functionMessage.MaxPriorityFeePerGas = gasPrice.MaxPriorityFeePerGas;
                 }
