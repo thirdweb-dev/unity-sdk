@@ -30,7 +30,6 @@ namespace Thirdweb.Pay
                 { "fromTokenAddress", buyWithCryptoParams.FromTokenAddress },
                 { "fromAmount", buyWithCryptoParams.FromAmount },
                 { "fromAmountWei", buyWithCryptoParams.FromAmountWei },
-                { "toAddress", buyWithCryptoParams.ToAddress },
                 { "toChainId", buyWithCryptoParams.ToChainId?.ToString() },
                 { "toTokenAddress", buyWithCryptoParams.ToTokenAddress },
                 { "toAmount", buyWithCryptoParams.ToAmount },

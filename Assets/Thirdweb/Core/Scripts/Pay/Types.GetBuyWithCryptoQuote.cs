@@ -21,9 +21,6 @@ namespace Thirdweb.Pay
         [JsonProperty("fromAmountWei")]
         public string FromAmountWei { get; set; }
 
-        [JsonProperty("toAddress")]
-        public string ToAddress { get; set; }
-
         [JsonProperty("toChainId")]
         public BigInteger? ToChainId { get; set; }
 
@@ -46,7 +43,6 @@ namespace Thirdweb.Pay
             string toTokenAddress,
             string fromAmount = null,
             string fromAmountWei = null,
-            string toAddress = null,
             BigInteger? toChainId = null,
             string toAmount = null,
             string toAmountWei = null,
@@ -58,7 +54,6 @@ namespace Thirdweb.Pay
             FromTokenAddress = fromTokenAddress;
             FromAmount = fromAmount;
             FromAmountWei = fromAmountWei;
-            ToAddress = toAddress;
             ToChainId = toChainId;
             ToTokenAddress = toTokenAddress;
             ToAmount = toAmount;
