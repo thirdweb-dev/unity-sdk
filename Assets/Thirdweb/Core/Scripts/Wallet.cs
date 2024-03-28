@@ -11,7 +11,7 @@ using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
 using System.Linq;
-using Newtonsoft.Json;
+using Nethereum.RPC.Eth.Transactions;
 
 namespace Thirdweb
 {
@@ -421,8 +421,14 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var txHash = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.GetEtherTransferService().TransferEtherAsync(to, decimal.Parse(amount));
-                    return await Transaction.WaitForTransactionResult(txHash);
+                    var txRequest = new TransactionRequest()
+                    {
+                        from = await GetAddress(),
+                        to = to,
+                        data = "0x",
+                        value = amount.ToWei(),
+                    };
+                    return await ExecuteRawTransaction(txRequest);
                 }
             }
         }
@@ -877,25 +883,57 @@ namespace Thirdweb
         /// </summary>
         /// <param name="transactionRequest">The transaction request object containing transaction details.</param>
         /// <returns>The result of the transaction as a TransactionResult object.</returns>
-        public async Task<TransactionResult> SendRawTransaction(TransactionRequest transactionRequest)
+        public async Task<string> SendRawTransaction(TransactionRequest transactionRequest)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("sendRawTransaction"), Utils.ToJsonStringArray(transactionRequest));
+                transactionRequest.gasPrice = null;
+                var res = await Bridge.InvokeRoute<JObject>(getRoute("sendRawTransaction"), Utils.ToJsonStringArray(transactionRequest));
+                return res["hash"].Value<string>();
             }
             else
             {
+                if (string.IsNullOrEmpty(transactionRequest.to))
+                    throw new UnityException("Please specify a to address.");
+
+                if (transactionRequest.from == null)
+                    transactionRequest.from = await GetAddress();
+
                 var input = new Nethereum.RPC.Eth.DTOs.TransactionInput(
-                    transactionRequest.data,
+                    string.IsNullOrEmpty(transactionRequest.data) ? null : transactionRequest.data,
                     transactionRequest.to,
                     transactionRequest.from,
-                    new HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
-                    new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
-                    new HexBigInteger(BigInteger.Parse(transactionRequest.value))
+                    string.IsNullOrEmpty(transactionRequest.gasLimit) ? null : new HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
+                    string.IsNullOrEmpty(transactionRequest.gasPrice) ? null : new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
+                    string.IsNullOrEmpty(transactionRequest.value) ? new HexBigInteger(0) : new HexBigInteger(BigInteger.Parse(transactionRequest.value))
                 );
-                var hash = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
-                return await Transaction.WaitForTransactionResult(hash);
+
+                if (
+                    ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
+                    && ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
+                )
+                {
+                    if (input.Gas == null)
+                        input.Gas = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.EstimateGasAsync(input);
+                    return await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
+                }
+                else
+                {
+                    var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.Session.Web3.Client);
+                    return await ethSendTx.SendRequestAsync(input);
+                }
             }
+        }
+
+        /// <summary>
+        /// Sends a raw transaction from the connected wallet and waits for the transaction to be mined.
+        /// </summary>
+        /// <param name="transactionRequest">The transaction request object containing transaction details.</param>
+        /// <returns>The result of the transaction as a TransactionResult object.</returns>
+        public async Task<TransactionResult> ExecuteRawTransaction(TransactionRequest transactionRequest)
+        {
+            var hash = await SendRawTransaction(transactionRequest);
+            return await Transaction.WaitForTransactionResult(hash);
         }
 
         /// <summary>
