@@ -887,6 +887,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
+                transactionRequest.gasPrice = null;
                 var res = await Bridge.InvokeRoute<JObject>(getRoute("sendRawTransaction"), Utils.ToJsonStringArray(transactionRequest));
                 return res["hash"].Value<string>();
             }
