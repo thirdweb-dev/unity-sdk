@@ -421,16 +421,12 @@ namespace Thirdweb
                 }
                 else
                 {
-                    BigInteger gasPrice = (await Utils.GetWeb3().Eth.GasPrice.SendRequestAsync()).Value;
-                    gasPrice = BigInteger.Multiply(gasPrice, 10) / 9;
                     var txRequest = new TransactionRequest()
                     {
                         from = await GetAddress(),
                         to = to,
                         data = "0x",
                         value = amount.ToWei(),
-                        gasLimit = "21000",
-                        gasPrice = gasPrice.ToString()
                     };
                     return await ExecuteRawTransaction(txRequest);
                 }
@@ -896,13 +892,19 @@ namespace Thirdweb
             }
             else
             {
+                if (string.IsNullOrEmpty(transactionRequest.to))
+                    throw new UnityException("Please specify a to address.");
+
+                if (transactionRequest.from == null)
+                    transactionRequest.from = await GetAddress();
+
                 var input = new Nethereum.RPC.Eth.DTOs.TransactionInput(
-                    transactionRequest.data,
+                    string.IsNullOrEmpty(transactionRequest.data) ? null : transactionRequest.data,
                     transactionRequest.to,
                     transactionRequest.from,
-                    new HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
-                    new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
-                    new HexBigInteger(BigInteger.Parse(transactionRequest.value))
+                    string.IsNullOrEmpty(transactionRequest.gasLimit) ? null : new HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
+                    string.IsNullOrEmpty(transactionRequest.gasPrice) ? null : new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
+                    string.IsNullOrEmpty(transactionRequest.value) ? new HexBigInteger(0) : new HexBigInteger(BigInteger.Parse(transactionRequest.value))
                 );
 
                 if (
@@ -910,6 +912,8 @@ namespace Thirdweb
                     && ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
                 )
                 {
+                    if (input.Gas == null)
+                        input.Gas = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.EstimateGasAsync(input);
                     return await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
                 }
                 else
