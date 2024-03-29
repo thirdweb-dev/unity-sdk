@@ -166,7 +166,7 @@ namespace Thirdweb.Examples
             {
                 _address = null;
                 _password = null;
-                await ThirdwebManager.Instance.SDK.wallet.Disconnect(endSession: false);
+                await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession: false);
                 onDisconnected.Invoke();
             }
             catch (System.Exception e)
