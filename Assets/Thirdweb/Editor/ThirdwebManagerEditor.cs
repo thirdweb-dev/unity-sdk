@@ -24,7 +24,12 @@ namespace Thirdweb
         private SerializedProperty forwarderDomainOverrideProperty;
         private SerializedProperty forwaderVersionOverrideProperty;
         private SerializedProperty walletConnectProjectIdProperty;
+        private SerializedProperty walletConnectEnableExplorerProperty;
         private SerializedProperty walletConnectExplorerRecommendedWalletIdsProperty;
+        private SerializedProperty walletConnectWalletImagesProperty;
+        private SerializedProperty walletConnectDesktopWalletsProperty;
+        private SerializedProperty walletConnectMobileWalletsProperty;
+        private SerializedProperty walletConnectThemeModeProperty;
         private SerializedProperty factoryAddressProperty;
         private SerializedProperty gaslessProperty;
         private SerializedProperty erc20PaymasterAddressProperty;
@@ -45,7 +50,8 @@ namespace Thirdweb
         private GUIContent warningIcon;
         private Texture2D bannerImage;
 
-        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_4.7.6";
+        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_4.9.0";
+        private static readonly string OptionalStateKey = "ThirdwebManagerEditor_OptionalState_4.9.0";
 
         private void OnEnable()
         {
@@ -66,7 +72,12 @@ namespace Thirdweb
             forwarderDomainOverrideProperty = serializedObject.FindProperty("forwarderDomainOverride");
             forwaderVersionOverrideProperty = serializedObject.FindProperty("forwaderVersionOverride");
             walletConnectProjectIdProperty = serializedObject.FindProperty("walletConnectProjectId");
+            walletConnectEnableExplorerProperty = serializedObject.FindProperty("walletConnectEnableExplorer");
             walletConnectExplorerRecommendedWalletIdsProperty = serializedObject.FindProperty("walletConnectExplorerRecommendedWalletIds");
+            walletConnectWalletImagesProperty = serializedObject.FindProperty("walletConnectWalletImages");
+            walletConnectDesktopWalletsProperty = serializedObject.FindProperty("walletConnectDesktopWallets");
+            walletConnectMobileWalletsProperty = serializedObject.FindProperty("walletConnectMobileWallets");
+            walletConnectThemeModeProperty = serializedObject.FindProperty("walletConnectThemeMode");
             factoryAddressProperty = serializedObject.FindProperty("factoryAddress");
             gaslessProperty = serializedObject.FindProperty("gasless");
             erc20PaymasterAddressProperty = serializedObject.FindProperty("erc20PaymasterAddress");
@@ -125,11 +136,16 @@ namespace Thirdweb
             bannerImage = Resources.Load<Texture2D>("EditorBanner");
 
             sectionExpanded = GetExpandedState();
+
+            showGaslessOptionalFields = EditorPrefs.GetBool($"{OptionalStateKey}_showGaslessOptionalFields", false);
+            showSmartWalletOptionalFields = EditorPrefs.GetBool($"{OptionalStateKey}_showSmartWalletOptionalFields", false);
         }
 
         private void OnDisable()
         {
             SetExpandedState(sectionExpanded);
+            EditorPrefs.SetBool($"{OptionalStateKey}_showGaslessOptionalFields", showGaslessOptionalFields);
+            EditorPrefs.SetBool($"{OptionalStateKey}_showSmartWalletOptionalFields", showSmartWalletOptionalFields);
         }
 
         public override void OnInspectorGUI()
@@ -282,7 +298,12 @@ namespace Thirdweb
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                     EditorGUILayout.PropertyField(walletConnectProjectIdProperty);
+                    EditorGUILayout.PropertyField(walletConnectEnableExplorerProperty);
                     EditorGUILayout.PropertyField(walletConnectExplorerRecommendedWalletIdsProperty);
+                    EditorGUILayout.PropertyField(walletConnectWalletImagesProperty, true);
+                    EditorGUILayout.PropertyField(walletConnectDesktopWalletsProperty, true);
+                    EditorGUILayout.PropertyField(walletConnectMobileWalletsProperty, true);
+                    EditorGUILayout.PropertyField(walletConnectThemeModeProperty);
                     EditorGUILayout.EndVertical();
                 }
             );

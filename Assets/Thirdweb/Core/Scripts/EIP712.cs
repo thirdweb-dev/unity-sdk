@@ -35,7 +35,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(forwardRequest, typedData);
+                return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(forwardRequest, typedData);
             }
         }
 
@@ -59,7 +59,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(mintRequest, typedData);
+                return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(mintRequest, typedData);
             }
         }
 
@@ -83,7 +83,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(mintRequest, typedData);
+                return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(mintRequest, typedData);
             }
         }
 
@@ -107,7 +107,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(mintRequest, typedData);
+                return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(mintRequest, typedData);
             }
         }
 
@@ -131,7 +131,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(signerPermissionRequest, typedData);
+                return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(signerPermissionRequest, typedData);
             }
         }
 
@@ -139,7 +139,7 @@ namespace Thirdweb
         {
             var typedData = GetTypedDefinition_SmartAccount_AccountMessage(domainName, version, chainId, verifyingContract);
             var accountMessage = new AccountMessage { Message = message };
-            return await ThirdwebManager.Instance.SDK.wallet.SignTypedDataV4(accountMessage, typedData);
+            return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(accountMessage, typedData);
         }
 
         #region Typed Data Definitions

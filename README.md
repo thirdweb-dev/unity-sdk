@@ -1,7 +1,7 @@
 <p align="center">
   <br />
   <a href="https://thirdweb.com">
-    <img src="https://github.com/thirdweb-dev/js/blob/main/packages/sdk/logo.svg?raw=true" width="200" alt=""/>
+    <img src="https://github.com/thirdweb-dev/js/blob/main/legacy_packages/sdk/logo.svg?raw=true" width="200" alt=""/>
   </a>
   <br />
   <h1 align="center">thirdweb Unity SDK</h1>
@@ -42,6 +42,8 @@ All you need is a [ThirdwebManager](https://portal.thirdweb.com/unity/thirdwebma
 
 Various blockchain interaction examples are available in our `Scene_Prefabs` scene.
 
+Payment related interaction examples are available in our `Scene_Pay` scene.
+
 Notes:
 
 - The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS. We highly recommend using 2022 LTS.
@@ -56,31 +58,50 @@ Notes:
 - Use `Smaller (faster) Builds` in the Build Settings (IL2CPP Code Generation in Unity 2022).
 - Use IL2CPP over Mono when possible in the Player Settings.
 - Using the SDK in the editor (pressing Play) is an accurate reflection of what you can expect to see on native platforms.
-- In order to communicate with the SDK on WebGL, you need to `Build and run` your project so it runs in a browser context.
 - In most cases, setting `Managed Stripping Level` to minimal when using IL2CPP is also helpful - you can find it under `Player Settings` > `Other Settings` > `Optimization`
 
 ## WebGL
 
+- In order to communicate with the SDK on WebGL, you need to `Build and run` your project so it runs in a browser context.
 - Open your `Build settings`, select `WebGL` as the target platform.
 - Open `Player settings` > `Resolution and Presentation` and under `WebGLTemplate` choose `Thirdweb`.
 - Save and click `Build and Run` to test out your game in a browser.
 
-If you're uploading your build, set `Compression Format` to `Disabled` in `Player Settings` > `Publishing Settings`.
+Important: If you're uploading your build, set `Compression Format` to `Disabled` in `Player Settings` > `Publishing Settings`.
+
+Please note that Embedded Wallets (OAuth version) may not work when testing locally using Unity's default Build and Run feature for WebGL.
+
+You must host the build or run it locally yourself after adding the `Cross-Origin-Opener-Policy` header and setting it to `same-origin-allow-popups`.
+
+Here's a simple way to do so, assuming you are in your WebGL build output folder:
+
+```csharp
+const express = require('express');
+const app = express();
+const port = 8000;
+
+app.use(function(req, res, next) {
+  res.header('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
+});
+
+app.use(express.static('.'));
+app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
+```
+
+Once again, please note that no action is needed for hosted builds.
 
 ## Mobile
 
 - For Android, it is best to run Force Resolve from the `Assets` menu > `External Dependency Manager` > `Android Resolver` > `Force Resolve` before building your game.
-- For iOS, if you are missing a MetaMask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder.
-- If you are having trouble building in XCode, make sure `ENABLE_BITCODE` is disabled and that the `Embedded Frameworks` in your `Build Phases` contain potentially missing frameworks like `MetaMask` or `Starscream`. You may also need to remove the `Thirdweb/Core/Plugins/MetaMask/Plugins/iOS/iphoneos/MetaMask_iOS.framework/Frameworks` folder in some cases.
+- ~~For iOS, if you are missing a MetaMask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder.~~ Recent versions should no longer require this.
+- ~~If you are having trouble building in XCode, make sure `ENABLE_BITCODE` is disabled and that the `Embedded Frameworks` in your `Build Phases` contain potentially missing frameworks like `MetaMask` or `Starscream`. You may also need to remove the `Thirdweb/Core/Plugins/MetaMask/Plugins/iOS/iphoneos/MetaMask_iOS.framework/Frameworks` folder in some cases.~~ Recent versions should no longer require this.
 
 # Usage
 
 In order to access the SDK, you only need to have a [ThirdwebManager](https://portal.thirdweb.com/unity/thirdwebmanager) in your scene.
 
 ```csharp
-// Reference to your Thirdweb SDK
-var sdk = ThirdwebManager.Instance.SDK;
-
 // Configure the connection
 var connection = new WalletConnection(
   provider: WalletProvider.EmbeddedWallet, // The wallet provider you want to connect to (Required)
@@ -89,26 +110,26 @@ var connection = new WalletConnection(
 );
 
 // Connect the wallet
-string address = await sdk.wallet.Connect(connection);
+string address = await ThirdwebManager.Instance.SDK.Wallet.Connect(connection);
 
 // Interact with the wallet
-CurrencyValue balance = await sdk.wallet.GetBalance();
-var signature = await sdk.wallet.Sign("message to sign");
+CurrencyValue balance = await ThirdwebManager.Instance.SDK.Wallet.GetBalance();
+var signature = await ThirdwebManager.Instance.SDK.Wallet.Sign("message to sign");
 
 // Get an instance of a deployed contract (no ABI required!)
-var contract = sdk.GetContract("0x...");
+var contract = ThirdwebManager.Instance.SDK.GetContract("0x...");
 
-// Fetch data from any ERC20/721/1155 or marketplace contract
+// Fetch data from any ERC20/721/1155 or Marketplace contract
 CurrencyValue currencyValue = await contract.ERC20.TotalSupply();
 NFT erc721NFT = await contract.ERC721.Get(tokenId);
 List<NFT> erc1155NFTs = await contract.ERC1155.GetAll();
-List<Listing> listings = await marketplace.GetAllListings();
+List<Listing> listings = await contract.Marketplace.DirectListings.GetAllListings();
 
 // Execute transactions from the connected wallet
 await contract.ERC20.Mint("1.2");
-await contract.ERC721.signature.Mint(signedPayload);
+await contract.ERC721.Signature.Mint(signedPayload);
 await contract.ERC1155.Claim(tokenId, quantity);
-await marketplace.BuyListing(listingId, quantity);
+await contract.Marketplace.DirectListings.BuyListing(listingId, quantity);
 
 // Custom interactions
 var res = await contract.Read<string>("myReadFunction", arg1, arg2, ...);

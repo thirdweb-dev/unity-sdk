@@ -14,16 +14,16 @@ namespace Thirdweb
     /// </summary>
     public class Marketplace : Routable
     {
-        public DirectListings directListings;
-        public EnglishAuctions englishAuctions;
-        public Offers offers;
+        public DirectListings DirectListings;
+        public EnglishAuctions EnglishAuctions;
+        public Offers Offers;
 
         public Marketplace(string parentRoute, string contractAddress)
             : base(parentRoute)
         {
-            this.directListings = new DirectListings(baseRoute, contractAddress);
-            this.englishAuctions = new EnglishAuctions(baseRoute, contractAddress);
-            this.offers = new Offers(baseRoute, contractAddress);
+            this.DirectListings = new DirectListings(baseRoute, contractAddress);
+            this.EnglishAuctions = new EnglishAuctions(baseRoute, contractAddress);
+            this.Offers = new Offers(baseRoute, contractAddress);
         }
     }
 
@@ -500,11 +500,12 @@ namespace Thirdweb
             }
         }
 
-        public async Task<int> GetBidBufferBps(string auctionId)
+        public async Task<BigInteger> GetBidBufferBps(string auctionId)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<int>(getRoute("getBidBufferBps"), Utils.ToJsonStringArray(auctionId));
+                var val = await Bridge.InvokeRoute<string>(getRoute("getBidBufferBps"), Utils.ToJsonStringArray(auctionId));
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -914,7 +915,7 @@ namespace Thirdweb
                             AssetContract = input.assetContractAddress,
                             TokenId = BigInteger.Parse(input.tokenId),
                             Quantity = BigInteger.Parse(input.quantity ?? "1"),
-                            Currency = input.currencyContractAddress ?? Utils.GetNativeTokenWrapper(ThirdwebManager.Instance.SDK.session.ChainId),
+                            Currency = input.currencyContractAddress ?? Utils.GetNativeTokenWrapper(ThirdwebManager.Instance.SDK.Session.ChainId),
                             TotalPrice = BigInteger.Parse(input.totalPrice.ToWei()),
                             ExpirationTimestamp = (BigInteger)(input.endTimestamp ?? Utils.GetUnixTimeStampIn10Years())
                         }

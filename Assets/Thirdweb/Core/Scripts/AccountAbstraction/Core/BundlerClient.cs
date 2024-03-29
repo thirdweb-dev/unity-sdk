@@ -65,9 +65,9 @@ namespace Thirdweb.AccountAbstraction
                 httpRequestMessage.Headers.Add("x-sdk-os", Utils.GetRuntimePlatform());
                 httpRequestMessage.Headers.Add("x-sdk-platform", "unity");
                 httpRequestMessage.Headers.Add("x-sdk-version", ThirdwebSDK.version);
-                httpRequestMessage.Headers.Add("x-client-id", ThirdwebManager.Instance.SDK.session.Options.clientId);
+                httpRequestMessage.Headers.Add("x-client-id", Utils.GetClientId());
                 if (!Utils.IsWebGLBuild())
-                    httpRequestMessage.Headers.Add("x-bundle-id", ThirdwebManager.Instance.SDK.session.Options.bundleId);
+                    httpRequestMessage.Headers.Add("x-bundle-id", Utils.GetBundleId());
             }
 
             var httpResponse = await client.SendAsync(httpRequestMessage);

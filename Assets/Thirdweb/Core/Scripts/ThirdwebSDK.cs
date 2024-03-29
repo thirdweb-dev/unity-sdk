@@ -76,14 +76,39 @@ namespace Thirdweb
             public string[] appIcons;
 
             /// <summary>
-            /// The project ID for WalletConnect authentication.
+            /// WalletConnect Project ID (https://cloud.walletconnect.com/app).
             /// </summary>
             public string walletConnectProjectId;
 
             /// <summary>
-            /// Wallets to display in the WC modal (https://walletconnect.com/explorer)
+            /// WalletConnect WebGL QR Modal: enable recommended explorer wallet buttons.
+            /// </summary>
+            public bool walletConnectEnableExplorer;
+
+            /// <summary>
+            /// WalletConnect WebGL QR Modal: wallets to display in the WC modal (https://walletconnect.com/explorer).
             /// </summary>
             public string[] walletConnectExplorerRecommendedWalletIds;
+
+            /// <summary>
+            /// WalletConnect WebGL QR Modal: mapping of wallet id to wallet image.
+            /// </summary>
+            public Dictionary<string, string> walletConnectWalletImages;
+
+            /// <summary>
+            /// WalletConnect WebGL QR Modal: custom desktop wallets to display.
+            /// </summary>
+            public WalletConnectWalletOptions[] walletConnectDesktopWallets;
+
+            /// <summary>
+            /// WalletConnect WebGL QR Modal: custom mobile wallets to display.
+            /// </summary>
+            public WalletConnectWalletOptions[] walletConnectMobileWallets;
+
+            /// <summary>
+            /// WalletConnect WebGL QR Modal: set theme to 'light' or 'dark'.
+            /// </summary>
+            public string walletConnectThemeMode;
 
             /// <summary>
             /// When using OAuth2 (e.g. Google) to login on mobile, you can provide a redirect URL such as 'myapp://'.
@@ -94,6 +119,24 @@ namespace Thirdweb
             /// Additional data to pass to the wallet provider.
             /// </summary>
             public Dictionary<string, object> extras;
+        }
+
+        /// <summary>
+        /// Optional wallet configuration options for WalletConnect wallets, useful for displaying specific wallets only.
+        /// </summary>
+        [System.Serializable]
+        public struct WalletConnectWalletOptions
+        {
+            public string id;
+            public string name;
+            public WalletConnectWalletLinks links;
+        }
+
+        [System.Serializable]
+        public class WalletConnectWalletLinks
+        {
+            public string native;
+            public string universal;
         }
 
         /// <summary>
@@ -232,18 +275,16 @@ namespace Thirdweb
         /// <summary>
         /// Connect and interact with a user's wallet.
         /// </summary>
-        public Wallet wallet;
+        public Wallet Wallet { get; internal set; }
 
         /// <summary>
-        /// Deploy new contracts.
+        /// Download files from anywhere, upload files to IPFS.
         /// </summary>
-        public Deployer deployer;
+        public Storage Storage { get; internal set; }
 
-        public Storage storage;
+        public ThirdwebSession Session { get; internal set; }
 
-        public ThirdwebSession session;
-
-        internal const string version = "4.7.6";
+        internal const string version = "4.9.0";
 
         /// <summary>
         /// Create an instance of the Thirdweb SDK.
@@ -251,29 +292,29 @@ namespace Thirdweb
         /// <param name="chainOrRPC">The chain name or RPC URL to connect to.</param>
         /// <param name="chainId">The chain ID.</param>
         /// <param name="options">Configuration options.</param>
-        public ThirdwebSDK(string chainOrRPC, BigInteger? chainId = null, Options options = new Options())
+        public ThirdwebSDK(string chainOrRPC, BigInteger chainId, Options options)
         {
             this.chainOrRPC = chainOrRPC;
-            this.wallet = new Wallet();
-            this.deployer = new Deployer();
-            this.storage = new Storage(options.storage, options.clientId);
+            this.Wallet = new Wallet();
+            this.Storage = new Storage(options.storage, options.clientId);
 
             string rpc = !chainOrRPC.StartsWith("https://")
                 ? (string.IsNullOrEmpty(options.clientId) ? $"https://{chainOrRPC}.rpc.thirdweb.com/" : $"https://{chainOrRPC}.rpc.thirdweb.com/{options.clientId}")
                 : chainOrRPC;
 
-            if (new System.Uri(rpc).Host.EndsWith(".thirdweb.com") && !rpc.Contains("bundleId="))
+            if (options.clientId != null && new System.Uri(rpc).Host.EndsWith(".thirdweb.com") && !rpc.Contains("bundleId="))
                 rpc = rpc.AppendBundleIdQueryParam();
 
             if (Utils.IsWebGLBuild())
             {
                 Bridge.Initialize(rpc, options);
+                this.Session = new ThirdwebSession(options, chainId, rpc);
             }
             else
             {
                 if (chainId == null)
                     throw new UnityException("Chain ID override required for native platforms!");
-                this.session = new ThirdwebSession(options, chainId.Value, rpc);
+                this.Session = new ThirdwebSession(options, chainId, rpc);
             }
 
             if (string.IsNullOrEmpty(options.clientId))

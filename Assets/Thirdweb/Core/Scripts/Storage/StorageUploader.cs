@@ -26,13 +26,23 @@ namespace Thirdweb
         public async Task<IPFSUploadResult> UploadText(string text)
         {
             var path = Application.temporaryCachePath + "/uploadedText.txt";
-            await System.IO.File.WriteAllTextAsync(path, text);
+            if (System.IO.File.Exists(path))
+                System.IO.File.Delete(path);
+            if (Utils.IsWebGLBuild())
+            {
+                System.IO.File.WriteAllText(path, text); // WebGL doesn't support async file writing
+                await new WaitForSeconds(3f);
+            }
+            else
+            {
+                await System.IO.File.WriteAllTextAsync(path, text);
+            }
             return await UploadFromPath(path);
         }
 
         public async Task<IPFSUploadResult> UploadFromPath(string path)
         {
-            if (string.IsNullOrEmpty(ThirdwebManager.Instance.SDK.storage.ClientId))
+            if (string.IsNullOrEmpty(ThirdwebManager.Instance.SDK.Storage.ClientId))
                 throw new UnityException("You cannot use default Upload features without setting a Client ID in the ThirdwebManager.");
 
             // Get data
@@ -48,9 +58,9 @@ namespace Thirdweb
                 pinReq.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
                 pinReq.SetRequestHeader("x-sdk-platform", "unity");
                 pinReq.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
-                pinReq.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
+                pinReq.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.Storage.ClientId);
                 if (!Utils.IsWebGLBuild())
-                    pinReq.SetRequestHeader("x-bundle-id", ThirdwebManager.Instance.SDK.session.Options.bundleId);
+                    pinReq.SetRequestHeader("x-bundle-id", ThirdwebManager.Instance.SDK.Session.Options.bundleId);
 
                 await pinReq.SendWebRequest();
 

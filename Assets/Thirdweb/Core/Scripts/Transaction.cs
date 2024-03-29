@@ -204,7 +204,7 @@ namespace Thirdweb
             else
             {
                 var web3 = Utils.GetWeb3();
-                var function = web3.Eth.GetContract(contract.abi, contract.address).GetFunction(Input.To);
+                var function = web3.Eth.GetContract(contract.ABI, contract.Address).GetFunction(Input.To);
                 Input.Data = function.GetData(args);
             }
             return this;
@@ -218,7 +218,8 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<BigInteger>(GetTxBuilderRoute("getGasPrice"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("getGasPrice"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -239,7 +240,8 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<BigInteger>(GetTxBuilderRoute("estimateGasLimit"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("estimateGasLimit"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return BigInteger.Parse(val);
             }
             else
             {
@@ -313,10 +315,10 @@ namespace Thirdweb
             }
             else
             {
-                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet && ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount() != null)
-                    return await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetLocalAccount().TransactionManager.SignTransactionAsync(Input);
+                if (ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet && ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetLocalAccount() != null)
+                    return await ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetLocalAccount().TransactionManager.SignTransactionAsync(Input);
                 else
-                    return await ThirdwebManager.Instance.SDK.session.Request<string>("eth_signTransaction", Input);
+                    return await ThirdwebManager.Instance.SDK.Session.Request<string>("eth_signTransaction", Input);
             }
         }
 
@@ -340,7 +342,7 @@ namespace Thirdweb
                     await EstimateAndSetGasLimitAsync();
                 if (Input.Value == null)
                     Input.Value = new HexBigInteger(0);
-                bool isGaslessSetup = ThirdwebManager.Instance.SDK.session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin.HasValue;
+                bool isGaslessSetup = ThirdwebManager.Instance.SDK.Session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin.HasValue;
                 if (gasless != null && gasless.Value && !isGaslessSetup)
                     throw new UnityException("Gasless transactions are not enabled. Please enable them in the SDK options.");
                 bool sendGaslessly = gasless == null ? isGaslessSetup : gasless.Value;
@@ -420,15 +422,15 @@ namespace Thirdweb
             else
             {
                 if (
-                    ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
-                    && ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
+                    ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
+                    && ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
                 )
                 {
-                    return await ThirdwebManager.Instance.SDK.session.Web3.Eth.TransactionManager.SendTransactionAsync(Input);
+                    return await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(Input);
                 }
                 else
                 {
-                    var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.session.Web3.Client);
+                    var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.Session.Web3.Client);
                     return await ethSendTx.SendRequestAsync(Input);
                 }
             }
@@ -442,10 +444,10 @@ namespace Thirdweb
             }
             else
             {
-                string relayerUrl = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.relayerUrl;
-                string forwarderAddress = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.relayerForwarderAddress;
-                string forwarderDomain = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.domainName;
-                string forwarderVersion = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.domainVersion;
+                string relayerUrl = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.relayerUrl;
+                string forwarderAddress = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.relayerForwarderAddress;
+                string forwarderDomain = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.domainName;
+                string forwarderVersion = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.domainVersion;
 
                 Input.Nonce = (
                     await TransactionManager.ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
@@ -467,7 +469,7 @@ namespace Thirdweb
                 var signature = await EIP712.GenerateSignature_MinimalForwarder(
                     forwarderDomain,
                     forwarderVersion,
-                    Input.ChainId?.Value ?? await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
+                    Input.ChainId?.Value ?? await ThirdwebManager.Instance.SDK.Wallet.GetChainId(),
                     forwarderAddress,
                     request
                 );
@@ -503,7 +505,7 @@ namespace Thirdweb
 
         private string GetTxBuilderRoute(string action)
         {
-            string route = contract.abi != null ? $"{contract.address}{Routable.subSeparator}{contract.abi}" : contract.address;
+            string route = contract.ABI != null ? $"{contract.Address}{Routable.subSeparator}{contract.ABI}" : contract.Address;
             return $"{route}{Routable.separator}tx{Routable.separator}{action}";
         }
     }

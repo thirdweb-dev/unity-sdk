@@ -27,7 +27,7 @@ namespace Thirdweb
         {
             try
             {
-                functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+                functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
             }
             catch (System.Exception)
             {
@@ -68,7 +68,7 @@ namespace Thirdweb
         {
             string txHash = null;
 
-            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
             functionMessage.AmountToSend = weiValue ?? 0;
 
             if (gasOverride.HasValue)
@@ -90,32 +90,39 @@ namespace Thirdweb
                 }
             }
 
-            bool isGasless = ThirdwebManager.Instance.SDK.session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin.HasValue;
+            bool isGasless = ThirdwebManager.Instance.SDK.Session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin.HasValue;
 
             if (!isGasless)
             {
+                if (functionMessage.GasPrice == null && functionMessage.MaxFeePerGas == null && functionMessage.MaxPriorityFeePerGas == null)
+                {
+                    var gasPrice = await Utils.GetGasPriceAsync(await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
+                    functionMessage.MaxFeePerGas = gasPrice.MaxFeePerGas;
+                    functionMessage.MaxPriorityFeePerGas = gasPrice.MaxPriorityFeePerGas;
+                }
+
                 if (
-                    ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
-                    && ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
+                    ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
+                    && ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
                 )
                 {
-                    var web3 = await ThirdwebManager.Instance.SDK.session.ActiveWallet.GetSignerWeb3();
+                    var web3 = await ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetSignerWeb3();
                     var transactionHandler = web3.Eth.GetContractTransactionHandler<TWFunction>();
                     txHash = await transactionHandler.SendRequestAsync(contractAddress, functionMessage);
                 }
                 else
                 {
-                    var transaction = new EthSendTransaction(ThirdwebManager.Instance.SDK.session.Web3.Client);
+                    var transaction = new EthSendTransaction(ThirdwebManager.Instance.SDK.Session.Web3.Client);
                     var transactionInput = functionMessage.CreateTransactionInput(contractAddress);
                     txHash = await transaction.SendRequestAsync(transactionInput);
                 }
             }
             else
             {
-                string relayerUrl = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.relayerUrl;
-                string forwarderAddress = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.relayerForwarderAddress;
-                string forwarderDomain = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.domainName;
-                string forwarderVersion = ThirdwebManager.Instance.SDK.session.Options.gasless.Value.openzeppelin?.domainVersion;
+                string relayerUrl = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.relayerUrl;
+                string forwarderAddress = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.relayerForwarderAddress;
+                string forwarderDomain = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.domainName;
+                string forwarderVersion = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.domainVersion;
 
                 functionMessage.Nonce = (
                     await ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
@@ -134,7 +141,7 @@ namespace Thirdweb
                     Data = functionMessage.GetCallData().ByteArrayToHexString()
                 };
 
-                var signature = await EIP712.GenerateSignature_MinimalForwarder(forwarderDomain, forwarderVersion, ThirdwebManager.Instance.SDK.session.ChainId, forwarderAddress, request);
+                var signature = await EIP712.GenerateSignature_MinimalForwarder(forwarderDomain, forwarderVersion, ThirdwebManager.Instance.SDK.Session.ChainId, forwarderAddress, request);
 
                 var postData = new RelayerRequest(request, signature, forwarderAddress);
 

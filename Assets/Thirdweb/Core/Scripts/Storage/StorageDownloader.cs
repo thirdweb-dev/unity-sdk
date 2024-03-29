@@ -29,7 +29,7 @@ namespace Thirdweb
                 req.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
                 req.SetRequestHeader("x-sdk-platform", "unity");
                 req.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
-                req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
+                req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.Storage.ClientId);
             }
 
             await req.SendWebRequest();
@@ -39,7 +39,23 @@ namespace Thirdweb
                 return default;
             }
             string json = req.downloadHandler.text;
-            return JsonConvert.DeserializeObject<T>(json);
+
+            try
+            {
+                return JsonConvert.DeserializeObject<T>(json);
+            }
+            catch
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    return (T)(object)json;
+                }
+                else
+                {
+                    ThirdwebDebug.LogWarning($"Unable to parse text uri {textURI} data to {typeof(T).Name}!");
+                    return default;
+                }
+            }
         }
 
         public async Task<Sprite> DownloadImage(string imageURI)
@@ -62,7 +78,7 @@ namespace Thirdweb
                 req.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
                 req.SetRequestHeader("x-sdk-platform", "unity");
                 req.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
-                req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.storage.ClientId);
+                req.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.Storage.ClientId);
             }
 
             await req.SendWebRequest();

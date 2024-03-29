@@ -15,6 +15,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Collections;
+using Nethereum.Hex.HexTypes;
 
 namespace Thirdweb
 {
@@ -151,7 +152,7 @@ namespace Thirdweb
 
         public static string ReplaceIPFS(this string uri)
         {
-            string gateway = ThirdwebManager.Instance.SDK.storage.IPFSGateway;
+            string gateway = ThirdwebManager.Instance.SDK.Storage.IPFSGateway;
             if (!string.IsNullOrEmpty(uri) && uri.StartsWith("ipfs://"))
                 return uri.Replace("ipfs://", gateway);
             else
@@ -309,18 +310,10 @@ namespace Thirdweb
             return Application.persistentDataPath + "/account.json";
         }
 
-        public static bool DeleteLocalAccount()
+        public static void DeleteLocalAccount()
         {
-            try
-            {
+            if (File.Exists(GetAccountPath()))
                 File.Delete(GetAccountPath());
-                return true;
-            }
-            catch (System.Exception e)
-            {
-                ThirdwebDebug.LogWarning("Error deleting account: " + e.Message);
-                return false;
-            }
         }
 
         public static Account UnlockOrGenerateLocalAccount(BigInteger chainId, string password = null, string privateKey = null)
@@ -394,19 +387,53 @@ namespace Thirdweb
             return useGateway ? ipfsRaw.ReplaceIPFS() : ipfsRaw;
         }
 
-        public async static Task<string> GetENSName(string address)
+        public async static Task<string> ResolveAddressFromENS(string ens)
         {
+            if (string.IsNullOrEmpty(ens) || !ens.EndsWith(".eth"))
+                return ens;
+
             try
             {
-                var ensService = new Nethereum.Contracts.Standards.ENS.ENSService(
-                    new Nethereum.Web3.Web3("https://ethereum.rpc.thirdweb.com/339d65590ba0fa79e4c8be0af33d64eda709e13652acb02c6be63f5a1fbef9c3").Eth,
-                    "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e"
-                );
-                return await ensService.ReverseResolveAsync(address);
+                string address = null;
+                if (IsWebGLBuild())
+                {
+                    address = await Bridge.ResolveAddressFromENS(ens);
+                }
+                else
+                {
+                    var ensService = new Nethereum.Contracts.Standards.ENS.ENSService(new Web3("https://1.rpc.thirdweb.com/").Eth, "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e");
+                    address = await ensService.ResolveAddressAsync(ens);
+                }
+                return string.IsNullOrEmpty(address) ? ens : address;
             }
             catch
             {
-                return null;
+                return ens;
+            }
+        }
+
+        public async static Task<string> ResolveENSFromAddress(string address)
+        {
+            if (string.IsNullOrEmpty(address) || address.Length != 42 || !address.StartsWith("0x"))
+                return address;
+
+            try
+            {
+                string ens = null;
+                if (IsWebGLBuild())
+                {
+                    ens = await Bridge.ResolveENSFromAddress(address);
+                }
+                else
+                {
+                    var ensService = new Nethereum.Contracts.Standards.ENS.ENSService(new Web3("https://1.rpc.thirdweb.com/").Eth, "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e");
+                    ens = await ensService.ReverseResolveAsync(address);
+                }
+                return string.IsNullOrEmpty(ens) ? address : ens;
+            }
+            catch
+            {
+                return address;
             }
         }
 
@@ -415,9 +442,14 @@ namespace Thirdweb
             return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address);
         }
 
+        public static string GetClientId()
+        {
+            return ThirdwebManager.Instance.SDK?.Session?.Options.clientId ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.clientId) ? null : ThirdwebManager.Instance.clientId);
+        }
+
         public static string GetBundleId()
         {
-            return ThirdwebManager.Instance.SDK?.session?.Options.bundleId
+            return ThirdwebManager.Instance.SDK?.Session?.Options.bundleId
                 ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.bundleIdOverride) ? Application.identifier.ToLower() : ThirdwebManager.Instance.bundleIdOverride);
         }
 
@@ -456,7 +488,7 @@ namespace Thirdweb
 
         public static Web3 GetWeb3(BigInteger? chainId = null)
         {
-            return new Web3(new ThirdwebClient(new Uri(chainId == null ? ThirdwebManager.Instance.SDK.session.RPC : $"https://{chainId}.rpc.thirdweb.com")));
+            return new Web3(new ThirdwebClient(new Uri(chainId == null ? ThirdwebManager.Instance.SDK.Session.RPC : $"https://{chainId}.rpc.thirdweb.com")));
         }
 
         public static string GetNativeTokenWrapper(BigInteger chainId)
@@ -523,6 +555,7 @@ namespace Thirdweb
 
         public async static Task<GasPriceParameters> GetGasPriceAsync(BigInteger chainId)
         {
+            BigInteger? priorityOverride = null;
             if (chainId == 137 || chainId == 80001)
             {
                 try
@@ -532,6 +565,7 @@ namespace Thirdweb
                 catch (System.Exception e)
                 {
                     ThirdwebDebug.LogWarning($"Failed to get gas price from Polygon gas station, using default method: {e.Message}");
+                    priorityOverride = GweiToWei(chainId == 137 ? 40 : 1);
                 }
             }
 
@@ -563,7 +597,7 @@ namespace Thirdweb
             )
             {
                 gasPrice = BigInteger.Multiply(gasPrice, 10) / 9;
-                return new GasPriceParameters(gasPrice, gasPrice);
+                return new GasPriceParameters(gasPrice, priorityOverride ?? gasPrice);
             }
 
             var maxPriorityFeePerGas = new BigInteger(2000000000) > gasPrice ? gasPrice : new BigInteger(2000000000);
@@ -585,41 +619,30 @@ namespace Thirdweb
                 maxPriorityFeePerGas = gasPrice;
             }
 
-            return new GasPriceParameters(gasPrice, maxPriorityFeePerGas);
+            return new GasPriceParameters(gasPrice, priorityOverride ?? maxPriorityFeePerGas);
         }
 
         public async static Task<GasPriceParameters> GetPolygonGasPriceParameters(int chainId)
         {
             using var httpClient = new HttpClient();
             string gasStationUrl;
-            BigInteger minGasPrice = 1;
             switch (chainId)
             {
                 case 137:
                     gasStationUrl = "https://gasstation.polygon.technology/v2";
-                    minGasPrice = 31;
                     break;
                 case 80001:
                     gasStationUrl = "https://gasstation-testnet.polygon.technology/v2";
-                    minGasPrice = 1;
                     break;
                 default:
                     throw new UnityException("Unsupported chain id");
             }
-            try
-            {
-                var response = await httpClient.GetAsync(gasStationUrl);
-                response.EnsureSuccessStatusCode();
-                string responseBody = await response.Content.ReadAsStringAsync();
-                var data = JsonConvert.DeserializeObject<PolygonGasStationResult>(responseBody);
-                return new GasPriceParameters(GweiToWei(data.fast.maxFee), GweiToWei(data.fast.maxPriorityFee));
-            }
-            catch (Exception e)
-            {
-                ThirdwebDebug.LogWarning($"Failed to get gas price from Polygon gas station, using default: {e.Message}");
-            }
-            var gasPrice = await GetWeb3().Eth.GasPrice.SendRequestAsync();
-            return new GasPriceParameters(gasPrice, minGasPrice);
+
+            var response = await httpClient.GetAsync(gasStationUrl);
+            response.EnsureSuccessStatusCode();
+            string responseBody = await response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<PolygonGasStationResult>(responseBody);
+            return new GasPriceParameters(GweiToWei(data.fast.maxFee), GweiToWei(data.fast.maxPriorityFee));
         }
 
         public static BigInteger GweiToWei(double gweiAmount)
@@ -627,8 +650,16 @@ namespace Thirdweb
             return new BigInteger(gweiAmount * 1e9);
         }
 
+        public static string BigIntToHex(this BigInteger number)
+        {
+            return new HexBigInteger(number).HexValue;
+        }
+
         public static async void TrackWalletAnalytics(string clientId, string source, string action, string walletType, string walletAddress)
         {
+            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(source) || string.IsNullOrEmpty(action) || string.IsNullOrEmpty(walletType) || string.IsNullOrEmpty(walletAddress))
+                return;
+
             try
             {
                 var body = new
@@ -692,6 +723,14 @@ namespace Thirdweb
         {
             var emailRegex = new System.Text.RegularExpressions.Regex(@"^\S+@\S+\.\S+$");
             return emailRegex.IsMatch(email.Replace("+", ""));
+        }
+
+        public static string GenerateRandomString(int v)
+        {
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new System.Random();
+            var result = new string(Enumerable.Repeat(chars, v).Select(s => s[random.Next(s.Length)]).ToArray());
+            return result;
         }
     }
 }

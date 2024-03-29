@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using System.Numerics;
 using UnityEngine;
 using Nethereum.Hex.HexTypes;
-using Nethereum.Web3;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using Nethereum.ABI.FunctionEncoding;
@@ -19,39 +18,39 @@ namespace Thirdweb
     /// </summary>
     public class Contract : Routable
     {
-        public string chain;
-        public string address;
-        public string abi;
+        public string Chain { get; private set; }
+        public string Address { get; private set; }
+        public string ABI { get; private set; }
 
         /// <summary>
         /// Call any ERC20 supported functions
         /// </summary>
-        public ERC20 ERC20;
+        public ERC20 ERC20 { get; private set; }
 
         /// <summary>
         /// Call any ERC721 supported functions
         /// </summary>
-        public ERC721 ERC721;
+        public ERC721 ERC721 { get; private set; }
 
         /// <summary>
         /// Call any ERC1155 supported functions
         /// </summary>
-        public ERC1155 ERC1155;
+        public ERC1155 ERC1155 { get; private set; }
 
         /// <summary>
         /// Call any Marketplace supported functions
         /// </summary>
-        public Marketplace marketplace;
+        public Marketplace Marketplace { get; private set; }
 
         /// <summary>
         /// Call any Pack supported functions
         /// </summary>
-        public Pack pack;
+        public Pack Pack { get; private set; }
 
         /// <summary>
         /// Call any Contract Event functions
         /// </summary>
-        public Events events;
+        public Events Events { get; private set; }
 
         /// <summary>
         /// Convenient wrapper to interact with any EVM contract
@@ -62,15 +61,15 @@ namespace Thirdweb
         public Contract(string chain, string address, string abi = null)
             : base(abi != null ? $"{address}{Routable.subSeparator}{abi}" : address)
         {
-            this.chain = chain;
-            this.address = address;
-            this.abi = abi;
+            this.Chain = chain;
+            this.Address = address;
+            this.ABI = abi;
             this.ERC20 = new ERC20(baseRoute, address);
             this.ERC721 = new ERC721(baseRoute, address);
             this.ERC1155 = new ERC1155(baseRoute, address);
-            this.marketplace = new Marketplace(baseRoute, address);
-            this.pack = new Pack(address);
-            this.events = new Events(baseRoute);
+            this.Marketplace = new Marketplace(baseRoute, address);
+            this.Pack = new Pack(address);
+            this.Events = new Events(baseRoute);
         }
 
         /// <summary>
@@ -85,7 +84,7 @@ namespace Thirdweb
             }
             else
             {
-                BigInteger balance = await Utils.GetWeb3().Eth.GetBalance.SendRequestAsync(address);
+                BigInteger balance = await Utils.GetWeb3().Eth.GetBalance.SendRequestAsync(Address);
                 var cv = new CurrencyValue { value = balance.ToString(), displayValue = balance.ToString().ToEth() };
                 return cv;
             }
@@ -114,14 +113,14 @@ namespace Thirdweb
             var initialInput = new TransactionInput();
             if (Utils.IsWebGLBuild())
             {
-                initialInput.From = from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
-                initialInput.To = address;
+                initialInput.From = from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
+                initialInput.To = Address;
             }
             else
             {
-                var contract = Utils.GetWeb3().Eth.GetContract(this.abi, this.address);
+                var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
                 var function = contract.GetFunction(functionName);
-                var fromAddress = from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+                var fromAddress = from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
                 initialInput = function.CreateTransactionInput(fromAddress, args);
             }
 
@@ -136,7 +135,7 @@ namespace Thirdweb
         /// <returns>The encoded function data as a string.</returns>
         public string Encode(string functionName, params object[] args)
         {
-            var contract = Utils.GetWeb3().Eth.GetContract(this.abi, this.address);
+            var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
             return function.GetData(args);
         }
@@ -149,7 +148,7 @@ namespace Thirdweb
         /// <returns>A list of <see cref="ParameterOutput"/> objects representing the decoded arguments.</returns>
         public List<ParameterOutput> Decode(string functionName, string encodedArgs)
         {
-            var contract = Utils.GetWeb3().Eth.GetContract(this.abi, this.address);
+            var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
             return function.DecodeInput(encodedArgs);
         }
@@ -162,7 +161,7 @@ namespace Thirdweb
             where TEventDTO : IEventDTO, new()
         {
             var web3 = Utils.GetWeb3();
-            var transferEventHandler = web3.Eth.GetEvent<TEventDTO>(this.address);
+            var transferEventHandler = web3.Eth.GetEvent<TEventDTO>(this.Address);
             var filter = transferEventHandler.CreateFilterInput(
                 fromBlock: fromBlock == null ? BlockParameter.CreateEarliest() : new BlockParameter(fromBlock.Value),
                 toBlock: toBlock == null ? BlockParameter.CreateLatest() : new BlockParameter(toBlock.Value)
@@ -198,10 +197,10 @@ namespace Thirdweb
             }
             else
             {
-                if (this.abi == null)
+                if (this.ABI == null)
                     throw new UnityException("You must pass an ABI for native platform custom calls");
 
-                var contract = ThirdwebManager.Instance.SDK.session.Web3.Eth.GetContract(this.abi, this.address);
+                var contract = ThirdwebManager.Instance.SDK.Session.Web3.Eth.GetContract(this.ABI, this.Address);
 
                 var function = contract.GetFunction(functionName);
 
@@ -210,17 +209,34 @@ namespace Thirdweb
                 var gas =
                     transactionOverrides?.gasLimit != null
                         ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasLimit))
-                        : await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.wallet.GetAddress(), null, value, args);
+                        : await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), null, value, args);
 
                 var gasPrice = transactionOverrides?.gasPrice != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasPrice)) : null;
 
-                var hash = await function.SendTransactionAsync(
-                    from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
-                    gas: gas,
-                    gasPrice: gasPrice,
-                    value: value,
-                    args
-                );
+                string hash;
+                if (gasPrice == null)
+                {
+                    var gasFees = await Utils.GetGasPriceAsync(await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
+                    hash = await function.SendTransactionAsync(
+                        from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
+                        gas: gas,
+                        value: value,
+                        maxFeePerGas: new HexBigInteger(gasFees.MaxFeePerGas),
+                        maxPriorityFeePerGas: new HexBigInteger(gasFees.MaxPriorityFeePerGas),
+                        args
+                    );
+                }
+                else
+                {
+                    hash = await function.SendTransactionAsync(
+                        from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
+                        gas: gas,
+                        gasPrice: gasPrice,
+                        value: value,
+                        args
+                    );
+                }
+
                 return await Transaction.WaitForTransactionResult(hash);
             }
         }
@@ -239,10 +255,10 @@ namespace Thirdweb
                 return await Bridge.InvokeRoute<T>(getRoute("call"), Utils.ToJsonStringArray(functionName, args));
             }
 
-            if (this.abi == null)
+            if (this.ABI == null)
                 throw new UnityException("You must pass an ABI for native platform custom calls");
 
-            var contract = Utils.GetWeb3().Eth.GetContract(this.abi, this.address);
+            var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
             var result = await function.CallDecodingToDefaultAsync(args);
 

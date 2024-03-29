@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Thirdweb/Examples/Scenes/Scene_Prefabs.unity
     guid: bd374468f6e2ace4c81d8f34ac8672ca
+  - enabled: 0
+    path: Assets/Thirdweb/Examples/Scenes/Scene_Pay.unity
+    guid: 34f71b484be21a142ba2b3bd0885e8c3
   m_configObjects: {}

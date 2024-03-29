@@ -16,7 +16,7 @@ namespace Thirdweb.Examples
         public async void LoadNFT(NFT nft)
         {
             nftName.text = nft.metadata.name;
-            nftImage.sprite = await ThirdwebManager.Instance.SDK.storage.DownloadImage(nft.metadata.image);
+            nftImage.sprite = await ThirdwebManager.Instance.SDK.Storage.DownloadImage(nft.metadata.image);
             nftButton.onClick.RemoveAllListeners();
             nftButton.onClick.AddListener(() => DoSomething(nft));
         }

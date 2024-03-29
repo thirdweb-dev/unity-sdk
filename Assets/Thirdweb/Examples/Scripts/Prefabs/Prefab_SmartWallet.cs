@@ -14,7 +14,7 @@ namespace Thirdweb.Examples
         {
             try
             {
-                var result = await ThirdwebManager.Instance.SDK.wallet.AddAdmin(randomAddress);
+                var result = await ThirdwebManager.Instance.SDK.Wallet.AddAdmin(randomAddress);
                 Debugger.Instance.Log("[AddAdmin] Sucess", result.ToString());
             }
             catch (System.Exception e)
@@ -27,7 +27,7 @@ namespace Thirdweb.Examples
         {
             try
             {
-                var result = await ThirdwebManager.Instance.SDK.wallet.RemoveAdmin(randomAddress);
+                var result = await ThirdwebManager.Instance.SDK.Wallet.RemoveAdmin(randomAddress);
                 Debugger.Instance.Log("[RemoveAdmin] Sucess", result.ToString());
             }
             catch (System.Exception e)
@@ -43,7 +43,7 @@ namespace Thirdweb.Examples
                 // Create session key granting restricted smart wallet access to the local wallet for 1 day
                 var contractsAllowedForInteraction = new List<string>() { "0x450b943729Ddba196Ab58b589Cea545551DF71CC" }; // contracts the local wallet is allowed to interact with
                 var permissionEndTimestamp = Utils.GetUnixTimeStampNow() + 86400; // 1 day from now
-                var result = await ThirdwebManager.Instance.SDK.wallet.CreateSessionKey(
+                var result = await ThirdwebManager.Instance.SDK.Wallet.CreateSessionKey(
                     signerAddress: randomAddress,
                     approvedTargets: contractsAllowedForInteraction,
                     nativeTokenLimitPerTransactionInWei: "0",
@@ -79,7 +79,7 @@ namespace Thirdweb.Examples
             try
             {
                 // Get smart account predicted address
-                var accountAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+                var accountAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
 
                 // Treat it as a contract, abi can be full or just contain setPermissionsForSigner for this use case
                 var accountContract = ThirdwebManager.Instance.SDK.GetContract(
@@ -108,8 +108,8 @@ namespace Thirdweb.Examples
                 var signature = await EIP712.GenerateSignature_SmartAccount(
                     "Account",
                     "1",
-                    await ThirdwebManager.Instance.SDK.wallet.GetChainId(),
-                    await ThirdwebManager.Instance.SDK.wallet.GetAddress(),
+                    await ThirdwebManager.Instance.SDK.Wallet.GetChainId(),
+                    await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
                     request
                 );
 

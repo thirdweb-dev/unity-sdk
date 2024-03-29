@@ -20,7 +20,7 @@ namespace Thirdweb.Examples
 
                 Debugger.Instance.Log("Screenshot Saved! Uploading to IPFS...", $"Screenshot Path: {fullPath}");
 
-                var response = await ThirdwebManager.Instance.SDK.storage.UploadFromPath(fullPath); // SDK must be initialized with StorageOptions apiToken
+                var response = await ThirdwebManager.Instance.SDK.Storage.UploadFromPath(fullPath); // SDK must be initialized with StorageOptions apiToken
                 Debugger.Instance.Log("Uploaded to IPFS Successfully!", response.ToString());
             }
             catch (System.Exception e)

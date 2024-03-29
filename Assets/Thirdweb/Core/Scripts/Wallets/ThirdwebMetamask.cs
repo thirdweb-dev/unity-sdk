@@ -61,8 +61,8 @@ namespace Thirdweb.Wallets
 
             config.SetDefaults(defaults);
 
-            var appName = ThirdwebManager.Instance.SDK.session.Options.wallet?.appName;
-            var appUrl = ThirdwebManager.Instance.SDK.session.Options.wallet?.appUrl;
+            var appName = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appName;
+            var appUrl = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appUrl;
             config.UpdateConfig(appName, appUrl);
 
             MetaMaskUnity.Instance.Initialize(config);
