@@ -31,4 +31,10 @@ namespace Thirdweb.AccountAbstraction
     {
         public string paymasterAndData { get; set; }
     }
+
+    public class ThirdwebGetUserOperationGasPriceResponse
+    {
+        public string maxFeePerGas { get; set; }
+        public string maxPriorityFeePerGas { get; set; }
+    }
 }
