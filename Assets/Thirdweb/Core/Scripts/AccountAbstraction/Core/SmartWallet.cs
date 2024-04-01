@@ -331,21 +331,11 @@ namespace Thirdweb.AccountAbstraction
             }
             ThirdwebDebug.Log("Tx Hash: " + txHash);
 
-            // Check if successful
+            // Check if successful deployment
 
             if (!_deployed)
             {
-                var receipt = await Transaction.WaitForTransactionResultRaw(txHash);
-                var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
-                if (decodedEvents[0].Event.Success == false)
-                {
-                    throw new Exception($"Transaction {txHash} execution reverted");
-                }
-                else
-                {
-                    ThirdwebDebug.Log("Transaction successful");
-                    _deployed = true;
-                }
+                await UpdateDeploymentStatus();
             }
 
             _deploying = false;
