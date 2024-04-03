@@ -88,7 +88,8 @@ jobs:
 
       # - uses: jlumbroso/free-disk-space@v1.3.1
 
-      - uses: game-ci/unity-builder@v4
+      - name: Build to Generate Project Files
+        uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -103,6 +104,9 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: "csharp"
+
+      - name: Autobuild CodeQL
+        uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
