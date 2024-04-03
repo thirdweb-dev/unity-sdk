@@ -100,13 +100,23 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           allowDirtyBuild: true
 
+      - name: List Files
+        run: |
+          echo "Listing files in the repository root:"
+          ls -lah
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "6.0.x"
+
+      - name: Build Project with dotnet
+        run: dotnet build ${{ matrix.projectPath }}/unity-sdk.sln --configuration Release
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: "csharp"
-
-      - name: Autobuild CodeQL
-        uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
