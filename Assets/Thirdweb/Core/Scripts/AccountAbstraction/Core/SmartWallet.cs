@@ -211,7 +211,20 @@ namespace Thirdweb.AccountAbstraction
 
             var (initCode, gas) = await GetInitCode();
 
-            var gasPrices = await Utils.GetGasPriceAsync(ThirdwebManager.Instance.SDK.Session.ChainId);
+            BigInteger maxFee;
+            BigInteger maxPriorityFee;
+            if (new Uri(Config.bundlerUrl).Host.EndsWith(".thirdweb.com"))
+            {
+                var fees = await BundlerClient.ThirdwebGetUserOperationGasPrice(Config.bundlerUrl, apiKey, requestId);
+                maxFee = new HexBigInteger(fees.maxFeePerGas).Value;
+                maxPriorityFee = new HexBigInteger(fees.maxPriorityFeePerGas).Value;
+            }
+            else
+            {
+                var fees = await Utils.GetGasPriceAsync(ThirdwebManager.Instance.SDK.Session.ChainId);
+                maxFee = fees.MaxFeePerGas;
+                maxPriorityFee = fees.MaxPriorityFeePerGas;
+            }
 
             var partialUserOp = new EntryPointContract.UserOperation()
             {
@@ -222,8 +235,8 @@ namespace Thirdweb.AccountAbstraction
                 CallGasLimit = 0,
                 VerificationGasLimit = 0,
                 PreVerificationGas = 0,
-                MaxFeePerGas = gasPrices.MaxFeePerGas,
-                MaxPriorityFeePerGas = gasPrices.MaxPriorityFeePerGas,
+                MaxFeePerGas = maxFee,
+                MaxPriorityFeePerGas = maxPriorityFee,
                 PaymasterAndData = new byte[] { },
                 Signature = Constants.DUMMY_SIG.HexStringToByteArray(),
             };
@@ -318,21 +331,11 @@ namespace Thirdweb.AccountAbstraction
             }
             ThirdwebDebug.Log("Tx Hash: " + txHash);
 
-            // Check if successful
+            // Check if successful deployment
 
             if (!_deployed)
             {
-                var receipt = await Transaction.WaitForTransactionResultRaw(txHash);
-                var decodedEvents = receipt.DecodeAllEvents<EntryPointContract.UserOperationEventEventDTO>();
-                if (decodedEvents[0].Event.Success == false)
-                {
-                    throw new Exception($"Transaction {txHash} execution reverted");
-                }
-                else
-                {
-                    ThirdwebDebug.Log("Transaction successful");
-                    _deployed = true;
-                }
+                await UpdateDeploymentStatus();
             }
 
             _deploying = false;

@@ -34,6 +34,12 @@ namespace Thirdweb.AccountAbstraction
             return JsonConvert.DeserializeObject<EthEstimateUserOperationGasResponse>(response.Result.ToString());
         }
 
+        public static async Task<ThirdwebGetUserOperationGasPriceResponse> ThirdwebGetUserOperationGasPrice(string bundlerUrl, string apiKey, object requestId)
+        {
+            var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "thirdweb_getUserOperationGasPrice");
+            return JsonConvert.DeserializeObject<ThirdwebGetUserOperationGasPriceResponse>(response.Result.ToString());
+        }
+
         // Paymaster requests
 
         public static async Task<PMSponsorOperationResponse> PMSponsorUserOperation(string paymasterUrl, string apiKey, object requestId, UserOperationHexified userOp, string entryPoint)

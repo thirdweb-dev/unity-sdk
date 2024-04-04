@@ -8,6 +8,9 @@ using UnityEngine;
 using MinimalForwarder = Thirdweb.Contracts.Forwarder.ContractDefinition;
 using UnityEngine.Networking;
 using Thirdweb.Redcode.Awaiting;
+using Nethereum.Contracts;
+using Nethereum.ABI.FunctionEncoding;
+using System;
 
 #pragma warning disable CS0618
 
@@ -407,8 +410,25 @@ namespace Thirdweb
                 {
                     var reason = await web3.Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
                     if (!string.IsNullOrEmpty(reason))
-                        throw new UnityException($"Transaction failed: {reason}");
+                        throw new UnityException($"Transaction {txHash} execution reverted: {reason}");
                 }
+
+                var userOpEvent = receipt.DecodeAllEvents<Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperationEventEventDTO>();
+                if (userOpEvent != null && userOpEvent.Count > 0 && userOpEvent[0].Event.Success == false)
+                {
+                    var revertReasonEvent = receipt.DecodeAllEvents<Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperationRevertReasonEventDTO>();
+                    if (revertReasonEvent != null && revertReasonEvent.Count > 0)
+                    {
+                        byte[] revertReason = revertReasonEvent[0].Event.RevertReason;
+                        string revertReasonString = new FunctionCallDecoder().DecodeFunctionErrorMessage(revertReason.ByteArrayToHexString());
+                        throw new Exception($"Transaction {txHash} execution silently reverted: {revertReasonString}");
+                    }
+                    else
+                    {
+                        throw new Exception($"Transaction {txHash} execution silently reverted with no reason string");
+                    }
+                }
+
                 return receipt;
             }
         }
