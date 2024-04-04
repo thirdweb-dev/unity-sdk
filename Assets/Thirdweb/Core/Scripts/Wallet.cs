@@ -11,7 +11,6 @@ using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
 using System.Linq;
-using Nethereum.RPC.Eth.Transactions;
 
 namespace Thirdweb
 {
@@ -896,8 +895,7 @@ namespace Thirdweb
                 if (string.IsNullOrEmpty(transactionRequest.to))
                     throw new UnityException("Please specify a to address.");
 
-                if (transactionRequest.from == null)
-                    transactionRequest.from = await GetAddress();
+                transactionRequest.from ??= await GetAddress();
 
                 var input = new Nethereum.RPC.Eth.DTOs.TransactionInput(
                     string.IsNullOrEmpty(transactionRequest.data) ? null : transactionRequest.data,
@@ -908,20 +906,8 @@ namespace Thirdweb
                     string.IsNullOrEmpty(transactionRequest.value) ? new HexBigInteger(0) : new HexBigInteger(BigInteger.Parse(transactionRequest.value))
                 );
 
-                if (
-                    ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
-                    && ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
-                )
-                {
-                    if (input.Gas == null)
-                        input.Gas = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.EstimateGasAsync(input);
-                    return await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
-                }
-                else
-                {
-                    var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.Session.Web3.Client);
-                    return await ethSendTx.SendRequestAsync(input);
-                }
+                var tx = new Transaction(input);
+                return await tx.Send();
             }
         }
 
