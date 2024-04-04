@@ -553,6 +553,13 @@ namespace Thirdweb
             return unixTimestamp.ToString();
         }
 
+        public async static Task<BigInteger> GetLegacyGasPriceAsync(BigInteger chainId)
+        {
+            var web3 = GetWeb3(chainId);
+            var gasPrice = (await web3.Eth.GasPrice.SendRequestAsync()).Value;
+            return BigInteger.Multiply(gasPrice, 10) / 9;
+        }
+
         public async static Task<GasPriceParameters> GetGasPriceAsync(BigInteger chainId)
         {
             BigInteger? priorityOverride = null;

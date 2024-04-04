@@ -41,13 +41,9 @@ namespace Thirdweb
     /// </summary>
     public class Transaction
     {
-        private readonly Contract contract;
-        private readonly string fnName;
-        private object[] fnArgs;
-
-        /// <summary>
-        /// Gets the transaction input.
-        /// </summary>
+        public Contract Contract { get; private set; }
+        public string FunctionName { get; private set; }
+        public object[] FunctionArgs { get; private set; }
         public TransactionInput Input { get; private set; }
 
         /// <summary>
@@ -57,10 +53,15 @@ namespace Thirdweb
         /// <param name="txInput">The transaction input.</param>
         public Transaction(Contract contract, TransactionInput txInput, string fnName, object[] fnArgs)
         {
-            this.contract = contract;
+            this.Contract = contract;
             this.Input = txInput;
-            this.fnName = fnName;
-            this.fnArgs = fnArgs;
+            this.FunctionName = fnName;
+            this.FunctionArgs = fnArgs;
+        }
+
+        public Transaction(TransactionInput txInput)
+        {
+            this.Input = txInput;
         }
 
         /// <summary>
@@ -202,12 +203,12 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                this.fnArgs = args;
+                this.FunctionArgs = args;
             }
             else
             {
                 var web3 = Utils.GetWeb3();
-                var function = web3.Eth.GetContract(contract.ABI, contract.Address).GetFunction(Input.To);
+                var function = web3.Eth.GetContract(Contract.ABI, Contract.Address).GetFunction(Input.To);
                 Input.Data = function.GetData(args);
             }
             return this;
@@ -221,17 +222,12 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("getGasPrice"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("getGasPrice"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
                 return BigInteger.Parse(val);
             }
             else
             {
-                var web3 = Utils.GetWeb3();
-                var gasPrice = await web3.Eth.GasPrice.SendRequestAsync();
-                var maxGasPrice = BigInteger.Parse("300000000000"); // 300 Gwei in Wei
-                var extraTip = gasPrice.Value / 10; // +10%
-                var txGasPrice = gasPrice.Value + extraTip;
-                return txGasPrice > maxGasPrice ? maxGasPrice : txGasPrice;
+                return await Utils.GetLegacyGasPriceAsync(ThirdwebManager.Instance.SDK.Session.ChainId);
             }
         }
 
@@ -243,7 +239,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("estimateGasLimit"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("estimateGasLimit"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
                 return BigInteger.Parse(val);
             }
             else
@@ -262,7 +258,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<GasCosts>(GetTxBuilderRoute("estimateGasCosts"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return await Bridge.InvokeRoute<GasCosts>(GetTxBuilderRoute("estimateGasCosts"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
             }
             else
             {
@@ -294,7 +290,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return JsonConvert.SerializeObject(await Bridge.InvokeRoute<object>(GetTxBuilderRoute("simulate"), Utils.ToJsonStringArray(Input, fnName, fnArgs)));
+                return JsonConvert.SerializeObject(await Bridge.InvokeRoute<object>(GetTxBuilderRoute("simulate"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs)));
             }
             else
             {
@@ -314,7 +310,7 @@ namespace Thirdweb
 
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("sign"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("sign"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
             }
             else
             {
@@ -371,7 +367,7 @@ namespace Thirdweb
                 else
                     action = "executeGasless";
 
-                return await Bridge.InvokeRoute<TransactionResult>(GetTxBuilderRoute(action), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return await Bridge.InvokeRoute<TransactionResult>(GetTxBuilderRoute(action), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
             }
             else
             {
@@ -437,22 +433,46 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("send"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("send"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
             }
             else
             {
+                var supports1559 = Utils.Supports1559(ThirdwebManager.Instance.SDK.Session.ChainId.ToString());
+                if (supports1559)
+                {
+                    if (Input.GasPrice == null)
+                    {
+                        var fees = await Utils.GetGasPriceAsync(ThirdwebManager.Instance.SDK.Session.ChainId);
+                        if (Input.MaxFeePerGas == null)
+                            Input.MaxFeePerGas = new HexBigInteger(fees.MaxFeePerGas);
+                        if (Input.MaxPriorityFeePerGas == null)
+                            Input.MaxPriorityFeePerGas = new HexBigInteger(fees.MaxPriorityFeePerGas);
+                    }
+                }
+                else
+                {
+                    if (Input.MaxFeePerGas == null && Input.MaxPriorityFeePerGas == null)
+                    {
+                        ThirdwebDebug.Log("Using Legacy Gas Pricing");
+                        Input.GasPrice = new HexBigInteger(await Utils.GetLegacyGasPriceAsync(ThirdwebManager.Instance.SDK.Session.ChainId));
+                    }
+                }
+
+                string hash;
                 if (
                     ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
                     && ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
                 )
                 {
-                    return await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(Input);
+                    hash = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(Input);
                 }
                 else
                 {
                     var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.Session.Web3.Client);
-                    return await ethSendTx.SendRequestAsync(Input);
+                    hash = await ethSendTx.SendRequestAsync(Input);
                 }
+                ThirdwebDebug.Log($"Transaction hash: {hash}");
+                return hash;
             }
         }
 
@@ -460,7 +480,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("sendGasless"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("sendGasless"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
             }
             else
             {
@@ -525,8 +545,49 @@ namespace Thirdweb
 
         private string GetTxBuilderRoute(string action)
         {
-            string route = contract.ABI != null ? $"{contract.Address}{Routable.subSeparator}{contract.ABI}" : contract.Address;
+            string route = Contract.ABI != null ? $"{Contract.Address}{Routable.subSeparator}{Contract.ABI}" : Contract.Address;
             return $"{route}{Routable.separator}tx{Routable.separator}{action}";
+        }
+    }
+
+    [System.Serializable]
+    public struct RelayerResponse
+    {
+        [JsonProperty("status")]
+        public string status;
+
+        [JsonProperty("result")]
+        public string result;
+    }
+
+    [System.Serializable]
+    public struct RelayerResult
+    {
+        [JsonProperty("txHash")]
+        public string txHash;
+    }
+
+    [System.Serializable]
+    public struct RelayerRequest
+    {
+        [JsonProperty("request")]
+        public MinimalForwarder.ForwardRequest request;
+
+        [JsonProperty("signature")]
+        public string signature;
+
+        [JsonProperty("forwarderAddress")]
+        public string forwarderAddress;
+
+        [JsonProperty("type")]
+        public string type;
+
+        public RelayerRequest(MinimalForwarder.ForwardRequest request, string signature, string forwarderAddress)
+        {
+            this.request = request;
+            this.signature = signature;
+            this.forwarderAddress = forwarderAddress;
+            this.type = "forward";
         }
     }
 }

@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using System.IO;
 using Thirdweb.Redcode.Awaiting;

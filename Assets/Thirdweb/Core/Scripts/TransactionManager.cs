@@ -1,14 +1,10 @@
 using System.Threading.Tasks;
 using System.Numerics;
 using Nethereum.Contracts;
-using UnityEngine;
 using Nethereum.RPC.Eth.DTOs;
 using MinimalForwarder = Thirdweb.Contracts.Forwarder.ContractDefinition;
-using UnityEngine.Networking;
 using Newtonsoft.Json;
 using Thirdweb.Contracts.Forwarder.ContractDefinition;
-using Nethereum.RPC.Eth.Transactions;
-using Thirdweb.Redcode.Awaiting;
 using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.Contracts.QueryHandlers.MultiCall;
 using System.Collections.Generic;
@@ -66,8 +62,6 @@ namespace Thirdweb
         public static async Task<TransactionReceipt> ThirdwebWriteRawResult<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null, BigInteger? gasOverride = null)
             where TWFunction : FunctionMessage, new()
         {
-            string txHash = null;
-
             functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
             functionMessage.AmountToSend = weiValue ?? 0;
 
@@ -89,130 +83,10 @@ namespace Thirdweb
                     functionMessage.Gas = 100000;
                 }
             }
-
-            bool isGasless = ThirdwebManager.Instance.SDK.Session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin.HasValue;
-
-            if (!isGasless)
-            {
-                if (functionMessage.GasPrice == null && functionMessage.MaxFeePerGas == null && functionMessage.MaxPriorityFeePerGas == null)
-                {
-                    var gasPrice = await Utils.GetGasPriceAsync(await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
-                    functionMessage.MaxFeePerGas = gasPrice.MaxFeePerGas;
-                    functionMessage.MaxPriorityFeePerGas = gasPrice.MaxPriorityFeePerGas;
-                }
-
-                if (
-                    ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
-                    && ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
-                )
-                {
-                    var web3 = await ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetSignerWeb3();
-                    var transactionHandler = web3.Eth.GetContractTransactionHandler<TWFunction>();
-                    txHash = await transactionHandler.SendRequestAsync(contractAddress, functionMessage);
-                }
-                else
-                {
-                    var transaction = new EthSendTransaction(ThirdwebManager.Instance.SDK.Session.Web3.Client);
-                    var transactionInput = functionMessage.CreateTransactionInput(contractAddress);
-                    txHash = await transaction.SendRequestAsync(transactionInput);
-                }
-            }
-            else
-            {
-                string relayerUrl = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.relayerUrl;
-                string forwarderAddress = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.relayerForwarderAddress;
-                string forwarderDomain = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.domainName;
-                string forwarderVersion = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.domainVersion;
-
-                functionMessage.Nonce = (
-                    await ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
-                        forwarderAddress,
-                        new MinimalForwarder.GetNonceFunction() { From = functionMessage.FromAddress }
-                    )
-                ).ReturnValue1;
-
-                var request = new MinimalForwarder.ForwardRequest()
-                {
-                    From = functionMessage.FromAddress,
-                    To = contractAddress,
-                    Value = functionMessage.AmountToSend,
-                    Gas = functionMessage.Gas.Value,
-                    Nonce = functionMessage.Nonce.Value,
-                    Data = functionMessage.GetCallData().ByteArrayToHexString()
-                };
-
-                var signature = await EIP712.GenerateSignature_MinimalForwarder(forwarderDomain, forwarderVersion, ThirdwebManager.Instance.SDK.Session.ChainId, forwarderAddress, request);
-
-                var postData = new RelayerRequest(request, signature, forwarderAddress);
-
-                using UnityWebRequest req = UnityWebRequest.Post(relayerUrl, "");
-                byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(postData));
-                req.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
-                req.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-                req.SetRequestHeader("Content-Type", "application/json");
-                await req.SendWebRequest();
-                if (req.result != UnityWebRequest.Result.Success)
-                {
-                    throw new UnityException(
-                        $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {forwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
-                    );
-                }
-                else
-                {
-                    var response = JsonConvert.DeserializeObject<RelayerResponse>(req.downloadHandler.text);
-                    if (response.status != "success")
-                    {
-                        throw new UnityException(
-                            $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {forwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
-                        );
-                    }
-                    var result = JsonConvert.DeserializeObject<RelayerResult>(response.result);
-                    txHash = result.txHash;
-                }
-            }
-            ThirdwebDebug.Log("txHash: " + txHash);
-            return await Transaction.WaitForTransactionResultRaw(txHash);
-        }
-    }
-
-    [System.Serializable]
-    public struct RelayerResponse
-    {
-        [JsonProperty("status")]
-        public string status;
-
-        [JsonProperty("result")]
-        public string result;
-    }
-
-    [System.Serializable]
-    public struct RelayerResult
-    {
-        [JsonProperty("txHash")]
-        public string txHash;
-    }
-
-    [System.Serializable]
-    public struct RelayerRequest
-    {
-        [JsonProperty("request")]
-        public MinimalForwarder.ForwardRequest request;
-
-        [JsonProperty("signature")]
-        public string signature;
-
-        [JsonProperty("forwarderAddress")]
-        public string forwarderAddress;
-
-        [JsonProperty("type")]
-        public string type;
-
-        public RelayerRequest(ForwardRequest request, string signature, string forwarderAddress)
-        {
-            this.request = request;
-            this.signature = signature;
-            this.forwarderAddress = forwarderAddress;
-            this.type = "forward";
+            var transactionInput = functionMessage.CreateTransactionInput(contractAddress);
+            var tx = new Transaction(transactionInput);
+            var hash = await tx.Send();
+            return await Transaction.WaitForTransactionResultRaw(hash);
         }
     }
 }

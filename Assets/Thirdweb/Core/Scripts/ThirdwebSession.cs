@@ -194,7 +194,6 @@ namespace Thirdweb
             CurrentChainData = newChainData;
             RPC = CurrentChainData.rpcUrls[0];
             Web3 = await ActiveWallet.GetWeb3();
-            Web3.TransactionManager.UseLegacyAsDefault = !Utils.Supports1559(newChainId.ToString());
             Web3.Client.OverridingRequestInterceptor = new ThirdwebInterceptor(ActiveWallet);
         }
 
