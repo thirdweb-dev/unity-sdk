@@ -57,6 +57,7 @@ var plugin = {
     chainId,
     password,
     email,
+    phoneNumber,
     personalWallet,
     authOptions,
     smartWalletAccountOverride,
@@ -74,6 +75,7 @@ var plugin = {
         UTF8ToString(chainId),
         UTF8ToString(password),
         UTF8ToString(email),
+        UTF8ToString(phoneNumber),
         UTF8ToString(personalWallet),
         UTF8ToString(authOptions),
         UTF8ToString(smartWalletAccountOverride)
