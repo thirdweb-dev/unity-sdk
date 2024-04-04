@@ -719,6 +719,12 @@ namespace Thirdweb
             return sha3.CalculateHash(message);
         }
 
+        public static bool IsValidEmail(string email)
+        {
+            var emailRegex = new System.Text.RegularExpressions.Regex(@"^\S+@\S+\.\S+$");
+            return emailRegex.IsMatch(email.Replace("+", ""));
+        }
+
         public static string GenerateRandomString(int v)
         {
             var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
