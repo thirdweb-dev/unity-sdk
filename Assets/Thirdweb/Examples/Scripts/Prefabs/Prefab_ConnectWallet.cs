@@ -128,7 +128,6 @@ namespace Thirdweb.Examples
                         email: emailInput.text,
                         authOptions: new AuthOptions(AuthProvider.EmailOTP)
                     );
-                Connect(wc);
             }
             else
             {
@@ -272,13 +271,13 @@ namespace Thirdweb.Examples
         {
             ThirdwebDebug.Log("Exporting wallet...");
             string json = await ThirdwebManager.Instance.SDK.Wallet.Export(_password);
-            GUIUtility.systemCopyBuffer = json;
+            await Utils.CopyToClipboard(json);
             ThirdwebDebug.Log($"Copied wallet to clipboard: {json}");
         }
 
-        public void CopyAddress()
+        public async void CopyAddress()
         {
-            GUIUtility.systemCopyBuffer = _address;
+            await Utils.CopyToClipboard(_address);
             ThirdwebDebug.Log($"Copied address to clipboard: {_address}");
         }
 

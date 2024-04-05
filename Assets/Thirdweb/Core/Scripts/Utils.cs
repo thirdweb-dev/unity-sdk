@@ -739,5 +739,22 @@ namespace Thirdweb
             var result = new string(Enumerable.Repeat(chars, v).Select(s => s[random.Next(s.Length)]).ToArray());
             return result;
         }
+
+        public static async Task<bool> CopyToClipboard(string text)
+        {
+            try
+            {
+                if (IsWebGLBuild())
+                    await Bridge.CopyBuffer(text);
+                else
+                    GUIUtility.systemCopyBuffer = text;
+                return true;
+            }
+            catch (Exception e)
+            {
+                ThirdwebDebug.LogWarning($"Failed to copy to clipboard: {e}");
+                return false;
+            }
+        }
     }
 }

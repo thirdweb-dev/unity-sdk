@@ -450,6 +450,22 @@ namespace Thirdweb
             return JsonConvert.DeserializeObject<Result<string>>(result).result;
         }
 
+        public static async Task CopyBuffer(string text)
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebCopyBuffer(taskId, text, jsCallback);
+#endif
+            await task.Task;
+        }
+
 #if UNITY_WEBGL
         [DllImport("__Internal")]
         private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
@@ -495,6 +511,8 @@ namespace Thirdweb
         private static extern string ThirdwebResolveENSFromAddress(string taskId, string address, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebResolveAddressFromENS(string taskId, string ens, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebCopyBuffer(string taskId, string text, Action<string, string, string> cb);
 #endif
     }
 }
