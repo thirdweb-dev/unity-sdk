@@ -383,6 +383,22 @@ namespace Thirdweb
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(rawResults));
         }
 
+        public async Task<T> ReadRaw<T>(string functionName, params object[] args)
+            where T : new()
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<T>(getRoute("call"), Utils.ToJsonStringArray(functionName, args));
+            }
+
+            if (this.ABI == null)
+                throw new UnityException("You must pass an ABI for native platform custom calls");
+
+            var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
+            var function = contract.GetFunction(functionName);
+            return await function.CallDeserializingToObjectAsync<T>(args);
+        }
+
         private T ConvertValue<T>(object value)
         {
             if (value is T result)
