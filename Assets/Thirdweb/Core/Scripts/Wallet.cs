@@ -816,12 +816,33 @@ namespace Thirdweb
                     throw new UnityException("This functionality is only available for SmartWallets.");
 
                 string address = await GetAddress();
-                var raw = await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetAllActiveSignersFunction, Contracts.Account.ContractDefinition.GetAllActiveSignersOutputDTO>(
+
+                var rawSigners = await TransactionManager.ThirdwebRead<
+                    Contracts.Account.ContractDefinition.GetAllActiveSignersFunction,
+                    Contracts.Account.ContractDefinition.GetAllActiveSignersOutputDTO
+                >(address, new Contracts.Account.ContractDefinition.GetAllActiveSignersFunction());
+                var allSigners = rawSigners.Signers;
+
+                var rawAdmins = await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetAllAdminsFunction, Contracts.Account.ContractDefinition.GetAllAdminsOutputDTO>(
                     address,
-                    new Contracts.Account.ContractDefinition.GetAllActiveSignersFunction()
+                    new Contracts.Account.ContractDefinition.GetAllAdminsFunction()
                 );
+                foreach (var admin in rawAdmins.ReturnValue1)
+                {
+                    allSigners.Add(
+                        new Contracts.Account.ContractDefinition.SignerPermissions()
+                        {
+                            Signer = admin,
+                            ApprovedTargets = new List<string>() { Utils.AddressZero },
+                            NativeTokenLimitPerTransaction = BigInteger.Zero,
+                            StartTimestamp = 0,
+                            EndTimestamp = Utils.GetUnixTimeStampIn10Years()
+                        }
+                    );
+                }
+
                 var signers = new List<SignerWithPermissions>();
-                foreach (var rawSigner in raw.Signers)
+                foreach (var rawSigner in allSigners)
                 {
                     bool? isAdmin;
                     try

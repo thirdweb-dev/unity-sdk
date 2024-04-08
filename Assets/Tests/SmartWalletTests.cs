@@ -95,6 +95,24 @@ public class SmartWalletTests : ConfigManager
             }
         }
         Assert.IsTrue(exists);
+
+        // Also check if admin is in here
+        exists = false;
+        var adminTask = ThirdwebManager.Instance.SDK.Wallet.GetSignerAddress();
+        yield return new WaitUntil(() => adminTask.IsCompleted);
+        Assert.IsTrue(adminTask.IsCompletedSuccessfully);
+        Assert.IsNotNull(adminTask.Result);
+        var admin = adminTask.Result;
+        foreach (var signer in getAllActiveSignersTask.Result)
+        {
+            if (signer.signer == admin)
+            {
+                exists = true;
+                Assert.IsTrue(signer.isAdmin);
+                break;
+            }
+        }
+        Assert.IsTrue(exists);
     }
 
     [UnityTest]
