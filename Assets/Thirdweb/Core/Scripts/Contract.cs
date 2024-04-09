@@ -10,6 +10,8 @@ using System;
 using Nethereum.Contracts;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.ABI.FunctionEncoding.Attributes;
+using UnityEngine.Networking;
+using Thirdweb.Redcode.Awaiting;
 
 namespace Thirdweb
 {
@@ -256,7 +258,7 @@ namespace Thirdweb
             }
 
             if (this.ABI == null)
-                throw new UnityException("You must pass an ABI for native platform custom calls");
+                throw new UnityException("You must pass an ABI for native platform custom calls - make use of the static Contract.FetchAbi method to fetch the ABI if you do not have it on hand.");
 
             var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
@@ -392,11 +394,25 @@ namespace Thirdweb
             }
 
             if (this.ABI == null)
-                throw new UnityException("You must pass an ABI for native platform custom calls");
+                throw new UnityException("You must pass an ABI for native platform custom calls - make use of the static Contract.FetchAbi method to fetch the ABI if you do not have it on hand.");
 
             var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
             return await function.CallDeserializingToObjectAsync<T>(args);
+        }
+
+        public static async Task<string> FetchAbi(string contractAddress, BigInteger chainId)
+        {
+            var url = $"https://contract.thirdweb.com/abi/{chainId}/{contractAddress}";
+            using (var request = UnityWebRequest.Get(url))
+            {
+                await request.SendWebRequest();
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    throw new UnityException($"Failed to fetch ABI! Error: {request.error}");
+                }
+                return request.downloadHandler.text;
+            }
         }
 
         private T ConvertValue<T>(object value)
