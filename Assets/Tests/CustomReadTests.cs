@@ -51,18 +51,10 @@ public class CustomReadTests : ConfigManager
         var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
         var readTask = contract.Read<BigInteger>("balanceOf", _dropErc20Address);
         yield return new WaitUntil(() => readTask.IsCompleted);
-        if (Utils.IsWebGLBuild())
-        {
-            if (readTask.IsFaulted)
-                throw readTask.Exception;
-            Assert.IsTrue(readTask.IsCompletedSuccessfully);
-            Assert.NotNull(readTask.Result);
-        }
-        else
-        {
-            Assert.IsTrue(readTask.IsFaulted);
-            Assert.AreEqual("You must pass an ABI for native platform custom calls", readTask.Exception.InnerException.Message);
-        }
+        if (readTask.IsFaulted)
+            throw readTask.Exception;
+        Assert.IsTrue(readTask.IsCompletedSuccessfully);
+        Assert.NotNull(readTask.Result);
     }
 
     [UnityTest]
