@@ -46,9 +46,15 @@ public class CustomReadTests : ConfigManager
     }
 
     [UnityTest]
-    public IEnumerator Custom_WithoutAbi_FailNativeSucceedWebGL()
+    public IEnumerator Custom_WithoutAbi_Fetch()
     {
-        var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address);
+        var abiTask = Contract.FetchAbi(_dropErc20Address, 421614);
+        yield return new WaitUntil(() => abiTask.IsCompleted);
+        if (abiTask.IsFaulted)
+            throw abiTask.Exception;
+        Assert.IsTrue(abiTask.IsCompletedSuccessfully);
+        Assert.NotNull(abiTask.Result);
+        var contract = ThirdwebManager.Instance.SDK.GetContract(_dropErc20Address, abiTask.Result);
         var readTask = contract.Read<BigInteger>("balanceOf", _dropErc20Address);
         yield return new WaitUntil(() => readTask.IsCompleted);
         if (readTask.IsFaulted)
