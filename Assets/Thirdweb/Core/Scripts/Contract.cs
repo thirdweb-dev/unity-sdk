@@ -200,7 +200,7 @@ namespace Thirdweb
             else
             {
                 if (this.ABI == null)
-                    throw new UnityException("You must pass an ABI for native platform custom calls");
+                    this.ABI = await FetchAbi(this.Address, await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
 
                 var contract = ThirdwebManager.Instance.SDK.Session.Web3.Eth.GetContract(this.ABI, this.Address);
 
@@ -258,7 +258,7 @@ namespace Thirdweb
             }
 
             if (this.ABI == null)
-                throw new UnityException("You must pass an ABI for native platform custom calls - make use of the static Contract.FetchAbi method to fetch the ABI if you do not have it on hand.");
+                this.ABI = await FetchAbi(this.Address, await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
 
             var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
@@ -394,7 +394,7 @@ namespace Thirdweb
             }
 
             if (this.ABI == null)
-                throw new UnityException("You must pass an ABI for native platform custom calls - make use of the static Contract.FetchAbi method to fetch the ABI if you do not have it on hand.");
+                this.ABI = await FetchAbi(this.Address, await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
 
             var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
