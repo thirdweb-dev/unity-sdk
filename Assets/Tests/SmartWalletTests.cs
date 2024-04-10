@@ -66,7 +66,7 @@ public class SmartWalletTests : ConfigManager
         yield return Connect_WithGaslessManagedAccountFactory_Success();
 
         var task = ThirdwebManager.Instance.SDK.Wallet.CreateSessionKey(
-            signerAddress: "0x22b79AD6c6009525933ac2FF40bC9F30dF14Ecfb",
+            signerAddress: "0xA86F78b995a3899785FA1508eB1E62aEa501fc3c",
             approvedTargets: new List<string>() { "0x450b943729Ddba196Ab58b589Cea545551DF71CC" },
             nativeTokenLimitPerTransactionInWei: "0",
             permissionStartTimestamp: "0",
@@ -88,7 +88,7 @@ public class SmartWalletTests : ConfigManager
         bool exists = false;
         foreach (var signer in getAllActiveSignersTask.Result)
         {
-            if (signer.signer == "0x22b79AD6c6009525933ac2FF40bC9F30dF14Ecfb")
+            if (signer.signer == "0xA86F78b995a3899785FA1508eB1E62aEa501fc3c")
             {
                 exists = true;
                 break;
@@ -120,7 +120,7 @@ public class SmartWalletTests : ConfigManager
     {
         yield return CreateSessionKey_WithValidSignerCheck_Success();
 
-        var task = ThirdwebManager.Instance.SDK.Wallet.RevokeSessionKey(signerAddress: "0x22b79AD6c6009525933ac2FF40bC9F30dF14Ecfb");
+        var task = ThirdwebManager.Instance.SDK.Wallet.RevokeSessionKey(signerAddress: "0xA86F78b995a3899785FA1508eB1E62aEa501fc3c");
         yield return new WaitUntil(() => task.IsCompleted);
         Assert.IsTrue(task.IsCompletedSuccessfully);
         Assert.IsNotNull(task.Result);
@@ -134,7 +134,7 @@ public class SmartWalletTests : ConfigManager
         bool exists = false;
         foreach (var signer in getAllActiveSignersTask.Result)
         {
-            if (signer.signer == "0x22b79AD6c6009525933ac2FF40bC9F30dF14Ecfb")
+            if (signer.signer == "0xA86F78b995a3899785FA1508eB1E62aEa501fc3c")
             {
                 exists = true;
                 break;
