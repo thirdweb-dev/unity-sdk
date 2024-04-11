@@ -120,6 +120,8 @@ namespace Thirdweb
             }
             else
             {
+                if (this.ABI == null)
+                    this.ABI = await FetchAbi(this.Address, await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
                 var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
                 var function = contract.GetFunction(functionName);
                 var fromAddress = from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
