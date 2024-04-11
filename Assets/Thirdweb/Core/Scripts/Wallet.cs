@@ -1048,7 +1048,7 @@ namespace Thirdweb
         LocalWallet,
         SmartWallet,
         Hyperplay,
-        EmbeddedWallet
+        InAppWallet
     }
 
     /// <summary>
