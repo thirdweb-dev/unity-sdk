@@ -1605,7 +1605,7 @@ GameObject:
   - component: {fileID: 3202619366221042882}
   - component: {fileID: 7585343039585244319}
   m_Layer: 0
-  m_Name: WalletProvider_EmbeddedWallet
+  m_Name: WalletProvider_InAppWallet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

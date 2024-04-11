@@ -117,8 +117,8 @@ namespace Thirdweb
         [Tooltip("Instantiates the Metamask SDK for Native platforms.")]
         public GameObject MetamaskPrefab;
 
-        [Tooltip("Instantiates the EmbeddedWallet SDK for Native platforms.")]
-        public GameObject EmbeddedWalletPrefab;
+        [Tooltip("Instantiates the InAppWallet SDK for Native platforms.")]
+        public GameObject InAppWalletPrefab;
 
         public ThirdwebSDK SDK;
 

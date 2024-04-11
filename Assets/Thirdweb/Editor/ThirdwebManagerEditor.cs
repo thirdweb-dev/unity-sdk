@@ -39,7 +39,7 @@ namespace Thirdweb
         private SerializedProperty entryPointAddressProperty;
         private SerializedProperty WalletConnectPrefabProperty;
         private SerializedProperty MetamaskPrefabProperty;
-        private SerializedProperty EmbeddedWalletPrefabProperty;
+        private SerializedProperty InAppWalletPrefabProperty;
 
         private ReorderableList supportedChainsList;
         private bool[] sectionExpanded;
@@ -87,7 +87,7 @@ namespace Thirdweb
             entryPointAddressProperty = serializedObject.FindProperty("entryPointAddress");
             WalletConnectPrefabProperty = serializedObject.FindProperty("WalletConnectPrefab");
             MetamaskPrefabProperty = serializedObject.FindProperty("MetamaskPrefab");
-            EmbeddedWalletPrefabProperty = serializedObject.FindProperty("EmbeddedWalletPrefab");
+            InAppWalletPrefabProperty = serializedObject.FindProperty("InAppWalletPrefab");
 
             supportedChainsList = new ReorderableList(serializedObject, supportedChainsProperty, true, true, true, true);
             supportedChainsList.drawHeaderCallback = rect =>
@@ -374,7 +374,7 @@ namespace Thirdweb
                     {
                         EditorGUILayout.PropertyField(WalletConnectPrefabProperty);
                         EditorGUILayout.PropertyField(MetamaskPrefabProperty);
-                        EditorGUILayout.PropertyField(EmbeddedWalletPrefabProperty);
+                        EditorGUILayout.PropertyField(InAppWalletPrefabProperty);
                     }
 
                     EditorGUILayout.EndVertical();

@@ -15,7 +15,7 @@ using UnityEngine.Events;
 
 namespace Thirdweb.Wallets
 {
-    public class EmbeddedWalletUI : MonoBehaviour
+    public class InAppWalletUI : MonoBehaviour
     {
         #region Variables
 
@@ -42,7 +42,7 @@ namespace Thirdweb.Wallets
 
         #region Initialization
 
-        public static EmbeddedWalletUI Instance { get; private set; }
+        public static InAppWalletUI Instance { get; private set; }
 
         private void Awake()
         {

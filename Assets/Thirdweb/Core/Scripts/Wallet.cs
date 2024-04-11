@@ -290,7 +290,7 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Gets the connected embedded wallet email if any.
+        /// Gets the connected In App Wallet email if any.
         /// </summary>
         public async Task<string> GetEmail()
         {
@@ -985,7 +985,7 @@ namespace Thirdweb
         /// <param name="password">Optional wallet encryption password</param>
         /// <param name="email">The email to login with if using email based providers.</param>
         /// <param name="personalWallet">The personal wallet provider if using smart wallets.</param>
-        /// <param name="authOptions">The authentication options if using embedded wallets.</param>
+        /// <param name="authOptions">The authentication options if using in app wallets.</param>
         /// <param name="smartWalletAccountOverride">Optionally choose to connect to a smart account the personal wallet is not an admin of.</param>
         /// <returns>A new instance of the <see cref="WalletConnection"/> class.</returns>
         public WalletConnection(
@@ -1011,7 +1011,7 @@ namespace Thirdweb
     }
 
     /// <summary>
-    /// Embedded Wallet Authentication Options.
+    /// In App Wallet Authentication Options.
     /// </summary>
     [System.Serializable]
     public class AuthOptions
@@ -1052,7 +1052,7 @@ namespace Thirdweb
     }
 
     /// <summary>
-    /// Represents the available auth providers for Embedded Wallet.
+    /// Represents the available auth providers for In App Wallet.
     /// </summary>
     [System.Serializable]
     public enum AuthProvider
