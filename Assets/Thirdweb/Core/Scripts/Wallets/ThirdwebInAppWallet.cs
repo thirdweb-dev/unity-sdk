@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace Thirdweb.Wallets
 {
-    public class ThirdwebEmbeddedWallet : IThirdwebWallet
+    public class ThirdwebInAppWallet : IThirdwebWallet
     {
         private Web3 _web3;
         private readonly WalletProvider _provider;
@@ -16,10 +16,10 @@ namespace Thirdweb.Wallets
         private Account _account;
         private string _email;
 
-        public ThirdwebEmbeddedWallet(string clientId, string bundleId)
+        public ThirdwebInAppWallet(string clientId, string bundleId)
         {
             _web3 = null;
-            _provider = WalletProvider.EmbeddedWallet;
+            _provider = WalletProvider.InAppWallet;
             _signerProvider = WalletProvider.LocalWallet;
             _embeddedWallet = new EmbeddedWallet(clientId, bundleId, "unity", ThirdwebSDK.version);
         }
@@ -28,12 +28,12 @@ namespace Thirdweb.Wallets
         {
             await _embeddedWallet.VerifyThirdwebClientIdAsync("");
 
-            if (EmbeddedWalletUI.Instance == null)
+            if (InAppWalletUI.Instance == null)
             {
-                GameObject.Instantiate(ThirdwebManager.Instance.EmbeddedWalletPrefab);
+                GameObject.Instantiate(ThirdwebManager.Instance.InAppWalletPrefab);
             }
 
-            var user = await EmbeddedWalletUI.Instance.Connect(_embeddedWallet, walletConnection.email, walletConnection.phoneNumber, walletConnection.authOptions);
+            var user = await InAppWalletUI.Instance.Connect(_embeddedWallet, walletConnection.email, walletConnection.phoneNumber, walletConnection.authOptions);
             _account = user.Account;
             _email = user.EmailAddress;
             _web3 = new Web3(_account, rpc);

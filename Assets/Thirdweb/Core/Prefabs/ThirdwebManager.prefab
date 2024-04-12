@@ -97,13 +97,19 @@ MonoBehaviour:
   forwarderDomainOverride: 
   forwaderVersionOverride: 
   walletConnectProjectId: 
+  walletConnectEnableExplorer: 0
   walletConnectExplorerRecommendedWalletIds: []
+  walletConnectWalletImages: []
+  walletConnectDesktopWallets: []
+  walletConnectMobileWallets: []
+  walletConnectThemeMode: 
   factoryAddress: 
   gasless: 0
-  deployOnSign: 0
+  erc20PaymasterAddress: 
+  erc20TokenAddress: 
   bundlerUrl: 
   paymasterUrl: 
   entryPointAddress: 
   WalletConnectPrefab: {fileID: 3202619366221042887, guid: c8c0099339b6ef54f87b1f049c5eb74f, type: 3}
   MetamaskPrefab: {fileID: 3503421935870801903, guid: f09c6d17b08bed346bec9906a7f17092, type: 3}
-  EmbeddedWalletPrefab: {fileID: 3202619366221042887, guid: bef3cf6334b95f14883fb1b8095a0960, type: 3}
+  InAppWalletPrefab: {fileID: 3202619366221042887, guid: bef3cf6334b95f14883fb1b8095a0960, type: 3}

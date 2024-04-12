@@ -15,11 +15,11 @@ using UnityEngine.Events;
 
 namespace Thirdweb.Wallets
 {
-    public class EmbeddedWalletUI : MonoBehaviour
+    public class InAppWalletUI : MonoBehaviour
     {
         #region Variables
 
-        public GameObject EmbeddedWalletCanvas;
+        public GameObject InAppWalletCanvas;
         public TMP_InputField OTPInput;
         public TMP_InputField RecoveryInput;
         public Button SubmitButton;
@@ -42,7 +42,7 @@ namespace Thirdweb.Wallets
 
         #region Initialization
 
-        public static EmbeddedWalletUI Instance { get; private set; }
+        public static InAppWalletUI Instance { get; private set; }
 
         private void Awake()
         {
@@ -78,7 +78,7 @@ namespace Thirdweb.Wallets
             RecoveryInput.gameObject.SetActive(false);
             SubmitButton.onClick.RemoveAllListeners();
             RecoveryCodesCopy.onClick.RemoveAllListeners();
-            EmbeddedWalletCanvas.SetActive(false);
+            InAppWalletCanvas.SetActive(false);
             RecoveryCodesCanvas.SetActive(false);
 
             try
@@ -135,7 +135,7 @@ namespace Thirdweb.Wallets
             }
 
             await new WaitUntil(() => _user != null || _exception != null);
-            EmbeddedWalletCanvas.SetActive(false);
+            InAppWalletCanvas.SetActive(false);
             if (_exception != null)
                 throw _exception;
             return _user;
@@ -157,7 +157,7 @@ namespace Thirdweb.Wallets
 
             SubmitButton.onClick.AddListener(OnSubmitOTP);
             await OnSendOTP();
-            EmbeddedWalletCanvas.SetActive(true);
+            InAppWalletCanvas.SetActive(true);
         }
 
         public virtual async Task OnSendOTP()
@@ -220,7 +220,7 @@ namespace Thirdweb.Wallets
 
             SubmitButton.onClick.AddListener(OnSubmitPhoneOTP);
             await OnSendPhoneOTP();
-            EmbeddedWalletCanvas.SetActive(true);
+            InAppWalletCanvas.SetActive(true);
         }
 
         public virtual async Task OnSendPhoneOTP()
@@ -385,7 +385,7 @@ namespace Thirdweb.Wallets
             if (hideOtpInput)
                 OTPInput.gameObject.SetActive(false);
             RecoveryInput.gameObject.SetActive(true);
-            EmbeddedWalletCanvas.SetActive(true);
+            InAppWalletCanvas.SetActive(true);
         }
 
         public virtual void ShowRecoveryCodes(EmbeddedWallet.VerifyResult res)

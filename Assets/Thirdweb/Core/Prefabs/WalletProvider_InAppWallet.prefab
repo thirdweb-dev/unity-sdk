@@ -1269,7 +1269,7 @@ GameObject:
   - component: {fileID: 5}
   - component: {fileID: 6}
   m_Layer: 5
-  m_Name: Canvas_EWS
+  m_Name: Canvas_InAppWallet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1605,7 +1605,7 @@ GameObject:
   - component: {fileID: 3202619366221042882}
   - component: {fileID: 7585343039585244319}
   m_Layer: 0
-  m_Name: WalletProvider_EmbeddedWallet
+  m_Name: WalletProvider_InAppWallet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1640,14 +1640,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e763a7f1e5865f44a89d3aa169a46691, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EmbeddedWalletCanvas: {fileID: 3040857394524813045}
+  InAppWalletCanvas: {fileID: 3040857394524813045}
   OTPInput: {fileID: 8918216154903914298}
   RecoveryInput: {fileID: 1061075594562819070}
   SubmitButton: {fileID: 1670754136118778672}
   RecoveryCodesCanvas: {fileID: 3065337689055971296}
   RecoveryCodesText: {fileID: 4840930599477263590}
   RecoveryCodesCopy: {fileID: 7908066674043299061}
-  OnEmailOTPVerificationFailed:
+  OnOTPVerificationFailed:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &3462065987877024667
