@@ -19,7 +19,7 @@ namespace Thirdweb
             /// <summary>
             /// Gasless relayer configuration options for Thirdweb Engine..
             /// </summary>
-            public RelayerOptions? relayer;
+            public RelayerOptions? gasless;
 
             /// <summary>
             /// Storage configuration options for the Thirdweb SDK.
@@ -209,6 +209,12 @@ namespace Thirdweb
         [System.Serializable]
         public struct RelayerOptions
         {
+            public EngineRelayerOptions engine;
+        }
+
+        [System.Serializable]
+        public struct EngineRelayerOptions
+        {
             /// <summary>
             /// The URL of the relayer service.
             /// </summary>
@@ -217,7 +223,7 @@ namespace Thirdweb
             /// <summary>
             /// The address of the relayer forwarder.
             /// </summary>
-            public string forwarderAddress;
+            public string relayerForwarderAddress;
 
             /// <summary>
             /// The domain name for the forwarder.

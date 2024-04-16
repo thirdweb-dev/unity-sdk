@@ -342,7 +342,7 @@ namespace Thirdweb
                     await EstimateAndSetGasLimitAsync();
                 if (Input.Value == null)
                     Input.Value = new HexBigInteger(0);
-                bool isGaslessSetup = ThirdwebManager.Instance.SDK.Session.Options.relayer.HasValue && !string.IsNullOrEmpty(ThirdwebManager.Instance.SDK.Session.Options.relayer.Value.relayerUrl);
+                bool isGaslessSetup = ThirdwebManager.Instance.SDK.Session.Options.gasless.HasValue && !string.IsNullOrEmpty(ThirdwebManager.Instance.SDK.Session.Options.gasless?.engine.relayerUrl);
                 if (gasless != null && gasless.Value && !isGaslessSetup)
                     throw new UnityException("Gasless relayer transactions are not enabled. Please enable them in the SDK options.");
                 bool sendGaslessly = gasless == null ? isGaslessSetup : gasless.Value;
@@ -485,10 +485,10 @@ namespace Thirdweb
             }
             else
             {
-                string relayerUrl = ThirdwebManager.Instance.SDK.Session.Options.relayer?.relayerUrl ?? throw new UnityException("Relayer URL not set in SDK options.");
-                string forwarderAddress = ThirdwebManager.Instance.SDK.Session.Options.relayer?.forwarderAddress ?? "0xD04F98C88cE1054c90022EE34d566B9237a1203C";
-                string forwarderDomain = ThirdwebManager.Instance.SDK.Session.Options.relayer?.domainName ?? "GSNv2 Forwarder";
-                string forwarderVersion = ThirdwebManager.Instance.SDK.Session.Options.relayer?.domainVersion ?? "0.0.1";
+                string relayerUrl = ThirdwebManager.Instance.SDK.Session.Options.gasless?.engine.relayerUrl ?? throw new UnityException("Relayer URL not set in SDK options.");
+                string forwarderAddress = ThirdwebManager.Instance.SDK.Session.Options.gasless?.engine.relayerForwarderAddress ?? "0xD04F98C88cE1054c90022EE34d566B9237a1203C";
+                string forwarderDomain = ThirdwebManager.Instance.SDK.Session.Options.gasless?.engine.domainName ?? "GSNv2 Forwarder";
+                string forwarderVersion = ThirdwebManager.Instance.SDK.Session.Options.gasless?.engine.domainVersion ?? "0.0.1";
 
                 Input.Nonce = (
                     await TransactionManager.ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(

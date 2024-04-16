@@ -208,12 +208,15 @@ namespace Thirdweb
             }
             if (!string.IsNullOrEmpty(relayerUrl))
             {
-                options.relayer = new ThirdwebSDK.RelayerOptions()
+                options.gasless = new ThirdwebSDK.RelayerOptions()
                 {
-                    relayerUrl = this.relayerUrl,
-                    forwarderAddress = string.IsNullOrEmpty(this.forwarderAddress) ? "0xD04F98C88cE1054c90022EE34d566B9237a1203C" : this.forwarderAddress,
-                    domainName = string.IsNullOrEmpty(this.forwarderDomainOverride) ? "GSNv2 Forwarder" : this.forwarderDomainOverride,
-                    domainVersion = string.IsNullOrEmpty(this.forwaderVersionOverride) ? "0.0.1" : this.forwaderVersionOverride
+                    engine = new ThirdwebSDK.EngineRelayerOptions()
+                    {
+                        relayerUrl = this.relayerUrl,
+                        relayerForwarderAddress = string.IsNullOrEmpty(this.forwarderAddress) ? "0xD04F98C88cE1054c90022EE34d566B9237a1203C" : this.forwarderAddress,
+                        domainName = string.IsNullOrEmpty(this.forwarderDomainOverride) ? "GSNv2 Forwarder" : this.forwarderDomainOverride,
+                        domainVersion = string.IsNullOrEmpty(this.forwaderVersionOverride) ? "0.0.1" : this.forwaderVersionOverride
+                    }
                 };
             }
 
