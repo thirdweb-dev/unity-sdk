@@ -17,9 +17,9 @@ namespace Thirdweb
         public struct Options
         {
             /// <summary>
-            /// Gasless configuration options for the Thirdweb SDK.
+            /// Gasless relayer configuration options for Thirdweb Engine..
             /// </summary>
-            public GaslessOptions? gasless;
+            public RelayerOptions? relayer;
 
             /// <summary>
             /// Storage configuration options for the Thirdweb SDK.
@@ -204,33 +204,10 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Gasless configuration options.
+        /// Thirdweb Engine Relayer configuration options.
         /// </summary>
         [System.Serializable]
-        public struct GaslessOptions
-        {
-            /// <summary>
-            /// OpenZeppelin Defender Gasless configuration options.
-            /// </summary>
-            public OZDefenderOptions? openzeppelin;
-
-            /// <summary>
-            /// [Obsolete] Biconomy Gasless configuration options. Biconomy is not fully supported and will be removed soon. Use OpenZeppelin Defender instead.
-            /// </summary>
-            [System.Obsolete("Biconomy is not fully supported and will be removed soon. Use OpenZeppelin Defender instead.")]
-            public BiconomyOptions? biconomy;
-
-            /// <summary>
-            /// Indicates whether experimental chainless support is enabled.
-            /// </summary>
-            public bool experimentalChainlessSupport;
-        }
-
-        /// <summary>
-        /// OpenZeppelin Defender Gasless configuration options.
-        /// </summary>
-        [System.Serializable]
-        public struct OZDefenderOptions
+        public struct RelayerOptions
         {
             /// <summary>
             /// The URL of the relayer service.
@@ -240,7 +217,7 @@ namespace Thirdweb
             /// <summary>
             /// The address of the relayer forwarder.
             /// </summary>
-            public string relayerForwarderAddress;
+            public string forwarderAddress;
 
             /// <summary>
             /// The domain name for the forwarder.
@@ -251,23 +228,6 @@ namespace Thirdweb
             /// The version of the forwarder domain.
             /// </summary>
             public string domainVersion;
-        }
-
-        /// <summary>
-        /// Biconomy Gasless configuration options.
-        /// </summary>
-        [System.Serializable]
-        public struct BiconomyOptions
-        {
-            /// <summary>
-            /// The API ID for Biconomy.
-            /// </summary>
-            public string apiId;
-
-            /// <summary>
-            /// The API key for Biconomy.
-            /// </summary>
-            public string apiKey;
         }
 
         private readonly string chainOrRPC;

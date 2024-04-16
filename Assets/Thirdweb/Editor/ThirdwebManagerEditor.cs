@@ -263,13 +263,12 @@ namespace Thirdweb
 
             // OZ Defender Options
             sectionExpanded[3] = DrawSectionWithExpand(
-                "OpenZeppelin Defender Options",
+                "Gasless Relayer Options",
                 sectionExpanded[3],
                 () =>
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                     EditorGUILayout.PropertyField(relayerUrlProperty);
-                    EditorGUILayout.PropertyField(forwarderAddressProperty);
 
                     EditorGUI.BeginChangeCheck();
                     showGaslessOptionalFields = EditorGUILayout.ToggleLeft("Show Optional Fields", showGaslessOptionalFields);
@@ -280,6 +279,7 @@ namespace Thirdweb
 
                     if (showGaslessOptionalFields)
                     {
+                        EditorGUILayout.PropertyField(forwarderAddressProperty);
                         EditorGUILayout.PropertyField(forwarderDomainOverrideProperty);
                         EditorGUILayout.PropertyField(forwaderVersionOverrideProperty);
                     }

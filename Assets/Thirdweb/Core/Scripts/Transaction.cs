@@ -11,6 +11,7 @@ using Thirdweb.Redcode.Awaiting;
 using Nethereum.Contracts;
 using Nethereum.ABI.FunctionEncoding;
 using System;
+using Newtonsoft.Json.Linq;
 
 #pragma warning disable CS0618
 
@@ -341,9 +342,9 @@ namespace Thirdweb
                     await EstimateAndSetGasLimitAsync();
                 if (Input.Value == null)
                     Input.Value = new HexBigInteger(0);
-                bool isGaslessSetup = ThirdwebManager.Instance.SDK.Session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin.HasValue;
+                bool isGaslessSetup = ThirdwebManager.Instance.SDK.Session.Options.relayer.HasValue && !string.IsNullOrEmpty(ThirdwebManager.Instance.SDK.Session.Options.relayer.Value.relayerUrl);
                 if (gasless != null && gasless.Value && !isGaslessSetup)
-                    throw new UnityException("Gasless transactions are not enabled. Please enable them in the SDK options.");
+                    throw new UnityException("Gasless relayer transactions are not enabled. Please enable them in the SDK options.");
                 bool sendGaslessly = gasless == null ? isGaslessSetup : gasless.Value;
                 if (sendGaslessly)
                     return await SendGasless();
@@ -484,10 +485,10 @@ namespace Thirdweb
             }
             else
             {
-                string relayerUrl = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.relayerUrl;
-                string forwarderAddress = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.relayerForwarderAddress;
-                string forwarderDomain = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.domainName;
-                string forwarderVersion = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.domainVersion;
+                string relayerUrl = ThirdwebManager.Instance.SDK.Session.Options.relayer?.relayerUrl ?? throw new UnityException("Relayer URL not set in SDK options.");
+                string forwarderAddress = ThirdwebManager.Instance.SDK.Session.Options.relayer?.forwarderAddress ?? "0xD04F98C88cE1054c90022EE34d566B9237a1203C";
+                string forwarderDomain = ThirdwebManager.Instance.SDK.Session.Options.relayer?.domainName ?? "GSNv2 Forwarder";
+                string forwarderVersion = ThirdwebManager.Instance.SDK.Session.Options.relayer?.domainVersion ?? "0.0.1";
 
                 Input.Nonce = (
                     await TransactionManager.ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
@@ -506,6 +507,8 @@ namespace Thirdweb
                     Data = Input.Data
                 };
 
+                ThirdwebDebug.Log($"Forwarding request: {JsonConvert.SerializeObject(request)}");
+
                 var signature = await EIP712.GenerateSignature_MinimalForwarder(
                     forwarderDomain,
                     forwarderVersion,
@@ -514,7 +517,13 @@ namespace Thirdweb
                     request
                 );
 
-                var postData = new RelayerRequest(request, signature, forwarderAddress);
+                var postData = new RelayerRequest()
+                {
+                    Type = "forward",
+                    Request = request,
+                    Signature = signature,
+                    ForwarderAddress = forwarderAddress,
+                };
 
                 using UnityWebRequest req = UnityWebRequest.Post(relayerUrl, "");
                 byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(postData));
@@ -530,17 +539,32 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var response = JsonConvert.DeserializeObject<RelayerResponse>(req.downloadHandler.text);
-                    if (response.status != "success")
-                    {
-                        throw new UnityException(
-                            $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {forwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
-                        );
-                    }
-                    var result = JsonConvert.DeserializeObject<RelayerResult>(response.result);
-                    return result.txHash;
+                    var queueId = JsonConvert.DeserializeObject<JObject>(req.downloadHandler.text)["result"]["queueId"].ToString();
+                    ThirdwebDebug.Log($"Forwarded request to relayer with queue ID: {queueId}");
+                    return await FetchTxHashFromQueueId(new Uri(relayerUrl).GetLeftPart(UriPartial.Authority), queueId);
                 }
             }
+        }
+
+        private async Task<string> FetchTxHashFromQueueId(string engineUrl, string queueId)
+        {
+            string txHash = null;
+            while (string.IsNullOrEmpty(txHash) && Application.isPlaying)
+            {
+                using UnityWebRequest req = UnityWebRequest.Get($"{engineUrl}/transaction/status/{queueId}");
+                await new WaitForSeconds(1f);
+                await req.SendWebRequest();
+                if (req.result != UnityWebRequest.Result.Success)
+                {
+                    throw new UnityException($"Failed to fetch transaction hash from queue ID {queueId}.\nError: {req.downloadHandler.text}");
+                }
+                else
+                {
+                    txHash = JsonConvert.DeserializeObject<JObject>(req.downloadHandler.text)["result"]["transactionHash"].ToString();
+                }
+            }
+            ThirdwebDebug.Log($"Transaction hash fetched from queue ID {queueId}: {txHash}");
+            return txHash;
         }
 
         private string GetTxBuilderRoute(string action)
@@ -551,43 +575,18 @@ namespace Thirdweb
     }
 
     [System.Serializable]
-    public struct RelayerResponse
-    {
-        [JsonProperty("status")]
-        public string status;
-
-        [JsonProperty("result")]
-        public string result;
-    }
-
-    [System.Serializable]
-    public struct RelayerResult
-    {
-        [JsonProperty("txHash")]
-        public string txHash;
-    }
-
-    [System.Serializable]
     public struct RelayerRequest
     {
+        [JsonProperty("type")]
+        public string Type;
+
         [JsonProperty("request")]
-        public MinimalForwarder.ForwardRequest request;
+        public MinimalForwarder.ForwardRequest Request;
 
         [JsonProperty("signature")]
-        public string signature;
+        public string Signature;
 
         [JsonProperty("forwarderAddress")]
-        public string forwarderAddress;
-
-        [JsonProperty("type")]
-        public string type;
-
-        public RelayerRequest(MinimalForwarder.ForwardRequest request, string signature, string forwarderAddress)
-        {
-            this.request = request;
-            this.signature = signature;
-            this.forwarderAddress = forwarderAddress;
-            this.type = "forward";
-        }
+        public string ForwarderAddress;
     }
 }
