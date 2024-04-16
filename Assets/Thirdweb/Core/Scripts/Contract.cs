@@ -204,44 +204,21 @@ namespace Thirdweb
                 if (this.ABI == null)
                     this.ABI = await FetchAbi(this.Address, await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
 
-                var contract = ThirdwebManager.Instance.SDK.Session.Web3.Eth.GetContract(this.ABI, this.Address);
-
-                var function = contract.GetFunction(functionName);
-
-                var value = transactionOverrides?.value != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.value)) : new HexBigInteger(0);
-
-                var gas =
-                    transactionOverrides?.gasLimit != null
-                        ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasLimit))
-                        : await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), null, value, args);
-
-                var gasPrice = transactionOverrides?.gasPrice != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasPrice)) : null;
-
-                string hash;
-                if (gasPrice == null)
+                var service = new Nethereum.Contracts.Contract(null, this.ABI, this.Address);
+                var function = service.GetFunction(functionName);
+                var data = function.GetData(args);
+                var input = new TransactionInput
                 {
-                    var gasFees = await Utils.GetGasPriceAsync(await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
-                    hash = await function.SendTransactionAsync(
-                        from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
-                        gas: gas,
-                        value: value,
-                        maxFeePerGas: new HexBigInteger(gasFees.MaxFeePerGas),
-                        maxPriorityFeePerGas: new HexBigInteger(gasFees.MaxPriorityFeePerGas),
-                        args
-                    );
-                }
-                else
-                {
-                    hash = await function.SendTransactionAsync(
-                        from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
-                        gas: gas,
-                        gasPrice: gasPrice,
-                        value: value,
-                        args
-                    );
-                }
+                    From = transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
+                    To = this.Address,
+                    Data = data,
+                    Value = transactionOverrides?.value != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.value)) : new HexBigInteger(0),
+                    Gas = transactionOverrides?.gasLimit != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasLimit)) : null,
+                    GasPrice = transactionOverrides?.gasPrice != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasPrice)) : null,
+                };
 
-                return await Transaction.WaitForTransactionResult(hash);
+                var tx = new Transaction(input);
+                return await tx.SendAndWaitForTransactionResult();
             }
         }
 
