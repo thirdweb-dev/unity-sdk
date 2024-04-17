@@ -11,6 +11,11 @@ using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
 using System.Linq;
+using UnityEngine.Networking;
+using Thirdweb.Redcode.Awaiting;
+using Newtonsoft.Json;
+
+#pragma warning disable CS0618
 
 namespace Thirdweb
 {
@@ -159,6 +164,61 @@ namespace Thirdweb
                     }
                 };
             }
+        }
+
+        /// <summary>
+        /// Authenticates the user by signing a payload that can be used to securely identify users. See https://portal.thirdweb.com/auth.
+        /// </summary>
+        /// <param name="domain">The domain to authenticate to.</param>
+        /// <returns>A string representing the server-side authentication result.</returns>
+        public async Task<string> AuthenticateAndLoginServerSide(string domain, BigInteger chainId, string authPayloadPath = "/auth/payload", string authLoginPath = "/auth/login")
+        {
+            string payloadURL = domain + authPayloadPath;
+            string loginURL = domain + authLoginPath;
+
+            var payloadBodyRaw = new { address = await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), chainId = chainId.ToString() };
+            var payloadBody = JsonConvert.SerializeObject(payloadBodyRaw);
+
+            using UnityWebRequest payloadRequest = UnityWebRequest.Post(payloadURL, "");
+            payloadRequest.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(payloadBody));
+            payloadRequest.downloadHandler = new DownloadHandlerBuffer();
+            payloadRequest.SetRequestHeader("Content-Type", "application/json");
+            await payloadRequest.SendWebRequest();
+            if (payloadRequest.result != UnityWebRequest.Result.Success)
+            {
+                throw new Exception("Error: " + payloadRequest.error + "\nResponse: " + payloadRequest.downloadHandler.text);
+            }
+            var payloadString = payloadRequest.downloadHandler.text;
+
+            var loginBodyRaw = JsonConvert.DeserializeObject<LoginPayload>(payloadString);
+            var resourcesString = loginBodyRaw.payload.Resources != null ? "\nResources:" + string.Join("", loginBodyRaw.payload.Resources.Select(r => $"\n- {r}")) : string.Empty;
+            var payloadToSign =
+                $"{loginBodyRaw.payload.Domain} wants you to sign in with your Ethereum account:"
+                + $"\n{loginBodyRaw.payload.Address}\n\n"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.Statement) ? "" : $"{loginBodyRaw.payload.Statement}\n")}"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.Uri) ? "" : $"\nURI: {loginBodyRaw.payload.Uri}")}"
+                + $"\nVersion: {loginBodyRaw.payload.Version}"
+                + $"\nChain ID: {loginBodyRaw.payload.ChainId}"
+                + $"\nNonce: {loginBodyRaw.payload.Nonce}"
+                + $"\nIssued At: {loginBodyRaw.payload.IssuedAt}"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.ExpirationTime) ? "" : $"\nExpiration Time: {loginBodyRaw.payload.ExpirationTime}")}"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.InvalidBefore) ? "" : $"\nNot Before: {loginBodyRaw.payload.InvalidBefore}")}"
+                + resourcesString;
+
+            loginBodyRaw.signature = await ThirdwebManager.Instance.SDK.Wallet.Sign(payloadToSign);
+            var loginBody = JsonConvert.SerializeObject(new { payload = loginBodyRaw });
+
+            using UnityWebRequest loginRequest = UnityWebRequest.Post(loginURL, "");
+            loginRequest.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(loginBody));
+            loginRequest.downloadHandler = new DownloadHandlerBuffer();
+            loginRequest.SetRequestHeader("Content-Type", "application/json");
+            await loginRequest.SendWebRequest();
+            if (loginRequest.result != UnityWebRequest.Result.Success)
+            {
+                throw new Exception("Error: " + loginRequest.error + "\nResponse: " + loginRequest.downloadHandler.text);
+            }
+            var responseString = loginRequest.downloadHandler.text;
+            return responseString;
         }
 
         /// <summary>
