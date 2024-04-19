@@ -51,6 +51,47 @@ Notes:
 - The Newtonsoft DLL is included as part of the Unity Package, feel free to deselect it if you already have it installed as a dependency to avoid conflicts.
 - If using .NET Framework and encountering an error related to HttpUtility, create a file `csc.rsp` that includes `-r:System.Web.dll` and save it under `Assets`.
 
+# Usage
+
+In order to access the SDK, you only need to have a [ThirdwebManager](https://portal.thirdweb.com/unity/thirdwebmanager) in your scene.
+
+```csharp
+// Configure the connection
+var connection = new WalletConnection(
+  provider: WalletProvider.EmbeddedWallet, // The wallet provider you want to connect to (Required)
+  chainId: 5,                              // The chain you want to connect to (Required)
+  email: "email@email.com"                 // The email you want to authenticate with (Required for this provider)
+);
+
+// Connect the wallet
+string address = await ThirdwebManager.Instance.SDK.Wallet.Connect(connection);
+
+// Interact with the wallet
+CurrencyValue balance = await ThirdwebManager.Instance.SDK.Wallet.GetBalance();
+var signature = await ThirdwebManager.Instance.SDK.Wallet.Sign("message to sign");
+
+// Get an instance of a deployed contract (no ABI required!)
+var contract = ThirdwebManager.Instance.SDK.GetContract("0x...");
+
+// Fetch data from any ERC20/721/1155 or Marketplace contract
+CurrencyValue currencyValue = await contract.ERC20.TotalSupply();
+NFT erc721NFT = await contract.ERC721.Get(tokenId);
+List<NFT> erc1155NFTs = await contract.ERC1155.GetAll();
+List<Listing> listings = await contract.Marketplace.DirectListings.GetAllListings();
+
+// Execute transactions from the connected wallet
+await contract.ERC20.Mint("1.2");
+await contract.ERC721.Signature.Mint(signedPayload);
+await contract.ERC1155.Claim(tokenId, quantity);
+await contract.Marketplace.DirectListings.BuyListing(listingId, quantity);
+
+// Custom interactions
+var res = await contract.Read<string>("myReadFunction", arg1, arg2, ...);
+var txRes = await contract.Write("myWriteFunction", arg1, arg2, ...);
+```
+
+
+
 # Build
 
 ## General
@@ -94,46 +135,73 @@ Once again, please note that no action is needed for hosted builds.
 ## Mobile
 
 - For Android, it is best to run Force Resolve from the `Assets` menu > `External Dependency Manager` > `Android Resolver` > `Force Resolve` before building your game.
-- ~~For iOS, if you are missing a MetaMask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder.~~ Recent versions should no longer require this.
+- For iOS, if you are missing a MetaMask package, you can double click on `main.unitypackage` under `Assets\Thirdweb\Plugins\MetaMask\Installer\Packages` and reimport the `iOS` folder (only).
 - ~~If you are having trouble building in XCode, make sure `ENABLE_BITCODE` is disabled and that the `Embedded Frameworks` in your `Build Phases` contain potentially missing frameworks like `MetaMask` or `Starscream`. You may also need to remove the `Thirdweb/Core/Plugins/MetaMask/Plugins/iOS/iphoneos/MetaMask_iOS.framework/Frameworks` folder in some cases.~~ Recent versions should no longer require this.
 
-# Usage
+## Miscellaneous
+If you don't want to use Minimal Stripping, you could instead create a `link.xml` file under your Assets folder and include assemblies that must be preserved, for instance:
+```xml
+<linker>
+    <!--Thirdweb-->
+    <assembly fullname="Amazon.Extensions.CognitoAuthentication" preserve="all" />
+    <assembly fullname="AWSSDK.CognitoIdentity" preserve="all" />
+    <assembly fullname="AWSSDK.CognitoIdentityProvider" preserve="all" />
+    <assembly fullname="AWSSDK.Core" preserve="all" />
+    <assembly fullname="AWSSDK.Lambda" preserve="all" />
+    <assembly fullname="AWSSDK.SecurityToken" preserve="all" />
+    <assembly fullname="embedded-wallet" preserve="all" />
 
-In order to access the SDK, you only need to have a [ThirdwebManager](https://portal.thirdweb.com/unity/thirdwebmanager) in your scene.
-
-```csharp
-// Configure the connection
-var connection = new WalletConnection(
-  provider: WalletProvider.EmbeddedWallet, // The wallet provider you want to connect to (Required)
-  chainId: 5,                              // The chain you want to connect to (Required)
-  email: "email@email.com"                 // The email you want to authenticate with (Required for this provider)
-);
-
-// Connect the wallet
-string address = await ThirdwebManager.Instance.SDK.Wallet.Connect(connection);
-
-// Interact with the wallet
-CurrencyValue balance = await ThirdwebManager.Instance.SDK.Wallet.GetBalance();
-var signature = await ThirdwebManager.Instance.SDK.Wallet.Sign("message to sign");
-
-// Get an instance of a deployed contract (no ABI required!)
-var contract = ThirdwebManager.Instance.SDK.GetContract("0x...");
-
-// Fetch data from any ERC20/721/1155 or Marketplace contract
-CurrencyValue currencyValue = await contract.ERC20.TotalSupply();
-NFT erc721NFT = await contract.ERC721.Get(tokenId);
-List<NFT> erc1155NFTs = await contract.ERC1155.GetAll();
-List<Listing> listings = await contract.Marketplace.DirectListings.GetAllListings();
-
-// Execute transactions from the connected wallet
-await contract.ERC20.Mint("1.2");
-await contract.ERC721.Signature.Mint(signedPayload);
-await contract.ERC1155.Claim(tokenId, quantity);
-await contract.Marketplace.DirectListings.BuyListing(listingId, quantity);
-
-// Custom interactions
-var res = await contract.Read<string>("myReadFunction", arg1, arg2, ...);
-var txRes = await contract.Write("myWriteFunction", arg1, arg2, ...);
+    <!--Other-->
+    <assembly fullname="System.Runtime.Serialization" preserve="all" />
+    <assembly fullname="Newtonsoft.Json" preserve="all" />
+    <assembly fullname="System" preserve="all">
+        <type fullname="System.ComponentModel.TypeConverter" preserve="all" />
+        <type fullname="System.ComponentModel.ArrayConverter" preserve="all" />
+        <type fullname="System.ComponentModel.BaseNumberConverter" preserve="all" />
+        <type fullname="System.ComponentModel.BooleanConverter" preserve="all" />
+        <type fullname="System.ComponentModel.ByteConverter" preserve="all" />
+        <type fullname="System.ComponentModel.CharConverter" preserve="all" />
+        <type fullname="System.ComponentModel.CollectionConverter" preserve="all" />
+        <type fullname="System.ComponentModel.ComponentConverter" preserve="all" />
+        <type fullname="System.ComponentModel.CultureInfoConverter" preserve="all" />
+        <type fullname="System.ComponentModel.DateTimeConverter" preserve="all" />
+        <type fullname="System.ComponentModel.DecimalConverter" preserve="all" />
+        <type fullname="System.ComponentModel.DoubleConverter" preserve="all" />
+        <type fullname="System.ComponentModel.EnumConverter" preserve="all" />
+        <type fullname="System.ComponentModel.ExpandableObjectConverter" preserve="all" />
+        <type fullname="System.ComponentModel.Int16Converter" preserve="all" />
+        <type fullname="System.ComponentModel.Int32Converter" preserve="all" />
+        <type fullname="System.ComponentModel.Int64Converter" preserve="all" />
+        <type fullname="System.ComponentModel.NullableConverter" preserve="all" />
+        <type fullname="System.ComponentModel.SByteConverter" preserve="all" />
+        <type fullname="System.ComponentModel.SingleConverter" preserve="all" />
+        <type fullname="System.ComponentModel.StringConverter" preserve="all" />
+        <type fullname="System.ComponentModel.TimeSpanConverter" preserve="all" />
+        <type fullname="System.ComponentModel.UInt16Converter" preserve="all" />
+        <type fullname="System.ComponentModel.UInt32Converter" preserve="all" />
+        <type fullname="System.ComponentModel.UInt64Converter" preserve="all" />
+    </assembly>
+    <assembly fullname="Nethereum.ABI" preserve="all" />
+    <assembly fullname="Nethereum.Accounts" preserve="all" />
+    <assembly fullname="Nethereum.BlockchainProcessing" preserve="all" />
+    <assembly fullname="Nethereum.Contracts" preserve="all" />
+    <assembly fullname="Nethereum.HdWallet" preserve="all" />
+    <assembly fullname="Nethereum.Hex" preserve="all" />
+    <assembly fullname="Nethereum.JsonRpc.Client" preserve="all" />
+    <assembly fullname="Nethereum.JsonRpc.RpcClient" preserve="all" />
+    <assembly fullname="Nethereum.Keystore" preserve="all" />
+    <assembly fullname="Nethereum.Merkle" preserve="all" />
+    <assembly fullname="Nethereum.Merkle.Patricia" preserve="all" />
+    <assembly fullname="Nethereum.Model" preserve="all" />
+    <assembly fullname="Nethereum.RLP" preserve=" all" />
+    <assembly fullname="Nethereum.RPC" preserve=" all" />
+    <assembly fullname="Nethereum.Signer" preserve=" all" />
+    <assembly fullname="Nethereum.Signer.EIP712" preserve=" all" />
+    <assembly fullname="Nethereum.Siwe" preserve=" all" />
+    <assembly fullname="Nethereum.Siwe.Core" preserve=" all" />
+    <assembly fullname="Nethereum.Util" preserve=" all" />
+    <assembly fullname="Nethereum.Web3" preserve=" all" />
+</linker>
 ```
 
 # Additional Links
