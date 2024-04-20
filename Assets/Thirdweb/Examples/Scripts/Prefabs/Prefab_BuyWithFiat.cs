@@ -58,6 +58,16 @@ public class Prefab_BuyWithFiat : MonoBehaviour
         ThirdwebDebug.Log($"Status: {JsonConvert.SerializeObject(status, Formatting.Indented)}");
     }
 
+    public async void GetBuyHistory()
+    {
+        string connectedAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
+        var history = await ThirdwebPay.GetBuyHistory(connectedAddress, 0, 1);
+        ThirdwebDebug.Log($"History: {JsonConvert.SerializeObject(history, Formatting.Indented)}");
+
+        var historyNext = await ThirdwebPay.GetBuyHistory(connectedAddress, 1, 10, history.NextCursor);
+        ThirdwebDebug.Log($"History Next: {JsonConvert.SerializeObject(historyNext, Formatting.Indented)}");
+    }
+
     [ContextMenu("Get Supported Currencies")]
     public async void GetSupportedCurrencies()
     {

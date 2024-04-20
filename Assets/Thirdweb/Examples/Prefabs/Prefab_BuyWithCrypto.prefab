@@ -541,7 +541,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 7598338171854559029}
         m_TargetAssemblyTypeName: Prefab_BuyWithCrypto, Thirdweb.Examples
-        m_MethodName: GetSwapHistory
+        m_MethodName: GetBuyHistory
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

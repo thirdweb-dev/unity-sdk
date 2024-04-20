@@ -71,4 +71,11 @@ namespace Thirdweb.Pay
         [JsonProperty("durationSeconds")]
         public int DurationSeconds { get; set; }
     }
+
+    public enum SwapType
+    {
+        SAME_CHAIN,
+        CROSS_CHAIN,
+        ON_RAMP
+    }
 }

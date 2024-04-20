@@ -14,8 +14,47 @@ namespace Thirdweb.Pay
         [JsonProperty("status")]
         public string Status { get; set; }
 
+        [JsonProperty("swapType")]
+        public string SwapType { get; set; }
+
+        [JsonProperty("toAddress")]
+        public string ToAddress { get; set; }
+
+        [JsonProperty("quote")]
+        public OnRampQuote Quote { get; set; }
+
+        [JsonProperty("source")]
+        public TransactionDetails Source { get; set; }
+
         [JsonProperty("failureMessage")]
         public string FailureMessage { get; set; }
+    }
+
+    public class OnRampQuote
+    {
+        [JsonProperty("createdAt")]
+        public string CreatedAt { get; set; }
+
+        [JsonProperty("estimatedOnRampAmountWei")]
+        public string EstimatedOnRampAmountWei { get; set; }
+
+        [JsonProperty("estimatedOnRampAmount")]
+        public string EstimatedOnRampAmount { get; set; }
+
+        [JsonProperty("estimatedToTokenAmount")]
+        public string EstimatedToTokenAmount { get; set; }
+
+        [JsonProperty("estimatedToTokenAmountWei")]
+        public string EstimatedToTokenAmountWei { get; set; }
+
+        [JsonProperty("fromCurrency")]
+        public string FromCurrency { get; set; }
+
+        [JsonProperty("onRampToken")]
+        public string OnRampToken { get; set; }
+
+        [JsonProperty("toToken")]
+        public string ToToken { get; set; }
     }
 
     public enum OnRampStatus
