@@ -114,21 +114,6 @@ namespace Thirdweb.Pay
         public double AmountUSDCents { get; set; }
     }
 
-    public class OnRampCurrency
-    {
-        [JsonProperty("amount")]
-        public string Amount { get; set; }
-
-        [JsonProperty("amountUnits")]
-        public string AmountUnits { get; set; }
-
-        [JsonProperty("decimals")]
-        public int Decimals { get; set; }
-
-        [JsonProperty("currencySymbol")]
-        public string CurrencySymbol { get; set; }
-    }
-
     public class OnRampFees
     {
         [JsonProperty("amount")]

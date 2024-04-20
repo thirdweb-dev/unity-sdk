@@ -48,13 +48,13 @@ namespace Thirdweb.Pay
         public string EstimatedToTokenAmountWei { get; set; }
 
         [JsonProperty("fromCurrency")]
-        public string FromCurrency { get; set; }
+        public OnRampCurrency FromCurrency { get; set; }
 
         [JsonProperty("onRampToken")]
-        public string OnRampToken { get; set; }
+        public Token OnRampToken { get; set; }
 
         [JsonProperty("toToken")]
-        public string ToToken { get; set; }
+        public Token ToToken { get; set; }
     }
 
     public enum OnRampStatus
