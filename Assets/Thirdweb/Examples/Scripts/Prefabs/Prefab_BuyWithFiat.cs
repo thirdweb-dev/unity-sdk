@@ -7,7 +7,7 @@ using System.Linq;
 public class Prefab_BuyWithFiat : MonoBehaviour
 {
     private BuyWithFiatQuoteResult _quote;
-    private string _quoteId;
+    private string _intentId;
 
     public async void GetQuote()
     {
@@ -15,7 +15,13 @@ public class Prefab_BuyWithFiat : MonoBehaviour
 
         _quote = null;
 
-        var fiatQuoteParams = new BuyWithFiatQuoteParams(fromCurrencySymbol: "USD", toAddress: connectedAddress, toChainId: "137", toTokenAddress: Utils.NativeTokenAddress, fromAmount: "25");
+        var fiatQuoteParams = new BuyWithFiatQuoteParams(
+            fromCurrencySymbol: "USD",
+            toAddress: connectedAddress,
+            toChainId: "137",
+            toTokenAddress: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+            fromAmount: "25"
+        );
 
         _quote = await ThirdwebPay.GetBuyWithFiatQuote(fiatQuoteParams);
         ThirdwebDebug.Log($"Quote: {JsonConvert.SerializeObject(_quote, Formatting.Indented)}");
@@ -31,8 +37,8 @@ public class Prefab_BuyWithFiat : MonoBehaviour
 
         try
         {
-            _quoteId = ThirdwebPay.BuyWithFiat(_quote);
-            ThirdwebDebug.Log($"Quote ID: {_quoteId}");
+            _intentId = ThirdwebPay.BuyWithFiat(_quote);
+            ThirdwebDebug.Log($"Intent ID: {_intentId}");
         }
         catch (System.Exception e)
         {
@@ -42,21 +48,20 @@ public class Prefab_BuyWithFiat : MonoBehaviour
 
     public async void GetStatus()
     {
-        if (string.IsNullOrEmpty(_quoteId))
+        if (string.IsNullOrEmpty(_intentId))
         {
-            ThirdwebDebug.Log("Quote ID is empty. Please buy first.");
+            ThirdwebDebug.Log("Intent ID is empty. Please buy first.");
             return;
         }
 
-        var status = await ThirdwebPay.GetBuyWithFiatStatus(_quoteId);
-        if (
-            status.Status == OnRampStatus.PAYMENT_FAILED.ToString()
-            || status.Status == OnRampStatus.ON_RAMP_TRANSFER_FAILED.ToString()
-            || status.Status == OnRampStatus.ON_RAMP_TRANSFER_FAILED.ToString()
-        )
+        var status = await ThirdwebPay.GetBuyWithFiatStatus(_intentId);
+        if (status.Status == OnRampStatus.PAYMENT_FAILED.ToString() || status.Status == OnRampStatus.ON_RAMP_TRANSFER_FAILED.ToString())
             ThirdwebDebug.LogWarning($"Failed! Reason: {status.FailureMessage}");
 
         ThirdwebDebug.Log($"Status: {JsonConvert.SerializeObject(status, Formatting.Indented)}");
+
+        if (status.Status == OnRampStatus.PENDING_CRYPTO_SWAP.ToString())
+            ThirdwebDebug.Log("OnRamp transfer completed. You may now use this intent id to trigger a BuyWithCrypto transaction and get to your destination token: " + _intentId);
     }
 
     public async void GetBuyHistory()

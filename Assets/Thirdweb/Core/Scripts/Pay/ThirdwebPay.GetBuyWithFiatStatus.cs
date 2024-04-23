@@ -13,21 +13,21 @@ namespace Thirdweb.Pay
         /// <summary>
         /// Get onramp status for a quote id.
         /// </summary>
-        /// <param name="quoteId">Quote ID to get onramp status for</param>
+        /// <param name="intentId">Intent ID to get onramp status for</param>
         /// <returns>Onramp status object <see cref="BuyWithFiatStatusResult"/></returns>
-        public static async Task<BuyWithFiatStatusResult> GetBuyWithFiatStatus(string quoteId)
+        public static async Task<BuyWithFiatStatusResult> GetBuyWithFiatStatus(string intentId)
         {
             if (string.IsNullOrEmpty(Utils.GetClientId()))
             {
                 throw new Exception("Client ID is not set. Please set it in the ThirdwebManager.");
             }
 
-            if (string.IsNullOrEmpty(quoteId))
+            if (string.IsNullOrEmpty(intentId))
             {
-                throw new ArgumentNullException(nameof(quoteId));
+                throw new ArgumentNullException(nameof(intentId));
             }
 
-            var queryString = new Dictionary<string, string> { { "transactionId", quoteId } };
+            var queryString = new Dictionary<string, string> { { "intentId", intentId } };
 
             var queryStringFormatted = string.Join("&", queryString.Where(kv => kv.Value != null).Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
             var url = $"{Constants.THIRDWEB_PAY_FIAT_STATUS_ENDPOINT}?{queryStringFormatted}";

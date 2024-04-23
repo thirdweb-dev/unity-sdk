@@ -25,7 +25,7 @@ namespace Thirdweb.Pay
 
             Application.OpenURL(onRampLink);
 
-            return buyWithFiatQuote.QuoteId;
+            return buyWithFiatQuote.IntentId;
         }
     }
 }

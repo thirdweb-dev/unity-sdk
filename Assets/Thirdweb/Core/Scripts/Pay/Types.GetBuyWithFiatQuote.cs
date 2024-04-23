@@ -59,8 +59,8 @@ namespace Thirdweb.Pay
 
     public class BuyWithFiatQuoteResult
     {
-        [JsonProperty("quoteId")]
-        public string QuoteId { get; set; }
+        [JsonProperty("intentId")]
+        public string IntentId { get; set; }
 
         [JsonProperty("toAddress")]
         public string ToAddress { get; set; }
