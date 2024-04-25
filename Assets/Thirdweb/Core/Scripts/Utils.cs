@@ -316,7 +316,7 @@ namespace Thirdweb
                 File.Delete(GetAccountPath());
         }
 
-        public static Account UnlockOrGenerateLocalAccount(BigInteger chainId, string password = null, string privateKey = null)
+        public static async Task<Account> UnlockOrGenerateLocalAccount(BigInteger chainId, string password = null, string privateKey = null)
         {
             password = string.IsNullOrEmpty(password) ? GetDeviceIdentifier() : password;
 
@@ -334,7 +334,7 @@ namespace Thirdweb
                     try
                     {
                         var encryptedJson = File.ReadAllText(path);
-                        var key = keyStoreService.DecryptKeyStoreFromJson(password, encryptedJson);
+                        var key = await Task.Run(() => keyStoreService.DecryptKeyStoreFromJson(password, encryptedJson));
                         return new Account(key, chainId);
                     }
                     catch (System.Exception)
@@ -350,13 +350,13 @@ namespace Thirdweb
                         rng.GetBytes(seed);
                     }
                     var ecKey = Nethereum.Signer.EthECKey.GenerateKey(seed);
-                    File.WriteAllText(path, EncryptAndGenerateKeyStore(ecKey, password));
+                    File.WriteAllText(path, await EncryptAndGenerateKeyStore(ecKey, password));
                     return new Account(ecKey, chainId);
                 }
             }
         }
 
-        public static string EncryptAndGenerateKeyStore(EthECKey ecKey, string password)
+        public static async Task<string> EncryptAndGenerateKeyStore(EthECKey ecKey, string password)
         {
             var keyStoreService = new Nethereum.KeyStore.KeyStoreScryptService();
             var scryptParams = new Nethereum.KeyStore.Model.ScryptParams
@@ -366,7 +366,7 @@ namespace Thirdweb
                 R = 1,
                 P = 8
             };
-            var keyStore = keyStoreService.EncryptAndGenerateKeyStore(password, ecKey.GetPrivateKeyAsBytes(), ecKey.GetPublicAddress(), scryptParams);
+            var keyStore = await Task.Run(() => keyStoreService.EncryptAndGenerateKeyStore(password, ecKey.GetPrivateKeyAsBytes(), ecKey.GetPublicAddress(), scryptParams));
             return keyStoreService.SerializeKeyStoreToJson(keyStore);
         }
 
