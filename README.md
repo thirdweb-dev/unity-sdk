@@ -1,20 +1,7 @@
-<p align="center">
-  <br />
-  <a href="https://thirdweb.com">
-    <img src="https://github.com/thirdweb-dev/js/blob/main/legacy_packages/sdk/logo.svg?raw=true" width="200" alt=""/>
-  </a>
-  <br />
-  <h1 align="center">thirdweb Unity SDK</h1>
-  <p align="center">
-    <a href="https://discord.gg/thirdweb">
-      <img alt="Join our Discord!" src="https://img.shields.io/discord/834227967404146718.svg?color=7289da&label=discord&logo=discord&style=flat"/>
-    </a>
-    <br />
-    <a href="https://thirdweb-dev.github.io/unity-sdk/">
-      <img alt="Preview" src="https://img.shields.io/badge/Preview-Unity%20WebGL-brightgreen?logo=unity&style=flat"/>
-    </a>
-  </p>
-</p>
+![Thirdweb Unity SDK](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/0eb16b66-317b-462b-9eb1-9425c0929c96)
+
+[<img alt="Discord" src="https://img.shields.io/discord/834227967404146718.svg?color=7289da&label=discord&logo=discord&style=for-the-badge" height="30">](https://discord.gg/thirdweb)
+[<img alt="Preview" src="https://img.shields.io/badge/Preview-Unity%20WebGL-brightgreen?logo=unity&style=for-the-badge" height="30">](https://thirdweb-dev.github.io/unity-sdk/)
 
 # Documentation
 
@@ -26,13 +13,24 @@ Try out our multichain game that leverages Embedded and Smart Wallets to create 
 
 ![image](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/171198b2-83e7-4c8a-951b-79126dd47abb)
 
-# Supported platforms
+# Supported Platforms & Wallets
 
-Build games for WebGL, Standalone and Mobile using 1000+ supported chains.
+**Build games for WebGL, Desktop and Mobile using 1000+ supported chains, with various login options!**
 
-![tw_wallets](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/0c7f5ad1-263e-4cc8-9dfa-97a7f84bc471)
+|                Wallet Provider                | WebGL     | Desktop   | Mobile    |
+| --------------------------------------------- | :-------: | :-------: | :-------: |
+| **In-App Wallet** (Email, Social, Phone)      | ✔️        | ✔️        | ✔️        |
+| **Local Wallet** (Guest Mode)                 | ✔️        | ✔️        | ✔️        |
+| **Wallet Connect**                            | ✔️        | ✔️        | ✔️        |
+| **MetaMask**                                  | ✔️        | ✔️        | ✔️        |
+| **Coinbase**                                  | ✔️        | ❌        | ❌        |
+| **Smart Wallet** (ERC4337)                    | ✔️        | ✔️        | ✔️        |
+| **Injected**                                  | ✔️        | —          | —         |
+| **HyperPlay**                                 | —          | ✔️        | —          |
 
-# Installation
+<sub>✔️ Supported</sub> &nbsp; <sub>❌ Not Supported</sub> &nbsp; <sub>— Not Applicable</sub>
+
+# Getting Started
 
 Head over to the [releases](https://github.com/thirdweb-dev/unity-sdk/releases) page and download the latest `.unitypackage` file.
 
@@ -44,12 +42,12 @@ Various blockchain interaction examples are available in our `Scene_Prefabs` sce
 
 Payment related interaction examples are available in our `Scene_Pay` scene.
 
-Notes:
-
-- The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS. We highly recommend using 2022 LTS.
+**Notes:**
+- The SDK has been tested on Web, Desktop and Mobile platforms using Unity 2021 and 2022 LTS. We **highly recommend** using 2022 LTS.
 - The example scenes are built using Unity 2022 LTS, it may look off in previous versions of Unity.
 - The Newtonsoft DLL is included as part of the Unity Package, feel free to deselect it if you already have it installed as a dependency to avoid conflicts.
 - If using .NET Framework and encountering an error related to HttpUtility, create a file `csc.rsp` that includes `-r:System.Web.dll` and save it under `Assets`.
+- If you have conflicting DLLs from other SDKs, in most cases our SDK will be compatible with previous versions, use version control and test removing duplicates.
 
 # Usage
 
@@ -90,9 +88,7 @@ var res = await contract.Read<string>("myReadFunction", arg1, arg2, ...);
 var txRes = await contract.Write("myWriteFunction", arg1, arg2, ...);
 ```
 
-
-
-# Build
+# Build Instructions
 
 ## General
 
@@ -211,12 +207,13 @@ If you don't want to use Minimal Stripping, you could instead create a `link.xml
 - [Starter Template: Blockventure](https://github.com/thirdweb-example/blockventure)
 - [Example Template: Enhancing Unity IAP with Blockchain Interactions](https://blog.thirdweb.com/guides/enhancing-unity-iap-with-blockchain-interactions/)
 - [Example Template: Pioneer](https://github.com/thirdweb-example/pioneer)
+- [Separate, Standalone .NET SDK](https://github.com/thirdweb-dev/thirdweb-dotnet)
 
 # Prefab Examples
 
 ![image](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/a213b668-0273-400f-a6c1-92a582a35535)
 
-The `Examples` folder contains a demo scene `Scene_Prefabs` using our user-friendly prefabs - they include script examples to get inspired and are entirely optional.
+The `Examples` folder contains a demo scene `Scene_Prefabs` using our user-friendly prefabs - they include script examples to get inspired and are entirely **optional**. You do not need to use any of them to recreate their functionality. We recommend creating your own UI once you are familiar with the SDK.
 
 All Prefabs require the [ThirdwebManager](https://github.com/thirdweb-dev/unity-sdk/blob/main/Assets/Thirdweb/Core/Scripts/ThirdwebManager.cs) prefab to get the SDK Instance, drag and drop it into your scene and select the networks you want to support from the Inspector.
 
