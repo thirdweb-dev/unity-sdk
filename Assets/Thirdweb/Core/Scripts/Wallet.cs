@@ -91,7 +91,7 @@ namespace Thirdweb
             else
             {
                 var localAccount = ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetLocalAccount() ?? throw new Exception("No local account found");
-                return Utils.EncryptAndGenerateKeyStore(new EthECKey(localAccount.PrivateKey), password);
+                return await Utils.EncryptAndGenerateKeyStore(new EthECKey(localAccount.PrivateKey), password);
             }
         }
 
