@@ -119,5 +119,42 @@
       }
     ],
     "slug": "berachain-artio"
+  },
+  {
+    "name": "Treasure Ruby",
+    "chain": "treasure",
+    "rpc": [
+      "https://978657.rpc.thirdweb.com/${THIRDWEB_API_KEY}",
+      "https://rpc-testnet.treasure.lol/http",
+      "wss://rpc-testnet.treasure.lol/ws"
+    ],
+    "nativeCurrency": {
+      "name": "Testnet MAGIC",
+      "symbol": "MAGIC",
+      "decimals": 18
+    },
+    "shortName": "MAGIC",
+    "chainId": 978657,
+    "networkId": 978657,
+    "slug": "treasure-ruby",
+    "infoURL": "https://portal.treasure.lol",
+    "icon": "ipfs://QmQYRpJAMyPt1DKz1iAuseX3puBZYmdGgFeaZCFDPhixXp",
+    "features": [],
+    "faucets": ["https://portal.treasure.lol/faucet"],
+    "explorers": [
+      {
+        "name": "Treasurescan",
+        "url": "https://testnet.treasurescan.io/",
+        "standard": "EIP3091",
+        "icon": {
+          "url": "ipfs://QmbzZk23owb7grDEbEJLuxgUAqQVcHmdjsEkkCD7E9C5R9/Treasure_Primary_Icon%20-%20Karel%20Vuong.png",
+          "width": 512,
+          "height": 512,
+          "format": "png"
+        }
+      }
+    ],
+    "testnet": true,
+    "redFlags": []
   }
 ]
