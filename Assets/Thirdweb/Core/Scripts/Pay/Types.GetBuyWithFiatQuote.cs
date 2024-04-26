@@ -71,9 +71,6 @@ namespace Thirdweb.Pay
         [JsonProperty("onRampToken")]
         public OnRampToken OnRampToken { get; set; }
 
-        [JsonProperty("provider")]
-        public string Provider { get; set; }
-
         [JsonProperty("toToken")]
         public Token ToToken { get; set; }
 

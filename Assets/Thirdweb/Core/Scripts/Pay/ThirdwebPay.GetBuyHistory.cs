@@ -10,14 +10,14 @@ namespace Thirdweb.Pay
     public static partial class ThirdwebPay
     {
         /// <summary>
-        /// Get swap history, supports cursor and pagination.
+        /// Get buy history, supports cursor and pagination.
         /// </summary>
-        /// <param name="walletAddress">User wallet address to get swap history for</param>
+        /// <param name="walletAddress">User wallet address to get buy history for</param>
         /// <param name="start">Offset for the records</param>
         /// <param name="count">Number of records to retrieve</param>
         /// <param name="cursor">Cursor for paging through the history</param>
-        /// <param name="pageSize">Swap statuses to query for</param>
-        /// <returns>Swap history object <see cref="BuyHistoryResult"/></returns>
+        /// <param name="pageSize">Buy statuses to query for</param>
+        /// <returns>Buy history object <see cref="BuyHistoryResult"/></returns>
         /// <exception cref="Exception"></exception>
         public static async Task<BuyHistoryResult> GetBuyHistory(string walletAddress, int start, int count, string cursor = null, int? pageSize = null)
         {

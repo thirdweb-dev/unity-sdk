@@ -28,9 +28,6 @@ namespace Thirdweb.Pay
 
     public class HistoryPage
     {
-        [JsonProperty("type")]
-        public string Type { get; set; }
-
         [JsonProperty("buyWithCryptoStatus")]
         public BuyWithCryptoStatusResult BuyWithCryptoStatus;
 
