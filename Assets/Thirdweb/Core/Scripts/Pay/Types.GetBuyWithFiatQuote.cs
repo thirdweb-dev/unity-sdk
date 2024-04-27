@@ -33,6 +33,9 @@ namespace Thirdweb.Pay
         [JsonProperty("maxSlippageBPS")]
         public double? MaxSlippageBPS { get; set; }
 
+        [JsonProperty("isTestMode")]
+        public bool IsTestMode { get; set; }
+
         public BuyWithFiatQuoteParams(
             string fromCurrencySymbol,
             string toAddress,
@@ -42,7 +45,8 @@ namespace Thirdweb.Pay
             string fromAmountUnits = null,
             string toAmount = null,
             string toAmountWei = null,
-            double? maxSlippageBPS = null
+            double? maxSlippageBPS = null,
+            bool isTestMode = false
         )
         {
             FromCurrencySymbol = fromCurrencySymbol;
@@ -54,6 +58,7 @@ namespace Thirdweb.Pay
             ToAmount = toAmount;
             ToAmountWei = toAmountWei;
             MaxSlippageBPS = maxSlippageBPS;
+            IsTestMode = isTestMode;
         }
     }
 

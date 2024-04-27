@@ -15,7 +15,14 @@ public class Prefab_BuyWithFiat : MonoBehaviour
 
         _quote = null;
 
-        var fiatQuoteParams = new BuyWithFiatQuoteParams(fromCurrencySymbol: "USD", toAddress: connectedAddress, toChainId: "137", toTokenAddress: Utils.NativeTokenAddress, toAmount: "20");
+        var fiatQuoteParams = new BuyWithFiatQuoteParams(
+            fromCurrencySymbol: "USD",
+            toAddress: connectedAddress,
+            toChainId: "137",
+            toTokenAddress: Utils.NativeTokenAddress,
+            toAmount: "20",
+            isTestMode: true
+        );
 
         _quote = await ThirdwebPay.GetBuyWithFiatQuote(fiatQuoteParams);
         ThirdwebDebug.Log($"Quote: {JsonConvert.SerializeObject(_quote, Formatting.Indented)}");
