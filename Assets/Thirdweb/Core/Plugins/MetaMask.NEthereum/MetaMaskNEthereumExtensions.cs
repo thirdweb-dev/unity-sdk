@@ -5,7 +5,7 @@ namespace MetaMask.NEthereum
 {
     public static class MetaMaskNEthereumExtensions
     {
-        public static Web3 CreateWeb3(this MetaMaskUnity metaMaskUnity)
+        public static Web3 CreateWeb3(this IMetaMaskSDK metaMaskUnity)
         {
             return metaMaskUnity.Wallet.CreateWeb3();
         }

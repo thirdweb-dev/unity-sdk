@@ -1,11 +1,13 @@
 using MetaMask.Unity;
 using MetaMask.Unity.Contracts;
+using MetaMask.Unity.Utils;
 using TMPro;
 using UnityEngine;
 
-public class TokenDisplay : MonoBehaviour
+public class TokenDisplay : BindableMonoBehavior
 {
-    private MetaMaskUnity _metaMask;
+    private IMetaMaskSDK _metaMask => MetaMaskSDK.SDKInstance;
+    
     private TextMeshProUGUI _balanceText;
 
     public ScriptableERC20 contract;
@@ -13,7 +15,6 @@ public class TokenDisplay : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _metaMask = MetaMaskUnity.Instance;
         _balanceText = GetComponent<TextMeshProUGUI>();
 
         if (_metaMask.Wallet.IsConnected)

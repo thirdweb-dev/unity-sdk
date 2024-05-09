@@ -39,10 +39,10 @@ namespace MetaMask.Transports.Unity.UI
         //protected bool _useDeeplink = false;
         /// <summary>Whether to spawn a canvas on startup.</summary>
         [SerializeField]
-        protected bool spawnCanvas = false;
+        internal bool spawnCanvas = false;
         /// <summary>The canvas that contains the MetaMask UI.</summary>
         [SerializeField]
-        protected GameObject metaMaskCanvas;
+        internal GameObject metaMaskCanvas;
 
         [SerializeField]
         protected bool useUniversalLinks = false;

@@ -10,11 +10,10 @@ namespace MetaMask.Unity
 {
     public class MetaMaskUnityEventHandler : BindableMonoBehavior, IMetaMaskEventsHandler
     {
-        [Inject]
-        private MetaMaskUnity _metaMask;
-
         [Inject(optional = true)]
         private MetaMaskUnityEventListener _eventListener;
+        
+        protected IMetaMaskSDK _metaMask => MetaMaskUnity.Instance;
         
         public event EventHandler<MetaMaskConnectEventArgs> StartConnecting;
         public event EventHandler WalletReady;
@@ -39,9 +38,6 @@ namespace MetaMask.Unity
 
         internal void SetupEvents()
         {
-            if (_metaMask == null)
-                UnityBinder.Inject(this);
-            
             // 1. Unity Event
             // 2. Getter for .NET Event Handler
             // 3. Getter for Unity Event Handler

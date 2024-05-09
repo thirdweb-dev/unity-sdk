@@ -56,6 +56,8 @@ namespace Thirdweb.Wallets
 
         private void SetupMetaMask()
         {
+            MetaMaskWallet.Source = "Thirdweb";
+            
             var config = ScriptableObject.CreateInstance<MetaMaskThirdwebConfig>();
             var defaults = MetaMaskConfig.DefaultInstance;
 
@@ -65,7 +67,7 @@ namespace Thirdweb.Wallets
             var appUrl = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appUrl;
             config.UpdateConfig(appName, appUrl);
 
-            MetaMaskUnity.Instance.Initialize(config);
+            MetaMaskUnity.Instance.Initialize();
         }
 
         public Task Disconnect(bool endSession = true)

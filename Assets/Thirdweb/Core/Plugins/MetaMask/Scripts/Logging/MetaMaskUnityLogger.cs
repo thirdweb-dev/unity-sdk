@@ -34,10 +34,22 @@ namespace MetaMask.Logging
 
         protected Logger logger;
 
+        public LogType FilterLogType
+        {
+            get
+            {
+                return logger.filterLogType;
+            }
+            set
+            {
+                logger.filterLogType = value;
+            }
+        }
+
         protected MetaMaskUnityLogger()
         {
             logger = new Logger(Debug.unityLogger);
-            logger.filterLogType = MetaMaskConfig.DefaultInstance.Log ? LogType.Log : LogType.Assert;
+            UpdateLogFilter();
         }
 
         /// <summary>Initializes the <see cref="MetaMaskDebug"/> class.</summary>
@@ -74,6 +86,11 @@ namespace MetaMask.Logging
         public void LogWarning(object message)
         {
             logger.LogWarning(Tag, message);
+        }
+
+        public void UpdateLogFilter()
+        {
+            FilterLogType = MetaMaskSDK.EnableLogging ? LogType.Log : LogType.Assert;
         }
     }
 }

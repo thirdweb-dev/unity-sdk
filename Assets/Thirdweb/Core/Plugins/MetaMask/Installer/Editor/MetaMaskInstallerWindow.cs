@@ -13,7 +13,6 @@ namespace MetaMask
 
     public class MetaMaskInstallerWindow : EditorWindow
     {
-
         private static MetaMaskInstallerWindow instance;
 
         private const string showOnStartupKey = "metamask.installer.showOnStartup";
@@ -36,7 +35,7 @@ namespace MetaMask
         private AddRequest addRequest;
         private Vector2 scrollPosition;
 
-        [MenuItem("Tools/MetaMask/Install")]
+        [MenuItem("MetaMask/Install")]
         public static void Initialize()
         {
             instance = GetWindow<MetaMaskInstallerWindow>();
@@ -44,6 +43,11 @@ namespace MetaMask
             instance.minSize = new Vector2(440, 292);
             instance.UpdateDependencies();
             instance.Show();
+        }
+
+        public static void ResetStartupBool()
+        {
+            EditorPrefs.SetBool(showOnStartupKey, true);
         }
 
         [InitializeOnLoadMethod]
@@ -241,6 +245,7 @@ namespace MetaMask
             GUILayout.FlexibleSpace();
 
             EditorGUILayout.BeginHorizontal();
+            //var isUpdate = MetaMaskGettingStartedWindow.UpdateQueued;
             string installLabel = "Install MetaMask";
             bool metaMaskInstallReady = this.listRequest == null && allInstalled;
             if (!metaMaskInstallReady)

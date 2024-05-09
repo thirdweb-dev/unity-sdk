@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using evm.net.Network;
 using MetaMask.Unity;
+using MetaMask.Unity.Utils;
 using UnityEngine;
 using UnityEngine.Networking;
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -134,9 +135,12 @@ namespace MetaMask.IO
 
         private Queue<UnityHttpServiceRequest> requests = new Queue<UnityHttpServiceRequest>();
         private bool isCheckingQueue;
+        
+        private IMetaMaskSDK _metaMaskSDK => MetaMaskSDK.SDKInstance;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             HttpServiceFactory.SetCreator(CreateHttpService);
         }
 
@@ -207,8 +211,8 @@ namespace MetaMask.IO
 
                 if (Infura.IsUrl(url))
                 {
-                    uwr.SetRequestHeader("X-Infura-User-Agent", $"metamask/sdk-csharp {MetaMaskUnity.Version}");
-                    uwr.SetRequestHeader("Metamask-Sdk-Info", $"Sdk/Unity SdkVersion/{MetaMaskUnity.Version} Platform/{SystemInfo.operatingSystem} dApp/{MetaMaskUnity.Instance.Config.AppUrl} dAppTitle/{MetaMaskUnity.Instance.Config.AppName}");
+                    uwr.SetRequestHeader("X-Infura-User-Agent", $"metamask/sdk-csharp {_metaMaskSDK.SDKVersion}");
+                    uwr.SetRequestHeader("Metamask-Sdk-Info", $"Sdk/Unity SdkVersion/{_metaMaskSDK.SDKVersion} Platform/{SystemInfo.operatingSystem} dApp/{_metaMaskSDK.Config.AppUrl} dAppTitle/{_metaMaskSDK.Config.AppName}");
                 }
 
                 if (!string.IsNullOrWhiteSpace(@params))

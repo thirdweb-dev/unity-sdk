@@ -37,10 +37,15 @@ namespace MetaMask.Unity
         [SerializeField]
         protected string appUrl = "example.com";
         
+        /// <summary>The base64 encoded version of the app icon.</summary>
+        /// <remarks>This is used to display the app icon.</remarks>
+        [SerializeField]
+        protected string appIcon = "";
+        
         /// <summary>The URL of the app icon.</summary>
         /// <remarks>This is used to determine where the app icon should be fetched from.</remarks>
         [SerializeField]
-        protected string appIcon = "";
+        protected string appIconUrl = "";
 
         /// <summary>The user agent to use when making requests.</summary>
         /// <remarks>This is used to identify the application when making requests.</remarks>
@@ -96,6 +101,8 @@ namespace MetaMask.Unity
         /// <returns>The URL of the app.</returns>
         public virtual string AppIcon => this.appIcon;
 
+        public string AppIconUrl => this.appIconUrl;
+
         /// <summary>The user agent to use when making requests.</summary>
         /// <remarks>This is used to identify the application when making requests.</remarks>
         public virtual string UserAgent => this.userAgent;
@@ -110,7 +117,11 @@ namespace MetaMask.Unity
 
         /// <summary>Gets the URL of the socket.</summary>
         /// <returns>The URL of the socket.</returns>
-        public virtual string SocketUrl => this.socketUrl;
+        public virtual string SocketUrl
+        {
+            get { return this.socketUrl; }
+            internal set { this.socketUrl = value; }
+        }
 
         #endregion
     }
