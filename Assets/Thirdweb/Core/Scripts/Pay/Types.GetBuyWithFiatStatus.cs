@@ -11,11 +11,11 @@ namespace Thirdweb.Pay
 
     public class BuyWithFiatStatusResult
     {
+        [JsonProperty("intentId")]
+        public string IntentId { get; set; }
+
         [JsonProperty("status")]
         public string Status { get; set; }
-
-        [JsonProperty("swapType")]
-        public string SwapType { get; set; }
 
         [JsonProperty("toAddress")]
         public string ToAddress { get; set; }
@@ -25,6 +25,9 @@ namespace Thirdweb.Pay
 
         [JsonProperty("source")]
         public TransactionDetails Source { get; set; }
+
+        [JsonProperty("destination")]
+        public TransactionDetails Destination { get; set; }
 
         [JsonProperty("failureMessage")]
         public string FailureMessage { get; set; }

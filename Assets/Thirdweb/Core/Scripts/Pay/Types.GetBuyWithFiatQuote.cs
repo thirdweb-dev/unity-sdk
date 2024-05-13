@@ -73,14 +73,14 @@ namespace Thirdweb.Pay
         [JsonProperty("fromCurrency")]
         public OnRampCurrency FromCurrency { get; set; }
 
+        [JsonProperty("fromCurrencyWithFees")]
+        public OnRampCurrency FromCurrencyWithFees { get; set; }
+
         [JsonProperty("onRampToken")]
         public OnRampToken OnRampToken { get; set; }
 
         [JsonProperty("toToken")]
         public Token ToToken { get; set; }
-
-        [JsonProperty("estimatedOnRampTokenWeiForSwap")]
-        public string EstimatedOnRampTokenWeiForSwap { get; set; }
 
         [JsonProperty("estimatedToAmountMinWei")]
         public string EstimatedToAmountMinWei { get; set; }
