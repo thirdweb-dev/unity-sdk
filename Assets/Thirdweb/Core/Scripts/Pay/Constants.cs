@@ -2,7 +2,7 @@ namespace Thirdweb.Pay
 {
     public static class Constants
     {
-        public const string THIRDWEB_PAY_BASE_URL = "https://pay.thirdweb-dev.com";
+        public const string THIRDWEB_PAY_BASE_URL = "https://pay.thirdweb.com";
 
         public const string THIRDWEB_PAY_CRYPTO_QUOTE_ENDPOINT = THIRDWEB_PAY_BASE_URL + "/buy-with-crypto/quote/v1";
         public const string THIRDWEB_PAY_CRYPTO_STATUS_ENDPOINT = THIRDWEB_PAY_BASE_URL + "/buy-with-crypto/status/v1";
