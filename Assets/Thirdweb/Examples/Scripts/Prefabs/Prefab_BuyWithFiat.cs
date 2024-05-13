@@ -56,13 +56,37 @@ public class Prefab_BuyWithFiat : MonoBehaviour
         }
 
         var status = await ThirdwebPay.GetBuyWithFiatStatus(_intentId);
-        if (status.Status == OnRampStatus.PAYMENT_FAILED.ToString() || status.Status == OnRampStatus.ON_RAMP_TRANSFER_FAILED.ToString())
+
+        if (status.Status == OnRampStatus.PAYMENT_FAILED.ToString() || status.Status == OnRampStatus.ON_RAMP_TRANSFER_FAILED.ToString() || status.Status == OnRampStatus.CRYPTO_SWAP_FAILED.ToString())
+        {
             ThirdwebDebug.LogWarning($"Failed! Reason: {status.FailureMessage}");
+        }
+        else if (status.Status == OnRampStatus.CRYPTO_SWAP_FALLBACK.ToString())
+        {
+            ThirdwebDebug.LogWarning($"Fallback! Two step process failed and user received fallback funds on the destination chain.");
+        }
+        else if (status.Status == OnRampStatus.CRYPTO_SWAP_REQUIRED.ToString())
+        {
+            ThirdwebDebug.Log("OnRamp transfer completed. You may now use this intent id to trigger a BuyWithCrypto transaction and get to your destination token: " + _intentId);
+
+            // This is only necessary when you can't get to the destination token directly from the onramp
+            // Example of how to trigger a BuyWithCrypto transaction using the intent id of the onramp with the newly received funds
+
+            // var swapQuoteParams = new BuyWithCryptoQuoteParams(
+            //     fromAddress: status.ToAddress,
+            //     fromChainId: status.Quote.OnRampToken.ChainId,
+            //     fromTokenAddress: status.Quote.OnRampToken.TokenAddress,
+            //     toTokenAddress: status.Quote.ToToken.TokenAddress,
+            //     toAmount: status.Quote.EstimatedToTokenAmount,
+            //     intentId: _intentId
+            // );
+
+            // var quote = await ThirdwebPay.GetBuyWithCryptoQuote(swapQuoteParams);
+
+            // See Prefab_BuyWithCrypto.cs for the rest of the process
+        }
 
         ThirdwebDebug.Log($"Status: {JsonConvert.SerializeObject(status, Formatting.Indented)}");
-
-        if (status.Status == OnRampStatus.PENDING_CRYPTO_SWAP.ToString())
-            ThirdwebDebug.Log("OnRamp transfer completed. You may now use this intent id to trigger a BuyWithCrypto transaction and get to your destination token: " + _intentId);
     }
 
     public async void GetBuyHistory()

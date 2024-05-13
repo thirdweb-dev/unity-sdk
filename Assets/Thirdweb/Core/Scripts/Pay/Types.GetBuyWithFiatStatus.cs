@@ -53,11 +53,17 @@ namespace Thirdweb.Pay
         [JsonProperty("fromCurrency")]
         public OnRampCurrency FromCurrency { get; set; }
 
+        [JsonProperty("fromCurrencyWithFees")]
+        public OnRampCurrency FromCurrencyWithFees { get; set; }
+
         [JsonProperty("onRampToken")]
         public Token OnRampToken { get; set; }
 
         [JsonProperty("toToken")]
         public Token ToToken { get; set; }
+
+        [JsonProperty("estimatedDurationSeconds")]
+        public long EstimatedDurationSeconds { get; set; }
     }
 
     public enum OnRampStatus
@@ -69,11 +75,10 @@ namespace Thirdweb.Pay
         ON_RAMP_TRANSFER_IN_PROGRESS,
         ON_RAMP_TRANSFER_COMPLETED,
         ON_RAMP_TRANSFER_FAILED,
-        PENDING_CRYPTO_SWAP,
-        CRYPTO_SWAP_PARTIAL_SUCCESS,
-        CRYPTO_SWAP_REVERTED_ON_CHAIN,
+        CRYPTO_SWAP_REQUIRED,
         CRYPTO_SWAP_COMPLETED,
-        CRYPTO_SWAP_UNKNOWN_ERROR,
-        CRYPTO_SWAP_WAITING_BRIDGE
+        CRYPTO_SWAP_FALLBACK,
+        CRYPTO_SWAP_IN_PROGRESS,
+        CRYPTO_SWAP_FAILED,
     }
 }
