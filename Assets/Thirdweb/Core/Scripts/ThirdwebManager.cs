@@ -286,18 +286,16 @@ namespace Thirdweb
                 customScheme = string.IsNullOrEmpty(thirdwebConfig.customScheme) ? null : thirdwebConfig.customScheme,
             };
 
-            options.smartWalletConfig = string.IsNullOrEmpty(factoryAddress)
-                ? null
-                : new ThirdwebSDK.SmartWalletConfig()
-                {
-                    factoryAddress = factoryAddress,
-                    gasless = gasless,
-                    erc20PaymasterAddress = string.IsNullOrEmpty(erc20PaymasterAddress) ? null : erc20PaymasterAddress,
-                    erc20TokenAddress = string.IsNullOrEmpty(erc20TokenAddress) ? null : erc20TokenAddress,
-                    bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : bundlerUrl,
-                    paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : paymasterUrl,
-                    entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
-                };
+            options.smartWalletConfig = new ThirdwebSDK.SmartWalletConfig()
+            {
+                factoryAddress = string.IsNullOrEmpty(factoryAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_FACTORY_ADDRESS : factoryAddress,
+                gasless = gasless,
+                erc20PaymasterAddress = string.IsNullOrEmpty(erc20PaymasterAddress) ? null : erc20PaymasterAddress,
+                erc20TokenAddress = string.IsNullOrEmpty(erc20TokenAddress) ? null : erc20TokenAddress,
+                bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : bundlerUrl,
+                paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : paymasterUrl,
+                entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
+            };
 
             // Pass active chain rpc and chainId
 

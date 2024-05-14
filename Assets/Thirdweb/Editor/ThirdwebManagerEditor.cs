@@ -317,7 +317,6 @@ namespace Thirdweb
                 () =>
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                    EditorGUILayout.PropertyField(factoryAddressProperty);
                     EditorGUILayout.PropertyField(gaslessProperty);
 
                     EditorGUI.BeginChangeCheck();
@@ -329,6 +328,7 @@ namespace Thirdweb
 
                     if (showSmartWalletOptionalFields)
                     {
+                        EditorGUILayout.PropertyField(factoryAddressProperty);
                         EditorGUILayout.PropertyField(erc20PaymasterAddressProperty);
                         EditorGUILayout.PropertyField(erc20TokenAddressProperty);
                         EditorGUILayout.PropertyField(bundlerUrlProperty);
