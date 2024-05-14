@@ -53,7 +53,7 @@ namespace Thirdweb
                         var personalSign = new PersonalSign(msg, acc);
                         return await WalletConnect.Instance.RequestAsync<PersonalSign, string>(personalSign);
                     case WalletProvider.LocalWallet:
-                    case WalletProvider.EmbeddedWallet:
+                    case WalletProvider.InAppWallet:
                         var message = request.RawParameters[0].ToString();
                         return new EthereumMessageSigner().EncodeUTF8AndSign(message, new EthECKey(_thirdwebWallet.GetLocalAccount().PrivateKey));
                     case WalletProvider.SmartWallet:
@@ -74,7 +74,7 @@ namespace Thirdweb
                         var ethSignTypedDataV4 = new EthSignTypedDataV4(account, data);
                         return await WalletConnect.Instance.RequestAsync<EthSignTypedDataV4, string>(ethSignTypedDataV4);
                     case WalletProvider.LocalWallet:
-                    case WalletProvider.EmbeddedWallet:
+                    case WalletProvider.InAppWallet:
                         throw new Exception("Please use Wallet.SignTypedDataV4 instead.");
                     case WalletProvider.SmartWallet:
                         return await signerWeb3.Client.SendRequestAsync<T>("eth_signTypedData_v4", null, request.RawParameters);
@@ -146,7 +146,7 @@ namespace Thirdweb
                         var personalSign = new PersonalSign(msg, acc);
                         return await WalletConnect.Instance.RequestAsync<PersonalSign, string>(personalSign);
                     case WalletProvider.LocalWallet:
-                    case WalletProvider.EmbeddedWallet:
+                    case WalletProvider.InAppWallet:
                         var message = paramList[0].ToString();
                         return new EthereumMessageSigner().EncodeUTF8AndSign(message, new EthECKey(_thirdwebWallet.GetLocalAccount().PrivateKey));
                     case WalletProvider.SmartWallet:
@@ -167,7 +167,7 @@ namespace Thirdweb
                         var ethSignTypedDataV4 = new EthSignTypedDataV4(acc, msg);
                         return await WalletConnect.Instance.RequestAsync<EthSignTypedDataV4, string>(ethSignTypedDataV4);
                     case WalletProvider.LocalWallet:
-                    case WalletProvider.EmbeddedWallet:
+                    case WalletProvider.InAppWallet:
                         throw new Exception("Please use Wallet.SignTypedDataV4 instead.");
                     case WalletProvider.SmartWallet:
                         return await signerWeb3.Client.SendRequestAsync<T>("eth_signTypedData_v4", null, paramList);

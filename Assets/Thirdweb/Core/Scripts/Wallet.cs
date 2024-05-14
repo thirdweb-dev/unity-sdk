@@ -11,6 +11,11 @@ using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
 using System.Linq;
+using UnityEngine.Networking;
+using Thirdweb.Redcode.Awaiting;
+using Newtonsoft.Json;
+
+#pragma warning disable CS0618
 
 namespace Thirdweb
 {
@@ -86,7 +91,7 @@ namespace Thirdweb
             else
             {
                 var localAccount = ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetLocalAccount() ?? throw new Exception("No local account found");
-                return Utils.EncryptAndGenerateKeyStore(new EthECKey(localAccount.PrivateKey), password);
+                return await Utils.EncryptAndGenerateKeyStore(new EthECKey(localAccount.PrivateKey), password);
             }
         }
 
@@ -159,6 +164,61 @@ namespace Thirdweb
                     }
                 };
             }
+        }
+
+        /// <summary>
+        /// Authenticates the user by signing a payload that can be used to securely identify users. See https://portal.thirdweb.com/auth.
+        /// </summary>
+        /// <param name="domain">The domain to authenticate to.</param>
+        /// <returns>A string representing the server-side authentication result.</returns>
+        public async Task<string> AuthenticateAndLoginServerSide(string domain, BigInteger chainId, string authPayloadPath = "/auth/payload", string authLoginPath = "/auth/login")
+        {
+            string payloadURL = domain + authPayloadPath;
+            string loginURL = domain + authLoginPath;
+
+            var payloadBodyRaw = new { address = await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), chainId = chainId.ToString() };
+            var payloadBody = JsonConvert.SerializeObject(payloadBodyRaw);
+
+            using UnityWebRequest payloadRequest = UnityWebRequest.Post(payloadURL, "");
+            payloadRequest.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(payloadBody));
+            payloadRequest.downloadHandler = new DownloadHandlerBuffer();
+            payloadRequest.SetRequestHeader("Content-Type", "application/json");
+            await payloadRequest.SendWebRequest();
+            if (payloadRequest.result != UnityWebRequest.Result.Success)
+            {
+                throw new Exception("Error: " + payloadRequest.error + "\nResponse: " + payloadRequest.downloadHandler.text);
+            }
+            var payloadString = payloadRequest.downloadHandler.text;
+
+            var loginBodyRaw = JsonConvert.DeserializeObject<LoginPayload>(payloadString);
+            var resourcesString = loginBodyRaw.payload.Resources != null ? "\nResources:" + string.Join("", loginBodyRaw.payload.Resources.Select(r => $"\n- {r}")) : string.Empty;
+            var payloadToSign =
+                $"{loginBodyRaw.payload.Domain} wants you to sign in with your Ethereum account:"
+                + $"\n{loginBodyRaw.payload.Address}\n\n"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.Statement) ? "" : $"{loginBodyRaw.payload.Statement}\n")}"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.Uri) ? "" : $"\nURI: {loginBodyRaw.payload.Uri}")}"
+                + $"\nVersion: {loginBodyRaw.payload.Version}"
+                + $"\nChain ID: {loginBodyRaw.payload.ChainId}"
+                + $"\nNonce: {loginBodyRaw.payload.Nonce}"
+                + $"\nIssued At: {loginBodyRaw.payload.IssuedAt}"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.ExpirationTime) ? "" : $"\nExpiration Time: {loginBodyRaw.payload.ExpirationTime}")}"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.InvalidBefore) ? "" : $"\nNot Before: {loginBodyRaw.payload.InvalidBefore}")}"
+                + resourcesString;
+
+            loginBodyRaw.signature = await ThirdwebManager.Instance.SDK.Wallet.Sign(payloadToSign);
+            var loginBody = JsonConvert.SerializeObject(new { payload = loginBodyRaw });
+
+            using UnityWebRequest loginRequest = UnityWebRequest.Post(loginURL, "");
+            loginRequest.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(loginBody));
+            loginRequest.downloadHandler = new DownloadHandlerBuffer();
+            loginRequest.SetRequestHeader("Content-Type", "application/json");
+            await loginRequest.SendWebRequest();
+            if (loginRequest.result != UnityWebRequest.Result.Success)
+            {
+                throw new Exception("Error: " + loginRequest.error + "\nResponse: " + loginRequest.downloadHandler.text);
+            }
+            var responseString = loginRequest.downloadHandler.text;
+            return responseString;
         }
 
         /// <summary>
@@ -290,7 +350,7 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Gets the connected embedded wallet email if any.
+        /// Gets the connected In App Wallet email if any.
         /// </summary>
         public async Task<string> GetEmail()
         {
@@ -816,12 +876,33 @@ namespace Thirdweb
                     throw new UnityException("This functionality is only available for SmartWallets.");
 
                 string address = await GetAddress();
-                var raw = await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetAllActiveSignersFunction, Contracts.Account.ContractDefinition.GetAllActiveSignersOutputDTO>(
+
+                var rawSigners = await TransactionManager.ThirdwebRead<
+                    Contracts.Account.ContractDefinition.GetAllActiveSignersFunction,
+                    Contracts.Account.ContractDefinition.GetAllActiveSignersOutputDTO
+                >(address, new Contracts.Account.ContractDefinition.GetAllActiveSignersFunction());
+                var allSigners = rawSigners.Signers;
+
+                var rawAdmins = await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetAllAdminsFunction, Contracts.Account.ContractDefinition.GetAllAdminsOutputDTO>(
                     address,
-                    new Contracts.Account.ContractDefinition.GetAllActiveSignersFunction()
+                    new Contracts.Account.ContractDefinition.GetAllAdminsFunction()
                 );
+                foreach (var admin in rawAdmins.ReturnValue1)
+                {
+                    allSigners.Add(
+                        new Contracts.Account.ContractDefinition.SignerPermissions()
+                        {
+                            Signer = admin,
+                            ApprovedTargets = new List<string>() { Utils.AddressZero },
+                            NativeTokenLimitPerTransaction = BigInteger.Zero,
+                            StartTimestamp = 0,
+                            EndTimestamp = Utils.GetUnixTimeStampIn10Years()
+                        }
+                    );
+                }
+
                 var signers = new List<SignerWithPermissions>();
-                foreach (var rawSigner in raw.Signers)
+                foreach (var rawSigner in allSigners)
                 {
                     bool? isAdmin;
                     try
@@ -964,7 +1045,7 @@ namespace Thirdweb
         /// <param name="password">Optional wallet encryption password</param>
         /// <param name="email">The email to login with if using email based providers.</param>
         /// <param name="personalWallet">The personal wallet provider if using smart wallets.</param>
-        /// <param name="authOptions">The authentication options if using embedded wallets.</param>
+        /// <param name="authOptions">The authentication options if using in app wallets.</param>
         /// <param name="smartWalletAccountOverride">Optionally choose to connect to a smart account the personal wallet is not an admin of.</param>
         /// <returns>A new instance of the <see cref="WalletConnection"/> class.</returns>
         public WalletConnection(
@@ -990,7 +1071,7 @@ namespace Thirdweb
     }
 
     /// <summary>
-    /// Embedded Wallet Authentication Options.
+    /// In App Wallet Authentication Options.
     /// </summary>
     [System.Serializable]
     public class AuthOptions
@@ -1027,11 +1108,11 @@ namespace Thirdweb
         LocalWallet,
         SmartWallet,
         Hyperplay,
-        EmbeddedWallet
+        InAppWallet
     }
 
     /// <summary>
-    /// Represents the available auth providers for Embedded Wallet.
+    /// Represents the available auth providers for In App Wallet.
     /// </summary>
     [System.Serializable]
     public enum AuthProvider

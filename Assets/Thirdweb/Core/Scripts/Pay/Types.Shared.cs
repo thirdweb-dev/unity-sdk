@@ -71,4 +71,26 @@ namespace Thirdweb.Pay
         [JsonProperty("durationSeconds")]
         public int DurationSeconds { get; set; }
     }
+
+    public class OnRampCurrency
+    {
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        [JsonProperty("amountUnits")]
+        public string AmountUnits { get; set; }
+
+        [JsonProperty("decimals")]
+        public int Decimals { get; set; }
+
+        [JsonProperty("currencySymbol")]
+        public string CurrencySymbol { get; set; }
+    }
+
+    public enum SwapType
+    {
+        SAME_CHAIN,
+        CROSS_CHAIN,
+        ON_RAMP
+    }
 }

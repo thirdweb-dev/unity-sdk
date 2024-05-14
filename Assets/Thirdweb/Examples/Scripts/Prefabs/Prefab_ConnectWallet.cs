@@ -31,7 +31,7 @@ namespace Thirdweb.Examples
         public class WalletProviderUIDictionary : SerializableDictionaryBase<WalletProvider, GameObject> { }
 
         [Header("Enabled Wallet Providers. Press Play to see changes.")]
-        public List<WalletProvider> enabledWalletProviders = new List<WalletProvider> { WalletProvider.LocalWallet, WalletProvider.EmbeddedWallet, WalletProvider.SmartWallet };
+        public List<WalletProvider> enabledWalletProviders = new List<WalletProvider> { WalletProvider.LocalWallet, WalletProvider.InAppWallet, WalletProvider.SmartWallet };
 
         [Header("Use ERC-4337 (Account Abstraction) compatible smart wallets.\nEnabling this will connect user to the associated smart wallet as per your ThirwebManager settings.")]
         public bool useSmartWallets = false;
@@ -96,10 +96,10 @@ namespace Thirdweb.Examples
                     provider: WalletProvider.SmartWallet,
                     chainId: BigInteger.Parse(_currentChainData.chainId),
                     authOptions: new AuthOptions(Enum.Parse<AuthProvider>(authProviderStr)),
-                    personalWallet: WalletProvider.EmbeddedWallet
+                    personalWallet: WalletProvider.InAppWallet
                 )
                 : new WalletConnection(
-                    provider: WalletProvider.EmbeddedWallet,
+                    provider: WalletProvider.InAppWallet,
                     chainId: BigInteger.Parse(_currentChainData.chainId),
                     authOptions: new AuthOptions(Enum.Parse<AuthProvider>(authProviderStr))
                 );
@@ -120,10 +120,10 @@ namespace Thirdweb.Examples
                         chainId: BigInteger.Parse(_currentChainData.chainId),
                         email: emailInput.text,
                         authOptions: new AuthOptions(AuthProvider.EmailOTP),
-                        personalWallet: WalletProvider.EmbeddedWallet
+                        personalWallet: WalletProvider.InAppWallet
                     )
                     : new WalletConnection(
-                        provider: WalletProvider.EmbeddedWallet,
+                        provider: WalletProvider.InAppWallet,
                         chainId: BigInteger.Parse(_currentChainData.chainId),
                         email: emailInput.text,
                         authOptions: new AuthOptions(AuthProvider.EmailOTP)
@@ -137,10 +137,10 @@ namespace Thirdweb.Examples
                         chainId: BigInteger.Parse(_currentChainData.chainId),
                         phoneNumber: input,
                         authOptions: new AuthOptions(AuthProvider.PhoneOTP),
-                        personalWallet: WalletProvider.EmbeddedWallet
+                        personalWallet: WalletProvider.InAppWallet
                     )
                     : new WalletConnection(
-                        provider: WalletProvider.EmbeddedWallet,
+                        provider: WalletProvider.InAppWallet,
                         chainId: BigInteger.Parse(_currentChainData.chainId),
                         phoneNumber: input,
                         authOptions: new AuthOptions(AuthProvider.PhoneOTP)

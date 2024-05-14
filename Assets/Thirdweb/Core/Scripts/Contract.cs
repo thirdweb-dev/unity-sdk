@@ -10,6 +10,8 @@ using System;
 using Nethereum.Contracts;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.ABI.FunctionEncoding.Attributes;
+using UnityEngine.Networking;
+using Thirdweb.Redcode.Awaiting;
 
 namespace Thirdweb
 {
@@ -118,6 +120,8 @@ namespace Thirdweb
             }
             else
             {
+                if (this.ABI == null)
+                    this.ABI = await FetchAbi(this.Address, await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
                 var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
                 var function = contract.GetFunction(functionName);
                 var fromAddress = from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
@@ -198,46 +202,23 @@ namespace Thirdweb
             else
             {
                 if (this.ABI == null)
-                    throw new UnityException("You must pass an ABI for native platform custom calls");
+                    this.ABI = await FetchAbi(this.Address, await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
 
-                var contract = ThirdwebManager.Instance.SDK.Session.Web3.Eth.GetContract(this.ABI, this.Address);
-
-                var function = contract.GetFunction(functionName);
-
-                var value = transactionOverrides?.value != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.value)) : new HexBigInteger(0);
-
-                var gas =
-                    transactionOverrides?.gasLimit != null
-                        ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasLimit))
-                        : await function.EstimateGasAsync(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), null, value, args);
-
-                var gasPrice = transactionOverrides?.gasPrice != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasPrice)) : null;
-
-                string hash;
-                if (gasPrice == null)
+                var service = new Nethereum.Contracts.Contract(null, this.ABI, this.Address);
+                var function = service.GetFunction(functionName);
+                var data = function.GetData(args);
+                var input = new TransactionInput
                 {
-                    var gasFees = await Utils.GetGasPriceAsync(await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
-                    hash = await function.SendTransactionAsync(
-                        from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
-                        gas: gas,
-                        value: value,
-                        maxFeePerGas: new HexBigInteger(gasFees.MaxFeePerGas),
-                        maxPriorityFeePerGas: new HexBigInteger(gasFees.MaxPriorityFeePerGas),
-                        args
-                    );
-                }
-                else
-                {
-                    hash = await function.SendTransactionAsync(
-                        from: transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
-                        gas: gas,
-                        gasPrice: gasPrice,
-                        value: value,
-                        args
-                    );
-                }
+                    From = transactionOverrides?.from ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
+                    To = this.Address,
+                    Data = data,
+                    Value = transactionOverrides?.value != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.value)) : new HexBigInteger(0),
+                    Gas = transactionOverrides?.gasLimit != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasLimit)) : null,
+                    GasPrice = transactionOverrides?.gasPrice != null ? new HexBigInteger(BigInteger.Parse(transactionOverrides?.gasPrice)) : null,
+                };
 
-                return await Transaction.WaitForTransactionResult(hash);
+                var tx = new Transaction(input);
+                return await tx.SendAndWaitForTransactionResult();
             }
         }
 
@@ -256,7 +237,7 @@ namespace Thirdweb
             }
 
             if (this.ABI == null)
-                throw new UnityException("You must pass an ABI for native platform custom calls");
+                this.ABI = await FetchAbi(this.Address, await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
 
             var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
@@ -381,6 +362,36 @@ namespace Thirdweb
             }
 
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(rawResults));
+        }
+
+        public async Task<T> ReadRaw<T>(string functionName, params object[] args)
+            where T : new()
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<T>(getRoute("call"), Utils.ToJsonStringArray(functionName, args));
+            }
+
+            if (this.ABI == null)
+                this.ABI = await FetchAbi(this.Address, await ThirdwebManager.Instance.SDK.Wallet.GetChainId());
+
+            var contract = Utils.GetWeb3().Eth.GetContract(this.ABI, this.Address);
+            var function = contract.GetFunction(functionName);
+            return await function.CallDeserializingToObjectAsync<T>(args);
+        }
+
+        public static async Task<string> FetchAbi(string contractAddress, BigInteger chainId)
+        {
+            var url = $"https://contract.thirdweb.com/abi/{chainId}/{contractAddress}";
+            using (var request = UnityWebRequest.Get(url))
+            {
+                await request.SendWebRequest();
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    throw new UnityException($"Failed to fetch ABI! Error: {request.error}");
+                }
+                return request.downloadHandler.text;
+            }
         }
 
         private T ConvertValue<T>(object value)

@@ -20,11 +20,11 @@ namespace Thirdweb.Wallets
             _signerProvider = WalletProvider.LocalWallet;
         }
 
-        public Task<string> Connect(WalletConnection walletConnection, string rpc)
+        public async Task<string> Connect(WalletConnection walletConnection, string rpc)
         {
-            _account = Utils.UnlockOrGenerateLocalAccount(walletConnection.chainId, walletConnection.password, null);
+            _account = await Utils.UnlockOrGenerateLocalAccount(walletConnection.chainId, walletConnection.password, null);
             _web3 = new Web3(_account, rpc);
-            return Task.FromResult(_account.Address);
+            return _account.Address;
         }
 
         public Task Disconnect(bool endSession = true)

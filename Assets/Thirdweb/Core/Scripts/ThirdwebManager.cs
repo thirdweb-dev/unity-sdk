@@ -57,10 +57,10 @@ namespace Thirdweb
         [Tooltip("IPFS Gateway Override")]
         public string storageIpfsGatewayUrl = null;
 
-        [Tooltip("Autotask URL")]
+        [Tooltip("Find out more about relayers here https://portal.thirdweb.com/engine/features/relayers")]
         public string relayerUrl = null;
 
-        [Tooltip("Forwarders can be found here https://github.com/thirdweb-dev/ozdefender-autotask")]
+        [Tooltip("Forwarder Contract Address (Defaults to 0xD04F98C88cE1054c90022EE34d566B9237a1203C if left empty)")]
         public string forwarderAddress = null;
 
         [Tooltip("Forwarder Domain Override (Defaults to GSNv2 Forwarder if left empty)")]
@@ -117,8 +117,8 @@ namespace Thirdweb
         [Tooltip("Instantiates the Metamask SDK for Native platforms.")]
         public GameObject MetamaskPrefab;
 
-        [Tooltip("Instantiates the EmbeddedWallet SDK for Native platforms.")]
-        public GameObject EmbeddedWalletPrefab;
+        [Tooltip("Instantiates the InAppWallet SDK for Native platforms.")]
+        public GameObject InAppWalletPrefab;
 
         public ThirdwebSDK SDK;
 
@@ -206,14 +206,14 @@ namespace Thirdweb
             {
                 options.storage = new ThirdwebSDK.StorageOptions() { ipfsGatewayUrl = storageIpfsGatewayUrl };
             }
-            if (!string.IsNullOrEmpty(relayerUrl) && !string.IsNullOrEmpty(forwarderAddress))
+            if (!string.IsNullOrEmpty(relayerUrl))
             {
-                options.gasless = new ThirdwebSDK.GaslessOptions()
+                options.gasless = new ThirdwebSDK.RelayerOptions()
                 {
-                    openzeppelin = new ThirdwebSDK.OZDefenderOptions()
+                    engine = new ThirdwebSDK.EngineRelayerOptions()
                     {
                         relayerUrl = this.relayerUrl,
-                        relayerForwarderAddress = this.forwarderAddress,
+                        relayerForwarderAddress = string.IsNullOrEmpty(this.forwarderAddress) ? "0xD04F98C88cE1054c90022EE34d566B9237a1203C" : this.forwarderAddress,
                         domainName = string.IsNullOrEmpty(this.forwarderDomainOverride) ? "GSNv2 Forwarder" : this.forwarderDomainOverride,
                         domainVersion = string.IsNullOrEmpty(this.forwaderVersionOverride) ? "0.0.1" : this.forwaderVersionOverride
                     }
@@ -286,18 +286,16 @@ namespace Thirdweb
                 customScheme = string.IsNullOrEmpty(thirdwebConfig.customScheme) ? null : thirdwebConfig.customScheme,
             };
 
-            options.smartWalletConfig = string.IsNullOrEmpty(factoryAddress)
-                ? null
-                : new ThirdwebSDK.SmartWalletConfig()
-                {
-                    factoryAddress = factoryAddress,
-                    gasless = gasless,
-                    erc20PaymasterAddress = string.IsNullOrEmpty(erc20PaymasterAddress) ? null : erc20PaymasterAddress,
-                    erc20TokenAddress = string.IsNullOrEmpty(erc20TokenAddress) ? null : erc20TokenAddress,
-                    bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : bundlerUrl,
-                    paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : paymasterUrl,
-                    entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
-                };
+            options.smartWalletConfig = new ThirdwebSDK.SmartWalletConfig()
+            {
+                factoryAddress = string.IsNullOrEmpty(factoryAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_FACTORY_ADDRESS : factoryAddress,
+                gasless = gasless,
+                erc20PaymasterAddress = string.IsNullOrEmpty(erc20PaymasterAddress) ? null : erc20PaymasterAddress,
+                erc20TokenAddress = string.IsNullOrEmpty(erc20TokenAddress) ? null : erc20TokenAddress,
+                bundlerUrl = string.IsNullOrEmpty(bundlerUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : bundlerUrl,
+                paymasterUrl = string.IsNullOrEmpty(paymasterUrl) ? $"https://{activeChainId}.bundler.thirdweb.com" : paymasterUrl,
+                entryPointAddress = string.IsNullOrEmpty(entryPointAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS : entryPointAddress,
+            };
 
             // Pass active chain rpc and chainId
 

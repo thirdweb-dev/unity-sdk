@@ -34,7 +34,10 @@ namespace Thirdweb.Pay
         public string ToAmountWei { get; set; }
 
         [JsonProperty("maxSlippageBPS")]
-        public int? MaxSlippageBPS { get; set; }
+        public double? MaxSlippageBPS { get; set; }
+
+        [JsonProperty("intentId")]
+        public string IntentId { get; set; }
 
         public BuyWithCryptoQuoteParams(
             string fromAddress,
@@ -46,7 +49,8 @@ namespace Thirdweb.Pay
             BigInteger? toChainId = null,
             string toAmount = null,
             string toAmountWei = null,
-            int? maxSlippageBPS = null
+            double? maxSlippageBPS = null,
+            string intentId = null
         )
         {
             FromAddress = fromAddress;
@@ -59,6 +63,7 @@ namespace Thirdweb.Pay
             ToAmount = toAmount;
             ToAmountWei = toAmountWei;
             MaxSlippageBPS = maxSlippageBPS;
+            IntentId = intentId;
         }
     }
 
@@ -182,7 +187,7 @@ namespace Thirdweb.Pay
         public Estimated Estimated { get; set; }
 
         [JsonProperty("maxSlippageBPS")]
-        public int MaxSlippageBPS { get; set; }
+        public double MaxSlippageBPS { get; set; }
 
         [JsonProperty("bridge")]
         public string Bridge { get; set; }

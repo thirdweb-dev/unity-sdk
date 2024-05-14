@@ -2,6 +2,7 @@ namespace Thirdweb.AccountAbstraction
 {
     public static class Constants
     {
+        public const string DEFAULT_FACTORY_ADDRESS = "0x85e23b94e7F5E9cC1fF78BCe78cfb15B81f0DF00";
         public const string DEFAULT_ENTRYPOINT_ADDRESS = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"; // v0.6
         public const string DUMMY_SIG = "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c";
         public const string DUMMY_PAYMASTER_AND_DATA_HEX =

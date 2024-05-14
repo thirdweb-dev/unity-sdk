@@ -2,6 +2,7 @@ using UnityEngine;
 using Thirdweb;
 using Thirdweb.Pay;
 using Newtonsoft.Json;
+using System.Linq;
 
 public class Prefab_BuyWithCrypto : MonoBehaviour
 {
@@ -62,13 +63,16 @@ public class Prefab_BuyWithCrypto : MonoBehaviour
         ThirdwebDebug.Log($"Status: {JsonConvert.SerializeObject(status, Formatting.Indented)}");
     }
 
-    public async void GetSwapHistory()
+    public async void GetBuyHistory()
     {
         string connectedAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
-        var history = await ThirdwebPay.GetBuyWithCryptoHistory(connectedAddress, 0, 1);
-        ThirdwebDebug.Log($"History: {JsonConvert.SerializeObject(history, Formatting.Indented)}");
+        var history = await ThirdwebPay.GetBuyHistory(connectedAddress, 0, 10);
+        ThirdwebDebug.Log($"Full History: {JsonConvert.SerializeObject(history, Formatting.Indented)}");
 
-        var historyNext = await ThirdwebPay.GetBuyWithCryptoHistory(connectedAddress, 1, 10, history.NextCursor);
-        ThirdwebDebug.Log($"History Next: {JsonConvert.SerializeObject(historyNext, Formatting.Indented)}");
+        var latestBuyWithCryptoStatus = history.Page.FirstOrDefault(h => h.BuyWithCryptoStatus != null)?.BuyWithCryptoStatus;
+        if (latestBuyWithCryptoStatus != null)
+            ThirdwebDebug.Log($"Latest Buy With Crypto Status: {JsonConvert.SerializeObject(latestBuyWithCryptoStatus, Formatting.Indented)}");
+        else
+            ThirdwebDebug.Log("No Buy With Crypto status found.");
     }
 }
