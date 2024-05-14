@@ -13,7 +13,7 @@ public class ContractGeneratorEditor : EditorWindow
     private string AbiJson = "[\n\t{ }\n]";
     private string rootNamespace = "Contracts";
 
-    [MenuItem("MetaMask/Contract ABI Converter")]
+    [MenuItem("Tools/MetaMask/Contract ABI Converter")]
     public static void Initialize()
     {
         instance = GetWindow<ContractGeneratorEditor>();

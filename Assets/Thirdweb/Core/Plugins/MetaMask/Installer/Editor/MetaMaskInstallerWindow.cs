@@ -35,7 +35,7 @@ namespace MetaMask
         private AddRequest addRequest;
         private Vector2 scrollPosition;
 
-        [MenuItem("MetaMask/Install")]
+        [MenuItem("Tools/MetaMask/Install")]
         public static void Initialize()
         {
             instance = GetWindow<MetaMaskInstallerWindow>();

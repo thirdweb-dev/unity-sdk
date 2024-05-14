@@ -23,10 +23,11 @@ namespace Thirdweb.Wallets
                 this.socketUrl = defaults.SocketUrl;
             }
 
-            public void UpdateConfig(string appName, string appUrl)
+            public void UpdateConfig(string appName, string appUrl, string appIconUrl)
             {
                 this.appName = appName;
                 this.appUrl = appUrl;
+                this.appIconUrl = appIconUrl;
             }
         }
 
@@ -57,7 +58,7 @@ namespace Thirdweb.Wallets
         private void SetupMetaMask()
         {
             MetaMaskWallet.Source = "Thirdweb";
-            
+
             var config = ScriptableObject.CreateInstance<MetaMaskThirdwebConfig>();
             var defaults = MetaMaskConfig.DefaultInstance;
 
@@ -65,7 +66,8 @@ namespace Thirdweb.Wallets
 
             var appName = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appName;
             var appUrl = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appUrl;
-            config.UpdateConfig(appName, appUrl);
+            var appIconUrl = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appIcons[0];
+            config.UpdateConfig(appName, appUrl, appIconUrl);
 
             MetaMaskUnity.Instance.Initialize();
         }
