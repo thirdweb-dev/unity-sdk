@@ -12,7 +12,7 @@ namespace Thirdweb.Pay
     public class BuyWithCryptoStatusResult
     {
         [JsonProperty("quote")]
-        public Quote Quote { get; set; }
+        public SwapQuote Quote { get; set; }
 
         [JsonProperty("swapType")]
         public string SwapType { get; set; }
@@ -42,7 +42,31 @@ namespace Thirdweb.Pay
         public string Bridge { get; set; }
     }
 
-    public class Quote
+    public class TransactionDetails
+    {
+        [JsonProperty("transactionHash")]
+        public string TransactionHash { get; set; }
+
+        [JsonProperty("token")]
+        public Token Token { get; set; }
+
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        [JsonProperty("amountWei")]
+        public string AmountWei { get; set; }
+
+        [JsonProperty("amountUSDCents")]
+        public double AmountUSDCents { get; set; }
+
+        [JsonProperty("completedAt")]
+        public DateTime CompletedAt { get; set; }
+
+        [JsonProperty("explorerLink")]
+        public string ExplorerLink { get; set; }
+    }
+
+    public class SwapQuote
     {
         [JsonProperty("fromToken")]
         public Token FromToken { get; set; }
@@ -75,30 +99,6 @@ namespace Thirdweb.Pay
         public DateTime CreatedAt { get; set; }
     }
 
-    public class TransactionDetails
-    {
-        [JsonProperty("transactionHash")]
-        public string TransactionHash { get; set; }
-
-        [JsonProperty("token")]
-        public Token Token { get; set; }
-
-        [JsonProperty("amount")]
-        public string Amount { get; set; }
-
-        [JsonProperty("amountWei")]
-        public string AmountWei { get; set; }
-
-        [JsonProperty("amountUSDCents")]
-        public double AmountUSDCents { get; set; }
-
-        [JsonProperty("completedAt")]
-        public DateTime CompletedAt { get; set; }
-
-        [JsonProperty("explorerLink")]
-        public string ExplorerLink { get; set; }
-    }
-
     public enum SwapStatus
     {
         NOT_FOUND,
@@ -116,11 +116,5 @@ namespace Thirdweb.Pay
         SUCCESS,
         PARTIAL_SUCCESS,
         UNKNOWN_ERROR
-    }
-
-    public enum SwapType
-    {
-        SAME_CHAIN,
-        CROSS_CHAIN
     }
 }

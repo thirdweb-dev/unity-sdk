@@ -10,16 +10,16 @@ namespace Thirdweb.Pay
     public static partial class ThirdwebPay
     {
         /// <summary>
-        /// Get swap history, supports cursor and pagination.
+        /// Get buy history, supports cursor and pagination.
         /// </summary>
-        /// <param name="walletAddress">User wallet address to get swap history for</param>
+        /// <param name="walletAddress">User wallet address to get buy history for</param>
         /// <param name="start">Offset for the records</param>
         /// <param name="count">Number of records to retrieve</param>
         /// <param name="cursor">Cursor for paging through the history</param>
-        /// <param name="pageSize">Swap statuses to query for</param>
-        /// <returns>Swap history object <see cref="BuyWithCryptoHistoryResult"/></returns>
+        /// <param name="pageSize">Buy statuses to query for</param>
+        /// <returns>Buy history object <see cref="BuyHistoryResult"/></returns>
         /// <exception cref="Exception"></exception>
-        public static async Task<BuyWithCryptoHistoryResult> GetBuyWithCryptoHistory(string walletAddress, int start, int count, string cursor = null, int? pageSize = null)
+        public static async Task<BuyHistoryResult> GetBuyHistory(string walletAddress, int start, int count, string cursor = null, int? pageSize = null)
         {
             if (string.IsNullOrEmpty(Utils.GetClientId()))
             {
@@ -83,7 +83,8 @@ namespace Thirdweb.Pay
             }
 
             var content = request.downloadHandler.text;
-            var data = JsonConvert.DeserializeObject<SwapHistoryResponse>(content);
+            ThirdwebDebug.Log($"GetBuyHistory response: {content}");
+            var data = JsonConvert.DeserializeObject<BuyHistoryResponse>(content);
             return data.Result;
         }
     }

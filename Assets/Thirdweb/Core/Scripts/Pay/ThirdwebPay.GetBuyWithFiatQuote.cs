@@ -5,18 +5,18 @@ using Newtonsoft.Json;
 using System.Linq;
 using Thirdweb.Redcode.Awaiting;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Thirdweb.Pay
 {
     public static partial class ThirdwebPay
     {
         /// <summary>
-        /// Get a quote containing a TransactionRequest for swapping any token pair.
+        /// Get a quote containing an onramp link for a fiat to crypto swap.
         /// </summary>
-        /// <param name="buyWithCryptoParams">Swap parameters <see cref="BuyWithCryptoQuoteParams"/></param>
-        /// <returns>Swap quote object <see cref="BuyWithCryptoQuoteResult"/></returns>
-        /// <exception cref="Exception"></exception>
-        public static async Task<BuyWithCryptoQuoteResult> GetBuyWithCryptoQuote(BuyWithCryptoQuoteParams buyWithCryptoParams)
+        /// <param name="buyWithFiatParams">Fiat onramp parameters <see cref="BuyWithFiatQuoteParams"/></param>
+        /// <returns>Fiat quote object <see cref="BuyWithFiatQuoteResult"/></returns>
+        public static async Task<BuyWithFiatQuoteResult> GetBuyWithFiatQuote(BuyWithFiatQuoteParams buyWithFiatParams)
         {
             if (string.IsNullOrEmpty(Utils.GetClientId()))
             {
@@ -25,21 +25,20 @@ namespace Thirdweb.Pay
 
             var queryString = new Dictionary<string, string>
             {
-                { "fromAddress", buyWithCryptoParams.FromAddress },
-                { "fromChainId", buyWithCryptoParams.FromChainId?.ToString() },
-                { "fromTokenAddress", buyWithCryptoParams.FromTokenAddress },
-                { "fromAmount", buyWithCryptoParams.FromAmount },
-                { "fromAmountWei", buyWithCryptoParams.FromAmountWei },
-                { "toChainId", buyWithCryptoParams.ToChainId?.ToString() },
-                { "toTokenAddress", buyWithCryptoParams.ToTokenAddress },
-                { "toAmount", buyWithCryptoParams.ToAmount },
-                { "toAmountWei", buyWithCryptoParams.ToAmountWei },
-                { "maxSlippageBPS", buyWithCryptoParams.MaxSlippageBPS?.ToString() },
-                { "intentId", buyWithCryptoParams.IntentId }
+                { "fromCurrencySymbol", buyWithFiatParams.FromCurrencySymbol },
+                { "fromAmount", buyWithFiatParams.FromAmount },
+                { "fromAmountUnits", buyWithFiatParams.FromAmountUnits },
+                { "toAddress", buyWithFiatParams.ToAddress },
+                { "toChainId", buyWithFiatParams.ToChainId },
+                { "toTokenAddress", buyWithFiatParams.ToTokenAddress },
+                { "toAmount", buyWithFiatParams.ToAmount },
+                { "toAmountWei", buyWithFiatParams.ToAmountWei },
+                { "maxSlippageBPS", buyWithFiatParams.MaxSlippageBPS?.ToString() }
             };
 
             var queryStringFormatted = string.Join("&", queryString.Where(kv => kv.Value != null).Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
-            var url = $"{Constants.THIRDWEB_PAY_CRYPTO_QUOTE_ENDPOINT}?{queryStringFormatted}";
+            var url = $"{Constants.THIRDWEB_PAY_FIAT_QUOTE_ENDPOINT}?{queryStringFormatted}";
+            url += buyWithFiatParams.IsTestMode ? "&isTestMode=true" : "&isTestMode=false";
 
             using var request = UnityWebRequest.Get(url);
 
@@ -81,7 +80,7 @@ namespace Thirdweb.Pay
             }
 
             var content = request.downloadHandler.text;
-            var data = JsonConvert.DeserializeObject<GetSwapQuoteResponse>(content);
+            var data = JsonConvert.DeserializeObject<GetFiatQuoteResponse>(content);
             return data.Result;
         }
     }
