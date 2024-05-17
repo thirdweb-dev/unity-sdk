@@ -23,7 +23,7 @@ namespace Thirdweb
     {
         public const string AddressZero = "0x0000000000000000000000000000000000000000";
         public const string NativeTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-        public const decimal DECIMALS_18 = 1000000000000000000;
+        public const decimal DECIMALS_18 = 1_000_000_000_000_000_000M;
 
         public static string[] ToJsonStringArray(params object[] args)
         {
@@ -93,10 +93,22 @@ namespace Thirdweb
 
         public static string ToWei(this string eth)
         {
-            if (!decimal.TryParse(eth, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal ethDecimal))
-                throw new ArgumentException("Invalid eth value.");
-            BigInteger wei = (BigInteger)(ethDecimal * DECIMALS_18);
-            return wei.ToString();
+            try
+            {
+                if (!decimal.TryParse(eth, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal ethDecimal))
+                    throw new ArgumentException("Invalid eth value.");
+
+                BigInteger wei = (BigInteger)(ethDecimal * DECIMALS_18);
+                return wei.ToString();
+            }
+            catch (OverflowException)
+            {
+                if (!double.TryParse(eth, NumberStyles.Number, CultureInfo.InvariantCulture, out double ethDouble))
+                    throw new ArgumentException("Invalid eth value.");
+
+                BigInteger wei = (BigInteger)(ethDouble * (double)DECIMALS_18);
+                return wei.ToString();
+            }
         }
 
         public static string ToEth(this string wei, int decimalsToDisplay = 4, bool addCommas = true)
@@ -109,15 +121,24 @@ namespace Thirdweb
             if (!BigInteger.TryParse(wei, out BigInteger weiBigInt))
                 throw new ArgumentException("Invalid wei value.");
 
-            decimal eth = (decimal)weiBigInt / (decimal)Math.Pow(10, decimals);
             string format = addCommas ? "#,0" : "#0";
 
             if (decimalsToDisplay > 0)
+            {
                 format += ".";
-            for (int i = 0; i < decimalsToDisplay; i++)
-                format += "#";
+                format += new string('#', decimalsToDisplay);
+            }
 
-            return eth.ToString(format);
+            try
+            {
+                decimal eth = (decimal)weiBigInt / (decimal)BigInteger.Pow(10, decimals);
+                return eth.ToString(format, CultureInfo.InvariantCulture);
+            }
+            catch (OverflowException)
+            {
+                double eth = (double)weiBigInt / Math.Pow(10, decimals);
+                return eth.ToString(format, CultureInfo.InvariantCulture);
+            }
         }
 
         public static BigInteger AdjustDecimals(this BigInteger value, int fromDecimals, int toDecimals)
