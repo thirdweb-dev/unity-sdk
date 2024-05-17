@@ -36,6 +36,9 @@ namespace Thirdweb.Examples
         [Header("Use ERC-4337 (Account Abstraction) compatible smart wallets.\nEnabling this will connect user to the associated smart wallet as per your ThirwebManager settings.")]
         public bool useSmartWallets = false;
 
+        [Header("End session on disconnect. If enabled, user will have to re-authenticate on next connect.")]
+        public bool endSessionOnDisconnect = false;
+
         [Header("Events")]
         public UnityEvent onStart;
         public UnityEvent<WalletConnection> onConnectionRequested;
@@ -165,7 +168,7 @@ namespace Thirdweb.Examples
             {
                 _address = null;
                 _password = null;
-                await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession: false);
+                await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession: endSessionOnDisconnect);
                 onDisconnected.Invoke();
             }
             catch (System.Exception e)
