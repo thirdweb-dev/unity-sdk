@@ -4788,6 +4788,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enabledWalletProviders: 07000000000000000100000002000000060000000300000004000000
   useSmartWallets: 0
+  endSessionOnDisconnect: 0
   onStart:
     m_PersistentCalls:
       m_Calls:
