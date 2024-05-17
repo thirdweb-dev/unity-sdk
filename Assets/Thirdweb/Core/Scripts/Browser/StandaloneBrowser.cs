@@ -12,6 +12,8 @@ namespace Thirdweb.Browser
     {
         private TaskCompletionSource<BrowserResult> _taskCompletionSource;
 
+        private readonly HttpListener httpListener = new();
+
         private readonly string closePageResponse =
             @"
             <html>
@@ -57,14 +59,17 @@ namespace Thirdweb.Browser
             cancellationToken.Register(() =>
             {
                 _taskCompletionSource?.TrySetCanceled();
+                StopHttpListener();
             });
-
-            using var httpListener = new HttpListener();
 
             try
             {
                 redirectUrl = AddForwardSlashIfNecessary(redirectUrl);
-                httpListener.Prefixes.Add(redirectUrl);
+                if (httpListener.Prefixes.Count == 0 || !httpListener.Prefixes.Contains(redirectUrl))
+                {
+                    httpListener.Prefixes.Clear();
+                    httpListener.Prefixes.Add(redirectUrl);
+                }
                 httpListener.Start();
                 httpListener.BeginGetContext(IncomingHttpRequest, httpListener);
 
@@ -80,15 +85,35 @@ namespace Thirdweb.Browser
                     return new BrowserResult(BrowserStatus.Timeout, null, "The operation timed out.");
                 }
             }
+            catch (TaskCanceledException)
+            {
+                return new BrowserResult(BrowserStatus.UserCanceled, null, "The operation was cancelled.");
+            }
+            catch (Exception ex)
+            {
+                return new BrowserResult(BrowserStatus.UnknownError, null, $"An error occurred: {ex.Message}");
+            }
             finally
             {
+                StopHttpListener();
+            }
+        }
+
+        private void StopHttpListener()
+        {
+            if (httpListener != null && httpListener.IsListening)
+            {
                 httpListener.Stop();
+                httpListener.Close();
             }
         }
 
         private void IncomingHttpRequest(IAsyncResult result)
         {
             var httpListener = (HttpListener)result.AsyncState;
+            if (!httpListener.IsListening)
+                return;
+
             var httpContext = httpListener.EndGetContext(result);
             var httpRequest = httpContext.Request;
             var httpResponse = httpContext.Response;
@@ -104,10 +129,9 @@ namespace Thirdweb.Browser
 
         private string AddForwardSlashIfNecessary(string url)
         {
-            string forwardSlash = "/";
-            if (!url.EndsWith(forwardSlash))
+            if (!url.EndsWith("/"))
             {
-                url += forwardSlash;
+                url += "/";
             }
             return url;
         }

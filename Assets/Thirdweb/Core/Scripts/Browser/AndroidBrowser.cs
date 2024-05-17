@@ -39,6 +39,14 @@ namespace Thirdweb.Browser
                     return new BrowserResult(BrowserStatus.Timeout, null, "The operation timed out.");
                 }
             }
+            catch (TaskCanceledException)
+            {
+                return new BrowserResult(BrowserStatus.UserCanceled, null, "The operation was cancelled.");
+            }
+            catch (Exception ex)
+            {
+                return new BrowserResult(BrowserStatus.UnknownError, null, $"An error occurred: {ex.Message}");
+            }
             finally
             {
                 Application.deepLinkActivated -= OnDeepLinkActivated;
@@ -47,17 +55,17 @@ namespace Thirdweb.Browser
 
         private void OpenURL(string url)
         {
-            AndroidJavaClass thirdwebActivityClass = new("com.unity3d.player.UnityPlayer");
-            AndroidJavaObject thirdwebActivity = thirdwebActivityClass.GetStatic<AndroidJavaObject>("currentActivity");
-            thirdwebActivity.Call("OpenCustomTab", url);
+            AndroidJavaClass unityPlayer = new("com.unity3d.player.UnityPlayer");
+            AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            activity.Call("OpenCustomTab", url);
         }
 
         private void OnDeepLinkActivated(string url)
         {
-            if (!url.StartsWith(_customScheme))
+            if (_taskCompletionSource.Task.IsCanceled || !url.StartsWith(_customScheme))
                 return;
 
-            _taskCompletionSource.SetResult(new BrowserResult(BrowserStatus.Success, url));
+            _taskCompletionSource.TrySetResult(new BrowserResult(BrowserStatus.Success, url));
         }
     }
 }

@@ -12,6 +12,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.Events;
+using System.Threading;
 
 namespace Thirdweb.Wallets
 {
@@ -37,6 +38,7 @@ namespace Thirdweb.Wallets
         protected Exception _exception;
         protected string _callbackUrl;
         protected string _customScheme;
+        protected CancellationTokenSource _cancellationTokenSource;
 
         #endregion
 
@@ -141,8 +143,16 @@ namespace Thirdweb.Wallets
             return _user;
         }
 
+        [ContextMenu("Cancel")]
         public virtual void Cancel()
         {
+            if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
+            }
+
             _exception = new UnityException("User cancelled");
         }
 
@@ -285,11 +295,27 @@ namespace Thirdweb.Wallets
 
             string redirectUrl = Application.isMobilePlatform ? _customScheme : "http://localhost:8789/";
             CrossPlatformBrowser browser = new();
-            var browserResult = await browser.Login(loginUrl, redirectUrl);
-            if (browserResult.status != BrowserStatus.Success)
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = new CancellationTokenSource();
+            var browserResult = await browser.Login(loginUrl, redirectUrl, _cancellationTokenSource.Token);
+
+            if (browserResult.status == BrowserStatus.UserCanceled)
+            {
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = null;
+                ThirdwebDebug.LogWarning("User cancelled login");
+                return;
+            }
+            else if (browserResult.status != BrowserStatus.Success)
+            {
                 _exception = new UnityException($"Failed to login with {authProviderStr}: {browserResult.status} | {browserResult.error}");
+                return;
+            }
             else
+            {
                 _callbackUrl = browserResult.callbackUrl;
+            }
 
             await new WaitUntil(() => _callbackUrl != null);
 
