@@ -23,7 +23,7 @@ namespace Thirdweb
     {
         public const string AddressZero = "0x0000000000000000000000000000000000000000";
         public const string NativeTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-        public const double DECIMALS_18 = 1000000000000000000;
+        public const decimal DECIMALS_18 = 1000000000000000000;
 
         public static string[] ToJsonStringArray(params object[] args)
         {
@@ -93,9 +93,9 @@ namespace Thirdweb
 
         public static string ToWei(this string eth)
         {
-            if (!double.TryParse(eth, NumberStyles.Number, CultureInfo.InvariantCulture, out double ethDouble))
+            if (!decimal.TryParse(eth, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal ethDecimal))
                 throw new ArgumentException("Invalid eth value.");
-            BigInteger wei = (BigInteger)(ethDouble * DECIMALS_18);
+            BigInteger wei = (BigInteger)(ethDecimal * DECIMALS_18);
             return wei.ToString();
         }
 
@@ -106,15 +106,17 @@ namespace Thirdweb
 
         public static string FormatERC20(this string wei, int decimalsToDisplay = 4, int decimals = 18, bool addCommas = true)
         {
-            decimals = decimals == 0 ? 18 : decimals;
             if (!BigInteger.TryParse(wei, out BigInteger weiBigInt))
                 throw new ArgumentException("Invalid wei value.");
-            double eth = (double)weiBigInt / Math.Pow(10.0, decimals);
+
+            decimal eth = (decimal)weiBigInt / (decimal)Math.Pow(10, decimals);
             string format = addCommas ? "#,0" : "#0";
+
             if (decimalsToDisplay > 0)
                 format += ".";
             for (int i = 0; i < decimalsToDisplay; i++)
                 format += "#";
+
             return eth.ToString(format);
         }
 
@@ -652,9 +654,9 @@ namespace Thirdweb
             return new GasPriceParameters(GweiToWei(data.fast.maxFee), GweiToWei(data.fast.maxPriorityFee));
         }
 
-        public static BigInteger GweiToWei(double gweiAmount)
+        public static BigInteger GweiToWei(decimal gweiAmount)
         {
-            return new BigInteger(gweiAmount * 1e9);
+            return new BigInteger(gweiAmount * 1_000_000_000m); // 1e9 in decimal
         }
 
         public static string BigIntToHex(this BigInteger number)
