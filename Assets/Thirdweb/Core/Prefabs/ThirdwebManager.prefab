@@ -55,8 +55,8 @@ MonoBehaviour:
   - identifier: polygon
     chainId: 137
     rpcOverride: 
-  - identifier: mumbai
-    chainId: 80001
+  - identifier: polygon-amoy-testnet
+    chainId: 80002
     rpcOverride: 
   - identifier: fantom
     chainId: 250
