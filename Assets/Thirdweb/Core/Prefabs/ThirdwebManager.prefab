@@ -55,8 +55,8 @@ MonoBehaviour:
   - identifier: polygon
     chainId: 137
     rpcOverride: 
-  - identifier: mumbai
-    chainId: 80001
+  - identifier: polygon-amoy-testnet
+    chainId: 80002
     rpcOverride: 
   - identifier: fantom
     chainId: 250
@@ -81,6 +81,12 @@ MonoBehaviour:
     rpcOverride: 
   - identifier: binance-testnet
     chainId: 97
+    rpcOverride: 
+  - identifier: xai
+    chainId: 660279
+    rpcOverride: 
+  - identifier: xai-sepolia
+    chainId: 37714555429
     rpcOverride: 
   clientId: 
   initializeOnAwake: 1
