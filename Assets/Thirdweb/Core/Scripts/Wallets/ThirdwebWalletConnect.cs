@@ -18,7 +18,6 @@ namespace Thirdweb.Wallets
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
         private string _walletConnectProjectId;
-        private KeyValuePair<string, Namespace> _namespace;
 
         public ThirdwebWalletConnect(string walletConnectProjectId)
         {
@@ -37,11 +36,7 @@ namespace Thirdweb.Wallets
             }
 
             await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
-            _namespace = WalletConnect.Instance.ActiveSession.Namespaces.First();
-            var config = ProjectConfiguration.Load();
-            // Using WalletConnect Blockchain API: https://docs.walletconnect.com/cloud/blockchain-api
-            var url = $"https://rpc.walletconnect.com/v1?chainId={_namespace.Value.Chains[0]}&projectId={config.Id}";
-            _web3 = new Web3(url);
+            _web3 = new Web3(rpc);
             return await GetAddress();
         }
 
@@ -69,7 +64,7 @@ namespace Thirdweb.Wallets
 
         public Task<string> GetAddress()
         {
-            var ethAccs = new string[] { WalletConnect.Instance.ActiveSession.CurrentAddress(_namespace.Key).Address };
+            var ethAccs = new string[] { WalletConnect.Instance.ActiveSession.CurrentAddress(WalletConnect.Instance.ActiveChainId).Address };
             var addy = ethAccs[0];
             if (addy != null)
                 addy = addy.ToChecksumAddress();

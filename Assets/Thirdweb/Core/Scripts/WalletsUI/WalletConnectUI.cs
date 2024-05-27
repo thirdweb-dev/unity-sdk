@@ -9,6 +9,8 @@ using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectSharp.Sign.Models;
 using System;
 using Thirdweb.Redcode.Awaiting;
+using System.Linq;
+using Nethereum.Hex.HexTypes;
 
 namespace Thirdweb.Wallets
 {
@@ -17,7 +19,7 @@ namespace Thirdweb.Wallets
         public GameObject WalletConnectCanvas;
         public Image QRCodeImage;
         public Button DeepLinkButton;
-        public string[] SupportedMethods = new[] { "eth_sendTransaction", "personal_sign", "eth_signTypedData_v4" };
+        public string[] SupportedMethods = new[] { "eth_sendTransaction", "personal_sign", "eth_signTypedData_v4", "wallet_switchEthereumChain", "wallet_addEthereumChain" };
 
         public static WalletConnectUI Instance { get; private set; }
 
@@ -45,43 +47,51 @@ namespace Thirdweb.Wallets
                 await WalletConnect.Instance.InitializeAsync();
 
             var sessionResumed = await WalletConnect.Instance.TryResumeSessionAsync();
-            if (!sessionResumed)
+            if (sessionResumed)
+                await WalletConnect.Instance.DisconnectAsync();
+
+            WalletConnectCanvas.SetActive(true);
+
+            var chains = new[] { $"eip155:{chainId}" };
+            var additionalChains = ThirdwebManager.Instance.SDK.Session.Options.supportedChains;
+            if (additionalChains != null)
+                chains = chains.Concat(additionalChains.Select(x => $"eip155:{new HexBigInteger(x.chainId).Value}")).ToArray();
+
+            ThirdwebDebug.Log($"Supported chains: {string.Join(", ", chains)}");
+
+            var connectOptions = new ConnectOptions
             {
-                WalletConnectCanvas.SetActive(true);
-
-                var connectOptions = new ConnectOptions
+                RequiredNamespaces = new RequiredNamespaces
                 {
-                    RequiredNamespaces = new RequiredNamespaces
                     {
+                        "eip155",
+                        new ProposedNamespace
                         {
-                            "eip155",
-                            new ProposedNamespace
-                            {
-                                Methods = SupportedMethods,
-                                Chains = new[] { $"eip155:{chainId}" },
-                                Events = new[] { "chainChanged", "accountsChanged" },
-                            }
+                            Methods = SupportedMethods,
+                            Chains = new[] { $"eip155:{chainId}" },
+                            Events = new[] { "chainChanged", "accountsChanged" },
                         }
-                    },
-                };
+                    }
+                },
+            };
 
-                var connectData = await WalletConnect.Instance.ConnectAsync(connectOptions);
+            var connectData = await WalletConnect.Instance.ConnectAsync(connectOptions);
 
-                var qrCodeAsTexture2D = GenerateQRTexture(connectData.Uri);
-                QRCodeImage.sprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new UnityEngine.Vector2(0.5f, 0.5f));
-                QRCodeImage.mainTexture.filterMode = FilterMode.Point;
+            var qrCodeAsTexture2D = GenerateQRTexture(connectData.Uri);
+            QRCodeImage.sprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new UnityEngine.Vector2(0.5f, 0.5f));
+            QRCodeImage.mainTexture.filterMode = FilterMode.Point;
 
-                DeepLinkButton.onClick.RemoveAllListeners();
-                DeepLinkButton.onClick.AddListener(() => Application.OpenURL(connectData.Uri));
+            DeepLinkButton.onClick.RemoveAllListeners();
+            DeepLinkButton.onClick.AddListener(() => Application.OpenURL(connectData.Uri));
 
-                var task = connectData.Approval;
-                await new WaitUntil(() => task.IsCompleted || _exception != null);
-                if (_exception != null)
-                {
-                    WalletConnectCanvas.SetActive(false);
-                    throw _exception;
-                }
+            var task = connectData.Approval;
+            await new WaitUntil(() => task.IsCompleted || _exception != null);
+            if (_exception != null)
+            {
+                WalletConnectCanvas.SetActive(false);
+                throw _exception;
             }
+
             WalletConnectCanvas.SetActive(false);
         }
 

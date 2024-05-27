@@ -1,12 +1,13 @@
 using System;
 using System.IO;
-using NativeWebSocket;
+using WalletConnectUnity.NativeWebSocket;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
 using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Logging;
-using WalletConnectSharp.Common.Model.Errors;
 using WalletConnectSharp.Network;
 using WalletConnectSharp.Network.Models;
 
@@ -14,28 +15,9 @@ namespace WalletConnectUnity.Core
 {
     public sealed class WebSocketConnection : IModule, IJsonRpcConnection
     {
-        public string Name => "websocket-connection";
-
-        public string Context { get; }
-
-        public bool Connected { get; set; }
-
-        public bool Connecting { get; private set; }
-
-        public string Url { get; private set; }
-
-        public bool IsPaused { get; private set; }
-
-        public event EventHandler<string> PayloadReceived;
-        public event EventHandler Closed;
-        public event EventHandler<Exception> ErrorReceived;
-        public event EventHandler<object> Opened;
-#pragma warning disable 0067
-        public event EventHandler<Exception> RegisterErrored;
-#pragma warning restore 0067
+        private bool _disposed;
 
         private WebSocket _socket;
-        private bool _disposed;
 
         public WebSocketConnection(string url)
         {
@@ -45,6 +27,22 @@ namespace WalletConnectUnity.Core
             Context = Guid.NewGuid().ToString();
             Url = url;
         }
+
+        public bool Connected { get; private set; }
+
+        public bool Connecting { get; private set; }
+
+        public string Url { get; private set; }
+
+        public bool IsPaused { get; set; }
+
+        public event EventHandler<string> PayloadReceived;
+        public event EventHandler Closed;
+        public event EventHandler<Exception> ErrorReceived;
+        public event EventHandler<object> Opened;
+#pragma warning disable 67
+        public event EventHandler<Exception> RegisterErrored;
+#pragma warning restore 67
 
         Task IJsonRpcConnection.Open()
         {
@@ -79,15 +77,13 @@ namespace WalletConnectUnity.Core
             if (_disposed)
                 throw new ObjectDisposedException(nameof(WebSocketConnection));
 
-            WCLogger.Log("Closing websocket due to Close() being called");
-
             await _socket.Close();
             OnClose(WebSocketCloseCode.Normal);
         }
 
         async Task IJsonRpcConnection.SendRequest<T>(IJsonRpcRequest<T> requestPayload, object context)
         {
-            if (_socket == null)
+            if (_socket == null || (!Connected && !Connecting))
                 throw new IOException("Connection is not open");
 
             if (_disposed)
@@ -96,7 +92,6 @@ namespace WalletConnectUnity.Core
             try
             {
                 var json = JsonConvert.SerializeObject(requestPayload);
-                WCLogger.Log($"[WebSocketConnection-{Context}] Sending request {json}");
 
                 await _socket.SendText(json);
 
@@ -148,8 +143,26 @@ namespace WalletConnectUnity.Core
             }
         }
 
+        public string Name => "websocket-connection";
+
+        public string Context { get; }
+
         private void Register()
         {
+            var unitySyncContext = WalletConnect.UnitySyncContext;
+            var isOnMainThread = SynchronizationContext.Current == WalletConnect.UnitySyncContext;
+
+            if (isOnMainThread)
+                RegisterCore();
+            else
+                unitySyncContext.Post(_ => Register(), null);
+        }
+
+        private void RegisterCore()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(nameof(WebSocketConnection));
+
             if (!Validation.IsWsUrl(Url))
                 throw new ArgumentException($"Provided URL is not compatible with WebSocket connection: {Url}");
 
@@ -159,6 +172,7 @@ namespace WalletConnectUnity.Core
             Connecting = true;
 
             _socket = new WebSocket(Url);
+
             _socket.OnOpen += OnOpen;
             _socket.OnMessage += OnMessage;
             _socket.OnClose += OnDisconnect;
@@ -167,7 +181,6 @@ namespace WalletConnectUnity.Core
 #if !UNITY_WEBGL || UNITY_EDITOR
             UnityEventsDispatcher.Instance.Tick += OnTick;
 #endif
-            UnityEventsDispatcher.Instance.ApplicationPause += OnApplicationPause;
 
             try
             {
@@ -185,6 +198,9 @@ namespace WalletConnectUnity.Core
         {
             try
             {
+                if (_socket == null || !Connected || Connecting || _disposed)
+                    return;
+
                 _socket.DispatchMessageQueue();
             }
 #if ENABLE_IL2CPP
@@ -201,11 +217,6 @@ namespace WalletConnectUnity.Core
         }
 #endif
 
-        private void OnApplicationPause(bool status)
-        {
-            IsPaused = status;
-        }
-
         private void OnOpen()
         {
             Connected = true;
@@ -216,9 +227,7 @@ namespace WalletConnectUnity.Core
 
         private void OnMessage(byte[] data)
         {
-            var json = System.Text.Encoding.UTF8.GetString(data);
-
-            WCLogger.Log($"[WebSocketConnection-{Context}] Got payload: \n{json}");
+            var json = Encoding.UTF8.GetString(data);
 
             if (string.IsNullOrWhiteSpace(json))
                 return;
@@ -236,8 +245,12 @@ namespace WalletConnectUnity.Core
 
         private void OnError(string message)
         {
-            ErrorReceived?.Invoke(this, new Exception(message));
-            WCLogger.LogError(Connecting ? $"[{Name}-{Context}] Error happened during connection. Make sure Project ID is valid. Error message: {message}" : $"[{Name}-{Context}] Error: {message}");
+            ErrorReceived?.Invoke(this, new WebSocketException(message));
+
+            if (Connecting)
+                Connecting = false;
+
+            WCLogger.LogError(Connecting ? $"[{Name}-{Context}] Error happened during connection. Error message: {message}" : $"[{Name}-{Context}] Error: {message}");
         }
 
         private void OnError<T>(IJsonRpcPayload ogPayload, Exception e)
@@ -246,7 +259,7 @@ namespace WalletConnectUnity.Core
             {
                 var payload = new JsonRpcResponse<T>(
                     ogPayload.Id,
-                    new Error()
+                    new Error
                     {
                         Code = e.HResult,
                         Data = null,
@@ -266,16 +279,17 @@ namespace WalletConnectUnity.Core
 
         private void OnClose(WebSocketCloseCode obj)
         {
+            Connected = false;
+            Connecting = false;
+
             if (_socket == null)
                 return;
 
 #if !UNITY_WEBGL || UNITY_EDITOR
             UnityEventsDispatcher.Instance.Tick -= OnTick;
 #endif
-            UnityEventsDispatcher.Instance.ApplicationPause -= OnApplicationPause;
 
             _socket = null;
-            Connected = false;
             Closed?.Invoke(this, EventArgs.Empty);
         }
 
@@ -285,10 +299,26 @@ namespace WalletConnectUnity.Core
             await _socket.Connect();
         }
 
-        public async void Dispose()
+        public void Dispose()
         {
-            if (_socket != null)
-                await _socket.Close();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+#if !UNITY_WEBGL || UNITY_EDITOR
+                UnityEventsDispatcher.Instance.Tick -= OnTick;
+#endif
+                _socket?.Dispose();
+            }
+
+            _disposed = true;
         }
     }
 }

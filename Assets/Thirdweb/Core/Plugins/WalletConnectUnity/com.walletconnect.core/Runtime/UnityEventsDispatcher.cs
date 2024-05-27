@@ -47,8 +47,17 @@ namespace WalletConnectUnity.Core
 
                 _tick += value;
 
-                if (wasEmpty)
+                if (!wasEmpty)
+                    return;
+
+                try
+                {
                     _tickCoroutine = StartCoroutine(TickRoutine());
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
             }
             remove
             {
@@ -59,10 +68,31 @@ namespace WalletConnectUnity.Core
             }
         }
 
+        public static void InvokeNextFrame(Action action)
+        {
+            Instance.StartCoroutine(InvokeNextFrameRoutine(action));
+        }
+
+        private static IEnumerator InvokeNextFrameRoutine(Action action)
+        {
+            yield return null;
+            action?.Invoke();
+        }
+
         /// <summary>
         /// Invoked when the application is paused or resumed.
         /// </summary>
         public event Action<bool> ApplicationPause;
+        
+        /// <summary>
+        /// Invoked when the application gains or loses focus.
+        /// </summary>
+        public event Action<bool> ApplicationFocus;
+
+        /// <summary>
+        /// Invoked when the application is quitting.
+        /// </summary>
+        public event Action ApplicationQuit;
 
         private IEnumerator TickRoutine()
         {
@@ -76,6 +106,16 @@ namespace WalletConnectUnity.Core
         private void OnApplicationPause(bool pauseStatus)
         {
             ApplicationPause?.Invoke(pauseStatus);
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            ApplicationFocus?.Invoke(hasFocus);
+        }
+
+        private void OnApplicationQuit()
+        {
+            ApplicationQuit?.Invoke();
         }
 
         private void OnDestroy()

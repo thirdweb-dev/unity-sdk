@@ -161,26 +161,21 @@ namespace Thirdweb
             switch (switchResult)
             {
                 case NetworkSwitchAction.ContinueSwitch:
-                    var hexChainId = await Request<string>("eth_chainId");
-                    var connectedChainId = hexChainId.HexToBigInteger(false);
-                    if (connectedChainId != ChainId)
+                    try
                     {
+                        await SwitchNetwork(new ThirdwebChain() { chainId = newChainData.chainId });
+                    }
+                    catch (System.Exception e)
+                    {
+                        ThirdwebDebug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
                         try
                         {
+                            await AddNetwork(newChainData);
                             await SwitchNetwork(new ThirdwebChain() { chainId = newChainData.chainId });
                         }
-                        catch (System.Exception e)
+                        catch (System.Exception f)
                         {
-                            ThirdwebDebug.LogWarning("Switching chain error, attempting to add chain: " + e.Message);
-                            try
-                            {
-                                await AddNetwork(newChainData);
-                                await SwitchNetwork(new ThirdwebChain() { chainId = newChainData.chainId });
-                            }
-                            catch (System.Exception f)
-                            {
-                                throw new UnityException("Adding chain error: " + f.Message);
-                            }
+                            throw new UnityException("Adding chain error: " + f.Message);
                         }
                     }
                     break;

@@ -2,6 +2,7 @@ using System.Text;
 using Thirdweb;
 using UnityEngine;
 using WalletConnectSharp.Core;
+using WalletConnectSharp.Core.Controllers;
 
 namespace WalletConnectUnity.Core
 {
@@ -14,12 +15,15 @@ namespace WalletConnectUnity.Core
         [field: SerializeField]
         public Metadata Metadata { get; private set; }
 
+        [field: SerializeField]
+        public string RelayUrl { get; private set; } = Relayer.DEFAULT_RELAY_URL;
+
         [field: SerializeField, Header("Debug")]
         public bool LoggingEnabled { get; private set; }
 
         private const string ConfigName = "WalletConnectProjectConfig";
 
-        public static readonly string ConfigPath = $"Assets/WalletConnectUnity/Resources/{ConfigName}.asset";
+        public static readonly string ConfigPath = $"Assets/Thirdweb/Core/Plugins/WalletConnectUnity/Resources/{ConfigName}.asset";
 
         public static ProjectConfiguration Load(string path = null)
         {
