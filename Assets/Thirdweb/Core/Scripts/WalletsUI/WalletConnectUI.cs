@@ -20,6 +20,7 @@ namespace Thirdweb.Wallets
         public Image QRCodeImage;
         public Button DeepLinkButton;
         public string[] SupportedMethods = new[] { "eth_sendTransaction", "personal_sign", "eth_signTypedData_v4", "wallet_switchEthereumChain", "wallet_addEthereumChain" };
+        public GameObject ResumePanel;
 
         public static WalletConnectUI Instance { get; private set; }
 
@@ -46,11 +47,31 @@ namespace Thirdweb.Wallets
             if (!WalletConnect.Instance.IsInitialized)
                 await WalletConnect.Instance.InitializeAsync();
 
+            WalletConnectCanvas.SetActive(true);
+
             var sessionResumed = await WalletConnect.Instance.TryResumeSessionAsync();
             if (sessionResumed)
-                await WalletConnect.Instance.DisconnectAsync();
+            {
+                try
+                {
+                    ThirdwebDebug.Log($"Pinging client to check if it's available.");
+                    ResumePanel.SetActive(true);
+                    await WalletConnect.Instance.SignClient.Ping(WalletConnect.Instance.ActiveSession.Topic);
+                    await new WaitForSecondsRealtime(1f); // In case wallet app was just minimized
+                    await WalletConnect.Instance.SignClient.Ping(WalletConnect.Instance.ActiveSession.Topic);
+                    ThirdwebDebug.Log($"Client is available, resuming session.");
+                    ResumePanel.SetActive(false);
+                    WalletConnectCanvas.SetActive(false);
+                    return;
+                }
+                catch
+                {
+                    ThirdwebDebug.Log($"Could not ping client, may be unavailable, restarting session.");
+                    await WalletConnect.Instance.DisconnectAsync();
+                }
+            }
 
-            WalletConnectCanvas.SetActive(true);
+            ResumePanel.SetActive(false);
 
             var chains = new[] { $"eip155:{chainId}" };
             var additionalChains = ThirdwebManager.Instance.SDK.Session.Options.supportedChains;
