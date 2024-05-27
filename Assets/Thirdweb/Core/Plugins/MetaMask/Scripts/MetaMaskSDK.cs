@@ -664,7 +664,8 @@ namespace MetaMask.Unity
                 transportToUse, socket, socketUrl);
             #endif
             
-            this._wallet.ProviderEngine.AnalyticsPlatform = "unity";
+            this._wallet.ProviderEngine.AnalyticsPlatform = $"unity_{Application.unityVersion}";
+            this._wallet.ProviderEngine.DappId = Application.identifier;
         }
 
         protected void SetupRPCUrls()

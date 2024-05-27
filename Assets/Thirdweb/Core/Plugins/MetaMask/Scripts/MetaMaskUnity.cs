@@ -381,7 +381,8 @@ namespace MetaMask.Unity
                 this.session = this.wallet.Session;
                 this.sessionData = this.wallet.Session.Data;
                 
-                this.wallet.ProviderEngine.AnalyticsPlatform = "unity";
+                this.wallet.ProviderEngine.AnalyticsPlatform = $"unity_{Application.unityVersion}";
+                this.wallet.ProviderEngine.DappId = Application.identifier;
                 
                 if (!string.IsNullOrWhiteSpace(_infuraProjectId))
                 {
