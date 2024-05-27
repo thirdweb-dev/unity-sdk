@@ -13,13 +13,13 @@ namespace Thirdweb
     public class ThirdwebInterceptor : RequestInterceptor
     {
         private readonly IThirdwebWallet _thirdwebWallet;
-        private readonly WalletConnectInterceptor _walletConnectInterceptor;
+        private readonly WalletConnectUnityInterceptor _walletConnectInterceptor;
 
         public ThirdwebInterceptor(IThirdwebWallet thirdwebWallet)
         {
             _thirdwebWallet = thirdwebWallet;
             if (WalletConnect.Instance != null)
-                _walletConnectInterceptor = new WalletConnectInterceptor(new WalletConnectServiceCore(WalletConnect.Instance.SignClient));
+                _walletConnectInterceptor = new WalletConnectUnityInterceptor(WalletConnect.Instance);
         }
 
         public override async Task<object> InterceptSendRequestAsync<T>(Func<RpcRequest, string, Task<T>> interceptedSendRequestAsync, RpcRequest request, string route = null)
