@@ -34,6 +34,7 @@ namespace WalletConnectUnity.Nethereum
 
         public override async Task<object> InterceptSendRequestAsync<T>(Func<RpcRequest, string, Task<T>> interceptedSendRequestAsync, RpcRequest request, string route = null)
         {
+            ThirdwebDebug.Log($"[WalletConnectInterceptor] InterceptSendRequestAsync: {request.Method}");
             if (!_signMethods.Contains(request.Method))
             {
                 return await base.InterceptSendRequestAsync(interceptedSendRequestAsync, request, route).ConfigureAwait(false);
@@ -61,8 +62,12 @@ namespace WalletConnectUnity.Nethereum
 
                 if (request.Method == ApiMethods.wallet_switchEthereumChain.ToString())
                 {
+                    ThirdwebDebug.Log($"[WalletConnectInterceptor] wallet_switchEthereumChain");
                     var param = JsonConvert.DeserializeObject<ThirdwebChain>(JsonConvert.SerializeObject(request.RawParameters[0]));
-                    return await _walletConnectService.WalletSwitchEthereumChainAsync(new SwitchEthereumChainParameter() { ChainId = new HexBigInteger(param.chainId), });
+                    ThirdwebDebug.Log($"[WalletConnectInterceptor] chainId: {param.chainId}");
+                    var res = await _walletConnectService.WalletSwitchEthereumChainAsync(new SwitchEthereumChainParameter() { ChainId = new HexBigInteger(param.chainId), });
+                    ThirdwebDebug.Log($"[WalletConnectInterceptor] wallet_switchEthereumChain res: {res}");
+                    return res;
                 }
                 if (request.Method == ApiMethods.wallet_addEthereumChain.ToString())
                 {
@@ -98,6 +103,8 @@ namespace WalletConnectUnity.Nethereum
             params object[] paramList
         )
         {
+            ThirdwebDebug.Log($"[WalletConnectInterceptor] InterceptSendRequestAsync: {method}");
+
             if (!_signMethods.Contains(method))
             {
                 return await base.InterceptSendRequestAsync(interceptedSendRequestAsync, method, route, paramList).ConfigureAwait(false);

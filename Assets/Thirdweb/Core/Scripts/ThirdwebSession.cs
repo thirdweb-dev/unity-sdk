@@ -57,7 +57,7 @@ namespace Thirdweb
                 case WalletProvider.WalletConnect:
                     if (Options.wallet == null || string.IsNullOrEmpty(Options.wallet?.walletConnectProjectId))
                         throw new UnityException("Wallet connect project id is required for wallet connect connection method!");
-                    ActiveWallet = new ThirdwebWalletConnect(Options.wallet?.walletConnectProjectId);
+                    ActiveWallet = new ThirdwebWalletConnect();
                     break;
                 case WalletProvider.Metamask:
                     ActiveWallet = new ThirdwebMetamask();
@@ -146,6 +146,7 @@ namespace Thirdweb
 
         internal async Task EnsureCorrectNetwork(BigInteger newChainId)
         {
+            ThirdwebDebug.Log($"Ensuring correct network for chain {newChainId}");
             ThirdwebChainData newChainData = null;
             try
             {
@@ -190,6 +191,7 @@ namespace Thirdweb
             RPC = CurrentChainData.rpcUrls[0];
             Web3 = await ActiveWallet.GetWeb3();
             Web3.Client.OverridingRequestInterceptor = new ThirdwebInterceptor(ActiveWallet);
+            ThirdwebDebug.Log($"Switched to chain {newChainId} with RPC {RPC}");
         }
 
         #endregion

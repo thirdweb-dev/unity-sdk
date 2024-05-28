@@ -11,22 +11,21 @@ using System;
 using Thirdweb.Redcode.Awaiting;
 using System.Linq;
 using Nethereum.Hex.HexTypes;
+using WalletConnectUnity.Modal;
+using System.Collections.Generic;
 
 namespace Thirdweb.Wallets
 {
     public class WalletConnectUI : MonoBehaviour
     {
-        public GameObject WalletConnectCanvas;
-        public Image QRCodeImage;
-        public Button DeepLinkButton;
-        public string[] SupportedMethods = new[] { "eth_sendTransaction", "personal_sign", "eth_signTypedData_v4", "wallet_switchEthereumChain", "wallet_addEthereumChain" };
-        public GameObject ResumePanel;
+        public GameObject WalletConnectUIParent;
 
         public static WalletConnectUI Instance { get; private set; }
 
         protected Exception _exception;
+        protected bool _isConnected;
 
-        private void Awake()
+        protected virtual async void Awake()
         {
             if (Instance == null)
             {
@@ -38,106 +37,113 @@ namespace Thirdweb.Wallets
                 Destroy(this.gameObject);
                 return;
             }
+
+            await WalletConnectModal.InitializeAsync();
         }
 
-        public virtual async Task Connect(string walletConnectProjectId, BigInteger chainId)
+        public virtual async Task Connect()
         {
             _exception = null;
+            _isConnected = false;
 
-            if (!WalletConnect.Instance.IsInitialized)
-                await WalletConnect.Instance.InitializeAsync();
+            WalletConnectUIParent.SetActive(true);
 
-            WalletConnectCanvas.SetActive(true);
+            WalletConnectModal.Ready += OnReady;
+            WalletConnect.Instance.ActiveSessionChanged += OnActiveSessionChanged;
+            WalletConnect.Instance.SessionDisconnected += OnSessionDisconnected;
 
-            var sessionResumed = await WalletConnect.Instance.TryResumeSessionAsync();
-            if (sessionResumed)
+            if (WalletConnect.Instance.IsInitialized)
+                CreateNewSession();
+
+            await new WaitUntil(() => _isConnected || _exception != null);
+
+            WalletConnectModal.Ready -= OnReady;
+            WalletConnect.Instance.ActiveSessionChanged -= OnActiveSessionChanged;
+            WalletConnect.Instance.SessionDisconnected -= OnSessionDisconnected;
+
+            WalletConnectUIParent.SetActive(false);
+
+            if (_exception != null)
+                throw _exception;
+        }
+
+        protected virtual void OnSessionDisconnected(object sender, EventArgs e)
+        {
+            _isConnected = false;
+            ThirdwebDebug.Log("Session disconnected");
+        }
+
+        protected virtual void OnActiveSessionChanged(object sender, SessionStruct sessionStruct)
+        {
+            if (!string.IsNullOrEmpty(sessionStruct.Topic))
             {
-                try
-                {
-                    ThirdwebDebug.Log($"Pinging client to check if it's available.");
-                    ResumePanel.SetActive(true);
-                    await WalletConnect.Instance.SignClient.Ping(WalletConnect.Instance.ActiveSession.Topic);
-                    await new WaitForSecondsRealtime(1f); // In case wallet app was just minimized
-                    await WalletConnect.Instance.SignClient.Ping(WalletConnect.Instance.ActiveSession.Topic);
-                    ThirdwebDebug.Log($"Client is available, resuming session.");
-                    ResumePanel.SetActive(false);
-                    WalletConnectCanvas.SetActive(false);
-                    return;
-                }
-                catch
-                {
-                    ThirdwebDebug.Log($"Could not ping client, may be unavailable, restarting session.");
-                    await WalletConnect.Instance.DisconnectAsync();
-                }
+                _isConnected = true;
+                ThirdwebDebug.Log("Session connected");
+            }
+            else
+            {
+                _isConnected = false;
+                ThirdwebDebug.Log("No topic found in sessionStruct");
+            }
+        }
+
+        protected virtual async void OnReady(object sender, ModalReadyEventArgs args)
+        {
+            if (args.SessionResumed)
+            {
+                // Session exists
+                await WalletConnect.Instance.DisconnectAsync();
+                ThirdwebDebug.Log("Resetting session");
             }
 
-            ResumePanel.SetActive(false);
+            CreateNewSession();
+        }
 
-            var chains = new[] { $"eip155:{chainId}" };
+        protected virtual void CreateNewSession()
+        {
+            ThirdwebDebug.Log("Creating new session");
+            // Session hasn't been resumed
+            var chains = new string[] { };
             var additionalChains = ThirdwebManager.Instance.SDK.Session.Options.supportedChains;
             if (additionalChains != null)
                 chains = chains.Concat(additionalChains.Select(x => $"eip155:{new HexBigInteger(x.chainId).Value}")).ToArray();
 
-            ThirdwebDebug.Log($"Supported chains: {string.Join(", ", chains)}");
-
-            var connectOptions = new ConnectOptions
+            var optionalNamespaces = new Dictionary<string, ProposedNamespace>
             {
-                RequiredNamespaces = new RequiredNamespaces
                 {
+                    "eip155",
+                    new ProposedNamespace
                     {
-                        "eip155",
-                        new ProposedNamespace
-                        {
-                            Methods = SupportedMethods,
-                            Chains = new[] { $"eip155:{chainId}" },
-                            Events = new[] { "chainChanged", "accountsChanged" },
-                        }
+                        Methods = new[] { "eth_sendTransaction", "personal_sign", "eth_signTypedData_v4", "wallet_switchEthereumChain", "wallet_addEthereumChain" },
+                        Chains = chains,
+                        Events = new[] { "chainChanged", "accountsChanged" },
                     }
-                },
+                }
             };
 
-            var connectData = await WalletConnect.Instance.ConnectAsync(connectOptions);
+            var connectOptions = new ConnectOptions { OptionalNamespaces = optionalNamespaces, };
 
-            var qrCodeAsTexture2D = GenerateQRTexture(connectData.Uri);
-            QRCodeImage.sprite = Sprite.Create(qrCodeAsTexture2D, new Rect(0, 0, qrCodeAsTexture2D.width, qrCodeAsTexture2D.height), new UnityEngine.Vector2(0.5f, 0.5f));
-            QRCodeImage.mainTexture.filterMode = FilterMode.Point;
-
-            DeepLinkButton.onClick.RemoveAllListeners();
-            DeepLinkButton.onClick.AddListener(() => Application.OpenURL(connectData.Uri));
-
-            var task = connectData.Approval;
-            await new WaitUntil(() => task.IsCompleted || _exception != null);
-            if (_exception != null)
-            {
-                WalletConnectCanvas.SetActive(false);
-                throw _exception;
-            }
-
-            WalletConnectCanvas.SetActive(false);
+            // Open modal
+            WalletConnectModal.Open(
+                new WalletConnectModalOptions { ConnectOptions = connectOptions, IncludedWalletIds = ThirdwebManager.Instance.SDK.Session.Options.wallet?.walletConnectExplorerRecommendedWalletIds }
+            );
         }
 
-        public virtual void Cancel()
+        public virtual async void Cancel()
         {
             _exception = new UnityException("User cancelled");
-        }
+            WalletConnectModal.Ready -= OnReady;
+            WalletConnect.Instance.ActiveSessionChanged -= OnActiveSessionChanged;
+            WalletConnect.Instance.SessionDisconnected -= OnSessionDisconnected;
 
-        public virtual Texture2D GenerateQRTexture(string text)
-        {
-            Texture2D encoded = new(256, 256);
-            var color32 = EncodeToQR(text, encoded.width, encoded.height);
-            encoded.SetPixels32(color32);
-            encoded.Apply();
-            return encoded;
-        }
-
-        public virtual Color32[] EncodeToQR(string textForEncoding, int width, int height)
-        {
-            var writer = new BarcodeWriter
+            try
             {
-                Format = BarcodeFormat.QR_CODE,
-                Options = new QrCodeEncodingOptions { Height = height, Width = width }
-            };
-            return writer.Write(textForEncoding);
+                await WalletConnect.Instance.DisconnectAsync();
+            }
+            catch (Exception e)
+            {
+                ThirdwebDebug.LogWarning($"Error disconnecting WalletConnect: {e}");
+            }
         }
     }
 }

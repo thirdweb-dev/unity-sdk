@@ -6,9 +6,6 @@ using System;
 using System.Numerics;
 using Thirdweb.Redcode.Awaiting;
 using WalletConnectUnity.Core;
-using System.Linq;
-using System.Collections.Generic;
-using WalletConnectSharp.Sign.Models;
 
 namespace Thirdweb.Wallets
 {
@@ -17,14 +14,12 @@ namespace Thirdweb.Wallets
         private Web3 _web3;
         private WalletProvider _provider;
         private WalletProvider _signerProvider;
-        private string _walletConnectProjectId;
 
-        public ThirdwebWalletConnect(string walletConnectProjectId)
+        public ThirdwebWalletConnect()
         {
             _web3 = null;
             _provider = WalletProvider.WalletConnect;
             _signerProvider = WalletProvider.WalletConnect;
-            _walletConnectProjectId = walletConnectProjectId;
         }
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
@@ -35,24 +30,27 @@ namespace Thirdweb.Wallets
                 await new WaitForSeconds(0.5f);
             }
 
-            await WalletConnectUI.Instance.Connect(_walletConnectProjectId, walletConnection.chainId);
+            await WalletConnectUI.Instance.Connect();
+            await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{walletConnection.chainId}");
             _web3 = new Web3(rpc);
             return await GetAddress();
         }
 
         public async Task Disconnect(bool endSession = true)
         {
-            if (endSession)
-            {
-                try
-                {
-                    await WalletConnect.Instance.DisconnectAsync();
-                }
-                catch (Exception e)
-                {
-                    ThirdwebDebug.LogWarning($"Error disconnecting WalletConnect: {e.Message}");
-                }
-            }
+            // if (endSession)
+            // {
+            //     try
+            //     {
+            //         await WalletConnect.Instance.DisconnectAsync();
+            //     }
+            //     catch (Exception e)
+            //     {
+            //         ThirdwebDebug.LogWarning($"Error disconnecting WalletConnect: {e.Message}");
+            //     }
+            // }
+
+            await WalletConnect.Instance.DisconnectAsync();
 
             _web3 = null;
         }
@@ -64,7 +62,7 @@ namespace Thirdweb.Wallets
 
         public Task<string> GetAddress()
         {
-            var ethAccs = new string[] { WalletConnect.Instance.ActiveSession.CurrentAddress(WalletConnect.Instance.ActiveChainId).Address };
+            var ethAccs = new string[] { WalletConnect.Instance.SignClient.AddressProvider.CurrentAddress().Address };
             var addy = ethAccs[0];
             if (addy != null)
                 addy = addy.ToChecksumAddress();
@@ -106,9 +104,10 @@ namespace Thirdweb.Wallets
             return Task.FromResult(_web3 != null);
         }
 
-        public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
+        public async Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
         {
-            return Task.FromResult(NetworkSwitchAction.ContinueSwitch);
+            await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{newChainId}");
+            return NetworkSwitchAction.Handled;
         }
     }
 }
