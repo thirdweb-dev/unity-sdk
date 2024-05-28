@@ -1,10 +1,6 @@
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
-using ZXing;
-using ZXing.QrCode;
 using WalletConnectUnity.Core;
-using System.Numerics;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectSharp.Sign.Models;
 using System;

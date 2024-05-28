@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
-using System;
 using System.Numerics;
 using Thirdweb.Redcode.Awaiting;
 using WalletConnectUnity.Core;
