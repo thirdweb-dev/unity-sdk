@@ -38,18 +38,6 @@ namespace Thirdweb.Wallets
 
         public async Task Disconnect(bool endSession = true)
         {
-            // if (endSession)
-            // {
-            //     try
-            //     {
-            //         await WalletConnect.Instance.DisconnectAsync();
-            //     }
-            //     catch (Exception e)
-            //     {
-            //         ThirdwebDebug.LogWarning($"Error disconnecting WalletConnect: {e.Message}");
-            //     }
-            // }
-
             await WalletConnect.Instance.DisconnectAsync();
 
             _web3 = null;
