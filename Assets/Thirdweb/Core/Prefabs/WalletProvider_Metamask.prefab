@@ -322,8 +322,8 @@ MonoBehaviour:
   config: {fileID: 11400000, guid: 6cbb8289bcfbdba43817188b3b4f15e0, type: 2}
   initializeOnAwake: 0
   _transport: {fileID: 11400000, guid: 2794b8de755b55048bc6f0544321e072, type: 2}
-  InfuraProjectId: 
-  RpcUrl: []
+  _infuraProjectId: 
+  _rpcUrl: []
   clearSessionData: 0
 --- !u!114 &4671479922431115845
 MonoBehaviour:

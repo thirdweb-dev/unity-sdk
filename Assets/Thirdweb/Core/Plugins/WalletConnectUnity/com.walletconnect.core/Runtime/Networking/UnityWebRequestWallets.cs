@@ -50,12 +50,13 @@ namespace WalletConnectUnity.Core.Networking
             null;
 #endif
 
-        public UnityWebRequestWalletsFactory(string url, string[] includedWalletIds, string[] excludedWalletIds)
+        public UnityWebRequestWalletsFactory(string url = "https://api.web3modal.com/getWallets", string[] includedWalletIds = null, string[] excludedWalletIds = null)
         {
             _url = url;
             _includedWalletIds = includedWalletIds;
             _excludedWalletIds = excludedWalletIds;
         }
+        
 
         public UnityWebRequest GetWallets(int page, int entries, string search = null)
         {

@@ -15,6 +15,7 @@ using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Thirdweb.Redcode.Awaiting;
 using Thirdweb.Contracts.Account.ContractDefinition;
+using Thirdweb.Wallets;
 
 namespace Thirdweb.AccountAbstraction
 {
@@ -42,15 +43,14 @@ namespace Thirdweb.AccountAbstraction
         private bool _approving;
 
         public List<string> Accounts { get; internal set; }
-        public string PersonalAddress { get; internal set; }
-        public Web3 PersonalWeb3 { get; internal set; }
+        public IThirdwebWallet PersonalWallet { get; internal set; }
         public ThirdwebSDK.SmartWalletConfig Config { get; internal set; }
         public bool IsDeployed => _deployed;
         public bool IsDeploying => _deploying;
 
-        public SmartWallet(Web3 personalWeb3, ThirdwebSDK.SmartWalletConfig config)
+        public SmartWallet(IThirdwebWallet personalWallet, ThirdwebSDK.SmartWalletConfig config)
         {
-            PersonalWeb3 = personalWeb3;
+            PersonalWallet = personalWallet;
             Config = new ThirdwebSDK.SmartWalletConfig()
             {
                 factoryAddress = config.factoryAddress,
@@ -71,8 +71,7 @@ namespace Thirdweb.AccountAbstraction
 
         internal async Task<string> GetPersonalAddress()
         {
-            var accounts = await PersonalWeb3.Eth.Accounts.SendRequestAsync();
-            return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(accounts[0]);
+            return await PersonalWallet.GetAddress();
         }
 
         internal async Task Initialize(string smartWalletOverride = null)
@@ -80,14 +79,12 @@ namespace Thirdweb.AccountAbstraction
             if (_initialized)
                 return;
 
-            PersonalAddress = await GetPersonalAddress();
-
             var predictedAccount =
                 smartWalletOverride
                 ?? (
                     await TransactionManager.ThirdwebRead<FactoryContract.GetAddressFunction, FactoryContract.GetAddressOutputDTO>(
                         Config.factoryAddress,
-                        new FactoryContract.GetAddressFunction() { AdminSigner = PersonalAddress, Data = new byte[] { } }
+                        new FactoryContract.GetAddressFunction() { AdminSigner = await GetPersonalAddress(), Data = new byte[] { } }
                     )
                 ).ReturnValue1;
 
@@ -97,7 +94,7 @@ namespace Thirdweb.AccountAbstraction
 
             _initialized = true;
 
-            ThirdwebDebug.Log($"Initialized with Factory: {Config.factoryAddress}, AdminSigner: {PersonalAddress}, Predicted Account: {Accounts[0]}, Deployed: {_deployed}");
+            ThirdwebDebug.Log($"Initialized with Factory: {Config.factoryAddress}, AdminSigner: {await GetPersonalAddress()}, Predicted Account: {Accounts[0]}, Deployed: {_deployed}");
         }
 
         internal async Task UpdateDeploymentStatus()
@@ -144,7 +141,7 @@ namespace Thirdweb.AccountAbstraction
             if (_deployed)
                 return (new byte[] { }, 0);
 
-            var fn = new FactoryContract.CreateAccountFunction() { Admin = PersonalAddress, Data = new byte[] { } };
+            var fn = new FactoryContract.CreateAccountFunction() { Admin = await GetPersonalAddress(), Data = new byte[] { } };
             var deployHandler = Utils.GetWeb3().Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
             var txInput = await deployHandler.CreateTransactionInputEstimatingGasAsync(Config.factoryAddress, fn);
             var data = Utils.HexConcat(Config.factoryAddress, txInput.Data);
@@ -170,7 +167,7 @@ namespace Thirdweb.AccountAbstraction
             {
                 try
                 {
-                    var chainId = await PersonalWeb3.Eth.ChainId.SendRequestAsync();
+                    var chainId = await (await PersonalWallet.GetWeb3()).Eth.ChainId.SendRequestAsync();
                     return new RpcResponseMessage(requestMessage.Id, chainId.HexValue);
                 }
                 catch

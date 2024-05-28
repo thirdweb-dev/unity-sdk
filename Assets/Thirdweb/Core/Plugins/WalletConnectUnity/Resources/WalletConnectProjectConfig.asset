@@ -23,4 +23,5 @@ MonoBehaviour:
       Native: 
       Universal: 
     VerifyUrl: 
+  <RelayUrl>k__BackingField: wss://relay.walletconnect.com
   <LoggingEnabled>k__BackingField: 0
