@@ -29,6 +29,8 @@ namespace Thirdweb
 
         public static int Nonce { get; private set; } = 0;
 
+        private static List<ChainIDNetworkData> _allChainsData;
+
         #endregion
 
         #region Constructors
@@ -41,6 +43,7 @@ namespace Thirdweb
             SiweSession = new SiweMessageService();
             Web3 = new Web3(rpcUrl);
             CurrentChainData = options.supportedChains.ToList().Find(x => x.chainId == new HexBigInteger(chainId).HexValue);
+            LoadChainsData();
         }
 
         #endregion
@@ -210,17 +213,28 @@ namespace Thirdweb
             await Request<object>("wallet_addEthereumChain", new object[] { newChainData });
         }
 
+        private static void LoadChainsData()
+        {
+            if (_allChainsData == null || _allChainsData.Count == 0)
+            {
+                var allChainsJson = (TextAsset)Resources.Load("all_chains", typeof(TextAsset));
+                _allChainsData = JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(allChainsJson.text, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Include });
+
+                var additionalChainsJson = (TextAsset)Resources.Load("all_chains_additional", typeof(TextAsset));
+                var additionalChainsData = JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(
+                    additionalChainsJson.text,
+                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Include }
+                );
+
+                _allChainsData.AddRange(additionalChainsData);
+            }
+        }
+
         public static ThirdwebChainData FetchChainData(BigInteger chainId, string rpcOverride = null)
         {
-            var allChainsJson = (TextAsset)Resources.Load("all_chains", typeof(TextAsset));
-            var allChainsData = JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(allChainsJson.text, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Include });
+            LoadChainsData();
 
-            var additionalChainsJson = (TextAsset)Resources.Load("all_chains_additional", typeof(TextAsset));
-            var additionalChainsData = JsonConvert.DeserializeObject<List<ChainIDNetworkData>>(additionalChainsJson.text, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Include });
-
-            allChainsData.AddRange(additionalChainsData);
-
-            ChainIDNetworkData currentNetwork = allChainsData.Find(x => x.chainId == chainId.ToString());
+            ChainIDNetworkData currentNetwork = _allChainsData.Find(x => x.chainId == chainId.ToString());
             if (currentNetwork == null)
             {
                 return new ThirdwebChainData()
