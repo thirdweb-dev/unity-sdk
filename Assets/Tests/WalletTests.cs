@@ -91,38 +91,38 @@ public class WalletTests : ConfigManager
         Assert.IsTrue(exportTask.Result.Length > 0);
     }
 
-    [UnityTest]
-    public IEnumerator Authenticate_WithLocalWallet_Success()
-    {
-        yield return Connect_WithLocalWallet_Success();
+    // [UnityTest]
+    // public IEnumerator Authenticate_WithLocalWallet_Success()
+    // {
+    //     yield return Connect_WithLocalWallet_Success();
 
-        var authenticateTask = ThirdwebManager.Instance.SDK.Wallet.Authenticate("example.com");
-        yield return new WaitUntil(() => authenticateTask.IsCompleted);
-        Assert.IsTrue(authenticateTask.IsCompletedSuccessfully);
-        Assert.IsNotNull(authenticateTask.Result);
-        Assert.IsTrue(authenticateTask.Result.signature.Length == 132);
-    }
+    //     var authenticateTask = ThirdwebManager.Instance.SDK.Wallet.Authenticate("example.com");
+    //     yield return new WaitUntil(() => authenticateTask.IsCompleted);
+    //     Assert.IsTrue(authenticateTask.IsCompletedSuccessfully);
+    //     Assert.IsNotNull(authenticateTask.Result);
+    //     Assert.IsTrue(authenticateTask.Result.signature.Length == 132);
+    // }
 
-    [UnityTest]
-    public IEnumerator Verify_WithLocalWallet_Success()
-    {
-        yield return Connect_WithLocalWallet_Success();
+    // [UnityTest]
+    // public IEnumerator Verify_WithLocalWallet_Success()
+    // {
+    //     yield return Connect_WithLocalWallet_Success();
 
-        var authenticateTask = ThirdwebManager.Instance.SDK.Wallet.Authenticate("example.com");
-        yield return new WaitUntil(() => authenticateTask.IsCompleted);
-        Assert.IsTrue(authenticateTask.IsCompletedSuccessfully);
-        Assert.IsNotNull(authenticateTask.Result);
-        Assert.IsTrue(authenticateTask.Result.signature.Length == 132);
+    //     var authenticateTask = ThirdwebManager.Instance.SDK.Wallet.Authenticate("example.com");
+    //     yield return new WaitUntil(() => authenticateTask.IsCompleted);
+    //     Assert.IsTrue(authenticateTask.IsCompletedSuccessfully);
+    //     Assert.IsNotNull(authenticateTask.Result);
+    //     Assert.IsTrue(authenticateTask.Result.signature.Length == 132);
 
-        var verifyTask = ThirdwebManager.Instance.SDK.Wallet.Verify(authenticateTask.Result);
-        yield return new WaitUntil(() => verifyTask.IsCompleted);
-        Assert.IsTrue(verifyTask.IsCompletedSuccessfully);
+    //     var verifyTask = ThirdwebManager.Instance.SDK.Wallet.Verify(authenticateTask.Result);
+    //     yield return new WaitUntil(() => verifyTask.IsCompleted);
+    //     Assert.IsTrue(verifyTask.IsCompletedSuccessfully);
 
-        var getAddressTask = ThirdwebManager.Instance.SDK.Wallet.GetAddress();
-        yield return new WaitUntil(() => getAddressTask.IsCompleted);
-        Assert.IsTrue(getAddressTask.IsCompletedSuccessfully);
-        Assert.AreEqual(verifyTask.Result, getAddressTask.Result);
-    }
+    //     var getAddressTask = ThirdwebManager.Instance.SDK.Wallet.GetAddress();
+    //     yield return new WaitUntil(() => getAddressTask.IsCompleted);
+    //     Assert.IsTrue(getAddressTask.IsCompletedSuccessfully);
+    //     Assert.AreEqual(verifyTask.Result, getAddressTask.Result);
+    // }
 
     [UnityTest]
     public IEnumerator GetBalance_WithLocalWallet_Success()

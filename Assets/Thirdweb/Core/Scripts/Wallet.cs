@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Nethereum.Signer;
 using UnityEngine;
 using System;
-using Nethereum.Siwe.Core;
 using System.Collections.Generic;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.ABI.EIP712;
@@ -111,79 +110,8 @@ namespace Thirdweb
         /// Authenticates the user by signing a payload that can be used to securely identify users. See https://portal.thirdweb.com/auth.
         /// </summary>
         /// <param name="domain">The domain to authenticate to.</param>
-        /// <returns>A task representing the authentication result.</returns>
-        public async Task<LoginPayload> Authenticate(string domain)
-        {
-            if (Utils.IsWebGLBuild())
-            {
-                return await Bridge.InvokeRoute<LoginPayload>($"auth{subSeparator}login", Utils.ToJsonStringArray(domain));
-            }
-            else
-            {
-                var siwe = _sdk.Session.SiweSession;
-                var siweMsg = new SiweMessage()
-                {
-                    Resources = null,
-                    Uri = null,
-                    Statement = "Please ensure that the domain above matches the URL of the current website.",
-                    Address = await GetAddress(),
-                    Domain = domain,
-                    ChainId = (await GetChainId()).ToString(),
-                    Version = "1",
-                    Nonce = null,
-                    IssuedAt = null,
-                    ExpirationTime = null,
-                    NotBefore = null,
-                    RequestId = null
-                };
-                siweMsg.SetIssuedAtNow();
-                siweMsg.SetExpirationTime(DateTime.UtcNow.AddSeconds(60 * 5));
-                siweMsg.SetNotBefore(DateTime.UtcNow);
-                siweMsg = siwe.AssignNewNonce(siweMsg);
-
-                var resourcesString = siweMsg.Resources != null ? "\nResources:" + string.Join("", siweMsg.Resources.Select(r => $"\n- {r}")) : string.Empty;
-                var finalMsg =
-                    $"{siweMsg.Domain} wants you to sign in with your Ethereum account:"
-                    + $"\n{siweMsg.Address}\n\n"
-                    + $"{(string.IsNullOrEmpty(siweMsg.Statement) ? "" : $"{siweMsg.Statement}\n")}"
-                    + $"{(string.IsNullOrEmpty(siweMsg.Uri) ? "" : $"\nURI: {siweMsg.Uri}")}"
-                    + $"\nVersion: {siweMsg.Version}"
-                    + $"\nChain ID: {siweMsg.ChainId}"
-                    + $"\nNonce: {siweMsg.Nonce}"
-                    + $"\nIssued At: {siweMsg.IssuedAt}"
-                    + $"{(string.IsNullOrEmpty(siweMsg.ExpirationTime) ? "" : $"\nExpiration Time: {siweMsg.ExpirationTime}")}"
-                    + $"{(string.IsNullOrEmpty(siweMsg.NotBefore) ? "" : $"\nNot Before: {siweMsg.NotBefore}")}"
-                    + $"{(string.IsNullOrEmpty(siweMsg.RequestId) ? "" : $"\nRequest ID: {siweMsg.RequestId}")}"
-                    + resourcesString;
-                var signature = await Sign(finalMsg);
-
-                return new LoginPayload()
-                {
-                    signature = signature,
-                    payload = new LoginPayloadData()
-                    {
-                        Domain = siweMsg.Domain,
-                        Address = siweMsg.Address,
-                        Statement = siweMsg.Statement,
-                        Uri = siweMsg.Uri,
-                        Version = siweMsg.Version,
-                        ChainId = siweMsg.ChainId,
-                        Nonce = siweMsg.Nonce,
-                        IssuedAt = siweMsg.IssuedAt,
-                        ExpirationTime = siweMsg.ExpirationTime,
-                        InvalidBefore = siweMsg.NotBefore,
-                        Resources = siweMsg.Resources,
-                    }
-                };
-            }
-        }
-
-        /// <summary>
-        /// Authenticates the user by signing a payload that can be used to securely identify users. See https://portal.thirdweb.com/auth.
-        /// </summary>
-        /// <param name="domain">The domain to authenticate to.</param>
         /// <returns>A string representing the server-side authentication result.</returns>
-        public async Task<string> AuthenticateAndLoginServerSide(string domain, BigInteger chainId, string authPayloadPath = "/auth/payload", string authLoginPath = "/auth/login")
+        public async Task<string> Authenticate(string domain, BigInteger chainId, string authPayloadPath = "/auth/payload", string authLoginPath = "/auth/login")
         {
             string payloadURL = domain + authPayloadPath;
             string loginURL = domain + authLoginPath;
@@ -231,84 +159,6 @@ namespace Thirdweb
             }
             var responseString = loginRequest.downloadHandler.text;
             return responseString;
-        }
-
-        /// <summary>
-        /// Verifies the authenticity of a login payload.
-        /// </summary>
-        /// <param name="payload">The login payload to verify.</param>
-        /// <returns>The verification result as a string.</returns>
-        public async Task<string> Verify(LoginPayload payload)
-        {
-            if (Utils.IsWebGLBuild())
-            {
-                return await Bridge.InvokeRoute<string>($"auth{subSeparator}verify", Utils.ToJsonStringArray(payload));
-            }
-            else
-            {
-                var siwe = _sdk.Session.SiweSession;
-                var siweMessage = new SiweMessage()
-                {
-                    Domain = payload.payload.Domain,
-                    Address = payload.payload.Address,
-                    Statement = payload.payload.Statement,
-                    Uri = payload.payload.Uri,
-                    Version = payload.payload.Version,
-                    ChainId = payload.payload.ChainId,
-                    Nonce = payload.payload.Nonce,
-                    IssuedAt = payload.payload.IssuedAt,
-                    ExpirationTime = payload.payload.ExpirationTime,
-                    NotBefore = payload.payload.InvalidBefore,
-                    Resources = payload.payload.Resources,
-                    RequestId = null
-                };
-                var signature = payload.signature;
-                var validUser = await siwe.IsUserAddressRegistered(siweMessage);
-                var resourcesString = siweMessage.Resources != null ? "\nResources:" + string.Join("", siweMessage.Resources.Select(r => $"\n- {r}")) : string.Empty;
-                var msg =
-                    $"{siweMessage.Domain} wants you to sign in with your Ethereum account:"
-                    + $"\n{siweMessage.Address}\n\n"
-                    + $"{(string.IsNullOrEmpty(siweMessage.Statement) ? "" : $"{siweMessage.Statement}\n")}"
-                    + $"{(string.IsNullOrEmpty(siweMessage.Uri) ? "" : $"\nURI: {siweMessage.Uri}")}"
-                    + $"\nVersion: {siweMessage.Version}"
-                    + $"\nChain ID: {siweMessage.ChainId}"
-                    + $"\nNonce: {siweMessage.Nonce}"
-                    + $"\nIssued At: {siweMessage.IssuedAt}"
-                    + $"{(string.IsNullOrEmpty(siweMessage.ExpirationTime) ? "" : $"\nExpiration Time: {siweMessage.ExpirationTime}")}"
-                    + $"{(string.IsNullOrEmpty(siweMessage.NotBefore) ? "" : $"\nNot Before: {siweMessage.NotBefore}")}"
-                    + $"{(string.IsNullOrEmpty(siweMessage.RequestId) ? "" : $"\nRequest ID: {siweMessage.RequestId}")}"
-                    + resourcesString;
-                if (validUser)
-                {
-                    string recoveredAddress = await RecoverAddress(msg, signature);
-                    if (recoveredAddress == siweMessage.Address)
-                    {
-                        if (siwe.IsMessageTheSameAsSessionStored(siweMessage))
-                        {
-                            if (siwe.HasMessageDateStartedAndNotExpired(siweMessage))
-                            {
-                                return siweMessage.Address;
-                            }
-                            else
-                            {
-                                return "Expired";
-                            }
-                        }
-                        else
-                        {
-                            return "Invalid Session";
-                        }
-                    }
-                    else
-                    {
-                        return "Invalid Signature";
-                    }
-                }
-                else
-                {
-                    return "Invalid User";
-                }
-            }
         }
 
         /// <summary>

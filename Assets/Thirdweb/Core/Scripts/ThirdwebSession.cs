@@ -3,7 +3,6 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.JsonRpc.Client;
-using Nethereum.Siwe;
 using Nethereum.Web3;
 using UnityEngine;
 using Thirdweb.Wallets;
@@ -21,7 +20,6 @@ namespace Thirdweb
         public ThirdwebSDK.Options Options { get; private set; }
         public BigInteger ChainId { get; private set; }
         public string RPC { get; private set; }
-        public SiweMessageService SiweSession { get; private set; }
         public Web3 Web3 { get; private set; }
         public ThirdwebChainData CurrentChainData { get; private set; }
 
@@ -44,7 +42,6 @@ namespace Thirdweb
             Options = options;
             ChainId = chainId;
             RPC = rpcUrl;
-            SiweSession = new SiweMessageService();
             Web3 = new Web3(rpcUrl);
             CurrentChainData = options.supportedChains.ToList().Find(x => x.chainId == new HexBigInteger(chainId).HexValue);
             LoadChainsData();
