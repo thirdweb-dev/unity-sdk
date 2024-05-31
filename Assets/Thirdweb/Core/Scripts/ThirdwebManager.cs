@@ -179,7 +179,7 @@ namespace Thirdweb
                     : chainData.rpcOverride;
 
                 if (options.clientId != null && new System.Uri(rpc).Host.EndsWith(".thirdweb.com"))
-                    rpc = rpc.AppendBundleIdQueryParam();
+                    rpc = rpc.AppendBundleIdQueryParam(options.bundleId);
 
                 if (chainData.identifier == activeChain)
                 {

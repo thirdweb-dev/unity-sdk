@@ -33,12 +33,16 @@ namespace Thirdweb.Wallets
         private Web3 _web3;
         private readonly WalletProvider _provider;
         private readonly WalletProvider _signerProvider;
+        private readonly string _appName;
+        private readonly string _appUrl;
 
-        public ThirdwebMetamask()
+        public ThirdwebMetamask(string appName, string appUrl)
         {
             _web3 = null;
             _provider = WalletProvider.Metamask;
             _signerProvider = WalletProvider.Metamask;
+            _appName = appName;
+            _appUrl = appUrl;
         }
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
@@ -61,9 +65,7 @@ namespace Thirdweb.Wallets
 
             config.SetDefaults(defaults);
 
-            var appName = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appName;
-            var appUrl = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appUrl;
-            config.UpdateConfig(appName, appUrl);
+            config.UpdateConfig(_appName, _appUrl);
 
             MetaMaskUnity.Instance.Initialize(config);
         }

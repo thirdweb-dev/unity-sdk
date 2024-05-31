@@ -16,6 +16,8 @@ using Nethereum.Hex.HexConvertors.Extensions;
 using Thirdweb.Redcode.Awaiting;
 using Thirdweb.Contracts.Account.ContractDefinition;
 using Thirdweb.Wallets;
+using Nethereum.Signer;
+using System.Security.Cryptography;
 
 namespace Thirdweb.AccountAbstraction
 {
@@ -44,24 +46,15 @@ namespace Thirdweb.AccountAbstraction
 
         public List<string> Accounts { get; internal set; }
         public IThirdwebWallet PersonalWallet { get; internal set; }
-        public ThirdwebSDK.SmartWalletConfig Config { get; internal set; }
         public bool IsDeployed => _deployed;
         public bool IsDeploying => _deploying;
 
-        public SmartWallet(IThirdwebWallet personalWallet, ThirdwebSDK.SmartWalletConfig config)
+        private readonly ThirdwebSDK _sdk;
+
+        public SmartWallet(IThirdwebWallet personalWallet, ThirdwebSDK sdk)
         {
             PersonalWallet = personalWallet;
-            Config = new ThirdwebSDK.SmartWalletConfig()
-            {
-                factoryAddress = config.factoryAddress,
-                gasless = config.gasless,
-                erc20PaymasterAddress = config.erc20PaymasterAddress,
-                erc20TokenAddress = config.erc20TokenAddress,
-                bundlerUrl = string.IsNullOrEmpty(config.bundlerUrl) ? $"https://{ThirdwebManager.Instance.SDK.Session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.bundlerUrl,
-                paymasterUrl = string.IsNullOrEmpty(config.paymasterUrl) ? $"https://{ThirdwebManager.Instance.SDK.Session.CurrentChainData.chainName}.bundler.thirdweb.com" : config.paymasterUrl,
-                entryPointAddress = string.IsNullOrEmpty(config.entryPointAddress) ? Constants.DEFAULT_ENTRYPOINT_ADDRESS : config.entryPointAddress,
-            };
-
+            _sdk = sdk;
             _deployed = false;
             _initialized = false;
             _deploying = false;
@@ -83,7 +76,8 @@ namespace Thirdweb.AccountAbstraction
                 smartWalletOverride
                 ?? (
                     await TransactionManager.ThirdwebRead<FactoryContract.GetAddressFunction, FactoryContract.GetAddressOutputDTO>(
-                        Config.factoryAddress,
+                        _sdk,
+                        _sdk.Session.Options.smartWalletConfig?.factoryAddress,
                         new FactoryContract.GetAddressFunction() { AdminSigner = await GetPersonalAddress(), Data = new byte[] { } }
                     )
                 ).ReturnValue1;
@@ -94,18 +88,20 @@ namespace Thirdweb.AccountAbstraction
 
             _initialized = true;
 
-            ThirdwebDebug.Log($"Initialized with Factory: {Config.factoryAddress}, AdminSigner: {await GetPersonalAddress()}, Predicted Account: {Accounts[0]}, Deployed: {_deployed}");
+            ThirdwebDebug.Log(
+                $"Initialized with Factory: {_sdk.Session.Options.smartWalletConfig?.factoryAddress}, AdminSigner: {await GetPersonalAddress()}, Predicted Account: {Accounts[0]}, Deployed: {_deployed}"
+            );
         }
 
         internal async Task UpdateDeploymentStatus()
         {
-            var bytecode = await Utils.GetWeb3().Eth.GetCode.SendRequestAsync(Accounts[0]);
+            var bytecode = await Utils.GetWeb3(_sdk.Session.ChainId).Eth.GetCode.SendRequestAsync(Accounts[0]);
             _deployed = bytecode != "0x";
         }
 
         internal async Task<TransactionResult> SetPermissionsForSigner(SignerPermissionRequest signerPermissionRequest, byte[] signature)
         {
-            return await TransactionManager.ThirdwebWrite(Accounts[0], new SetPermissionsForSignerFunction() { Req = signerPermissionRequest, Signature = signature });
+            return await TransactionManager.ThirdwebWrite(_sdk, Accounts[0], new SetPermissionsForSignerFunction() { Req = signerPermissionRequest, Signature = signature });
         }
 
         internal async Task ForceDeploy()
@@ -115,7 +111,7 @@ namespace Thirdweb.AccountAbstraction
 
             var input = new TransactionInput("0x", Accounts[0], new HexBigInteger(0));
             var txHash = await Request(new RpcRequestMessage(1, "eth_sendTransaction", input));
-            await Transaction.WaitForTransactionResult(txHash.Result.ToString());
+            await Transaction.WaitForTransactionResult(txHash.Result.ToString(), _sdk.Session.ChainId);
             await UpdateDeploymentStatus();
         }
 
@@ -124,6 +120,7 @@ namespace Thirdweb.AccountAbstraction
             try
             {
                 var verifyRes = await TransactionManager.ThirdwebRead<AccountContract.IsValidSignatureFunction, AccountContract.IsValidSignatureOutputDTO>(
+                    _sdk,
                     Accounts[0],
                     new AccountContract.IsValidSignatureFunction() { Hash = hash, Signature = signature }
                 );
@@ -142,9 +139,9 @@ namespace Thirdweb.AccountAbstraction
                 return (new byte[] { }, 0);
 
             var fn = new FactoryContract.CreateAccountFunction() { Admin = await GetPersonalAddress(), Data = new byte[] { } };
-            var deployHandler = Utils.GetWeb3().Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
-            var txInput = await deployHandler.CreateTransactionInputEstimatingGasAsync(Config.factoryAddress, fn);
-            var data = Utils.HexConcat(Config.factoryAddress, txInput.Data);
+            var deployHandler = Utils.GetWeb3(_sdk.Session.ChainId).Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
+            var txInput = await deployHandler.CreateTransactionInputEstimatingGasAsync(_sdk.Session.Options.smartWalletConfig?.factoryAddress, fn);
+            var data = Utils.HexConcat(_sdk.Session.Options.smartWalletConfig?.factoryAddress, txInput.Data);
             return (data.HexStringToByteArray(), txInput.Gas.Value);
         }
 
@@ -157,7 +154,7 @@ namespace Thirdweb.AccountAbstraction
                 var parameters = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(requestMessage.RawParameters));
                 var txInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(parameters[0]));
                 var partialUserOp = await SignTransactionAsUserOp(txInput, requestMessage.Id);
-                return new RpcResponseMessage(requestMessage.Id, JsonConvert.SerializeObject(partialUserOp.EncodeUserOperation()));
+                return new RpcResponseMessage(requestMessage.Id, JsonConvert.SerializeObject(EncodeUserOperation(partialUserOp)));
             }
             else if (requestMessage.Method == "eth_sendTransaction")
             {
@@ -172,12 +169,12 @@ namespace Thirdweb.AccountAbstraction
                 }
                 catch
                 {
-                    return new RpcResponseMessage(requestMessage.Id, ThirdwebManager.Instance.SDK.Session.CurrentChainData.chainId);
+                    return new RpcResponseMessage(requestMessage.Id, _sdk.Session.CurrentChainData.chainId);
                 }
             }
             else if (requestMessage.Method == "eth_estimateGas")
             {
-                var web3 = Utils.GetWeb3();
+                var web3 = Utils.GetWeb3(_sdk.Session.ChainId);
                 var parameters = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(requestMessage.RawParameters));
                 var txInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(parameters[0]));
                 var result = await web3.Eth.Transactions.EstimateGas.SendRequestAsync(txInput);
@@ -193,7 +190,8 @@ namespace Thirdweb.AccountAbstraction
         {
             requestId ??= SmartWalletClient.GenerateRpcId();
 
-            string apiKey = Utils.GetClientId();
+            string apiKey = _sdk.Session.Options.clientId;
+            string bundleId = _sdk.Session.Options.bundleId;
 
             // Create the user operation and its safe (hexified) version
 
@@ -210,15 +208,15 @@ namespace Thirdweb.AccountAbstraction
 
             BigInteger maxFee;
             BigInteger maxPriorityFee;
-            if (new Uri(Config.bundlerUrl).Host.EndsWith(".thirdweb.com"))
+            if (new Uri(_sdk.Session.Options.smartWalletConfig?.bundlerUrl).Host.EndsWith(".thirdweb.com"))
             {
-                var fees = await BundlerClient.ThirdwebGetUserOperationGasPrice(Config.bundlerUrl, apiKey, requestId);
+                var fees = await BundlerClient.ThirdwebGetUserOperationGasPrice(_sdk.Session.Options.smartWalletConfig?.bundlerUrl, apiKey, bundleId, requestId);
                 maxFee = new HexBigInteger(fees.maxFeePerGas).Value;
                 maxPriorityFee = new HexBigInteger(fees.maxPriorityFeePerGas).Value;
             }
             else
             {
-                var fees = await Utils.GetGasPriceAsync(ThirdwebManager.Instance.SDK.Session.ChainId);
+                var fees = await Utils.GetGasPriceAsync(_sdk.Session.ChainId);
                 maxFee = fees.MaxFeePerGas;
                 maxPriorityFee = fees.MaxPriorityFeePerGas;
             }
@@ -240,24 +238,31 @@ namespace Thirdweb.AccountAbstraction
 
             // Update paymaster data if any
 
-            partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestId, partialUserOp.EncodeUserOperation(), apiKey);
+            partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestId, EncodeUserOperation(partialUserOp), apiKey, bundleId);
 
             // Estimate gas
 
-            var gasEstimates = await BundlerClient.EthEstimateUserOperationGas(Config.bundlerUrl, apiKey, requestId, partialUserOp.EncodeUserOperation(), Config.entryPointAddress);
+            var gasEstimates = await BundlerClient.EthEstimateUserOperationGas(
+                _sdk.Session.Options.smartWalletConfig?.bundlerUrl,
+                apiKey,
+                bundleId,
+                requestId,
+                EncodeUserOperation(partialUserOp),
+                _sdk.Session.Options.smartWalletConfig?.entryPointAddress
+            );
             partialUserOp.CallGasLimit = 50000 + new HexBigInteger(gasEstimates.CallGasLimit).Value;
-            partialUserOp.VerificationGasLimit = string.IsNullOrEmpty(Config.erc20PaymasterAddress)
+            partialUserOp.VerificationGasLimit = string.IsNullOrEmpty(_sdk.Session.Options.smartWalletConfig?.erc20PaymasterAddress)
                 ? new HexBigInteger(gasEstimates.VerificationGas).Value
                 : new HexBigInteger(gasEstimates.VerificationGas).Value * 3;
             partialUserOp.PreVerificationGas = new HexBigInteger(gasEstimates.PreVerificationGas).Value;
 
             // Update paymaster data if any
 
-            partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestId, partialUserOp.EncodeUserOperation(), apiKey);
+            partialUserOp.PaymasterAndData = await GetPaymasterAndData(requestId, EncodeUserOperation(partialUserOp), apiKey, bundleId);
 
             // Hash, sign and encode the user operation
 
-            partialUserOp.Signature = await partialUserOp.HashAndSignUserOp(Config.entryPointAddress);
+            partialUserOp.Signature = await HashAndSignUserOp(partialUserOp, _sdk.Session.Options.smartWalletConfig?.entryPointAddress);
 
             return partialUserOp;
         }
@@ -272,7 +277,8 @@ namespace Thirdweb.AccountAbstraction
                 _deploying = true;
             }
 
-            string apiKey = Utils.GetClientId();
+            string apiKey = _sdk.Session.Options.clientId;
+            string bundleId = _sdk.Session.Options.bundleId;
 
             // Deserialize the transaction input from the request message
 
@@ -281,18 +287,18 @@ namespace Thirdweb.AccountAbstraction
 
             // Approve ERC20 tokens if any
 
-            if (!string.IsNullOrEmpty(Config.erc20PaymasterAddress) && !_approved && !_approving)
+            if (!string.IsNullOrEmpty(_sdk.Session.Options.smartWalletConfig?.erc20PaymasterAddress) && !_approved && !_approving)
             {
                 try
                 {
                     _approving = true;
-                    var tokenContract = ThirdwebManager.Instance.SDK.GetContract(Config.erc20TokenAddress);
-                    var approvedAmount = await tokenContract.ERC20.AllowanceOf(Accounts[0], Config.erc20PaymasterAddress);
+                    var tokenContract = _sdk.GetContract(_sdk.Session.Options.smartWalletConfig?.erc20TokenAddress);
+                    var approvedAmount = await tokenContract.ERC20.AllowanceOf(Accounts[0], _sdk.Session.Options.smartWalletConfig?.erc20PaymasterAddress);
                     if (BigInteger.Parse(approvedAmount.value) == 0)
                     {
                         ThirdwebDebug.Log($"Approving tokens for ERC20Paymaster spending");
                         _deploying = false;
-                        await tokenContract.ERC20.SetAllowance(Config.erc20PaymasterAddress, (BigInteger.Pow(2, 96) - 1).ToString().ToEth());
+                        await tokenContract.ERC20.SetAllowance(_sdk.Session.Options.smartWalletConfig?.erc20PaymasterAddress, (BigInteger.Pow(2, 96) - 1).ToString().ToEth());
                     }
                     _approved = true;
                     _approving = false;
@@ -313,8 +319,15 @@ namespace Thirdweb.AccountAbstraction
             // Send the user operation
 
             ThirdwebDebug.Log("Valid UserOp: " + JsonConvert.SerializeObject(partialUserOp));
-            ThirdwebDebug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(partialUserOp.EncodeUserOperation()));
-            var userOpHash = await BundlerClient.EthSendUserOperation(Config.bundlerUrl, apiKey, requestMessage.Id, partialUserOp.EncodeUserOperation(), Config.entryPointAddress);
+            ThirdwebDebug.Log("Valid Encoded UserOp: " + JsonConvert.SerializeObject(EncodeUserOperation(partialUserOp)));
+            var userOpHash = await BundlerClient.EthSendUserOperation(
+                _sdk.Session.Options.smartWalletConfig?.bundlerUrl,
+                apiKey,
+                bundleId,
+                requestMessage.Id,
+                EncodeUserOperation(partialUserOp),
+                _sdk.Session.Options.smartWalletConfig?.entryPointAddress
+            );
             ThirdwebDebug.Log("UserOp Hash: " + userOpHash);
 
             // Wait for the transaction to be mined
@@ -322,7 +335,7 @@ namespace Thirdweb.AccountAbstraction
             string txHash = null;
             while (txHash == null)
             {
-                var userOpReceipt = await BundlerClient.EthGetUserOperationReceipt(Config.bundlerUrl, apiKey, requestMessage.Id, userOpHash);
+                var userOpReceipt = await BundlerClient.EthGetUserOperationReceipt(_sdk.Session.Options.smartWalletConfig?.bundlerUrl, apiKey, bundleId, requestMessage.Id, userOpHash);
                 txHash = userOpReceipt?.receipt?.TransactionHash;
                 await new WaitForSecondsRealtime(1f);
             }
@@ -343,27 +356,92 @@ namespace Thirdweb.AccountAbstraction
         private async Task<BigInteger> GetNonce()
         {
             var nonce = await TransactionManager.ThirdwebRead<EntryPointContract.GetNonceFunction, EntryPointContract.GetNonceOutputDTO>(
-                Config.entryPointAddress,
-                new EntryPointContract.GetNonceFunction() { Sender = Accounts[0], Key = UserOpUtils.GetRandomInt192() }
+                _sdk,
+                _sdk.Session.Options.smartWalletConfig?.entryPointAddress,
+                new EntryPointContract.GetNonceFunction() { Sender = Accounts[0], Key = GetRandomInt192() }
             );
             return nonce.Nonce;
         }
 
-        private async Task<byte[]> GetPaymasterAndData(object requestId, UserOperationHexified userOp, string apiKey)
+        private async Task<byte[]> GetPaymasterAndData(object requestId, UserOperationHexified userOp, string apiKey, string bundleId)
         {
-            if (!string.IsNullOrEmpty(Config.erc20PaymasterAddress) && !_approving)
+            if (!string.IsNullOrEmpty(_sdk.Session.Options.smartWalletConfig?.erc20PaymasterAddress) && !_approving)
             {
-                return Config.erc20PaymasterAddress.HexToByteArray();
+                return _sdk.Session.Options.smartWalletConfig?.erc20PaymasterAddress.HexToByteArray();
             }
-            else if (Config.gasless)
+            else if (_sdk.Session.Options.smartWalletConfig?.gasless == true)
             {
-                var paymasterAndData = await BundlerClient.PMSponsorUserOperation(Config.paymasterUrl, apiKey, requestId, userOp, Config.entryPointAddress);
+                var paymasterAndData = await BundlerClient.PMSponsorUserOperation(
+                    _sdk.Session.Options.smartWalletConfig?.paymasterUrl,
+                    apiKey,
+                    bundleId,
+                    requestId,
+                    userOp,
+                    _sdk.Session.Options.smartWalletConfig?.entryPointAddress
+                );
                 return paymasterAndData.paymasterAndData.HexToByteArray();
             }
             else
             {
                 return new byte[] { };
             }
+        }
+
+        private BigInteger GetRandomInt192()
+        {
+            byte[] randomBytes = GetRandomBytes(24); // 192 bits = 24 bytes
+            BigInteger randomInt = new(randomBytes);
+            randomInt = BigInteger.Abs(randomInt) % (BigInteger.One << 192);
+            return randomInt;
+        }
+
+        private byte[] GetRandomBytes(int byteCount)
+        {
+            using (RNGCryptoServiceProvider rng = new())
+            {
+                byte[] randomBytes = new byte[byteCount];
+                rng.GetBytes(randomBytes);
+                return randomBytes;
+            }
+        }
+
+        private async Task<byte[]> HashAndSignUserOp(EntryPointContract.UserOperation userOp, string entryPoint)
+        {
+            var userOpHash = await TransactionManager.ThirdwebRead<EntryPointContract.GetUserOpHashFunction, EntryPointContract.GetUserOpHashOutputDTO>(
+                _sdk,
+                entryPoint,
+                new EntryPointContract.GetUserOpHashFunction() { UserOp = userOp }
+            );
+
+            var smartWallet = _sdk.Session.ActiveWallet;
+            if (smartWallet.GetLocalAccount() != null)
+            {
+                var localWallet = smartWallet.GetLocalAccount();
+                return new EthereumMessageSigner().Sign(userOpHash.ReturnValue1, new EthECKey(localWallet.PrivateKey)).HexStringToByteArray();
+            }
+            else
+            {
+                var sig = await _sdk.Session.Request<string>("personal_sign", userOpHash.ReturnValue1.ByteArrayToHexString(), await _sdk.Wallet.GetSignerAddress());
+                return sig.HexStringToByteArray();
+            }
+        }
+
+        private UserOperationHexified EncodeUserOperation(EntryPointContract.UserOperation userOperation)
+        {
+            return new UserOperationHexified()
+            {
+                sender = userOperation.Sender,
+                nonce = userOperation.Nonce.ToHexBigInteger().HexValue,
+                initCode = userOperation.InitCode.ByteArrayToHexString(),
+                callData = userOperation.CallData.ByteArrayToHexString(),
+                callGasLimit = userOperation.CallGasLimit.ToHexBigInteger().HexValue,
+                verificationGasLimit = userOperation.VerificationGasLimit.ToHexBigInteger().HexValue,
+                preVerificationGas = userOperation.PreVerificationGas.ToHexBigInteger().HexValue,
+                maxFeePerGas = userOperation.MaxFeePerGas.ToHexBigInteger().HexValue,
+                maxPriorityFeePerGas = userOperation.MaxPriorityFeePerGas.ToHexBigInteger().HexValue,
+                paymasterAndData = userOperation.PaymasterAndData.ByteArrayToHexString(),
+                signature = userOperation.Signature.ByteArrayToHexString()
+            };
         }
     }
 }

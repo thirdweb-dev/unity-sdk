@@ -16,6 +16,7 @@ namespace Thirdweb
         /// SIGNATURE GENERATION ///
 
         public async static Task<string> GenerateSignature_MinimalForwarder(
+            ThirdwebSDK sdk,
             string domainName,
             string version,
             BigInteger chainId,
@@ -35,11 +36,12 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(forwardRequest, typedData);
+                return await sdk.Wallet.SignTypedDataV4(forwardRequest, typedData);
             }
         }
 
         public async static Task<string> GenerateSignature_TokenERC20(
+            ThirdwebSDK sdk,
             string domainName,
             string version,
             BigInteger chainId,
@@ -59,11 +61,12 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(mintRequest, typedData);
+                return await sdk.Wallet.SignTypedDataV4(mintRequest, typedData);
             }
         }
 
         public async static Task<string> GenerateSignature_TokenERC721(
+            ThirdwebSDK sdk,
             string domainName,
             string version,
             BigInteger chainId,
@@ -83,11 +86,12 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(mintRequest, typedData);
+                return await sdk.Wallet.SignTypedDataV4(mintRequest, typedData);
             }
         }
 
         public async static Task<string> GenerateSignature_TokenERC1155(
+            ThirdwebSDK sdk,
             string domainName,
             string version,
             BigInteger chainId,
@@ -107,11 +111,12 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(mintRequest, typedData);
+                return await sdk.Wallet.SignTypedDataV4(mintRequest, typedData);
             }
         }
 
         public async static Task<string> GenerateSignature_SmartAccount(
+            ThirdwebSDK sdk,
             string domainName,
             string version,
             BigInteger chainId,
@@ -131,15 +136,15 @@ namespace Thirdweb
             }
             else
             {
-                return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(signerPermissionRequest, typedData);
+                return await sdk.Wallet.SignTypedDataV4(signerPermissionRequest, typedData);
             }
         }
 
-        public async static Task<string> GenerateSignature_SmartAccount_AccountMessage(string domainName, string version, BigInteger chainId, string verifyingContract, byte[] message)
+        public async static Task<string> GenerateSignature_SmartAccount_AccountMessage(ThirdwebSDK sdk, string domainName, string version, BigInteger chainId, string verifyingContract, byte[] message)
         {
             var typedData = GetTypedDefinition_SmartAccount_AccountMessage(domainName, version, chainId, verifyingContract);
             var accountMessage = new AccountMessage { Message = message };
-            return await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(accountMessage, typedData);
+            return await sdk.Wallet.SignTypedDataV4(accountMessage, typedData);
         }
 
         #region Typed Data Definitions

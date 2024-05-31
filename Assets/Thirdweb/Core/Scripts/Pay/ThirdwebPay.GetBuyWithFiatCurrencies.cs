@@ -8,15 +8,15 @@ using Thirdweb.Redcode.Awaiting;
 
 namespace Thirdweb.Pay
 {
-    public static partial class ThirdwebPay
+    public partial class ThirdwebPay
     {
         /// <summary>
         /// Get supported fiat currencies for Buy with Fiat.
         /// </summary>
         /// <returns>List of supported Fiat currency symbols.</returns>
-        public static async Task<List<string>> GetBuyWithFiatCurrencies()
+        public async Task<List<string>> GetBuyWithFiatCurrencies()
         {
-            if (string.IsNullOrEmpty(Utils.GetClientId()))
+            if (string.IsNullOrEmpty(_sdk.Session.Options.clientId))
             {
                 throw new Exception("Client ID is not set. Please set it in the ThirdwebManager.");
             }
@@ -29,9 +29,9 @@ namespace Thirdweb.Pay
             request.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
             request.SetRequestHeader("x-sdk-platform", "unity");
             request.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
-            request.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.Session.Options.clientId);
+            request.SetRequestHeader("x-client-id", _sdk.Session.Options.clientId);
             if (!Utils.IsWebGLBuild())
-                request.SetRequestHeader("x-bundle-id", ThirdwebManager.Instance.SDK.Session.Options.bundleId);
+                request.SetRequestHeader("x-bundle-id", _sdk.Session.Options.bundleId);
 
             await request.SendWebRequest();
 

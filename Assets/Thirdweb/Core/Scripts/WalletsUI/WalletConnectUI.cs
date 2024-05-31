@@ -20,6 +20,8 @@ namespace Thirdweb.Wallets
 
         protected Exception _exception;
         protected bool _isConnected;
+        protected string[] _supportedChains;
+        protected string[] _includedWalletIds;
 
         protected virtual async void Awake()
         {
@@ -37,10 +39,12 @@ namespace Thirdweb.Wallets
             await WalletConnectModal.InitializeAsync();
         }
 
-        public virtual async Task Connect()
+        public virtual async Task Connect(string[] eip155ChainsSupported, string[] includedWalletIds)
         {
             _exception = null;
             _isConnected = false;
+            _supportedChains = eip155ChainsSupported;
+            _includedWalletIds = includedWalletIds;
 
             WalletConnectUIParent.SetActive(true);
 
@@ -98,12 +102,6 @@ namespace Thirdweb.Wallets
         protected virtual void CreateNewSession()
         {
             ThirdwebDebug.Log("Creating new session");
-            // Session hasn't been resumed
-            var chains = new string[] { };
-            var additionalChains = ThirdwebManager.Instance.SDK.Session.Options.supportedChains;
-            if (additionalChains != null)
-                chains = chains.Concat(additionalChains.Select(x => $"eip155:{new HexBigInteger(x.chainId).Value}")).ToArray();
-
             var optionalNamespaces = new Dictionary<string, ProposedNamespace>
             {
                 {
@@ -111,7 +109,7 @@ namespace Thirdweb.Wallets
                     new ProposedNamespace
                     {
                         Methods = new[] { "eth_sendTransaction", "personal_sign", "eth_signTypedData_v4", "wallet_switchEthereumChain", "wallet_addEthereumChain" },
-                        Chains = chains,
+                        Chains = _supportedChains,
                         Events = new[] { "chainChanged", "accountsChanged" },
                     }
                 }
@@ -120,9 +118,7 @@ namespace Thirdweb.Wallets
             var connectOptions = new ConnectOptions { OptionalNamespaces = optionalNamespaces, };
 
             // Open modal
-            WalletConnectModal.Open(
-                new WalletConnectModalOptions { ConnectOptions = connectOptions, IncludedWalletIds = ThirdwebManager.Instance.SDK.Session.Options.wallet?.walletConnectExplorerRecommendedWalletIds }
-            );
+            WalletConnectModal.Open(new WalletConnectModalOptions { ConnectOptions = connectOptions, IncludedWalletIds = _includedWalletIds });
         }
 
         public virtual async void Cancel()

@@ -31,12 +31,16 @@ namespace Thirdweb
 
         private static List<ChainIDNetworkData> _allChainsData;
 
+        private readonly ThirdwebSDK _sdk;
+
         #endregion
 
         #region Constructors
 
-        public ThirdwebSession(ThirdwebSDK.Options options, BigInteger chainId, string rpcUrl)
+        public ThirdwebSession(ThirdwebSDK sdk, ThirdwebSDK.Options options, BigInteger chainId, string rpcUrl)
         {
+            _sdk = sdk;
+
             Options = options;
             ChainId = chainId;
             RPC = rpcUrl;
@@ -60,10 +64,13 @@ namespace Thirdweb
                 case WalletProvider.WalletConnect:
                     if (Options.wallet == null || string.IsNullOrEmpty(Options.wallet?.walletConnectProjectId))
                         throw new UnityException("Wallet connect project id is required for wallet connect connection method!");
-                    ActiveWallet = new ThirdwebWalletConnect();
+                    var chains = new string[] { };
+                    if (Options.supportedChains != null)
+                        chains = chains.Concat(Options.supportedChains.Select(x => $"eip155:{new HexBigInteger(x.chainId).Value}")).ToArray();
+                    ActiveWallet = new ThirdwebWalletConnect(chains, Options.wallet?.walletConnectExplorerRecommendedWalletIds);
                     break;
                 case WalletProvider.Metamask:
-                    ActiveWallet = new ThirdwebMetamask();
+                    ActiveWallet = new ThirdwebMetamask(Options.wallet?.appName, Options.wallet?.appUrl);
                     break;
                 case WalletProvider.SmartWallet:
                     if (Options.smartWalletConfig == null)
@@ -92,7 +99,7 @@ namespace Thirdweb
                     {
                         ThirdwebDebug.Log("Already connected to personal wallet, skipping connection.");
                     }
-                    ActiveWallet = new ThirdwebSmartWallet(ActiveWallet, Options.smartWalletConfig.Value);
+                    ActiveWallet = new ThirdwebSmartWallet(ActiveWallet, _sdk);
                     break;
                 case WalletProvider.Hyperplay:
                     ActiveWallet = new ThirdwebHyperplay(ChainId.ToString());
@@ -137,7 +144,8 @@ namespace Thirdweb
             {
                 ThirdwebDebug.LogWarning("No active wallet detected, unable to disconnect.");
             }
-            ThirdwebManager.Instance.SDK.Session = new ThirdwebSession(Options, ChainId, RPC);
+
+            ActiveWallet = null;
         }
 
         internal async Task<T> Request<T>(string method, params object[] parameters)

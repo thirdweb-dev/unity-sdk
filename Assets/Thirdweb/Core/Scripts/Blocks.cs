@@ -5,12 +5,19 @@ using Nethereum.RPC.Eth.DTOs;
 
 namespace Thirdweb
 {
-    public static class Blocks
+    public class Blocks
     {
+        private readonly ThirdwebSDK _sdk;
+
+        public Blocks(ThirdwebSDK sdk)
+        {
+            _sdk = sdk;
+        }
+
         /// <summary>
         /// Returns the latest block number
         /// </summary>
-        public static async Task<BigInteger> GetLatestBlockNumber()
+        public async Task<BigInteger> GetLatestBlockNumber()
         {
             if (Utils.IsWebGLBuild())
             {
@@ -18,7 +25,7 @@ namespace Thirdweb
             }
             else
             {
-                var hex = await Utils.GetWeb3().Eth.Blocks.GetBlockNumber.SendRequestAsync();
+                var hex = await Utils.GetWeb3(_sdk.Session.ChainId).Eth.Blocks.GetBlockNumber.SendRequestAsync();
                 return hex.Value;
             }
         }
@@ -26,7 +33,7 @@ namespace Thirdweb
         /// <summary>
         /// Returns the latest block timestamp
         /// </summary>
-        public static async Task<BigInteger> GetLatestBlockTimestamp()
+        public async Task<BigInteger> GetLatestBlockTimestamp()
         {
             var block = await GetBlock(await GetLatestBlockNumber());
             return block.Timestamp.Value;
@@ -36,7 +43,7 @@ namespace Thirdweb
         /// Returns the latest block (with transaction hashes)
         /// </summary>
         /// <param name="blockNumber">Number of the block to retrieve</param>
-        public static async Task<BlockWithTransactionHashes> GetBlock(BigInteger blockNumber)
+        public async Task<BlockWithTransactionHashes> GetBlock(BigInteger blockNumber)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -44,7 +51,7 @@ namespace Thirdweb
             }
             else
             {
-                return await Utils.GetWeb3().Eth.Blocks.GetBlockWithTransactionsHashesByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
+                return await Utils.GetWeb3(_sdk.Session.ChainId).Eth.Blocks.GetBlockWithTransactionsHashesByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
             }
         }
 
@@ -52,7 +59,7 @@ namespace Thirdweb
         /// Returns the latest block with transaction data
         /// </summary>
         /// <param name="blockNumber">Number of the block to retrieve</param>
-        public static async Task<BlockWithTransactions> GetBlockWithTransactions(BigInteger blockNumber)
+        public async Task<BlockWithTransactions> GetBlockWithTransactions(BigInteger blockNumber)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -60,7 +67,7 @@ namespace Thirdweb
             }
             else
             {
-                return await Utils.GetWeb3().Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
+                return await Utils.GetWeb3(_sdk.Session.ChainId).Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
             }
         }
     }

@@ -7,7 +7,7 @@ using WalletConnectSharp.Core.Controllers;
 namespace WalletConnectUnity.Core
 {
     [CreateAssetMenu(fileName = "WalletConnectProjectConfig", menuName = "WalletConnect/Project Configuration")]
-    public sealed class ProjectConfiguration : ScriptableObject
+    public class ProjectConfiguration : ScriptableObject
     {
         [field: SerializeField, Header("Application")]
         public string Id { get; private set; }

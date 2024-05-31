@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Thirdweb.Pay
 {
-    public static partial class ThirdwebPay
+    public partial class ThirdwebPay
     {
         /// <summary>
         /// Buy crypto with fiat using the onramp link from the quote and get a quote ID to poll for the onramp status.
@@ -12,10 +12,8 @@ namespace Thirdweb.Pay
         /// <param name="buyWithFiatQuote">Quote containing onramp details</param>
         /// <param name="sdk">Optional SDK instance, defaults to ThirdwebManager instance</param>
         /// <returns>Quote ID to poll for the onramp status</returns>
-        public static string BuyWithFiat(BuyWithFiatQuoteResult buyWithFiatQuote, ThirdwebSDK sdk = null)
+        public string BuyWithFiat(BuyWithFiatQuoteResult buyWithFiatQuote)
         {
-            sdk ??= ThirdwebManager.Instance.SDK;
-
             if (string.IsNullOrEmpty(buyWithFiatQuote.OnRampLink))
             {
                 throw new Exception("OnRampLink is required to buy with fiat.");

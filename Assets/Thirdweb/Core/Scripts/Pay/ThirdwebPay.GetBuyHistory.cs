@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Thirdweb.Pay
 {
-    public static partial class ThirdwebPay
+    public partial class ThirdwebPay
     {
         /// <summary>
         /// Get buy history, supports cursor and pagination.
@@ -19,9 +19,9 @@ namespace Thirdweb.Pay
         /// <param name="pageSize">Buy statuses to query for</param>
         /// <returns>Buy history object <see cref="BuyHistoryResult"/></returns>
         /// <exception cref="Exception"></exception>
-        public static async Task<BuyHistoryResult> GetBuyHistory(string walletAddress, int start, int count, string cursor = null, int? pageSize = null)
+        public async Task<BuyHistoryResult> GetBuyHistory(string walletAddress, int start, int count, string cursor = null, int? pageSize = null)
         {
-            if (string.IsNullOrEmpty(Utils.GetClientId()))
+            if (string.IsNullOrEmpty(_sdk.Session.Options.clientId))
             {
                 throw new Exception("Client ID is not set. Please set it in the ThirdwebManager.");
             }
@@ -44,9 +44,9 @@ namespace Thirdweb.Pay
             request.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
             request.SetRequestHeader("x-sdk-platform", "unity");
             request.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
-            request.SetRequestHeader("x-client-id", Utils.GetClientId());
+            request.SetRequestHeader("x-client-id", _sdk.Session.Options.clientId);
             if (!Utils.IsWebGLBuild())
-                request.SetRequestHeader("x-bundle-id", Utils.GetBundleId());
+                request.SetRequestHeader("x-bundle-id", _sdk.Session.Options.bundleId);
 
             var operation = request.SendWebRequest();
 

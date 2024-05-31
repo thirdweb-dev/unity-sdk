@@ -16,6 +16,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Collections;
 using Nethereum.Hex.HexTypes;
+using Dynamitey;
 
 namespace Thirdweb
 {
@@ -173,11 +174,10 @@ namespace Thirdweb
 #endif
         }
 
-        public static string ReplaceIPFS(this string uri)
+        public static string ReplaceIPFS(this string uri, string ipfsGateway)
         {
-            string gateway = ThirdwebManager.Instance.SDK.Storage.IPFSGateway;
-            if (!string.IsNullOrEmpty(uri) && uri.StartsWith("ipfs://"))
-                return uri.Replace("ipfs://", gateway);
+            if (!string.IsNullOrEmpty(uri) && uri.StartsWith("ipfs://") && !string.IsNullOrEmpty(ipfsGateway))
+                return uri.Replace("ipfs://", ipfsGateway);
             else
                 return uri;
         }
@@ -404,10 +404,10 @@ namespace Thirdweb
             return new Account(ecKey, chainId);
         }
 
-        public static string CidToIpfsUrl(this string cid, bool useGateway = false)
+        public static string CidToIpfsUrl(this string cid, string ipfsGateway = null)
         {
             string ipfsRaw = $"ipfs://{cid}";
-            return useGateway ? ipfsRaw.ReplaceIPFS() : ipfsRaw;
+            return ipfsRaw.ReplaceIPFS(ipfsGateway);
         }
 
         public async static Task<string> ResolveAddressFromENS(string ens)
@@ -465,17 +465,6 @@ namespace Thirdweb
             return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address);
         }
 
-        public static string GetClientId()
-        {
-            return ThirdwebManager.Instance.SDK?.Session?.Options.clientId ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.clientId) ? null : ThirdwebManager.Instance.clientId);
-        }
-
-        public static string GetBundleId()
-        {
-            return ThirdwebManager.Instance.SDK?.Session?.Options.bundleId
-                ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.bundleIdOverride) ? Application.identifier.ToLower() : ThirdwebManager.Instance.bundleIdOverride);
-        }
-
         public static string GetRuntimePlatform()
         {
             switch (Application.platform)
@@ -500,18 +489,18 @@ namespace Thirdweb
             }
         }
 
-        public static string AppendBundleIdQueryParam(this string uri)
+        public static string AppendBundleIdQueryParam(this string uri, string bundleId)
         {
-            if (IsWebGLBuild())
+            if (IsWebGLBuild() || string.IsNullOrEmpty(bundleId))
                 return uri;
 
-            uri += $"?bundleId={GetBundleId()}";
+            uri += $"?bundleId={bundleId}";
             return uri;
         }
 
-        public static Web3 GetWeb3(BigInteger? chainId = null)
+        public static Web3 GetWeb3(BigInteger chainId)
         {
-            return new Web3(new ThirdwebClient(new Uri(chainId == null ? ThirdwebManager.Instance.SDK.Session.RPC : $"https://{chainId}.rpc.thirdweb.com")));
+            return new Web3(new ThirdwebClient(new Uri($"https://{chainId}.rpc.thirdweb.com")));
         }
 
         public static string GetNativeTokenWrapper(BigInteger chainId)
@@ -685,9 +674,16 @@ namespace Thirdweb
             return new HexBigInteger(number).HexValue;
         }
 
-        public static async void TrackWalletAnalytics(string clientId, string source, string action, string walletType, string walletAddress)
+        public static async void TrackWalletAnalytics(string clientId, string bundleId, string source, string action, string walletType, string walletAddress)
         {
-            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(source) || string.IsNullOrEmpty(action) || string.IsNullOrEmpty(walletType) || string.IsNullOrEmpty(walletAddress))
+            if (
+                string.IsNullOrEmpty(clientId)
+                || string.IsNullOrEmpty(bundleId)
+                || string.IsNullOrEmpty(source)
+                || string.IsNullOrEmpty(action)
+                || string.IsNullOrEmpty(walletType)
+                || string.IsNullOrEmpty(walletAddress)
+            )
                 return;
 
             try
@@ -706,7 +702,7 @@ namespace Thirdweb
                     { "x-sdk-name", "UnitySDK" },
                     { "x-sdk-version", ThirdwebSDK.version },
                     { "x-sdk-os", GetRuntimePlatform() },
-                    { "x-bundle-id", GetBundleId() },
+                    { "x-bundle-id", bundleId },
                 };
                 var request = new HttpRequestMessage(HttpMethod.Post, "https://c.thirdweb.com/event")
                 {

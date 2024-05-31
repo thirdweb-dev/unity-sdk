@@ -11,14 +11,19 @@ namespace Thirdweb.Wallets
     public class ThirdwebWalletConnect : IThirdwebWallet
     {
         private Web3 _web3;
-        private WalletProvider _provider;
-        private WalletProvider _signerProvider;
 
-        public ThirdwebWalletConnect()
+        private readonly WalletProvider _provider;
+        private readonly WalletProvider _signerProvider;
+        private readonly string[] _supportedChains;
+        private readonly string[] _includedWalletIds;
+
+        public ThirdwebWalletConnect(string[] supportedChains, string[] includedWalletIds)
         {
             _web3 = null;
             _provider = WalletProvider.WalletConnect;
             _signerProvider = WalletProvider.WalletConnect;
+            _supportedChains = supportedChains;
+            _includedWalletIds = includedWalletIds;
         }
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)
@@ -29,7 +34,7 @@ namespace Thirdweb.Wallets
                 await new WaitForSeconds(0.5f);
             }
 
-            await WalletConnectUI.Instance.Connect();
+            await WalletConnectUI.Instance.Connect(_supportedChains, _includedWalletIds);
             await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{walletConnection.chainId}");
             _web3 = new Web3(rpc);
             return await GetAddress();
