@@ -9,6 +9,7 @@ using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.Contracts.QueryHandlers.MultiCall;
 using System.Collections.Generic;
 using System.Linq;
+using Amazon.Runtime.Internal.Util;
 
 #pragma warning disable CS0618
 
@@ -18,12 +19,12 @@ namespace Thirdweb
     {
         private static bool warned;
 
-        public static async Task<TWResult> ThirdwebRead<TWFunction, TWResult>(string contractAddress, TWFunction functionMessage)
+        public static async Task<TWResult> ThirdwebRead<TWFunction, TWResult>(ThirdwebSDK sdk, string contractAddress, TWFunction functionMessage)
             where TWFunction : FunctionMessage, new()
         {
             try
             {
-                functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
+                functionMessage.FromAddress = await sdk.Wallet.GetAddress();
             }
             catch (System.Exception)
             {
@@ -34,15 +35,17 @@ namespace Thirdweb
                 }
             }
 
-            var queryHandler = Utils.GetWeb3().Eth.GetContractQueryHandler<TWFunction>();
+            var web3 = Utils.GetWeb3(sdk.Session.ChainId, sdk.Session.Options.clientId, sdk.Session.Options.bundleId);
+            var queryHandler = web3.Eth.GetContractQueryHandler<TWFunction>();
             return await queryHandler.QueryAsync<TWResult>(contractAddress, functionMessage);
         }
 
-        public static async Task<TWResult[]> ThirdwebMulticallRead<TWFunction, TWResult>(string contractAddress, TWFunction[] functionMessages)
+        public static async Task<TWResult[]> ThirdwebMulticallRead<TWFunction, TWResult>(ThirdwebSDK sdk, string contractAddress, TWFunction[] functionMessages)
             where TWFunction : FunctionMessage, new()
             where TWResult : IFunctionOutputDTO, new()
         {
-            MultiQueryHandler multiqueryHandler = Utils.GetWeb3().Eth.GetMultiQueryHandler();
+            var web3 = Utils.GetWeb3(sdk.Session.ChainId, sdk.Session.Options.clientId, sdk.Session.Options.bundleId);
+            MultiQueryHandler multiqueryHandler = web3.Eth.GetMultiQueryHandler();
             var calls = new List<MulticallInputOutput<TWFunction, TWResult>>();
             for (int i = 0; i < functionMessages.Length; i++)
             {
@@ -52,17 +55,29 @@ namespace Thirdweb
             return calls.Select(x => x.Output).ToArray();
         }
 
-        public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null, BigInteger? gasOverride = null)
+        public static async Task<TransactionResult> ThirdwebWrite<TWFunction>(
+            ThirdwebSDK sdk,
+            string contractAddress,
+            TWFunction functionMessage,
+            BigInteger? weiValue = null,
+            BigInteger? gasOverride = null
+        )
             where TWFunction : FunctionMessage, new()
         {
-            var receipt = await ThirdwebWriteRawResult(contractAddress, functionMessage, weiValue, gasOverride);
+            var receipt = await ThirdwebWriteRawResult(sdk, contractAddress, functionMessage, weiValue, gasOverride);
             return receipt.ToTransactionResult();
         }
 
-        public static async Task<TransactionReceipt> ThirdwebWriteRawResult<TWFunction>(string contractAddress, TWFunction functionMessage, BigInteger? weiValue = null, BigInteger? gasOverride = null)
+        public static async Task<TransactionReceipt> ThirdwebWriteRawResult<TWFunction>(
+            ThirdwebSDK sdk,
+            string contractAddress,
+            TWFunction functionMessage,
+            BigInteger? weiValue = null,
+            BigInteger? gasOverride = null
+        )
             where TWFunction : FunctionMessage, new()
         {
-            functionMessage.FromAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
+            functionMessage.FromAddress = await sdk.Wallet.GetAddress();
             functionMessage.AmountToSend = weiValue ?? 0;
 
             if (gasOverride.HasValue)
@@ -73,7 +88,8 @@ namespace Thirdweb
             {
                 try
                 {
-                    var gasEstimator = Utils.GetWeb3().Eth.GetContractTransactionHandler<TWFunction>();
+                    var web3 = Utils.GetWeb3(sdk.Session.ChainId, sdk.Session.Options.clientId, sdk.Session.Options.bundleId);
+                    var gasEstimator = web3.Eth.GetContractTransactionHandler<TWFunction>();
                     var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
                     functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
                 }
@@ -84,9 +100,9 @@ namespace Thirdweb
                 }
             }
             var transactionInput = functionMessage.CreateTransactionInput(contractAddress);
-            var tx = new Transaction(transactionInput);
+            var tx = new Transaction(sdk, transactionInput);
             var hash = await tx.Send();
-            return await Transaction.WaitForTransactionResultRaw(hash);
+            return await Transaction.WaitForTransactionResultRaw(hash, sdk.Session.ChainId);
         }
     }
 }

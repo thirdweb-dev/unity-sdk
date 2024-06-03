@@ -8,16 +8,16 @@ using Thirdweb.Redcode.Awaiting;
 
 namespace Thirdweb.Pay
 {
-    public static partial class ThirdwebPay
+    public partial class ThirdwebPay
     {
         /// <summary>
         /// Get swap status for a transaction hash.
         /// </summary>
         /// <param name="transactionHash">Transaction hash to get swap status for</param>
         /// <returns>Swap status object <see cref="BuyWithCryptoStatusResult"/></returns>
-        public static async Task<BuyWithCryptoStatusResult> GetBuyWithCryptoStatus(string transactionHash)
+        public async Task<BuyWithCryptoStatusResult> GetBuyWithCryptoStatus(string transactionHash)
         {
-            if (string.IsNullOrEmpty(Utils.GetClientId()))
+            if (string.IsNullOrEmpty(_sdk.Session.Options.clientId))
             {
                 throw new Exception("Client ID is not set. Please set it in the ThirdwebManager.");
             }
@@ -34,13 +34,11 @@ namespace Thirdweb.Pay
 
             using var request = UnityWebRequest.Get(url);
 
-            request.SetRequestHeader("x-sdk-name", "UnitySDK");
-            request.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
-            request.SetRequestHeader("x-sdk-platform", "unity");
-            request.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
-            request.SetRequestHeader("x-client-id", ThirdwebManager.Instance.SDK.Session.Options.clientId);
-            if (!Utils.IsWebGLBuild())
-                request.SetRequestHeader("x-bundle-id", ThirdwebManager.Instance.SDK.Session.Options.bundleId);
+            var headers = Utils.GetThirdwebHeaders(_sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+            foreach (var header in headers)
+            {
+                request.SetRequestHeader(header.Key, header.Value);
+            }
 
             await request.SendWebRequest();
 

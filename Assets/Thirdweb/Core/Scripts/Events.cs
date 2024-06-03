@@ -7,8 +7,13 @@ namespace Thirdweb
 {
     public class Events : Routable
     {
-        public Events(string parentRoute)
-            : base(Routable.append(parentRoute, "events")) { }
+        private readonly ThirdwebSDK _sdk;
+
+        public Events(ThirdwebSDK sdk, string parentRoute)
+            : base(Routable.append(parentRoute, "events"))
+        {
+            _sdk = sdk;
+        }
 
         // READ FUNCTIONS
 

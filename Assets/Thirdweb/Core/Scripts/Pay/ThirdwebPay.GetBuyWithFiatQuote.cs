@@ -9,16 +9,16 @@ using System.Diagnostics;
 
 namespace Thirdweb.Pay
 {
-    public static partial class ThirdwebPay
+    public partial class ThirdwebPay
     {
         /// <summary>
         /// Get a quote containing an onramp link for a fiat to crypto swap.
         /// </summary>
         /// <param name="buyWithFiatParams">Fiat onramp parameters <see cref="BuyWithFiatQuoteParams"/></param>
         /// <returns>Fiat quote object <see cref="BuyWithFiatQuoteResult"/></returns>
-        public static async Task<BuyWithFiatQuoteResult> GetBuyWithFiatQuote(BuyWithFiatQuoteParams buyWithFiatParams)
+        public async Task<BuyWithFiatQuoteResult> GetBuyWithFiatQuote(BuyWithFiatQuoteParams buyWithFiatParams)
         {
-            if (string.IsNullOrEmpty(Utils.GetClientId()))
+            if (string.IsNullOrEmpty(_sdk.Session.Options.clientId))
             {
                 throw new Exception("Client ID is not set. Please set it in the ThirdwebManager.");
             }
@@ -42,13 +42,11 @@ namespace Thirdweb.Pay
 
             using var request = UnityWebRequest.Get(url);
 
-            request.SetRequestHeader("x-sdk-name", "UnitySDK");
-            request.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
-            request.SetRequestHeader("x-sdk-platform", "unity");
-            request.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
-            request.SetRequestHeader("x-client-id", Utils.GetClientId());
-            if (!Utils.IsWebGLBuild())
-                request.SetRequestHeader("x-bundle-id", Utils.GetBundleId());
+            var headers = Utils.GetThirdwebHeaders(_sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+            foreach (var header in headers)
+            {
+                request.SetRequestHeader(header.Key, header.Value);
+            }
 
             await request.SendWebRequest();
 

@@ -16,6 +16,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Collections;
 using Nethereum.Hex.HexTypes;
+using Dynamitey;
 
 namespace Thirdweb
 {
@@ -173,11 +174,10 @@ namespace Thirdweb
 #endif
         }
 
-        public static string ReplaceIPFS(this string uri)
+        public static string ReplaceIPFS(this string uri, string ipfsGateway)
         {
-            string gateway = ThirdwebManager.Instance.SDK.Storage.IPFSGateway;
-            if (!string.IsNullOrEmpty(uri) && uri.StartsWith("ipfs://"))
-                return uri.Replace("ipfs://", gateway);
+            if (!string.IsNullOrEmpty(uri) && uri.StartsWith("ipfs://") && !string.IsNullOrEmpty(ipfsGateway))
+                return uri.Replace("ipfs://", ipfsGateway);
             else
                 return uri;
         }
@@ -404,10 +404,10 @@ namespace Thirdweb
             return new Account(ecKey, chainId);
         }
 
-        public static string CidToIpfsUrl(this string cid, bool useGateway = false)
+        public static string CidToIpfsUrl(this string cid, string ipfsGateway = null)
         {
             string ipfsRaw = $"ipfs://{cid}";
-            return useGateway ? ipfsRaw.ReplaceIPFS() : ipfsRaw;
+            return ipfsRaw.ReplaceIPFS(ipfsGateway);
         }
 
         public async static Task<string> ResolveAddressFromENS(string ens)
@@ -465,17 +465,6 @@ namespace Thirdweb
             return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address);
         }
 
-        public static string GetClientId()
-        {
-            return ThirdwebManager.Instance.SDK?.Session?.Options.clientId ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.clientId) ? null : ThirdwebManager.Instance.clientId);
-        }
-
-        public static string GetBundleId()
-        {
-            return ThirdwebManager.Instance.SDK?.Session?.Options.bundleId
-                ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.bundleIdOverride) ? Application.identifier.ToLower() : ThirdwebManager.Instance.bundleIdOverride);
-        }
-
         public static string GetRuntimePlatform()
         {
             switch (Application.platform)
@@ -500,18 +489,24 @@ namespace Thirdweb
             }
         }
 
-        public static string AppendBundleIdQueryParam(this string uri)
+        public static string AppendBundleIdQueryParam(this string uri, string bundleId)
         {
-            if (IsWebGLBuild())
+            if (IsWebGLBuild() || string.IsNullOrEmpty(bundleId) || uri.Contains("bundleId="))
                 return uri;
 
-            uri += $"?bundleId={GetBundleId()}";
+            uri += $"?bundleId={bundleId}";
             return uri;
         }
 
-        public static Web3 GetWeb3(BigInteger? chainId = null)
+        public static Web3 GetWeb3(BigInteger chainId, string clientId, string bundleId)
         {
-            return new Web3(new ThirdwebClient(new Uri(chainId == null ? ThirdwebManager.Instance.SDK.Session.RPC : $"https://{chainId}.rpc.thirdweb.com")));
+            var url = $"https://{chainId}.rpc.thirdweb.com";
+            if (!string.IsNullOrEmpty(clientId))
+            {
+                url += $"/{clientId}";
+                url = url.AppendBundleIdQueryParam(bundleId);
+            }
+            return new Web3(new ThirdwebClient(new Uri(url)));
         }
 
         public static string GetNativeTokenWrapper(BigInteger chainId)
@@ -576,14 +571,14 @@ namespace Thirdweb
             return unixTimestamp.ToString();
         }
 
-        public async static Task<BigInteger> GetLegacyGasPriceAsync(BigInteger chainId)
+        public async static Task<BigInteger> GetLegacyGasPriceAsync(BigInteger chainId, string clientId = null, string bundleId = null)
         {
-            var web3 = GetWeb3(chainId);
+            var web3 = GetWeb3(chainId, clientId, bundleId);
             var gasPrice = (await web3.Eth.GasPrice.SendRequestAsync()).Value;
             return BigInteger.Multiply(gasPrice, 10) / 9;
         }
 
-        public async static Task<GasPriceParameters> GetGasPriceAsync(BigInteger chainId)
+        public async static Task<GasPriceParameters> GetGasPriceAsync(BigInteger chainId, string clientId = null, string bundleId = null)
         {
             BigInteger? priorityOverride = null;
             if (chainId == 137 || chainId == 80001)
@@ -599,7 +594,7 @@ namespace Thirdweb
                 }
             }
 
-            var web3 = GetWeb3(chainId);
+            var web3 = GetWeb3(chainId, clientId, bundleId);
             var gasPrice = (await web3.Eth.GasPrice.SendRequestAsync()).Value;
 
             if (chainId == 42220) // celo mainnet
@@ -685,9 +680,16 @@ namespace Thirdweb
             return new HexBigInteger(number).HexValue;
         }
 
-        public static async void TrackWalletAnalytics(string clientId, string source, string action, string walletType, string walletAddress)
+        public static async void TrackWalletAnalytics(string clientId, string bundleId, string source, string action, string walletType, string walletAddress)
         {
-            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(source) || string.IsNullOrEmpty(action) || string.IsNullOrEmpty(walletType) || string.IsNullOrEmpty(walletAddress))
+            if (
+                string.IsNullOrEmpty(clientId)
+                || string.IsNullOrEmpty(bundleId)
+                || string.IsNullOrEmpty(source)
+                || string.IsNullOrEmpty(action)
+                || string.IsNullOrEmpty(walletType)
+                || string.IsNullOrEmpty(walletAddress)
+            )
                 return;
 
             try
@@ -699,24 +701,21 @@ namespace Thirdweb
                     walletAddress,
                     walletType,
                 };
-                var headers = new Dictionary<string, string>
-                {
-                    { "x-client-id", clientId },
-                    { "x-sdk-platform", "unity" },
-                    { "x-sdk-name", "UnitySDK" },
-                    { "x-sdk-version", ThirdwebSDK.version },
-                    { "x-sdk-os", GetRuntimePlatform() },
-                    { "x-bundle-id", GetBundleId() },
-                };
+
                 var request = new HttpRequestMessage(HttpMethod.Post, "https://c.thirdweb.com/event")
                 {
                     Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json")
                 };
+
+                var headers = GetThirdwebHeaders(clientId, bundleId);
+
                 foreach (var header in headers)
                 {
                     request.Headers.Add(header.Key, header.Value);
                 }
+
                 using var client = new HttpClient();
+
                 await client.SendAsync(request);
             }
             catch (System.Exception e)
@@ -778,6 +777,31 @@ namespace Thirdweb
                 ThirdwebDebug.LogWarning($"Failed to copy to clipboard: {e}");
                 return false;
             }
+        }
+
+        public static bool IsThirdwebRequest(string uri)
+        {
+            var host = new Uri(uri).Host;
+            return host.EndsWith(".ipfscdn.io") || host.EndsWith(".thirdweb.com");
+        }
+
+        public static Dictionary<string, string> GetThirdwebHeaders(string clientId, string bundleId)
+        {
+            var headers = new Dictionary<string, string>
+            {
+                { "x-sdk-name", "UnitySDK" },
+                { "x-sdk-os", GetRuntimePlatform() },
+                { "x-sdk-platform", "unity" },
+                { "x-sdk-version", ThirdwebSDK.version },
+                { "x-client-id", clientId },
+            };
+
+            if (!IsWebGLBuild())
+            {
+                headers.Add("x-bundle-id", bundleId);
+            }
+
+            return headers;
         }
     }
 }

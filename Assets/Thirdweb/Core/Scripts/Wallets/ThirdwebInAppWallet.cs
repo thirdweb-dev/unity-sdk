@@ -15,6 +15,7 @@ namespace Thirdweb.Wallets
         private readonly EmbeddedWallet _embeddedWallet;
         private Account _account;
         private string _email;
+        private string _clientId;
 
         public ThirdwebInAppWallet(string clientId, string bundleId)
         {
@@ -33,7 +34,7 @@ namespace Thirdweb.Wallets
                 GameObject.Instantiate(ThirdwebManager.Instance.InAppWalletPrefab);
             }
 
-            var user = await InAppWalletUI.Instance.Connect(_embeddedWallet, walletConnection.email, walletConnection.phoneNumber, walletConnection.authOptions);
+            var user = await InAppWalletUI.Instance.Connect(_embeddedWallet, walletConnection.email, walletConnection.phoneNumber, walletConnection.authOptions, _clientId);
             _account = user.Account;
             _email = user.EmailAddress;
             _web3 = new Web3(_account, rpc);

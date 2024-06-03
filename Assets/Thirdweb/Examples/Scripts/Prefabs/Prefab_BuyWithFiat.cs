@@ -24,7 +24,7 @@ public class Prefab_BuyWithFiat : MonoBehaviour
             isTestMode: true
         );
 
-        _quote = await ThirdwebPay.GetBuyWithFiatQuote(fiatQuoteParams);
+        _quote = await ThirdwebManager.Instance.SDK.Pay.GetBuyWithFiatQuote(fiatQuoteParams);
         ThirdwebDebug.Log($"Quote: {JsonConvert.SerializeObject(_quote, Formatting.Indented)}");
     }
 
@@ -38,7 +38,7 @@ public class Prefab_BuyWithFiat : MonoBehaviour
 
         try
         {
-            _intentId = ThirdwebPay.BuyWithFiat(_quote);
+            _intentId = ThirdwebManager.Instance.SDK.Pay.BuyWithFiat(_quote);
             ThirdwebDebug.Log($"Intent ID: {_intentId}");
         }
         catch (System.Exception e)
@@ -55,7 +55,7 @@ public class Prefab_BuyWithFiat : MonoBehaviour
             return;
         }
 
-        var status = await ThirdwebPay.GetBuyWithFiatStatus(_intentId);
+        var status = await ThirdwebManager.Instance.SDK.Pay.GetBuyWithFiatStatus(_intentId);
 
         if (status.Status == OnRampStatus.PAYMENT_FAILED.ToString() || status.Status == OnRampStatus.ON_RAMP_TRANSFER_FAILED.ToString() || status.Status == OnRampStatus.CRYPTO_SWAP_FAILED.ToString())
         {
@@ -81,7 +81,7 @@ public class Prefab_BuyWithFiat : MonoBehaviour
             //     intentId: _intentId
             // );
 
-            // var quote = await ThirdwebPay.GetBuyWithCryptoQuote(swapQuoteParams);
+            // var quote = await ThirdwebManager.Instance.SDK.Pay.GetBuyWithCryptoQuote(swapQuoteParams);
 
             // See Prefab_BuyWithCrypto.cs for the rest of the process
         }
@@ -92,7 +92,7 @@ public class Prefab_BuyWithFiat : MonoBehaviour
     public async void GetBuyHistory()
     {
         string connectedAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
-        var history = await ThirdwebPay.GetBuyHistory(connectedAddress, 0, 10);
+        var history = await ThirdwebManager.Instance.SDK.Pay.GetBuyHistory(connectedAddress, 0, 10);
         ThirdwebDebug.Log($"Full History: {JsonConvert.SerializeObject(history, Formatting.Indented)}");
 
         var latestBuyWithFiatStatus = history.Page.FirstOrDefault(h => h.BuyWithFiatStatus != null)?.BuyWithFiatStatus;
@@ -105,7 +105,7 @@ public class Prefab_BuyWithFiat : MonoBehaviour
     [ContextMenu("Get Supported Currencies")]
     public async void GetSupportedCurrencies()
     {
-        var currencies = await ThirdwebPay.GetBuyWithFiatCurrencies();
+        var currencies = await ThirdwebManager.Instance.SDK.Pay.GetBuyWithFiatCurrencies();
         ThirdwebDebug.Log($"Supported Currencies: {JsonConvert.SerializeObject(currencies, Formatting.Indented)}");
     }
 }

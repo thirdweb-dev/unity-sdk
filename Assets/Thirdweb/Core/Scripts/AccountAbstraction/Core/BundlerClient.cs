@@ -10,41 +10,55 @@ namespace Thirdweb.AccountAbstraction
     {
         // Bundler requests
 
-        public static async Task<EthGetUserOperationByHashResponse> EthGetUserOperationByHash(string bundlerUrl, string apiKey, object requestId, string userOpHash)
+        public static async Task<EthGetUserOperationByHashResponse> EthGetUserOperationByHash(string bundlerUrl, string apiKey, string bundleId, object requestId, string userOpHash)
         {
-            var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "eth_getUserOperationByHash", userOpHash);
+            var response = await BundlerRequest(bundlerUrl, apiKey, bundleId, requestId, "eth_getUserOperationByHash", userOpHash);
             return JsonConvert.DeserializeObject<EthGetUserOperationByHashResponse>(response.Result.ToString());
         }
 
-        public static async Task<EthGetUserOperationReceiptResponse> EthGetUserOperationReceipt(string bundlerUrl, string apiKey, object requestId, string userOpHash)
+        public static async Task<EthGetUserOperationReceiptResponse> EthGetUserOperationReceipt(string bundlerUrl, string apiKey, string bundleId, object requestId, string userOpHash)
         {
-            var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "eth_getUserOperationReceipt", userOpHash);
+            var response = await BundlerRequest(bundlerUrl, apiKey, bundleId, requestId, "eth_getUserOperationReceipt", userOpHash);
             return JsonConvert.DeserializeObject<EthGetUserOperationReceiptResponse>(response.Result.ToString());
         }
 
-        public static async Task<string> EthSendUserOperation(string bundlerUrl, string apiKey, object requestId, UserOperationHexified userOp, string entryPoint)
+        public static async Task<string> EthSendUserOperation(string bundlerUrl, string apiKey, string bundleId, object requestId, UserOperationHexified userOp, string entryPoint)
         {
-            var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "eth_sendUserOperation", userOp, entryPoint);
+            var response = await BundlerRequest(bundlerUrl, apiKey, bundleId, requestId, "eth_sendUserOperation", userOp, entryPoint);
             return response.Result.ToString();
         }
 
-        public static async Task<EthEstimateUserOperationGasResponse> EthEstimateUserOperationGas(string bundlerUrl, string apiKey, object requestId, UserOperationHexified userOp, string entryPoint)
+        public static async Task<EthEstimateUserOperationGasResponse> EthEstimateUserOperationGas(
+            string bundlerUrl,
+            string apiKey,
+            string bundleId,
+            object requestId,
+            UserOperationHexified userOp,
+            string entryPoint
+        )
         {
-            var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "eth_estimateUserOperationGas", userOp, entryPoint);
+            var response = await BundlerRequest(bundlerUrl, apiKey, bundleId, requestId, "eth_estimateUserOperationGas", userOp, entryPoint);
             return JsonConvert.DeserializeObject<EthEstimateUserOperationGasResponse>(response.Result.ToString());
         }
 
-        public static async Task<ThirdwebGetUserOperationGasPriceResponse> ThirdwebGetUserOperationGasPrice(string bundlerUrl, string apiKey, object requestId)
+        public static async Task<ThirdwebGetUserOperationGasPriceResponse> ThirdwebGetUserOperationGasPrice(string bundlerUrl, string apiKey, string bundleId, object requestId)
         {
-            var response = await BundlerRequest(bundlerUrl, apiKey, requestId, "thirdweb_getUserOperationGasPrice");
+            var response = await BundlerRequest(bundlerUrl, apiKey, bundleId, requestId, "thirdweb_getUserOperationGasPrice");
             return JsonConvert.DeserializeObject<ThirdwebGetUserOperationGasPriceResponse>(response.Result.ToString());
         }
 
         // Paymaster requests
 
-        public static async Task<PMSponsorOperationResponse> PMSponsorUserOperation(string paymasterUrl, string apiKey, object requestId, UserOperationHexified userOp, string entryPoint)
+        public static async Task<PMSponsorOperationResponse> PMSponsorUserOperation(
+            string paymasterUrl,
+            string apiKey,
+            string bundleId,
+            object requestId,
+            UserOperationHexified userOp,
+            string entryPoint
+        )
         {
-            var response = await BundlerRequest(paymasterUrl, apiKey, requestId, "pm_sponsorUserOperation", userOp, new EntryPointWrapper() { entryPoint = entryPoint });
+            var response = await BundlerRequest(paymasterUrl, apiKey, bundleId, requestId, "pm_sponsorUserOperation", userOp, new EntryPointWrapper() { entryPoint = entryPoint });
             try
             {
                 return JsonConvert.DeserializeObject<PMSponsorOperationResponse>(response.Result.ToString());
@@ -57,7 +71,7 @@ namespace Thirdweb.AccountAbstraction
 
         // Request
 
-        private static async Task<RpcResponseMessage> BundlerRequest(string url, string apiKey, object requestId, string method, params object[] args)
+        private static async Task<RpcResponseMessage> BundlerRequest(string url, string apiKey, string bundleId, object requestId, string method, params object[] args)
         {
             using HttpClient client = new HttpClient();
             ThirdwebDebug.Log($"Bundler Request: {method}({JsonConvert.SerializeObject(args)}");
@@ -65,15 +79,13 @@ namespace Thirdweb.AccountAbstraction
             string requestMessageJson = JsonConvert.SerializeObject(requestMessage);
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, url) { Content = new StringContent(requestMessageJson, System.Text.Encoding.UTF8, "application/json") };
-            if (new Uri(url).Host.EndsWith(".thirdweb.com"))
+            if (Utils.IsThirdwebRequest(url))
             {
-                httpRequestMessage.Headers.Add("x-sdk-name", "UnitySDK");
-                httpRequestMessage.Headers.Add("x-sdk-os", Utils.GetRuntimePlatform());
-                httpRequestMessage.Headers.Add("x-sdk-platform", "unity");
-                httpRequestMessage.Headers.Add("x-sdk-version", ThirdwebSDK.version);
-                httpRequestMessage.Headers.Add("x-client-id", Utils.GetClientId());
-                if (!Utils.IsWebGLBuild())
-                    httpRequestMessage.Headers.Add("x-bundle-id", Utils.GetBundleId());
+                var headers = Utils.GetThirdwebHeaders(apiKey, bundleId);
+                foreach (var header in headers)
+                {
+                    httpRequestMessage.Headers.Add(header.Key, header.Value);
+                }
             }
 
             var httpResponse = await client.SendAsync(httpRequestMessage);
