@@ -251,8 +251,6 @@ namespace Thirdweb.AccountAbstraction
             var gasPerPubData = feeData["gas_per_pubdata_limit"].ToObject<HexBigInteger>().Value;
             var gasLimit = feeData["gas_limit"].ToObject<HexBigInteger>().Value * 10 / 5;
 
-            ThirdwebDebug.Log($"MaxFee: {maxFee}, MaxPriorityFee: {maxPriorityFee}, GasPerPubData: {gasPerPubData}, GasLimit: {gasLimit}");
-
             if (_sdk.Session.Options.smartWalletConfig?.gasless == true)
             {
                 var pmDataResult = await BundlerClient.ZkPaymasterData(

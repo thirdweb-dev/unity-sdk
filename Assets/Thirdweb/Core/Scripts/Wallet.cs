@@ -495,7 +495,6 @@ namespace Thirdweb
                         // Zk AA
                         if (_sdk.Session.ChainId == 300 || _sdk.Session.ChainId == 324)
                         {
-                            ThirdwebDebug.Log("Signing Zk AA typed data with EOA...");
                             var hashToken = jsonObject.SelectToken("$.message.data");
                             if (hashToken != null)
                             {
