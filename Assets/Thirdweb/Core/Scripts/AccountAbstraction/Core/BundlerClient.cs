@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Nethereum.JsonRpc.Client.RpcMessages;
+using Nethereum.RPC.Eth.DTOs;
 using Newtonsoft.Json;
 
 namespace Thirdweb.AccountAbstraction
@@ -67,6 +68,25 @@ namespace Thirdweb.AccountAbstraction
             {
                 return new PMSponsorOperationResponse() { paymasterAndData = response.Result.ToString() };
             }
+        }
+
+        public static async Task<ZkPaymasterDataResponse> ZkPaymasterData(string paymasterUrl, string apiKey, string bundleId, object requestId, TransactionInput txInput)
+        {
+            var response = await BundlerRequest(paymasterUrl, apiKey, bundleId, requestId, "zk_paymasterData", txInput);
+            try
+            {
+                return JsonConvert.DeserializeObject<ZkPaymasterDataResponse>(response.Result.ToString());
+            }
+            catch
+            {
+                return new ZkPaymasterDataResponse() { paymaster = null, paymasterInput = null };
+            }
+        }
+
+        public static async Task<ZkBroadcastTransactionResponse> ZkBroadcastTransaction(string paymasterUrl, string apiKey, string bundleId, object requestId, object txInput)
+        {
+            var response = await BundlerRequest(paymasterUrl, apiKey, bundleId, requestId, "zk_broadcastTransaction", txInput);
+            return JsonConvert.DeserializeObject<ZkBroadcastTransactionResponse>(response.Result.ToString());
         }
 
         // Request

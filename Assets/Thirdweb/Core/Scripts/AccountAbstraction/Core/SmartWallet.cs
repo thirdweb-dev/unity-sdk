@@ -18,6 +18,7 @@ using Thirdweb.Contracts.Account.ContractDefinition;
 using Thirdweb.Wallets;
 using Nethereum.Signer;
 using System.Security.Cryptography;
+using Newtonsoft.Json.Linq;
 
 namespace Thirdweb.AccountAbstraction
 {
@@ -50,6 +51,7 @@ namespace Thirdweb.AccountAbstraction
         public bool IsDeploying => _deploying;
 
         private readonly ThirdwebSDK _sdk;
+        private bool IsZkSync => _sdk.Session.ChainId == 300 || _sdk.Session.ChainId == 324;
 
         public SmartWallet(IThirdwebWallet personalWallet, ThirdwebSDK sdk)
         {
@@ -71,6 +73,13 @@ namespace Thirdweb.AccountAbstraction
         {
             if (_initialized)
                 return;
+
+            if (IsZkSync)
+            {
+                Accounts = new List<string>() { await GetPersonalAddress() };
+                _initialized = true;
+                return;
+            }
 
             var predictedAccount =
                 smartWalletOverride
@@ -95,6 +104,12 @@ namespace Thirdweb.AccountAbstraction
 
         internal async Task UpdateDeploymentStatus()
         {
+            if (IsZkSync)
+            {
+                _deployed = true;
+                return;
+            }
+
             var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
             var bytecode = await web3.Eth.GetCode.SendRequestAsync(Accounts[0]);
             _deployed = bytecode != "0x";
@@ -102,11 +117,20 @@ namespace Thirdweb.AccountAbstraction
 
         internal async Task<TransactionResult> SetPermissionsForSigner(SignerPermissionRequest signerPermissionRequest, byte[] signature)
         {
+            if (IsZkSync)
+            {
+                throw new NotImplementedException("SetPermissionsForSigner is not supported on zkSync");
+            }
             return await TransactionManager.ThirdwebWrite(_sdk, Accounts[0], new SetPermissionsForSignerFunction() { Req = signerPermissionRequest, Signature = signature });
         }
 
         internal async Task ForceDeploy()
         {
+            if (IsZkSync)
+            {
+                return;
+            }
+
             if (_deployed)
                 return;
 
@@ -118,6 +142,11 @@ namespace Thirdweb.AccountAbstraction
 
         internal async Task<bool> VerifySignature(byte[] hash, byte[] signature)
         {
+            if (IsZkSync)
+            {
+                throw new NotImplementedException("VerifySignature is not supported on zkSync");
+            }
+
             try
             {
                 var verifyRes = await TransactionManager.ThirdwebRead<AccountContract.IsValidSignatureFunction, AccountContract.IsValidSignatureOutputDTO>(
@@ -136,6 +165,11 @@ namespace Thirdweb.AccountAbstraction
 
         internal async Task<(byte[] initCode, BigInteger gas)> GetInitCode()
         {
+            if (IsZkSync)
+            {
+                throw new NotImplementedException("GetInitCode is not supported on zkSync");
+            }
+
             if (_deployed)
                 return (new byte[] { }, 0);
 
@@ -153,6 +187,11 @@ namespace Thirdweb.AccountAbstraction
 
             if (requestMessage.Method == "eth_signTransaction")
             {
+                if (IsZkSync)
+                {
+                    throw new NotImplementedException("eth_signTransaction is not supported on zkSync");
+                }
+
                 var parameters = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(requestMessage.RawParameters));
                 var txInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(parameters[0]));
                 var partialUserOp = await SignTransactionAsUserOp(txInput, requestMessage.Id);
@@ -160,6 +199,13 @@ namespace Thirdweb.AccountAbstraction
             }
             else if (requestMessage.Method == "eth_sendTransaction")
             {
+                if (IsZkSync)
+                {
+                    var paramList = JsonConvert.DeserializeObject<List<object>>(JsonConvert.SerializeObject(requestMessage.RawParameters));
+                    var transactionInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(paramList[0]));
+                    var hash = await SendZkSyncAATransaction(transactionInput);
+                    return new RpcResponseMessage(requestMessage.Id, hash);
+                }
                 return await CreateUserOpAndSend(requestMessage);
             }
             else if (requestMessage.Method == "eth_chainId")
@@ -185,6 +231,82 @@ namespace Thirdweb.AccountAbstraction
             else
             {
                 throw new NotImplementedException("Method not supported: " + requestMessage.Method);
+            }
+        }
+
+        private async Task<string> SendZkSyncAATransaction(TransactionInput transactionInput)
+        {
+            var transaction = new Transaction(_sdk, transactionInput);
+            var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+
+            if (transactionInput.Nonce == null)
+            {
+                var nonce = await web3.Client.SendRequestAsync<HexBigInteger>(method: "eth_getTransactionCount", route: null, paramList: new object[] { Accounts[0], "latest" });
+                _ = transaction.SetNonce(nonce.Value.ToString());
+            }
+
+            var feeData = await web3.Client.SendRequestAsync<JToken>(method: "zks_estimateFee", route: null, paramList: new object[] { transactionInput, "latest" });
+            var maxFee = feeData["max_fee_per_gas"].ToObject<HexBigInteger>().Value * 10 / 5;
+            var maxPriorityFee = feeData["max_priority_fee_per_gas"].ToObject<HexBigInteger>().Value * 10 / 5;
+            var gasPerPubData = feeData["gas_per_pubdata_limit"].ToObject<HexBigInteger>().Value;
+            var gasLimit = feeData["gas_limit"].ToObject<HexBigInteger>().Value * 10 / 5;
+
+            if (_sdk.Session.Options.smartWalletConfig?.gasless == true)
+            {
+                var pmDataResult = await BundlerClient.ZkPaymasterData(
+                    _sdk.Session.Options.smartWalletConfig?.paymasterUrl,
+                    _sdk.Session.Options.clientId,
+                    _sdk.Session.Options.bundleId,
+                    1,
+                    transactionInput
+                );
+
+                var zkTx = new AccountAbstraction.ZkSyncAATransaction
+                {
+                    TxType = 0x71,
+                    From = new HexBigInteger(transaction.Input.From).Value,
+                    To = new HexBigInteger(transaction.Input.To).Value,
+                    GasLimit = gasLimit,
+                    GasPerPubdataByteLimit = gasPerPubData,
+                    MaxFeePerGas = maxFee,
+                    MaxPriorityFeePerGas = maxPriorityFee,
+                    Paymaster = new HexBigInteger(pmDataResult.paymaster).Value,
+                    Nonce = transaction.Input.Nonce.Value,
+                    Value = transaction.Input.Value?.Value ?? 0,
+                    Data = transaction.Input.Data?.HexToByteArray() ?? new byte[0],
+                    FactoryDeps = new List<byte[]>(),
+                    PaymasterInput = pmDataResult.paymasterInput?.HexToByteArray() ?? new byte[0]
+                };
+
+                var zkTxSigned = await EIP712.GenerateSignature_ZkSyncTransaction(_sdk, "zkSync", "2", _sdk.Session.ChainId, zkTx);
+
+                // Match bundler ZkTransactionInput type without recreating
+                var zkBroadcastResult = await BundlerClient.ZkBroadcastTransaction(
+                    _sdk.Session.Options.smartWalletConfig?.paymasterUrl,
+                    _sdk.Session.Options.clientId,
+                    _sdk.Session.Options.bundleId,
+                    1,
+                    new
+                    {
+                        nonce = zkTx.Nonce.ToString(),
+                        from = zkTx.From,
+                        to = zkTx.To,
+                        gas = zkTx.GasLimit.ToString(),
+                        gasPrice = string.Empty,
+                        value = zkTx.Value.ToString(),
+                        data = Utils.ByteArrayToHexString(zkTx.Data),
+                        maxFeePerGas = zkTx.MaxFeePerGas.ToString(),
+                        maxPriorityFeePerGas = zkTx.MaxPriorityFeePerGas.ToString(),
+                        chainId = _sdk.Session.ChainId.ToString(),
+                        signedTransaction = zkTxSigned,
+                        paymaster = pmDataResult.paymaster,
+                    }
+                );
+                return zkBroadcastResult.transactionHash;
+            }
+            else
+            {
+                throw new NotImplementedException("ZkSync Smart Wallet transactions are not supported without gasless mode");
             }
         }
 

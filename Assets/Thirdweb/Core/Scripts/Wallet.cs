@@ -371,7 +371,7 @@ namespace Thirdweb
             }
             else
             {
-                if (_sdk.Session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                if (_sdk.Session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet && _sdk.Session.ChainId != 300 && _sdk.Session.ChainId != 324)
                 {
                     var sw = _sdk.Session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                     if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
@@ -492,14 +492,43 @@ namespace Thirdweb
 
                     if (_sdk.Session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                     {
-                        // Smart accounts
-                        var hashToken = jsonObject.SelectToken("$.message.message");
-                        if (hashToken != null)
+                        // Zk AA
+                        if (_sdk.Session.ChainId == 300 || _sdk.Session.ChainId == 324)
                         {
-                            var hashBase64 = hashToken.Value<string>();
-                            var hashBytes = Convert.FromBase64String(hashBase64);
-                            var hashHex = hashBytes.ByteArrayToHexString();
-                            hashToken.Replace(hashHex);
+                            var hashToken = jsonObject.SelectToken("$.message.data");
+                            if (hashToken != null)
+                            {
+                                var hashBase64 = hashToken.Value<string>();
+                                var hashBytes = Convert.FromBase64String(hashBase64);
+                                var hashHex = hashBytes.ByteArrayToHexString();
+                                hashToken.Replace(hashHex);
+                            }
+                            // set factory deps to 0x
+                            var factoryDepsToken = jsonObject.SelectToken("$.message.factoryDeps");
+                            if (factoryDepsToken != null)
+                            {
+                                factoryDepsToken.Replace(new JArray());
+                            }
+                            var paymasterInputToken = jsonObject.SelectToken("$.message.paymasterInput");
+                            if (paymasterInputToken != null)
+                            {
+                                var paymasterInputBase64 = paymasterInputToken.Value<string>();
+                                var paymasterInputBytes = Convert.FromBase64String(paymasterInputBase64);
+                                var paymasterInputHex = paymasterInputBytes.ByteArrayToHexString();
+                                paymasterInputToken.Replace(paymasterInputHex);
+                            }
+                        }
+                        // Normal AA
+                        else
+                        {
+                            var hashToken = jsonObject.SelectToken("$.message.message");
+                            if (hashToken != null)
+                            {
+                                var hashBase64 = hashToken.Value<string>();
+                                var hashBytes = Convert.FromBase64String(hashBase64);
+                                var hashHex = hashBytes.ByteArrayToHexString();
+                                hashToken.Replace(hashHex);
+                            }
                         }
                     }
 
@@ -537,7 +566,7 @@ namespace Thirdweb
             else
             {
                 var signer = new EthereumMessageSigner();
-                if (_sdk.Session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
+                if (_sdk.Session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet && _sdk.Session.ChainId != 300 && _sdk.Session.ChainId != 324)
                 {
                     var sw = _sdk.Session.ActiveWallet as Wallets.ThirdwebSmartWallet;
                     bool isSigValid = await sw.SmartWallet.VerifySignature(message.HashPrefixedMessage().HexStringToByteArray(), signature.HexStringToByteArray());
