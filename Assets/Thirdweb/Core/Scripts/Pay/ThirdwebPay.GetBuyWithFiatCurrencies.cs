@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
-using System.Linq;
 using System.Threading.Tasks;
 using Thirdweb.Redcode.Awaiting;
 
@@ -25,13 +24,11 @@ namespace Thirdweb.Pay
 
             using var request = UnityWebRequest.Get(url);
 
-            request.SetRequestHeader("x-sdk-name", "UnitySDK");
-            request.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
-            request.SetRequestHeader("x-sdk-platform", "unity");
-            request.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
-            request.SetRequestHeader("x-client-id", _sdk.Session.Options.clientId);
-            if (!Utils.IsWebGLBuild())
-                request.SetRequestHeader("x-bundle-id", _sdk.Session.Options.bundleId);
+            var headers = Utils.GetThirdwebHeaders(_sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+            foreach (var header in headers)
+            {
+                request.SetRequestHeader(header.Key, header.Value);
+            }
 
             await request.SendWebRequest();
 

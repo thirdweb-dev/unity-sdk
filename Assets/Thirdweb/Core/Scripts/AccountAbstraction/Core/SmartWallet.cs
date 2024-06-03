@@ -95,7 +95,8 @@ namespace Thirdweb.AccountAbstraction
 
         internal async Task UpdateDeploymentStatus()
         {
-            var bytecode = await Utils.GetWeb3(_sdk.Session.ChainId).Eth.GetCode.SendRequestAsync(Accounts[0]);
+            var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+            var bytecode = await web3.Eth.GetCode.SendRequestAsync(Accounts[0]);
             _deployed = bytecode != "0x";
         }
 
@@ -111,7 +112,7 @@ namespace Thirdweb.AccountAbstraction
 
             var input = new TransactionInput("0x", Accounts[0], new HexBigInteger(0));
             var txHash = await Request(new RpcRequestMessage(1, "eth_sendTransaction", input));
-            await Transaction.WaitForTransactionResult(txHash.Result.ToString(), _sdk.Session.ChainId);
+            await Transaction.WaitForTransactionResult(txHash.Result.ToString(), _sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
             await UpdateDeploymentStatus();
         }
 
@@ -139,7 +140,8 @@ namespace Thirdweb.AccountAbstraction
                 return (new byte[] { }, 0);
 
             var fn = new FactoryContract.CreateAccountFunction() { Admin = await GetPersonalAddress(), Data = new byte[] { } };
-            var deployHandler = Utils.GetWeb3(_sdk.Session.ChainId).Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
+            var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+            var deployHandler = web3.Eth.GetContractTransactionHandler<FactoryContract.CreateAccountFunction>();
             var txInput = await deployHandler.CreateTransactionInputEstimatingGasAsync(_sdk.Session.Options.smartWalletConfig?.factoryAddress, fn);
             var data = Utils.HexConcat(_sdk.Session.Options.smartWalletConfig?.factoryAddress, txInput.Data);
             return (data.HexStringToByteArray(), txInput.Gas.Value);
@@ -174,7 +176,7 @@ namespace Thirdweb.AccountAbstraction
             }
             else if (requestMessage.Method == "eth_estimateGas")
             {
-                var web3 = Utils.GetWeb3(_sdk.Session.ChainId);
+                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
                 var parameters = JsonConvert.DeserializeObject<object[]>(JsonConvert.SerializeObject(requestMessage.RawParameters));
                 var txInput = JsonConvert.DeserializeObject<TransactionInput>(JsonConvert.SerializeObject(parameters[0]));
                 var result = await web3.Eth.Transactions.EstimateGas.SendRequestAsync(txInput);
@@ -208,7 +210,7 @@ namespace Thirdweb.AccountAbstraction
 
             BigInteger maxFee;
             BigInteger maxPriorityFee;
-            if (new Uri(_sdk.Session.Options.smartWalletConfig?.bundlerUrl).Host.EndsWith(".thirdweb.com"))
+            if (Utils.IsThirdwebRequest(_sdk.Session.Options.smartWalletConfig?.bundlerUrl))
             {
                 var fees = await BundlerClient.ThirdwebGetUserOperationGasPrice(_sdk.Session.Options.smartWalletConfig?.bundlerUrl, apiKey, bundleId, requestId);
                 maxFee = new HexBigInteger(fees.maxFeePerGas).Value;
@@ -216,7 +218,7 @@ namespace Thirdweb.AccountAbstraction
             }
             else
             {
-                var fees = await Utils.GetGasPriceAsync(_sdk.Session.ChainId);
+                var fees = await Utils.GetGasPriceAsync(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
                 maxFee = fees.MaxFeePerGas;
                 maxPriorityFee = fees.MaxPriorityFeePerGas;
             }

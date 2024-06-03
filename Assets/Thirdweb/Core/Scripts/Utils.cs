@@ -491,16 +491,22 @@ namespace Thirdweb
 
         public static string AppendBundleIdQueryParam(this string uri, string bundleId)
         {
-            if (IsWebGLBuild() || string.IsNullOrEmpty(bundleId))
+            if (IsWebGLBuild() || string.IsNullOrEmpty(bundleId) || uri.Contains("bundleId="))
                 return uri;
 
             uri += $"?bundleId={bundleId}";
             return uri;
         }
 
-        public static Web3 GetWeb3(BigInteger chainId)
+        public static Web3 GetWeb3(BigInteger chainId, string clientId, string bundleId)
         {
-            return new Web3(new ThirdwebClient(new Uri($"https://{chainId}.rpc.thirdweb.com")));
+            var url = $"https://{chainId}.rpc.thirdweb.com";
+            if (!string.IsNullOrEmpty(clientId))
+            {
+                url += $"/{clientId}";
+                url = url.AppendBundleIdQueryParam(bundleId);
+            }
+            return new Web3(new ThirdwebClient(new Uri(url)));
         }
 
         public static string GetNativeTokenWrapper(BigInteger chainId)
@@ -565,14 +571,14 @@ namespace Thirdweb
             return unixTimestamp.ToString();
         }
 
-        public async static Task<BigInteger> GetLegacyGasPriceAsync(BigInteger chainId)
+        public async static Task<BigInteger> GetLegacyGasPriceAsync(BigInteger chainId, string clientId = null, string bundleId = null)
         {
-            var web3 = GetWeb3(chainId);
+            var web3 = GetWeb3(chainId, clientId, bundleId);
             var gasPrice = (await web3.Eth.GasPrice.SendRequestAsync()).Value;
             return BigInteger.Multiply(gasPrice, 10) / 9;
         }
 
-        public async static Task<GasPriceParameters> GetGasPriceAsync(BigInteger chainId)
+        public async static Task<GasPriceParameters> GetGasPriceAsync(BigInteger chainId, string clientId = null, string bundleId = null)
         {
             BigInteger? priorityOverride = null;
             if (chainId == 137 || chainId == 80001)
@@ -588,7 +594,7 @@ namespace Thirdweb
                 }
             }
 
-            var web3 = GetWeb3(chainId);
+            var web3 = GetWeb3(chainId, clientId, bundleId);
             var gasPrice = (await web3.Eth.GasPrice.SendRequestAsync()).Value;
 
             if (chainId == 42220) // celo mainnet
@@ -695,24 +701,21 @@ namespace Thirdweb
                     walletAddress,
                     walletType,
                 };
-                var headers = new Dictionary<string, string>
-                {
-                    { "x-client-id", clientId },
-                    { "x-sdk-platform", "unity" },
-                    { "x-sdk-name", "UnitySDK" },
-                    { "x-sdk-version", ThirdwebSDK.version },
-                    { "x-sdk-os", GetRuntimePlatform() },
-                    { "x-bundle-id", bundleId },
-                };
+
                 var request = new HttpRequestMessage(HttpMethod.Post, "https://c.thirdweb.com/event")
                 {
                     Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json")
                 };
+
+                var headers = GetThirdwebHeaders(clientId, bundleId);
+
                 foreach (var header in headers)
                 {
                     request.Headers.Add(header.Key, header.Value);
                 }
+
                 using var client = new HttpClient();
+
                 await client.SendAsync(request);
             }
             catch (System.Exception e)
@@ -774,6 +777,31 @@ namespace Thirdweb
                 ThirdwebDebug.LogWarning($"Failed to copy to clipboard: {e}");
                 return false;
             }
+        }
+
+        public static bool IsThirdwebRequest(string uri)
+        {
+            var host = new Uri(uri).Host;
+            return host.EndsWith(".ipfscdn.io") || host.EndsWith(".thirdweb.com");
+        }
+
+        public static Dictionary<string, string> GetThirdwebHeaders(string clientId, string bundleId)
+        {
+            var headers = new Dictionary<string, string>
+            {
+                { "x-sdk-name", "UnitySDK" },
+                { "x-sdk-os", GetRuntimePlatform() },
+                { "x-sdk-platform", "unity" },
+                { "x-sdk-version", ThirdwebSDK.version },
+                { "x-client-id", clientId },
+            };
+
+            if (!IsWebGLBuild())
+            {
+                headers.Add("x-bundle-id", bundleId);
+            }
+
+            return headers;
         }
     }
 }

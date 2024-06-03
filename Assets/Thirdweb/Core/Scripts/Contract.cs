@@ -89,7 +89,8 @@ namespace Thirdweb
             }
             else
             {
-                BigInteger balance = await Utils.GetWeb3(this.Chain).Eth.GetBalance.SendRequestAsync(Address);
+                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+                BigInteger balance = await web3.Eth.GetBalance.SendRequestAsync(Address);
                 var cv = new CurrencyValue { value = balance.ToString(), displayValue = balance.ToString().ToEth() };
                 return cv;
             }
@@ -125,7 +126,9 @@ namespace Thirdweb
             {
                 if (this.ABI == null)
                     this.ABI = await FetchAbi(this.Address, await _sdk.Wallet.GetChainId());
-                var contract = Utils.GetWeb3(this.Chain).Eth.GetContract(this.ABI, this.Address);
+
+                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+                var contract = web3.Eth.GetContract(this.ABI, this.Address);
                 var function = contract.GetFunction(functionName);
                 var fromAddress = from ?? await _sdk.Wallet.GetAddress();
                 initialInput = function.CreateTransactionInput(fromAddress, args);
@@ -142,7 +145,8 @@ namespace Thirdweb
         /// <returns>The encoded function data as a string.</returns>
         public string Encode(string functionName, params object[] args)
         {
-            var contract = Utils.GetWeb3(this.Chain).Eth.GetContract(this.ABI, this.Address);
+            var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+            var contract = web3.Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
             return function.GetData(args);
         }
@@ -155,7 +159,8 @@ namespace Thirdweb
         /// <returns>A list of <see cref="ParameterOutput"/> objects representing the decoded arguments.</returns>
         public List<ParameterOutput> Decode(string functionName, string encodedArgs)
         {
-            var contract = Utils.GetWeb3(this.Chain).Eth.GetContract(this.ABI, this.Address);
+            var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+            var contract = web3.Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
             return function.DecodeInput(encodedArgs);
         }
@@ -167,7 +172,7 @@ namespace Thirdweb
         public async Task<List<EventLog<TEventDTO>>> GetEventLogs<TEventDTO>(ulong? fromBlock = null, ulong? toBlock = null)
             where TEventDTO : IEventDTO, new()
         {
-            var web3 = Utils.GetWeb3(this.Chain);
+            var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
             var transferEventHandler = web3.Eth.GetEvent<TEventDTO>(this.Address);
             var filter = transferEventHandler.CreateFilterInput(
                 fromBlock: fromBlock == null ? BlockParameter.CreateEarliest() : new BlockParameter(fromBlock.Value),
@@ -242,7 +247,8 @@ namespace Thirdweb
             if (this.ABI == null)
                 this.ABI = await FetchAbi(this.Address, await _sdk.Wallet.GetChainId());
 
-            var contract = Utils.GetWeb3(this.Chain).Eth.GetContract(this.ABI, this.Address);
+            var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+            var contract = web3.Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
             var result = await function.CallDecodingToDefaultAsync(args);
 
@@ -378,7 +384,8 @@ namespace Thirdweb
             if (this.ABI == null)
                 this.ABI = await FetchAbi(this.Address, await _sdk.Wallet.GetChainId());
 
-            var contract = Utils.GetWeb3(this.Chain).Eth.GetContract(this.ABI, this.Address);
+            var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+            var contract = web3.Eth.GetContract(this.ABI, this.Address);
             var function = contract.GetFunction(functionName);
             return await function.CallDeserializingToObjectAsync<T>(args);
         }

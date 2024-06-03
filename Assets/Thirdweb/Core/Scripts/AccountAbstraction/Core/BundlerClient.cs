@@ -79,15 +79,13 @@ namespace Thirdweb.AccountAbstraction
             string requestMessageJson = JsonConvert.SerializeObject(requestMessage);
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, url) { Content = new StringContent(requestMessageJson, System.Text.Encoding.UTF8, "application/json") };
-            if (new Uri(url).Host.EndsWith(".thirdweb.com"))
+            if (Utils.IsThirdwebRequest(url))
             {
-                httpRequestMessage.Headers.Add("x-sdk-name", "UnitySDK");
-                httpRequestMessage.Headers.Add("x-sdk-os", Utils.GetRuntimePlatform());
-                httpRequestMessage.Headers.Add("x-sdk-platform", "unity");
-                httpRequestMessage.Headers.Add("x-sdk-version", ThirdwebSDK.version);
-                httpRequestMessage.Headers.Add("x-client-id", apiKey);
-                if (!Utils.IsWebGLBuild())
-                    httpRequestMessage.Headers.Add("x-bundle-id", bundleId);
+                var headers = Utils.GetThirdwebHeaders(apiKey, bundleId);
+                foreach (var header in headers)
+                {
+                    httpRequestMessage.Headers.Add(header.Key, header.Value);
+                }
             }
 
             var httpResponse = await client.SendAsync(httpRequestMessage);

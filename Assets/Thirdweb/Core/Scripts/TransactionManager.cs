@@ -35,7 +35,8 @@ namespace Thirdweb
                 }
             }
 
-            var queryHandler = Utils.GetWeb3(sdk.Session.ChainId).Eth.GetContractQueryHandler<TWFunction>();
+            var web3 = Utils.GetWeb3(sdk.Session.ChainId, sdk.Session.Options.clientId, sdk.Session.Options.bundleId);
+            var queryHandler = web3.Eth.GetContractQueryHandler<TWFunction>();
             return await queryHandler.QueryAsync<TWResult>(contractAddress, functionMessage);
         }
 
@@ -43,7 +44,8 @@ namespace Thirdweb
             where TWFunction : FunctionMessage, new()
             where TWResult : IFunctionOutputDTO, new()
         {
-            MultiQueryHandler multiqueryHandler = Utils.GetWeb3(sdk.Session.ChainId).Eth.GetMultiQueryHandler();
+            var web3 = Utils.GetWeb3(sdk.Session.ChainId, sdk.Session.Options.clientId, sdk.Session.Options.bundleId);
+            MultiQueryHandler multiqueryHandler = web3.Eth.GetMultiQueryHandler();
             var calls = new List<MulticallInputOutput<TWFunction, TWResult>>();
             for (int i = 0; i < functionMessages.Length; i++)
             {
@@ -86,7 +88,8 @@ namespace Thirdweb
             {
                 try
                 {
-                    var gasEstimator = Utils.GetWeb3(sdk.Session.ChainId).Eth.GetContractTransactionHandler<TWFunction>();
+                    var web3 = Utils.GetWeb3(sdk.Session.ChainId, sdk.Session.Options.clientId, sdk.Session.Options.bundleId);
+                    var gasEstimator = web3.Eth.GetContractTransactionHandler<TWFunction>();
                     var gas = await gasEstimator.EstimateGasAsync(contractAddress, functionMessage);
                     functionMessage.Gas = gas.Value < 100000 ? 100000 : gas.Value;
                 }

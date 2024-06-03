@@ -77,13 +77,11 @@ namespace Thirdweb
             string result = "";
             using (UnityWebRequest pinReq = UnityWebRequest.Post(PIN_URI, form))
             {
-                pinReq.SetRequestHeader("x-sdk-name", "UnitySDK");
-                pinReq.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
-                pinReq.SetRequestHeader("x-sdk-platform", "unity");
-                pinReq.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
-                pinReq.SetRequestHeader("x-client-id", _sdk.Session.Options.clientId);
-                if (!Utils.IsWebGLBuild())
-                    pinReq.SetRequestHeader("x-bundle-id", _sdk.Session.Options.bundleId);
+                var headers = Utils.GetThirdwebHeaders(_sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+                foreach (var header in headers)
+                {
+                    pinReq.SetRequestHeader(header.Key, header.Value);
+                }
 
                 await pinReq.SendWebRequest();
 
@@ -105,18 +103,15 @@ namespace Thirdweb
             }
 
             textURI = textURI.ReplaceIPFS(IPFSGateway);
-            bool isThirdwebRequest = new Uri(textURI).Host.EndsWith(".ipfscdn.io");
-            if (isThirdwebRequest)
-                textURI = textURI.AppendBundleIdQueryParam(_sdk.Session.Options.bundleId);
 
             using UnityWebRequest req = UnityWebRequest.Get(textURI);
-            if (isThirdwebRequest)
+            if (Utils.IsThirdwebRequest(textURI))
             {
-                req.SetRequestHeader("x-sdk-name", "UnitySDK");
-                req.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
-                req.SetRequestHeader("x-sdk-platform", "unity");
-                req.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
-                req.SetRequestHeader("x-client-id", _sdk.Session.Options.clientId);
+                var headers = Utils.GetThirdwebHeaders(_sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+                foreach (var header in headers)
+                {
+                    req.SetRequestHeader(header.Key, header.Value);
+                }
             }
 
             await req.SendWebRequest();
@@ -154,18 +149,18 @@ namespace Thirdweb
             }
 
             imageURI = imageURI.ReplaceIPFS(IPFSGateway);
-            bool isThirdwebRequest = new Uri(imageURI).Host.EndsWith(".ipfscdn.io");
+            bool isThirdwebRequest = Utils.IsThirdwebRequest(imageURI);
             if (isThirdwebRequest)
                 imageURI = imageURI.AppendBundleIdQueryParam(_sdk.Session.Options.bundleId);
 
             using UnityWebRequest req = UnityWebRequestTexture.GetTexture(imageURI);
             if (isThirdwebRequest)
             {
-                req.SetRequestHeader("x-sdk-name", "UnitySDK");
-                req.SetRequestHeader("x-sdk-os", Utils.GetRuntimePlatform());
-                req.SetRequestHeader("x-sdk-platform", "unity");
-                req.SetRequestHeader("x-sdk-version", ThirdwebSDK.version);
-                req.SetRequestHeader("x-client-id", _sdk.Session.Options.clientId);
+                var headers = Utils.GetThirdwebHeaders(_sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+                foreach (var header in headers)
+                {
+                    req.SetRequestHeader(header.Key, header.Value);
+                }
             }
 
             await req.SendWebRequest();

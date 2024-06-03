@@ -25,7 +25,8 @@ namespace Thirdweb
             }
             else
             {
-                var hex = await Utils.GetWeb3(_sdk.Session.ChainId).Eth.Blocks.GetBlockNumber.SendRequestAsync();
+                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+                var hex = await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
                 return hex.Value;
             }
         }
@@ -51,7 +52,8 @@ namespace Thirdweb
             }
             else
             {
-                return await Utils.GetWeb3(_sdk.Session.ChainId).Eth.Blocks.GetBlockWithTransactionsHashesByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
+                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+                return await web3.Eth.Blocks.GetBlockWithTransactionsHashesByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
             }
         }
 
@@ -67,7 +69,8 @@ namespace Thirdweb
             }
             else
             {
-                return await Utils.GetWeb3(_sdk.Session.ChainId).Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
+                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+                return await web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(blockNumber));
             }
         }
     }

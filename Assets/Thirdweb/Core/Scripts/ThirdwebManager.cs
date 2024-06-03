@@ -178,7 +178,7 @@ namespace Thirdweb
                     ? (string.IsNullOrEmpty(clientId) ? $"https://{chainData.chainId}.rpc.thirdweb.com/" : $"https://{chainData.chainId}.rpc.thirdweb.com/{clientId}")
                     : chainData.rpcOverride;
 
-                if (options.clientId != null && new System.Uri(rpc).Host.EndsWith(".thirdweb.com"))
+                if (options.clientId != null && Utils.IsThirdwebRequest(rpc))
                     rpc = rpc.AppendBundleIdQueryParam(options.bundleId);
 
                 if (chainData.identifier == activeChain)

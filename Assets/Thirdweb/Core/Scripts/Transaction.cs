@@ -212,7 +212,7 @@ namespace Thirdweb
             }
             else
             {
-                var web3 = Utils.GetWeb3(_sdk.Session.ChainId);
+                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
                 var function = web3.Eth.GetContract(Contract.ABI, Contract.Address).GetFunction(Input.To);
                 Input.Data = function.GetData(args);
             }
@@ -232,7 +232,7 @@ namespace Thirdweb
             }
             else
             {
-                return await Utils.GetLegacyGasPriceAsync(_sdk.Session.ChainId);
+                return await Utils.GetLegacyGasPriceAsync(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
             }
         }
 
@@ -249,8 +249,8 @@ namespace Thirdweb
             }
             else
             {
-                var gasEstimator = Utils.GetWeb3(_sdk.Session.ChainId);
-                var gas = await gasEstimator.Eth.Transactions.EstimateGas.SendRequestAsync(Input);
+                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+                var gas = await web3.Eth.Transactions.EstimateGas.SendRequestAsync(Input);
                 return gas.Value;
             }
         }
@@ -299,7 +299,7 @@ namespace Thirdweb
             }
             else
             {
-                var web3 = Utils.GetWeb3(_sdk.Session.ChainId);
+                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
                 return await web3.Eth.Transactions.Call.SendRequestAsync(Input);
             }
         }
@@ -377,7 +377,7 @@ namespace Thirdweb
             else
             {
                 var txHash = await Send(gasless);
-                return await WaitForTransactionResult(txHash, _sdk.Session.ChainId);
+                return await WaitForTransactionResult(txHash, _sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
             }
         }
 
@@ -386,7 +386,7 @@ namespace Thirdweb
         /// </summary>
         /// <param name="txHash">The transaction hash to wait for.</param>
         /// <returns>The transaction result as a <see cref="TransactionResult"/> object.</returns>
-        public static async Task<TransactionResult> WaitForTransactionResult(string txHash, BigInteger chainId)
+        public static async Task<TransactionResult> WaitForTransactionResult(string txHash, BigInteger chainId, string clientId = null, string bundleId = null)
         {
             var receipt = await WaitForTransactionResultRaw(txHash, chainId);
             return receipt.ToTransactionResult();
@@ -397,7 +397,7 @@ namespace Thirdweb
         /// </summary>
         /// <param name="txHash">The transaction hash to wait for.</param>
         /// <returns>The transaction result as a <see cref="TransactionResult"/> object.</returns>
-        public static async Task<TransactionReceipt> WaitForTransactionResultRaw(string txHash, BigInteger chainId)
+        public static async Task<TransactionReceipt> WaitForTransactionResultRaw(string txHash, BigInteger chainId, string clientId = null, string bundleId = null)
         {
             if (Utils.IsWebGLBuild())
             {
@@ -405,7 +405,7 @@ namespace Thirdweb
             }
             else
             {
-                var web3 = Utils.GetWeb3(chainId);
+                var web3 = Utils.GetWeb3(chainId, clientId, bundleId);
                 var receipt = await web3.TransactionReceiptPolling.PollForReceiptAsync(txHash);
                 if (receipt.Failed())
                 {
@@ -447,7 +447,7 @@ namespace Thirdweb
                 {
                     if (Input.GasPrice == null)
                     {
-                        var fees = await Utils.GetGasPriceAsync(_sdk.Session.ChainId);
+                        var fees = await Utils.GetGasPriceAsync(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
                         if (Input.MaxFeePerGas == null)
                             Input.MaxFeePerGas = new HexBigInteger(fees.MaxFeePerGas);
                         if (Input.MaxPriorityFeePerGas == null)
@@ -459,7 +459,7 @@ namespace Thirdweb
                     if (Input.MaxFeePerGas == null && Input.MaxPriorityFeePerGas == null)
                     {
                         ThirdwebDebug.Log("Using Legacy Gas Pricing");
-                        Input.GasPrice = new HexBigInteger(await Utils.GetLegacyGasPriceAsync(_sdk.Session.ChainId));
+                        Input.GasPrice = new HexBigInteger(await Utils.GetLegacyGasPriceAsync(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId));
                     }
                 }
 

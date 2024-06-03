@@ -185,7 +185,8 @@ namespace Thirdweb
                 else
                 {
                     string address = await GetAddress();
-                    HexBigInteger balance = await Utils.GetWeb3(_sdk.Session.ChainId).Eth.GetBalance.SendRequestAsync(address);
+                    var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+                    HexBigInteger balance = await web3.Eth.GetBalance.SendRequestAsync(address);
                     var nativeCurrency = _sdk.Session.CurrentChainData.nativeCurrency;
                     return new CurrencyValue(nativeCurrency.name, nativeCurrency.symbol, nativeCurrency.decimals.ToString(), balance.Value.ToString(), balance.Value.ToString().ToEth());
                 }
@@ -865,7 +866,7 @@ namespace Thirdweb
         public async Task<TransactionResult> ExecuteRawTransaction(TransactionRequest transactionRequest)
         {
             var hash = await SendRawTransaction(transactionRequest);
-            return await Transaction.WaitForTransactionResult(hash, _sdk.Session.ChainId);
+            return await Transaction.WaitForTransactionResult(hash, _sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
         }
 
         /// <summary>
