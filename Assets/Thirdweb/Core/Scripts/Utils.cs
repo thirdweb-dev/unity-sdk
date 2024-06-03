@@ -573,101 +573,62 @@ namespace Thirdweb
 
         public async static Task<BigInteger> GetLegacyGasPriceAsync(BigInteger chainId, string clientId = null, string bundleId = null)
         {
-            var web3 = GetWeb3(chainId, clientId, bundleId);
-            var gasPrice = (await web3.Eth.GasPrice.SendRequestAsync()).Value;
-            return BigInteger.Multiply(gasPrice, 10) / 9;
+            var client = GetWeb3(chainId, clientId, bundleId).Client;
+            var hex = new HexBigInteger(await client.SendRequestAsync<string>("eth_gasPrice"));
+            return BigInteger.Multiply(hex.Value, 10) / 9;
         }
 
         public async static Task<GasPriceParameters> GetGasPriceAsync(BigInteger chainId, string clientId = null, string bundleId = null)
         {
-            BigInteger? priorityOverride = null;
+            var client = GetWeb3(chainId, clientId, bundleId).Client;
+            var gasPrice = await GetLegacyGasPriceAsync(chainId, clientId, bundleId);
+
             if (chainId == 137 || chainId == 80001)
             {
-                try
-                {
-                    return await GetPolygonGasPriceParameters((int)chainId);
-                }
-                catch (System.Exception e)
-                {
-                    ThirdwebDebug.LogWarning($"Failed to get gas price from Polygon gas station, using default method: {e.Message}");
-                    priorityOverride = GweiToWei(chainId == 137 ? 40 : 1);
-                }
+                return new GasPriceParameters(gasPrice * 3 / 2, gasPrice * 4 / 3);
             }
 
-            var web3 = GetWeb3(chainId, clientId, bundleId);
-            var gasPrice = (await web3.Eth.GasPrice.SendRequestAsync()).Value;
-
-            if (chainId == 42220) // celo mainnet
+            try
             {
-                gasPrice = BigInteger.Multiply(gasPrice, 3) / 2;
+                if (
+                    // chainId == 1 // mainnet
+                    // || chainId == 11155111 // sepolia
+                    // || chainId == 42161 // arbitrum
+                    // || chainId == 421614 // arbitrum sepolia
+                    // || chainId == 534352 // scroll
+                    // || chainId == 534351 // scroll sepolia
+                    // || chainId == 5000 // mantle
+                    // || chainId == 22222 // nautilus
+                    // || chainId == 8453 // base
+                    // || chainId == 53935 // dfk
+                    // || chainId == 43114 // avalanche
+                    // || chainId == 43113 // avalanche fuji
+                    // || chainId == 8453 // base
+                    // || chainId == 84532 // base sepolia
+                    chainId == 42220 // celo
+                    || chainId == 44787 // celo-alfajores-testnet
+                    || chainId == 62320 // celo-baklava-testnet
+                )
+                {
+                    return new GasPriceParameters(gasPrice, gasPrice);
+                }
+
+                var block = await client.SendRequestAsync<JObject>(method: "eth_getBlockByNumber", route: null, paramList: new object[] { "latest", true });
+                var baseBlockFee = block["baseFeePerGas"]?.ToObject<HexBigInteger>();
+                var maxFeePerGas = baseBlockFee.Value * 2;
+                var maxPriorityFeePerGas = ((await client.SendRequestAsync<HexBigInteger>("eth_maxPriorityFeePerGas"))?.Value) ?? maxFeePerGas / 2;
+
+                if (maxPriorityFeePerGas > maxFeePerGas)
+                {
+                    maxPriorityFeePerGas = maxFeePerGas / 2;
+                }
+
+                return new GasPriceParameters((maxFeePerGas + maxPriorityFeePerGas) * 10 / 9, maxPriorityFeePerGas * 10 / 9);
+            }
+            catch
+            {
                 return new GasPriceParameters(gasPrice, gasPrice);
             }
-
-            if (
-                chainId == 1 // mainnet
-                || chainId == 11155111 // sepolia
-                || chainId == 42161 // arbitrum
-                || chainId == 421614 // arbitrum sepolia
-                || chainId == 534352 // scroll
-                || chainId == 534351 // scroll sepolia
-                || chainId == 5000 // mantle
-                || chainId == 22222 // nautilus
-                || chainId == 8453 // base
-                || chainId == 53935 // dfk
-                || chainId == 44787 // celo alfajores
-                || chainId == 43114 // avalanche
-                || chainId == 43113 // avalanche fuji
-                || chainId == 8453 // base
-                || chainId == 84532 // base sepolia
-            )
-            {
-                gasPrice = BigInteger.Multiply(gasPrice, 10) / 9;
-                return new GasPriceParameters(gasPrice, priorityOverride ?? gasPrice);
-            }
-
-            var maxPriorityFeePerGas = new BigInteger(2000000000) > gasPrice ? gasPrice : new BigInteger(2000000000);
-
-            var feeHistory = await web3.Eth.FeeHistory.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(20), Nethereum.RPC.Eth.DTOs.BlockParameter.CreateLatest(), new double[] { 20 });
-
-            if (feeHistory.Reward == null)
-            {
-                gasPrice = BigInteger.Multiply(gasPrice, 3) / 2;
-                maxPriorityFeePerGas = gasPrice;
-            }
-            else
-            {
-                var feeAverage = feeHistory.Reward.Select(r => r[0]).Aggregate(BigInteger.Zero, (acc, cur) => cur + acc) / 10;
-                if (feeAverage > gasPrice)
-                {
-                    gasPrice = feeAverage;
-                }
-                maxPriorityFeePerGas = gasPrice;
-            }
-
-            return new GasPriceParameters(gasPrice, priorityOverride ?? maxPriorityFeePerGas);
-        }
-
-        public async static Task<GasPriceParameters> GetPolygonGasPriceParameters(int chainId)
-        {
-            using var httpClient = new HttpClient();
-            string gasStationUrl;
-            switch (chainId)
-            {
-                case 137:
-                    gasStationUrl = "https://gasstation.polygon.technology/v2";
-                    break;
-                case 80001:
-                    gasStationUrl = "https://gasstation-testnet.polygon.technology/v2";
-                    break;
-                default:
-                    throw new UnityException("Unsupported chain id");
-            }
-
-            var response = await httpClient.GetAsync(gasStationUrl);
-            response.EnsureSuccessStatusCode();
-            string responseBody = await response.Content.ReadAsStringAsync();
-            var data = JsonConvert.DeserializeObject<PolygonGasStationResult>(responseBody);
-            return new GasPriceParameters(GweiToWei(data.fast.maxFee), GweiToWei(data.fast.maxPriorityFee));
         }
 
         public static BigInteger GweiToWei(decimal gweiAmount)
