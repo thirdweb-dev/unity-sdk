@@ -48,28 +48,10 @@ namespace Thirdweb.Wallets
             {
                 GameObject.Instantiate(ThirdwebManager.Instance.MetamaskPrefab);
                 await new WaitForSeconds(1f);
-                SetupMetaMask();
             }
-            await MetamaskUI.Instance.Connect();
-            _web3 = MetaMaskUnity.Instance.CreateWeb3();
+            await MetamaskUI.Instance.Connect(walletConnection);
+            _web3 = MetaMaskSDK.Instance.CreateWeb3();
             return await GetAddress();
-        }
-
-        private void SetupMetaMask()
-        {
-            MetaMaskWallet.Source = "Thirdweb";
-
-            var config = ScriptableObject.CreateInstance<MetaMaskThirdwebConfig>();
-            var defaults = MetaMaskConfig.DefaultInstance;
-
-            config.SetDefaults(defaults);
-
-            var appName = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appName;
-            var appUrl = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appUrl;
-            var appIconUrl = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appIcons[0];
-            config.UpdateConfig(appName, appUrl, appIconUrl);
-
-            MetaMaskUnity.Instance.Initialize();
         }
 
         public Task Disconnect(bool endSession = true)

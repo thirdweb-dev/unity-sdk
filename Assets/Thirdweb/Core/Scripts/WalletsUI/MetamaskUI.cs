@@ -1,9 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using MetaMask;
 using MetaMask.Models;
 using MetaMask.Transports;
 using MetaMask.Transports.Unity;
 using MetaMask.Unity;
+using MetaMask.Unity.Models;
 using UnityEngine;
 using UnityEngine.UI;
 using ZXing;
@@ -21,6 +25,8 @@ namespace Thirdweb.Wallets
         public GameObject OTPPanel;
         public TMP_Text OTPText;
         public TMP_Text OTPHeaderText;
+
+        public MetaMaskWallet Wallet => MetaMaskSDK.Instance.Wallet;
 
         public static MetamaskUI Instance;
 
@@ -44,9 +50,10 @@ namespace Thirdweb.Wallets
 
         // Core
 
-        public virtual async Task<string> Connect()
+        public virtual async Task<string> Connect(WalletConnection walletConnection)
         {
             OTPPanel.SetActive(false);
+            MetaMaskWallet.Source = "Thirdweb";
 
             _connected = false;
             _authorized = false;
@@ -56,15 +63,52 @@ namespace Thirdweb.Wallets
 
             MetamaskCanvas.SetActive(true);
 
-            MetaMaskUnity.Instance.Events.WalletConnected += OnWalletConnected;
-            MetaMaskUnity.Instance.Events.WalletAuthorized += OnWalletAuthorized;
+            MetaMaskSDK.Instance.Events.WalletConnected += OnWalletConnected;
+            MetaMaskSDK.Instance.Events.WalletAuthorized += OnWalletAuthorized;
 
-            MetaMaskUnity.Instance.Connect();
+            // setup config
+            var appName = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appName;
+            var appUrl = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appUrl;
+            var currentChainData = ThirdwebManager.Instance.SDK.Session.CurrentChainData;
+            var appIconUrl = ThirdwebManager.Instance.SDK.Session.Options.wallet?.appIcons[0];
+
+            var sdk = MetaMaskSDK.SDKInstance;
+
+            sdk.dappName = appName;
+            sdk.dappIconUrl = appIconUrl;
+            sdk.dappUrl = appUrl;
+            sdk.debugLogging = ThirdwebManager.Instance.showDebugLogs;
+            
+            sdk.useDefaultChain = true;
+            sdk.defaultChain = ChainId.Other;
+            sdk.DefaultChainInfo = new ChainInfo()
+            {
+                BlockExplorerUrls = currentChainData.blockExplorerUrls,
+                ChainId = currentChainData.chainId,
+                ChainName = currentChainData.chainName,
+                IconUrls = currentChainData.iconUrls,
+                NativeCurrency = new Blockchains.NativeCurrency()
+                {
+                    Decimals = currentChainData.nativeCurrency.decimals,
+                    Name = currentChainData.nativeCurrency.name,
+                    Symbol = currentChainData.nativeCurrency.symbol
+                },
+                RpcUrls = currentChainData.rpcUrls
+            };
+            sdk.rpcUrl = new List<MetaMaskUnityRpcUrlConfig>(currentChainData.rpcUrls.Select(url =>
+                new MetaMaskUnityRpcUrlConfig()
+                {
+                    ChainId = currentChainData.chainId,
+                    RpcUrl = url
+                }));
+            
+            // Connect() will now auto initialize SDK
+            sdk.Connect();
 
             await new WaitUntil(() => (_connected && _authorized) || _exception != null);
 
-            MetaMaskUnity.Instance.Events.WalletConnected -= OnWalletConnected;
-            MetaMaskUnity.Instance.Events.WalletAuthorized -= OnWalletAuthorized;
+            MetaMaskSDK.Instance.Events.WalletConnected -= OnWalletConnected;
+            MetaMaskSDK.Instance.Events.WalletAuthorized -= OnWalletAuthorized;
 
             OTPPanel.SetActive(false);
 
@@ -72,11 +116,11 @@ namespace Thirdweb.Wallets
 
             if (_exception != null)
             {
-                MetaMaskUnity.Instance.Disconnect(true);
+                MetaMaskSDK.Instance.Disconnect(true);
                 throw _exception;
             }
 
-            return MetaMaskUnity.Instance.Wallet.SelectedAddress;
+            return Wallet.SelectedAddress;
         }
 
         public virtual void Cancel()
@@ -153,7 +197,7 @@ namespace Thirdweb.Wallets
         {
             OTPPanel.SetActive(true);
 
-            var shouldShowOtpCode = DateTime.Now - MetaMaskUnity.Instance.Wallet.LastActive >= TimeSpan.FromHours(1);
+            var shouldShowOtpCode = DateTime.Now - Wallet.LastActive >= TimeSpan.FromHours(1);
 
             // They simply need to press resume in the app
             OTPText.gameObject.SetActive(shouldShowOtpCode);
@@ -170,8 +214,8 @@ namespace Thirdweb.Wallets
 
         public virtual void OnMetaMaskDisconnected()
         {
-            var isMobile = MetaMaskUnity.Instance.Wallet.Transport.ConnectionMode == TransportMode.Deeplink;
-            if (!isMobile || !MetaMaskUnity.Instance.Wallet.HasSession)
+            var isMobile = Wallet.Transport.ConnectionMode == TransportMode.Deeplink;
+            if (!isMobile || !Wallet.HasSession)
             {
                 _exception = new UnityException("User disconnected");
             }

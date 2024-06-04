@@ -253,6 +253,10 @@ namespace MetaMask.Unity
 
                 return chainData;
             }
+            set
+            {
+                _otherDefaultChainData = new UnityChainInfo(value);
+            }
         }
         public TransportMode ConnectionMode { get; set; }
         public string AppName => this.dappName;
