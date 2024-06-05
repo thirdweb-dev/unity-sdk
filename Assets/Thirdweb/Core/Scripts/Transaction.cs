@@ -213,7 +213,8 @@ namespace Thirdweb
             else
             {
                 var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
-                var function = web3.Eth.GetContract(Contract.ABI, Contract.Address).GetFunction(Input.To);
+                var contract = web3.Eth.GetContract(Contract.ABI, Contract.Address);
+                var function = Utils.GetFunctionMatchSignature(contract, FunctionName, args);
                 Input.Data = function.GetData(args);
             }
             return this;
