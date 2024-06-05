@@ -37,7 +37,7 @@ public class StorageTests : ConfigManager
         Assert.AreEqual(ThirdwebManager.Instance.SDK.Storage.IPFSGateway, "https://cloudflare-ipfs.com/ipfs/");
 
         string testIpfsRawUrl = "ipfs://Qblabla";
-        Assert.AreEqual(Utils.ReplaceIPFS(testIpfsRawUrl), "https://cloudflare-ipfs.com/ipfs/Qblabla");
+        Assert.AreEqual(Utils.ReplaceIPFS(testIpfsRawUrl, ThirdwebManager.Instance.SDK.Storage.IPFSGateway), "https://cloudflare-ipfs.com/ipfs/Qblabla");
 
         yield return null;
     }
@@ -52,7 +52,7 @@ public class StorageTests : ConfigManager
         Assert.AreEqual(ThirdwebManager.Instance.SDK.Storage.IPFSGateway, $"https://{clientId}.ipfscdn.io/ipfs/");
 
         string testIpfsRawUrl = "ipfs://Qblabla";
-        Assert.AreEqual(Utils.ReplaceIPFS(testIpfsRawUrl), $"https://{clientId}.ipfscdn.io/ipfs/Qblabla");
+        Assert.AreEqual(Utils.ReplaceIPFS(testIpfsRawUrl, ThirdwebManager.Instance.SDK.Storage.IPFSGateway), $"https://{clientId}.ipfscdn.io/ipfs/Qblabla");
 
         yield return null;
     }
@@ -67,7 +67,7 @@ public class StorageTests : ConfigManager
         Assert.AreEqual(ThirdwebManager.Instance.SDK.Storage.IPFSGateway, ipfsGatewayUrl);
 
         string testIpfsRawUrl = "ipfs://Qblabla";
-        Assert.AreEqual(Utils.ReplaceIPFS(testIpfsRawUrl), "https://ipfs.io/ipfs/Qblabla");
+        Assert.AreEqual(Utils.ReplaceIPFS(testIpfsRawUrl, ThirdwebManager.Instance.SDK.Storage.IPFSGateway), "https://ipfs.io/ipfs/Qblabla");
 
         yield return null;
     }

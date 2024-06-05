@@ -16,6 +16,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Collections;
 using Nethereum.Hex.HexTypes;
+using Dynamitey;
 
 namespace Thirdweb
 {
@@ -173,11 +174,10 @@ namespace Thirdweb
 #endif
         }
 
-        public static string ReplaceIPFS(this string uri)
+        public static string ReplaceIPFS(this string uri, string ipfsGateway)
         {
-            string gateway = ThirdwebManager.Instance.SDK.Storage.IPFSGateway;
-            if (!string.IsNullOrEmpty(uri) && uri.StartsWith("ipfs://"))
-                return uri.Replace("ipfs://", gateway);
+            if (!string.IsNullOrEmpty(uri) && uri.StartsWith("ipfs://") && !string.IsNullOrEmpty(ipfsGateway))
+                return uri.Replace("ipfs://", ipfsGateway);
             else
                 return uri;
         }
@@ -404,10 +404,10 @@ namespace Thirdweb
             return new Account(ecKey, chainId);
         }
 
-        public static string CidToIpfsUrl(this string cid, bool useGateway = false)
+        public static string CidToIpfsUrl(this string cid, string ipfsGateway = null)
         {
             string ipfsRaw = $"ipfs://{cid}";
-            return useGateway ? ipfsRaw.ReplaceIPFS() : ipfsRaw;
+            return ipfsRaw.ReplaceIPFS(ipfsGateway);
         }
 
         public async static Task<string> ResolveAddressFromENS(string ens)
@@ -465,17 +465,6 @@ namespace Thirdweb
             return Nethereum.Util.AddressUtil.Current.ConvertToChecksumAddress(address);
         }
 
-        public static string GetClientId()
-        {
-            return ThirdwebManager.Instance.SDK?.Session?.Options.clientId ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.clientId) ? null : ThirdwebManager.Instance.clientId);
-        }
-
-        public static string GetBundleId()
-        {
-            return ThirdwebManager.Instance.SDK?.Session?.Options.bundleId
-                ?? (string.IsNullOrEmpty(ThirdwebManager.Instance.bundleIdOverride) ? Application.identifier.ToLower() : ThirdwebManager.Instance.bundleIdOverride);
-        }
-
         public static string GetRuntimePlatform()
         {
             switch (Application.platform)
@@ -500,18 +489,24 @@ namespace Thirdweb
             }
         }
 
-        public static string AppendBundleIdQueryParam(this string uri)
+        public static string AppendBundleIdQueryParam(this string uri, string bundleId)
         {
-            if (IsWebGLBuild())
+            if (IsWebGLBuild() || string.IsNullOrEmpty(bundleId) || uri.Contains("bundleId="))
                 return uri;
 
-            uri += $"?bundleId={GetBundleId()}";
+            uri += $"?bundleId={bundleId}";
             return uri;
         }
 
-        public static Web3 GetWeb3(BigInteger? chainId = null)
+        public static Web3 GetWeb3(BigInteger chainId, string clientId, string bundleId)
         {
-            return new Web3(new ThirdwebClient(new Uri(chainId == null ? ThirdwebManager.Instance.SDK.Session.RPC : $"https://{chainId}.rpc.thirdweb.com")));
+            var url = $"https://{chainId}.rpc.thirdweb.com";
+            if (!string.IsNullOrEmpty(clientId))
+            {
+                url += $"/{clientId}";
+                url = url.AppendBundleIdQueryParam(bundleId);
+            }
+            return new Web3(new ThirdwebClient(new Uri(url)));
         }
 
         public static string GetNativeTokenWrapper(BigInteger chainId)
@@ -576,103 +571,64 @@ namespace Thirdweb
             return unixTimestamp.ToString();
         }
 
-        public async static Task<BigInteger> GetLegacyGasPriceAsync(BigInteger chainId)
+        public async static Task<BigInteger> GetLegacyGasPriceAsync(BigInteger chainId, string clientId = null, string bundleId = null)
         {
-            var web3 = GetWeb3(chainId);
-            var gasPrice = (await web3.Eth.GasPrice.SendRequestAsync()).Value;
-            return BigInteger.Multiply(gasPrice, 10) / 9;
+            var client = GetWeb3(chainId, clientId, bundleId).Client;
+            var hex = new HexBigInteger(await client.SendRequestAsync<string>("eth_gasPrice"));
+            return BigInteger.Multiply(hex.Value, 10) / 9;
         }
 
-        public async static Task<GasPriceParameters> GetGasPriceAsync(BigInteger chainId)
+        public async static Task<GasPriceParameters> GetGasPriceAsync(BigInteger chainId, string clientId = null, string bundleId = null)
         {
-            BigInteger? priorityOverride = null;
+            var client = GetWeb3(chainId, clientId, bundleId).Client;
+            var gasPrice = await GetLegacyGasPriceAsync(chainId, clientId, bundleId);
+
             if (chainId == 137 || chainId == 80001)
             {
-                try
-                {
-                    return await GetPolygonGasPriceParameters((int)chainId);
-                }
-                catch (System.Exception e)
-                {
-                    ThirdwebDebug.LogWarning($"Failed to get gas price from Polygon gas station, using default method: {e.Message}");
-                    priorityOverride = GweiToWei(chainId == 137 ? 40 : 1);
-                }
+                return new GasPriceParameters(gasPrice * 3 / 2, gasPrice * 4 / 3);
             }
 
-            var web3 = GetWeb3(chainId);
-            var gasPrice = (await web3.Eth.GasPrice.SendRequestAsync()).Value;
-
-            if (chainId == 42220) // celo mainnet
+            try
             {
-                gasPrice = BigInteger.Multiply(gasPrice, 3) / 2;
+                if (
+                    // chainId == 1 // mainnet
+                    // || chainId == 11155111 // sepolia
+                    // || chainId == 42161 // arbitrum
+                    // || chainId == 421614 // arbitrum sepolia
+                    // || chainId == 534352 // scroll
+                    // || chainId == 534351 // scroll sepolia
+                    // || chainId == 5000 // mantle
+                    // || chainId == 22222 // nautilus
+                    // || chainId == 8453 // base
+                    // || chainId == 53935 // dfk
+                    // || chainId == 43114 // avalanche
+                    // || chainId == 43113 // avalanche fuji
+                    // || chainId == 8453 // base
+                    // || chainId == 84532 // base sepolia
+                    chainId == 42220 // celo
+                    || chainId == 44787 // celo-alfajores-testnet
+                    || chainId == 62320 // celo-baklava-testnet
+                )
+                {
+                    return new GasPriceParameters(gasPrice, gasPrice);
+                }
+
+                var block = await client.SendRequestAsync<JObject>(method: "eth_getBlockByNumber", route: null, paramList: new object[] { "latest", true });
+                var baseBlockFee = block["baseFeePerGas"]?.ToObject<HexBigInteger>();
+                var maxFeePerGas = baseBlockFee.Value * 2;
+                var maxPriorityFeePerGas = ((await client.SendRequestAsync<HexBigInteger>("eth_maxPriorityFeePerGas"))?.Value) ?? maxFeePerGas / 2;
+
+                if (maxPriorityFeePerGas > maxFeePerGas)
+                {
+                    maxPriorityFeePerGas = maxFeePerGas / 2;
+                }
+
+                return new GasPriceParameters((maxFeePerGas + maxPriorityFeePerGas) * 10 / 9, maxPriorityFeePerGas * 10 / 9);
+            }
+            catch
+            {
                 return new GasPriceParameters(gasPrice, gasPrice);
             }
-
-            if (
-                chainId == 1 // mainnet
-                || chainId == 11155111 // sepolia
-                || chainId == 42161 // arbitrum
-                || chainId == 421614 // arbitrum sepolia
-                || chainId == 534352 // scroll
-                || chainId == 534351 // scroll sepolia
-                || chainId == 5000 // mantle
-                || chainId == 22222 // nautilus
-                || chainId == 8453 // base
-                || chainId == 53935 // dfk
-                || chainId == 44787 // celo alfajores
-                || chainId == 43114 // avalanche
-                || chainId == 43113 // avalanche fuji
-                || chainId == 8453 // base
-                || chainId == 84532 // base sepolia
-            )
-            {
-                gasPrice = BigInteger.Multiply(gasPrice, 10) / 9;
-                return new GasPriceParameters(gasPrice, priorityOverride ?? gasPrice);
-            }
-
-            var maxPriorityFeePerGas = new BigInteger(2000000000) > gasPrice ? gasPrice : new BigInteger(2000000000);
-
-            var feeHistory = await web3.Eth.FeeHistory.SendRequestAsync(new Nethereum.Hex.HexTypes.HexBigInteger(20), Nethereum.RPC.Eth.DTOs.BlockParameter.CreateLatest(), new double[] { 20 });
-
-            if (feeHistory.Reward == null)
-            {
-                gasPrice = BigInteger.Multiply(gasPrice, 3) / 2;
-                maxPriorityFeePerGas = gasPrice;
-            }
-            else
-            {
-                var feeAverage = feeHistory.Reward.Select(r => r[0]).Aggregate(BigInteger.Zero, (acc, cur) => cur + acc) / 10;
-                if (feeAverage > gasPrice)
-                {
-                    gasPrice = feeAverage;
-                }
-                maxPriorityFeePerGas = gasPrice;
-            }
-
-            return new GasPriceParameters(gasPrice, priorityOverride ?? maxPriorityFeePerGas);
-        }
-
-        public async static Task<GasPriceParameters> GetPolygonGasPriceParameters(int chainId)
-        {
-            using var httpClient = new HttpClient();
-            string gasStationUrl;
-            switch (chainId)
-            {
-                case 137:
-                    gasStationUrl = "https://gasstation.polygon.technology/v2";
-                    break;
-                case 80001:
-                    gasStationUrl = "https://gasstation-testnet.polygon.technology/v2";
-                    break;
-                default:
-                    throw new UnityException("Unsupported chain id");
-            }
-
-            var response = await httpClient.GetAsync(gasStationUrl);
-            response.EnsureSuccessStatusCode();
-            string responseBody = await response.Content.ReadAsStringAsync();
-            var data = JsonConvert.DeserializeObject<PolygonGasStationResult>(responseBody);
-            return new GasPriceParameters(GweiToWei(data.fast.maxFee), GweiToWei(data.fast.maxPriorityFee));
         }
 
         public static BigInteger GweiToWei(decimal gweiAmount)
@@ -685,9 +641,16 @@ namespace Thirdweb
             return new HexBigInteger(number).HexValue;
         }
 
-        public static async void TrackWalletAnalytics(string clientId, string source, string action, string walletType, string walletAddress)
+        public static async void TrackWalletAnalytics(string clientId, string bundleId, string source, string action, string walletType, string walletAddress)
         {
-            if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(source) || string.IsNullOrEmpty(action) || string.IsNullOrEmpty(walletType) || string.IsNullOrEmpty(walletAddress))
+            if (
+                string.IsNullOrEmpty(clientId)
+                || string.IsNullOrEmpty(bundleId)
+                || string.IsNullOrEmpty(source)
+                || string.IsNullOrEmpty(action)
+                || string.IsNullOrEmpty(walletType)
+                || string.IsNullOrEmpty(walletAddress)
+            )
                 return;
 
             try
@@ -699,24 +662,21 @@ namespace Thirdweb
                     walletAddress,
                     walletType,
                 };
-                var headers = new Dictionary<string, string>
-                {
-                    { "x-client-id", clientId },
-                    { "x-sdk-platform", "unity" },
-                    { "x-sdk-name", "UnitySDK" },
-                    { "x-sdk-version", ThirdwebSDK.version },
-                    { "x-sdk-os", GetRuntimePlatform() },
-                    { "x-bundle-id", GetBundleId() },
-                };
+
                 var request = new HttpRequestMessage(HttpMethod.Post, "https://c.thirdweb.com/event")
                 {
                     Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json")
                 };
+
+                var headers = GetThirdwebHeaders(clientId, bundleId);
+
                 foreach (var header in headers)
                 {
                     request.Headers.Add(header.Key, header.Value);
                 }
+
                 using var client = new HttpClient();
+
                 await client.SendAsync(request);
             }
             catch (System.Exception e)
@@ -778,6 +738,31 @@ namespace Thirdweb
                 ThirdwebDebug.LogWarning($"Failed to copy to clipboard: {e}");
                 return false;
             }
+        }
+
+        public static bool IsThirdwebRequest(string uri)
+        {
+            var host = new Uri(uri).Host;
+            return host.EndsWith(".ipfscdn.io") || host.EndsWith(".thirdweb.com");
+        }
+
+        public static Dictionary<string, string> GetThirdwebHeaders(string clientId, string bundleId)
+        {
+            var headers = new Dictionary<string, string>
+            {
+                { "x-sdk-name", "UnitySDK" },
+                { "x-sdk-os", GetRuntimePlatform() },
+                { "x-sdk-platform", "unity" },
+                { "x-sdk-version", ThirdwebSDK.version },
+                { "x-client-id", clientId },
+            };
+
+            if (!IsWebGLBuild())
+            {
+                headers.Add("x-bundle-id", bundleId);
+            }
+
+            return headers;
         }
     }
 }

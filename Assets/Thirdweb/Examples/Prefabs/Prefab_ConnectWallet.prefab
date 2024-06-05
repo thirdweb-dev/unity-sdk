@@ -5129,7 +5129,7 @@ MonoBehaviour:
   - provider: 1
     sprite: {fileID: 21300000, guid: 3707a9cd5e5944947812bcf0fa8a7bab, type: 3}
   - provider: 2
-    sprite: {fileID: 21300000, guid: 3707a9cd5e5944947812bcf0fa8a7bab, type: 3}
+    sprite: {fileID: 21300000, guid: aa1e79762e06bab44b224debe00d9da1, type: 3}
   - provider: 3
     sprite: {fileID: 21300000, guid: 3e5d6a23922d2534984e078557413826, type: 3}
   - provider: 4

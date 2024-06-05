@@ -42,5 +42,32 @@ namespace WalletConnectUnity.Core.Utils
 
             return wallet != null;
         }
+
+        public static void SetLastViewedWallet(Wallet wallet)
+        {
+            if (wallet == null)
+                return;
+
+            PlayerPrefs.SetString("WC_LAST_VIEWED_WALLET", JsonConvert.SerializeObject(wallet));
+        }
+
+        public static void RemoveLastViewedWallet()
+        {
+            PlayerPrefs.DeleteKey("WC_LAST_VIEWED_WALLET");
+        }
+
+        public static bool TryGetLastViewedWallet(out Wallet wallet)
+        {
+            wallet = null;
+
+            var recentWalletJson = PlayerPrefs.GetString("WC_LAST_VIEWED_WALLET");
+
+            if (string.IsNullOrWhiteSpace(recentWalletJson))
+                return false;
+
+            wallet = JsonConvert.DeserializeObject<Wallet>(recentWalletJson);
+
+            return wallet != null;
+        }
     }
 }

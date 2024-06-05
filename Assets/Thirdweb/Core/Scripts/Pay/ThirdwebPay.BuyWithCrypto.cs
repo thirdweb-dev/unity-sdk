@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Thirdweb.Pay
 {
-    public static partial class ThirdwebPay
+    public partial class ThirdwebPay
     {
         /// <summary>
         /// Send a quoted swap transaction.
@@ -11,14 +11,12 @@ namespace Thirdweb.Pay
         /// <param name="buyWithCryptoQuote">Swap quote containing the transaction request</param>
         /// <param name="sdk">Optional SDK instance, defaults to ThirdwebManager instance</param>
         /// <returns></returns>
-        public static async Task<string> BuyWithCrypto(BuyWithCryptoQuoteResult buyWithCryptoQuote, ThirdwebSDK sdk = null)
+        public async Task<string> BuyWithCrypto(BuyWithCryptoQuoteResult buyWithCryptoQuote)
         {
-            sdk ??= ThirdwebManager.Instance.SDK;
-
             if (buyWithCryptoQuote.Approval != null)
             {
                 ThirdwebDebug.Log("Approving ERC20...");
-                var erc20ToApprove = sdk.GetContract(buyWithCryptoQuote.Approval.TokenAddress);
+                var erc20ToApprove = _sdk.GetContract(buyWithCryptoQuote.Approval.TokenAddress);
                 var currentAllowance = await erc20ToApprove.ERC20.Allowance(buyWithCryptoQuote.Approval.SpenderAddress);
                 if (BigInteger.Parse(currentAllowance.value) >= BigInteger.Parse(buyWithCryptoQuote.Approval.AmountWei))
                 {
@@ -32,7 +30,7 @@ namespace Thirdweb.Pay
             }
 
             ThirdwebDebug.Log("Sending swap transaction...");
-            var hash = await sdk.Wallet.SendRawTransaction(
+            var hash = await _sdk.Wallet.SendRawTransaction(
                 new Thirdweb.TransactionRequest()
                 {
                     from = buyWithCryptoQuote.TransactionRequest.From,

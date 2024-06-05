@@ -13,15 +13,17 @@ namespace Thirdweb
     /// </summary>
     public class Pack : Routable
     {
-        private readonly string contractAddress;
+        private readonly string _contractAddress;
+        private readonly ThirdwebSDK _sdk;
 
         /// <summary>
         /// Interact with a Marketplace contract.
         /// </summary>
-        public Pack(string address)
+        public Pack(ThirdwebSDK sdk, string address)
             : base($"{address}{subSeparator}pack")
         {
-            this.contractAddress = address;
+            this._contractAddress = address;
+            this._sdk = sdk;
         }
 
         /// READ FUNCTIONS
@@ -38,7 +40,8 @@ namespace Thirdweb
             else
             {
                 var tokenURI = await TransactionManager.ThirdwebRead<PackContract.UriFunction, PackContract.UriOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new PackContract.UriFunction() { TokenId = BigInteger.Parse(tokenId) }
                 );
 
@@ -48,11 +51,11 @@ namespace Thirdweb
                     type = "ERC1155",
                     supply = await TotalSupply(tokenId),
                     quantityOwned = null,
-                    metadata = await ThirdwebManager.Instance.SDK.Storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1)
+                    metadata = await _sdk.Storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1)
                 };
-                nft.metadata.image = nft.metadata.image.ReplaceIPFS();
+                nft.metadata.image = nft.metadata.image.ReplaceIPFS(_sdk.Storage.IPFSGateway);
                 nft.metadata.id = tokenId;
-                nft.metadata.uri = tokenURI.ReturnValue1.ReplaceIPFS();
+                nft.metadata.uri = tokenURI.ReturnValue1.ReplaceIPFS(_sdk.Storage.IPFSGateway);
                 return nft;
             }
         }
@@ -93,7 +96,7 @@ namespace Thirdweb
         /// </summary>
         public async Task<BigInteger> Balance(string tokenId)
         {
-            return await BalanceOf(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), tokenId);
+            return await BalanceOf(await _sdk.Wallet.GetAddress(), tokenId);
         }
 
         /// <summary>
@@ -109,7 +112,8 @@ namespace Thirdweb
             else
             {
                 var tokenURI = await TransactionManager.ThirdwebRead<PackContract.BalanceOfFunction, PackContract.BalanceOfOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new PackContract.BalanceOfFunction() { Account = address, Id = BigInteger.Parse(tokenId) }
                 );
                 return tokenURI.ReturnValue1;
@@ -130,7 +134,8 @@ namespace Thirdweb
             else
             {
                 var isApprovedForAll = await TransactionManager.ThirdwebRead<PackContract.IsApprovedForAllFunction, PackContract.IsApprovedForAllOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new PackContract.IsApprovedForAllFunction() { Account = address, Operator = approvedContract }
                 );
                 return isApprovedForAll.ReturnValue1.ToString();
@@ -163,7 +168,8 @@ namespace Thirdweb
             else
             {
                 var totalSupply = await TransactionManager.ThirdwebRead<PackContract.TotalSupplyFunction, PackContract.TotalSupplyOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new PackContract.TotalSupplyFunction() { ReturnValue1 = BigInteger.Parse(tokenId) }
                 );
                 return totalSupply.ReturnValue1;
@@ -182,7 +188,8 @@ namespace Thirdweb
             else
             {
                 var packContents = await TransactionManager.ThirdwebRead<PackContract.GetPackContentsFunction, PackContract.GetPackContentsOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new PackContract.GetPackContentsFunction() { PackId = BigInteger.Parse(packId) }
                 );
                 var erc20R = new List<ERC20Contents>();
@@ -244,7 +251,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new PackContract.SetApprovalForAllFunction() { Operator = contractToApprove, Approved = approved });
+                return await TransactionManager.ThirdwebWrite(_sdk, _contractAddress, new PackContract.SetApprovalForAllFunction() { Operator = contractToApprove, Approved = approved });
             }
         }
 
@@ -260,10 +267,11 @@ namespace Thirdweb
             else
             {
                 return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new PackContract.SafeTransferFromFunction()
                     {
-                        From = await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
+                        From = await _sdk.Wallet.GetAddress(),
                         To = to,
                         Id = BigInteger.Parse(tokenId),
                         Amount = amount,
@@ -284,7 +292,7 @@ namespace Thirdweb
             }
             else
             {
-                return await CreateTo(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), pack);
+                return await CreateTo(await _sdk.Wallet.GetAddress(), pack);
             }
         }
 
@@ -299,15 +307,16 @@ namespace Thirdweb
             }
             else
             {
-                var uri = await ThirdwebManager.Instance.SDK.Storage.UploadText(JsonConvert.SerializeObject(pack.packMetadata));
+                var uri = await _sdk.Storage.UploadText(JsonConvert.SerializeObject(pack.packMetadata));
                 return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new PackContract.CreatePackFunction()
                     {
                         Contents = pack.ToPackTokenList(),
                         NumOfRewardUnits = pack.ToPackRewardUnitsList(),
                         PackUri = uri.IpfsHash.CidToIpfsUrl(),
-                        OpenStartTimestamp = await Blocks.GetLatestBlockTimestamp(),
+                        OpenStartTimestamp = await _sdk.Blocks.GetLatestBlockTimestamp(),
                         AmountDistributedPerOpen = BigInteger.Parse(pack.rewardsPerPack),
                         Recipient = receiverAddress
                     }
@@ -342,7 +351,7 @@ namespace Thirdweb
             else
             {
                 var openPackFunction = new PackContract.OpenPackFunction() { PackId = BigInteger.Parse(packId), AmountToOpen = BigInteger.Parse(amount) };
-                var openPackResult = await TransactionManager.ThirdwebWriteRawResult(contractAddress, openPackFunction, null, gasLimit);
+                var openPackResult = await TransactionManager.ThirdwebWriteRawResult(_sdk, _contractAddress, openPackFunction, null, gasLimit);
 
                 var packOpenedEvents = openPackResult.DecodeAllEvents<PackContract.PackOpenedEventDTO>();
                 var tokensAwarded = new List<PackContract.Token>();

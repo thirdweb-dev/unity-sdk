@@ -23,7 +23,7 @@ public class Prefab_BuyWithCrypto : MonoBehaviour
             toAmount: "2"
         );
 
-        _quote = await ThirdwebPay.GetBuyWithCryptoQuote(swapQuoteParams);
+        _quote = await ThirdwebManager.Instance.SDK.Pay.GetBuyWithCryptoQuote(swapQuoteParams);
         ThirdwebDebug.Log($"Quote: {JsonConvert.SerializeObject(_quote, Formatting.Indented)}");
     }
 
@@ -39,7 +39,7 @@ public class Prefab_BuyWithCrypto : MonoBehaviour
 
         try
         {
-            _txHash = await ThirdwebPay.BuyWithCrypto(_quote);
+            _txHash = await ThirdwebManager.Instance.SDK.Pay.BuyWithCrypto(_quote);
             ThirdwebDebug.Log($"Transaction hash: {_txHash}");
         }
         catch (System.Exception e)
@@ -56,7 +56,7 @@ public class Prefab_BuyWithCrypto : MonoBehaviour
             return;
         }
 
-        var status = await ThirdwebPay.GetBuyWithCryptoStatus(_txHash);
+        var status = await ThirdwebManager.Instance.SDK.Pay.GetBuyWithCryptoStatus(_txHash);
         if (status.Status == SwapStatus.FAILED.ToString())
             ThirdwebDebug.LogWarning($"Failed! Reason: {status.FailureMessage}");
 
@@ -66,7 +66,7 @@ public class Prefab_BuyWithCrypto : MonoBehaviour
     public async void GetBuyHistory()
     {
         string connectedAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
-        var history = await ThirdwebPay.GetBuyHistory(connectedAddress, 0, 10);
+        var history = await ThirdwebManager.Instance.SDK.Pay.GetBuyHistory(connectedAddress, 0, 10);
         ThirdwebDebug.Log($"Full History: {JsonConvert.SerializeObject(history, Formatting.Indented)}");
 
         var latestBuyWithCryptoStatus = history.Page.FirstOrDefault(h => h.BuyWithCryptoStatus != null)?.BuyWithCryptoStatus;

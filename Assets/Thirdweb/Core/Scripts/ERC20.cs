@@ -24,17 +24,20 @@ namespace Thirdweb
         /// </summary>
         public ERC20ClaimConditions ClaimConditions;
 
-        private readonly string contractAddress;
+        private readonly string _contractAddress;
+
+        private readonly ThirdwebSDK _sdk;
 
         /// <summary>
         /// Interact with any ERC20 compatible contract.
         /// </summary>
-        public ERC20(string parentRoute, string contractAddress)
+        public ERC20(ThirdwebSDK SDK, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "erc20"))
         {
-            this.contractAddress = contractAddress;
-            this.Signature = new ERC20Signature(baseRoute, contractAddress);
-            this.ClaimConditions = new ERC20ClaimConditions(baseRoute, contractAddress);
+            this._sdk = SDK;
+            this._contractAddress = contractAddress;
+            this.Signature = new ERC20Signature(SDK, baseRoute, contractAddress);
+            this.ClaimConditions = new ERC20ClaimConditions(SDK, baseRoute, contractAddress);
         }
 
         // READ FUNCTIONS
@@ -51,13 +54,18 @@ namespace Thirdweb
             else
             {
                 var decimals = await TransactionManager.ThirdwebRead<TokenERC20Contract.DecimalsFunction, TokenERC20Contract.DecimalsOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC20Contract.DecimalsFunction()
                 );
 
-                var name = await TransactionManager.ThirdwebRead<TokenERC20Contract.NameFunction, TokenERC20Contract.NameOutputDTO>(contractAddress, new TokenERC20Contract.NameFunction());
+                var name = await TransactionManager.ThirdwebRead<TokenERC20Contract.NameFunction, TokenERC20Contract.NameOutputDTO>(_sdk, _contractAddress, new TokenERC20Contract.NameFunction());
 
-                var symbol = await TransactionManager.ThirdwebRead<TokenERC20Contract.SymbolFunction, TokenERC20Contract.SymbolOutputDTO>(contractAddress, new TokenERC20Contract.SymbolFunction());
+                var symbol = await TransactionManager.ThirdwebRead<TokenERC20Contract.SymbolFunction, TokenERC20Contract.SymbolOutputDTO>(
+                    _sdk,
+                    _contractAddress,
+                    new TokenERC20Contract.SymbolFunction()
+                );
 
                 return new Currency(name.ReturnValue1, symbol.ReturnValue1, decimals.ReturnValue1.ToString());
             }
@@ -74,7 +82,7 @@ namespace Thirdweb
             }
             else
             {
-                return await BalanceOf(await ThirdwebManager.Instance.SDK.Wallet.GetAddress());
+                return await BalanceOf(await _sdk.Wallet.GetAddress());
             }
         }
 
@@ -91,7 +99,8 @@ namespace Thirdweb
             {
                 Currency c = await Get();
                 var balance = await TransactionManager.ThirdwebRead<TokenERC20Contract.BalanceOfFunction, TokenERC20Contract.BalanceOfOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC20Contract.BalanceOfFunction() { Account = address }
                 );
                 return new CurrencyValue(c.name, c.symbol, c.decimals, balance.ReturnValue1.ToString(), balance.ReturnValue1.ToString().FormatERC20(4, int.Parse(c.decimals), true));
@@ -109,7 +118,7 @@ namespace Thirdweb
             }
             else
             {
-                return await AllowanceOf(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), spender);
+                return await AllowanceOf(await _sdk.Wallet.GetAddress(), spender);
             }
         }
 
@@ -126,7 +135,8 @@ namespace Thirdweb
             {
                 Currency c = await Get();
                 var allowance = await TransactionManager.ThirdwebRead<TokenERC20Contract.AllowanceFunction, TokenERC20Contract.AllowanceOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC20Contract.AllowanceFunction() { Owner = owner, Spender = spender }
                 );
                 return new CurrencyValue(c.name, c.symbol, c.decimals, allowance.ReturnValue1.ToString(), allowance.ReturnValue1.ToString().FormatERC20(4, int.Parse(c.decimals), true));
@@ -146,7 +156,8 @@ namespace Thirdweb
             {
                 Currency c = await Get();
                 var totalSupply = await TransactionManager.ThirdwebRead<TokenERC20Contract.TotalSupplyFunction, TokenERC20Contract.TotalSupplyOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC20Contract.TotalSupplyFunction() { }
                 );
                 return new CurrencyValue(c.name, c.symbol, c.decimals, totalSupply.ReturnValue1.ToString(), totalSupply.ReturnValue1.ToString().FormatERC20(4, int.Parse(c.decimals), true));
@@ -166,7 +177,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.ApproveFunction() { Spender = spender, Amount = BigInteger.Parse(amount.ToWei()) });
+                return await TransactionManager.ThirdwebWrite(_sdk, _contractAddress, new TokenERC20Contract.ApproveFunction() { Spender = spender, Amount = BigInteger.Parse(amount.ToWei()) });
             }
         }
 
@@ -183,7 +194,7 @@ namespace Thirdweb
             {
                 var currency = await Get();
                 var rawAmountToTransfer = BigInteger.Parse(amount.ToWei()).AdjustDecimals(18, int.Parse(currency.decimals));
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.TransferFunction() { To = to, Amount = rawAmountToTransfer });
+                return await TransactionManager.ThirdwebWrite(_sdk, _contractAddress, new TokenERC20Contract.TransferFunction() { To = to, Amount = rawAmountToTransfer });
             }
         }
 
@@ -201,7 +212,8 @@ namespace Thirdweb
                 var currency = await Get();
                 var rawAmountToTransfer = BigInteger.Parse(amount.ToWei()).AdjustDecimals(18, int.Parse(currency.decimals));
                 return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC20Contract.TransferFromFunction()
                     {
                         From = from,
@@ -223,7 +235,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.BurnFunction() { Amount = BigInteger.Parse(amount.ToWei()) });
+                return await TransactionManager.ThirdwebWrite(_sdk, _contractAddress, new TokenERC20Contract.BurnFunction() { Amount = BigInteger.Parse(amount.ToWei()) });
             }
         }
 
@@ -238,7 +250,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ClaimTo(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), amount);
+                return await ClaimTo(await _sdk.Wallet.GetAddress(), amount);
             }
         }
 
@@ -255,13 +267,15 @@ namespace Thirdweb
             {
                 var claimCondition = await ClaimConditions.GetActive();
                 var decimals = await TransactionManager.ThirdwebRead<TokenERC20Contract.DecimalsFunction, TokenERC20Contract.DecimalsOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC20Contract.DecimalsFunction()
                 );
                 var rawAmountToClaim = BigInteger.Parse(amount.ToWei()).AdjustDecimals(18, int.Parse(decimals.ReturnValue1.ToString()));
                 var rawPrice = BigInteger.Parse(claimCondition.currencyMetadata.value);
                 return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new DropERC20Contract.ClaimFunction()
                     {
                         Receiver = address,
@@ -293,7 +307,7 @@ namespace Thirdweb
             }
             else
             {
-                return await MintTo(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), amount);
+                return await MintTo(await _sdk.Wallet.GetAddress(), amount);
             }
         }
 
@@ -308,7 +322,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC20Contract.MintToFunction() { To = address, Amount = BigInteger.Parse(amount.ToWei()) });
+                return await TransactionManager.ThirdwebWrite(_sdk, _contractAddress, new TokenERC20Contract.MintToFunction() { To = address, Amount = BigInteger.Parse(amount.ToWei()) });
             }
         }
     }
@@ -364,12 +378,14 @@ namespace Thirdweb
 #nullable enable
     public class ERC20ClaimConditions : Routable
     {
-        private readonly string contractAddress;
+        private readonly string _contractAddress;
+        private readonly ThirdwebSDK _sdk;
 
-        public ERC20ClaimConditions(string parentRoute, string contractAddress)
+        public ERC20ClaimConditions(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "claimConditions"))
         {
-            this.contractAddress = contractAddress;
+            this._contractAddress = contractAddress;
+            this._sdk = sdk;
         }
 
         /// <summary>
@@ -384,19 +400,21 @@ namespace Thirdweb
             else
             {
                 var id = await TransactionManager.ThirdwebRead<DropERC20Contract.GetActiveClaimConditionIdFunction, DropERC20Contract.GetActiveClaimConditionIdOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new DropERC20Contract.GetActiveClaimConditionIdFunction() { }
                 );
 
                 var data = await TransactionManager.ThirdwebRead<DropERC20Contract.GetClaimConditionByIdFunction, DropERC20Contract.GetClaimConditionByIdOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new DropERC20Contract.GetClaimConditionByIdFunction() { ConditionId = id.ReturnValue1 }
                 );
 
                 var currency = new Currency();
                 try
                 {
-                    currency = await ThirdwebManager.Instance.SDK.GetContract(data.Condition.Currency).ERC20.Get();
+                    currency = await _sdk.GetContract(data.Condition.Currency).ERC20.Get();
                 }
                 catch
                 {
@@ -472,15 +490,17 @@ namespace Thirdweb
     /// </summary>
     public class ERC20Signature : Routable
     {
-        private readonly string contractAddress;
+        private readonly string _contractAddress;
+        private readonly ThirdwebSDK _sdk;
 
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC20Signature(string parentRoute, string contractAddress)
+        public ERC20Signature(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "signature"))
         {
-            this.contractAddress = contractAddress;
+            this._sdk = sdk;
+            this._contractAddress = contractAddress;
         }
 
         /// <summary>
@@ -493,7 +513,7 @@ namespace Thirdweb
                 if (string.IsNullOrEmpty(privateKeyOverride))
                     return await Bridge.InvokeRoute<ERC20SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
 
-                var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
+                var contract = _sdk.GetContract(_contractAddress);
                 var primarySaleRecipient = await contract.Read<string>("primarySaleRecipient");
 
                 var req = new TokenERC20Contract.MintRequest()
@@ -511,10 +531,11 @@ namespace Thirdweb
                 var name = await contract.Read<string>("name");
 
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(
+                    _sdk,
                     name,
                     "1",
-                    await ThirdwebManager.Instance.SDK.Wallet.GetChainId(),
-                    contractAddress,
+                    await _sdk.Wallet.GetChainId(),
+                    _contractAddress,
                     req,
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
@@ -540,7 +561,8 @@ namespace Thirdweb
             else
             {
                 var primarySaleRecipient = await TransactionManager.ThirdwebRead<TokenERC20Contract.PrimarySaleRecipientFunction, TokenERC20Contract.PrimarySaleRecipientOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC20Contract.PrimarySaleRecipientFunction() { }
                 );
 
@@ -556,13 +578,14 @@ namespace Thirdweb
                     Uid = payloadToSign.uid.HexStringToByteArray()
                 };
 
-                var name = await TransactionManager.ThirdwebRead<TokenERC20Contract.NameFunction, TokenERC20Contract.NameOutputDTO>(contractAddress, new TokenERC20Contract.NameFunction() { });
+                var name = await TransactionManager.ThirdwebRead<TokenERC20Contract.NameFunction, TokenERC20Contract.NameOutputDTO>(_sdk, _contractAddress, new TokenERC20Contract.NameFunction() { });
 
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC20(
+                    _sdk,
                     name.ReturnValue1,
                     "1",
-                    await ThirdwebManager.Instance.SDK.Wallet.GetChainId(),
-                    contractAddress,
+                    await _sdk.Wallet.GetChainId(),
+                    _contractAddress,
                     req,
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
@@ -599,7 +622,8 @@ namespace Thirdweb
             else
             {
                 var verifyResult = await TransactionManager.ThirdwebRead<TokenERC20Contract.VerifyFunction, TokenERC20Contract.VerifyOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC20Contract.VerifyFunction()
                     {
                         Req = new TokenERC20Contract.MintRequest()
@@ -632,7 +656,8 @@ namespace Thirdweb
             else
             {
                 return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC20Contract.MintWithSignatureFunction()
                     {
                         Req = new TokenERC20Contract.MintRequest()

@@ -106,6 +106,7 @@ namespace Thirdweb.Examples
 
                 // Sign the typed data related to session keys
                 var signature = await EIP712.GenerateSignature_SmartAccount(
+                    ThirdwebManager.Instance.SDK,
                     "Account",
                     "1",
                     await ThirdwebManager.Instance.SDK.Wallet.GetChainId(),

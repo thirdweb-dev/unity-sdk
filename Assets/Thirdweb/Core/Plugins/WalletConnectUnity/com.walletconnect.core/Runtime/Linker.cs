@@ -6,6 +6,7 @@ using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Core.Models.Publisher;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectUnity.Core.Networking;
+using WalletConnectUnity.Core.Utils;
 
 namespace WalletConnectUnity.Core
 {
@@ -33,8 +34,6 @@ namespace WalletConnectUnity.Core
             if (string.IsNullOrWhiteSpace(uri))
                 throw new ArgumentException($"[Linker] Uri cannot be empty.");
 
-            uri = System.Uri.EscapeDataString(uri);
-
 #if UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
             // In editor we cannot open _mobile_ deep links, so we just log the uri
             Debug.Log($"[Linker] Requested to open mobile deep link. The uri: {uri}");
@@ -46,10 +45,7 @@ namespace WalletConnectUnity.Core
             if (string.IsNullOrWhiteSpace(link))
                 throw new Exception($"[Linker] No link found for {Application.platform} platform in wallet {wallet.Name}.");
 
-            if (!link.EndsWith("//"))
-                link = $"{link}//";
-
-            var url = $"{link}wc?uri={uri}";
+            var url = BuildConnectionDeepLink(link, uri);
 
             WCLogger.Log($"[Linker] Opening URL {url}");
 
@@ -62,14 +58,44 @@ namespace WalletConnectUnity.Core
             if (string.IsNullOrWhiteSpace(session.Topic))
                 throw new Exception("[Linker] No session topic found in provided session. Cannot open deep link.");
 
-            if (session.Peer.Metadata is { Redirect: not null })
+            if (session.Peer.Metadata != null)
             {
-                Application.OpenURL(session.Peer.Metadata.Redirect.Native);
+                var redirectNative = session.Peer.Metadata.Redirect.Native;
+
+                if (string.IsNullOrWhiteSpace(redirectNative) && WalletUtils.TryGetRecentWallet(out var recentWallet))
+                {
+                    WCLogger.LogError($"[Linker] No redirect found for {session.Peer.Metadata.Name}. Using deep link from the Recent Wallet.");
+                    Application.OpenURL(Application.isMobilePlatform ? recentWallet.MobileLink : recentWallet.DesktopLink);
+                }
+                else
+                {
+                    WCLogger.Log($"[Linker] Open native deep link: {redirectNative}");
+                    Application.OpenURL(redirectNative);
+                }
             }
-            else
+        }
+
+        public static string BuildConnectionDeepLink(string appLink, string wcUri)
+        {
+            if (string.IsNullOrWhiteSpace(wcUri))
+                throw new ArgumentException($"[Linker] Uri cannot be empty.");
+
+            if (string.IsNullOrWhiteSpace(appLink))
+                throw new ArgumentException($"[Linker] Native link cannot be empty.");
+
+            var safeAppUrl = appLink;
+            if (!safeAppUrl.Contains("://"))
             {
-                WCLogger.LogError($"[Linker] No redirect found for {session.Peer.Metadata.Name}. Cannot open deep link.");
+                safeAppUrl = safeAppUrl.Replace("/", "").Replace(":", "");
+                safeAppUrl = $"{safeAppUrl}://";
             }
+
+            if (!safeAppUrl.EndsWith("/"))
+                safeAppUrl = $"{safeAppUrl}/";
+
+            var encodedWcUrl = Uri.EscapeDataString(wcUri);
+
+            return $"{safeAppUrl}wc?uri={encodedWcUrl}";
         }
 
         public void OpenSessionRequestDeepLink(string sessionTopic)
@@ -106,17 +132,13 @@ namespace WalletConnectUnity.Core
             );
         }
 
-        internal void OpenSessionRequestDeepLinkAfterMessageFromSession(string sessionTopic)
+        public void OpenSessionRequestDeepLinkAfterMessageFromSession(string sessionTopic)
         {
             WCLogger.Log($"[Linker] OpenSessionRequestDeepLinkAfterMessageFromSession. Topic: {sessionTopic}");
             if (_sessionMessagesCounter.TryGetValue(sessionTopic, out var messageCount))
-            {
                 _sessionMessagesCounter[sessionTopic] = messageCount + 1;
-            }
             else
-            {
                 _sessionMessagesCounter.Add(sessionTopic, 1);
-            }
         }
 
         public static bool CanOpenURL(string url)
@@ -162,9 +184,7 @@ namespace WalletConnectUnity.Core
                 return;
 
             if (disposing)
-            {
                 _walletConnect.SignClient.Core.Relayer.Publisher.OnPublishedMessage -= OnPublisherPublishedMessage;
-            }
 
             disposed = true;
         }

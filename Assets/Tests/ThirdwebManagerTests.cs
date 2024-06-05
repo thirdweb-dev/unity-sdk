@@ -154,7 +154,7 @@ public class ThirdwebManagerTests : ConfigManager
         ThirdwebManager.Instance.clientId = "testClientId";
         Assert.IsNull(ThirdwebManager.Instance.bundleIdOverride);
 
-        string bundleId = Utils.GetBundleId();
+        string bundleId = Application.identifier.ToLower();
         Assert.IsNotNull(bundleId);
 
         ThirdwebManager.Instance.supportedChains = new List<ChainData> { new("arbitrum-sepolia", "421614", null), };

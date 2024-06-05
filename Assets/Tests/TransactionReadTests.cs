@@ -37,7 +37,7 @@ public class TransactionReadTests : ConfigManager
     public IEnumerator Static_WaitForTransactionResult_Success()
     {
         string txHash = "0x52b79681f549d7b01b12b8be5fa9dd88f7fee1411f965cbe7ec6e157ccb48af1";
-        var task = Transaction.WaitForTransactionResult(txHash);
+        var task = Transaction.WaitForTransactionResult(txHash, ThirdwebManager.Instance.SDK.Session.ChainId);
         yield return new WaitUntil(() => task.IsCompleted);
         Assert.IsTrue(task.IsCompletedSuccessfully);
         Assert.IsNotNull(task.Result);

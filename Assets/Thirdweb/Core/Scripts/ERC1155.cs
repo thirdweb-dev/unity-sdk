@@ -25,17 +25,19 @@ namespace Thirdweb
         /// </summary>
         public ERC1155ClaimConditions ClaimConditions;
 
-        private readonly string contractAddress;
+        private readonly string _contractAddress;
+        private readonly ThirdwebSDK _sdk;
 
         /// <summary>
         /// Interact with any ERC1155 compatible contract.
         /// </summary>
-        public ERC1155(string parentRoute, string contractAddress)
+        public ERC1155(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "erc1155"))
         {
-            this.contractAddress = contractAddress;
-            this.Signature = new ERC1155Signature(baseRoute, contractAddress);
-            this.ClaimConditions = new ERC1155ClaimConditions(baseRoute, contractAddress);
+            this._contractAddress = contractAddress;
+            this._sdk = sdk;
+            this.Signature = new ERC1155Signature(sdk, baseRoute, contractAddress);
+            this.ClaimConditions = new ERC1155ClaimConditions(sdk, baseRoute, contractAddress);
         }
 
         // READ FUNCTIONS
@@ -52,7 +54,8 @@ namespace Thirdweb
             else
             {
                 var tokenURI = await TransactionManager.ThirdwebRead<TokenERC1155Contract.UriFunction, TokenERC1155Contract.UriOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.UriFunction() { TokenId = BigInteger.Parse(tokenId) }
                 );
 
@@ -64,11 +67,11 @@ namespace Thirdweb
                     type = "ERC1155",
                     supply = await TotalSupply(tokenId),
                     quantityOwned = null,
-                    metadata = await ThirdwebManager.Instance.SDK.Storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1)
+                    metadata = await _sdk.Storage.DownloadText<NFTMetadata>(tokenURI.ReturnValue1)
                 };
-                nft.metadata.image = nft.metadata.image.ReplaceIPFS();
+                nft.metadata.image = nft.metadata.image.ReplaceIPFS(_sdk.Storage.IPFSGateway);
                 nft.metadata.id = tokenId;
-                nft.metadata.uri = tokenURI.ReturnValue1.ReplaceIPFS();
+                nft.metadata.uri = tokenURI.ReturnValue1.ReplaceIPFS(_sdk.Storage.IPFSGateway);
                 return nft;
             }
         }
@@ -92,12 +95,12 @@ namespace Thirdweb
                 try
                 {
                     var uriFunctions = Enumerable.Range((int)start, (int)(end - start)).Select(i => new TokenERC1155Contract.UriFunction() { TokenId = new BigInteger(i) }).ToArray();
-                    var uriResults = await TransactionManager.ThirdwebMulticallRead<TokenERC1155Contract.UriFunction, TokenERC1155Contract.UriOutputDTO>(contractAddress, uriFunctions);
+                    var uriResults = await TransactionManager.ThirdwebMulticallRead<TokenERC1155Contract.UriFunction, TokenERC1155Contract.UriOutputDTO>(_sdk, _contractAddress, uriFunctions);
                     var metadataFetchTasks = new List<Task<NFTMetadata>>();
                     for (int i = 0; i < uriResults.Length; i++)
                     {
-                        var tokenUri = uriResults[i].ReturnValue1.Replace("0x{id}", uriFunctions[i].TokenId.ToString()).ReplaceIPFS();
-                        metadataFetchTasks.Add(ThirdwebManager.Instance.SDK.Storage.DownloadText<NFTMetadata>(tokenUri));
+                        var tokenUri = uriResults[i].ReturnValue1.Replace("0x{id}", uriFunctions[i].TokenId.ToString()).ReplaceIPFS(_sdk.Storage.IPFSGateway);
+                        metadataFetchTasks.Add(_sdk.Storage.DownloadText<NFTMetadata>(tokenUri));
                     }
                     var metadataResults = await Task.WhenAll(metadataFetchTasks);
                     allNfts = new List<NFT>();
@@ -105,9 +108,9 @@ namespace Thirdweb
                     {
                         var tokenId = uriFunctions[i].TokenId.ToString();
                         var metadata = metadataResults[i];
-                        metadata.image = metadata.image.ReplaceIPFS();
+                        metadata.image = metadata.image.ReplaceIPFS(_sdk.Storage.IPFSGateway);
                         metadata.id = tokenId;
-                        metadata.uri = uriResults[i].ReturnValue1.ReplaceIPFS();
+                        metadata.uri = uriResults[i].ReturnValue1.ReplaceIPFS(_sdk.Storage.IPFSGateway);
 
                         var nft = new NFT
                         {
@@ -144,7 +147,7 @@ namespace Thirdweb
             }
             else
             {
-                string owner = address ?? await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
+                string owner = address ?? await _sdk.Wallet.GetAddress();
                 BigInteger totalCount = await TotalCount();
                 List<NFT> ownedNfts = new();
 
@@ -152,13 +155,14 @@ namespace Thirdweb
                 {
                     var balanceFunctions = Enumerable.Range(0, (int)totalCount).Select(i => new TokenERC1155Contract.BalanceOfFunction() { Account = owner, Id = new BigInteger(i) }).ToArray();
                     var balanceResults = await TransactionManager.ThirdwebMulticallRead<TokenERC1155Contract.BalanceOfFunction, TokenERC1155Contract.BalanceOfOutputDTO>(
-                        contractAddress,
+                        _sdk,
+                        _contractAddress,
                         balanceFunctions
                     );
                     var nonZeroBalanceTokenIds = balanceResults.Select((result, index) => (Balance: result.ReturnValue1, TokenId: index)).Where(x => x.Balance > 0).ToList();
                     var uriFunctions = nonZeroBalanceTokenIds.Select(x => new TokenERC1155Contract.UriFunction() { TokenId = new BigInteger(x.TokenId) }).ToArray();
-                    var uriResults = await TransactionManager.ThirdwebMulticallRead<TokenERC1155Contract.UriFunction, TokenERC1155Contract.UriOutputDTO>(contractAddress, uriFunctions);
-                    var metadataFetchTasks = uriResults.Select(uriResult => ThirdwebManager.Instance.SDK.Storage.DownloadText<NFTMetadata>(uriResult.ReturnValue1.ReplaceIPFS())).ToList();
+                    var uriResults = await TransactionManager.ThirdwebMulticallRead<TokenERC1155Contract.UriFunction, TokenERC1155Contract.UriOutputDTO>(_sdk, _contractAddress, uriFunctions);
+                    var metadataFetchTasks = uriResults.Select(uriResult => _sdk.Storage.DownloadText<NFTMetadata>(uriResult.ReturnValue1.ReplaceIPFS(_sdk.Storage.IPFSGateway))).ToList();
                     var metadataResults = await Task.WhenAll(metadataFetchTasks);
                     ownedNfts = new List<NFT>();
                     for (int i = 0; i < nonZeroBalanceTokenIds.Count; i++)
@@ -166,9 +170,9 @@ namespace Thirdweb
                         var tokenId = nonZeroBalanceTokenIds[i].TokenId.ToString();
                         var balance = nonZeroBalanceTokenIds[i].Balance;
                         var metadata = metadataResults[i];
-                        metadata.image = metadata.image.ReplaceIPFS();
+                        metadata.image = metadata.image.ReplaceIPFS(_sdk.Storage.IPFSGateway);
                         metadata.id = tokenId;
-                        metadata.uri = uriResults[i].ReturnValue1.ReplaceIPFS();
+                        metadata.uri = uriResults[i].ReturnValue1.ReplaceIPFS(_sdk.Storage.IPFSGateway);
 
                         ownedNfts.Add(
                             new NFT
@@ -210,7 +214,7 @@ namespace Thirdweb
         /// </summary>
         public async Task<BigInteger> Balance(string tokenId)
         {
-            return await BalanceOf(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), tokenId);
+            return await BalanceOf(await _sdk.Wallet.GetAddress(), tokenId);
         }
 
         /// <summary>
@@ -226,7 +230,8 @@ namespace Thirdweb
             else
             {
                 var balance = await TransactionManager.ThirdwebRead<TokenERC1155Contract.BalanceOfFunction, TokenERC1155Contract.BalanceOfOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.BalanceOfFunction() { Account = address, Id = BigInteger.Parse(tokenId) }
                 );
                 return balance.ReturnValue1;
@@ -247,7 +252,8 @@ namespace Thirdweb
             else
             {
                 var IsApprovedForAll = await TransactionManager.ThirdwebRead<TokenERC1155Contract.IsApprovedForAllFunction, TokenERC1155Contract.IsApprovedForAllOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.IsApprovedForAllFunction() { Account = address, Operator = approvedContract }
                 );
                 return IsApprovedForAll.ReturnValue1;
@@ -258,14 +264,15 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
+                var contract = _sdk.GetContract(_contractAddress);
                 var val = await contract.Read<string>("nextTokenIdToMint");
                 return BigInteger.Parse(val);
             }
             else
             {
                 var nextTokenIdToMint = await TransactionManager.ThirdwebRead<TokenERC1155Contract.NextTokenIdToMintFunction, TokenERC1155Contract.NextTokenIdToMintOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.NextTokenIdToMintFunction() { }
                 );
                 return nextTokenIdToMint.ReturnValue1;
@@ -279,14 +286,15 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
+                var contract = _sdk.GetContract(_contractAddress);
                 var val = await contract.Read<string>("totalSupply", BigInteger.Parse(tokenId));
                 return BigInteger.Parse(val);
             }
             else
             {
                 var totalSupply = await TransactionManager.ThirdwebRead<TokenERC1155Contract.TotalSupplyFunction, TokenERC1155Contract.TotalSupplyOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.TotalSupplyFunction() { ReturnValue1 = BigInteger.Parse(tokenId) }
                 );
                 return totalSupply.ReturnValue1;
@@ -306,7 +314,7 @@ namespace Thirdweb
             }
             else
             {
-                return await TransactionManager.ThirdwebWrite(contractAddress, new TokenERC1155Contract.SetApprovalForAllFunction() { Operator = contractToApprove, Approved = approved });
+                return await TransactionManager.ThirdwebWrite(_sdk, _contractAddress, new TokenERC1155Contract.SetApprovalForAllFunction() { Operator = contractToApprove, Approved = approved });
             }
         }
 
@@ -322,10 +330,11 @@ namespace Thirdweb
             else
             {
                 return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.SafeTransferFromFunction()
                     {
-                        From = await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
+                        From = await _sdk.Wallet.GetAddress(),
                         To = to,
                         Id = BigInteger.Parse(tokenId),
                         Amount = amount,
@@ -351,10 +360,11 @@ namespace Thirdweb
             else
             {
                 return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.SafeBatchTransferFromFunction()
                     {
-                        From = await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
+                        From = await _sdk.Wallet.GetAddress(),
                         To = to,
                         Ids = tokenIds.ToList(),
                         Amounts = amounts.ToList(),
@@ -385,10 +395,11 @@ namespace Thirdweb
                 try
                 {
                     return await TransactionManager.ThirdwebWrite(
-                        contractAddress,
+                        _sdk,
+                        _contractAddress,
                         new TokenERC1155Contract.BurnFunction()
                         {
-                            Account = await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
+                            Account = await _sdk.Wallet.GetAddress(),
                             Id = BigInteger.Parse(tokenId),
                             Value = amount
                         }
@@ -397,10 +408,11 @@ namespace Thirdweb
                 catch
                 {
                     return await TransactionManager.ThirdwebWrite(
-                        contractAddress,
+                        _sdk,
+                        _contractAddress,
                         new TokenERC1155Contract.BurnBatchFunction()
                         {
-                            Account = await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
+                            Account = await _sdk.Wallet.GetAddress(),
                             Ids = new List<BigInteger> { BigInteger.Parse(tokenId) },
                             Values = new List<BigInteger> { amount }
                         }
@@ -420,7 +432,7 @@ namespace Thirdweb
             }
             else
             {
-                return await ClaimTo(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), tokenId, quantity);
+                return await ClaimTo(await _sdk.Wallet.GetAddress(), tokenId, quantity);
             }
         }
 
@@ -438,7 +450,8 @@ namespace Thirdweb
                 var claimCondition = await ClaimConditions.GetActive(tokenId);
                 BigInteger rawPrice = BigInteger.Parse(claimCondition.currencyMetadata.value);
                 return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new DropERC1155Contract.ClaimFunction()
                     {
                         Receiver = address,
@@ -471,7 +484,7 @@ namespace Thirdweb
             }
             else
             {
-                return await MintTo(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), nft);
+                return await MintTo(await _sdk.Wallet.GetAddress(), nft);
             }
         }
 
@@ -486,9 +499,10 @@ namespace Thirdweb
             }
             else
             {
-                var uri = await ThirdwebManager.Instance.SDK.Storage.UploadText(JsonConvert.SerializeObject(nft.metadata));
+                var uri = await _sdk.Storage.UploadText(JsonConvert.SerializeObject(nft.metadata));
                 return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.MintToFunction()
                     {
                         To = address,
@@ -511,7 +525,7 @@ namespace Thirdweb
             }
             else
             {
-                return await MintAdditionalSupplyTo(await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), tokenId, additionalSupply);
+                return await MintAdditionalSupplyTo(await _sdk.Wallet.GetAddress(), tokenId, additionalSupply);
             }
         }
 
@@ -527,15 +541,17 @@ namespace Thirdweb
             else
             {
                 var uri = await TransactionManager.ThirdwebRead<TokenERC1155Contract.UriFunction, TokenERC1155Contract.UriOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.UriFunction() { TokenId = BigInteger.Parse(tokenId) }
                 );
 
                 return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.MintToFunction()
                     {
-                        To = await ThirdwebManager.Instance.SDK.Wallet.GetAddress(),
+                        To = await _sdk.Wallet.GetAddress(),
                         TokenId = BigInteger.Parse(tokenId),
                         Uri = uri.ReturnValue1,
                         Amount = additionalSupply
@@ -550,12 +566,14 @@ namespace Thirdweb
     /// </summary>
     public class ERC1155ClaimConditions : Routable
     {
-        private readonly string contractAddress;
+        private readonly string _contractAddress;
+        private readonly ThirdwebSDK _sdk;
 
-        public ERC1155ClaimConditions(string parentRoute, string contractAddress)
+        public ERC1155ClaimConditions(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "claimConditions"))
         {
-            this.contractAddress = contractAddress;
+            this._contractAddress = contractAddress;
+            this._sdk = sdk;
         }
 
         /// <summary>
@@ -570,19 +588,21 @@ namespace Thirdweb
             else
             {
                 var conditionId = await TransactionManager.ThirdwebRead<DropERC1155Contract.GetActiveClaimConditionIdFunction, DropERC1155Contract.GetActiveClaimConditionIdOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new DropERC1155Contract.GetActiveClaimConditionIdFunction() { TokenId = BigInteger.Parse(tokenId) }
                 );
 
                 var data = await TransactionManager.ThirdwebRead<DropERC1155Contract.GetClaimConditionByIdFunction, DropERC1155Contract.GetClaimConditionByIdOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new DropERC1155Contract.GetClaimConditionByIdFunction() { TokenId = BigInteger.Parse(tokenId), ConditionId = conditionId.ReturnValue1 }
                 );
 
                 var currency = new Currency();
                 try
                 {
-                    currency = await ThirdwebManager.Instance.SDK.GetContract(data.Condition.Currency).ERC20.Get();
+                    currency = await _sdk.GetContract(data.Condition.Currency).ERC20.Get();
                 }
                 catch
                 {
@@ -746,15 +766,17 @@ namespace Thirdweb
     /// </summary>
     public class ERC1155Signature : Routable
     {
-        private readonly string contractAddress;
+        private readonly string _contractAddress;
+        private readonly ThirdwebSDK _sdk;
 
         /// <summary>
         /// Generate, verify and mint signed mintable payloads
         /// </summary>
-        public ERC1155Signature(string parentRoute, string contractAddress)
+        public ERC1155Signature(ThirdwebSDK sdk, string parentRoute, string contractAddress)
             : base(Routable.append(parentRoute, "signature"))
         {
-            this.contractAddress = contractAddress;
+            this._contractAddress = contractAddress;
+            this._sdk = sdk;
         }
 
         /// <summary>
@@ -767,8 +789,8 @@ namespace Thirdweb
                 if (string.IsNullOrEmpty(privateKeyOverride))
                     return await Bridge.InvokeRoute<ERC1155SignedPayload>(getRoute("generate"), Utils.ToJsonStringArray(payloadToSign));
 
-                var uri = await ThirdwebManager.Instance.SDK.Storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
-                var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
+                var uri = await _sdk.Storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
+                var contract = _sdk.GetContract(_contractAddress);
                 var primarySaleRecipient = await contract.Read<string>("primarySaleRecipient");
                 var royaltyInfo = await contract.Read<object[]>("getDefaultRoyaltyInfo");
 
@@ -789,10 +811,11 @@ namespace Thirdweb
                 };
 
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC1155(
+                    _sdk,
                     "TokenERC1155",
                     "1",
-                    await ThirdwebManager.Instance.SDK.Wallet.GetChainId(),
-                    contractAddress,
+                    await _sdk.Wallet.GetChainId(),
+                    _contractAddress,
                     req,
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
@@ -821,13 +844,15 @@ namespace Thirdweb
             }
             else
             {
-                var uri = await ThirdwebManager.Instance.SDK.Storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
+                var uri = await _sdk.Storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
                 var royalty = await TransactionManager.ThirdwebRead<TokenERC1155Contract.GetDefaultRoyaltyInfoFunction, TokenERC1155Contract.GetDefaultRoyaltyInfoOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.GetDefaultRoyaltyInfoFunction() { }
                 );
                 var primarySaleRecipient = await TransactionManager.ThirdwebRead<TokenERC1155Contract.PrimarySaleRecipientFunction, TokenERC1155Contract.PrimarySaleRecipientOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.PrimarySaleRecipientFunction() { }
                 );
 
@@ -848,10 +873,11 @@ namespace Thirdweb
                 };
 
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC1155(
+                    _sdk,
                     "TokenERC1155",
                     "1",
-                    await ThirdwebManager.Instance.SDK.Wallet.GetChainId(),
-                    contractAddress,
+                    await _sdk.Wallet.GetChainId(),
+                    _contractAddress,
                     req,
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
@@ -887,7 +913,7 @@ namespace Thirdweb
                 if (string.IsNullOrEmpty(privateKeyOverride))
                     return await Bridge.InvokeRoute<ERC1155SignedPayload>(getRoute("generateFromTokenId"), Utils.ToJsonStringArray(payloadToSign));
 
-                var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress);
+                var contract = _sdk.GetContract(_contractAddress);
                 var uri = await contract.Read<string>("uri", int.Parse(payloadToSign.tokenId));
                 var primarySaleRecipient = await contract.Read<string>("primarySaleRecipient");
                 var royaltyInfo = await contract.Read<object[]>("getDefaultRoyaltyInfo");
@@ -909,10 +935,11 @@ namespace Thirdweb
                 };
 
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC1155(
+                    _sdk,
                     "TokenERC1155",
                     "1",
-                    await ThirdwebManager.Instance.SDK.Wallet.GetChainId(),
-                    contractAddress,
+                    await _sdk.Wallet.GetChainId(),
+                    _contractAddress,
                     req,
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
@@ -941,17 +968,20 @@ namespace Thirdweb
             }
             else
             {
-                // var uri = await ThirdwebManager.Instance.SDK.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
+                // var uri = await _sdk.storage.UploadText(JsonConvert.SerializeObject(payloadToSign.metadata));
                 var uri = await TransactionManager.ThirdwebRead<TokenERC1155Contract.UriFunction, TokenERC1155Contract.UriOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.UriFunction() { TokenId = BigInteger.Parse(payloadToSign.tokenId) }
                 );
                 var royalty = await TransactionManager.ThirdwebRead<TokenERC1155Contract.GetDefaultRoyaltyInfoFunction, TokenERC1155Contract.GetDefaultRoyaltyInfoOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.GetDefaultRoyaltyInfoFunction() { }
                 );
                 var primarySaleRecipient = await TransactionManager.ThirdwebRead<TokenERC1155Contract.PrimarySaleRecipientFunction, TokenERC1155Contract.PrimarySaleRecipientOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.PrimarySaleRecipientFunction() { }
                 );
 
@@ -972,10 +1002,11 @@ namespace Thirdweb
                 };
 
                 string signature = await Thirdweb.EIP712.GenerateSignature_TokenERC1155(
+                    _sdk,
                     "TokenERC1155",
                     "1",
-                    await ThirdwebManager.Instance.SDK.Wallet.GetChainId(),
-                    contractAddress,
+                    await _sdk.Wallet.GetChainId(),
+                    _contractAddress,
                     req,
                     string.IsNullOrEmpty(privateKeyOverride) ? null : privateKeyOverride
                 );
@@ -1015,7 +1046,8 @@ namespace Thirdweb
             else
             {
                 var verify = await TransactionManager.ThirdwebRead<TokenERC1155Contract.VerifyFunction, TokenERC1155Contract.VerifyOutputDTO>(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.VerifyFunction()
                     {
                         Req = new TokenERC1155Contract.MintRequest()
@@ -1053,7 +1085,8 @@ namespace Thirdweb
             else
             {
                 return await TransactionManager.ThirdwebWrite(
-                    contractAddress,
+                    _sdk,
+                    _contractAddress,
                     new TokenERC1155Contract.MintWithSignatureFunction()
                     {
                         Req = new TokenERC1155Contract.MintRequest()

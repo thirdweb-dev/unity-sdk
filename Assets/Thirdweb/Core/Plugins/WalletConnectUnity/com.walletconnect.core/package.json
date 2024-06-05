@@ -1,8 +1,10 @@
 {
   "name": "com.walletconnect.core",
-  "version": "3.0.5",
+  "version": "3.1.6",
   "displayName": "WalletConnectUnity Core",
   "unity": "2021.3",
+  "changelogUrl": "https://github.com/WalletConnect/WalletConnectUnity/blob/main/Packages/com.walletconnect.core/CHANGELOG.md",
+  "author": "WalletConnect",
   "keywords": [
     "wallet",
     "walletconnect",
@@ -10,6 +12,6 @@
     "walletconnectunity"
   ],
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "3.0.0"
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
   }
 }

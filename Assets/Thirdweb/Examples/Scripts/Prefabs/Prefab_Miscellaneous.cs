@@ -1,3 +1,6 @@
+using Nethereum.ABI.EIP712;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Thirdweb.Examples
@@ -85,26 +88,66 @@ namespace Thirdweb.Examples
             }
         }
 
-        public async void Authenticate()
+        // public async void Authenticate()
+        // {
+        //     try
+        //     {
+        //         // Authenticate with backend
+        //         string result = await ThirdwebManager.Instance.SDK.Wallet.Authenticate(domain: "http://localhost:8000", chainId: 421614);
+        //         Debug.Log($"Result: {result}");
+        //         string authToken = JsonConvert.DeserializeObject<JToken>(result)["token"].ToString();
+        //         Debugger.Instance.Log("[Authenticate] Successful", $"Token: {authToken}");
+        //     }
+        //     catch (System.Exception e)
+        //     {
+        //         Debugger.Instance.Log("[Authenticate] Error", "This functionality is only available if you have a backend server set up with thirdweb auth! " + e.Message);
+        //     }
+        // }
+
+        public async void SignTypedData()
         {
             try
             {
-                // Generate and sign
-                LoginPayload data = await ThirdwebManager.Instance.SDK.Wallet.Authenticate("example.com");
-                // Verify
-                string resultAddressOrError = await ThirdwebManager.Instance.SDK.Wallet.Verify(data);
-                if (await ThirdwebManager.Instance.SDK.Wallet.GetAddress() == resultAddressOrError)
+                var myAddress = await ThirdwebManager.Instance.SDK.Wallet.GetAddress();
+                var myTokenERC721 = "0x345E7B4CCA26725197f1Bed802A05691D8EF7770";
+
+                // Values
+                var mintRequest = new Thirdweb.Contracts.TokenERC721.ContractDefinition.MintRequest
                 {
-                    Debugger.Instance.Log("[Authenticate] Successful", resultAddressOrError);
-                }
-                else
+                    To = myAddress,
+                    RoyaltyRecipient = myAddress,
+                    RoyaltyBps = 0,
+                    PrimarySaleRecipient = myAddress,
+                    Uri = "https://example.com",
+                    Price = 0,
+                    Currency = myTokenERC721,
+                    ValidityStartTimestamp = 0,
+                    ValidityEndTimestamp = Utils.GetUnixTimeStampIn10Years(),
+                    Uid = new byte[] { 0x01, 0x02, 0x03, 0x04 },
+                };
+
+                // Types
+                var typedData = new TypedData<Domain>
                 {
-                    Debugger.Instance.Log("[Authenticate] Invalid", resultAddressOrError);
-                }
+                    Domain = new Domain
+                    {
+                        Name = "TokenERC721",
+                        Version = "1",
+                        ChainId = 421614,
+                        VerifyingContract = myTokenERC721,
+                    },
+                    Types = MemberDescriptionFactory.GetTypesMemberDescription(typeof(Domain), typeof(Thirdweb.Contracts.TokenERC721.ContractDefinition.MintRequest)),
+                    PrimaryType = nameof(Thirdweb.Contracts.TokenERC721.ContractDefinition.MintRequest),
+                };
+
+                // Sign
+                var sig = await ThirdwebManager.Instance.SDK.Wallet.SignTypedDataV4(mintRequest, typedData);
+
+                Debugger.Instance.Log("[Sign] Successful", $"Signature: {sig}");
             }
             catch (System.Exception e)
             {
-                Debugger.Instance.Log("[Authenticate] Error", e.Message);
+                Debugger.Instance.Log("[Sign] Error", e.ToString());
             }
         }
 
