@@ -1003,7 +1003,8 @@ namespace Thirdweb
         LocalWallet,
         SmartWallet,
         Hyperplay,
-        InAppWallet
+        InAppWallet,
+        Rabby
     }
 
     /// <summary>
