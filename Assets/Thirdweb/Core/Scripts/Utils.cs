@@ -583,7 +583,7 @@ namespace Thirdweb
             var client = GetWeb3(chainId, clientId, bundleId).Client;
             var gasPrice = await GetLegacyGasPriceAsync(chainId, clientId, bundleId);
 
-            if (chainId == 137 || chainId == 80001)
+            if (chainId == 137 || chainId == 80002)
             {
                 return new GasPriceParameters(gasPrice * 3 / 2, gasPrice * 4 / 3);
             }
