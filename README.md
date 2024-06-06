@@ -23,6 +23,7 @@ Try out our multichain game that leverages Embedded and Smart Wallets to create 
 | **Local Wallet** (Guest Mode)                 | ✔️        | ✔️        | ✔️        |
 | **Wallet Connect**                            | ✔️        | ✔️        | ✔️        |
 | **MetaMask**                                  | ✔️        | ✔️        | ✔️        |
+| **Rabby**                                     | ✔️        | —          | —          |
 | **Coinbase**                                  | ✔️        | ❌        | ❌        |
 | **Smart Wallet** (ERC4337)                    | ✔️        | ✔️        | ✔️        |
 | **Injected**                                  | ✔️        | —          | —         |
