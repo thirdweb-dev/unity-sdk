@@ -299,7 +299,6 @@ namespace MetaMask.Unity.Utils
 				return;
 			}
 
-
 			var genericMethod = unityCall.MakeGenericMethod(injectType);
 			var rawResult = genericMethod.Invoke(null, null);
 

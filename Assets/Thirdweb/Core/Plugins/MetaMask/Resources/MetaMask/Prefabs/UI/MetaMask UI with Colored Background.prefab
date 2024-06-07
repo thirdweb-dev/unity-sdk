@@ -31,6 +31,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8368185024531543926}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -108,6 +109,7 @@ RectTransform:
   m_Children:
   - {fileID: 5865748283406482728}
   m_Father: {fileID: 8368185024531543926}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -196,6 +198,7 @@ RectTransform:
   - {fileID: 4909953034281529766}
   - {fileID: 8368185024531543926}
   m_Father: {fileID: 8076574866014554358}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -233,6 +236,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8076574866014554358}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -309,6 +313,7 @@ RectTransform:
   m_Children:
   - {fileID: 7089558685279630760}
   m_Father: {fileID: 8788168392122667522}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
@@ -422,6 +427,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8368185024531543926}
   - component: {fileID: 2268755768774888843}
+  - component: {fileID: 213471189368337058}
   m_Layer: 5
   m_Name: QR Code
   m_TagString: Untagged
@@ -444,6 +450,7 @@ RectTransform:
   - {fileID: 6534412299432871727}
   - {fileID: 8153481091150003373}
   m_Father: {fileID: 8788168392122667522}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -462,6 +469,22 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &213471189368337058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5455918590097035912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 884edae6b9577c74dab2373fd7d1a8b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioClip: {fileID: 0}
+  playAudio: 0
+  tweenInOnStart: 1
+  tweenInTime: 1
 --- !u!1 &6439922646294248678
 GameObject:
   m_ObjectHideFlags: 0
@@ -498,6 +521,7 @@ RectTransform:
   - {fileID: 8788168392122667522}
   - {fileID: 293841021509110826}
   m_Father: {fileID: 0}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -521,9 +545,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
-  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -618,6 +640,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4909953034281529766}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
@@ -726,7 +749,6 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 3
     m_TransformParent: {fileID: 8153481091150003373}
     m_Modifications:
     - target: {fileID: 1542943019436598481, guid: f94c4f71513d37640b52f4094e97e9e3, type: 3}
@@ -830,9 +852,6 @@ PrefabInstance:
       value: MetaMask QR RawImage
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f94c4f71513d37640b52f4094e97e9e3, type: 3}
 --- !u!114 &3950203764407014509 stripped
 MonoBehaviour:
@@ -855,7 +874,6 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 3
     m_TransformParent: {fileID: 8076574866014554358}
     m_Modifications:
     - target: {fileID: 856985863518395958, guid: 9fd24752cf4fec04f9071b0a3c24fd9e, type: 3}
@@ -1098,11 +1116,7 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 289.12238
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 4519065099083792754, guid: 9fd24752cf4fec04f9071b0a3c24fd9e, type: 3}
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9fd24752cf4fec04f9071b0a3c24fd9e, type: 3}
 --- !u!224 &293841021509110826 stripped
 RectTransform:

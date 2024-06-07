@@ -5,6 +5,7 @@ using UnityEngine;
 using evm.net;
 using evm.net.Factory;
 using evm.net.Models;
+using MetaMask.Models;
 
 namespace MetaMask.Unity.Contracts
 {
@@ -16,20 +17,6 @@ namespace MetaMask.Unity.Contracts
             Contract.ContractFactory = new ImpromptuContractFactory();
         }
         #endif
-        
-        [Serializable]
-        public enum ChainId : int
-        {
-            Ethereum = 1,
-            Polygon = 137,
-            Bsc = 56,
-            Avalanche = 43114,
-            Arbitrum = 42161,
-            Optimism = 10,
-            zkSyncEra = 324,
-            LineaTestnet = 59140,
-            Goerli = 5,
-        }
         
         [Serializable]
         public class AddressByChain

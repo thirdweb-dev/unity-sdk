@@ -67,7 +67,7 @@ namespace Thirdweb
                     ActiveWallet = new ThirdwebWalletConnect(chains, Options.wallet?.walletConnectExplorerRecommendedWalletIds);
                     break;
                 case WalletProvider.Metamask:
-                    ActiveWallet = new ThirdwebMetamask(Options.wallet?.appName, Options.wallet?.appUrl);
+                    ActiveWallet = new ThirdwebMetamask();
                     break;
                 case WalletProvider.SmartWallet:
                     if (Options.smartWalletConfig == null)

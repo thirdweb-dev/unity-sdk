@@ -239,9 +239,9 @@ GameObject:
   - component: {fileID: 228276015862408994}
   - component: {fileID: 3873553887018070327}
   - component: {fileID: 2275499870215901365}
-  - component: {fileID: 399087149046820997}
   - component: {fileID: 4671479922431115845}
   - component: {fileID: 1828125881911289438}
+  - component: {fileID: 2341054509153392456}
   m_Layer: 0
   m_Name: WalletProvider_Metamask
   m_TagString: Untagged
@@ -307,24 +307,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 197bc6540b6a47328860a65dc2f1b894, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &399087149046820997
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3503421935870801903}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 523533b4558dd4b4094acf159d13a23d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: 6cbb8289bcfbdba43817188b3b4f15e0, type: 2}
-  initializeOnAwake: 0
-  _transport: {fileID: 11400000, guid: 2794b8de755b55048bc6f0544321e072, type: 2}
-  _infuraProjectId: 
-  _rpcUrl: []
-  clearSessionData: 0
 --- !u!114 &4671479922431115845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -351,6 +333,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 340bb01ce83382c49bd159bf86491fcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2341054509153392456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3503421935870801903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd09eefdc5da93b409d3619cb0cb34c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dappName: thirdweb
+  dappUrl: https://thirdweb.com
+  dappIconUrl: https://thirdweb.com/favicon.ico
+  dappIcon: {fileID: 0}
+  spawnCanvas: 0
+  connectionCanvas: {fileID: 6439922646294248678, guid: 9e03dfd5b166cc246ae7bbe9c62d6baf, type: 3}
+  useLegacyUITransport: 0
+  uiTransport: {fileID: 11400000, guid: 2794b8de755b55048bc6f0544321e072, type: 2}
+  useConnectAndSign: 0
+  connectAndSignMessage: 
+  onConnectAndSignCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  useInfura: 0
+  infuraProjectId: 
+  rpcUrl: []
+  useDefaultChain: 0
+  defaultChain: -1
+  _otherDefaultChainData:
+    ChainId: 0x1
+    ChainName: Ethereum
+    BlockExplorerUrls: []
+    IconUrls: []
+    RpcUrls: []
+    NativeCurrency:
+      Decimals: 0
+      Name: 
+      Symbol: 
+  saveSessionState: 1
+  encrypt: 1
+  encryptionPassword: UnityUGUITransport/1.0.0
+  dontDestroyOnLoad: 0
+  debugLogging: 0
+  socketUrl: https://metamask-sdk.api.cx.metamask.io
+  userAgent: UnityUGUITransport/1.0.0
+  useUniversalLinks: 0
 --- !u!1 &3688373047027065788
 GameObject:
   m_ObjectHideFlags: 0

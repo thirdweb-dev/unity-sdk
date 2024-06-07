@@ -458,7 +458,7 @@ namespace MetaMask.SocketIOClient
 
         private void OnErrorReceived(Exception ex)
         {
-            UnityEngine.Debug.LogException(ex);
+            Thirdweb.ThirdwebDebug.LogException(ex);
             InvokeDisconnect(DisconnectReason.TransportClose);
         }
 
