@@ -57,7 +57,7 @@ namespace Thirdweb.Wallets
             _web3 = MetaMaskSDK.Instance.CreateWeb3();
             return await GetAddress();
         }
-        
+
         public Task Disconnect(bool endSession = true)
         {
             MetaMaskUnity.Instance.Disconnect(endSession);
@@ -113,9 +113,17 @@ namespace Thirdweb.Wallets
             return Task.FromResult(_web3 != null);
         }
 
-        public Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
+        public async Task<NetworkSwitchAction> PrepareForNetworkSwitch(BigInteger newChainId, string newRpc)
         {
-            return Task.FromResult(NetworkSwitchAction.ContinueSwitch);
+            var selectedChain = await _web3.Eth.ChainId.SendRequestAsync();
+            if (selectedChain.Value != newChainId)
+            {
+                return NetworkSwitchAction.ContinueSwitch;
+            }
+            else
+            {
+                return NetworkSwitchAction.Handled;
+            }
         }
     }
 }
