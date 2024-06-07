@@ -12,38 +12,15 @@ namespace Thirdweb.Wallets
 {
     public class ThirdwebMetamask : IThirdwebWallet
     {
-        public class MetaMaskThirdwebConfig : MetaMaskConfig
-        {
-            public void SetDefaults(MetaMaskConfig defaults)
-            {
-                this.encrypt = defaults.Encrypt;
-                this.log = defaults.Log;
-                this.encryptionPassword = defaults.EncryptionPassword;
-                this.userAgent = defaults.UserAgent;
-                this.socketUrl = defaults.SocketUrl;
-            }
-
-            public void UpdateConfig(string appName, string appUrl, string appIconUrl)
-            {
-                this.appName = appName;
-                this.appUrl = appUrl;
-                this.appIconUrl = appIconUrl;
-            }
-        }
-
         private Web3 _web3;
         private readonly WalletProvider _provider;
         private readonly WalletProvider _signerProvider;
-        private readonly string _appName;
-        private readonly string _appUrl;
 
-        public ThirdwebMetamask(string appName, string appUrl)
+        public ThirdwebMetamask()
         {
             _web3 = null;
             _provider = WalletProvider.Metamask;
             _signerProvider = WalletProvider.Metamask;
-            _appName = appName;
-            _appUrl = appUrl;
         }
 
         public async Task<string> Connect(WalletConnection walletConnection, string rpc)

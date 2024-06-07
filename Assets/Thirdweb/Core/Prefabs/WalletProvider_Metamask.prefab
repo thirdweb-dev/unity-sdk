@@ -377,7 +377,7 @@ MonoBehaviour:
   encrypt: 1
   encryptionPassword: UnityUGUITransport/1.0.0
   dontDestroyOnLoad: 0
-  debugLogging: 1
+  debugLogging: 0
   socketUrl: https://metamask-sdk.api.cx.metamask.io
   userAgent: UnityUGUITransport/1.0.0
   useUniversalLinks: 0
