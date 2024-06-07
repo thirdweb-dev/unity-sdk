@@ -20,6 +20,7 @@ namespace Thirdweb.Wallets
         public ThirdwebInAppWallet(string clientId, string bundleId)
         {
             _web3 = null;
+            _clientId = clientId;
             _provider = WalletProvider.InAppWallet;
             _signerProvider = WalletProvider.LocalWallet;
             _embeddedWallet = new EmbeddedWallet(clientId, bundleId, "unity", ThirdwebSDK.version);
