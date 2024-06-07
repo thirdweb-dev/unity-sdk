@@ -129,7 +129,7 @@ namespace Thirdweb
 
                 var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
                 var contract = web3.Eth.GetContract(this.ABI, this.Address);
-                var function = contract.GetFunction(functionName);
+                var function = Utils.GetFunctionMatchSignature(contract, functionName, args);
                 var fromAddress = from ?? await _sdk.Wallet.GetAddress();
                 initialInput = function.CreateTransactionInput(fromAddress, args);
             }
@@ -147,7 +147,7 @@ namespace Thirdweb
         {
             var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
             var contract = web3.Eth.GetContract(this.ABI, this.Address);
-            var function = contract.GetFunction(functionName);
+            var function = Utils.GetFunctionMatchSignature(contract, functionName, args);
             return function.GetData(args);
         }
 
@@ -161,7 +161,7 @@ namespace Thirdweb
         {
             var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
             var contract = web3.Eth.GetContract(this.ABI, this.Address);
-            var function = contract.GetFunction(functionName);
+            var function = Utils.GetFunctionMatchSignature(contract, functionName);
             return function.DecodeInput(encodedArgs);
         }
 
@@ -212,8 +212,8 @@ namespace Thirdweb
                 if (this.ABI == null)
                     this.ABI = await FetchAbi(this.Address, await _sdk.Wallet.GetChainId());
 
-                var service = new Nethereum.Contracts.Contract(null, this.ABI, this.Address);
-                var function = service.GetFunction(functionName);
+                var contract = new Nethereum.Contracts.Contract(null, this.ABI, this.Address);
+                var function = Utils.GetFunctionMatchSignature(contract, functionName, args);
                 var data = function.GetData(args);
                 var input = new TransactionInput
                 {
@@ -249,7 +249,7 @@ namespace Thirdweb
 
             var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
             var contract = web3.Eth.GetContract(this.ABI, this.Address);
-            var function = contract.GetFunction(functionName);
+            var function = Utils.GetFunctionMatchSignature(contract, functionName, args);
             var result = await function.CallDecodingToDefaultAsync(args);
 
             var rawResults = new List<object>();
@@ -386,7 +386,7 @@ namespace Thirdweb
 
             var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
             var contract = web3.Eth.GetContract(this.ABI, this.Address);
-            var function = contract.GetFunction(functionName);
+            var function = Utils.GetFunctionMatchSignature(contract, functionName, args);
             return await function.CallDeserializingToObjectAsync<T>(args);
         }
 

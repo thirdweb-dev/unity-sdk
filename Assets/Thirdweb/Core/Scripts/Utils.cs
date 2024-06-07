@@ -583,7 +583,7 @@ namespace Thirdweb
             var client = GetWeb3(chainId, clientId, bundleId).Client;
             var gasPrice = await GetLegacyGasPriceAsync(chainId, clientId, bundleId);
 
-            if (chainId == 137 || chainId == 80001)
+            if (chainId == 137 || chainId == 80002)
             {
                 return new GasPriceParameters(gasPrice * 3 / 2, gasPrice * 4 / 3);
             }
@@ -763,6 +763,22 @@ namespace Thirdweb
             }
 
             return headers;
+        }
+
+        public static Nethereum.Contracts.Function GetFunctionMatchSignature(Nethereum.Contracts.Contract contract, string functionName, params object[] args)
+        {
+            var abi = contract.ContractBuilder.ContractABI;
+            var functions = abi.Functions;
+            int paramsCount = args?.Length ?? 0;
+            foreach (var function in functions)
+            {
+                if (function.Name == functionName && function.InputParameters.Length == paramsCount)
+                {
+                    string sha = function.Sha3Signature;
+                    return contract.GetFunctionBySignature(sha);
+                }
+            }
+            throw new UnityException($"Can't find function {functionName} in contract {contract.Address}, that takes: {paramsCount} arguments");
         }
     }
 }
