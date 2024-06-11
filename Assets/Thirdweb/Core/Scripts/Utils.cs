@@ -780,5 +780,10 @@ namespace Thirdweb
             }
             throw new UnityException($"Can't find function {functionName} in contract {contract.Address}, that takes: {paramsCount} arguments");
         }
+
+        public static bool IsZkSyncChain(BigInteger chainId)
+        {
+            return chainId == 324 || chainId == 300 || chainId == 302;
+        }
     }
 }
