@@ -51,7 +51,7 @@ namespace Thirdweb.AccountAbstraction
         public bool IsDeploying => _deploying;
 
         private readonly ThirdwebSDK _sdk;
-        private bool IsZkSync => _sdk.Session.ChainId == 300 || _sdk.Session.ChainId == 324;
+        private bool IsZkSync => Utils.IsZkSyncChain(_sdk.Session.ChainId);
 
         public SmartWallet(IThirdwebWallet personalWallet, ThirdwebSDK sdk)
         {
