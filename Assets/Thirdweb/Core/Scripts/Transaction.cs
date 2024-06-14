@@ -444,9 +444,7 @@ namespace Thirdweb
             else
             {
                 var force1559 = Input.Type != null && Input.Type.HexValue == new HexBigInteger((int)TransactionType.EIP1559).HexValue;
-                Debug.Log($"Force 1559: {force1559}");
                 var supports1559 = force1559 || (Input.Type == null && Utils.Supports1559(_sdk.Session.ChainId.ToString()));
-                Debug.Log($"Supports 1559: {supports1559}");
                 if (supports1559)
                 {
                     if (Input.GasPrice == null)
