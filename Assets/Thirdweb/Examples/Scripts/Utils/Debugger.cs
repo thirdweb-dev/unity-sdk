@@ -1,7 +1,7 @@
 using UnityEngine;
 using TMPro;
 
-namespace Thirdweb.Examples
+namespace Thirdweb.Unity.Examples
 {
     public class Debugger : MonoBehaviour
     {

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Portable.BouncyCastle</id>
+    <version>1.9.0</version>
+    <title>Bouncy Castle Portable</title>
+    <authors>Claire Novotny</authors>
+    <licenseUrl>https://www.bouncycastle.org/csharp/licence.html</licenseUrl>
+    <projectUrl>https://www.bouncycastle.org/csharp/</projectUrl>
+    <iconUrl>https://www.bouncycastle.org/images/csharp_logo.gif</iconUrl>
+    <description>BouncyCastle portable version with support for .NET 4, .NET Standard 2.0</description>
+    <releaseNotes>https://www.bouncycastle.org/csharp/#DOWNLOAD1900</releaseNotes>
+    <copyright>© 2000-2021 Legion of the Bouncy Castle Inc.</copyright>
+    <tags>bouncycastle cryptography encryption security</tags>
+    <repository type="git" url="https://github.com/novotnyllc/bc-csharp" commit="0f827cc3e74a8f45669fba5c525adacd6b897503" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.0" />
+      <group targetFramework=".NETStandard2.0" />
+    </dependencies>
+  </metadata>
+</package>

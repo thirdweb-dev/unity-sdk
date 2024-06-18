@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Thirdweb</name>
+    </assembly>
+    <members>
+        <member name="M:Thirdweb.EWS.IvGenerator.ComputeIvAsync(System.Byte[])">
+            <summary>
+            Compute IV using half LFSR-generated and half random bytes.
+            </summary>
+            <remarks>https://crypto.stackexchange.com/questions/84357/what-are-the-rules-for-using-aes-gcm-correctly</remarks>
+            <param name="iv">The IV byte array to fill.  This must be twelve bytes in size.</param>
+        </member>
+        <member name="M:Thirdweb.EWS.IvGenerator.ComputeNextPrbsValue(System.Int64)">
+            <summary>
+            Compute the next value of a PRBS using a 48-bit Galois LFSR.
+            </summary>
+            <remarks>https://en.wikipedia.org/wiki/Linear-feedback_shift_register</remarks>
+            <param name="prbsValue">The current PRBS value.</param>
+            <returns>The next value.</returns>
+        </member>
+        <member name="M:Thirdweb.EWS.Secrets.Combine(System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>
+            Reconsitute a secret from <paramref name="shares"/>.
+            </summary>
+            <remarks>
+            <para>The return value will <c>not</c> be the original secret if the number of shares provided is less than the threshold
+            number of shares.</para>
+            <para>Duplicate shares do not count toward the threshold.</para>
+            </remarks>
+            <param name="shares">The shares used to reconstitute the secret.</param>
+            <returns>The reconstituted secret.</returns>
+        </member>
+        <member name="M:Thirdweb.EWS.Secrets.GetBytes(System.String)">
+            <summary>
+            Convert a string of hexadecimal digits into a byte array.
+            </summary>
+            <param name="s">The string of hexadecimal digits to convert.</param>
+            <returns>A byte array.</returns>
+        </member>
+        <member name="M:Thirdweb.EWS.Secrets.GetHexString(System.Byte[])">
+            <summary>
+            Convert a byte array into a string of hexadecimal digits.
+            </summary>
+            <param name="bytes">The byte array to convert.</param>
+            <returns>A string of hexadecimal digits.</returns>
+        </member>
+        <member name="M:Thirdweb.EWS.Secrets.NewShare(System.Int32,System.Collections.Generic.IReadOnlyList{System.String})">
+            <summary>
+            Generate a new share identified as <paramref name="shareId"/>.
+            </summary>
+            <remarks>
+            <para>The return value will be invalid if the number of shares provided is less than the threshold number of shares.</para>
+            <para>If <paramref name="shareId"/> is the identifier of a share in <paramref name="shares"/> and the number of shares
+            provided is at least the threshold number of shares, the return value will be the same as the identified share.</para>
+            <para>Duplicate shares do not count toward the threshold.</para>
+            </remarks>
+            <param name="shareId">The identifier of the share to generate.</param>
+            <param name="shares">The shares from which to generate the new share.</param>
+            <returns>A hexadecimal string of the new share.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"></exception>
+            <exception cref="T:System.ArgumentException"></exception>
+        </member>
+        <member name="M:Thirdweb.EWS.Secrets.Random(System.Int32)">
+            <summary>
+            Generate a random value expressed as a string of hexadecimal digits that contains <paramref name="nBytes"/> bytes using a
+            secure random number generator.
+            </summary>
+            <param name="nBytes">The number of bytes of output.</param>
+            <returns>A hexadecimal string of the value.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"></exception>
+        </member>
+        <member name="M:Thirdweb.EWS.Secrets.Share(System.String,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Divide a <paramref name="secret"/> into <paramref name="nShares"/>
+            shares, requiring <paramref name="threshold"/> shares to
+            reconstruct the secret.  Optionally, initialize with <paramref name="nBits"/>. Optionally, zero-pad the secret to a length
+            that is a multiple of <paramref name="paddingMultiple"/> (default 128) before sharing.
+            </summary>
+            <param name="secret">A secret value expressed as a string of hexadecimal digits.</param>
+            <param name="nShares">The number of shares to produce.</param>
+            <param name="threshold">The number of shares required to reconstruct the secret.</param>
+            <param name="nBits">The number of bits to use to create the shares.</param>
+            <param name="paddingMultiple">The amount of zero-padding to apply to the secret before sharing.</param>
+            <returns>A list of strings of hexadecimal digits.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"></exception>
+            <exception cref="T:System.ArgumentException"></exception>
+        </member>
+    </members>
+</doc>

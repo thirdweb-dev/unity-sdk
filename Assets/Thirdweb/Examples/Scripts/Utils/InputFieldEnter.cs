@@ -4,7 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-namespace Thirdweb.Examples
+namespace Thirdweb.Unity.Examples
 {
     [RequireComponent(typeof(TMP_InputField))]
     public class InputFieldEnter : MonoBehaviour

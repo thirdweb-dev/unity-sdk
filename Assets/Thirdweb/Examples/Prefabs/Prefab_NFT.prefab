@@ -31,7 +31,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7568917608122384975}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -166,7 +165,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7568917608122384975}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -248,7 +246,6 @@ RectTransform:
   - {fileID: 4694709902515662479}
   - {fileID: 7568917607133685698}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -275,9 +272,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d59cb2d6fb2a5147960e5bfd89a4dee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nftImage: {fileID: 7568917607133685709}
-  nftName: {fileID: 2246936847203908692}
-  nftButton: {fileID: 2160864981104645952}
+  <NFTContractAddress>k__BackingField: 0x94894F65d93eb124839C667Fc04F97723e5C4544
+  <NFTTokenId>k__BackingField: 0
+  <NFTType>k__BackingField: 1
+  <ChainId>k__BackingField: 421614
+  <NFTImage>k__BackingField: {fileID: 7568917607133685709}
+  <NFTName>k__BackingField: {fileID: 2246936847203908692}
+  <NFTButton>k__BackingField: {fileID: 2160864981104645952}
 --- !u!114 &7568917608122384974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -365,7 +366,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_EffectColor: {r: 1, g: 1, b: 1, a: 0.5}
-  m_EffectDistance: {x: 1, y: -1}
+  m_EffectDistance: {x: 2, y: -2}
   m_UseGraphicAlpha: 1
 --- !u!114 &6132057075306054890
 MonoBehaviour:

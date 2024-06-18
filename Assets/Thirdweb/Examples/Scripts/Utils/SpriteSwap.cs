@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Thirdweb.Examples
+namespace Thirdweb.Unity.Examples
 {
     [RequireComponent(typeof(Image))]
     public class SpriteSwap : MonoBehaviour

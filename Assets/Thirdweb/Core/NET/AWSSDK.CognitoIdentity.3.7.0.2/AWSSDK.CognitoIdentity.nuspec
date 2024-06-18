@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>AWSSDK.CognitoIdentity</id>
+    <version>3.7.0.2</version>
+    <title>AWSSDK - Amazon Cognito Identity</title>
+    <authors>Amazon Web Services</authors>
+    <owners>Amazon Web Services</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>http://aws.amazon.com/apache2.0/</licenseUrl>
+    <projectUrl>https://github.com/aws/aws-sdk-net/</projectUrl>
+    <iconUrl>https://sdk-for-net.amazonwebservices.com/images/AWSLogo128x128.png</iconUrl>
+    <description>Amazon Cognito is a service that makes it easy to save user data, such as app preferences or game state, in the AWS Cloud without writing any backend code or managing any infrastructure. With Amazon Cognito, you can focus on creating great app experiences instead of having to worry about building and managing a backend solution to handle identity management, network state, storage, and sync.</description>
+    <language>en-US</language>
+    <tags>AWS Amazon cloud CognitoIdentity aws-sdk-v3</tags>
+    <dependencies>
+      <dependency id="AWSSDK.SecurityToken" version="[3.7.0.2, 3.8.0)" />
+      <dependency id="AWSSDK.Core" version="[3.7.0.3, 3.8.0)" />
+    </dependencies>
+  </metadata>
+</package>

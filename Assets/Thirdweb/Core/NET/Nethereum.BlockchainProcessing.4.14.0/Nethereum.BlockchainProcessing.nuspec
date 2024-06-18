@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Nethereum.BlockchainProcessing</id>
+    <version>4.14.0</version>
+    <authors>Juan Blanco,Nethereum contributors</authors>
+    <license type="file">LICENSE.md</license>
+    <licenseUrl>https://aka.ms/deprecateLicenseUrl</licenseUrl>
+    <icon>images\logo64x64.png</icon>
+    <projectUrl>https://nethereum.com/</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/Nethereum/Nethereum/master/logos/logo64x64.png</iconUrl>
+    <description>Nethereum.BlockchainProcessing Ethereum blockchain processing allowing to crawl Blocks, Transactions, TransactionReceipts and Logs (Event) for storage and / or using custom handlers like queuing , search, etc</description>
+    <copyright>Nethereum.com (Juan Blanco) 2015-2022</copyright>
+    <tags>Netherum Ethereum Blockchain Crypto 2.0</tags>
+    <repository type="git" url="https://github.com/Nethereum/Nethereum" commit="a375d5a3352cff31895da52a17f23d972aa98ac4" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.5.1">
+        <dependency id="Nethereum.Contracts" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Hex" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.JsonRpc.RpcClient" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.RPC" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Util" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="BouncyCastle" version="[1.8.2, 2.0.0)" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="[11.0.2, 14.0.0)" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETFramework4.6.1">
+        <dependency id="Nethereum.Contracts" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Hex" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.JsonRpc.RpcClient" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.RPC" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Util" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="BouncyCastle" version="[1.8.2, 2.0.0)" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="[11.0.2, 14.0.0)" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard1.1">
+        <dependency id="Nethereum.Contracts" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Hex" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.JsonRpc.RpcClient" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.RPC" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Util" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="[11.0.2, 14.0.0)" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETCoreApp2.1">
+        <dependency id="Nethereum.Contracts" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Hex" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.JsonRpc.RpcClient" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.RPC" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Util" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="[11.0.2, 14.0.0)" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETCoreApp3.1">
+        <dependency id="Nethereum.Contracts" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Hex" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.JsonRpc.RpcClient" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.RPC" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Util" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="[11.0.2, 14.0.0)" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="net5.0">
+        <dependency id="Nethereum.Contracts" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Hex" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.JsonRpc.RpcClient" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.RPC" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Util" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="[11.0.2, 14.0.0)" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard2.0">
+        <dependency id="Nethereum.Contracts" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Hex" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.JsonRpc.RpcClient" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.RPC" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="Nethereum.Util" version="4.14.0" exclude="Build,Analyzers" />
+        <dependency id="NETStandard.Library" version="2.0.3" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="[11.0.2, 14.0.0)" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5.1, .NETFramework4.6.1" />
+      <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.5.1, .NETFramework4.6.1" />
+      <frameworkAssembly assemblyName="System.Net.Http" targetFramework=".NETFramework4.5.1, .NETFramework4.6.1" />
+      <frameworkAssembly assemblyName="System.Numerics" targetFramework=".NETFramework4.5.1, .NETFramework4.6.1" />
+    </frameworkAssemblies>
+  </metadata>
+</package>

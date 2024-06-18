@@ -8,8 +8,9 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Numerics;
 using RotaryHeart.Lib.SerializableDictionary;
+using System.Linq;
 
-namespace Thirdweb.Examples
+namespace Thirdweb.Unity.Examples
 {
     public class Prefab_ConnectWallet : MonoBehaviour
     {
@@ -27,267 +28,277 @@ namespace Thirdweb.Examples
             public Sprite sprite;
         }
 
-        [System.Serializable]
+        public enum WalletProvider
+        {
+            PrivateKeyWallet,
+            InAppWallet,
+            WalletConnectWallet,
+            SmartWallet
+        }
+
+        public class ConnectionParameters
+        {
+            public WalletProvider provider;
+            public string email;
+            public string phoneNumber;
+            public AuthProvider authProvider;
+        }
+
+        [Serializable]
         public class WalletProviderUIDictionary : SerializableDictionaryBase<WalletProvider, GameObject> { }
 
         [Header("Enabled Wallet Providers. Press Play to see changes.")]
-        public List<WalletProvider> enabledWalletProviders = new List<WalletProvider> { WalletProvider.LocalWallet, WalletProvider.InAppWallet, WalletProvider.SmartWallet };
+        public List<WalletProvider> enabledWalletProviders = new() { WalletProvider.PrivateKeyWallet, WalletProvider.InAppWallet, WalletProvider.WalletConnectWallet };
 
         [Header("Use ERC-4337 (Account Abstraction) compatible smart wallets.\nEnabling this will connect user to the associated smart wallet as per your ThirwebManager settings.")]
         public bool useSmartWallets = false;
 
-        [Header("End session on disconnect. If enabled, user will have to re-authenticate on next connect.")]
-        public bool endSessionOnDisconnect = false;
+        [Header("Chains to connect to.")]
+        public string activeChainId = "421614";
+        public string[] allSupportedChainIds = new[] { "421614" };
 
         [Header("Events")]
-        public UnityEvent onStart;
-        public UnityEvent<WalletConnection> onConnectionRequested;
-        public UnityEvent<string> onConnected;
-        public UnityEvent<Exception> onConnectionError;
-        public UnityEvent onDisconnected;
-        public UnityEvent onSwitchNetwork;
+        public UnityEvent<IThirdwebWallet> OnConnected;
+        public UnityEvent OnDisconnected;
+        public UnityEvent<IThirdwebWallet, ConnectionParameters> OnConnectionRequested;
+        public UnityEvent<IThirdwebWallet, ConnectionParameters> OnConnectionStarted;
+        public UnityEvent<Exception> OnConnectionFailed;
 
         [Header("UI")]
         public WalletProviderUIDictionary walletProviderUI;
         public TMP_InputField emailInput;
-        public GameObject exportButton;
         public List<Image> walletImages;
         public List<TMP_Text> addressTexts;
         public List<TMP_Text> balanceTexts;
-        public Button networkSwitchButton;
-        public Transform switchNetworkContent;
-        public GameObject switchNetworkButtonPrefab;
-        public List<NetworkIcon> networkIcons;
         public List<WalletIcon> walletIcons;
-        public Image currentNetworkIcon;
-        public TMP_Text currentNetworkText;
 
         private string _address;
-        private string _password;
-        private ChainData _currentChainData;
+
+        private IThirdwebWallet _activeWallet;
+        private ThirdwebClient _client;
+
+        private void Awake()
+        {
+            OnConnectionRequested.AddListener(Connect);
+            OnConnectionFailed.AddListener(e => ThirdwebDebug.LogError($"Connection failed: {e}"));
+        }
 
         private void Start()
         {
             _address = null;
-            _password = null;
-
-            _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
-
-            networkSwitchButton.interactable = ThirdwebManager.Instance.supportedChains.Count > 1;
+            _client = ThirdwebManager.Instance.Client;
 
             foreach (var walletProvider in walletProviderUI)
                 walletProvider.Value.SetActive(enabledWalletProviders.Contains(walletProvider.Key));
-
-            onStart.Invoke();
         }
 
         // Connection
 
-        public void ConnectGuest(string password)
+        public async void ConnectGuest()
         {
-            _password = password;
-            var wc = useSmartWallets
-                ? new WalletConnection(provider: WalletProvider.SmartWallet, chainId: BigInteger.Parse(_currentChainData.chainId), password: _password, personalWallet: WalletProvider.LocalWallet)
-                : new WalletConnection(provider: WalletProvider.LocalWallet, chainId: BigInteger.Parse(_currentChainData.chainId), password: _password);
-            Connect(wc);
-        }
-
-        public void ConnectOauth(string authProviderStr)
-        {
-            var wc = useSmartWallets
-                ? new WalletConnection(
-                    provider: WalletProvider.SmartWallet,
-                    chainId: BigInteger.Parse(_currentChainData.chainId),
-                    authOptions: new AuthOptions(Enum.Parse<AuthProvider>(authProviderStr)),
-                    personalWallet: WalletProvider.InAppWallet
-                )
-                : new WalletConnection(
-                    provider: WalletProvider.InAppWallet,
-                    chainId: BigInteger.Parse(_currentChainData.chainId),
-                    authOptions: new AuthOptions(Enum.Parse<AuthProvider>(authProviderStr))
-                );
-            Connect(wc);
-        }
-
-        public void ConnectEmail()
-        {
-            string input = emailInput.text;
-            bool isEmail = Utils.IsValidEmail(input);
-
-            WalletConnection wc;
-            if (isEmail)
-            {
-                wc = useSmartWallets
-                    ? new WalletConnection(
-                        provider: WalletProvider.SmartWallet,
-                        chainId: BigInteger.Parse(_currentChainData.chainId),
-                        email: emailInput.text,
-                        authOptions: new AuthOptions(AuthProvider.EmailOTP),
-                        personalWallet: WalletProvider.InAppWallet
-                    )
-                    : new WalletConnection(
-                        provider: WalletProvider.InAppWallet,
-                        chainId: BigInteger.Parse(_currentChainData.chainId),
-                        email: emailInput.text,
-                        authOptions: new AuthOptions(AuthProvider.EmailOTP)
-                    );
-            }
-            else
-            {
-                wc = useSmartWallets
-                    ? new WalletConnection(
-                        provider: WalletProvider.SmartWallet,
-                        chainId: BigInteger.Parse(_currentChainData.chainId),
-                        phoneNumber: input,
-                        authOptions: new AuthOptions(AuthProvider.PhoneOTP),
-                        personalWallet: WalletProvider.InAppWallet
-                    )
-                    : new WalletConnection(
-                        provider: WalletProvider.InAppWallet,
-                        chainId: BigInteger.Parse(_currentChainData.chainId),
-                        phoneNumber: input,
-                        authOptions: new AuthOptions(AuthProvider.PhoneOTP)
-                    );
-            }
-
-            Connect(wc);
-        }
-
-        public void ConnectExternal(string walletProviderStr)
-        {
-            var wc = useSmartWallets
-                ? new WalletConnection(provider: WalletProvider.SmartWallet, chainId: BigInteger.Parse(_currentChainData.chainId), personalWallet: Enum.Parse<WalletProvider>(walletProviderStr))
-                : new WalletConnection(provider: Enum.Parse<WalletProvider>(walletProviderStr), chainId: BigInteger.Parse(_currentChainData.chainId));
-            Connect(wc);
-        }
-
-        public async void Disconnect()
-        {
-            ThirdwebDebug.Log("Disconnecting...");
             try
             {
-                _address = null;
-                _password = null;
-                await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession: endSessionOnDisconnect);
-                onDisconnected.Invoke();
-            }
-            catch (System.Exception e)
-            {
-                ThirdwebDebug.LogError($"Failed to disconnect: {e}");
-            }
-        }
-
-        private async void Connect(WalletConnection wc)
-        {
-            ThirdwebDebug.Log($"Connecting to {wc.provider}...");
-
-            onConnectionRequested.Invoke(wc);
-
-            await new WaitForSeconds(0.5f);
-
-            try
-            {
-                _address = await ThirdwebManager.Instance.SDK.Wallet.Connect(wc);
-                exportButton.SetActive(wc.provider == WalletProvider.LocalWallet);
+                var privateKeyWallet = await PrivateKeyWallet.Generate(client: _client);
+                OnConnectionRequested.Invoke(privateKeyWallet, new ConnectionParameters() { provider = WalletProvider.PrivateKeyWallet });
             }
             catch (Exception e)
             {
-                _address = null;
-                ThirdwebDebug.LogError($"Failed to connect: {e}");
-                onConnectionError.Invoke(e);
+                OnConnectionFailed.Invoke(e);
                 return;
             }
-
-            PostConnect(wc);
         }
 
-        private async void PostConnect(WalletConnection wc = null)
+        public async void ConnectOauth(string authProviderStr)
+        {
+            try
+            {
+                var inAppWallet = await InAppWallet.Create(
+                    client: _client,
+                    email: null,
+                    phoneNumber: null,
+                    authprovider: Enum.Parse<AuthProvider>(authProviderStr),
+                    storageDirectoryPath: Application.persistentDataPath
+                );
+
+                OnConnectionRequested.Invoke(
+                    inAppWallet,
+                    new ConnectionParameters()
+                    {
+                        provider = WalletProvider.InAppWallet,
+                        email = null,
+                        phoneNumber = null,
+                        authProvider = Enum.Parse<AuthProvider>(authProviderStr),
+                    }
+                );
+            }
+            catch (Exception e)
+            {
+                OnConnectionFailed.Invoke(e);
+                return;
+            }
+        }
+
+        public async void ConnectEmailOrPhone()
+        {
+            try
+            {
+                var input = emailInput.text;
+                var emailRegex = new System.Text.RegularExpressions.Regex(@"^\S+@\S+\.\S+$");
+                var isEmail = emailRegex.IsMatch(input.Replace("+", ""));
+
+                if (isEmail)
+                {
+                    var inAppWallet = await InAppWallet.Create(
+                        client: _client,
+                        email: input,
+                        phoneNumber: null,
+                        authprovider: AuthProvider.Default,
+                        storageDirectoryPath: Application.persistentDataPath
+                    );
+                    OnConnectionRequested.Invoke(
+                        inAppWallet,
+                        new ConnectionParameters()
+                        {
+                            provider = WalletProvider.InAppWallet,
+                            email = input,
+                            phoneNumber = null,
+                            authProvider = AuthProvider.Default,
+                        }
+                    );
+                }
+                else
+                {
+                    var inAppWallet = await InAppWallet.Create(
+                        client: _client,
+                        email: null,
+                        phoneNumber: input,
+                        authprovider: AuthProvider.Default,
+                        storageDirectoryPath: Application.persistentDataPath
+                    );
+                    OnConnectionRequested.Invoke(
+                        inAppWallet,
+                        new ConnectionParameters()
+                        {
+                            provider = WalletProvider.InAppWallet,
+                            email = null,
+                            phoneNumber = input,
+                            authProvider = AuthProvider.Default,
+                        }
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                OnConnectionFailed.Invoke(e);
+                return;
+            }
+        }
+
+        public async void ConnectExternal(string walletProviderStr)
+        {
+            try
+            {
+                var walletProvider = Enum.Parse<WalletProvider>(walletProviderStr);
+                switch (walletProvider)
+                {
+                    case WalletProvider.WalletConnectWallet:
+                        var wcWallet = await WalletConnectWallet.Create(client: _client);
+                        OnConnectionRequested.Invoke(wcWallet, new ConnectionParameters() { provider = WalletProvider.WalletConnectWallet });
+                        break;
+                    default:
+                        throw new NotImplementedException($"Wallet provider {walletProvider} not implemented.");
+                }
+            }
+            catch (Exception e)
+            {
+                OnConnectionFailed.Invoke(e);
+                return;
+            }
+        }
+
+        public void Disconnect()
+        {
+            if (_activeWallet != null)
+            {
+                ThirdwebDebug.Log("Disconnecting...");
+                try
+                {
+                    _activeWallet = null;
+                    OnDisconnected.Invoke();
+                }
+                catch (Exception e)
+                {
+                    ThirdwebDebug.LogError($"Failed to disconnect: {e}");
+                }
+            }
+            else
+            {
+                ThirdwebDebug.LogWarning("No active wallet to disconnect.");
+            }
+        }
+
+        private async void Connect(IThirdwebWallet wallet, ConnectionParameters connectionParameters)
+        {
+            try
+            {
+                OnConnectionStarted.Invoke(wallet, connectionParameters);
+
+                _address = wallet switch
+                {
+                    WalletConnectWallet wcWallet => await wcWallet.Connect(BigInteger.Parse(activeChainId), allSupportedChainIds.Select(x => BigInteger.Parse(x)).ToArray()),
+                    InAppWallet inAppWallet => await InAppWalletModal.Instance.Connect(wallet: inAppWallet, authprovider: connectionParameters.authProvider),
+                    PrivateKeyWallet privateKeyWallet => await privateKeyWallet.GetAddress(),
+                    _ => throw new NotImplementedException($"Wallet type {wallet.GetType()} not implemented."),
+                };
+
+                _activeWallet = wallet;
+
+                if (useSmartWallets)
+                {
+                    var smartWallet = await SmartWallet.Create(_client, _activeWallet, BigInteger.Parse(activeChainId), true);
+                    _address = await smartWallet.GetAddress();
+                    _activeWallet = smartWallet;
+                }
+
+                PostConnect(connectionParameters);
+            }
+            catch (Exception e)
+            {
+                OnConnectionFailed.Invoke(e);
+                return;
+            }
+        }
+
+        private async void PostConnect(ConnectionParameters wc = null)
         {
             ThirdwebDebug.Log($"Connected to {_address}");
 
-            var addy = _address.ShortenAddress();
+            var addy = $"{_address[..4]}...{_address[^4..]}";
+
             foreach (var addressText in addressTexts)
                 addressText.text = addy;
 
-            var bal = await ThirdwebManager.Instance.SDK.Wallet.GetBalance();
-            var balStr = $"{bal.value.ToEth()} {bal.symbol}";
+            var bal = await _activeWallet.GetBalance(_client, BigInteger.Parse(activeChainId));
+            var balStr = $"{bal.ToString().ToEth()} ETH";
             foreach (var balanceText in balanceTexts)
                 balanceText.text = balStr;
 
             if (wc != null)
             {
-                var currentWalletIcon = walletIcons.Find(x => x.provider == wc.provider)?.sprite ?? walletIcons[0].sprite;
+                var currentWalletIcon = walletIcons.Find(x => x.provider == (useSmartWallets ? WalletProvider.SmartWallet : wc.provider))?.sprite ?? walletIcons[0].sprite;
                 foreach (var walletImage in walletImages)
                     walletImage.sprite = currentWalletIcon;
             }
 
-            currentNetworkIcon.sprite = networkIcons.Find(x => x.chain == _currentChainData.identifier)?.sprite ?? networkIcons[0].sprite;
-            currentNetworkText.text = PrettifyNetwork(_currentChainData.identifier);
+            OnConnected.Invoke(_activeWallet);
 
-            onConnected.Invoke(_address);
+            ThirdwebDebug.Log($"Connected to {_activeWallet.GetType()} with address {_address}");
         }
 
-        // Network switching
-
-        public void ToggleSwitchNetworkPanel()
+        public void CopyAddress()
         {
-            foreach (Transform item in switchNetworkContent)
-                Destroy(item.gameObject);
-
-            foreach (var chain in ThirdwebManager.Instance.supportedChains)
-            {
-                if (chain.identifier == _currentChainData.identifier)
-                    continue;
-
-                var chainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == chain.identifier);
-                var chainButton = Instantiate(switchNetworkButtonPrefab, switchNetworkContent);
-                var chainButtonImage = chainButton.transform.Find("Image_Network");
-                var chainButtonText = chainButton.transform.Find("Text_Network");
-                chainButtonText.GetComponentInChildren<TMP_Text>().text = PrettifyNetwork(chain.identifier);
-                chainButtonImage.GetComponentInChildren<Image>().sprite = networkIcons.Find(x => x.chain == chain.identifier)?.sprite ?? networkIcons[0].sprite;
-                chainButton.GetComponent<Button>().onClick.RemoveAllListeners();
-                chainButton.GetComponent<Button>().onClick.AddListener(() => SwitchNetwork(chainData));
-            }
-        }
-
-        private async void SwitchNetwork(ChainData chainData)
-        {
-            ThirdwebDebug.Log($"Switching to network: {chainData.identifier}...");
-            try
-            {
-                await ThirdwebManager.Instance.SDK.Wallet.SwitchNetwork(BigInteger.Parse(chainData.chainId));
-                ThirdwebManager.Instance.activeChain = chainData.identifier;
-                _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
-                ThirdwebDebug.Log($"Switched to network: {chainData.identifier}");
-                onSwitchNetwork?.Invoke();
-                PostConnect();
-            }
-            catch (System.Exception e)
-            {
-                ThirdwebDebug.LogWarning($"Could not switch network! {e}");
-            }
-        }
-
-        // Utility
-
-        public async void ExportWallet()
-        {
-            ThirdwebDebug.Log("Exporting wallet...");
-            string json = await ThirdwebManager.Instance.SDK.Wallet.Export(_password);
-            await Utils.CopyToClipboard(json);
-            ThirdwebDebug.Log($"Copied wallet to clipboard: {json}");
-        }
-
-        public async void CopyAddress()
-        {
-            await Utils.CopyToClipboard(_address);
+            GUIUtility.systemCopyBuffer = _address;
             ThirdwebDebug.Log($"Copied address to clipboard: {_address}");
-        }
-
-        private string PrettifyNetwork(string networkIdentifier)
-        {
-            var replaced = networkIdentifier.Replace("-", " ");
-            return replaced.Substring(0, 1).ToUpper() + replaced.Substring(1);
         }
     }
 }

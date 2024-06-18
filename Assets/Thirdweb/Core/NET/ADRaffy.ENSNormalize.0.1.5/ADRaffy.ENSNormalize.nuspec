@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>ADRaffy.ENSNormalize</id>
+    <version>0.1.5</version>
+    <title>ENSNormalize</title>
+    <authors>raffy.eth</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <readme>README.md</readme>
+    <projectUrl>https://adraffy.github.io/ens-normalize.js/test/resolver.html</projectUrl>
+    <description>Ethereum Name Service ENS-15 Name Normalization</description>
+    <tags>ENS ENSIP-15 Normalize NFC NFD</tags>
+    <repository type="git" url="https://github.com/adraffy/ENSNormalize.cs.git" commit="dc4a323306b873e9abb7c6a1584009d284a2cc01" />
+    <dependencies>
+      <group targetFramework=".NETFramework3.5" />
+      <group targetFramework=".NETFramework4.5.1" />
+      <group targetFramework=".NETFramework4.6.1" />
+      <group targetFramework=".NETStandard1.1">
+        <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETCoreApp3.1" />
+      <group targetFramework="net5.0" />
+      <group targetFramework=".NETStandard2.0" />
+    </dependencies>
+  </metadata>
+</package>

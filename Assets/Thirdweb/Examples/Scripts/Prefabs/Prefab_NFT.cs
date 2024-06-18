@@ -1,29 +1,47 @@
-using System.Collections;
+using System.Numerics;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using UnityEngine.Networking;
 
-namespace Thirdweb.Examples
+namespace Thirdweb.Unity.Examples
 {
+    public enum NFTType
+    {
+        ERC721,
+        ERC1155
+    }
+
     public class Prefab_NFT : MonoBehaviour
     {
-        [Header("UI ELEMENTS")]
-        public Image nftImage;
-        public TMP_Text nftName;
-        public Button nftButton;
+        [field: SerializeField, Header("UI Elements")]
+        private Image NFTImage { get; set; }
+
+        [field: SerializeField]
+        private TMP_Text NFTName { get; set; }
+
+        [field: SerializeField]
+        private Button NFTButton { get; set; }
 
         public async void LoadNFT(NFT nft)
         {
-            nftName.text = nft.metadata.name;
-            nftImage.sprite = await ThirdwebManager.Instance.SDK.Storage.DownloadImage(nft.metadata.image);
-            nftButton.onClick.RemoveAllListeners();
-            nftButton.onClick.AddListener(() => DoSomething(nft));
+            NFTButton.onClick.RemoveAllListeners();
+
+            var imageBytes = await nft.GetNFTImageBytes(ThirdwebManager.Instance.Client);
+
+            var texture = new Texture2D(256, 256);
+            texture.LoadImage(imageBytes);
+            NFTImage.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new UnityEngine.Vector2(0.5f, 0.5f));
+
+            NFTName.text = nft.Metadata.Name;
+
+            NFTButton.onClick.AddListener(() => OnNFTButtonClicked(nft.Metadata));
         }
 
-        void DoSomething(NFT nft)
+        private void OnNFTButtonClicked(NFTMetadata metadata)
         {
-            Debugger.Instance.Log(nft.metadata.name, nft.ToString());
+            Debugger.Instance.Log(metadata.Name, JsonConvert.SerializeObject(metadata, Formatting.Indented));
         }
     }
 }
