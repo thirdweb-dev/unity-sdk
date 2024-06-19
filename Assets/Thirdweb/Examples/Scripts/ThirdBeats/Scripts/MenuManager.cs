@@ -1,25 +1,52 @@
 using System;
 using UnityEngine;
 using UnityEngine.Events;
+using RotaryHeart.Lib.SerializableDictionary;
+using System.Collections.Generic;
 
 namespace Thirdweb.Unity.Examples
 {
     public class MenuManager : MonoBehaviour
     {
         [field: SerializeField]
-        private UnityEvent OnLoggedIn;
+        private AudioClip MenuMusic;
 
         [field: SerializeField]
-        private AudioClip menuMusic;
+        private AudioSource Source;
 
         [field: SerializeField]
-        private AudioSource audioSource;
+        private Transform SongContent;
+
+        [field: SerializeField]
+        private Song SongPrefab;
+
+        [field: SerializeField]
+        private List<AudioClip> MusicTracks;
+
+        [field: SerializeField]
+        internal UnityEvent OnLoggedIn;
+
+        [field: SerializeField]
+        internal UnityEvent OnSongSelected;
 
         private IThirdwebWallet _wallet;
 
+        internal static MenuManager Instance { get; private set; }
+
         private void Awake()
         {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
+
             ResetMenu();
+            OnLoggedIn.AddListener(PopulateSongList);
         }
 
         public async void OnLogin(string method)
@@ -61,9 +88,30 @@ namespace Thirdweb.Unity.Examples
 
         public void ResetMenu()
         {
-            audioSource.clip = menuMusic;
-            audioSource.loop = true;
-            audioSource.Play();
+            Source.clip = MenuMusic;
+            Source.loop = true;
+            Source.Play();
+        }
+
+        private void PopulateSongList()
+        {
+            try
+            {
+                foreach (Transform child in SongContent)
+                {
+                    Destroy(child.gameObject);
+                }
+
+                foreach (var song in MusicTracks)
+                {
+                    var songInstance = Instantiate(SongPrefab, SongContent);
+                    songInstance.SetupSong(clip: song, isAvailable: true);
+                }
+            }
+            catch (Exception e)
+            {
+                ThirdwebDebug.LogError($"Error populating song list: {e.Message}");
+            }
         }
     }
 }

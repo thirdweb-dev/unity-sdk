@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Thirdweb.Redcode.Awaiting;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -27,9 +28,6 @@ namespace Thirdweb.Unity.Examples
         private UnityEvent<GameResult> OnGameEnded;
 
         [field: SerializeField, Header("MUSIC SETTINGS")]
-        private List<AudioClip> musicTracks;
-
-        [field: SerializeField]
         private AudioSource audioSource;
 
         [field: SerializeField, Header("GAME SETTINGS")]
@@ -47,20 +45,37 @@ namespace Thirdweb.Unity.Examples
         [field: SerializeField]
         private GameObject hitEffectPrefab;
 
+        internal int Score { get; set; }
+
         private float[] spectrumData = new float[64];
         private bool isGameRunning;
+        private bool isGameEnding;
         private float peakThreshold;
         private float fallTime;
         private float lastSpawnTime;
         private float minSpawnInterval = 0.3f; // Minimum interval between spawns to prevent overlap
         private Queue<float> spawnQueue = new Queue<float>();
-        private int score = 0;
         private int combo = 0;
         private int maxCombo = 0;
 
+        internal static MusicGameManager Instance { get; private set; }
+
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
+        }
+
         public void StartGame()
         {
-            score = 0;
+            Score = 0;
             combo = 0;
             maxCombo = 0;
 
@@ -69,15 +84,15 @@ namespace Thirdweb.Unity.Examples
             maxComboText.text = "Max Combo: 0";
 
             isGameRunning = true;
-            SelectRandomMusic();
+            isGameEnding = false;
+            StartMusic(Song._selectedSong.Clip);
             CalculateFallTime();
             StartCoroutine(CalibrateThreshold());
         }
 
-        private void SelectRandomMusic()
+        private void StartMusic(AudioClip song)
         {
-            AudioClip selectedTrack = musicTracks[Random.Range(0, musicTracks.Count)];
-            audioSource.clip = selectedTrack;
+            audioSource.clip = song;
             audioSource.loop = false;
             audioSource.Play();
         }
@@ -109,7 +124,7 @@ namespace Thirdweb.Unity.Examples
         {
             float previousIntensity = 0f;
 
-            while (isGameRunning)
+            while (isGameRunning && !isGameEnding)
             {
                 audioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
                 float currentIntensity = GetAverageIntensity(spectrumData);
@@ -132,7 +147,7 @@ namespace Thirdweb.Unity.Examples
 
         private IEnumerator ProcessSpawnQueue()
         {
-            while (isGameRunning)
+            while (isGameRunning && !isGameEnding)
             {
                 if (spawnQueue.Count > 0)
                 {
@@ -176,10 +191,10 @@ namespace Thirdweb.Unity.Examples
 
         private void Update()
         {
-            if (!isGameRunning)
+            if (!isGameRunning && !isGameEnding)
                 return;
 
-            if (!audioSource.isPlaying)
+            if (!isGameEnding && !audioSource.isPlaying)
             {
                 EndGame();
             }
@@ -201,10 +216,10 @@ namespace Thirdweb.Unity.Examples
 
         private void LateUpdate()
         {
-            if (!isGameRunning)
+            if (!isGameRunning && !isGameEnding)
                 return;
 
-            scoreText.text = $"Score: {score}";
+            scoreText.text = $"Score: {Score}";
             comboText.text = $"Combo: {combo}";
             maxComboText.text = $"Max Combo: {maxCombo}";
         }
@@ -232,7 +247,7 @@ namespace Thirdweb.Unity.Examples
                 if (lowestTile != null)
                 {
                     Destroy(lowestTile.gameObject); // Destroy the lowest tile on hit
-                    score += 100; // Increase score
+                    Score += 100; // Increase score
                     combo++; // Increase combo
                     maxCombo = Mathf.Max(maxCombo, combo); // Track max combo
                     StartCoroutine(ShowHitEffect(hitAreaCollider.bounds.center)); // Show hit effect
@@ -240,7 +255,8 @@ namespace Thirdweb.Unity.Examples
                 else
                 {
                     combo = 0; // Reset combo on miss
-                    score -= 25; // Decrease score on miss
+                    Score -= 25; // Decrease score on miss
+                    CameraShake.Instance.Shake(0.1f, 0.1f); // Shake the camera on miss
                 }
             }
         }
@@ -252,11 +268,14 @@ namespace Thirdweb.Unity.Examples
             Destroy(hitEffect);
         }
 
-        private void EndGame()
+        private async void EndGame()
         {
-            isGameRunning = false;
+            isGameEnding = true;
             audioSource.Stop();
-            OnGameEnded.Invoke(new GameResult { score = score, maxCombo = maxCombo });
+            await new WaitForSeconds(5f);
+            isGameRunning = false;
+            isGameEnding = false;
+            OnGameEnded.Invoke(new GameResult { score = Score, maxCombo = maxCombo });
         }
     }
 }

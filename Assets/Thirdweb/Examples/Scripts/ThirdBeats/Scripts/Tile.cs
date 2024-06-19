@@ -19,6 +19,8 @@ namespace Thirdweb.Unity.Examples
 
             if (transform.position.y < -5f)
             {
+                MusicGameManager.Instance.Score -= 50;
+                CameraShake.Instance.Shake(0.1f, 0.1f);
                 Destroy(gameObject); // Destroy tile when it goes off-screen
             }
         }
