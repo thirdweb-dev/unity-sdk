@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - thirdweb
+  - Tile
+  - HitArea
   layers:
   - Default
   - TransparentFX
