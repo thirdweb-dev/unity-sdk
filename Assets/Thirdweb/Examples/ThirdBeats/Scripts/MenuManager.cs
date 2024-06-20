@@ -5,6 +5,7 @@ using RotaryHeart.Lib.SerializableDictionary;
 using System.Collections.Generic;
 using System.Numerics;
 using TMPro;
+using System.Collections;
 
 namespace Thirdweb.Unity.Examples
 {
@@ -72,6 +73,10 @@ namespace Thirdweb.Unity.Examples
                 {
                     // Google login
                     _wallet = await InAppWallet.Create(client: ThirdwebManager.Instance.Client, authprovider: AuthProvider.Google, storageDirectoryPath: Application.persistentDataPath);
+                    if (await _wallet.IsConnected())
+                    {
+                        await (_wallet as InAppWallet).Disconnect();
+                    }
                     // Note: simpler api than doing it directly with InAppWallet.LoginWithOauth
                     var address = await InAppWalletModal.Instance.Connect(_wallet as InAppWallet, authprovider: AuthProvider.Google);
                     ThirdwebDebug.Log($"Personal Address: {address}");

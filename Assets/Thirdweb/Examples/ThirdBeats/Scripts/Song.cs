@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using RotaryHeart.Lib.SerializableDictionary;
 using TMPro;
+using System.Collections;
 
 namespace Thirdweb.Unity.Examples
 {
@@ -23,6 +24,10 @@ namespace Thirdweb.Unity.Examples
 
         private AudioSource _musicSource;
 
+        private Button _songButton;
+        private TMP_Text _songText;
+        private Image _songImage;
+
         private void Awake()
         {
             _musicSource = GameObject.Find("MusicSource")?.GetComponent<AudioSource>();
@@ -31,12 +36,17 @@ namespace Thirdweb.Unity.Examples
                 ThirdwebDebug.LogError("MusicSource not found in the scene.");
             }
 
-            GetComponent<Button>().onClick.AddListener(SelectSong);
+            _songButton = GetComponent<Button>();
+            _songButton.onClick.AddListener(SelectSong);
+
+            _songText = GetComponentInChildren<TMP_Text>();
+
+            _songImage = GetComponent<Image>();
         }
 
         public void SetupSong(AudioClip clip, bool isAvailable)
         {
-            _originalState = isAvailable ? SongState.Available : SongState.Unavailable;
+            _originalState = isAvailable ? SongState.Unlocked : SongState.Locked;
             Clip = clip;
             SetState(_originalState);
         }
@@ -48,7 +58,7 @@ namespace Thirdweb.Unity.Examples
 
         private void SelectSong()
         {
-            if (_currentState == SongState.Unavailable)
+            if (_currentState == SongState.Locked)
             {
                 ThirdwebDebug.LogWarning("Cannot select unavailable song.");
                 return;
@@ -60,7 +70,7 @@ namespace Thirdweb.Unity.Examples
             }
 
             _selectedSong = this;
-            SetState(SongState.Available);
+            SetState(SongState.Unlocked);
             MenuManager.Instance.OnSongSelected.Invoke();
         }
 
@@ -68,10 +78,11 @@ namespace Thirdweb.Unity.Examples
         {
             _currentState = state;
 
-            var textComponent = GetComponentInChildren<TMP_Text>();
-            if (textComponent != null)
+            if (_songText != null)
             {
-                textComponent.text = $"{Clip.name} ({state})";
+                var lengthInMinutes = Mathf.Floor(Clip.length / 60);
+                var extraSeconds = Mathf.Floor(Clip.length % 60);
+                _songText.text = Clip.name + (_currentState != SongState.Unlocked ? $" ({_currentState})" : $" ({lengthInMinutes}:{extraSeconds:00})");
             }
             else
             {
@@ -80,7 +91,7 @@ namespace Thirdweb.Unity.Examples
 
             if (StateColors.TryGetValue(state, out Color color))
             {
-                GetComponent<Image>().color = color;
+                _songImage.color = color;
             }
             else
             {
@@ -90,10 +101,10 @@ namespace Thirdweb.Unity.Examples
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (_currentState == SongState.Available)
+            if (_currentState == SongState.Unlocked)
             {
+                SetState(SongState.Playing);
                 PreviewSong();
-                SetState(SongState.Selected);
             }
         }
 
@@ -102,13 +113,14 @@ namespace Thirdweb.Unity.Examples
             if (_musicSource != null && Clip != null)
             {
                 _musicSource.clip = Clip;
+                _musicSource.loop = false;
                 _musicSource.Play();
             }
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (_currentState == SongState.Selected)
+            if (_currentState == SongState.Playing)
             {
                 SetState(_originalState);
             }
@@ -117,9 +129,9 @@ namespace Thirdweb.Unity.Examples
         [Serializable]
         private enum SongState
         {
-            Available,
-            Selected,
-            Unavailable
+            Unlocked,
+            Playing,
+            Locked
         }
 
         [Serializable]

@@ -127,7 +127,7 @@ namespace Thirdweb.Unity.Examples
             int samples = 50; // Reduced number of samples for faster calibration
             for (int i = 0; i < samples; i++)
             {
-                audioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
+                GetSpectrumDataExtension.GetSpectrumData(audioSource, spectrumData);
                 sum += GetAverageIntensity(spectrumData);
                 yield return new WaitForSeconds(0.05f);
             }
@@ -142,7 +142,7 @@ namespace Thirdweb.Unity.Examples
 
             while (isGameRunning && !isGameEnding)
             {
-                audioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
+                GetSpectrumDataExtension.GetSpectrumData(audioSource, spectrumData);
                 float currentIntensity = GetAverageIntensity(spectrumData);
 
                 // Adjust the peak threshold dynamically based on the current intensity

@@ -27,7 +27,7 @@ namespace Thirdweb.Unity.Examples
 
         private void Update()
         {
-            TrackedAudio.GetSpectrumData(_spectrumData, 0, FFTWindow.BlackmanHarris);
+            GetSpectrumDataExtension.GetSpectrumData(TrackedAudio, _spectrumData);
             SmoothSpectrumData();
             AnimateBars();
         }
