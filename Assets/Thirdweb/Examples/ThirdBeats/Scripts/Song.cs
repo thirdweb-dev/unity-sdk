@@ -60,7 +60,7 @@ namespace Thirdweb.Unity.Examples
             }
 
             _selectedSong = this;
-            SetState(SongState.Selected);
+            SetState(SongState.Available);
             MenuManager.Instance.OnSongSelected.Invoke();
         }
 

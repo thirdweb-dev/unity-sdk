@@ -9,11 +9,24 @@ namespace Thirdweb.Unity.Examples
 
         public static CameraShake Instance { get; private set; }
 
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
+        }
+
         public void Shake(float duration, float magnitude)
         {
             if (_shakeCoroutine != null)
             {
-                StopCoroutine(_shakeCoroutine);
+                return;
             }
 
             _shakeCoroutine = StartCoroutine(ShakeCoroutine(duration, magnitude));
@@ -37,6 +50,8 @@ namespace Thirdweb.Unity.Examples
             }
 
             transform.localPosition = originalPosition;
+
+            _shakeCoroutine = null;
         }
     }
 }

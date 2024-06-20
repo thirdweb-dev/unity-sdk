@@ -11,6 +11,7 @@ namespace Thirdweb.Unity.Examples
     {
         public int score;
         public int maxCombo;
+        public bool cancelled;
     }
 
     public class MusicGameManager : MonoBehaviour
@@ -23,9 +24,6 @@ namespace Thirdweb.Unity.Examples
 
         [field: SerializeField]
         private TMP_Text maxComboText;
-
-        [field: SerializeField, Header("EVENTS")]
-        private UnityEvent<GameResult> OnGameEnded;
 
         [field: SerializeField, Header("MUSIC SETTINGS")]
         private AudioSource audioSource;
@@ -40,12 +38,27 @@ namespace Thirdweb.Unity.Examples
         private Transform[] hitAreas; // Array of hit areas for left, center, and right
 
         [field: SerializeField]
-        private float tileFallSpeed = 5f;
+        private float baseTileFallSpeed = 5f; // Base fall speed for tiles
 
         [field: SerializeField]
         private GameObject hitEffectPrefab;
 
-        internal int Score { get; set; }
+        [field: SerializeField, Header("EVENTS")]
+        internal UnityEvent<GameResult> OnGameEnded;
+
+        private int _score;
+        internal int Score
+        {
+            get => _score;
+            set
+            {
+                _score = value;
+                if (_score < 0)
+                {
+                    _score = 0;
+                }
+            }
+        }
 
         private float[] spectrumData = new float[64];
         private bool isGameRunning;
@@ -53,10 +66,12 @@ namespace Thirdweb.Unity.Examples
         private float peakThreshold;
         private float fallTime;
         private float lastSpawnTime;
-        private float minSpawnInterval = 0.3f; // Minimum interval between spawns to prevent overlap
+        private float minSpawnInterval = 0.5f; // Adjusted minimum interval between spawns
         private Queue<float> spawnQueue = new Queue<float>();
         private int combo = 0;
         private int maxCombo = 0;
+        private float musicStartTime;
+        private bool firstTileSpawned = false;
 
         internal static MusicGameManager Instance { get; private set; }
 
@@ -86,7 +101,7 @@ namespace Thirdweb.Unity.Examples
             isGameRunning = true;
             isGameEnding = false;
             StartMusic(Song._selectedSong.Clip);
-            CalculateFallTime();
+            CalculateFallTime(baseTileFallSpeed);
             StartCoroutine(CalibrateThreshold());
         }
 
@@ -95,9 +110,10 @@ namespace Thirdweb.Unity.Examples
             audioSource.clip = song;
             audioSource.loop = false;
             audioSource.Play();
+            musicStartTime = Time.time;
         }
 
-        private void CalculateFallTime()
+        private void CalculateFallTime(float tileFallSpeed)
         {
             // Calculate the fall time based on the distance between spawn point and hit area, and the fall speed
             float distance = Vector3.Distance(tileSpawnPoints[0].position, hitAreas[0].position);
@@ -108,7 +124,7 @@ namespace Thirdweb.Unity.Examples
         {
             // Analyze initial spectrum data to set a reasonable peak threshold
             float sum = 0f;
-            int samples = 100;
+            int samples = 50; // Reduced number of samples for faster calibration
             for (int i = 0; i < samples; i++)
             {
                 audioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
@@ -129,19 +145,36 @@ namespace Thirdweb.Unity.Examples
                 audioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
                 float currentIntensity = GetAverageIntensity(spectrumData);
 
+                // Adjust the peak threshold dynamically based on the current intensity
+                float dynamicThreshold = peakThreshold * (currentIntensity / previousIntensity);
+
                 // Detect peaks based on a significant increase in intensity
-                if (currentIntensity > previousIntensity * 1.1f && currentIntensity > peakThreshold)
+                if (currentIntensity > dynamicThreshold)
                 {
+                    if (!firstTileSpawned)
+                    {
+                        // Ensure the first tile spawns exactly at the right time
+                        float timeSinceMusicStart = Time.time - musicStartTime;
+                        float initialDelay = fallTime - timeSinceMusicStart;
+
+                        if (initialDelay > 0)
+                        {
+                            yield return new WaitForSeconds(initialDelay);
+                        }
+
+                        firstTileSpawned = true;
+                    }
+
                     if (Time.time - lastSpawnTime >= minSpawnInterval)
                     {
-                        EnqueueTileSpawn();
+                        EnqueueTileSpawn(currentIntensity);
                         lastSpawnTime = Time.time;
                     }
                 }
 
                 previousIntensity = currentIntensity;
 
-                yield return new WaitForSeconds(0.05f); // Check more frequently for better synchronization
+                yield return new WaitForSeconds(0.025f); // Check more frequently for better synchronization
             }
         }
 
@@ -153,7 +186,10 @@ namespace Thirdweb.Unity.Examples
                 {
                     float delay = spawnQueue.Dequeue();
                     yield return new WaitForSeconds(delay);
-                    SpawnTile();
+                    if (audioSource.isPlaying) // Check if the audio is still playing before spawning a tile
+                    {
+                        SpawnTile();
+                    }
                 }
                 else
                 {
@@ -162,10 +198,12 @@ namespace Thirdweb.Unity.Examples
             }
         }
 
-        private void EnqueueTileSpawn()
+        private void EnqueueTileSpawn(float currentIntensity)
         {
-            // Add a delay to the spawn queue to ensure proper intervals between tile spawns
-            float delay = Random.Range(0f, minSpawnInterval);
+            // Calculate a delay based on the current intensity to adjust difficulty dynamically
+            float intensityFactor = Mathf.Clamp(currentIntensity / peakThreshold, 0.5f, 2f); // Ensure intensityFactor is within a reasonable range
+            float adjustedMinSpawnInterval = minSpawnInterval / intensityFactor;
+            float delay = Random.Range(0f, adjustedMinSpawnInterval);
             spawnQueue.Enqueue(delay);
         }
 
@@ -186,7 +224,7 @@ namespace Thirdweb.Unity.Examples
             Tile tile = Instantiate(tilePrefab, selectedSpawnPoint.position, Quaternion.identity);
 
             // Set the fall speed and initialize the tile
-            tile.Initialize(tileFallSpeed);
+            tile.Initialize(baseTileFallSpeed);
         }
 
         private void Update()
@@ -247,7 +285,7 @@ namespace Thirdweb.Unity.Examples
                 if (lowestTile != null)
                 {
                     Destroy(lowestTile.gameObject); // Destroy the lowest tile on hit
-                    Score += 100; // Increase score
+                    Score += 10; // Increase score
                     combo++; // Increase combo
                     maxCombo = Mathf.Max(maxCombo, combo); // Track max combo
                     StartCoroutine(ShowHitEffect(hitAreaCollider.bounds.center)); // Show hit effect
@@ -255,7 +293,7 @@ namespace Thirdweb.Unity.Examples
                 else
                 {
                     combo = 0; // Reset combo on miss
-                    Score -= 25; // Decrease score on miss
+                    Score -= 5; // Decrease score on miss
                     CameraShake.Instance.Shake(0.1f, 0.1f); // Shake the camera on miss
                 }
             }
@@ -268,14 +306,27 @@ namespace Thirdweb.Unity.Examples
             Destroy(hitEffect);
         }
 
-        private async void EndGame()
+        private async void EndGame(bool cancelled = false)
         {
             isGameEnding = true;
             audioSource.Stop();
-            await new WaitForSeconds(5f);
+            await new WaitForSeconds(2f);
             isGameRunning = false;
             isGameEnding = false;
-            OnGameEnded.Invoke(new GameResult { score = Score, maxCombo = maxCombo });
+            OnGameEnded.Invoke(
+                new GameResult
+                {
+                    score = Score,
+                    maxCombo = maxCombo,
+                    cancelled = cancelled
+                }
+            );
+            await new WaitForSeconds(3f);
+        }
+
+        public void CancelGame()
+        {
+            EndGame(true);
         }
     }
 }
