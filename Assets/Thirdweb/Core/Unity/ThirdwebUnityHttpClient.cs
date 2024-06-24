@@ -104,7 +104,7 @@ namespace Thirdweb.Unity
                     await Task.Yield();
                 }
 
-                if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.ProtocolError)
+                if (webRequest.result == UnityWebRequest.Result.ConnectionError || webRequest.result == UnityWebRequest.Result.DataProcessingError)
                 {
                     tcs.SetException(new Exception(webRequest.error));
                 }
