@@ -73,20 +73,20 @@ namespace Thirdweb.Unity.Examples
                 {
                     // Google login
                     _wallet = await InAppWallet.Create(client: ThirdwebManager.Instance.Client, authprovider: AuthProvider.Google, storageDirectoryPath: Application.persistentDataPath);
-                    if (await _wallet.IsConnected())
+                    if (!await _wallet.IsConnected())
                     {
-                        await (_wallet as InAppWallet).Disconnect();
+                        _ = await (_wallet as InAppWallet).LoginWithOauth(
+                            isMobile: Application.isMobilePlatform,
+                            browserOpenAction: (url) => Application.OpenURL(url),
+                            mobileRedirectScheme: "mythirdwebgame",
+                            browser: new CrossPlatformUnityBrowser()
+                        );
                     }
-                    // Note: simpler api than doing it directly with InAppWallet.LoginWithOauth
-                    var address = await InAppWalletModal.Instance.Connect(_wallet as InAppWallet, authprovider: AuthProvider.Google);
-                    ThirdwebDebug.Log($"Personal Address: {address}");
                 }
                 else if (method == "Guest")
                 {
                     // Guest
                     _wallet = await PrivateKeyWallet.Generate(client: ThirdwebManager.Instance.Client);
-                    var address = await _wallet.GetAddress();
-                    ThirdwebDebug.Log($"Personal Address: {address}");
                 }
                 else
                 {

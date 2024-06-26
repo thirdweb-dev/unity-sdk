@@ -26,9 +26,9 @@ namespace Thirdweb.Unity
 #endif
         }
 
-        public async Task<BrowserResult> Login(string loginUrl, string customScheme, Action<string> browserOpenAction, CancellationToken cancellationToken = default)
+        public async Task<BrowserResult> Login(ThirdwebClient client, string loginUrl, string customScheme, Action<string> browserOpenAction, CancellationToken cancellationToken = default)
         {
-            return await _unityBrowser.Login(loginUrl, customScheme, browserOpenAction, cancellationToken);
+            return await _unityBrowser.Login(client, loginUrl, customScheme, browserOpenAction, cancellationToken);
         }
     }
 }

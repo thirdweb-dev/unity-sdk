@@ -9,6 +9,7 @@ using UnityEngine.UI;
 using System.Numerics;
 using RotaryHeart.Lib.SerializableDictionary;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Thirdweb.Unity.Examples
 {
@@ -64,6 +65,9 @@ namespace Thirdweb.Unity.Examples
         public UnityEvent<IThirdwebWallet, ConnectionParameters> OnConnectionStarted;
         public UnityEvent<Exception> OnConnectionFailed;
 
+        [Tooltip("Invoked when the user submits an invalid OTP and can retry.")]
+        public UnityEvent OnOTPVerificationFailed;
+
         [Header("UI")]
         public WalletProviderUIDictionary walletProviderUI;
         public TMP_InputField emailInput;
@@ -71,6 +75,11 @@ namespace Thirdweb.Unity.Examples
         public List<TMP_Text> addressTexts;
         public List<TMP_Text> balanceTexts;
         public List<WalletIcon> walletIcons;
+
+        [Header("InAppWallet UI")]
+        public GameObject OTPPanel;
+        public TMP_InputField OTPInput;
+        public Button OTPSubmitButton;
 
         private string _address;
 
@@ -223,6 +232,11 @@ namespace Thirdweb.Unity.Examples
                 ThirdwebDebug.Log("Disconnecting...");
                 try
                 {
+                    if (_activeWallet is InAppWallet)
+                    {
+                        // Logout
+                        (_activeWallet as InAppWallet).Disconnect();
+                    }
                     _activeWallet = null;
                     OnDisconnected.Invoke();
                 }
@@ -243,13 +257,26 @@ namespace Thirdweb.Unity.Examples
             {
                 OnConnectionStarted.Invoke(wallet, connectionParameters);
 
-                _address = wallet switch
+                if (await wallet.IsConnected())
                 {
-                    WalletConnectWallet wcWallet => await wcWallet.Connect(BigInteger.Parse(activeChainId), allSupportedChainIds.Select(x => BigInteger.Parse(x)).ToArray()),
-                    InAppWallet inAppWallet => await InAppWalletModal.Instance.Connect(wallet: inAppWallet, authprovider: connectionParameters.authProvider),
-                    PrivateKeyWallet privateKeyWallet => await privateKeyWallet.GetAddress(),
-                    _ => throw new NotImplementedException($"Wallet type {wallet.GetType()} not implemented."),
-                };
+                    _address = await wallet.GetAddress();
+                }
+                else if (wallet is WalletConnectWallet)
+                {
+                    _address = await (wallet as WalletConnectWallet).Connect(BigInteger.Parse(activeChainId), allSupportedChainIds.Select(x => BigInteger.Parse(x)).ToArray());
+                }
+                else if (wallet is InAppWallet)
+                {
+                    _address = await LoginWithInAppWallet(wallet as InAppWallet, connectionParameters);
+                }
+                else if (wallet is PrivateKeyWallet)
+                {
+                    _address = await (wallet as PrivateKeyWallet).GetAddress();
+                }
+                else
+                {
+                    throw new NotImplementedException($"Wallet type {wallet.GetType()} not implemented.");
+                }
 
                 _activeWallet = wallet;
 
@@ -266,6 +293,64 @@ namespace Thirdweb.Unity.Examples
             {
                 OnConnectionFailed.Invoke(e);
                 return;
+            }
+        }
+
+        private async Task<string> LoginWithInAppWallet(InAppWallet wallet, ConnectionParameters connectionParameters)
+        {
+            OTPPanel.SetActive(false);
+            OTPSubmitButton.onClick.RemoveAllListeners();
+            OTPInput.text = "";
+
+            var authProvider = connectionParameters.authProvider;
+
+            if (authProvider == AuthProvider.Default)
+            {
+                OTPPanel.SetActive(true);
+                await wallet.SendOTP();
+                ThirdwebDebug.Log("Please submit the OTP sent to your email or phone.");
+                OTPSubmitButton.onClick.AddListener(async () => await SubmitOTP(wallet));
+            }
+            else
+            {
+                await wallet.LoginWithOauth(
+                    isMobile: Application.isMobilePlatform,
+                    browserOpenAction: (url) => Application.OpenURL(url),
+                    mobileRedirectScheme: "mythirdwebgame",
+                    browser: new CrossPlatformUnityBrowser()
+                );
+            }
+
+            while (!await wallet.IsConnected() && Application.isPlaying)
+            {
+                await Task.Delay(250);
+            }
+
+            OTPPanel.SetActive(false);
+            return await wallet.GetAddress();
+        }
+
+        private async Task<InAppWallet> SubmitOTP(InAppWallet wallet)
+        {
+            OTPInput.interactable = false;
+            OTPSubmitButton.interactable = false;
+
+            try
+            {
+                var otp = OTPInput.text;
+                (var inAppWalletAddress, var canRetry) = await wallet.SubmitOTP(otp);
+                if (inAppWalletAddress == null && canRetry)
+                {
+                    ThirdwebDebug.Log("Please submit the OTP again.");
+                    OTPInput.text = "";
+                    OnOTPVerificationFailed.Invoke();
+                }
+                return wallet;
+            }
+            finally
+            {
+                OTPInput.interactable = true;
+                OTPSubmitButton.interactable = true;
             }
         }
 

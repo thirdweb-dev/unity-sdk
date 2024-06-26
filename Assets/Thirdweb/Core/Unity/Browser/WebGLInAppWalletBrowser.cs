@@ -1,8 +1,11 @@
-#if UNITY_WEBGL && !UNITY_EDITOR
+// #if UNITY_WEBGL && !UNITY_EDITOR
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Thirdweb.Unity
@@ -14,12 +17,7 @@ namespace Thirdweb.Unity
         private bool _isCallbackInvoked;
 
         [DllImport("__Internal")]
-        private static extern void openPopup(
-            string url,
-            string redirectUrl,
-            string unityObjectName,
-            string unityCallbackMethod
-        );
+        private static extern void openPopup(string url, string developerClientId, string authOption, string unityObjectName, string unityCallbackMethod);
 
         private void Awake()
         {
@@ -34,57 +32,71 @@ namespace Thirdweb.Unity
             }
         }
 
-        public async Task<BrowserResult> Login(
-            string loginUrl,
-            string redirectUrl,
-            Action<string> browserOpenAction,
-            CancellationToken cancellationToken = default
-        )
+        public async Task<BrowserResult> Login(ThirdwebClient client, string loginUrl, string redirectUrl, Action<string> browserOpenAction, CancellationToken cancellationToken = default)
         {
             _taskCompletionSource = new TaskCompletionSource<BrowserResult>();
+
+            _isCallbackInvoked = false;
 
             cancellationToken.Register(() =>
             {
                 _taskCompletionSource?.TrySetCanceled();
             });
 
-            redirectUrl = AddForwardSlashIfNecessary(redirectUrl);
             string unityObjectName = gameObject.name;
             string unityCallbackMethod = "OnRedirect";
 
-            openPopup(loginUrl, redirectUrl, unityObjectName, unityCallbackMethod);
+            Uri uri = new(loginUrl);
 
-            var completedTask = await Task.WhenAny(
-                _taskCompletionSource.Task,
-                Task.Delay(TimeSpan.FromSeconds(30), cancellationToken)
-            );
-            return completedTask == _taskCompletionSource.Task
-                ? await _taskCompletionSource.Task
-                : new BrowserResult(BrowserStatus.Timeout, null, "The operation timed out.");
+            string developerClientId = client.ClientId;
+
+            var queryParts = uri.Query.TrimStart('?').Split('&');
+            string logoutUriEncoded = queryParts.FirstOrDefault(q => q.StartsWith("logout_uri="))?.Split('=')[1];
+            string logoutUriDecoded = Uri.UnescapeDataString(logoutUriEncoded ?? string.Empty);
+            Uri logoutUri = new(logoutUriDecoded);
+            var logoutQueryParts = logoutUri.Query.TrimStart('?').Split('&');
+            string authOption = logoutQueryParts.FirstOrDefault(q => q.StartsWith("identity_provider="))?.Split('=')[1];
+
+            openPopup(loginUrl, developerClientId, authOption, unityObjectName, unityCallbackMethod);
+
+            var completedTask = await Task.WhenAny(_taskCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(90), cancellationToken));
+            return completedTask == _taskCompletionSource.Task ? await _taskCompletionSource.Task : new BrowserResult(BrowserStatus.Timeout, null, "The operation timed out.");
         }
 
-        public void OnRedirect(string url)
+        public void OnRedirect(string message)
         {
-            if (string.IsNullOrEmpty(url) || !url.StartsWith("http://localhost:8789/"))
+            if (_isCallbackInvoked)
             {
                 return;
             }
 
-            if (!_isCallbackInvoked)
+            if (message == "PopupClosedWithoutAction")
             {
-                _isCallbackInvoked = true;
-                _taskCompletionSource.SetResult(new BrowserResult(BrowserStatus.Success, url));
+                _taskCompletionSource.SetResult(new BrowserResult(BrowserStatus.UserCanceled, null, "The popup was closed without completing the action."));
             }
-        }
+            else
+            {
+                try
+                {
+                    var data = JsonConvert.DeserializeObject<JObject>(message);
 
-        private string AddForwardSlashIfNecessary(string url)
-        {
-            if (!url.EndsWith("/"))
-            {
-                url += "/";
+                    if (data["eventType"].ToString() == "userLoginSuccess")
+                    {
+                        _isCallbackInvoked = true;
+                        _taskCompletionSource.SetResult(new BrowserResult(BrowserStatus.Success, data["authResult"].ToString()));
+                    }
+                    else if (data["eventType"].ToString() == "userLoginFailed")
+                    {
+                        _isCallbackInvoked = true;
+                        _taskCompletionSource.SetResult(new BrowserResult(BrowserStatus.UnknownError, null, data["error"].ToString()));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _taskCompletionSource.SetResult(new BrowserResult(BrowserStatus.UnknownError, null, $"Failed to parse the message from the popup. Error: {ex.Message}"));
+                }
             }
-            return url;
         }
     }
 }
-#endif
+// #endif

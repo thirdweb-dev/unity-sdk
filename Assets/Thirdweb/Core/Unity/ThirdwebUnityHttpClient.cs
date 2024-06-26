@@ -86,7 +86,7 @@ namespace Thirdweb.Unity
         {
             var tcs = new TaskCompletionSource<ThirdwebHttpResponseMessage>();
 
-            _ = MainThreadExecutor.RunOnMainThread(async () =>
+            _ = ThirdwebMainThreadExecutor.Instance.RunOnMainThread(async () =>
             {
                 using var webRequest = createRequest();
                 AddHeaders(webRequest);

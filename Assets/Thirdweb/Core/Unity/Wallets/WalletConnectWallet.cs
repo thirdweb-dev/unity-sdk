@@ -122,7 +122,6 @@ namespace Thirdweb.Unity
 
         public async Task<string> SendTransaction(ThirdwebTransactionInput transaction)
         {
-            Debug.Log($"SendTransaction: {JsonConvert.SerializeObject(transaction)}");
             var task = _walletConnectService.SendTransactionAsync(
                 new TransactionInput()
                 {

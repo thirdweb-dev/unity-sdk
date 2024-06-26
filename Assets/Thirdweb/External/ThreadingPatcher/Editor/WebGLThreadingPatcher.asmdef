@@ -14,8 +14,10 @@
         "Mono.Cecil.Pdb.dll",
         "Mono.Cecil.Rocks.dll"
     ],
-    "autoReferenced": true,
-    "defineConstraints": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_WEBGL"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }

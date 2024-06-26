@@ -82,7 +82,7 @@ namespace Thirdweb.Unity
 
         public bool prefersEphemeralWebBrowserSession { get; set; } = false;
 
-        public async Task<BrowserResult> Login(string loginUrl, string redirectUrl, Action<string> browserOpenAction, CancellationToken cancellationToken = default)
+        public async Task<BrowserResult> Login(ThirdwebClient client, string loginUrl, string redirectUrl, Action<string> browserOpenAction, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(loginUrl))
                 throw new ArgumentNullException(nameof(loginUrl));

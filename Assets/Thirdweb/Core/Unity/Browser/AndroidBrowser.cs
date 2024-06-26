@@ -13,7 +13,7 @@ namespace Thirdweb.Unity
 
         private string _customScheme;
 
-        public async Task<BrowserResult> Login(string loginUrl, string customScheme, Action<string> browserOpenAction, CancellationToken cancellationToken = default)
+        public async Task<BrowserResult> Login(ThirdwebClient client, string loginUrl, string customScheme, Action<string> browserOpenAction, CancellationToken cancellationToken = default)
         {
             _taskCompletionSource = new TaskCompletionSource<BrowserResult>();
 
