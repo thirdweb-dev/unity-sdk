@@ -214,5 +214,25 @@
     ],
     "testnet": true,
     "redFlags": []
+  },
+  {
+    "name": "Zuraverse",
+    "chain": "ZURA",
+    "rpc": ["https://zuraverse-2712670149155000-1.jsonrpc.sagarpc.io"],
+    "nativeCurrency": {
+      "name": "ZURA",
+      "symbol": "ZURA",
+      "decimals": 18
+    },
+    "shortName": "ZURA",
+    "chainId": 2712670149155000,
+    "networkId": 2712670149155000,
+    "slug": "zuraverse",
+    "icon": "https://bafybeiez6za62lqpt6zoizlzs33poax4fl3czuecvze2peeknuhkrhk5om.ipfs.w3s.link/ZV_mascot_white_trans.png",
+    "features": [],
+    "faucets": [],
+    "explorers": [],
+    "testnet": false,
+    "redFlags": []
   }
 ]
