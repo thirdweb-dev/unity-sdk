@@ -93,7 +93,7 @@ namespace Thirdweb.Unity.Examples
                     throw new Exception("Invalid login method");
                 }
 
-                _wallet = await SmartWallet.Create(client: ThirdwebManager.Instance.Client, personalWallet: _wallet, chainId: 37714555429, gasless: true);
+                _wallet = await SmartWallet.Create(personalWallet: _wallet, chainId: 37714555429, gasless: true);
                 var finalAddress = await _wallet.GetAddress();
                 ThirdwebDebug.Log($"Logged in as: {finalAddress}");
 

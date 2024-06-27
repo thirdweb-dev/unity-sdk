@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Numerics;
 using UnityEngine;
 
@@ -18,7 +16,7 @@ namespace Thirdweb.Unity.Examples
         {
             var wallet = await PrivateKeyWallet.Generate(_client); // Generate a new wallet
             var chainId = BigInteger.One;
-            var result = await wallet.GetBalance(_client, chainId);
+            var result = await wallet.GetBalance(chainId);
             var weiBalance = result.ToString();
             var ethBalance = weiBalance.ToEth(decimalsToDisplay: 4, addCommas: true);
             var address = await wallet.GetAddress();
@@ -30,7 +28,7 @@ namespace Thirdweb.Unity.Examples
             var wallet = await PrivateKeyWallet.Generate(_client);
             var chainId = BigInteger.One;
             var tokenAddress = "0x6b175474e89094c44da98b954eedeac495271d0f"; // DAI token address
-            var result = await wallet.GetBalance(_client, chainId, tokenAddress);
+            var result = await wallet.GetBalance(chainId, tokenAddress);
             var weiBalance = result.ToString();
             var ethBalance = weiBalance.ToEth(decimalsToDisplay: 4, addCommas: true);
             var address = await wallet.GetAddress();

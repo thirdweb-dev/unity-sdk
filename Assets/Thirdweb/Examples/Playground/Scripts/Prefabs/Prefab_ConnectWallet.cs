@@ -282,7 +282,7 @@ namespace Thirdweb.Unity.Examples
 
                 if (useSmartWallets)
                 {
-                    var smartWallet = await SmartWallet.Create(_client, _activeWallet, BigInteger.Parse(activeChainId), true);
+                    var smartWallet = await SmartWallet.Create(_activeWallet, BigInteger.Parse(activeChainId), true);
                     _address = await smartWallet.GetAddress();
                     _activeWallet = smartWallet;
                 }
@@ -363,7 +363,7 @@ namespace Thirdweb.Unity.Examples
             foreach (var addressText in addressTexts)
                 addressText.text = addy;
 
-            var bal = await _activeWallet.GetBalance(_client, BigInteger.Parse(activeChainId));
+            var bal = await _activeWallet.GetBalance(BigInteger.Parse(activeChainId));
             var balStr = $"{bal.ToString().ToEth()} ETH";
             foreach (var balanceText in balanceTexts)
                 balanceText.text = balStr;

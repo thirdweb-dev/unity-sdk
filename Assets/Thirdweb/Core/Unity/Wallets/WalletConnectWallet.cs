@@ -22,6 +22,8 @@ namespace Thirdweb.Unity
     {
         #region Core
 
+        public ThirdwebClient Client => _client;
+
         public ThirdwebAccountType AccountType => ThirdwebAccountType.ExternalAccount;
 
         protected ThirdwebClient _client;
