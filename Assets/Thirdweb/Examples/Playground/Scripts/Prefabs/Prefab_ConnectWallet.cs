@@ -81,6 +81,8 @@ namespace Thirdweb.Unity.Examples
         public TMP_InputField OTPInput;
         public Button OTPSubmitButton;
 
+        public IThirdwebWallet ActiveWallet => _activeWallet;
+
         private string _address;
 
         private IThirdwebWallet _activeWallet;

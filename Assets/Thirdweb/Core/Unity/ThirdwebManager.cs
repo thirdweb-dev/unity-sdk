@@ -54,7 +54,7 @@ namespace Thirdweb.Unity
 
             Client = ThirdwebClient.Create(
                 clientId: ClientId,
-                bundleId: BundleId,
+                bundleId: BundleId ?? Application.identifier,
                 httpClient: Application.platform == RuntimePlatform.WebGLPlayer ? new UnityThirdwebHttpClient() : new ThirdwebHttpClient(),
                 headers: new Dictionary<string, string>
                 {

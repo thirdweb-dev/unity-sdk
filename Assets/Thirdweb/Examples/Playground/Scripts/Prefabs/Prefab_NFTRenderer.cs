@@ -78,7 +78,8 @@ namespace Thirdweb.Unity.Examples
                 nftPrefabScript.LoadNFT(nft);
             }
 
-            loadingPanel.SetActive(false);
+            if (loadingPanel != null)
+                loadingPanel.SetActive(false);
         }
     }
 }
