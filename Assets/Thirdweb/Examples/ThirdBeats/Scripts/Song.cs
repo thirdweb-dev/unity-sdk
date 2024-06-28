@@ -5,6 +5,10 @@ using UnityEngine.EventSystems;
 using RotaryHeart.Lib.SerializableDictionary;
 using TMPro;
 using System.Collections;
+using System.Numerics;
+using System.Threading.Tasks;
+using UnityEngine.Events;
+using System.Collections.Generic;
 
 namespace Thirdweb.Unity.Examples
 {
@@ -21,12 +25,15 @@ namespace Thirdweb.Unity.Examples
         private SongState _originalState;
 
         internal static Song _selectedSong;
+        internal static Dictionary<string, bool> _isBeingUnlocked = new();
 
         private AudioSource _musicSource;
 
         private Button _songButton;
         private TMP_Text _songText;
         private Image _songImage;
+        private UnityAction _unlockAction;
+        private BigInteger _price;
 
         private void Awake()
         {
@@ -44,9 +51,12 @@ namespace Thirdweb.Unity.Examples
             _songImage = GetComponent<Image>();
         }
 
-        public void SetupSong(AudioClip clip, bool isAvailable)
+        public void SetupSong(AudioClip clip, BigInteger price, UnityAction unlockAction)
         {
-            _originalState = isAvailable ? SongState.Unlocked : SongState.Locked;
+            _isBeingUnlocked.TryAdd(clip.name, false);
+            _unlockAction = unlockAction;
+            _price = price;
+            _originalState = price == 0 || _isBeingUnlocked[clip.name] ? SongState.Unlocked : SongState.Locked;
             Clip = clip;
             SetState(_originalState);
         }
@@ -58,10 +68,17 @@ namespace Thirdweb.Unity.Examples
 
         private void SelectSong()
         {
-            if (_currentState == SongState.Locked)
+            if (_currentState == SongState.Locked && !_isBeingUnlocked[Clip.name])
             {
-                ThirdwebDebug.LogWarning("Cannot select unavailable song.");
-                return;
+                if (MenuManager.Instance.Balance < _price)
+                {
+                    ThirdwebDebug.LogWarning("Cannot unlock song. Not enough funds.");
+                    return;
+                }
+                Debug.Log("Unlocking song in the background...");
+                _unlockAction?.Invoke();
+                _isBeingUnlocked[Clip.name] = true;
+                _originalState = SongState.Unlocked;
             }
 
             if (_selectedSong != null)
@@ -82,7 +99,18 @@ namespace Thirdweb.Unity.Examples
             {
                 var lengthInMinutes = Mathf.Floor(Clip.length / 60);
                 var extraSeconds = Mathf.Floor(Clip.length % 60);
-                _songText.text = Clip.name + (_currentState != SongState.Unlocked ? $" ({_currentState})" : $" ({lengthInMinutes}:{extraSeconds:00})");
+                if (SongState.Locked == state)
+                {
+                    _songText.text = Clip.name + $" ({_price.ToString().ToEth(0, true)} $NOTES)";
+                }
+                else if (SongState.Playing == state)
+                {
+                    _songText.text = Clip.name + " (Playing)";
+                }
+                else if (SongState.Unlocked == state)
+                {
+                    _songText.text = Clip.name + $" ({lengthInMinutes}:{extraSeconds:00})";
+                }
             }
             else
             {

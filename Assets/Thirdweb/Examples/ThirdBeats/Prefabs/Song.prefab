@@ -215,7 +215,7 @@ MonoBehaviour:
     _values:
     - {r: 0, g: 0.47058824, b: 0.33333334, a: 1}
     - {r: 0.07450981, g: 0.30588236, b: 0.40784314, a: 1}
-    - {r: 0.03970537, g: 0.16559729, b: 0.22107512, a: 1}
+    - {r: 0.6156863, g: 0.28627452, b: 0.09803922, a: 1}
 --- !u!222 &6524174795315058554
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -237,7 +237,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.46885002, b: 0.33501366, a: 1}
+  m_Color: {r: 0.07450981, g: 0.30588236, b: 0.40784314, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
