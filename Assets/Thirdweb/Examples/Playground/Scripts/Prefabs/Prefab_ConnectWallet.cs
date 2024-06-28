@@ -1,9 +1,7 @@
 using UnityEngine;
-using Thirdweb;
 using System;
 using TMPro;
 using UnityEngine.Events;
-using Thirdweb.Redcode.Awaiting;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Numerics;

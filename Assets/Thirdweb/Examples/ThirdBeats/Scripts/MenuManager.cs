@@ -1,15 +1,13 @@
 using System;
 using UnityEngine;
 using UnityEngine.Events;
-using RotaryHeart.Lib.SerializableDictionary;
 using System.Collections.Generic;
 using System.Numerics;
 using TMPro;
 using System.Collections;
 using System.Linq;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Thirdweb.Redcode.Awaiting;
+using System.Threading.Tasks;
 
 namespace Thirdweb.Unity.Examples
 {
@@ -127,7 +125,11 @@ namespace Thirdweb.Unity.Examples
 
                 InvokeRepeating(nameof(UpdateBalance), 0f, 5f);
 
-                await new WaitUntil(() => _isReady);
+                // wait until _isReady
+                while (!_isReady)
+                {
+                    await Task.Delay(100);
+                }
 
                 OnLoggedIn.Invoke();
             }

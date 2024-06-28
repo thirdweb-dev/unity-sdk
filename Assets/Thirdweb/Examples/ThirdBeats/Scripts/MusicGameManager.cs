@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Thirdweb.Redcode.Awaiting;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -310,7 +310,8 @@ namespace Thirdweb.Unity.Examples
         {
             isGameEnding = true;
             audioSource.Stop();
-            await new WaitForSeconds(2f);
+            // wait 2 seconds
+            await Task.Delay(2000);
             isGameRunning = false;
             isGameEnding = false;
             OnGameEnded.Invoke(
@@ -321,7 +322,7 @@ namespace Thirdweb.Unity.Examples
                     cancelled = cancelled
                 }
             );
-            await new WaitForSeconds(3f);
+            await Task.Delay(3000);
         }
 
         public void CancelGame()

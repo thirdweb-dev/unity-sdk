@@ -11,7 +11,6 @@ using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectUnity.Core;
 using WalletConnectUnity.Modal;
-using Thirdweb.Redcode.Awaiting;
 using System.Linq;
 using WalletConnectUnity.Nethereum;
 using Nethereum.RPC.Eth.DTOs;
@@ -208,7 +207,10 @@ namespace Thirdweb.Unity
             if (WalletConnect.Instance.IsInitialized)
                 CreateNewSession();
 
-            await new WaitUntil(() => _isConnected || _exception != null);
+            while (!_isConnected && _exception == null)
+            {
+                await Task.Delay(100);
+            }
 
             WalletConnectModal.Ready -= OnReady;
             WalletConnect.Instance.ActiveSessionChanged -= OnActiveSessionChanged;
