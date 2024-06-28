@@ -6,9 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Thirdweb/Examples/_Scenes/Scene_ThirdBeats.unity
-    guid: e373095b368aec04a80cba660f521756
-  - enabled: 0
     path: Assets/Thirdweb/Examples/_Scenes/Scene_Playground.unity
     guid: bd374468f6e2ace4c81d8f34ac8672ca
+  - enabled: 1
+    path: Assets/Thirdweb/Examples/_Scenes/Scene_ThirdBeats.unity
+    guid: e373095b368aec04a80cba660f521756
   m_configObjects: {}
