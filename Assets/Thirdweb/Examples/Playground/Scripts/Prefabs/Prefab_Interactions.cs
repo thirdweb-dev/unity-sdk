@@ -358,6 +358,7 @@ namespace Thirdweb.Unity.Examples
 
         public async void Custom_ZkSyncAA()
         {
+            Debugger.Instance.Log("Custom ZkSync AA", "Sending a self transfer transaction to ZkSync Sepolia...");
             var zkSyncSepolia = 300;
             var wallet = _connectedWallet ?? await PrivateKeyWallet.Generate(_client);
             var zkSmartWallet = await SmartWallet.Create(personalWallet: wallet, chainId: zkSyncSepolia, gasless: true);
