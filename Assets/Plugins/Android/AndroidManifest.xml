@@ -16,7 +16,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="mythirdwebgame" />
+                <data android:scheme="com.thirdweb.unitysdk" />
             </intent-filter>
 
             <meta-data android:name="unityplayer.UnityActivity" android:value="true" />

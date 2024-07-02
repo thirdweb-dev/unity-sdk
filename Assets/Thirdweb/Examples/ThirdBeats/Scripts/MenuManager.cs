@@ -97,7 +97,7 @@ namespace Thirdweb.Unity.Examples
                         _ = await (_wallet as InAppWallet).LoginWithOauth(
                             isMobile: Application.isMobilePlatform,
                             browserOpenAction: (url) => Application.OpenURL(url),
-                            mobileRedirectScheme: "mythirdwebgame",
+                            mobileRedirectScheme: "com.thirdweb.unitysdk://",
                             browser: new CrossPlatformUnityBrowser()
                         );
                     }
