@@ -338,9 +338,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1025304751}
-  - {fileID: 611906264}
   - {fileID: 1198968335}
+  - {fileID: 611906264}
+  - {fileID: 1025304751}
   m_Father: {fileID: 1553730131}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &184035205
@@ -1405,10 +1405,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 395488094}
+  - component: {fileID: 395488097}
   - component: {fileID: 395488096}
   - component: {fileID: 395488095}
   m_Layer: 0
-  m_Name: Label_A
+  m_Name: Label_D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1567,6 +1568,44 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &395488097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 395488093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ed4c3d9d2b5a44498c3f789830cf922, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  platformActive:
+    reorderableList:
+      canAdd: 1
+      canRemove: 1
+      draggable: 1
+      expandable: 1
+      multipleSelection: 1
+      isExpanded: 1
+      label:
+        m_Text: Keys
+        m_Image: {fileID: 0}
+        m_Tooltip: 
+      headerHeight: 18
+      footerHeight: 13
+      slideEasing: 0.15
+      verticalSpacing: 2
+      showDefaultBackground: 1
+      elementDisplayType: 0
+      elementNameProperty: 
+      elementNameOverride: 
+      elementIcon: {fileID: 0}
+    reqReferences: {fileID: 0}
+    isExpanded: 1
+    _keyValues: 0b00000008000000
+    _keys: 0b00000008000000
+    _values: 0000
 --- !u!1 &452383619
 GameObject:
   m_ObjectHideFlags: 0
@@ -1783,10 +1822,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 476634572}
+  - component: {fileID: 476634575}
   - component: {fileID: 476634574}
   - component: {fileID: 476634573}
   m_Layer: 0
-  m_Name: Label_A
+  m_Name: Label_S
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1945,6 +1985,44 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &476634575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 476634571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ed4c3d9d2b5a44498c3f789830cf922, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  platformActive:
+    reorderableList:
+      canAdd: 0
+      canRemove: 0
+      draggable: 0
+      expandable: 0
+      multipleSelection: 0
+      isExpanded: 0
+      label:
+        m_Text: 
+        m_Image: {fileID: 0}
+        m_Tooltip: 
+      headerHeight: 0
+      footerHeight: 0
+      slideEasing: 0
+      verticalSpacing: 0
+      showDefaultBackground: 0
+      elementDisplayType: 0
+      elementNameProperty: 
+      elementNameOverride: 
+      elementIcon: {fileID: 0}
+    reqReferences: {fileID: 0}
+    isExpanded: 1
+    _keyValues: 0b00000008000000
+    _keys: 0b00000008000000
+    _values: 0000
 --- !u!1 &496964615
 GameObject:
   m_ObjectHideFlags: 0
@@ -4462,6 +4540,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1074604699}
+  - component: {fileID: 1074604702}
   - component: {fileID: 1074604701}
   - component: {fileID: 1074604700}
   m_Layer: 0
@@ -4624,6 +4703,44 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1074604702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074604698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ed4c3d9d2b5a44498c3f789830cf922, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  platformActive:
+    reorderableList:
+      canAdd: 0
+      canRemove: 0
+      draggable: 0
+      expandable: 0
+      multipleSelection: 0
+      isExpanded: 0
+      label:
+        m_Text: 
+        m_Image: {fileID: 0}
+        m_Tooltip: 
+      headerHeight: 0
+      footerHeight: 0
+      slideEasing: 0
+      verticalSpacing: 0
+      showDefaultBackground: 0
+      elementDisplayType: 0
+      elementNameProperty: 
+      elementNameOverride: 
+      elementIcon: {fileID: 0}
+    reqReferences: {fileID: 0}
+    isExpanded: 1
+    _keyValues: 0b00000008000000
+    _keys: 0b00000008000000
+    _values: 0000
 --- !u!1 &1091881567
 GameObject:
   m_ObjectHideFlags: 0
@@ -6629,9 +6746,9 @@ MonoBehaviour:
   - {fileID: 1010951435666739512}
   - {fileID: 64474800}
   hitAreas:
-  - {fileID: 1198968335}
-  - {fileID: 611906264}
-  - {fileID: 1025304751}
+  - {fileID: 1198968337}
+  - {fileID: 611906266}
+  - {fileID: 1025304753}
   baseTileFallSpeed: 5
   hitEffectPrefab: {fileID: 1413958753429881058, guid: f327f7ce218a01f438284bef62b7e309, type: 3}
   OnGameEnded:

@@ -35,7 +35,7 @@ namespace Thirdweb.Unity.Examples
         private Transform[] tileSpawnPoints; // Array of spawn points for three lanes
 
         [field: SerializeField]
-        private Transform[] hitAreas; // Array of hit areas for left, center, and right
+        private Collider2D[] hitAreas; // Array of hit areas for left, center, and right
 
         [field: SerializeField]
         private float baseTileFallSpeed = 5f; // Base fall speed for tiles
@@ -116,7 +116,7 @@ namespace Thirdweb.Unity.Examples
         private void CalculateFallTime(float tileFallSpeed)
         {
             // Calculate the fall time based on the distance between spawn point and hit area, and the fall speed
-            float distance = Vector3.Distance(tileSpawnPoints[0].position, hitAreas[0].position);
+            float distance = Vector3.Distance(tileSpawnPoints[0].position, hitAreas[0].transform.position);
             fallTime = distance / tileFallSpeed;
         }
 
@@ -227,7 +227,7 @@ namespace Thirdweb.Unity.Examples
             tile.Initialize(baseTileFallSpeed);
         }
 
-        private void Update()
+        void Update()
         {
             if (!isGameRunning && !isGameEnding)
                 return;
@@ -237,7 +237,7 @@ namespace Thirdweb.Unity.Examples
                 EndGame();
             }
 
-            // Input handling for A, S, and D keys
+            // Desktop Input Handling
             if (Input.GetKeyDown(KeyCode.A))
             {
                 HandleInput(0);
@@ -249,6 +249,36 @@ namespace Thirdweb.Unity.Examples
             if (Input.GetKeyDown(KeyCode.D))
             {
                 HandleInput(2);
+            }
+
+            // Mobile Input Handling
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+                if (touch.phase == TouchPhase.Began)
+                {
+                    Vector3 touchPosition = Camera.main.ScreenToWorldPoint(new Vector3(touch.position.x, touch.position.y, 0));
+                    CheckHitAreas(touchPosition);
+                }
+            }
+
+            // Editor Mouse Click Handling (for testing)
+            if (Application.isEditor && Input.GetMouseButtonDown(0))
+            {
+                Vector3 mousePosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
+                CheckHitAreas(mousePosition);
+            }
+        }
+
+        private void CheckHitAreas(Vector3 position)
+        {
+            foreach (var hitArea in hitAreas)
+            {
+                if (hitArea.OverlapPoint(position))
+                {
+                    HandleInput(System.Array.IndexOf(hitAreas, hitArea));
+                    return;
+                }
             }
         }
 
@@ -264,7 +294,7 @@ namespace Thirdweb.Unity.Examples
 
         private void HandleInput(int hitAreaIndex)
         {
-            Collider2D hitAreaCollider = hitAreas[hitAreaIndex].GetComponent<Collider2D>();
+            Collider2D hitAreaCollider = hitAreas[hitAreaIndex];
 
             if (hitAreaCollider != null)
             {

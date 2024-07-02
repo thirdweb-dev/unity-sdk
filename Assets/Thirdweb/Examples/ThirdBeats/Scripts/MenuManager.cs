@@ -169,41 +169,55 @@ namespace Thirdweb.Unity.Examples
         {
             try
             {
-                foreach (Transform child in SongContent)
+                // Clear SongContent efficiently
+                for (int i = SongContent.childCount - 1; i >= 0; i--)
                 {
-                    Destroy(child.gameObject);
+                    Destroy(SongContent.GetChild(i).gameObject);
                 }
+
+                var tasks = new List<Task>();
 
                 foreach (var song in MusicTracks)
                 {
-                    var price = BigInteger.Zero;
-                    bool isOwned = true;
-                    // Find related nft if any
-                    NFT nft = _songNfts.FirstOrDefault(nft => nft.Metadata.Name.ToLower() == song.name.ToLower());
-                    if (nft.Metadata.Id != null && nft.Metadata.AnimationUrl != null)
-                    {
-                        // Check balance
-                        var balance = await _songContract.ERC1155_BalanceOf(await _wallet.GetAddress(), BigInteger.Parse(nft.Metadata.Id));
-                        isOwned = balance > 0;
-                        if (!isOwned)
-                        {
-                            var claimCondition = await _songContract.DropERC1155_GetActiveClaimCondition(BigInteger.Parse(nft.Metadata.Id));
-                            price = claimCondition.PricePerToken;
-                        }
-                        else
-                        {
-                            price = BigInteger.Zero;
-                        }
-                    }
-
-                    var songInstance = Instantiate(SongPrefab, SongContent);
-                    songInstance.SetupSong(clip: song, price: price, unlockAction: price == 0 ? null : () => UnlockSongSync(price, BigInteger.Parse(nft.Metadata.Id)));
+                    tasks.Add(SetupSongInstance(song));
                 }
+
+                await Task.WhenAll(tasks);
             }
             catch (Exception e)
             {
                 ThirdwebDebug.LogException(e);
             }
+        }
+
+        private async Task SetupSongInstance(AudioClip song)
+        {
+            var price = BigInteger.Zero;
+            bool isOwned = true;
+
+            // Find related NFT if any
+            var nft = _songNfts.FirstOrDefault(nft => nft.Metadata.Name.ToLower() == song.name.ToLower());
+
+            if (nft.Metadata.Id != null && nft.Metadata.AnimationUrl != null)
+            {
+                var nftId = BigInteger.Parse(nft.Metadata.Id);
+                var address = await _wallet.GetAddress();
+
+                var balanceTask = _songContract.ERC1155_BalanceOf(address, nftId);
+                var claimConditionTask = _songContract.DropERC1155_GetActiveClaimCondition(nftId);
+
+                var balance = await balanceTask;
+                isOwned = balance > 0;
+
+                if (!isOwned)
+                {
+                    var claimCondition = await claimConditionTask;
+                    price = claimCondition.PricePerToken;
+                }
+            }
+
+            var songInstance = Instantiate(SongPrefab, SongContent);
+            songInstance.SetupSong(clip: song, price: price, unlockAction: price == 0 ? null : () => UnlockSongSync(price, BigInteger.Parse(nft.Metadata.Id)));
         }
 
         private async void ClaimTokens(GameResult gameResult)
