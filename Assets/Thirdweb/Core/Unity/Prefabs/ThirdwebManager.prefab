@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f46ce7448bd81e2468a9c174e6f6caf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <ClientId>k__BackingField: 7e7c070be896e27ffd5352e264df9bcc
-  <BundleId>k__BackingField: com.thirdweb.unitysdk
+  <ClientId>k__BackingField: 
+  <BundleId>k__BackingField: 
   <InitializeOnAwake>k__BackingField: 1
   <ShowDebugLogs>k__BackingField: 1
 --- !u!1001 &5843082358259632585
