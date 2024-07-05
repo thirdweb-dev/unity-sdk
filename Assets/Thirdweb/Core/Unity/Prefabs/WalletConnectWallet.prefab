@@ -3730,7 +3730,7 @@ GameObject:
   - component: {fileID: 927399162371239047}
   - component: {fileID: 5769675580277394246}
   m_Layer: 0
-  m_Name: WalletConnectModal
+  m_Name: WalletConnectWallet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

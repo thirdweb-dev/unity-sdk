@@ -175,7 +175,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5852007486238492023, guid: 6393a0b7364627248830caa747134c99, type: 3}
       propertyPath: m_Name
-      value: WalletConnectModal
+      value: WalletConnectWallet
       objectReference: {fileID: 0}
     - target: {fileID: 6065279674905622718, guid: 6393a0b7364627248830caa747134c99, type: 3}
       propertyPath: m_AnchorMax.y

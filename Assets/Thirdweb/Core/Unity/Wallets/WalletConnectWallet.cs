@@ -19,30 +19,64 @@ namespace Thirdweb.Unity
 {
     public class WalletConnectWallet : IThirdwebWallet
     {
-        #region Core
-
         public ThirdwebClient Client => _client;
 
         public ThirdwebAccountType AccountType => ThirdwebAccountType.ExternalAccount;
 
         protected ThirdwebClient _client;
 
-        protected Exception _exception;
-        protected bool _isConnected;
-        protected string[] _supportedChains;
-        protected string[] _includedWalletIds;
+        protected static Exception _exception;
+        protected static bool _isConnected;
+        protected static string[] _supportedChains;
+        protected static string[] _includedWalletIds;
 
-        private WalletConnectServiceCore _walletConnectService;
+        private static WalletConnectServiceCore _walletConnectService;
 
         protected WalletConnectWallet(ThirdwebClient client)
         {
             _client = client;
         }
 
-        public static Task<WalletConnectWallet> Create(ThirdwebClient client)
+        public async static Task<WalletConnectWallet> Create(ThirdwebClient client, BigInteger initialChainId, BigInteger[] supportedChains)
         {
-            return Task.FromResult(new WalletConnectWallet(client));
+            var eip155ChainsSupported = new string[] { };
+            if (supportedChains != null)
+                eip155ChainsSupported = eip155ChainsSupported.Concat(supportedChains.Select(x => $"eip155:{x}")).ToArray();
+
+            _exception = null;
+            _isConnected = false;
+            _supportedChains = eip155ChainsSupported;
+
+            WalletConnectModal.Ready += OnReady;
+            WalletConnect.Instance.ActiveSessionChanged += OnActiveSessionChanged;
+            WalletConnect.Instance.SessionDisconnected += OnSessionDisconnected;
+
+            if (WalletConnect.Instance.IsInitialized)
+                CreateNewSession();
+
+            while (!_isConnected && _exception == null)
+            {
+                await Task.Delay(100);
+            }
+
+            WalletConnectModal.Ready -= OnReady;
+            WalletConnect.Instance.ActiveSessionChanged -= OnActiveSessionChanged;
+            WalletConnect.Instance.SessionDisconnected -= OnSessionDisconnected;
+
+            if (_exception != null)
+            {
+                throw _exception;
+            }
+            else
+            {
+                await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{initialChainId}");
+                _walletConnectService = new WalletConnectServiceCore(WalletConnect.Instance.SignClient);
+            }
+
+            return new WalletConnectWallet(client);
         }
+
+        #region IThirdwebWallet
 
         public Task<string> GetAddress()
         {
@@ -186,54 +220,32 @@ namespace Thirdweb.Unity
             return responseString;
         }
 
+        public Task<string> RecoverAddressFromEthSign(string message, string signature)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> RecoverAddressFromPersonalSign(string message, string signature)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<string> RecoverAddressFromTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData, string signature)
+            where TDomain : IDomain
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         #region UI
 
-        public async Task<string> Connect(BigInteger initialChainId, BigInteger[] supportedChains)
-        {
-            var eip155ChainsSupported = new string[] { };
-            if (supportedChains != null)
-                eip155ChainsSupported = eip155ChainsSupported.Concat(supportedChains.Select(x => $"eip155:{x}")).ToArray();
-
-            _exception = null;
-            _isConnected = false;
-            _supportedChains = eip155ChainsSupported;
-
-            WalletConnectModal.Ready += OnReady;
-            WalletConnect.Instance.ActiveSessionChanged += OnActiveSessionChanged;
-            WalletConnect.Instance.SessionDisconnected += OnSessionDisconnected;
-
-            if (WalletConnect.Instance.IsInitialized)
-                CreateNewSession();
-
-            while (!_isConnected && _exception == null)
-            {
-                await Task.Delay(100);
-            }
-
-            WalletConnectModal.Ready -= OnReady;
-            WalletConnect.Instance.ActiveSessionChanged -= OnActiveSessionChanged;
-            WalletConnect.Instance.SessionDisconnected -= OnSessionDisconnected;
-
-            if (_exception != null)
-            {
-                throw _exception;
-            }
-            else
-            {
-                await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{initialChainId}");
-                _walletConnectService = new WalletConnectServiceCore(WalletConnect.Instance.SignClient);
-                return await GetAddress();
-            }
-        }
-
-        protected void OnSessionDisconnected(object sender, EventArgs e)
+        protected static void OnSessionDisconnected(object sender, EventArgs e)
         {
             _isConnected = false;
         }
 
-        protected void OnActiveSessionChanged(object sender, SessionStruct sessionStruct)
+        protected static void OnActiveSessionChanged(object sender, SessionStruct sessionStruct)
         {
             if (!string.IsNullOrEmpty(sessionStruct.Topic))
             {
@@ -245,7 +257,7 @@ namespace Thirdweb.Unity
             }
         }
 
-        protected async void OnReady(object sender, ModalReadyEventArgs args)
+        protected static async void OnReady(object sender, ModalReadyEventArgs args)
         {
             try
             {
@@ -263,7 +275,7 @@ namespace Thirdweb.Unity
             }
         }
 
-        protected void CreateNewSession()
+        protected static void CreateNewSession()
         {
             try
             {

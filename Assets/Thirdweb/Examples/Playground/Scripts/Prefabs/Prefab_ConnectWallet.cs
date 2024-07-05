@@ -32,6 +32,7 @@ namespace Thirdweb.Unity.Examples
             PrivateKeyWallet,
             InAppWallet,
             WalletConnectWallet,
+            MetaMaskWallet,
             SmartWallet
         }
 
@@ -73,6 +74,7 @@ namespace Thirdweb.Unity.Examples
         public List<TMP_Text> addressTexts;
         public List<TMP_Text> balanceTexts;
         public List<WalletIcon> walletIcons;
+        public int balanceUpdateIntervalInSeconds = 5;
 
         [Header("InAppWallet UI")]
         public GameObject OTPPanel;
@@ -211,8 +213,13 @@ namespace Thirdweb.Unity.Examples
                 switch (walletProvider)
                 {
                     case WalletProvider.WalletConnectWallet:
-                        var wcWallet = await WalletConnectWallet.Create(client: _client);
+                        var wcWallet = await WalletConnectWallet.Create(_client, BigInteger.Parse(activeChainId), allSupportedChainIds.Select(x => BigInteger.Parse(x)).ToArray());
                         OnConnectionRequested.Invoke(wcWallet, new ConnectionParameters() { provider = WalletProvider.WalletConnectWallet });
+                        break;
+                    case WalletProvider.MetaMaskWallet:
+                        var mmWallet = await MetaMaskWallet.Create(client: _client, BigInteger.Parse(activeChainId));
+                        await MetaMaskWallet.EnsureCorrectNetwork(BigInteger.Parse(activeChainId));
+                        OnConnectionRequested.Invoke(mmWallet, new ConnectionParameters() { provider = WalletProvider.MetaMaskWallet });
                         break;
                     default:
                         throw new NotImplementedException($"Wallet provider {walletProvider} not implemented.");
@@ -253,6 +260,8 @@ namespace Thirdweb.Unity.Examples
 
         private async void Connect(IThirdwebWallet wallet, ConnectionParameters connectionParameters)
         {
+            ThirdwebDebug.Log($"Finalizing Connection to {wallet.GetType()}...");
+
             try
             {
                 OnConnectionStarted.Invoke(wallet, connectionParameters);
@@ -261,21 +270,13 @@ namespace Thirdweb.Unity.Examples
                 {
                     _address = await wallet.GetAddress();
                 }
-                else if (wallet is WalletConnectWallet)
-                {
-                    _address = await (wallet as WalletConnectWallet).Connect(BigInteger.Parse(activeChainId), allSupportedChainIds.Select(x => BigInteger.Parse(x)).ToArray());
-                }
                 else if (wallet is InAppWallet)
                 {
                     _address = await LoginWithInAppWallet(wallet as InAppWallet, connectionParameters);
                 }
-                else if (wallet is PrivateKeyWallet)
-                {
-                    _address = await (wallet as PrivateKeyWallet).GetAddress();
-                }
                 else
                 {
-                    throw new NotImplementedException($"Wallet type {wallet.GetType()} not implemented.");
+                    _address = await wallet.GetAddress();
                 }
 
                 _activeWallet = wallet;
@@ -286,6 +287,8 @@ namespace Thirdweb.Unity.Examples
                     _address = await smartWallet.GetAddress();
                     _activeWallet = smartWallet;
                 }
+
+                ThirdwebDebug.Log($"Connected to {_address}");
 
                 PostConnect(connectionParameters);
             }
@@ -358,15 +361,7 @@ namespace Thirdweb.Unity.Examples
         {
             ThirdwebDebug.Log($"Connected to {_address}");
 
-            var addy = $"{_address[..4]}...{_address[^4..]}";
-
-            foreach (var addressText in addressTexts)
-                addressText.text = addy;
-
-            var bal = await _activeWallet.GetBalance(BigInteger.Parse(activeChainId));
-            var balStr = $"{bal.ToString().ToEth()} ETH";
-            foreach (var balanceText in balanceTexts)
-                balanceText.text = balStr;
+            await UpdateAddressAndBalanceAsync();
 
             if (wc != null)
             {
@@ -375,9 +370,41 @@ namespace Thirdweb.Unity.Examples
                     walletImage.sprite = currentWalletIcon;
             }
 
+            UpdateAddressAndBalancePeriodically();
+
             OnConnected.Invoke(_activeWallet);
 
             ThirdwebDebug.Log($"Connected to {_activeWallet.GetType()} with address {_address}");
+        }
+
+        private async void UpdateAddressAndBalancePeriodically()
+        {
+            while (Application.isPlaying && _activeWallet != null)
+            {
+                try
+                {
+                    await UpdateAddressAndBalanceAsync();
+                }
+                catch (Exception e)
+                {
+                    ThirdwebDebug.LogError($"Failed to update address and balance: {e}");
+                }
+
+                await Task.Delay(balanceUpdateIntervalInSeconds * 1000);
+            }
+        }
+
+        private async Task UpdateAddressAndBalanceAsync()
+        {
+            _address = await _activeWallet.GetAddress();
+            var addy = $"{_address[..4]}...{_address[^4..]}";
+            foreach (var addressText in addressTexts)
+                addressText.text = addy;
+
+            var bal = await _activeWallet.GetBalance(BigInteger.Parse(activeChainId));
+            var balStr = $"{bal.ToString().ToEth()} ETH"; // TODO: Fetch native token symbol
+            foreach (var balanceText in balanceTexts)
+                balanceText.text = balStr;
         }
 
         public void CopyAddress()
