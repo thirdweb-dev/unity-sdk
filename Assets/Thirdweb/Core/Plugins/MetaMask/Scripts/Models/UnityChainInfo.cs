@@ -14,7 +14,7 @@ namespace MetaMask.Unity.Models
         public UnityChainInfo(ChainInfo other) : base(other)
         {
         }
-        
+
         public bool IsValid()
         {
             return !string.IsNullOrWhiteSpace(ChainId) &&

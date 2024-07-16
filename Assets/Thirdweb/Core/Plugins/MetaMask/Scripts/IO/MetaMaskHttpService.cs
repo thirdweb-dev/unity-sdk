@@ -11,6 +11,7 @@ using UnityEngine.Networking;
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System;
 using UnityEngine.Scripting;
+using MetaMask.Unity.Utils;
 using Newtonsoft.Json;
 using System.Runtime.InteropServices;
 #endif
@@ -28,7 +29,7 @@ namespace MetaMask.IO
             POST,
             DELETE
         }
-
+        
         /// <summary>
         /// A class that represents a single HTTP Request
         /// </summary>
@@ -62,16 +63,13 @@ namespace MetaMask.IO
 
             public Task<string> Get(string uri)
             {
-                var fullUrl = string.IsNullOrWhiteSpace(baseUrl)
-                    ? uri
-                    : baseUrl.EndsWith("/") || uri.StartsWith("/")
-                        ? $"{baseUrl}{uri}"
-                        : $"{baseUrl}/{uri}";
-
+                var fullUrl = string.IsNullOrWhiteSpace(baseUrl) ? uri : 
+                    baseUrl.EndsWith("/") || uri.StartsWith("/") ? $"{baseUrl}{uri}" : $"{baseUrl}/{uri}";
+                
                 // ensure we dont end on a /
                 if (fullUrl.EndsWith("/"))
                     fullUrl = fullUrl.Substring(0, fullUrl.Length - 1);
-
+                
                 var request = new UnityHttpServiceRequest()
                 {
                     url = fullUrl,
@@ -80,7 +78,7 @@ namespace MetaMask.IO
                     authValue = authValue,
                     requestType = RequestType.GET
                 };
-
+                
                 service.requests.Enqueue(request);
 
                 return request.requestTask.Task;
@@ -88,16 +86,13 @@ namespace MetaMask.IO
 
             public Task<string> Post(string uri, string @params)
             {
-                var fullUrl = string.IsNullOrWhiteSpace(baseUrl)
-                    ? uri
-                    : baseUrl.EndsWith("/") || uri.StartsWith("/")
-                        ? $"{baseUrl}{uri}"
-                        : $"{baseUrl}/{uri}";
-
+                var fullUrl = string.IsNullOrWhiteSpace(baseUrl) ? uri : 
+                    baseUrl.EndsWith("/") || uri.StartsWith("/") ? $"{baseUrl}{uri}" : $"{baseUrl}/{uri}";
+                
                 // ensure we dont end on a /
                 if (fullUrl.EndsWith("/"))
                     fullUrl = fullUrl.Substring(0, fullUrl.Length - 1);
-
+                
                 var request = new UnityHttpServiceRequest()
                 {
                     url = fullUrl,
@@ -107,24 +102,21 @@ namespace MetaMask.IO
                     authKey = authKey,
                     authValue = authValue
                 };
-
+                
                 service.requests.Enqueue(request);
 
                 return request.requestTask.Task;
             }
-
+            
             public Task<string> Delete(string uri, string @params)
             {
-                var fullUrl = string.IsNullOrWhiteSpace(baseUrl)
-                    ? uri
-                    : baseUrl.EndsWith("/") || uri.StartsWith("/")
-                        ? $"{baseUrl}{uri}"
-                        : $"{baseUrl}/{uri}";
-
+                var fullUrl = string.IsNullOrWhiteSpace(baseUrl) ? uri : 
+                    baseUrl.EndsWith("/") || uri.StartsWith("/") ? $"{baseUrl}{uri}" : $"{baseUrl}/{uri}";
+                
                 // ensure we dont end on a /
                 if (fullUrl.EndsWith("/"))
                     fullUrl = fullUrl.Substring(0, fullUrl.Length - 1);
-
+                
                 var request = new UnityHttpServiceRequest()
                 {
                     url = fullUrl,
@@ -134,7 +126,7 @@ namespace MetaMask.IO
                     authKey = authKey,
                     authValue = authValue
                 };
-
+                
                 service.requests.Enqueue(request);
 
                 return request.requestTask.Task;
@@ -143,7 +135,7 @@ namespace MetaMask.IO
 
         private Queue<UnityHttpServiceRequest> requests = new Queue<UnityHttpServiceRequest>();
         private bool isCheckingQueue;
-
+        
         private IMetaMaskSDK _metaMaskSDK => MetaMaskSDK.SDKInstance;
 
         protected override void Awake()
@@ -192,7 +184,7 @@ namespace MetaMask.IO
                     method = "GET";
                     break;
             }
-
+            
 #if UNITY_WEBGL && !UNITY_EDITOR
             yield return SendRequestWebgl(method, request);
 #else
@@ -207,8 +199,10 @@ namespace MetaMask.IO
             bool isGet = request.requestType == RequestType.GET;
             string authHeaderKey = request.authKey;
             string authHeaderValue = request.authValue;
-
-            using (UnityWebRequest uwr = !isGet ? new UnityWebRequest(url, method) : UnityWebRequest.Get(url))
+            
+            using (UnityWebRequest uwr = !isGet
+                       ? new UnityWebRequest(url, method)
+                       : UnityWebRequest.Get(url))
             {
                 if (!string.IsNullOrWhiteSpace(authHeaderValue) && !string.IsNullOrWhiteSpace(authHeaderKey))
                 {
@@ -218,10 +212,7 @@ namespace MetaMask.IO
                 if (Infura.IsUrl(url))
                 {
                     uwr.SetRequestHeader("X-Infura-User-Agent", $"metamask/sdk-csharp {_metaMaskSDK.SDKVersion}");
-                    uwr.SetRequestHeader(
-                        "Metamask-Sdk-Info",
-                        $"Sdk/Unity SdkVersion/{_metaMaskSDK.SDKVersion} Platform/{SystemInfo.operatingSystem} dApp/{_metaMaskSDK.Config.AppUrl} dAppTitle/{_metaMaskSDK.Config.AppName}"
-                    );
+                    uwr.SetRequestHeader("Metamask-Sdk-Info", $"Sdk/Unity SdkVersion/{_metaMaskSDK.SDKVersion} Platform/{SystemInfo.operatingSystem} dApp/{_metaMaskSDK.Config.AppUrl} dAppTitle/{_metaMaskSDK.Config.AppName}");
                 }
 
                 if (!string.IsNullOrWhiteSpace(@params))
@@ -232,12 +223,12 @@ namespace MetaMask.IO
                     uwr.uploadHandler.contentType = "application/json";
                     uwr.SetRequestHeader("Content-Type", "application/json");
                 }
-
+                
                 yield return uwr.SendWebRequest();
 
                 switch (uwr.result)
                 {
-                    case UnityWebRequest.Result.ConnectionError:
+                    case UnityWebRequest.Result.ConnectionError: 
                     case UnityWebRequest.Result.DataProcessingError:
                     case UnityWebRequest.Result.ProtocolError:
                         request.requestTask.SetException(new IOException(uwr.error + " | " + uwr.downloadHandler.text));

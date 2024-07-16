@@ -287,7 +287,13 @@ namespace MetaMask.Unity
         public void Initialize()
         {
             var transport = _transport ? _transport : Resources.Load<MetaMaskUnityUITransport>("MetaMask/Transports/UnityUI");
-            var socket = new MetaMaskUnitySocketIO();
+            
+#if !UNITY_WEBGL || UNITY_EDITOR
+            var socket = new MetaMask.Providers.Sockets.MetaMaskUnitySocketIO();
+#else
+            IMetaMaskSocketWrapper socket = null;
+#endif
+            
             Initialize(MetaMaskConfig, transport, socket);
         }
 
@@ -296,7 +302,13 @@ namespace MetaMask.Unity
         public void Initialize(MetaMaskConfig config)
         {
             var transport = _transport ? _transport : Resources.Load<MetaMaskUnityUITransport>("MetaMask/Transports/UnityUI");
-            var socket = new MetaMaskUnitySocketIO();
+            
+#if !UNITY_WEBGL || UNITY_EDITOR
+            var socket = new MetaMask.Providers.Sockets.MetaMaskUnitySocketIO();
+#else
+            IMetaMaskSocketWrapper socket = null;
+#endif
+            
             Initialize(config, transport, socket);
         }
 

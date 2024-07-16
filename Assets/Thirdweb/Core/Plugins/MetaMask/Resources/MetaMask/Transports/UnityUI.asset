@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20df40b080d9d4749ba22a363ec31ab8, type: 3}
   m_Name: UnityUI
   m_EditorClassIdentifier: 
-  spawnCanvas: 0
+  userAgent: UnityUGUITransport/1.0.0
+  _useDeeplink: 1
+  spawnCanvas: 1
   metaMaskCanvas: {fileID: 6439922646294248678, guid: 9e03dfd5b166cc246ae7bbe9c62d6baf, type: 3}
-  useUniversalLinks: 0
