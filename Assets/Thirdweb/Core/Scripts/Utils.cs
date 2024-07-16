@@ -557,6 +557,10 @@ namespace Thirdweb
                 case "204":
                 // opBNB Testnet
                 case "5611":
+                // Oasys Testnet
+                case "9372":
+                // Vanar Testnet (Vanguard)
+                case "78600":
                     return false;
                 default:
                     return true;
