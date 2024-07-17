@@ -37,7 +37,7 @@ namespace Thirdweb.Wallets
 
         public Task Disconnect(bool endSession = true)
         {
-            MetaMaskUnity.Instance.Disconnect(endSession);
+            MetaMaskSDK.Instance.Disconnect(endSession);
             _web3 = null;
             return Task.CompletedTask;
         }
@@ -49,7 +49,7 @@ namespace Thirdweb.Wallets
 
         public Task<string> GetAddress()
         {
-            var addy = MetaMaskUnity.Instance.Wallet.SelectedAddress;
+            var addy = MetaMaskSDK.Instance.Wallet.SelectedAddress;
             if (addy != null)
                 addy = addy.ToChecksumAddress();
             return Task.FromResult(addy);
