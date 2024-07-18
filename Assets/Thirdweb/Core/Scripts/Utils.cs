@@ -557,6 +557,8 @@ namespace Thirdweb
                 case "204":
                 // opBNB Testnet
                 case "5611":
+                // Oasys Mainnet
+                case "248":
                 // Oasys Testnet
                 case "9372":
                 // Vanar Testnet (Vanguard)
