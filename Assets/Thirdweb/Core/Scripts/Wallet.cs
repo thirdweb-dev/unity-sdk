@@ -861,6 +861,7 @@ namespace Thirdweb
             {
                 return await Bridge.GetNonce(address, blockTag);
             }
+            else
             {
                 var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
                 var blockParameter =
