@@ -104,36 +104,11 @@ namespace Thirdweb
         /// <returns>A <see cref="Transaction"/> object representing the prepared transaction.</returns>
         public async Task<Transaction> Prepare(string functionName, params object[] args)
         {
-            return await Prepare(functionName, null, args);
-        }
-
-        /// <summary>
-        /// Prepare a transaction by creating a <see cref="Transaction"/> object.
-        /// </summary>
-        /// <param name="functionName">The name of the contract function.</param>
-        /// <param name="from">The address to send the transaction from.</param>
-        /// <param name="args">Optional function arguments.</param>
-        /// <returns>A <see cref="Transaction"/> object representing the prepared transaction.</returns>
-        public async Task<Transaction> Prepare(string functionName, string from = null, params object[] args)
-        {
-            var initialInput = new TransactionInput();
-            if (Utils.IsWebGLBuild())
-            {
-                initialInput.From = from ?? await _sdk.Wallet.GetAddress();
-                initialInput.To = Address;
-            }
-            else
-            {
-                if (this.ABI == null)
-                    this.ABI = await FetchAbi(this.Address, await _sdk.Wallet.GetChainId());
-
-                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
-                var contract = web3.Eth.GetContract(this.ABI, this.Address);
-                var function = Utils.GetFunctionMatchSignature(contract, functionName, args);
-                var fromAddress = from ?? await _sdk.Wallet.GetAddress();
-                initialInput = function.CreateTransactionInput(fromAddress, args);
-            }
-
+            this.ABI ??= await FetchAbi(this.Address, await _sdk.Wallet.GetChainId());
+            var contract = new Nethereum.Contracts.Contract(null, this.ABI, this.Address);
+            var function = Utils.GetFunctionMatchSignature(contract, functionName, args);
+            var fromAddress = await _sdk.Wallet.GetAddress();
+            var initialInput = function.CreateTransactionInput(fromAddress, args);
             return new Transaction(this, initialInput, functionName, args);
         }
 
