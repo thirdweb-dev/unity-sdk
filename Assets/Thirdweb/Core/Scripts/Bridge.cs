@@ -416,6 +416,23 @@ namespace Thirdweb
             return JsonConvert.DeserializeObject<Result<bool>>(result).result;
         }
 
+        public static async Task<int> GetNonce(string address, string blockTag)
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return -1;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebGetNonce(taskId, address, blockTag, jsCallback);
+#endif
+            string result = await task.Task;
+            return JsonConvert.DeserializeObject<Result<int>>(result).result;
+        }
+
         public static async Task<string> ResolveENSFromAddress(string address)
         {
             if (!Utils.IsWebGLBuild())
@@ -507,6 +524,8 @@ namespace Thirdweb
         private static extern string ThirdwebGetSignerAddress(string taskId, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebSmartWalletIsDeployed(string taskId, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebGetNonce(string taskId, string address, string blockTag, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebResolveENSFromAddress(string taskId, string address, Action<string, string, string> cb);
         [DllImport("__Internal")]
