@@ -9,7 +9,7 @@ See full documentation on the [thirdweb portal](https://portal.thirdweb.com/unit
 
 # Technical Demo
 
-Try out our multichain game that leverages Embedded and Smart Wallets to create seamless experiences, built in 3 weeks - [Web3 Warriors](https://web3warriors.thirdweb.com/).
+Try out our multichain game that leverages In-App and Smart Wallets to create seamless experiences, built in 3 weeks - [Web3 Warriors](https://web3warriors.thirdweb.com/).
 
 ![image](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/171198b2-83e7-4c8a-951b-79126dd47abb)
 
@@ -57,7 +57,7 @@ In order to access the SDK, you only need to have a [ThirdwebManager](https://po
 ```csharp
 // Configure the connection
 var connection = new WalletConnection(
-  provider: WalletProvider.EmbeddedWallet, // The wallet provider you want to connect to (Required)
+  provider: WalletProvider.InAppWallet,    // The wallet provider you want to connect to (Required)
   chainId: 5,                              // The chain you want to connect to (Required)
   email: "email@email.com"                 // The email you want to authenticate with (Required for this provider)
 );
