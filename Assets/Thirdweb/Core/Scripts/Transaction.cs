@@ -375,8 +375,7 @@ namespace Thirdweb
                 if (Input.MaxFeePerGas == null && Input.MaxPriorityFeePerGas == null)
                 {
                     ThirdwebDebug.Log("Using Legacy Gas Pricing");
-                    var gasPrice = await GetGasPrice();
-                    Input.GasPrice = new HexBigInteger(gasPrice);
+                    Input.GasPrice ??= new HexBigInteger(await GetGasPrice());
                 }
             }
             return this;
