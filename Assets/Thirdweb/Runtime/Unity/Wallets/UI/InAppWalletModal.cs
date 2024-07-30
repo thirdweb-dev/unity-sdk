@@ -28,6 +28,9 @@ namespace Thirdweb.Unity
             modal.OTPInputField.text = string.Empty;
             modal.InAppWalletCanvas.gameObject.SetActive(true);
 
+            modal.OTPInputField.interactable = true;
+            modal.SubmitButton.interactable = true;
+
             var tcs = new TaskCompletionSource<InAppWallet>();
 
             modal.SubmitButton.onClick.AddListener(async () =>
@@ -38,6 +41,8 @@ namespace Thirdweb.Unity
                     return;
                 }
 
+                modal.OTPInputField.interactable = false;
+                modal.SubmitButton.interactable = false;
                 (var address, var canRetry) = await wallet.SubmitOTP(otp);
                 if (address != null)
                 {
@@ -52,6 +57,8 @@ namespace Thirdweb.Unity
                 else
                 {
                     modal.OTPInputField.text = string.Empty;
+                    modal.OTPInputField.interactable = true;
+                    modal.SubmitButton.interactable = true;
                 }
             });
 

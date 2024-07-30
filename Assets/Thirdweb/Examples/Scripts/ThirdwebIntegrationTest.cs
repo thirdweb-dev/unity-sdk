@@ -32,6 +32,13 @@ namespace Thirdweb.Unity.Examples
 
             ThirdwebDebug.Log($"Connected to Wallet: {_wallet.GetType().Name}");
             ThirdwebDebug.Log($"Address: {await _wallet.GetAddress()}");
+
+            var personalWallet = _wallet is SmartWallet ? await (_wallet as SmartWallet).GetPersonalAccount() : _wallet;
+            if (personalWallet is InAppWallet)
+            {
+                var inAppWallet = personalWallet as InAppWallet;
+                await inAppWallet.Disconnect();
+            }
         }
     }
 }
