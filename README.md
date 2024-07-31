@@ -1,8 +1,5 @@
 ![Thirdweb Unity SDK](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/0eb16b66-317b-462b-9eb1-9425c0929c96)
 
-[<img alt="Discord" src="https://img.shields.io/discord/834227967404146718.svg?color=7289da&label=discord&logo=discord&style=for-the-badge" height="30">](https://discord.gg/thirdweb)
-[<img alt="Preview" src="https://img.shields.io/badge/Preview-Unity%20WebGL-brightgreen?logo=unity&style=for-the-badge" height="30">](https://thirdweb-dev.github.io/unity-sdk/)
-
 # Documentation
 
 See full documentation on the [thirdweb portal](https://portal.thirdweb.com/unity).
