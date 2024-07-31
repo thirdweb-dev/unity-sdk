@@ -46,12 +46,12 @@ namespace Thirdweb.Unity
                 (var address, var canRetry) = await wallet.SubmitOTP(otp);
                 if (address != null)
                 {
-                    modal.InAppWalletCanvas.enabled = false;
+                    modal.InAppWalletCanvas.gameObject.SetActive(false);
                     tcs.SetResult(wallet);
                 }
                 else if (!canRetry)
                 {
-                    modal.InAppWalletCanvas.enabled = false;
+                    modal.InAppWalletCanvas.gameObject.SetActive(false);
                     tcs.SetException(new UnityException("Failed to verify OTP."));
                 }
                 else

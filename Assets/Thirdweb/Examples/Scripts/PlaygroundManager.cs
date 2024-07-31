@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,22 +9,25 @@ namespace Thirdweb.Unity.Examples
     [System.Serializable]
     public class WalletPanelUI
     {
-        public WalletProvider Provider;
+        public string Identifier;
         public GameObject Panel;
-        public Button GetAddressButton;
-        public Button SignButton;
-        public Button GetBalanceButton;
+        public Button Action1Button;
+        public Button Action2Button;
+        public Button Action3Button;
         public Button BackButton;
+        public Button NextButton;
         public TMP_Text LogText;
+        public TMP_InputField InputField;
+        public Button InputFieldSubmitButton;
     }
 
     public class PlaygroundManager : MonoBehaviour
     {
         [field: SerializeField, Header("Wallet Options")]
-        public ulong ActiveChainId { get; private set; } = 421614;
+        private ulong ActiveChainId = 421614;
 
         [field: SerializeField, Header("Connect Wallet")]
-        public GameObject ConnectWalletPanel { get; private set; }
+        private GameObject ConnectWalletPanel;
 
         [field: SerializeField]
         private Button PrivateKeyWalletButton;
@@ -35,7 +39,7 @@ namespace Thirdweb.Unity.Examples
         private Button WalletConnectButton;
 
         [field: SerializeField, Header("Wallet Panels")]
-        public List<WalletPanelUI> WalletPanels;
+        private List<WalletPanelUI> WalletPanels;
 
         private ThirdwebChainData _chainDetails;
 
@@ -51,67 +55,70 @@ namespace Thirdweb.Unity.Examples
 
         private void InitializePanels()
         {
-            foreach (var walletPanel in WalletPanels)
-            {
-                walletPanel.Panel.SetActive(false);
-            }
+            CloseAllPanels();
 
             ConnectWalletPanel.SetActive(true);
 
             PrivateKeyWalletButton.onClick.RemoveAllListeners();
-            PrivateKeyWalletButton.onClick.AddListener(() => ConnectWallet(WalletProvider.PrivateKeyWallet));
+            PrivateKeyWalletButton.onClick.AddListener(() =>
+            {
+                var options = GetWalletOptions(WalletProvider.PrivateKeyWallet);
+                ConnectWallet(options);
+            });
 
             InAppWalletButton.onClick.RemoveAllListeners();
-            InAppWalletButton.onClick.AddListener(() => ConnectWallet(WalletProvider.InAppWallet));
+            InAppWalletButton.onClick.AddListener(() => InitializeInAppWalletPanel());
 
             WalletConnectButton.onClick.RemoveAllListeners();
-            WalletConnectButton.onClick.AddListener(() => ConnectWallet(WalletProvider.WalletConnectWallet));
+            WalletConnectButton.onClick.AddListener(() =>
+            {
+                var options = GetWalletOptions(WalletProvider.WalletConnectWallet);
+                ConnectWallet(options);
+            });
         }
 
-        private async void ConnectWallet(WalletProvider provider)
+        private async void ConnectWallet(WalletOptions options)
         {
             // Connect the wallet
 
-            var walletOptions = GetWalletOptions(provider);
-            var wallet = await ThirdwebManager.Instance.ConnectWallet(walletOptions);
+            var wallet = await ThirdwebManager.Instance.ConnectWallet(options);
 
             // Initialize the wallet panel
 
-            ConnectWalletPanel.SetActive(false);
-
-            foreach (var walletPanel in WalletPanels)
-            {
-                walletPanel.Panel.SetActive(walletPanel.Provider == provider);
-            }
+            CloseAllPanels();
 
             // Setup actions
 
-            var currentPanel = WalletPanels.Find(panel => panel.Provider == provider);
-            currentPanel.LogText.text = string.Empty;
+            var currentPanel = WalletPanels.Find(panel => panel.Identifier == options.Provider.ToString());
+            ClearLog(currentPanel.LogText);
+            currentPanel.Panel.SetActive(true);
 
             currentPanel.BackButton.onClick.RemoveAllListeners();
             currentPanel.BackButton.onClick.AddListener(InitializePanels);
 
-            currentPanel.GetAddressButton.onClick.RemoveAllListeners();
-            currentPanel.GetAddressButton.onClick.AddListener(async () =>
+            currentPanel.NextButton.onClick.RemoveAllListeners();
+            currentPanel.NextButton.onClick.AddListener(InitializeContractsPanel);
+
+            currentPanel.Action1Button.onClick.RemoveAllListeners();
+            currentPanel.Action1Button.onClick.AddListener(async () =>
             {
                 var address = await wallet.GetAddress();
-                currentPanel.LogText.text = $"Address: {address}";
+                Log(currentPanel.LogText, $"Address: {address}");
             });
 
-            currentPanel.SignButton.onClick.RemoveAllListeners();
-            currentPanel.SignButton.onClick.AddListener(async () =>
+            currentPanel.Action2Button.onClick.RemoveAllListeners();
+            currentPanel.Action2Button.onClick.AddListener(async () =>
             {
                 var message = "Hello World!";
                 var signature = await wallet.PersonalSign(message);
-                currentPanel.LogText.text = $"Signature: {signature}";
+                Log(currentPanel.LogText, $"Signature: {signature}");
             });
 
-            currentPanel.GetBalanceButton.onClick.RemoveAllListeners();
-            currentPanel.GetBalanceButton.onClick.AddListener(async () =>
+            currentPanel.Action3Button.onClick.RemoveAllListeners();
+            currentPanel.Action3Button.onClick.AddListener(async () =>
             {
                 var balance = await wallet.GetBalance(chainId: ActiveChainId);
-                currentPanel.LogText.text = $"Balance: {balance} {_chainDetails.NativeCurrency.Symbol}";
+                Log(currentPanel.LogText, $"Balance: {balance} {_chainDetails.NativeCurrency.Symbol}");
             });
         }
 
@@ -129,6 +136,220 @@ namespace Thirdweb.Unity.Examples
                 default:
                     throw new System.NotImplementedException("Wallet provider not implemented for this example.");
             }
+        }
+
+        private void InitializeInAppWalletPanel()
+        {
+            var panel = WalletPanels.Find(walletPanel => walletPanel.Identifier == "InAppWallet_Authentication");
+
+            CloseAllPanels();
+
+            ClearLog(panel.LogText);
+            panel.Panel.SetActive(true);
+
+            panel.BackButton.onClick.RemoveAllListeners();
+            panel.BackButton.onClick.AddListener(InitializePanels);
+
+            // Email
+            panel.Action1Button.onClick.RemoveAllListeners();
+            panel.Action1Button.onClick.AddListener(() =>
+            {
+                InitializeInAppWalletPanel_Email();
+            });
+
+            // Phone
+            panel.Action2Button.onClick.RemoveAllListeners();
+            panel.Action2Button.onClick.AddListener(() =>
+            {
+                InitializeInAppWalletPanel_Phone();
+            });
+
+            // Socials (Using Google Here)
+            panel.Action3Button.onClick.RemoveAllListeners();
+            panel.Action3Button.onClick.AddListener(() =>
+            {
+                InitializeInAppWalletPanel_Socials();
+            });
+        }
+
+        private void InitializeInAppWalletPanel_Email()
+        {
+            var panel = WalletPanels.Find(walletPanel => walletPanel.Identifier == "InAppWallet_Email");
+
+            CloseAllPanels();
+
+            ClearLog(panel.LogText);
+            panel.Panel.SetActive(true);
+
+            panel.BackButton.onClick.RemoveAllListeners();
+            panel.BackButton.onClick.AddListener(InitializeInAppWalletPanel);
+
+            panel.InputFieldSubmitButton.onClick.RemoveAllListeners();
+            panel.InputFieldSubmitButton.onClick.AddListener(() =>
+            {
+                try
+                {
+                    var email = panel.InputField.text;
+                    var inAppWalletOptions = new InAppWalletOptions(email: email);
+                    var options = new WalletOptions(provider: WalletProvider.InAppWallet, chainId: ActiveChainId, inAppWalletOptions: inAppWalletOptions);
+                    ConnectWallet(options);
+                }
+                catch (System.Exception e)
+                {
+                    Log(panel.LogText, e.Message);
+                }
+            });
+        }
+
+        private void InitializeInAppWalletPanel_Phone()
+        {
+            var panel = WalletPanels.Find(walletPanel => walletPanel.Identifier == "InAppWallet_Phone");
+
+            CloseAllPanels();
+
+            ClearLog(panel.LogText);
+            panel.Panel.SetActive(true);
+
+            panel.BackButton.onClick.RemoveAllListeners();
+            panel.BackButton.onClick.AddListener(InitializeInAppWalletPanel);
+
+            panel.InputFieldSubmitButton.onClick.RemoveAllListeners();
+            panel.InputFieldSubmitButton.onClick.AddListener(() =>
+            {
+                try
+                {
+                    var phone = panel.InputField.text;
+                    var inAppWalletOptions = new InAppWalletOptions(phoneNumber: phone);
+                    var options = new WalletOptions(provider: WalletProvider.InAppWallet, chainId: ActiveChainId, inAppWalletOptions: inAppWalletOptions);
+                    ConnectWallet(options);
+                }
+                catch (System.Exception e)
+                {
+                    Log(panel.LogText, e.Message);
+                }
+            });
+        }
+
+        private void InitializeInAppWalletPanel_Socials()
+        {
+            var panel = WalletPanels.Find(walletPanel => walletPanel.Identifier == "InAppWallet_Socials");
+
+            CloseAllPanels();
+
+            ClearLog(panel.LogText);
+            panel.Panel.SetActive(true);
+
+            panel.BackButton.onClick.RemoveAllListeners();
+            panel.BackButton.onClick.AddListener(InitializeInAppWalletPanel);
+
+            // socials action 1 is google, 2 is apple 3 is facebook
+
+            panel.Action1Button.onClick.RemoveAllListeners();
+            panel.Action1Button.onClick.AddListener(() =>
+            {
+                try
+                {
+                    var inAppWalletOptions = new InAppWalletOptions(authprovider: AuthProvider.Google);
+                    var options = new WalletOptions(provider: WalletProvider.InAppWallet, chainId: ActiveChainId, inAppWalletOptions: inAppWalletOptions);
+                    ConnectWallet(options);
+                }
+                catch (System.Exception e)
+                {
+                    Log(panel.LogText, e.Message);
+                }
+            });
+
+            panel.Action2Button.onClick.RemoveAllListeners();
+            panel.Action2Button.onClick.AddListener(() =>
+            {
+                try
+                {
+                    var inAppWalletOptions = new InAppWalletOptions(authprovider: AuthProvider.Apple);
+                    var options = new WalletOptions(provider: WalletProvider.InAppWallet, chainId: ActiveChainId, inAppWalletOptions: inAppWalletOptions);
+                    ConnectWallet(options);
+                }
+                catch (System.Exception e)
+                {
+                    Log(panel.LogText, e.Message);
+                }
+            });
+
+            panel.Action3Button.onClick.RemoveAllListeners();
+            panel.Action3Button.onClick.AddListener(() =>
+            {
+                try
+                {
+                    var inAppWalletOptions = new InAppWalletOptions(authprovider: AuthProvider.Facebook);
+                    var options = new WalletOptions(provider: WalletProvider.InAppWallet, chainId: ActiveChainId, inAppWalletOptions: inAppWalletOptions);
+                    ConnectWallet(options);
+                }
+                catch (System.Exception e)
+                {
+                    Log(panel.LogText, e.Message);
+                }
+            });
+        }
+
+        private void InitializeContractsPanel()
+        {
+            var panel = WalletPanels.Find(walletPanel => walletPanel.Identifier == "Contracts");
+
+            CloseAllPanels();
+
+            ClearLog(panel.LogText);
+            panel.Panel.SetActive(true);
+
+            panel.BackButton.onClick.RemoveAllListeners();
+            panel.BackButton.onClick.AddListener(InitializePanels);
+
+            // Get NFT
+            panel.Action1Button.onClick.RemoveAllListeners();
+            panel.Action1Button.onClick.AddListener(async () =>
+            {
+                var dropErc1155Contract = await ThirdwebManager.Instance.GetContract(address: "0x6A7a26c9a595E6893C255C9dF0b593e77518e0c3", chainId: ActiveChainId);
+                var nft = await dropErc1155Contract.ERC1155_GetNFT(tokenId: 1);
+                Log(panel.LogText, $"NFT: {JsonConvert.SerializeObject(nft.Metadata)}");
+            });
+
+            // Call contract
+            panel.Action2Button.onClick.RemoveAllListeners();
+            panel.Action2Button.onClick.AddListener(async () =>
+            {
+                var contract = await ThirdwebManager.Instance.GetContract(address: "0x6A7a26c9a595E6893C255C9dF0b593e77518e0c3", chainId: ActiveChainId);
+                var result = await contract.ERC1155_URI(tokenId: 1);
+                Log(panel.LogText, $"Result (uri): {result}");
+            });
+
+            // Get ERC20 Balance
+            panel.Action3Button.onClick.RemoveAllListeners();
+            panel.Action3Button.onClick.AddListener(async () =>
+            {
+                var dropErc20Contract = await ThirdwebManager.Instance.GetContract(address: "0xEBB8a39D865465F289fa349A67B3391d8f910da9", chainId: ActiveChainId);
+                var symbol = await dropErc20Contract.ERC20_Symbol();
+                var balance = await dropErc20Contract.ERC20_BalanceOf(ownerAddress: await ThirdwebManager.Instance.GetActiveWallet().GetAddress());
+                var balanceEth = Utils.ToEth(wei: balance.ToString(), decimalsToDisplay: 0, addCommas: false);
+                Log(panel.LogText, $"Balance: {balanceEth} {symbol}");
+            });
+        }
+
+        private void CloseAllPanels()
+        {
+            ConnectWalletPanel.SetActive(false);
+            foreach (var walletPanel in WalletPanels)
+            {
+                walletPanel.Panel.SetActive(false);
+            }
+        }
+
+        private void ClearLog(TMP_Text logText)
+        {
+            logText.text = string.Empty;
+        }
+
+        private void Log(TMP_Text logText, string message)
+        {
+            logText.text = message;
+            ThirdwebDebug.Log(message);
         }
     }
 }

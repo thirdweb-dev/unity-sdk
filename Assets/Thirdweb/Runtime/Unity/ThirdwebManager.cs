@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using System.Linq;
+using System;
 
 namespace Thirdweb.Unity
 {
@@ -161,8 +162,7 @@ namespace Thirdweb.Unity
         {
             if (!_initialized)
             {
-                ThirdwebDebug.LogError("ThirdwebManager is not initialized.");
-                return null;
+                throw new InvalidOperationException("ThirdwebManager is not initialized.");
             }
 
             return await ThirdwebContract.Create(Client, address, chainId, abi);
@@ -207,14 +207,17 @@ namespace Thirdweb.Unity
         {
             if (!_initialized)
             {
-                ThirdwebDebug.LogError("ThirdwebManager is not initialized.");
-                return null;
+                throw new InvalidOperationException("ThirdwebManager is not initialized.");
             }
 
             if (walletOptions == null)
             {
-                ThirdwebDebug.LogError("WalletOptions is required.");
-                return null;
+                throw new ArgumentNullException(nameof(walletOptions));
+            }
+
+            if (walletOptions.ChainId <= 0)
+            {
+                throw new ArgumentException("ChainId must be greater than 0.");
             }
 
             IThirdwebWallet wallet = null;
