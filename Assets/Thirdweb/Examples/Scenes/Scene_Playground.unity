@@ -1244,6 +1244,7 @@ GameObject:
   - component: {fileID: 187539454}
   - component: {fileID: 187539453}
   - component: {fileID: 187539452}
+  - component: {fileID: 187539455}
   m_Layer: 5
   m_Name: InputField_Email
   m_TagString: Untagged
@@ -1407,6 +1408,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 187539450}
   m_CullTransparentMesh: 1
+--- !u!114 &187539455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 187539450}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc33a39070010f94fb1c2dd721c1286d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showHtmlElement: 0
 --- !u!1 &198666611
 GameObject:
   m_ObjectHideFlags: 0
@@ -3784,7 +3798,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7581174088450466508, guid: f1f7a02a8c5efe54c95062bd90592227, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 686223896}
   m_SourcePrefab: {fileID: 100100000, guid: f1f7a02a8c5efe54c95062bd90592227, type: 3}
 --- !u!1 &581207178
 GameObject:
@@ -4718,6 +4735,24 @@ MonoBehaviour:
   m_Spacing: {x: 50, y: 50}
   m_Constraint: 0
   m_ConstraintCount: 2
+--- !u!1 &686223891 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7581174088450466508, guid: f1f7a02a8c5efe54c95062bd90592227, type: 3}
+  m_PrefabInstance: {fileID: 565346545}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &686223896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 686223891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc33a39070010f94fb1c2dd721c1286d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showHtmlElement: 0
 --- !u!1 &700700974
 GameObject:
   m_ObjectHideFlags: 0
@@ -7353,6 +7388,7 @@ GameObject:
   - component: {fileID: 1047630457}
   - component: {fileID: 1047630456}
   - component: {fileID: 1047630455}
+  - component: {fileID: 1047630458}
   m_Layer: 5
   m_Name: InputField_Phone
   m_TagString: Untagged
@@ -7516,6 +7552,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1047630453}
   m_CullTransparentMesh: 1
+--- !u!114 &1047630458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1047630453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc33a39070010f94fb1c2dd721c1286d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showHtmlElement: 0
 --- !u!1 &1053544815
 GameObject:
   m_ObjectHideFlags: 0
