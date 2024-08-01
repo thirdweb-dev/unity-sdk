@@ -289,5 +289,45 @@ namespace Thirdweb.Unity
 
             return wallet;
         }
+
+        public async Task<SmartWallet> UpgradeToSmartWallet(IThirdwebWallet personalWallet, BigInteger chainId, SmartWalletOptions smartWalletOptions)
+        {
+            if (!_initialized)
+            {
+                throw new InvalidOperationException("ThirdwebManager is not initialized.");
+            }
+
+            if (personalWallet.AccountType == ThirdwebAccountType.SmartAccount)
+            {
+                ThirdwebDebug.LogWarning("Wallet is already a SmartWallet.");
+                return personalWallet as SmartWallet;
+            }
+
+            if (smartWalletOptions == null)
+            {
+                throw new ArgumentNullException(nameof(smartWalletOptions));
+            }
+
+            if (chainId <= 0)
+            {
+                throw new ArgumentException("ChainId must be greater than 0.");
+            }
+
+            var wallet = await SmartWallet.Create(
+                personalWallet: personalWallet,
+                chainId: chainId,
+                gasless: smartWalletOptions.SponsorGas,
+                factoryAddress: smartWalletOptions.FactoryAddress,
+                accountAddressOverride: smartWalletOptions.AccountAddressOverride,
+                entryPoint: smartWalletOptions.EntryPoint,
+                bundlerUrl: smartWalletOptions.BundlerUrl,
+                paymasterUrl: smartWalletOptions.PaymasterUrl
+            );
+
+            AddWallet(wallet);
+            SetActiveWallet(wallet);
+
+            return wallet;
+        }
     }
 }

@@ -302,33 +302,135 @@ namespace Thirdweb.Unity.Examples
             panel.BackButton.onClick.RemoveAllListeners();
             panel.BackButton.onClick.AddListener(InitializePanels);
 
+            panel.NextButton.onClick.RemoveAllListeners();
+            panel.NextButton.onClick.AddListener(InitializeAccountAbstractionPanel);
+
             // Get NFT
             panel.Action1Button.onClick.RemoveAllListeners();
             panel.Action1Button.onClick.AddListener(async () =>
             {
-                var dropErc1155Contract = await ThirdwebManager.Instance.GetContract(address: "0x6A7a26c9a595E6893C255C9dF0b593e77518e0c3", chainId: ActiveChainId);
-                var nft = await dropErc1155Contract.ERC1155_GetNFT(tokenId: 1);
-                Log(panel.LogText, $"NFT: {JsonConvert.SerializeObject(nft.Metadata)}");
+                try
+                {
+                    var dropErc1155Contract = await ThirdwebManager.Instance.GetContract(address: "0x6A7a26c9a595E6893C255C9dF0b593e77518e0c3", chainId: ActiveChainId);
+                    var nft = await dropErc1155Contract.ERC1155_GetNFT(tokenId: 1);
+                    Log(panel.LogText, $"NFT: {JsonConvert.SerializeObject(nft.Metadata)}");
+                }
+                catch (System.Exception e)
+                {
+                    Log(panel.LogText, e.Message);
+                }
             });
 
             // Call contract
             panel.Action2Button.onClick.RemoveAllListeners();
             panel.Action2Button.onClick.AddListener(async () =>
             {
-                var contract = await ThirdwebManager.Instance.GetContract(address: "0x6A7a26c9a595E6893C255C9dF0b593e77518e0c3", chainId: ActiveChainId);
-                var result = await contract.ERC1155_URI(tokenId: 1);
-                Log(panel.LogText, $"Result (uri): {result}");
+                try
+                {
+                    var contract = await ThirdwebManager.Instance.GetContract(address: "0x6A7a26c9a595E6893C255C9dF0b593e77518e0c3", chainId: ActiveChainId);
+                    var result = await contract.ERC1155_URI(tokenId: 1);
+                    Log(panel.LogText, $"Result (uri): {result}");
+                }
+                catch (System.Exception e)
+                {
+                    Log(panel.LogText, e.Message);
+                }
             });
 
             // Get ERC20 Balance
             panel.Action3Button.onClick.RemoveAllListeners();
             panel.Action3Button.onClick.AddListener(async () =>
             {
-                var dropErc20Contract = await ThirdwebManager.Instance.GetContract(address: "0xEBB8a39D865465F289fa349A67B3391d8f910da9", chainId: ActiveChainId);
-                var symbol = await dropErc20Contract.ERC20_Symbol();
-                var balance = await dropErc20Contract.ERC20_BalanceOf(ownerAddress: await ThirdwebManager.Instance.GetActiveWallet().GetAddress());
-                var balanceEth = Utils.ToEth(wei: balance.ToString(), decimalsToDisplay: 0, addCommas: false);
-                Log(panel.LogText, $"Balance: {balanceEth} {symbol}");
+                try
+                {
+                    var dropErc20Contract = await ThirdwebManager.Instance.GetContract(address: "0xEBB8a39D865465F289fa349A67B3391d8f910da9", chainId: ActiveChainId);
+                    var symbol = await dropErc20Contract.ERC20_Symbol();
+                    var balance = await dropErc20Contract.ERC20_BalanceOf(ownerAddress: await ThirdwebManager.Instance.GetActiveWallet().GetAddress());
+                    var balanceEth = Utils.ToEth(wei: balance.ToString(), decimalsToDisplay: 0, addCommas: false);
+                    Log(panel.LogText, $"Balance: {balanceEth} {symbol}");
+                }
+                catch (System.Exception e)
+                {
+                    Log(panel.LogText, e.Message);
+                }
+            });
+        }
+
+        private async void InitializeAccountAbstractionPanel()
+        {
+            var currentWallet = ThirdwebManager.Instance.GetActiveWallet();
+            var smartWallet = await ThirdwebManager.Instance.UpgradeToSmartWallet(personalWallet: currentWallet, chainId: ActiveChainId, smartWalletOptions: new SmartWalletOptions(sponsorGas: true));
+
+            var panel = WalletPanels.Find(walletPanel => walletPanel.Identifier == "AccountAbstraction");
+
+            CloseAllPanels();
+
+            ClearLog(panel.LogText);
+            panel.Panel.SetActive(true);
+
+            panel.BackButton.onClick.RemoveAllListeners();
+            panel.BackButton.onClick.AddListener(InitializePanels);
+
+            // Personal Sign (1271)
+            panel.Action1Button.onClick.RemoveAllListeners();
+            panel.Action1Button.onClick.AddListener(async () =>
+            {
+                try
+                {
+                    if (!await smartWallet.IsDeployed())
+                    {
+                        Log(panel.LogText, "Account not deployed yet, deploying before signing...");
+                    }
+                    var message = "Hello, World!";
+                    var signature = await smartWallet.PersonalSign(message);
+                    Log(panel.LogText, $"Signature: {signature}");
+                }
+                catch (System.Exception e)
+                {
+                    Log(panel.LogText, e.Message);
+                }
+            });
+
+            // Create Session Key
+            panel.Action2Button.onClick.RemoveAllListeners();
+            panel.Action2Button.onClick.AddListener(async () =>
+            {
+                try
+                {
+                    Log(panel.LogText, "Granting Session Key...");
+                    var randomWallet = await PrivateKeyWallet.Generate(ThirdwebManager.Instance.Client);
+                    var randomWalletAddress = await randomWallet.GetAddress();
+                    var timeTomorrow = Utils.GetUnixTimeStampNow() + 60 * 60 * 24;
+                    var sessionKey = await smartWallet.CreateSessionKey(
+                        signerAddress: randomWalletAddress,
+                        approvedTargets: new List<string> { Constants.ADDRESS_ZERO },
+                        nativeTokenLimitPerTransactionInWei: "0",
+                        permissionStartTimestamp: "0",
+                        permissionEndTimestamp: timeTomorrow.ToString(),
+                        reqValidityStartTimestamp: "0",
+                        reqValidityEndTimestamp: timeTomorrow.ToString()
+                    );
+                    Log(panel.LogText, $"Session Key Created for {randomWalletAddress}: {sessionKey.TransactionHash}");
+                }
+                catch (System.Exception e)
+                {
+                    Log(panel.LogText, e.Message);
+                }
+            });
+
+            // Get Active Signers
+            panel.Action3Button.onClick.RemoveAllListeners();
+            panel.Action3Button.onClick.AddListener(async () =>
+            {
+                try
+                {
+                    var activeSigners = await smartWallet.GetAllActiveSigners();
+                    Log(panel.LogText, $"Active Signers: {JsonConvert.SerializeObject(activeSigners)}");
+                }
+                catch (System.Exception e)
+                {
+                    Log(panel.LogText, e.Message);
+                }
             });
         }
 

@@ -214,6 +214,12 @@ namespace Thirdweb.Unity
             throw new NotImplementedException();
         }
 
+        public Task Disconnect()
+        {
+            ThirdwebDebug.Log("Disconnecting has no effect on this wallet.");
+            return Task.CompletedTask;
+        }
+
         #endregion
 
         #region Network Switching
