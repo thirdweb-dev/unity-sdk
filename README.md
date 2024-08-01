@@ -21,7 +21,7 @@ Try out our multichain game that leverages In-App and Smart Wallets to create se
 | **Wallet Connect**                            | ✔️        | ✔️        | ✔️        |
 | **MetaMask**                                  | ✔️        | ✔️        | ✔️        |
 | **Rabby**                                     | ✔️        | —          | —          |
-| **Coinbase**                                  | ✔️        | ❌        | ❌        |
+| **Coinbase (Including Smart Wallet)**         | ✔️        | ❌        | ❌        |
 | **Smart Wallet** (ERC4337)                    | ✔️        | ✔️        | ✔️        |
 | **Injected**                                  | ✔️        | —          | —         |
 | **HyperPlay**                                 | —          | ✔️        | —          |
@@ -104,13 +104,14 @@ var txRes = await contract.Write("myWriteFunction", arg1, arg2, ...);
 
 Important: If you're uploading your build, set `Compression Format` to `Disabled` in `Player Settings` > `Publishing Settings`.
 
-Please note that Embedded Wallets (OAuth version) may not work when testing locally using Unity's default Build and Run feature for WebGL.
+Please note that In-App Wallets (OAuth) and Coinbase (Smart Wallet) will not work with default `Build and Run` when testing **locally**.
 
 You must host the build or run it locally yourself after adding the `Cross-Origin-Opener-Policy` header and setting it to `same-origin-allow-popups`.
 
 Here's a simple way to do so, assuming you are in your WebGL build output folder:
 
-```csharp
+```js
+// server.js
 const express = require('express');
 const app = express();
 const port = 8000;
@@ -122,6 +123,8 @@ app.use(function(req, res, next) {
 
 app.use(express.static('.'));
 app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
+
+// run it with `node server.js`
 ```
 
 Once again, please note that no action is needed for hosted builds.
