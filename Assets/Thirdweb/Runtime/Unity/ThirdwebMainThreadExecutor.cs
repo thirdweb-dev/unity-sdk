@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Thirdweb.Unity
+namespace Thirdweb.Unity.Helpers
 {
     public class ThirdwebMainThreadExecutor : MonoBehaviour
     {

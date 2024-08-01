@@ -139,7 +139,7 @@ namespace Thirdweb.Unity
             Client = ThirdwebClient.Create(
                 clientId: ClientId,
                 bundleId: BundleId,
-                httpClient: Application.platform == RuntimePlatform.WebGLPlayer ? new UnityThirdwebHttpClient() : new ThirdwebHttpClient(),
+                httpClient: Application.platform == RuntimePlatform.WebGLPlayer ? new Helpers.UnityThirdwebHttpClient() : new ThirdwebHttpClient(),
                 headers: new Dictionary<string, string>
                 {
                     { "x-sdk-name", Application.platform == RuntimePlatform.WebGLPlayer ? "UnitySDK_WebGL" : "UnitySDK" },

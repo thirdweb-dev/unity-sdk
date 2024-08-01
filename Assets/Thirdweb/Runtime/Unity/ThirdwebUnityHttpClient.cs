@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Thirdweb.Unity
+namespace Thirdweb.Unity.Helpers
 {
     public class UnityThirdwebHttpClient : IThirdwebHttpClient
     {

@@ -10,11 +10,10 @@ namespace Thirdweb.Unity.Examples
         private Coroutine _coroutine;
         private Dictionary<RectTransform, Vector3> originalPositions = new Dictionary<RectTransform, Vector3>();
 
-        public float animationDuration = 1f; // Duration of the animation
+        public float animationDuration = 1f;
 
         private void OnEnable()
         {
-            // Start the animation coroutine
             if (_coroutine != null)
             {
                 StopCoroutine(_coroutine);
@@ -25,7 +24,6 @@ namespace Thirdweb.Unity.Examples
 
         private void OnDisable()
         {
-            // Stop the animation coroutine and reset positions
             if (_coroutine != null)
             {
                 StopCoroutine(_coroutine);
@@ -35,11 +33,9 @@ namespace Thirdweb.Unity.Examples
 
         private IEnumerator Animate()
         {
-            // Get the current object's transform
             var rectTransform = GetComponent<RectTransform>();
             var children = rectTransform.GetComponentsInChildren<RectTransform>();
 
-            // Store the original positions and set initial setup
             foreach (var child in children)
             {
                 if (child.parent == transform)
@@ -73,7 +69,7 @@ namespace Thirdweb.Unity.Examples
                 }
                 else if (IsChildOfLayoutGroup(child) && child.TryGetComponent(out CanvasRenderer childCanvasRenderer))
                 {
-                    StartCoroutine(FadeInOnly(child, childCanvasRenderer));
+                    StartCoroutine(FadeInOnly(childCanvasRenderer));
                 }
             }
 
@@ -96,12 +92,11 @@ namespace Thirdweb.Unity.Examples
                 yield return null;
             }
 
-            // Ensure final state
             canvasRenderer.SetAlpha(1);
-            child.anchoredPosition = targetPosition; // Set to original position
+            child.anchoredPosition = targetPosition;
         }
 
-        private IEnumerator FadeInOnly(RectTransform child, CanvasRenderer canvasRenderer)
+        private IEnumerator FadeInOnly(CanvasRenderer canvasRenderer)
         {
             float elapsedTime = 0f;
 
@@ -114,7 +109,6 @@ namespace Thirdweb.Unity.Examples
                 yield return null;
             }
 
-            // Ensure final state
             canvasRenderer.SetAlpha(1);
         }
 
