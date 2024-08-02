@@ -158,8 +158,13 @@ namespace Thirdweb.Unity
                 throw new ArgumentNullException(nameof(data), "Data to sign cannot be null.");
             }
 
-            var json = typedData.ToJson(data);
-            return SignTypedDataV4(json);
+            if (typedData == null)
+            {
+                throw new ArgumentNullException(nameof(typedData), "Typed data to sign cannot be null.");
+            }
+
+            var safeJson = Utils.ToJsonExternalWalletFriendly(typedData, data);
+            return SignTypedDataV4(safeJson);
         }
 
         public virtual async Task<string> Authenticate(
@@ -205,7 +210,9 @@ namespace Thirdweb.Unity
 
         public Task<string> RecoverAddressFromPersonalSign(string message, string signature)
         {
-            throw new NotImplementedException();
+            var signer = new Nethereum.Signer.EthereumMessageSigner();
+            var addressRecovered = signer.EncodeUTF8AndEcRecover(message, signature);
+            return Task.FromResult(addressRecovered);
         }
 
         public Task<string> RecoverAddressFromTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData, string signature)
@@ -230,7 +237,9 @@ namespace Thirdweb.Unity
             {
                 await AddNetwork(chainId);
                 if (WebGLMetaMask.Instance.GetActiveChainId() == chainId)
+                {
                     return;
+                }
                 await SwitchNetwork(chainId);
             }
         }
@@ -244,23 +253,40 @@ namespace Thirdweb.Unity
 
         private static async Task AddNetwork(BigInteger chainId)
         {
-            var twChainData = await Utils.FetchThirdwebChainDataAsync(_client, chainId);
+            ThirdwebDebug.Log($"Fetching chain data for chainId {chainId}...");
+            var twChainData = await Utils.FetchThirdwebChainDataAsync(_client, chainId) ?? throw new Exception($"Chain data for chainId {chainId} could not be fetched.");
+            ThirdwebDebug.Log($"Chain data fetched: {JsonConvert.SerializeObject(twChainData)}");
+            var explorers = twChainData.Explorers?.Select(e => e?.Url).Where(url => url != null).ToList() ?? new List<string>();
+            var iconUrl = twChainData.Icon?.Url ?? "ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt";
+
+            var nativeCurrency =
+                twChainData.NativeCurrency
+                ?? new ThirdwebChainNativeCurrency
+                {
+                    Name = "Ether",
+                    Symbol = "ETH",
+                    Decimals = 18
+                };
+
             var addEthereumChainParameter = new AddEthereumChainParameter
             {
                 ChainId = new HexBigInteger(chainId),
-                BlockExplorerUrls = twChainData.Explorers.Select(e => e.Url).ToList(),
+                BlockExplorerUrls = explorers,
                 ChainName = twChainData.Name,
-                IconUrls = new List<string> { twChainData.Icon.Url },
+                IconUrls = new List<string> { iconUrl },
                 NativeCurrency = new NativeCurrency
                 {
-                    Name = twChainData.NativeCurrency.Name,
-                    Symbol = twChainData.NativeCurrency.Symbol,
-                    Decimals = (uint)twChainData.NativeCurrency.Decimals,
+                    Name = nativeCurrency.Name,
+                    Symbol = nativeCurrency.Symbol,
+                    Decimals = (uint)nativeCurrency.Decimals,
                 },
                 RpcUrls = new List<string> { $"https://{chainId}.rpc.thirdweb.com/" },
             };
+
             var rpcRequest = new RpcRequest { Method = "wallet_addEthereumChain", Params = new object[] { addEthereumChainParameter } };
             _ = await WebGLMetaMask.Instance.RequestAsync<string>(rpcRequest);
+
+            ThirdwebDebug.Log($"Chain {chainId} added.");
         }
 
         #endregion

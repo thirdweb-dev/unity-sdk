@@ -26,6 +26,9 @@ namespace Thirdweb.Unity.Examples
         [field: SerializeField, Header("Wallet Options")]
         private ulong ActiveChainId = 421614;
 
+        [field: SerializeField]
+        private bool WebglForceMetamaskExtension = false;
+
         [field: SerializeField, Header("Connect Wallet")]
         private GameObject ConnectWalletPanel;
 
@@ -81,6 +84,7 @@ namespace Thirdweb.Unity.Examples
         {
             // Connect the wallet
 
+            Debug.Log(1);
             var wallet = await ThirdwebManager.Instance.ConnectWallet(options);
 
             // Initialize the wallet panel
@@ -89,7 +93,8 @@ namespace Thirdweb.Unity.Examples
 
             // Setup actions
 
-            var currentPanel = WalletPanels.Find(panel => panel.Identifier == options.Provider.ToString());
+            var internalWalletProvider = options.Provider == WalletProvider.MetaMaskWallet ? WalletProvider.WalletConnectWallet : options.Provider;
+            var currentPanel = WalletPanels.Find(panel => panel.Identifier == internalWalletProvider.ToString());
             ClearLog(currentPanel.LogText);
             currentPanel.Panel.SetActive(true);
 
@@ -118,7 +123,8 @@ namespace Thirdweb.Unity.Examples
             currentPanel.Action3Button.onClick.AddListener(async () =>
             {
                 var balance = await wallet.GetBalance(chainId: ActiveChainId);
-                Log(currentPanel.LogText, $"Balance: {balance} {_chainDetails.NativeCurrency.Symbol}");
+                var balanceEth = Utils.ToEth(wei: balance.ToString(), decimalsToDisplay: 4, addCommas: true);
+                Log(currentPanel.LogText, $"Balance: {balanceEth} {_chainDetails.NativeCurrency.Symbol}");
             });
         }
 
@@ -132,7 +138,9 @@ namespace Thirdweb.Unity.Examples
                     var inAppWalletOptions = new InAppWalletOptions(authprovider: AuthProvider.Google);
                     return new WalletOptions(provider: WalletProvider.InAppWallet, chainId: ActiveChainId, inAppWalletOptions: inAppWalletOptions);
                 case WalletProvider.WalletConnectWallet:
-                    return new WalletOptions(provider: WalletProvider.WalletConnectWallet, chainId: ActiveChainId);
+                    var externalWalletProvider =
+                        Application.platform == RuntimePlatform.WebGLPlayer && WebglForceMetamaskExtension ? WalletProvider.MetaMaskWallet : WalletProvider.WalletConnectWallet;
+                    return new WalletOptions(provider: externalWalletProvider, chainId: ActiveChainId);
                 default:
                     throw new System.NotImplementedException("Wallet provider not implemented for this example.");
             }
@@ -387,7 +395,7 @@ namespace Thirdweb.Unity.Examples
                 }
                 catch (System.Exception e)
                 {
-                    Log(panel.LogText, e.Message);
+                    Log(panel.LogText, e.ToString());
                 }
             });
 

@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Nethereum.ABI.EIP712;
 using Newtonsoft.Json;
-using UnityEngine;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectUnity.Core;
@@ -85,21 +84,11 @@ namespace Thirdweb.Unity
 
         public Task<string> EthSign(byte[] rawMessage)
         {
-            if (rawMessage == null)
-            {
-                throw new ArgumentNullException(nameof(rawMessage), "Message to sign cannot be null.");
-            }
-
             throw new InvalidOperationException("EthSign is not supported by external wallets.");
         }
 
         public Task<string> EthSign(string message)
         {
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message), "Message to sign cannot be null.");
-            }
-
             throw new InvalidOperationException("EthSign is not supported by external wallets.");
         }
 
@@ -146,8 +135,13 @@ namespace Thirdweb.Unity
                 throw new ArgumentNullException(nameof(data), "Data to sign cannot be null.");
             }
 
-            var json = typedData.ToJson(data);
-            return SignTypedDataV4(json);
+            if (typedData == null)
+            {
+                throw new ArgumentNullException(nameof(typedData), "Typed data to sign cannot be null.");
+            }
+
+            var safeJson = Utils.ToJsonExternalWalletFriendly(typedData, data);
+            return SignTypedDataV4(safeJson);
         }
 
         public Task<string> SignTransaction(ThirdwebTransactionInput transaction)
@@ -227,7 +221,9 @@ namespace Thirdweb.Unity
 
         public Task<string> RecoverAddressFromPersonalSign(string message, string signature)
         {
-            throw new NotImplementedException();
+            var signer = new Nethereum.Signer.EthereumMessageSigner();
+            var addressRecovered = signer.EncodeUTF8AndEcRecover(message, signature);
+            return Task.FromResult(addressRecovered);
         }
 
         public Task<string> RecoverAddressFromTypedDataV4<T, TDomain>(T data, TypedData<TDomain> typedData, string signature)

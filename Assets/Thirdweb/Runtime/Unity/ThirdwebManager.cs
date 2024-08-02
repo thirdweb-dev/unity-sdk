@@ -188,9 +188,9 @@ namespace Thirdweb.Unity
             throw new KeyNotFoundException($"Wallet with address {address} not found.");
         }
 
-        public IThirdwebWallet AddWallet(IThirdwebWallet wallet)
+        public async Task<IThirdwebWallet> AddWallet(IThirdwebWallet wallet)
         {
-            var address = wallet.GetAddress().Result;
+            var address = await wallet.GetAddress();
             _walletMapping.TryAdd(address, wallet);
             return wallet;
         }
@@ -245,7 +245,7 @@ namespace Thirdweb.Unity
                     break;
             }
 
-            if (!await wallet.IsConnected() && walletOptions.Provider == WalletProvider.InAppWallet)
+            if (walletOptions.Provider == WalletProvider.InAppWallet && !await wallet.IsConnected())
             {
                 ThirdwebDebug.Log("Session does not exist or is expired, proceeding with InAppWallet authentication.");
 
@@ -272,22 +272,15 @@ namespace Thirdweb.Unity
 
             if (walletOptions.SmartWalletOptions != null)
             {
-                wallet = await SmartWallet.Create(
-                    personalWallet: wallet,
-                    chainId: walletOptions.ChainId,
-                    gasless: walletOptions.SmartWalletOptions.SponsorGas,
-                    factoryAddress: walletOptions.SmartWalletOptions.FactoryAddress,
-                    accountAddressOverride: walletOptions.SmartWalletOptions.AccountAddressOverride,
-                    entryPoint: walletOptions.SmartWalletOptions.EntryPoint,
-                    bundlerUrl: walletOptions.SmartWalletOptions.BundlerUrl,
-                    paymasterUrl: walletOptions.SmartWalletOptions.PaymasterUrl
-                );
+                ThirdwebDebug.Log("Upgrading to SmartWallet.");
+                return await UpgradeToSmartWallet(wallet, walletOptions.ChainId, walletOptions.SmartWalletOptions);
             }
-
-            AddWallet(wallet);
-            SetActiveWallet(wallet);
-
-            return wallet;
+            else
+            {
+                await AddWallet(wallet);
+                SetActiveWallet(wallet);
+                return wallet;
+            }
         }
 
         public async Task<SmartWallet> UpgradeToSmartWallet(IThirdwebWallet personalWallet, BigInteger chainId, SmartWalletOptions smartWalletOptions)
@@ -324,7 +317,7 @@ namespace Thirdweb.Unity
                 paymasterUrl: smartWalletOptions.PaymasterUrl
             );
 
-            AddWallet(wallet);
+            await AddWallet(wallet);
             SetActiveWallet(wallet);
 
             return wallet;

@@ -2886,6 +2886,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ActiveChainId: 421614
+  WebglForceMetamaskExtension: 1
   ConnectWalletPanel: {fileID: 974997944}
   PrivateKeyWalletButton: {fileID: 736464798}
   InAppWalletButton: {fileID: 1496910716}
