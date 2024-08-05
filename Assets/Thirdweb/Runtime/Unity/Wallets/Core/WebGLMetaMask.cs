@@ -10,8 +10,7 @@ namespace Thirdweb.Unity
 {
     public class WebGLMetaMask : MonoBehaviour
     {
-        #region WebGL Imports
-
+#if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern void EnableEthereum(string gameObjectName, string callback, string fallback);
 
@@ -30,7 +29,7 @@ namespace Thirdweb.Unity
         [DllImport("__Internal")]
         private static extern void Request(string rpcRequestMessage, string gameObjectName, string callback, string fallback);
 
-        #endregion
+#endif
 
         private static WebGLMetaMask _instance;
         private BigInteger _activeChainId;
@@ -72,7 +71,9 @@ namespace Thirdweb.Unity
         {
             _enableEthereumTaskCompletionSource = new TaskCompletionSource<bool>();
 
+#if UNITY_WEBGL && !UNITY_EDITOR
             EnableEthereum(gameObject.name, nameof(OnEnableEthereum), nameof(OnEnableEthereumFallback));
+#endif
 
             return await _enableEthereumTaskCompletionSource.Task;
         }
@@ -82,7 +83,9 @@ namespace Thirdweb.Unity
             ThirdwebDebug.Log($"OnEnableEthereum: {result}");
             _selectedAddress = result;
             _isConnected = true;
+#if UNITY_WEBGL && !UNITY_EDITOR
             EthereumInit(gameObject.name, nameof(OnAccountChange), nameof(OnChainChange));
+#endif
             _enableEthereumTaskCompletionSource.SetResult(true);
         }
 
@@ -96,13 +99,17 @@ namespace Thirdweb.Unity
         public void OnAccountChange(string result)
         {
             ThirdwebDebug.Log($"OnAccountChange: {result}");
+#if UNITY_WEBGL && !UNITY_EDITOR
             _selectedAddress = GetSelectedAddress();
+#endif
         }
 
         public void OnChainChange(string result)
         {
             ThirdwebDebug.Log($"OnChainChange: {result}");
+#if UNITY_WEBGL && !UNITY_EDITOR
             GetChainId(gameObject.name, nameof(OnChainId), nameof(OnChainIdFallback));
+#endif
         }
 
         public void OnChainId(string result)
@@ -121,7 +128,9 @@ namespace Thirdweb.Unity
             var rpcRequestMessage = JsonConvert.SerializeObject(rpcRequest);
             _rpcResponseCompletionSource = new TaskCompletionSource<string>();
 
+#if UNITY_WEBGL && !UNITY_EDITOR
             Request(rpcRequestMessage, gameObject.name, nameof(OnRequestCallback), nameof(OnRequestFallback));
+#endif
 
             var response = await _rpcResponseCompletionSource.Task;
             var rpcResponseRaw = JsonConvert.DeserializeObject<RpcResponse<T>>(response);
@@ -144,7 +153,11 @@ namespace Thirdweb.Unity
 
         public bool IsMetaMaskAvailable()
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
             return IsMetamaskAvailable();
+#else
+            return false;
+#endif
         }
 
         public string GetAddress()

@@ -132,7 +132,7 @@ namespace Thirdweb.Unity
         {
             if (string.IsNullOrEmpty(ClientId) || string.IsNullOrEmpty(BundleId))
             {
-                ThirdwebDebug.LogError("ClientId and BundleId must be set in order to initialize ThirdwebManager.");
+                ThirdwebDebug.LogError("ClientId and BundleId must be set in order to initialize ThirdwebManager. Get your API key from https://thirdweb.com/create-api-key");
                 return;
             }
 
