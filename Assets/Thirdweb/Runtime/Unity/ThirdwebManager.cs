@@ -92,6 +92,9 @@ namespace Thirdweb.Unity
         [field: SerializeField]
         private bool ShowDebugLogs { get; set; } = true;
 
+        [field: SerializeField]
+        private bool OptOutUsageAnalytics { get; set; } = false;
+
         [field: SerializeField, Header("Wallet Settings")]
         private ulong[] SupportedChains { get; set; } = new ulong[] { 421614 };
 
@@ -270,7 +273,14 @@ namespace Thirdweb.Unity
             var address = await wallet.GetAddress();
             ThirdwebDebug.Log($"Wallet address: {address}");
 
-            if (walletOptions.SmartWalletOptions != null)
+            var isSmartWallet = walletOptions.SmartWalletOptions != null;
+
+            if (!OptOutUsageAnalytics)
+            {
+                TrackUsage("connectWallet", "connect", isSmartWallet ? "smartWallet" : walletOptions.Provider.ToString()[..1].ToLower() + walletOptions.Provider.ToString()[1..], address);
+            }
+
+            if (isSmartWallet)
             {
                 ThirdwebDebug.Log("Upgrading to SmartWallet.");
                 return await UpgradeToSmartWallet(wallet, walletOptions.ChainId, walletOptions.SmartWalletOptions);
@@ -321,6 +331,37 @@ namespace Thirdweb.Unity
             SetActiveWallet(wallet);
 
             return wallet;
+        }
+
+        private async void TrackUsage(string source, string action, string walletType, string walletAddress)
+        {
+            if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(action) || string.IsNullOrEmpty(walletType) || string.IsNullOrEmpty(walletAddress))
+            {
+                ThirdwebDebug.LogWarning("Invalid usage analytics parameters.");
+                return;
+            }
+
+            try
+            {
+                var content = new System.Net.Http.StringContent(
+                    Newtonsoft.Json.JsonConvert.SerializeObject(
+                        new
+                        {
+                            source,
+                            action,
+                            walletAddress,
+                            walletType,
+                        }
+                    ),
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                );
+                _ = await Client.HttpClient.PostAsync("https://c.thirdweb.com/event", content);
+            }
+            catch
+            {
+                ThirdwebDebug.LogWarning($"Failed to report usage analytics.");
+            }
         }
     }
 }
