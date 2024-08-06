@@ -19,12 +19,14 @@ namespace WalletConnectUnity.UI
         private static readonly Dictionary<string, object> UriSpritesMap = new();
         private static readonly Dictionary<Type, object> ImageHandlers = new();
 
-        public static void RegisterImageHandler<TImage>(IImageHandler<TImage> handler) where TImage : class
+        public static void RegisterImageHandler<TImage>(IImageHandler<TImage> handler)
+            where TImage : class
         {
             ImageHandlers[typeof(TImage)] = handler;
         }
 
-        public static RemoteSprite<TImage> GetRemoteSprite<TImage>(string uri) where TImage : class
+        public static RemoteSprite<TImage> GetRemoteSprite<TImage>(string uri)
+            where TImage : class
         {
             if (!ImageHandlers.TryGetValue(typeof(TImage), out var handlerObj) || handlerObj is not IImageHandler<TImage> handler)
                 throw new InvalidOperationException($"No handler registered for type {typeof(TImage).Name}.");
@@ -42,7 +44,8 @@ namespace WalletConnectUnity.UI
         }
     }
 
-    public class RemoteSprite<TImage> where TImage : class
+    public class RemoteSprite<TImage>
+        where TImage : class
     {
         private readonly string _uri;
         private bool _isLoading;
@@ -97,14 +100,13 @@ namespace WalletConnectUnity.UI
 
             using (var uwr = UnityWebRequestTexture.GetTexture(_uri))
             {
-                uwr.SetWalletConnectRequestHeaders()
-                    .SetRequestHeader("accept", "image/jpeg,image/png");
+                uwr.SetWalletConnectRequestHeaders().SetRequestHeader("accept", "image/jpeg,image/png");
 
                 yield return uwr.SendWebRequest();
 
                 if (uwr.result != UnityWebRequest.Result.Success)
                 {
-                    Debug.LogError($"Failed to load remote sprite from {_uri}: {uwr.error}");
+                    Debug.LogWarning($"Failed to load remote sprite from {_uri}: {uwr.error}");
                 }
                 else
                 {

@@ -12,26 +12,30 @@ namespace WalletConnectUnity.Nethereum
     {
         private readonly WalletConnectService _walletConnectService;
 
-        private readonly HashSet<string> _signMethods =
-            new()
-            {
-                ApiMethods.eth_sendTransaction.ToString(),
-                ApiMethods.personal_sign.ToString(),
-                ApiMethods.eth_signTypedData_v4.ToString(),
-                ApiMethods.wallet_switchEthereumChain.ToString(),
-                ApiMethods.wallet_addEthereumChain.ToString()
-            };
+        private readonly HashSet<string> _signMethods = new()
+        {
+            ApiMethods.eth_sendTransaction.ToString(),
+            ApiMethods.personal_sign.ToString(),
+            ApiMethods.eth_signTypedData_v4.ToString(),
+            ApiMethods.wallet_switchEthereumChain.ToString(),
+            ApiMethods.wallet_addEthereumChain.ToString()
+        };
 
         public WalletConnectInterceptor(WalletConnectService walletConnectService)
         {
             _walletConnectService = walletConnectService;
         }
 
-        public override async Task<object> InterceptSendRequestAsync<T>(Func<RpcRequest, string, Task<T>> interceptedSendRequestAsync, RpcRequest request, string route = null)
+        public override async Task<object> InterceptSendRequestAsync<T>(
+            Func<RpcRequest, string, Task<T>> interceptedSendRequestAsync,
+            RpcRequest request,
+            string route = null)
         {
             if (!_signMethods.Contains(request.Method))
             {
-                return await base.InterceptSendRequestAsync(interceptedSendRequestAsync, request, route).ConfigureAwait(false);
+                return await base
+                    .InterceptSendRequestAsync(interceptedSendRequestAsync, request, route)
+                    .ConfigureAwait(false);
             }
 
             if (!_walletConnectService.IsWalletConnected)
@@ -54,7 +58,7 @@ namespace WalletConnectUnity.Nethereum
                     // If parameter has only one element, it's a json data.
                     // Otherwise, expect the data to be at index 1
                     var dataIndex = request.RawParameters.Length > 1 ? 1 : 0;
-
+                    
                     return await _walletConnectService.EthSignTypedDataV4Async((string)request.RawParameters[dataIndex]);
                 }
 
@@ -71,19 +75,22 @@ namespace WalletConnectUnity.Nethereum
                 throw new NotImplementedException();
             }
 
-            return await base.InterceptSendRequestAsync(interceptedSendRequestAsync, request, route).ConfigureAwait(false);
+            return await base
+                .InterceptSendRequestAsync(interceptedSendRequestAsync, request, route)
+                .ConfigureAwait(false);
         }
 
         public override async Task<object> InterceptSendRequestAsync<T>(
             Func<string, string, object[], Task<T>> interceptedSendRequestAsync,
             string method,
             string route = null,
-            params object[] paramList
-        )
+            params object[] paramList)
         {
             if (!_signMethods.Contains(method))
             {
-                return await base.InterceptSendRequestAsync(interceptedSendRequestAsync, method, route, paramList).ConfigureAwait(false);
+                return await base
+                    .InterceptSendRequestAsync(interceptedSendRequestAsync, method, route, paramList)
+                    .ConfigureAwait(false);
             }
 
             if (!_walletConnectService.IsWalletConnected)
@@ -119,7 +126,9 @@ namespace WalletConnectUnity.Nethereum
                 throw new NotImplementedException();
             }
 
-            return await base.InterceptSendRequestAsync(interceptedSendRequestAsync, method, route, paramList).ConfigureAwait(false);
+            return await base
+                .InterceptSendRequestAsync(interceptedSendRequestAsync, method, route, paramList)
+                .ConfigureAwait(false);
         }
     }
 }

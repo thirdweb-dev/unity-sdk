@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +31,7 @@ namespace WalletConnectUnity.Core
 
         public Linker Linker { get; private set; }
 
+
         public SessionStruct ActiveSession
         {
             get => SignClient.AddressProvider.DefaultSession;
@@ -53,7 +55,6 @@ namespace WalletConnectUnity.Core
 
         public event EventHandler<string> ActiveChainIdChanged;
 
-        private SessionStruct _activeSession;
         protected bool disposed;
 
         public async Task<IWalletConnect> InitializeAsync()
@@ -71,36 +72,33 @@ namespace WalletConnectUnity.Core
                 var currentSyncContext = SynchronizationContext.Current;
                 if (currentSyncContext.GetType().FullName != "UnityEngine.UnitySynchronizationContext")
                     throw new Exception(
-                        $"[WalletConnectUnity] SynchronizationContext is not of type UnityEngine.UnitySynchronizationContext. Current type is <i>{currentSyncContext.GetType().FullName}</i>. Make sure to initialize WalletConnect from the main thread."
-                    );
+                        $"[WalletConnectUnity] SynchronizationContext is not of type UnityEngine.UnitySynchronizationContext. Current type is <i>{currentSyncContext.GetType().FullName}</i>. Make sure to initialize WalletConnect from the main thread.");
                 UnitySyncContext = currentSyncContext;
 
                 var projectConfig = ProjectConfiguration.Load();
 
-                Assert.IsNotNull(projectConfig, $"Project configuration not found. Expected to find it at <i>{ProjectConfiguration.ConfigPath}</i>");
-                Assert.IsFalse(string.IsNullOrWhiteSpace(projectConfig.Id), $"Project ID is not set in the project configuration asset ( <i>{ProjectConfiguration.ConfigPath}</i> ).");
-                Assert.IsFalse(
-                    projectConfig.Metadata == null || string.IsNullOrWhiteSpace(projectConfig.Metadata.Name),
-                    $"Project name is not set in the project configuration asset ( <i>{ProjectConfiguration.ConfigPath}</i> )."
-                );
+                Assert.IsNotNull(projectConfig,
+                    $"Project configuration not found. Expected to find it at <i>{ProjectConfiguration.ConfigPath}</i>");
+                Assert.IsFalse(string.IsNullOrWhiteSpace(projectConfig.Id),
+                    $"Project ID is not set in the project configuration asset ( <i>{ProjectConfiguration.ConfigPath}</i> ).");
+                Assert.IsFalse(projectConfig.Metadata == null || string.IsNullOrWhiteSpace(projectConfig.Metadata.Name),
+                    $"Project name is not set in the project configuration asset ( <i>{ProjectConfiguration.ConfigPath}</i> ).");
 
                 if (projectConfig.LoggingEnabled)
                     WCLogger.Logger = new Logger();
 
                 var storage = await BuildStorage();
 
-                SignClient = await WalletConnectSignClient.Init(
-                    new SignClientOptions
-                    {
-                        Metadata = projectConfig.Metadata,
-                        Name = projectConfig.Metadata.Name,
-                        ProjectId = projectConfig.Id,
-                        Storage = storage,
-                        RelayUrl = projectConfig.RelayUrl,
-                        RelayUrlBuilder = new UnityRelayUrlBuilder(),
-                        ConnectionBuilder = new NativeWebSocketConnectionBuilder()
-                    }
-                );
+                SignClient = await WalletConnectSignClient.Init(new SignClientOptions
+                {
+                    Metadata = projectConfig.Metadata,
+                    Name = projectConfig.Metadata.Name,
+                    ProjectId = projectConfig.Id,
+                    Storage = storage,
+                    RelayUrl = projectConfig.RelayUrl,
+                    RelayUrlBuilder = new UnityRelayUrlBuilder(),
+                    ConnectionBuilder = new NativeWebSocketConnectionBuilder()
+                });
 
                 SignClient.SessionConnected += OnSessionConnected;
                 SignClient.SessionUpdateRequest += OnSessionUpdated;
@@ -134,6 +132,11 @@ namespace WalletConnectUnity.Core
             try
             {
                 await SignClient.Extend(sessionTopic);
+            }
+            catch (KeyNotFoundException)
+            {
+                SignClient.AddressProvider.DefaultSession = default;
+                return false;
             }
             catch (WalletConnectException)
             {
@@ -186,39 +189,30 @@ namespace WalletConnectUnity.Core
 
         private void OnSessionConnected(object sender, SessionStruct session)
         {
-            UnitySyncContext.Post(
-                _ =>
-                {
-                    SessionConnected?.Invoke(this, session);
-                    ActiveSessionChanged?.Invoke(this, session);
-                },
-                null
-            );
+            UnitySyncContext.Post(_ =>
+            {
+                SessionConnected?.Invoke(this, session);
+                ActiveSessionChanged?.Invoke(this, session);
+            }, null);
         }
 
         private void OnSessionUpdated(object sender, SessionEvent sessionEvent)
         {
             var sessionStruct = SignClient.Session.Values.First(s => s.Topic == sessionEvent.Topic);
-            UnitySyncContext.Post(
-                _ =>
-                {
-                    SessionUpdated?.Invoke(this, sessionStruct);
-                    ActiveSessionChanged?.Invoke(this, sessionStruct);
-                },
-                null
-            );
+            UnitySyncContext.Post(_ =>
+            {
+                SessionUpdated?.Invoke(this, sessionStruct);
+                ActiveSessionChanged?.Invoke(this, sessionStruct);
+            }, null);
         }
 
         private void OnSessionDeleted(object sender, SessionEvent _)
         {
-            UnitySyncContext.Post(
-                _ =>
-                {
-                    SessionDisconnected?.Invoke(this, EventArgs.Empty);
-                    ActiveSessionChanged?.Invoke(this, default);
-                },
-                null
-            );
+            UnitySyncContext.Post(_ =>
+            {
+                SessionDisconnected?.Invoke(this, EventArgs.Empty);
+                ActiveSessionChanged?.Invoke(this, default);
+            }, null);
         }
 
         private static async Task<IKeyValueStorage> BuildStorage()
@@ -233,7 +227,7 @@ namespace WalletConnectUnity.Core
             await playerPrefsStorage.Init();
 
             return playerPrefsStorage;
-#else
+#endif
 
             var path = $"{Application.persistentDataPath}/WalletConnect/storage.json";
             WCLogger.Log($"[WalletConnectUnity] Using storage path <i>{path}</i>");
@@ -252,7 +246,6 @@ namespace WalletConnectUnity.Core
             }
 
             return storage;
-#endif
         }
 
         private void ThrowIfNoActiveSession()
@@ -275,8 +268,7 @@ namespace WalletConnectUnity.Core
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
-                return;
+            if (disposed) return;
 
             if (disposing)
             {

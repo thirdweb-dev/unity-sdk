@@ -1,6 +1,6 @@
 {
   "name": "com.walletconnect.nethereum",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "WalletConnectUnity Nethereum",
   "unity": "2021.3",
   "author": "WalletConnect",
@@ -13,6 +13,6 @@
   ],
   "dependencies": {
     "com.nethereum.unity": "4.19.1",
-    "com.walletconnect.core": "3.1.5"
+    "com.walletconnect.core": "3.1.7"
   }
 }

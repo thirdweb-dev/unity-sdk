@@ -4,7 +4,7 @@ using WalletConnectUnity.Core.Networking;
 
 namespace WalletConnectUnity.Core.Utils
 {
-    public class WalletUtils
+    public static class WalletUtils
     {
         public static bool IsWalletInstalled(Wallet wallet)
         {

@@ -50,7 +50,8 @@ MonoBehaviour:
   <BundleId>k__BackingField: 
   <InitializeOnAwake>k__BackingField: 1
   <ShowDebugLogs>k__BackingField: 1
-  <SupportedChains>k__BackingField: ee6e060000000000
+  <OptOutUsageAnalytics>k__BackingField: 0
+  <SupportedChains>k__BackingField: 0100000000000000a736aa000000000089000000000000008238010000000000fa00000000000000a20f0000000000006aa800000000000069a8000000000000b1a4000000000000ee6e060000000000380000000000000061000000000000000a00000000000000dc37aa0000000000
 --- !u!1001 &1183062832708090628
 PrefabInstance:
   m_ObjectHideFlags: 0

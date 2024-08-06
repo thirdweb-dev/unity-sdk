@@ -84,7 +84,6 @@ namespace Thirdweb.Unity.Examples
         {
             // Connect the wallet
 
-            Debug.Log(1);
             var wallet = await ThirdwebManager.Instance.ConnectWallet(options);
 
             // Initialize the wallet panel
@@ -395,7 +394,7 @@ namespace Thirdweb.Unity.Examples
                 }
                 catch (System.Exception e)
                 {
-                    Log(panel.LogText, e.ToString());
+                    Log(panel.LogText, e.Message);
                 }
             });
 

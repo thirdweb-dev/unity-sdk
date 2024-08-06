@@ -1,10 +1,9 @@
 using System;
-using Org.BouncyCastle.Bcpg;
 using UnityEngine;
 
 namespace WalletConnectUnity.Core.Utils
 {
-    public class DeviceUtils
+    public static class DeviceUtils
     {
         public static DeviceType GetDeviceType()
         {
@@ -14,13 +13,9 @@ namespace WalletConnectUnity.Core.Utils
                 : DeviceType.Phone;
 #elif UNITY_VISIONOS
             return DeviceType.Tablet;
-#elif UNITY_ANDROID
+#elif UNITY_ANDROID && UNITY_EDITOR
             return DeviceType.Phone;
-#elif UNITY_WEBGL
-            return DeviceType.Web;
-#elif UNITY_STANDALONE_OSX || UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
-            return DeviceType.Desktop;
-#elif !UNITY_EDITOR
+#elif UNITY_ANDROID && !UNITY_EDITOR
             try
             {
                 var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
@@ -38,8 +33,10 @@ namespace WalletConnectUnity.Core.Utils
                 Debug.LogException(e);
                 return DeviceType.Phone;
             }
+#elif UNITY_WEBGL
+            return DeviceType.Web;
 #else
-            return DeviceType.Phone;
+            return DeviceType.Desktop;
 #endif
         }
     }

@@ -37,13 +37,12 @@ namespace WalletConnectUnity.Core
 #if UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
             // In editor we cannot open _mobile_ deep links, so we just log the uri
             Debug.Log($"[Linker] Requested to open mobile deep link. The uri: {uri}");
-            return;
 #else
-
             var link = Application.isMobilePlatform ? wallet.MobileLink : wallet.DesktopLink;
 
             if (string.IsNullOrWhiteSpace(link))
-                throw new Exception($"[Linker] No link found for {Application.platform} platform in wallet {wallet.Name}.");
+                throw new Exception(
+                    $"[Linker] No link found for {Application.platform} platform in wallet {wallet.Name}.");
 
             var url = BuildConnectionDeepLink(link, uri);
 
@@ -58,20 +57,34 @@ namespace WalletConnectUnity.Core
             if (string.IsNullOrWhiteSpace(session.Topic))
                 throw new Exception("[Linker] No session topic found in provided session. Cannot open deep link.");
 
-            if (session.Peer.Metadata != null)
-            {
-                var redirectNative = session.Peer.Metadata.Redirect.Native;
+            if (session.Peer.Metadata == null)
+                return;
 
-                if (string.IsNullOrWhiteSpace(redirectNative) && WalletUtils.TryGetRecentWallet(out var recentWallet))
-                {
-                    WCLogger.LogError($"[Linker] No redirect found for {session.Peer.Metadata.Name}. Using deep link from the Recent Wallet.");
-                    Application.OpenURL(Application.isMobilePlatform ? recentWallet.MobileLink : recentWallet.DesktopLink);
-                }
-                else
-                {
-                    WCLogger.Log($"[Linker] Open native deep link: {redirectNative}");
-                    Application.OpenURL(redirectNative);
-                }
+            var redirectNative = session.Peer.Metadata.Redirect?.Native;
+
+            if (string.IsNullOrWhiteSpace(redirectNative))
+            {
+                if (!WalletUtils.TryGetRecentWallet(out var recentWallet))
+                    return;
+
+                Debug.LogWarning(
+                    $"[Linker] No redirect found for {session.Peer.Metadata.Name}. Using deep link from the Recent Wallet."
+                );
+
+                redirectNative = Application.isMobilePlatform ? recentWallet.MobileLink : recentWallet.DesktopLink;
+                if (!redirectNative.EndsWith("://"))
+                    redirectNative = $"{redirectNative}://";
+
+                Application.OpenURL(redirectNative);
+            }
+            else
+            {
+                WCLogger.Log($"[Linker] Open native deep link: {redirectNative}");
+
+                if (!redirectNative.EndsWith("://"))
+                    redirectNative = $"{redirectNative}://";
+
+                Application.OpenURL(redirectNative);
             }
         }
 
@@ -90,7 +103,7 @@ namespace WalletConnectUnity.Core
                 safeAppUrl = $"{safeAppUrl}://";
             }
 
-            if (!safeAppUrl.EndsWith("/"))
+            if (!safeAppUrl.EndsWith('/'))
                 safeAppUrl = $"{safeAppUrl}/";
 
             var encodedWcUrl = Uri.EscapeDataString(wcUri);
@@ -112,24 +125,21 @@ namespace WalletConnectUnity.Core
 
         protected virtual void OnPublisherPublishedMessage(object sender, PublishParams publishParams)
         {
-            WalletConnect.UnitySyncContext.Post(
-                _ =>
-                {
-                    if (string.IsNullOrWhiteSpace(publishParams.Topic))
-                        return;
+            WalletConnect.UnitySyncContext.Post(_ =>
+            {
+                if (string.IsNullOrWhiteSpace(publishParams.Topic))
+                    return;
 
-                    if (_sessionMessagesCounter.TryGetValue(publishParams.Topic, out var messageCount))
+                if (_sessionMessagesCounter.TryGetValue(publishParams.Topic, out var messageCount))
+                {
+                    WCLogger.Log($"[Linker] OnPublisherPublishedMessage. Message count: {messageCount}");
+                    if (messageCount != 0)
                     {
-                        WCLogger.Log($"[Linker] OnPublisherPublishedMessage. Message count: {messageCount}");
-                        if (messageCount != 0)
-                        {
-                            _sessionMessagesCounter[publishParams.Topic] = messageCount - 1;
-                            OpenSessionRequestDeepLink(publishParams.Topic);
-                        }
+                        _sessionMessagesCounter[publishParams.Topic] = messageCount - 1;
+                        OpenSessionRequestDeepLink(publishParams.Topic);
                     }
-                },
-                null
-            );
+                }
+            }, null);
         }
 
         public void OpenSessionRequestDeepLinkAfterMessageFromSession(string sessionTopic)
@@ -180,8 +190,7 @@ namespace WalletConnectUnity.Core
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
-                return;
+            if (disposed) return;
 
             if (disposing)
                 _walletConnect.SignClient.Core.Relayer.Publisher.OnPublishedMessage -= OnPublisherPublishedMessage;

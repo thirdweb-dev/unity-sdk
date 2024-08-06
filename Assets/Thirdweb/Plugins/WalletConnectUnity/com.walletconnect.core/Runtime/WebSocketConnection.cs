@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using WalletConnectUnity.NativeWebSocket;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +9,7 @@ using WalletConnectSharp.Common;
 using WalletConnectSharp.Common.Logging;
 using WalletConnectSharp.Network;
 using WalletConnectSharp.Network.Models;
+using WalletConnectUnity.NativeWebSocket;
 
 namespace WalletConnectUnity.Core
 {

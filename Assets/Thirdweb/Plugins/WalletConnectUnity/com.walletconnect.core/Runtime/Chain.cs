@@ -7,6 +7,9 @@ namespace WalletConnectUnity.Core
     public class Chain
     {
         public virtual string Name { get; }
+        
+        // https://github.com/wevm/viem/blob/main/src/chains/index.ts
+        public virtual string ViemName { get; }
         public virtual Currency NativeCurrency { get; }
         public virtual BlockExplorer BlockExplorer { get; }
         public virtual string RpcUrl { get; }
@@ -28,7 +31,8 @@ namespace WalletConnectUnity.Core
             BlockExplorer blockExplorer,
             string rpcUrl,
             bool isTestnet,
-            string imageUrl)
+            string imageUrl,
+            string viemName = null)
         {
             ChainNamespace = chainNamespace;
             ChainReference = chainReference;
@@ -38,6 +42,7 @@ namespace WalletConnectUnity.Core
             RpcUrl = rpcUrl;
             IsTestnet = isTestnet;
             ImageUrl = imageUrl;
+            ViemName = viemName;
         }
     }
 
@@ -141,7 +146,8 @@ namespace WalletConnectUnity.Core
                 new BlockExplorer("Etherscan", "https://etherscan.io"),
                 "https://cloudflare-eth.com",
                 false,
-                $"{ChainImageUrl}/{ImageIds[References.Ethereum]}"
+                $"{ChainImageUrl}/{ImageIds[References.Ethereum]}",
+                "mainnet"
             );
 
             public static readonly Chain EthereumGoerli = new(
@@ -152,7 +158,8 @@ namespace WalletConnectUnity.Core
                 new BlockExplorer("Etherscan", "https://goerli.etherscan.io"),
                 "https://goerli.infura.io/v3/",
                 true,
-                $"{ChainImageUrl}/{ImageIds[References.EthereumGoerli]}"
+                $"{ChainImageUrl}/{ImageIds[References.EthereumGoerli]}",
+                "goerli"
             );
 
             public static readonly Chain Optimism = new(
@@ -163,7 +170,8 @@ namespace WalletConnectUnity.Core
                 new BlockExplorer("Optimistic Etherscan", "https://optimistic.etherscan.io"),
                 "https://mainnet.optimism.io",
                 false,
-                $"{ChainImageUrl}/{ImageIds[References.Optimism]}"
+                $"{ChainImageUrl}/{ImageIds[References.Optimism]}",
+                "optimism"
             );
 
             public static readonly Chain Ronin = new(
@@ -171,10 +179,11 @@ namespace WalletConnectUnity.Core
                 References.Ronin,
                 "Ronin",
                 new Currency("Ronin", "RON", 18),
-                new BlockExplorer("Ronin Explorer", "https://api-gateway.skymavis.com/rpc"),
+                new BlockExplorer("Ronin Explorer", "https://app.roninchain.com/"),
                 "https://api.roninchain.com/rpc",
                 false,
-                $"{ChainImageUrl}/{ImageIds[References.Ronin]}"
+                $"{ChainImageUrl}/{ImageIds[References.Ronin]}",
+                "ronin"
             );
 
             public static readonly Chain RoninSaigon = new(
@@ -185,7 +194,8 @@ namespace WalletConnectUnity.Core
                 new BlockExplorer("Ronin Explorer", "https://explorer.roninchain.com"),
                 "\thttps://api-gateway.skymavis.com/rpc/testnet",
                 false,
-                $"{ChainImageUrl}/{ImageIds[References.Ronin]}"
+                $"{ChainImageUrl}/{ImageIds[References.Ronin]}",
+                "saigon"
             );
 
             public static readonly Chain Arbitrum = new(
@@ -196,7 +206,8 @@ namespace WalletConnectUnity.Core
                 new BlockExplorer("Arbitrum Explorer", "https://arbiscan.io"),
                 "https://arb1.arbitrum.io/rpc",
                 false,
-                $"{ChainImageUrl}/{ImageIds[References.Arbitrum]}"
+                $"{ChainImageUrl}/{ImageIds[References.Arbitrum]}",
+                "arbitrum"
             );
 
             public static readonly Chain Celo = new(
@@ -207,7 +218,8 @@ namespace WalletConnectUnity.Core
                 new BlockExplorer("Celo Explorer", "https://explorer.celo.org"),
                 "https://forno.celo.org",
                 false,
-                $"{ChainImageUrl}/{ImageIds[References.Celo]}"
+                $"{ChainImageUrl}/{ImageIds[References.Celo]}",
+                "celo"
             );
 
             public static readonly Chain CeloAlfajores = new(
@@ -218,7 +230,8 @@ namespace WalletConnectUnity.Core
                 new BlockExplorer("Celo Explorer", "https://alfajores-blockscout.celo-testnet.org"),
                 "https://alfajores-forno.celo-testnet.org",
                 true,
-                $"{ChainImageUrl}/{ImageIds[References.CeloAlfajores]}"
+                $"{ChainImageUrl}/{ImageIds[References.CeloAlfajores]}",
+                "celoAlfajores"
             );
 
             public static readonly Chain Base = new(
@@ -229,7 +242,8 @@ namespace WalletConnectUnity.Core
                 new BlockExplorer("BaseScan", "https://basescan.org/"),
                 "https://mainnet.base.org",
                 false,
-                $"{ChainImageUrl}/{ImageIds[References.Base]}"
+                $"{ChainImageUrl}/{ImageIds[References.Base]}",
+                "base"
             );
 
             public static readonly Chain BaseGoerli = new(
@@ -240,7 +254,8 @@ namespace WalletConnectUnity.Core
                 new BlockExplorer("BaseScan", "https://goerli.basescan.org/"),
                 "https://goerli.base.org",
                 true,
-                $"{ChainImageUrl}/{ImageIds[References.BaseGoerli]}"
+                $"{ChainImageUrl}/{ImageIds[References.BaseGoerli]}",
+                "baseGoerli"
             );
 
             public static readonly Chain Polygon = new(
@@ -249,9 +264,10 @@ namespace WalletConnectUnity.Core
                 "Polygon",
                 new Currency("Matic", "MATIC", 18),
                 new BlockExplorer("Polygon Explorer", "https://polygonscan.com"),
-                "https://rpc-mainnet.maticvigil.com",
+                "https://polygon-rpc.com",
                 false,
-                $"{ChainImageUrl}/{ImageIds[References.Polygon]}"
+                $"{ChainImageUrl}/{ImageIds[References.Polygon]}",
+                "polygon"
             );
 
             public static readonly Chain Avalanche = new(
@@ -262,7 +278,8 @@ namespace WalletConnectUnity.Core
                 new BlockExplorer("Avalanche Explorer", "https://snowtrace.io/"),
                 "https://api.avax.network/ext/bc/C/rpc",
                 false,
-                $"{ChainImageUrl}/{ImageIds[References.Avalanche]}"
+                $"{ChainImageUrl}/{ImageIds[References.Avalanche]}",
+                "avalanche"
             );
 
             public static readonly Chain Solana = new(
@@ -273,7 +290,8 @@ namespace WalletConnectUnity.Core
                 new BlockExplorer("Solana Explorer", "https://explorer.solana.com"),
                 "https://api.mainnet-beta.solana.com",
                 false,
-                $"{ChainImageUrl}/{ImageIds[References.Solana]}"
+                $"{ChainImageUrl}/{ImageIds[References.Solana]}",
+                "solana"
             );
 
             public static readonly IReadOnlyCollection<Chain> All = new HashSet<Chain>

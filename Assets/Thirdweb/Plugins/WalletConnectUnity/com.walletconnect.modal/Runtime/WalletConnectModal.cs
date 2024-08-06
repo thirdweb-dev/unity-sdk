@@ -1,11 +1,8 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using WalletConnectSharp.Sign.Interfaces;
 using WalletConnectSharp.Sign.Models;
-using WalletConnectSharp.Sign.Models.Engine.Events;
-using WalletConnectSharp.Sign.Models.Engine.Methods;
 using WalletConnectUnity.Core;
 using WalletConnectUnity.Core.Networking;
 using WalletConnectUnity.Core.Utils;
@@ -15,19 +12,18 @@ namespace WalletConnectUnity.Modal
 {
     public sealed class WalletConnectModal : MonoBehaviour
     {
-        [field: SerializeField]
-        private bool InitializeOnAwake { get; set; } = true;
+        [field: SerializeField] private bool InitializeOnAwake { get; set; } = true;
 
-        [field: SerializeField]
-        private bool ResumeSessionOnInit { get; set; } = true;
+        [field: SerializeField] private bool ResumeSessionOnInit { get; set; } = true;
 
-        [field: SerializeField, Space]
-        private WCModal Modal { get; set; }
+        [field: SerializeField] [field: Space] private WCModal Modal { get; set; }
 
-        [field: SerializeField]
-        private SerializableDictionary<ViewType, WCModalView> Views { get; set; } = new();
+        [field: SerializeField] private SerializableDictionary<ViewType, WCModalView> Views { get; set; } = new();
 
-        public static ISignClient SignClient => WalletConnect.Instance.SignClient;
+        public static ISignClient SignClient
+        {
+            get => WalletConnect.Instance.SignClient;
+        }
 
         public static UnityWebRequestWalletsFactory WalletsRequestsFactory { get; private set; }
 
@@ -59,7 +55,7 @@ namespace WalletConnectUnity.Modal
 
         public static async Task InitializeAsync()
         {
-            UnityWebRequestExtensions.sdkVersion = "unity-wcm-v1.1.6"; // TODO: update this from CI
+            SdkMetadata.Version = "unity-wcm-v1.1.11"; // TODO: update this from CI
 
             await WalletConnect.Instance.InitializeAsync();
 
@@ -75,7 +71,10 @@ namespace WalletConnectUnity.Modal
                 sessionResumed = await WalletConnect.Instance.TryResumeSessionAsync();
 
             IsReady = true;
-            Ready?.Invoke(Instance, new ModalReadyEventArgs { SessionResumed = sessionResumed });
+            Ready?.Invoke(Instance, new ModalReadyEventArgs
+            {
+                SessionResumed = sessionResumed
+            });
         }
 
         private bool TryConfigureSingleton()
@@ -88,7 +87,7 @@ namespace WalletConnectUnity.Modal
             }
             else
             {
-                // Debug.LogError("[WalletConnectUnity] WalletConnectModal already exists. Destroying...");
+                Debug.LogError("[WalletConnectUnity] WalletConnectModal already exists. Destroying...");
                 Destroy(gameObject);
                 return false;
             }
@@ -112,7 +111,10 @@ namespace WalletConnectUnity.Modal
             {
                 Options = options;
 
-                WalletsRequestsFactory = new UnityWebRequestWalletsFactory(includedWalletIds: options.IncludedWalletIds, excludedWalletIds: options.ExcludedWalletIds);
+                WalletsRequestsFactory = new UnityWebRequestWalletsFactory(
+                    includedWalletIds: options.IncludedWalletIds,
+                    excludedWalletIds: options.ExcludedWalletIds
+                );
 
                 ConnectionController.InitiateConnection(options.ConnectOptions);
             }
@@ -141,14 +143,11 @@ namespace WalletConnectUnity.Modal
 
         private void OnSessionErrored(object sender, Exception e)
         {
-            WalletConnect.UnitySyncContext.Post(
-                _ =>
-                {
-                    Modal.CloseModal();
-                    ConnectionError?.Invoke(this, EventArgs.Empty);
-                },
-                null
-            );
+            WalletConnect.UnitySyncContext.Post(_ =>
+            {
+                Modal.CloseModal();
+                ConnectionError?.Invoke(this, EventArgs.Empty);
+            }, null);
         }
 
         private void OnDestroy()
@@ -162,7 +161,7 @@ namespace WalletConnectUnity.Modal
 
     public enum ViewType : sbyte
     {
-        Connect = 1,
+        Connect = 1
     }
 
     public class ModalReadyEventArgs : EventArgs

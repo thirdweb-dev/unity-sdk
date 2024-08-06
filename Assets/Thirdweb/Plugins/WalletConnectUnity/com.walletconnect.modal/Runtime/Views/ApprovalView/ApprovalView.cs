@@ -35,10 +35,9 @@ namespace WalletConnectUnity.Modal.Views
         {
             _tabsController.Initialize();
 
-#pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable 618
             WalletConnectModal.Connected += OnConnected;
-#pragma warning restore CS0618 // Type or member is obsolete
-
+#pragma warning restore 618
 
             base.Awake();
         }

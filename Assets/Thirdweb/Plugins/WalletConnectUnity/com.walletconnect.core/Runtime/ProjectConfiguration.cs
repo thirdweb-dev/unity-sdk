@@ -1,33 +1,24 @@
 using System.Text;
-using Thirdweb;
 using UnityEngine;
 using WalletConnectSharp.Core;
 using WalletConnectSharp.Core.Controllers;
 
 namespace WalletConnectUnity.Core
 {
-    [CreateAssetMenu(
-        fileName = "WalletConnectProjectConfig",
-        menuName = "WalletConnect/Project Configuration"
-    )]
+    [CreateAssetMenu(fileName = "WalletConnectProjectConfig", menuName = "WalletConnect/Project Configuration")]
     public sealed class ProjectConfiguration : ScriptableObject
     {
-        [field: SerializeField, Header("Application")]
-        public string Id { get; private set; }
+        [field: SerializeField, Header("Application")] public string Id { get; private set; }
+        
+        [field: SerializeField] public Metadata Metadata { get; private set; }
 
-        [field: SerializeField]
-        public Metadata Metadata { get; private set; }
-
-        [field: SerializeField]
-        public string RelayUrl { get; private set; } = Relayer.DEFAULT_RELAY_URL;
-
-        [field: SerializeField, Header("Debug")]
-        public bool LoggingEnabled { get; private set; }
-
+        [field: SerializeField] public string RelayUrl { get; private set; } = Relayer.DEFAULT_RELAY_URL;
+        
+        [field: SerializeField, Header ("Debug")] public bool LoggingEnabled { get; private set; }
+        
         private const string ConfigName = "WalletConnectProjectConfig";
 
-        public static readonly string ConfigPath =
-            $"Assets/Thirdweb/Core/Plugins/WalletConnectUnity/Resources/{ConfigName}.asset";
+        public static readonly string ConfigPath = $"Assets/WalletConnectUnity/Resources/{ConfigName}.asset";
 
         public static ProjectConfiguration Load(string path = null)
         {
@@ -45,15 +36,15 @@ namespace WalletConnectUnity.Core
             }
 
             EnsureFolderStructureExists(ConfigPath);
-
+            
             config = CreateInstance<ProjectConfiguration>();
             UnityEditor.AssetDatabase.CreateAsset(config, ConfigPath);
             UnityEditor.AssetDatabase.SaveAssets();
             UnityEditor.AssetDatabase.Refresh();
-
+            
             Debug.Log($"[WalletConnect] Project configuration created at <i>{ConfigPath}</i>");
         }
-
+        
         private static void EnsureFolderStructureExists(string desiredPath)
         {
             if (!desiredPath.StartsWith("Assets/"))
@@ -69,10 +60,7 @@ namespace WalletConnectUnity.Core
 
                 var currentPath = pathBuilder.ToString();
                 if (!UnityEditor.AssetDatabase.IsValidFolder(currentPath))
-                    UnityEditor.AssetDatabase.CreateFolder(
-                        System.IO.Path.GetDirectoryName(currentPath),
-                        folders[i]
-                    );
+                    UnityEditor.AssetDatabase.CreateFolder(System.IO.Path.GetDirectoryName(currentPath), folders[i]);
             }
         }
 #endif

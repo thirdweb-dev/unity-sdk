@@ -13,6 +13,8 @@ using WalletConnectUnity.Modal;
 using System.Linq;
 using WalletConnectUnity.Nethereum;
 using Nethereum.RPC.Eth.DTOs;
+using WalletConnectUnity.Core.Evm;
+using Nethereum.Hex.HexTypes;
 
 namespace Thirdweb.Unity
 {
@@ -68,11 +70,45 @@ namespace Thirdweb.Unity
             }
             else
             {
-                await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{initialChainId}");
+                try
+                {
+                    var chainInfo = await Utils.FetchThirdwebChainDataAsync(client, initialChainId);
+                    var wcChainInfo = new EthereumChain()
+                    {
+                        chainIdHex = new HexBigInteger(chainInfo.ChainId).HexValue,
+                        name = chainInfo.Name,
+                        nativeCurrency = new Currency(chainInfo.NativeCurrency.Name, chainInfo.NativeCurrency.Symbol, chainInfo.NativeCurrency.Decimals),
+                        rpcUrls = new string[] { $"https://{chainInfo.ChainId}.rpc.thirdweb.com" },
+                        blockExplorerUrls = chainInfo.Explorers == null || chainInfo.Explorers.Count == 0 ? null : new string[] { chainInfo.Explorers[0].Url },
+                        chainIdDecimal = chainInfo.ChainId.ToString(),
+                    };
+                    await WalletConnect.Instance.SwitchEthereumChainAsync(wcChainInfo);
+                    await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{initialChainId}");
+                }
+                catch (Exception e)
+                {
+                    ThirdwebDebug.LogWarning($"Failed to ensure wallet is on active chain: {e.Message}");
+                }
                 _walletConnectService = new WalletConnectServiceCore(WalletConnect.Instance.SignClient);
             }
 
             return new WalletConnectWallet(client);
+        }
+
+        public async Task EnsureCorrectNetwork(BigInteger chainId)
+        {
+            var chainInfo = await Utils.FetchThirdwebChainDataAsync(_client, chainId);
+            var wcChainInfo = new EthereumChain()
+            {
+                chainIdHex = new HexBigInteger(chainInfo.ChainId).HexValue,
+                name = chainInfo.Name,
+                nativeCurrency = new Currency(chainInfo.NativeCurrency.Name, chainInfo.NativeCurrency.Symbol, chainInfo.NativeCurrency.Decimals),
+                rpcUrls = new string[] { $"https://{chainInfo.ChainId}.rpc.thirdweb.com" },
+                blockExplorerUrls = chainInfo.Explorers == null || chainInfo.Explorers.Count == 0 ? null : new string[] { chainInfo.Explorers[0].Url },
+                chainIdDecimal = chainInfo.ChainId.ToString(),
+            };
+            await WalletConnect.Instance.SwitchEthereumChainAsync(wcChainInfo);
+            await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{chainId}");
         }
 
         #region IThirdwebWallet

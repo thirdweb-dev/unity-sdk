@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.10] - 2024-07-31
+
+### Changed
+
+- Upgraded WalletConnectSharp to [v2.4.1](https://github.com/WalletConnect/WalletConnectSharp/releases/tag/v2.4.1)
+
+### Fixed
+
+- Occasionally a grey texture would appear instead of a QR code
+- Deep linking didn't work with some wallets on mobile
+
+## [3.1.10] - 2024-07-16
+
+- Upgraded WalletConnectSharp to [v2.4.0](https://github.com/WalletConnect/WalletConnectSharp/releases/tag/v2.4.0)
+
+## [3.1.8] - 2024-06-26
+
+### Fixed
+
+- Incorrect Ronin chain explorer URL
+- Warming about unnecessary zxing asmdef file
+
+## [3.1.7] - 2024-06-07
+
+### Changed
+
+- Upgraded WalletConnectSharp to [v2.3.8](https://github.com/WalletConnect/WalletConnectSharp/releases/tag/v2.3.8)
+
+### Fixed
+
+- `Unreachable code detected` warnings
+- `WalletConnectInterceptor` doesn't support `eth_signTypedData_v4` requests with more than 1 parameter
+- Deprecated Polygon RPC URL
+- Dependency collision with UniRx and Cysharp/R3
+- Generated QR code textures taking up too much memory
+
 ## [3.1.6] - 2024-05-09
 
 ### Added
