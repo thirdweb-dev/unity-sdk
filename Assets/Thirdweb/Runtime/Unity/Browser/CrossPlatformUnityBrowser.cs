@@ -20,7 +20,7 @@ namespace Thirdweb.Unity
 #elif UNITY_ANDROID
             _unityBrowser = new AndroidBrowser();
 #elif UNITY_IOS
-            _unityBrowser = new iOSBrowser();
+            _unityBrowser = new IOSBrowser();
 #else
             _unityBrowser = new InAppWalletBrowser();
 #endif
