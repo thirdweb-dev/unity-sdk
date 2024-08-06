@@ -95,6 +95,7 @@ namespace Thirdweb.Wallets
                     AuthProvider.Facebook => "Facebook",
                     AuthProvider.JWT => "CustomAuth",
                     AuthProvider.PhoneOTP => "PhoneOTP",
+                    AuthProvider.Discord => "Discord",
                     _ => throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}"),
                 };
                 return await _embeddedWallet.GetUserAsync(_email, authProvider);
@@ -119,6 +120,9 @@ namespace Thirdweb.Wallets
                         break;
                     case AuthProvider.Facebook:
                         await LoginWithOauth("Facebook");
+                        break;
+                    case AuthProvider.Discord:
+                        await LoginWithOauth("Discord");
                         break;
                     case AuthProvider.JWT:
                         await LoginWithJWT(authOptions.jwtOrPayload, authOptions.encryptionKey);

@@ -1069,6 +1069,11 @@ namespace Thirdweb
         /// <summary>
         /// Phone Number OTP Flow.
         /// </summary>
-        PhoneOTP
+        PhoneOTP,
+
+        /// <summary>
+        /// Discord OAuth2 Flow.
+        /// </summary>
+        Discord
     }
 }
