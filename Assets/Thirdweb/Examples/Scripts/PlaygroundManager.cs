@@ -249,7 +249,7 @@ namespace Thirdweb.Unity.Examples
             panel.BackButton.onClick.RemoveAllListeners();
             panel.BackButton.onClick.AddListener(InitializeInAppWalletPanel);
 
-            // socials action 1 is google, 2 is apple 3 is facebook
+            // socials action 1 is google, 2 is apple 3 is discord
 
             panel.Action1Button.onClick.RemoveAllListeners();
             panel.Action1Button.onClick.AddListener(() =>
@@ -286,7 +286,7 @@ namespace Thirdweb.Unity.Examples
             {
                 try
                 {
-                    var inAppWalletOptions = new InAppWalletOptions(authprovider: AuthProvider.Facebook);
+                    var inAppWalletOptions = new InAppWalletOptions(authprovider: AuthProvider.Discord);
                     var options = new WalletOptions(provider: WalletProvider.InAppWallet, chainId: ActiveChainId, inAppWalletOptions: inAppWalletOptions);
                     ConnectWallet(options);
                 }

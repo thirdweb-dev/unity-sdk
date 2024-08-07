@@ -29,7 +29,7 @@ namespace Thirdweb.Unity
             try
             {
                 OpenURL(loginUrl);
-                var completedTask = await Task.WhenAny(_taskCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(60)));
+                var completedTask = await Task.WhenAny(_taskCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(120)));
                 if (completedTask == _taskCompletionSource.Task)
                 {
                     return await _taskCompletionSource.Task;

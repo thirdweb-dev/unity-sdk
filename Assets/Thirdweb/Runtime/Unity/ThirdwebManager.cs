@@ -235,7 +235,7 @@ namespace Thirdweb.Unity
                         client: Client,
                         email: walletOptions.InAppWalletOptions?.Email,
                         phoneNumber: walletOptions.InAppWalletOptions?.PhoneNumber,
-                        authprovider: walletOptions.InAppWalletOptions?.AuthProvider ?? AuthProvider.Default,
+                        authProvider: walletOptions.InAppWalletOptions?.AuthProvider ?? AuthProvider.Default,
                         storageDirectoryPath: Application.persistentDataPath
                     );
                     break;
