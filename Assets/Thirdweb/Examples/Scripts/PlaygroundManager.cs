@@ -84,6 +84,11 @@ namespace Thirdweb.Unity.Examples
         {
             // Connect the wallet
 
+            var internalWalletProvider = options.Provider == WalletProvider.MetaMaskWallet ? WalletProvider.WalletConnectWallet : options.Provider;
+            var currentPanel = WalletPanels.Find(panel => panel.Identifier == internalWalletProvider.ToString());
+
+            Log(currentPanel.LogText, $"Connecting...");
+
             var wallet = await ThirdwebManager.Instance.ConnectWallet(options);
 
             // Initialize the wallet panel
@@ -92,8 +97,6 @@ namespace Thirdweb.Unity.Examples
 
             // Setup actions
 
-            var internalWalletProvider = options.Provider == WalletProvider.MetaMaskWallet ? WalletProvider.WalletConnectWallet : options.Provider;
-            var currentPanel = WalletPanels.Find(panel => panel.Identifier == internalWalletProvider.ToString());
             ClearLog(currentPanel.LogText);
             currentPanel.Panel.SetActive(true);
 
@@ -121,6 +124,7 @@ namespace Thirdweb.Unity.Examples
             currentPanel.Action3Button.onClick.RemoveAllListeners();
             currentPanel.Action3Button.onClick.AddListener(async () =>
             {
+                LoadingLog(currentPanel.LogText);
                 var balance = await wallet.GetBalance(chainId: ActiveChainId);
                 var balanceEth = Utils.ToEth(wei: balance.ToString(), decimalsToDisplay: 4, addCommas: true);
                 Log(currentPanel.LogText, $"Balance: {balanceEth} {_chainDetails.NativeCurrency.Symbol}");
@@ -171,7 +175,7 @@ namespace Thirdweb.Unity.Examples
                 InitializeInAppWalletPanel_Phone();
             });
 
-            // Socials (Using Google Here)
+            // Socials
             panel.Action3Button.onClick.RemoveAllListeners();
             panel.Action3Button.onClick.AddListener(() =>
             {
@@ -256,6 +260,7 @@ namespace Thirdweb.Unity.Examples
             {
                 try
                 {
+                    Log(panel.LogText, "Authenticating...");
                     var inAppWalletOptions = new InAppWalletOptions(authprovider: AuthProvider.Google);
                     var options = new WalletOptions(provider: WalletProvider.InAppWallet, chainId: ActiveChainId, inAppWalletOptions: inAppWalletOptions);
                     ConnectWallet(options);
@@ -271,6 +276,7 @@ namespace Thirdweb.Unity.Examples
             {
                 try
                 {
+                    Log(panel.LogText, "Authenticating...");
                     var inAppWalletOptions = new InAppWalletOptions(authprovider: AuthProvider.Apple);
                     var options = new WalletOptions(provider: WalletProvider.InAppWallet, chainId: ActiveChainId, inAppWalletOptions: inAppWalletOptions);
                     ConnectWallet(options);
@@ -286,6 +292,7 @@ namespace Thirdweb.Unity.Examples
             {
                 try
                 {
+                    Log(panel.LogText, "Authenticating...");
                     var inAppWalletOptions = new InAppWalletOptions(authprovider: AuthProvider.Discord);
                     var options = new WalletOptions(provider: WalletProvider.InAppWallet, chainId: ActiveChainId, inAppWalletOptions: inAppWalletOptions);
                     ConnectWallet(options);
@@ -318,6 +325,7 @@ namespace Thirdweb.Unity.Examples
             {
                 try
                 {
+                    LoadingLog(panel.LogText);
                     var dropErc1155Contract = await ThirdwebManager.Instance.GetContract(address: "0x6A7a26c9a595E6893C255C9dF0b593e77518e0c3", chainId: ActiveChainId);
                     var nft = await dropErc1155Contract.ERC1155_GetNFT(tokenId: 1);
                     Log(panel.LogText, $"NFT: {JsonConvert.SerializeObject(nft.Metadata)}");
@@ -334,6 +342,7 @@ namespace Thirdweb.Unity.Examples
             {
                 try
                 {
+                    LoadingLog(panel.LogText);
                     var contract = await ThirdwebManager.Instance.GetContract(address: "0x6A7a26c9a595E6893C255C9dF0b593e77518e0c3", chainId: ActiveChainId);
                     var result = await contract.ERC1155_URI(tokenId: 1);
                     Log(panel.LogText, $"Result (uri): {result}");
@@ -350,6 +359,7 @@ namespace Thirdweb.Unity.Examples
             {
                 try
                 {
+                    LoadingLog(panel.LogText);
                     var dropErc20Contract = await ThirdwebManager.Instance.GetContract(address: "0xEBB8a39D865465F289fa349A67B3391d8f910da9", chainId: ActiveChainId);
                     var symbol = await dropErc20Contract.ERC20_Symbol();
                     var balance = await dropErc20Contract.ERC20_BalanceOf(ownerAddress: await ThirdwebManager.Instance.GetActiveWallet().GetAddress());
@@ -431,6 +441,7 @@ namespace Thirdweb.Unity.Examples
             {
                 try
                 {
+                    LoadingLog(panel.LogText);
                     var activeSigners = await smartWallet.GetAllActiveSigners();
                     Log(panel.LogText, $"Active Signers: {JsonConvert.SerializeObject(activeSigners)}");
                 }
@@ -459,6 +470,11 @@ namespace Thirdweb.Unity.Examples
         {
             logText.text = message;
             ThirdwebDebug.Log(message);
+        }
+
+        private void LoadingLog(TMP_Text logText)
+        {
+            logText.text = "Loading...";
         }
     }
 }

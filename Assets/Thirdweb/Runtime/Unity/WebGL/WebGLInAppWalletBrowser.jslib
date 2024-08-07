@@ -1,20 +1,12 @@
 mergeInto(LibraryManager.library, {
-  openPopup: function (
-    urlPtr,
-    developerClientIdPtr,
-    authOptionPtr,
-    unityObjectNamePtr,
-    unityCallbackMethodPtr
-  ) {
+  openPopup: function (urlPtr, unityObjectNamePtr, unityCallbackMethodPtr) {
     var initialUrl = UTF8ToString(urlPtr);
-    var developerClientId = UTF8ToString(developerClientIdPtr);
-    var authOption = UTF8ToString(authOptionPtr);
     var unityObjectName = UTF8ToString(unityObjectNamePtr);
     var unityCallbackMethod = UTF8ToString(unityCallbackMethodPtr);
 
     // Calculate dimensions and position for the popup
-    var width = 350;
-    var height = 500;
+    var width = 600;
+    var height = 750;
     var top = (window.innerHeight - height) / 2;
     var left = (window.innerWidth - width) / 2;
 
@@ -35,43 +27,46 @@ mergeInto(LibraryManager.library, {
       SendMessage(unityObjectName, unityCallbackMethod, message);
     }
 
-    // Listen for messages from the popup
-    window.addEventListener("message", function (event) {
-        var data = event.data;
-        
-        // console.log("Received message from popup: ", data);
-
-        switch (data.eventType) {
-          case "injectDeveloperClientId":
-            // send message back with developer client id
-            popupWindow.postMessage({
-              eventType: "injectDeveloperClientIdResult",
-              developerClientId: developerClientId,
-              authOption: authOption,
-            }, "*");
-            break;
-          case "userLoginSuccess":
-            clearInterval(pollTimer);
-            sendMessageToUnity(JSON.stringify(data));
-            popupWindow.close();
-            break;
-          case "userLoginFailed":
-            clearInterval(pollTimer);
-            sendMessageToUnity(JSON.stringify(data));
-            popupWindow.close();
-            break;
-          default:
-            break;
-        }
-    });
-
-    // Poll to check if the popup is closed
-    var pollTimer = setInterval(function () {
+    // Detect when the popup is closed
+    var pollTimer = window.setInterval(function () {
       if (popupWindow.closed) {
         clearInterval(pollTimer);
-        sendMessageToUnity("PopupClosedWithoutAction");
+        window.removeEventListener("message", messageListener);
+        sendMessageToUnity(
+          JSON.stringify({
+            eventType: "PopupClosedWithoutAction",
+          })
+        );
       }
-    }, 500);
+    }, 1000);
+
+    // Listen for messages from the popup window
+    function messageListener(event) {
+      // Ensure the message is from the expected origin
+      if (event.origin !== new URL(initialUrl).origin) {
+        return;
+      }
+
+      // Ensure the event data is an object
+      if (typeof event.data !== "object") {
+        return;
+      }
+
+      switch (event.data.eventType) {
+        case "oauthSuccessResult":
+        case "oauthFailureResult":
+          window.removeEventListener("message", messageListener);
+          clearInterval(pollTimer);
+          popupWindow.close();
+          sendMessageToUnity(JSON.stringify(event.data));
+          break;
+        default:
+          // no-op, do not throw here
+          break;
+      }
+    }
+
+    window.addEventListener("message", messageListener);
 
     // Close the popup when the main window is closed or refreshed
     window.addEventListener("beforeunload", function () {
@@ -79,5 +74,5 @@ mergeInto(LibraryManager.library, {
         popupWindow.close();
       }
     });
-  }
+  },
 });
