@@ -15,6 +15,7 @@ using WalletConnectUnity.Nethereum;
 using Nethereum.RPC.Eth.DTOs;
 using WalletConnectUnity.Core.Evm;
 using Nethereum.Hex.HexTypes;
+using UnityEngine;
 
 namespace Thirdweb.Unity
 {
@@ -48,21 +49,25 @@ namespace Thirdweb.Unity
             _isConnected = false;
             _supportedChains = eip155ChainsSupported;
 
-            WalletConnectModal.Ready += OnReady;
-            WalletConnect.Instance.ActiveSessionChanged += OnActiveSessionChanged;
-            WalletConnect.Instance.SessionDisconnected += OnSessionDisconnected;
-
-            if (WalletConnect.Instance.IsInitialized)
-                CreateNewSession();
-
-            while (!_isConnected && _exception == null)
+            if (WalletConnect.Instance != null && WalletConnect.Instance.IsConnected)
             {
+                try
+                {
+                    await WalletConnect.Instance.DisconnectAsync();
+                }
+                catch
+                {
+                    // no-op
+                }
                 await Task.Delay(100);
             }
 
-            WalletConnectModal.Ready -= OnReady;
-            WalletConnect.Instance.ActiveSessionChanged -= OnActiveSessionChanged;
-            WalletConnect.Instance.SessionDisconnected -= OnSessionDisconnected;
+            CreateNewSession(eip155ChainsSupported);
+
+            while (!WalletConnect.Instance.IsConnected && _exception == null)
+            {
+                await Task.Delay(100);
+            }
 
             if (_exception != null)
             {
@@ -72,17 +77,9 @@ namespace Thirdweb.Unity
             {
                 try
                 {
-                    var chainInfo = await Utils.FetchThirdwebChainDataAsync(client, initialChainId);
-                    var wcChainInfo = new EthereumChain()
-                    {
-                        chainIdHex = new HexBigInteger(chainInfo.ChainId).HexValue,
-                        name = chainInfo.Name,
-                        nativeCurrency = new Currency(chainInfo.NativeCurrency.Name, chainInfo.NativeCurrency.Symbol, chainInfo.NativeCurrency.Decimals),
-                        rpcUrls = new string[] { $"https://{chainInfo.ChainId}.rpc.thirdweb.com" },
-                        blockExplorerUrls = chainInfo.Explorers == null || chainInfo.Explorers.Count == 0 ? null : new string[] { chainInfo.Explorers[0].Url },
-                        chainIdDecimal = chainInfo.ChainId.ToString(),
-                    };
-                    await WalletConnect.Instance.SwitchEthereumChainAsync(wcChainInfo);
+                    var data = new WalletSwitchEthereumChain(new HexBigInteger(initialChainId).HexValue);
+                    await WalletConnect.Instance.RequestAsync<WalletSwitchEthereumChain, string>(data);
+                    await Task.Delay(5000); // wait for chain switch to take effect
                     await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{initialChainId}");
                 }
                 catch (Exception e)
@@ -107,7 +104,18 @@ namespace Thirdweb.Unity
                 blockExplorerUrls = chainInfo.Explorers == null || chainInfo.Explorers.Count == 0 ? null : new string[] { chainInfo.Explorers[0].Url },
                 chainIdDecimal = chainInfo.ChainId.ToString(),
             };
-            await WalletConnect.Instance.SwitchEthereumChainAsync(wcChainInfo);
+            var request = new WalletAddEthereumChain(wcChainInfo);
+            try
+            {
+                await WalletConnect.Instance.RequestAsync<WalletAddEthereumChain, string>(request);
+            }
+            catch
+            {
+                // no-op
+            }
+            var data = new WalletSwitchEthereumChain(new HexBigInteger(chainId).HexValue);
+            await WalletConnect.Instance.RequestAsync<WalletSwitchEthereumChain, string>(data);
+            await Task.Delay(5000); // wait for chain switch to take effect
             await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{chainId}");
         }
 
@@ -115,7 +123,7 @@ namespace Thirdweb.Unity
 
         public Task<string> GetAddress()
         {
-            return Task.FromResult(WalletConnect.Instance.SignClient.AddressProvider.CurrentAddress().Address.ToChecksumAddress());
+            return Task.FromResult(WalletConnect.Instance.SignClient.AddressProvider.CurrentAddress(WalletConnect.Instance.ActiveChainId).Address.ToChecksumAddress());
         }
 
         public Task<string> EthSign(byte[] rawMessage)
@@ -272,54 +280,19 @@ namespace Thirdweb.Unity
 
         #region UI
 
-        protected static void OnSessionDisconnected(object sender, EventArgs e)
-        {
-            _isConnected = false;
-        }
-
-        protected static void OnActiveSessionChanged(object sender, SessionStruct sessionStruct)
-        {
-            if (!string.IsNullOrEmpty(sessionStruct.Topic))
-            {
-                _isConnected = true;
-            }
-            else
-            {
-                _isConnected = false;
-            }
-        }
-
-        protected static async void OnReady(object sender, ModalReadyEventArgs args)
+        protected static void CreateNewSession(string[] supportedChains)
         {
             try
             {
-                if (args.SessionResumed)
-                {
-                    // Session exists
-                    await WalletConnect.Instance.DisconnectAsync();
-                }
-
-                CreateNewSession();
-            }
-            catch (Exception e)
-            {
-                _exception = e;
-            }
-        }
-
-        protected static void CreateNewSession()
-        {
-            try
-            {
-                var optionalNamespaces = new Dictionary<string, ProposedNamespace>
+                var optionalNamespaces = new Dictionary<string, ProposedNamespace>()
                 {
                     {
                         "eip155",
                         new ProposedNamespace
                         {
                             Methods = new[] { "eth_sendTransaction", "personal_sign", "eth_signTypedData_v4", "wallet_switchEthereumChain", "wallet_addEthereumChain" },
-                            Chains = _supportedChains,
-                            Events = new[] { "chainChanged", "accountsChanged" },
+                            Chains = supportedChains,
+                            Events = new string[] { "chainChanged", "accountsChanged" },
                         }
                     }
                 };
