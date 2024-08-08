@@ -1,15 +1,12 @@
 ![Thirdweb Unity SDK](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/0eb16b66-317b-462b-9eb1-9425c0929c96)
 
-[<img alt="Discord" src="https://img.shields.io/discord/834227967404146718.svg?color=7289da&label=discord&logo=discord&style=for-the-badge" height="30">](https://discord.gg/thirdweb)
-[<img alt="Preview" src="https://img.shields.io/badge/Preview-Unity%20WebGL-brightgreen?logo=unity&style=for-the-badge" height="30">](https://thirdweb-dev.github.io/unity-sdk/)
-
 # Documentation
 
 See full documentation on the [thirdweb portal](https://portal.thirdweb.com/unity).
 
 # Technical Demo
 
-Try out our multichain game that leverages Embedded and Smart Wallets to create seamless experiences, built in 3 weeks - [Web3 Warriors](https://web3warriors.thirdweb.com/).
+Try out our multichain game that leverages In-App and Smart Wallets to create seamless experiences, built in 3 weeks - [Web3 Warriors](https://web3warriors.thirdweb.com/).
 
 ![image](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/171198b2-83e7-4c8a-951b-79126dd47abb)
 
@@ -24,7 +21,7 @@ Try out our multichain game that leverages Embedded and Smart Wallets to create 
 | **Wallet Connect**                            | ✔️        | ✔️        | ✔️        |
 | **MetaMask**                                  | ✔️        | ✔️        | ✔️        |
 | **Rabby**                                     | ✔️        | —          | —          |
-| **Coinbase**                                  | ✔️        | ❌        | ❌        |
+| **Coinbase (Including Smart Wallet)**         | ✔️        | ❌        | ❌        |
 | **Smart Wallet** (ERC4337)                    | ✔️        | ✔️        | ✔️        |
 | **Injected**                                  | ✔️        | —          | —         |
 | **HyperPlay**                                 | —          | ✔️        | —          |
@@ -57,7 +54,7 @@ In order to access the SDK, you only need to have a [ThirdwebManager](https://po
 ```csharp
 // Configure the connection
 var connection = new WalletConnection(
-  provider: WalletProvider.EmbeddedWallet, // The wallet provider you want to connect to (Required)
+  provider: WalletProvider.InAppWallet,    // The wallet provider you want to connect to (Required)
   chainId: 5,                              // The chain you want to connect to (Required)
   email: "email@email.com"                 // The email you want to authenticate with (Required for this provider)
 );
@@ -107,13 +104,14 @@ var txRes = await contract.Write("myWriteFunction", arg1, arg2, ...);
 
 Important: If you're uploading your build, set `Compression Format` to `Disabled` in `Player Settings` > `Publishing Settings`.
 
-Please note that Embedded Wallets (OAuth version) may not work when testing locally using Unity's default Build and Run feature for WebGL.
+Please note that In-App Wallets (OAuth) and Coinbase (Smart Wallet) will not work with default `Build and Run` when testing **locally**.
 
 You must host the build or run it locally yourself after adding the `Cross-Origin-Opener-Policy` header and setting it to `same-origin-allow-popups`.
 
 Here's a simple way to do so, assuming you are in your WebGL build output folder:
 
-```csharp
+```js
+// server.js
 const express = require('express');
 const app = express();
 const port = 8000;
@@ -125,6 +123,8 @@ app.use(function(req, res, next) {
 
 app.use(express.static('.'));
 app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
+
+// run it with `node server.js`
 ```
 
 Once again, please note that no action is needed for hosted builds.

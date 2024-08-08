@@ -13,6 +13,7 @@ using System.Linq;
 using UnityEngine.Networking;
 using Thirdweb.Redcode.Awaiting;
 using Newtonsoft.Json;
+using Nethereum.RPC.Eth.DTOs;
 
 #pragma warning disable CS0618
 
@@ -853,6 +854,28 @@ namespace Thirdweb
             }
         }
 
+        public async Task<BigInteger> GetNonce(string blockTag = "pending")
+        {
+            var address = await GetAddress();
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.GetNonce(address, blockTag);
+            }
+            else
+            {
+                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+                var blockParameter =
+                    blockTag == "pending"
+                        ? BlockParameter.CreatePending()
+                        : blockTag == "latest"
+                            ? BlockParameter.CreateLatest()
+                            : blockTag == "earliest"
+                                ? BlockParameter.CreateEarliest()
+                                : BlockParameter.CreatePending();
+                return web3.Eth.Transactions.GetTransactionCount.SendRequestAsync(address, blockParameter).Result.Value;
+            }
+        }
+
         /// <summary>
         /// Sends a raw transaction from the connected wallet.
         /// </summary>
@@ -873,7 +896,7 @@ namespace Thirdweb
 
                 transactionRequest.from ??= await GetAddress();
 
-                var input = new Nethereum.RPC.Eth.DTOs.TransactionInput(
+                var input = new TransactionInput(
                     string.IsNullOrEmpty(transactionRequest.data) ? null : transactionRequest.data,
                     transactionRequest.to,
                     transactionRequest.from,
@@ -1046,6 +1069,11 @@ namespace Thirdweb
         /// <summary>
         /// Phone Number OTP Flow.
         /// </summary>
-        PhoneOTP
+        PhoneOTP,
+
+        /// <summary>
+        /// Discord OAuth2 Flow.
+        /// </summary>
+        Discord
     }
 }

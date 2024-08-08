@@ -75,7 +75,21 @@ namespace Thirdweb
         /// <returns>The JSON string representation of the transaction input.</returns>
         public override string ToString()
         {
-            return JsonConvert.SerializeObject(Input);
+            var readableInput = new
+            {
+                from = Input.From,
+                to = Input.To,
+                value = Input.Value?.Value.ToString(),
+                gas = Input.Gas?.Value.ToString(),
+                gasPrice = Input.GasPrice?.Value.ToString(),
+                data = Input.Data,
+                nonce = Input.Nonce?.Value.ToString(),
+                chainId = Input.ChainId?.Value.ToString(),
+                maxFeePerGas = Input.MaxFeePerGas?.Value.ToString(),
+                maxPriorityFeePerGas = Input.MaxPriorityFeePerGas?.Value.ToString(),
+                type = Input.Type?.Value.ToString()
+            };
+            return JsonConvert.SerializeObject(readableInput);
         }
 
         /// <summary>
@@ -206,17 +220,10 @@ namespace Thirdweb
         /// <returns>The modified <see cref="Transaction"/> object.</returns>
         public Transaction SetArgs(params object[] args)
         {
-            if (Utils.IsWebGLBuild())
-            {
-                this.FunctionArgs = args;
-            }
-            else
-            {
-                var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
-                var contract = web3.Eth.GetContract(Contract.ABI, Contract.Address);
-                var function = Utils.GetFunctionMatchSignature(contract, FunctionName, args);
-                Input.Data = function.GetData(args);
-            }
+            this.FunctionArgs = args;
+            var contract = new Nethereum.Contracts.Contract(null, Contract.ABI, Contract.Address);
+            var function = Utils.GetFunctionMatchSignature(contract, FunctionName, args);
+            Input.Data = function.GetData(args);
             return this;
         }
 
@@ -234,6 +241,18 @@ namespace Thirdweb
             else
             {
                 return await Utils.GetLegacyGasPriceAsync(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
+            }
+        }
+
+        public async Task<GasPriceParameters> GetGasFees()
+        {
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<GasPriceParameters>(GetTxBuilderRoute("getGasFees"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
+            }
+            else
+            {
+                return await Utils.GetGasPriceAsync(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
             }
         }
 
@@ -328,34 +347,56 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Sends the transaction asynchronously.
+        /// Populates the transaction asynchronously, setting the gas limit, gas price, nonce, and other parameters.
         /// </summary>
-        /// <param name="gasless">Specifies whether to send the transaction as a gasless transaction. Default is null (uses gasless if set up).</param>
-        /// <returns>The transaction hash as a string.</returns>
-        public async Task<string> Send(bool? gasless = null)
+        /// <returns>The prepared <see cref="Transaction"/> object.</returns>
+        /// <remarks> There is no guarantee the gas and nonce values will be preserved when using Account Abstraction.</remarks>
+        public async Task<Transaction> Populate()
         {
-            if (Utils.IsWebGLBuild())
+            Input.Gas ??= new HexBigInteger(await EstimateGasLimit());
+
+            Input.Value ??= new HexBigInteger(0);
+
+            Input.Nonce ??= new HexBigInteger(await _sdk.Wallet.GetNonce());
+
+            var force1559 = Input.Type != null && Input.Type.HexValue == new HexBigInteger((int)TransactionType.EIP1559).HexValue;
+            var supports1559 = force1559 || (Input.Type == null && Utils.Supports1559(_sdk.Session.ChainId.ToString()));
+            if (supports1559)
             {
-                if (gasless == null || gasless == false)
-                    return await Send();
-                else
-                    return await SendGasless();
+                if (Input.GasPrice == null)
+                {
+                    var fees = await GetGasFees();
+                    Input.MaxFeePerGas ??= new HexBigInteger(fees.MaxFeePerGas);
+                    Input.MaxPriorityFeePerGas ??= new HexBigInteger(fees.MaxPriorityFeePerGas);
+                }
             }
             else
             {
-                if (Input.Gas == null)
-                    await EstimateAndSetGasLimitAsync();
-                if (Input.Value == null)
-                    Input.Value = new HexBigInteger(0);
-                bool isGaslessSetup = _sdk.Session.Options.gasless.HasValue && !string.IsNullOrEmpty(_sdk.Session.Options.gasless?.engine.relayerUrl);
-                if (gasless != null && gasless.Value && !isGaslessSetup)
-                    throw new UnityException("Gasless relayer transactions are not enabled. Please enable them in the SDK options.");
-                bool sendGaslessly = gasless == null ? isGaslessSetup : gasless.Value;
-                if (sendGaslessly)
-                    return await SendGasless();
-                else
-                    return await Send();
+                if (Input.MaxFeePerGas == null && Input.MaxPriorityFeePerGas == null)
+                {
+                    ThirdwebDebug.Log("Using Legacy Gas Pricing");
+                    Input.GasPrice ??= new HexBigInteger(await GetGasPrice());
+                }
             }
+            return this;
+        }
+
+        /// <summary>
+        /// Sends the transaction asynchronously.
+        /// </summary>
+        /// <param name="gasless">Specifies whether to send the transaction as a gasless transaction (through thirdweb Engine relayer). Default is null (uses gasless if set up).</param>
+        /// <returns>The transaction hash as a string.</returns>
+        public async Task<string> Send(bool? gasless = null)
+        {
+            var tx = await Populate();
+            bool isGaslessSetup = _sdk.Session.Options.gasless.HasValue && !string.IsNullOrEmpty(_sdk.Session.Options.gasless?.engine.relayerUrl);
+            if (gasless != null && gasless.Value && !isGaslessSetup)
+                throw new UnityException("Gasless relayer transactions are not enabled. Please enable them in the SDK options.");
+            bool sendGaslessly = gasless == null ? isGaslessSetup : gasless.Value;
+            if (sendGaslessly)
+                return await tx.SendGasless();
+            else
+                return await tx.Send();
         }
 
         /// <summary>
@@ -437,35 +478,13 @@ namespace Thirdweb
 
         private async Task<string> Send()
         {
+            string hash;
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("send"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
+                hash = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("send"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
             }
             else
             {
-                var force1559 = Input.Type != null && Input.Type.HexValue == new HexBigInteger((int)TransactionType.EIP1559).HexValue;
-                var supports1559 = force1559 || (Input.Type == null && Utils.Supports1559(_sdk.Session.ChainId.ToString()));
-                if (supports1559)
-                {
-                    if (Input.GasPrice == null)
-                    {
-                        var fees = await Utils.GetGasPriceAsync(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
-                        if (Input.MaxFeePerGas == null)
-                            Input.MaxFeePerGas = new HexBigInteger(fees.MaxFeePerGas);
-                        if (Input.MaxPriorityFeePerGas == null)
-                            Input.MaxPriorityFeePerGas = new HexBigInteger(fees.MaxPriorityFeePerGas);
-                    }
-                }
-                else
-                {
-                    if (Input.MaxFeePerGas == null && Input.MaxPriorityFeePerGas == null)
-                    {
-                        ThirdwebDebug.Log("Using Legacy Gas Pricing");
-                        Input.GasPrice = new HexBigInteger(await Utils.GetLegacyGasPriceAsync(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId));
-                    }
-                }
-
-                string hash;
                 if (_sdk.Session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet && _sdk.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet)
                 {
                     hash = await _sdk.Session.Web3.Eth.TransactionManager.SendTransactionAsync(Input);
@@ -475,9 +494,9 @@ namespace Thirdweb
                     var ethSendTx = new EthSendTransaction(_sdk.Session.Web3.Client);
                     hash = await ethSendTx.SendRequestAsync(Input);
                 }
-                ThirdwebDebug.Log($"Transaction hash: {hash}");
-                return hash;
             }
+            ThirdwebDebug.Log($"Transaction hash: {hash}");
+            return hash;
         }
 
         private async Task<string> SendGasless()
