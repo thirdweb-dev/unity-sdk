@@ -18,10 +18,9 @@ namespace MetaMask.NEthereum
         {
             this._metaMask = metaMask;
         }
-        
+
         private static readonly Random rng = new Random();
-        private static readonly DateTime UnixEpoch =
-            new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public static long GenerateRpcId()
         {
@@ -38,18 +37,26 @@ namespace MetaMask.NEthereum
             var arrayParameters = message.RawParameters as object[];
             var rawParameters = message.RawParameters;
 
-            var rpcRequestMessage = mapParameters != null
-                ? new RpcRequestMessage(id, message.Method, mapParameters)
-                : arrayParameters != null
-                    ? new RpcRequestMessage(id, message.Method, arrayParameters)
-                    : new RpcRequestMessage(id, message.Method, rawParameters);
-            
-            var response = await _metaMask.Request(new MetaMaskEthereumRequest()
+            var rpcRequestMessage =
+                mapParameters != null
+                    ? new RpcRequestMessage(id, message.Method, mapParameters)
+                    : arrayParameters != null
+                        ? new RpcRequestMessage(id, message.Method, arrayParameters)
+                        : new RpcRequestMessage(id, message.Method, rawParameters);
+
+            var response = await _metaMask.Request(
+                new MetaMaskEthereumRequest()
+                {
+                    Id = rpcRequestMessage.Id.ToString(),
+                    Method = rpcRequestMessage.Method,
+                    Parameters = rpcRequestMessage.RawParameters
+                }
+            );
+
+            if (response == null || string.IsNullOrEmpty(response.ToString()))
             {
-                Id = rpcRequestMessage.Id.ToString(),
-                Method = rpcRequestMessage.Method,
-                Parameters = rpcRequestMessage.RawParameters
-            });
+                return new RpcResponseMessage(rpcRequestMessage.Id, result: new JObject());
+            }
 
             try
             {
