@@ -17,7 +17,6 @@ using MetaMask.Models;
 using MetaMask.Providers;
 using MetaMask.Scripts.Utilities;
 using MetaMask.SocketIOClient;
-using MetaMask.Sockets;
 using MetaMask.Transports;
 using MetaMask.Transports.Unity;
 using MetaMask.Transports.Unity.UI;
@@ -29,6 +28,8 @@ using UnityEngine.Scripting;
 using UnityEngine.Serialization;
 #if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
+#else // Add imports here that are not needed for WebGL build
+using MetaMask.Providers.Sockets;
 #endif
 
 namespace MetaMask.Unity
@@ -472,9 +473,12 @@ namespace MetaMask.Unity
             {
                 if (this.dataManager == null)
                     SetupDataManager();
-                    
+
                 if (this.dataManager != null)
+                {
                     this.dataManager.Delete(EncryptedProvider.SessionId);
+                    this.dataManager.Delete(EncryptedProvider.ChannelConfigKey);
+                }
             }
         }
         #endregion
@@ -760,7 +764,10 @@ namespace MetaMask.Unity
         protected async Task ConnectWithDefaultChain()
         {
             var chainData = DefaultChainInfo;
-            if (Blockchains.MetaMaskDefaults.Contains((long)defaultChain))
+            
+            // If the defaultChain is "Other" (never valid), check what the chainId is in chainData
+            long chainId = defaultChain == ChainId.Other ? ChainInfo.ChainToId(chainData.ChainId) : (long)defaultChain;
+            if (Blockchains.MetaMaskDefaults.Contains(chainId))
             {
                 await _wallet.ConnectWith<object>(RpcMethods.WalletSwitchEthereumChain,
                     new object[] { chainData.AsSwitchChainRequest() });
@@ -788,7 +795,7 @@ namespace MetaMask.Unity
         public void OpenConnectionDeepLink()
         {
             var url = useUniversalLinks ? this.connectionUniversalLinkUrl : this.connectionDeepLinkUrl;
-            Debug.Log("Opening Connection URL: " + url);
+            MetaMaskDebug.Log($"Opening URL: {url}");
             OpenDeeplinkURL(url);
         }
 

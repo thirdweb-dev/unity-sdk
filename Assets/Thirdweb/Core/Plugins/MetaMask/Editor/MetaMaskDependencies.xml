@@ -40,7 +40,7 @@
       </repositories>
     </androidPackage>
   </androidPackages>
-  <!-- iOS Cocoapod dependencies can be specified by each iosPod element. -->
+    <!-- iOS Cocoapod dependencies can be specified by each iosPod element. -->
   <iosPods>
     <!-- Global set of sources to search for Cocoapods.
          These sources will be searched for all Cocoapods specified by

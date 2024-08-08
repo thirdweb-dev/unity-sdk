@@ -78,12 +78,6 @@ namespace MetaMask.Unity.Providers
             
             _SendMetaMaskJS(request.Id, request.Method, json, decodedCallback, errorCallback);
         }
-        
-        public override void LoadOrCreateSession(IAppConfig appConfig, IEciesProvider eciesProvider)
-        {
-            // Only save the session data, but nothing else
-            this.Session = new MetaMaskSession(eciesProvider, new MetaMaskSessionData(appConfig));
-        }
 
         public override void ClearSession()
         {
@@ -129,6 +123,8 @@ namespace MetaMask.Unity.Providers
                 throw new Exception("AppName cannot be null or empty. Please set in Tools > MetaMask > Setup Window");
             }
             
+            this.Session = new MetaMaskSession(new MetaMaskSessionData(_appConfig), new ChannelConfig());
+            
             _InitMetaMaskJS(_appConfig.AppName, _appConfig.AppUrl, _appConfig.AppIcon, 
                 this._unitySdk.InfuraProjectId, JsonConvert.SerializeObject(rpcMap), 
                 walletCallback, providerCallback, errorCallback, eventCallback, extendedInitAllowed, Debug.isDebugBuild);
@@ -138,6 +134,13 @@ namespace MetaMask.Unity.Providers
         {
             var payload = JsonConvert.DeserializeObject<JsonRpcPayload>(json);
             EthereumEventReceived?.Invoke(this, new JsonRpcEventArgs(payload, json));
+        }
+
+        protected override void OnWalletAuthorized()
+        {
+            ValidateProvider();
+            
+            base.OnWalletAuthorized();
         }
 
         private void ConnectCallback()

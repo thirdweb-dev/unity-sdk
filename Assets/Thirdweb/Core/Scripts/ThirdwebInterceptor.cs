@@ -29,17 +29,7 @@ namespace Thirdweb
                 return await _walletConnectInterceptor.InterceptSendRequestAsync(interceptedSendRequestAsync, request, route);
             }
 
-            if (request.Method == "eth_chainId")
-            {
-                switch (_thirdwebWallet.GetProvider())
-                {
-                    case WalletProvider.Metamask:
-                        return new HexBigInteger((BigInteger)MetaMask.Unity.MetaMaskUnity.Instance.Wallet.ChainId).HexValue;
-                    default:
-                        break;
-                }
-            }
-            else if (request.Method == "eth_accounts")
+            if (request.Method == "eth_accounts")
             {
                 var addy = await _thirdwebWallet.GetAddress();
                 return new string[] { addy };
@@ -91,17 +81,7 @@ namespace Thirdweb
                 return await _walletConnectInterceptor.InterceptSendRequestAsync(interceptedSendRequestAsync, method, route, paramList);
             }
 
-            if (method == "eth_chainId")
-            {
-                switch (_thirdwebWallet.GetProvider())
-                {
-                    case WalletProvider.Metamask:
-                        return new HexBigInteger((BigInteger)MetaMask.Unity.MetaMaskUnity.Instance.Wallet.ChainId).HexValue;
-                    default:
-                        break;
-                }
-            }
-            else if (method == "eth_accounts")
+            if (method == "eth_accounts")
             {
                 var addy = await _thirdwebWallet.GetAddress();
                 return new string[] { addy };
