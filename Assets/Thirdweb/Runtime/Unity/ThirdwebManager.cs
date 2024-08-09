@@ -23,6 +23,7 @@ namespace Thirdweb.Unity
         public string JwtOrPayload;
         public string EncryptionKey;
         public string StorageDirectoryPath;
+        public IThirdwebWallet SiweSigner;
 
         public InAppWalletOptions(
             string email = null,
@@ -30,7 +31,8 @@ namespace Thirdweb.Unity
             AuthProvider authprovider = AuthProvider.Default,
             string jwtOrPayload = null,
             string encryptionKey = null,
-            string storageDirectoryPath = null
+            string storageDirectoryPath = null,
+            IThirdwebWallet siweSigner = null
         )
         {
             Email = email;
@@ -39,6 +41,7 @@ namespace Thirdweb.Unity
             JwtOrPayload = jwtOrPayload;
             EncryptionKey = encryptionKey;
             StorageDirectoryPath = storageDirectoryPath ?? Application.persistentDataPath;
+            SiweSigner = siweSigner;
         }
     }
 
@@ -50,8 +53,19 @@ namespace Thirdweb.Unity
         public string EntryPoint;
         public string BundlerUrl;
         public string PaymasterUrl;
+        public string ERC20PaymasterAddress;
+        public string ERC20PaymasterToken;
 
-        public SmartWalletOptions(bool sponsorGas, string factoryAddress = null, string accountAddressOverride = null, string entryPoint = null, string bundlerUrl = null, string paymasterUrl = null)
+        public SmartWalletOptions(
+            bool sponsorGas,
+            string factoryAddress = null,
+            string accountAddressOverride = null,
+            string entryPoint = null,
+            string bundlerUrl = null,
+            string paymasterUrl = null,
+            string erc20PaymasterAddress = null,
+            string erc20PaymasterToken = null
+        )
         {
             SponsorGas = sponsorGas;
             FactoryAddress = factoryAddress;
@@ -59,6 +73,8 @@ namespace Thirdweb.Unity
             EntryPoint = entryPoint;
             BundlerUrl = bundlerUrl;
             PaymasterUrl = paymasterUrl;
+            ERC20PaymasterAddress = erc20PaymasterAddress;
+            ERC20PaymasterToken = erc20PaymasterToken;
         }
     }
 
@@ -259,6 +275,11 @@ namespace Thirdweb.Unity
                     await inAppWallet.SendOTP();
                     _ = await InAppWalletModal.VerifyOTP(inAppWallet);
                 }
+                else if (walletOptions.InAppWalletOptions.AuthProvider == AuthProvider.Siwe)
+                {
+                    var siweSigner = walletOptions.InAppWalletOptions.SiweSigner;
+                    _ = await inAppWallet.LoginWithSiwe(siweSigner, walletOptions.ChainId);
+                }
                 else
                 {
                     _ = await inAppWallet.LoginWithOauth(
@@ -324,7 +345,9 @@ namespace Thirdweb.Unity
                 accountAddressOverride: smartWalletOptions.AccountAddressOverride,
                 entryPoint: smartWalletOptions.EntryPoint,
                 bundlerUrl: smartWalletOptions.BundlerUrl,
-                paymasterUrl: smartWalletOptions.PaymasterUrl
+                paymasterUrl: smartWalletOptions.PaymasterUrl,
+                erc20PaymasterAddress: smartWalletOptions.ERC20PaymasterAddress,
+                erc20PaymasterToken: smartWalletOptions.ERC20PaymasterToken
             );
 
             await AddWallet(wallet);
