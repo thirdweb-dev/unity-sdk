@@ -1,6 +1,6 @@
 ![Thirdweb Unity SDK](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/0eb16b66-317b-462b-9eb1-9425c0929c96)
 
-[<img alt="Unity Documentation" src="https://img.shields.io/badge/Unity-Documentation-blue?logo=unity&style=for-the-badge" height="30">](https://portal.thirdweb.com/unity)
+[<img alt="Unity Documentation" src="https://img.shields.io/badge/Unity-Documentation-blue?logo=unity&style=for-the-badge" height="30">](https://portal.thirdweb.com/unity/v5)
 [<img alt=".NET Documentation" src="https://img.shields.io/badge/.NET-Documentation-purple?logo=dotnet&style=for-the-badge" height="30">](https://portal.thirdweb.com/dotnet)
 
 <div style="border-left: 4px solid #f0ad4e; padding: 10px; background-color: #fcf8e3;">
