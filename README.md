@@ -45,7 +45,7 @@ Thirdweb's Unity SDK v5 leverages the robust [.NET SDK](https://portal.thirdweb.
 - **Cross-Platform Consistency:** No behavioral differences between platforms. What you see in the editor is what you get in WebGL, Standalone, and Mobile runtime platforms.
 
 ## Note:
-To achieve full .NET core functionality for WebGL, we include [WebGLThreadingPatcher](https://github.com/VolodymyrBS/WebGLThreadingPatcher), which makes async tasks blocking on the main thread. This is due to Unity's lack of support for C# multithreading in WebGL. This mainly affects InAppWallet initial creation (not session resuming).
+To achieve full .NET core functionality for WebGL, we include a modified version of [WebGLThreadingPatcher](https://github.com/VolodymyrBS/WebGLThreadingPatcher), which makes async tasks blocking on the main thread. This is due to Unity's lack of support for C# multithreading in WebGL. This mainly affects InAppWallet initial creation (not session resuming).
 
 # Getting Started
 
@@ -54,8 +54,7 @@ To achieve full .NET core functionality for WebGL, we include [WebGLThreadingPat
 3. **Learn:** Explore the [.NET SDK Documentation](https://portal.thirdweb.com/dotnet) to find full API references.
 
 **Notes:**
-- Tested on Unity 2021 and 2022 LTS. Highly recommend using 2022 LTS.
-- Example scenes are built with Unity 2022 LTS; they may look off in earlier versions.
+- Tested on Unity 2021.3+, 2022.3+, Unity 6 Preview. We recommend using 2022 LTS.
 - Newtonsoft DLL included; deselect if already installed to avoid conflicts.
 - If using .NET Framework and encountering `HttpUtility` errors, create `csc.rsp` with `-r:System.Web.dll` under `Assets`.
 - Use version control and test removing duplicate DLLs if conflicts arise.
@@ -64,9 +63,9 @@ To achieve full .NET core functionality for WebGL, we include [WebGLThreadingPat
 
 ## General
 
-- **Build Settings:** Use `Smaller (faster) Builds` (IL2CPP Code Generation in Unity 2022).
-- **Player Settings:** Use IL2CPP over Mono.
-- **Stripping Level:** Set `Managed Stripping Level` to `Minimal` (`Player Settings` > `Other Settings` > `Optimization`).
+- **Build Settings:** Use `Smaller (faster) Builds` / `Shorter Build Time`.
+- **Player Settings:** Use IL2CPP over Mono when available.
+- **Stripping Level:** Set `Managed Stripping Level` to `Minimal` (`Player Settings` > `Other Settings` > `Optimization`). (Alternatively, if you do not want to use Minimal Stripping, you may use a linker.xml instead to preserve assemblies that are being stripped and causing errors at runtime)
 
 ## WebGL
 
@@ -97,7 +96,7 @@ No action needed for hosted builds.
 ## Mobile
 
 - **EDM4U:** Comes with the package, resolves dependencies at runtime. Use `Force Resolve` from `Assets` > `External Dependency Manager` > `Android Resolver`.
-- **Custom Schemes:** Set custom schemes matching your bundle ID in `Plugins/AndroidManifest.xml` or equivalent for InAppWallet OAuth.
+- **Redirect Schemes:** Set custom schemes matching your bundle ID in `Plugins/AndroidManifest.xml` or equivalent for InAppWallet OAuth.
 
 # Need Help?
 
