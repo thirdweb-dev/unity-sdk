@@ -273,12 +273,11 @@ namespace Thirdweb.Unity
                 if (walletOptions.InAppWalletOptions.AuthProvider == AuthProvider.Default)
                 {
                     await inAppWallet.SendOTP();
-                    _ = await InAppWalletModal.VerifyOTP(inAppWallet);
+                    _ = await InAppWalletModal.LoginWithOtp(inAppWallet);
                 }
                 else if (walletOptions.InAppWalletOptions.AuthProvider == AuthProvider.Siwe)
                 {
-                    var siweSigner = walletOptions.InAppWalletOptions.SiweSigner;
-                    _ = await inAppWallet.LoginWithSiwe(siweSigner, walletOptions.ChainId);
+                    _ = await inAppWallet.LoginWithSiwe(walletOptions.ChainId);
                 }
                 else
                 {
@@ -354,6 +353,21 @@ namespace Thirdweb.Unity
             SetActiveWallet(wallet);
 
             return wallet;
+        }
+
+        public async Task<List<LinkedAccount>> LinkAccount(InAppWallet mainWallet, InAppWallet walletToLink, string otp = null, BigInteger? chainId = null, string jwtOrPayload = null)
+        {
+            return await mainWallet.LinkAccount(
+                walletToLink: walletToLink,
+                otp: otp,
+                isMobile: Application.isMobilePlatform,
+                browserOpenAction: (url) => Application.OpenURL(url),
+                mobileRedirectScheme: BundleId + "://",
+                browser: new CrossPlatformUnityBrowser(),
+                chainId: chainId,
+                jwt: jwtOrPayload,
+                payload: jwtOrPayload
+            );
         }
 
         private async void TrackUsage(string source, string action, string walletType, string walletAddress)

@@ -16,7 +16,7 @@ namespace Thirdweb.Unity
         [field: SerializeField]
         private Button SubmitButton { get; set; }
 
-        public static Task<InAppWallet> VerifyOTP(InAppWallet wallet)
+        public static Task<InAppWallet> LoginWithOtp(InAppWallet wallet)
         {
 #if UNITY_6000_0_OR_NEWER
             var modal = FindAnyObjectByType<InAppWalletModal>();
@@ -47,7 +47,7 @@ namespace Thirdweb.Unity
 
                 modal.OTPInputField.interactable = false;
                 modal.SubmitButton.interactable = false;
-                (var address, var canRetry) = await wallet.SubmitOTP(otp);
+                (var address, var canRetry) = await wallet.LoginWithOtp(otp);
                 if (address != null)
                 {
                     modal.InAppWalletCanvas.gameObject.SetActive(false);
