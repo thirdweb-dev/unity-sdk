@@ -120,7 +120,7 @@ namespace Thirdweb.Unity
 
         public static ThirdwebManager Instance { get; private set; }
 
-        private const string THIRDWEB_UNITY_SDK_VERSION = "5.0.0-beta.2";
+        private const string THIRDWEB_UNITY_SDK_VERSION = "5.0.0-beta.3";
 
         private bool _initialized;
 
