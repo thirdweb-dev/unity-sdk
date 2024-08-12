@@ -16,7 +16,11 @@ namespace Thirdweb.Unity.Helpers
             {
                 if (instance == null)
                 {
+#if UNITY_6000_0_OR_NEWER
+                    var existingInstance = FindAnyObjectByType<ThirdwebMainThreadExecutor>();
+#else
                     var existingInstance = FindObjectOfType<ThirdwebMainThreadExecutor>();
+#endif
                     if (existingInstance != null)
                     {
                         instance = existingInstance;

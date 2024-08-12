@@ -18,7 +18,11 @@ namespace Thirdweb.Unity
 
         public static Task<InAppWallet> VerifyOTP(InAppWallet wallet)
         {
+#if UNITY_6000_0_OR_NEWER
+            var modal = FindAnyObjectByType<InAppWalletModal>();
+#else
             var modal = FindObjectOfType<InAppWalletModal>();
+#endif
             if (modal == null)
             {
                 modal = new GameObject("InAppWalletModal").AddComponent<InAppWalletModal>();
