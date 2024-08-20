@@ -109,8 +109,6 @@ namespace Thirdweb.Unity
 
         public async Task<string> SendTransaction(ThirdwebTransactionInput transaction)
         {
-            await EnsureCorrectNetwork(transaction.ChainId);
-
             var rpcRequest = new RpcRequest
             {
                 Method = "eth_sendTransaction",
@@ -119,7 +117,7 @@ namespace Thirdweb.Unity
                     new TransactionInput()
                     {
                         Nonce = transaction.Nonce,
-                        From = transaction.From,
+                        From = await GetAddress(),
                         To = transaction.To,
                         Gas = transaction.Gas,
                         GasPrice = transaction.GasPrice,
@@ -127,16 +125,22 @@ namespace Thirdweb.Unity
                         Data = transaction.Data,
                         MaxFeePerGas = transaction.MaxFeePerGas,
                         MaxPriorityFeePerGas = transaction.MaxPriorityFeePerGas,
-                        ChainId = transaction.ChainId,
+                        ChainId = new HexBigInteger(WebGLMetaMask.Instance.GetActiveChainId()),
                     }
                 }
             };
             return await WebGLMetaMask.Instance.RequestAsync<string>(rpcRequest);
         }
 
+        public async Task<ThirdwebTransactionReceipt> ExecuteTransaction(ThirdwebTransactionInput transaction)
+        {
+            var hash = await SendTransaction(transaction);
+            return await ThirdwebTransaction.WaitForTransactionReceipt(client: _client, chainId: WebGLMetaMask.Instance.GetActiveChainId(), txHash: hash);
+        }
+
         public Task<string> SignTransaction(ThirdwebTransactionInput transaction)
         {
-            throw new NotImplementedException("Offline transaction signing is not supported by MetaMask.");
+            throw new NotImplementedException("Raw transaction signing is not supported.");
         }
 
         public async Task<string> SignTypedDataV4(string json)
@@ -191,9 +195,9 @@ namespace Thirdweb.Unity
             var payloadString = await payloadResponse.Content.ReadAsStringAsync();
 
             var loginBodyRaw = JsonConvert.DeserializeObject<LoginPayload>(payloadString);
-            var payloadToSign = Utils.GenerateSIWE(loginBodyRaw.payload);
+            var payloadToSign = Utils.GenerateSIWE(loginBodyRaw.Payload);
 
-            loginBodyRaw.signature = await PersonalSign(payloadToSign);
+            loginBodyRaw.Signature = await PersonalSign(payloadToSign);
             var loginBody = JsonConvert.SerializeObject(new { payload = loginBodyRaw });
 
             var loginContent = new StringContent(loginBody, Encoding.UTF8, "application/json");
@@ -254,7 +258,7 @@ namespace Thirdweb.Unity
         private static async Task AddNetwork(BigInteger chainId)
         {
             ThirdwebDebug.Log($"Fetching chain data for chainId {chainId}...");
-            var twChainData = await Utils.FetchThirdwebChainDataAsync(_client, chainId) ?? throw new Exception($"Chain data for chainId {chainId} could not be fetched.");
+            var twChainData = await Utils.GetChainMetadata(_client, chainId) ?? throw new Exception($"Chain data for chainId {chainId} could not be fetched.");
             ThirdwebDebug.Log($"Chain data fetched: {JsonConvert.SerializeObject(twChainData)}");
             var explorers = twChainData.Explorers?.Select(e => e?.Url).Where(url => url != null).ToList() ?? new List<string>();
             var iconUrl = twChainData.Icon?.Url ?? "ipfs://QmdwQDr6vmBtXmK2TmknkEuZNoaDqTasFdZdu3DRw8b2wt";

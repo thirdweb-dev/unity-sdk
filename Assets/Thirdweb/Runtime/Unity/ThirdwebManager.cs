@@ -53,8 +53,7 @@ namespace Thirdweb.Unity
         public string EntryPoint;
         public string BundlerUrl;
         public string PaymasterUrl;
-        public string ERC20PaymasterAddress;
-        public string ERC20PaymasterToken;
+        public TokenPaymaster TokenPaymaster;
 
         public SmartWalletOptions(
             bool sponsorGas,
@@ -63,8 +62,7 @@ namespace Thirdweb.Unity
             string entryPoint = null,
             string bundlerUrl = null,
             string paymasterUrl = null,
-            string erc20PaymasterAddress = null,
-            string erc20PaymasterToken = null
+            TokenPaymaster tokenPaymaster = TokenPaymaster.NONE
         )
         {
             SponsorGas = sponsorGas;
@@ -73,8 +71,7 @@ namespace Thirdweb.Unity
             EntryPoint = entryPoint;
             BundlerUrl = bundlerUrl;
             PaymasterUrl = paymasterUrl;
-            ERC20PaymasterAddress = erc20PaymasterAddress;
-            ERC20PaymasterToken = erc20PaymasterToken;
+            TokenPaymaster = tokenPaymaster;
         }
     }
 
@@ -345,8 +342,7 @@ namespace Thirdweb.Unity
                 entryPoint: smartWalletOptions.EntryPoint,
                 bundlerUrl: smartWalletOptions.BundlerUrl,
                 paymasterUrl: smartWalletOptions.PaymasterUrl,
-                erc20PaymasterAddress: smartWalletOptions.ERC20PaymasterAddress,
-                erc20PaymasterToken: smartWalletOptions.ERC20PaymasterToken
+                tokenPaymaster: smartWalletOptions.TokenPaymaster
             );
 
             await AddWallet(wallet);

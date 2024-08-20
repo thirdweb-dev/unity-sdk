@@ -94,7 +94,7 @@ namespace Thirdweb.Unity
 
         public async Task EnsureCorrectNetwork(BigInteger chainId)
         {
-            var chainInfo = await Utils.FetchThirdwebChainDataAsync(_client, chainId);
+            var chainInfo = await Utils.GetChainMetadata(_client, chainId);
             var wcChainInfo = new EthereumChain()
             {
                 chainIdHex = new HexBigInteger(chainInfo.ChainId).HexValue,
@@ -190,16 +190,17 @@ namespace Thirdweb.Unity
 
         public Task<string> SignTransaction(ThirdwebTransactionInput transaction)
         {
-            throw new InvalidOperationException("Offline signing is not supported by external wallets.");
+            throw new NotImplementedException("Raw transaction signing is not supported.");
         }
 
         public async Task<string> SendTransaction(ThirdwebTransactionInput transaction)
         {
+            Debug.Log("DEFAULT CHAIN ID: " + WalletConnect.Instance.SignClient.AddressProvider.DefaultChainId);
             var task = _walletConnectService.SendTransactionAsync(
                 new TransactionInput()
                 {
                     Nonce = transaction.Nonce,
-                    From = transaction.From,
+                    From = await GetAddress(),
                     To = transaction.To,
                     Gas = transaction.Gas,
                     GasPrice = transaction.GasPrice,
@@ -207,11 +208,17 @@ namespace Thirdweb.Unity
                     Data = transaction.Data,
                     MaxFeePerGas = transaction.MaxFeePerGas,
                     MaxPriorityFeePerGas = transaction.MaxPriorityFeePerGas,
-                    ChainId = transaction.ChainId,
+                    ChainId = new HexBigInteger(WalletConnect.Instance.SignClient.AddressProvider.DefaultChainId),
                 }
             );
             SessionRequestDeeplink();
             return await task as string;
+        }
+
+        public async Task<ThirdwebTransactionReceipt> ExecuteTransaction(ThirdwebTransactionInput transaction)
+        {
+            var hash = await SendTransaction(transaction);
+            return await ThirdwebTransaction.WaitForTransactionReceipt(client: _client, chainId: WebGLMetaMask.Instance.GetActiveChainId(), txHash: hash);
         }
 
         public Task<bool> IsConnected()
@@ -246,9 +253,9 @@ namespace Thirdweb.Unity
             var payloadString = await payloadResponse.Content.ReadAsStringAsync();
 
             var loginBodyRaw = JsonConvert.DeserializeObject<LoginPayload>(payloadString);
-            var payloadToSign = Utils.GenerateSIWE(loginBodyRaw.payload);
+            var payloadToSign = Utils.GenerateSIWE(loginBodyRaw.Payload);
 
-            loginBodyRaw.signature = await PersonalSign(payloadToSign);
+            loginBodyRaw.Signature = await PersonalSign(payloadToSign);
             var loginBody = JsonConvert.SerializeObject(new { payload = loginBodyRaw });
 
             var loginContent = new StringContent(loginBody, Encoding.UTF8, "application/json");

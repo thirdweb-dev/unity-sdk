@@ -53,7 +53,7 @@ namespace Thirdweb.Unity.Examples
 
         private async void Start()
         {
-            _chainDetails = await Utils.FetchThirdwebChainDataAsync(client: ThirdwebManager.Instance.Client, chainId: ActiveChainId);
+            _chainDetails = await Utils.GetChainMetadata(client: ThirdwebManager.Instance.Client, chainId: ActiveChainId);
         }
 
         private void InitializePanels()
