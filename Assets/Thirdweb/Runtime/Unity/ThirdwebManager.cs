@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
+using System.IO;
 
 namespace Thirdweb.Unity
 {
@@ -13,6 +14,7 @@ namespace Thirdweb.Unity
         InAppWallet,
         WalletConnectWallet,
         MetaMaskWallet,
+        EcosystemWallet
     }
 
     public class InAppWalletOptions
@@ -40,7 +42,43 @@ namespace Thirdweb.Unity
             AuthProvider = authprovider;
             JwtOrPayload = jwtOrPayload;
             EncryptionKey = encryptionKey;
-            StorageDirectoryPath = storageDirectoryPath ?? Application.persistentDataPath;
+            StorageDirectoryPath = storageDirectoryPath ?? Path.Combine(Application.persistentDataPath, "Thirdweb", "InAppWallet");
+            SiweSigner = siweSigner;
+        }
+    }
+
+    public class EcosystemWalletOptions
+    {
+        public string EcosystemId;
+        public string EcosystemPartnerId;
+        public string Email;
+        public string PhoneNumber;
+        public AuthProvider AuthProvider;
+        public string JwtOrPayload;
+        public string EncryptionKey;
+        public string StorageDirectoryPath;
+        public IThirdwebWallet SiweSigner;
+
+        public EcosystemWalletOptions(
+            string ecosystemId = null,
+            string ecosystemPartnerId = null,
+            string email = null,
+            string phoneNumber = null,
+            AuthProvider authprovider = AuthProvider.Default,
+            string jwtOrPayload = null,
+            string encryptionKey = null,
+            string storageDirectoryPath = null,
+            IThirdwebWallet siweSigner = null
+        )
+        {
+            EcosystemId = ecosystemId;
+            EcosystemPartnerId = ecosystemPartnerId;
+            Email = email;
+            PhoneNumber = phoneNumber;
+            AuthProvider = authprovider;
+            JwtOrPayload = jwtOrPayload;
+            EncryptionKey = encryptionKey;
+            StorageDirectoryPath = storageDirectoryPath ?? Path.Combine(Application.persistentDataPath, "Thirdweb", "EcosystemWallet");
             SiweSigner = siweSigner;
         }
     }
@@ -80,14 +118,22 @@ namespace Thirdweb.Unity
         public WalletProvider Provider;
         public BigInteger ChainId;
         public InAppWalletOptions InAppWalletOptions;
+        public EcosystemWalletOptions EcosystemWalletOptions;
         public SmartWalletOptions SmartWalletOptions;
 
-        public WalletOptions(WalletProvider provider, BigInteger chainId, InAppWalletOptions inAppWalletOptions = null, SmartWalletOptions smartWalletOptions = null)
+        public WalletOptions(
+            WalletProvider provider,
+            BigInteger chainId,
+            InAppWalletOptions inAppWalletOptions = null,
+            EcosystemWalletOptions ecosystemWalletOptions = null,
+            SmartWalletOptions smartWalletOptions = null
+        )
         {
             Provider = provider;
             ChainId = chainId;
             InAppWalletOptions = inAppWalletOptions ?? new InAppWalletOptions();
             SmartWalletOptions = smartWalletOptions;
+            EcosystemWalletOptions = ecosystemWalletOptions;
         }
     }
 
@@ -117,7 +163,7 @@ namespace Thirdweb.Unity
 
         public static ThirdwebManager Instance { get; private set; }
 
-        private const string THIRDWEB_UNITY_SDK_VERSION = "5.0.0-beta.4";
+        public static readonly string THIRDWEB_UNITY_SDK_VERSION = "5.0.0-beta.4";
 
         private bool _initialized;
 
@@ -146,11 +192,13 @@ namespace Thirdweb.Unity
 
         public void Initialize()
         {
-            if (string.IsNullOrEmpty(ClientId) || string.IsNullOrEmpty(BundleId))
+            if (string.IsNullOrEmpty(ClientId))
             {
-                ThirdwebDebug.LogError("ClientId and BundleId must be set in order to initialize ThirdwebManager. Get your API key from https://thirdweb.com/create-api-key");
+                ThirdwebDebug.LogError("ClientId and must be set in order to initialize ThirdwebManager. Get your API key from https://thirdweb.com/create-api-key");
                 return;
             }
+
+            BundleId ??= Application.identifier ?? $"com.{Application.companyName}.{Application.productName}";
 
             Client = ThirdwebClient.Create(
                 clientId: ClientId,
@@ -246,10 +294,29 @@ namespace Thirdweb.Unity
                 case WalletProvider.InAppWallet:
                     wallet = await InAppWallet.Create(
                         client: Client,
-                        email: walletOptions.InAppWalletOptions?.Email,
-                        phoneNumber: walletOptions.InAppWalletOptions?.PhoneNumber,
-                        authProvider: walletOptions.InAppWalletOptions?.AuthProvider ?? AuthProvider.Default,
-                        storageDirectoryPath: Application.persistentDataPath
+                        email: walletOptions.InAppWalletOptions.Email,
+                        phoneNumber: walletOptions.InAppWalletOptions.PhoneNumber,
+                        authProvider: walletOptions.InAppWalletOptions.AuthProvider,
+                        storageDirectoryPath: walletOptions.InAppWalletOptions.StorageDirectoryPath
+                    );
+                    break;
+                case WalletProvider.EcosystemWallet:
+                    if (walletOptions.EcosystemWalletOptions == null)
+                    {
+                        throw new ArgumentException("EcosystemWalletOptions must be provided for EcosystemWallet provider.");
+                    }
+                    if (string.IsNullOrEmpty(walletOptions.EcosystemWalletOptions.EcosystemId) || string.IsNullOrEmpty(walletOptions.EcosystemWalletOptions.EcosystemPartnerId))
+                    {
+                        throw new ArgumentException("EcosystemId and EcosystemPartnerId must be provided for EcosystemWallet provider.");
+                    }
+                    wallet = await EcosystemWallet.Create(
+                        client: Client,
+                        ecosystemId: walletOptions.EcosystemWalletOptions.EcosystemId,
+                        ecosystemPartnerId: walletOptions.EcosystemWalletOptions.EcosystemPartnerId,
+                        email: walletOptions.EcosystemWalletOptions.Email,
+                        phoneNumber: walletOptions.EcosystemWalletOptions.PhoneNumber,
+                        authProvider: walletOptions.EcosystemWalletOptions.AuthProvider,
+                        storageDirectoryPath: walletOptions.EcosystemWalletOptions.StorageDirectoryPath
                     );
                     break;
                 case WalletProvider.WalletConnectWallet:
@@ -279,6 +346,32 @@ namespace Thirdweb.Unity
                 else
                 {
                     _ = await inAppWallet.LoginWithOauth(
+                        isMobile: Application.isMobilePlatform,
+                        browserOpenAction: (url) => Application.OpenURL(url),
+                        mobileRedirectScheme: BundleId + "://",
+                        browser: new CrossPlatformUnityBrowser()
+                    );
+                }
+            }
+
+            if (walletOptions.Provider == WalletProvider.EcosystemWallet && !await wallet.IsConnected())
+            {
+                ThirdwebDebug.Log("Session does not exist or is expired, proceeding with EcosystemWallet authentication.");
+
+                var ecosystemWallet = wallet as EcosystemWallet;
+
+                if (walletOptions.EcosystemWalletOptions.AuthProvider == AuthProvider.Default)
+                {
+                    await ecosystemWallet.SendOTP();
+                    _ = await EcosystemWalletModal.LoginWithOtp(ecosystemWallet);
+                }
+                else if (walletOptions.EcosystemWalletOptions.AuthProvider == AuthProvider.Siwe)
+                {
+                    _ = await ecosystemWallet.LoginWithSiwe(walletOptions.ChainId);
+                }
+                else
+                {
+                    _ = await ecosystemWallet.LoginWithOauth(
                         isMobile: Application.isMobilePlatform,
                         browserOpenAction: (url) => Application.OpenURL(url),
                         mobileRedirectScheme: BundleId + "://",

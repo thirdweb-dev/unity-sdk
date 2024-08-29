@@ -39,34 +39,40 @@ namespace Thirdweb.Unity
 
             modal.SubmitButton.onClick.AddListener(async () =>
             {
-                var otp = modal.OTPInputField.text;
-                if (string.IsNullOrEmpty(otp))
+                try
                 {
-                    return;
-                }
+                    var otp = modal.OTPInputField.text;
+                    if (string.IsNullOrEmpty(otp))
+                    {
+                        return;
+                    }
 
-                modal.OTPInputField.interactable = false;
-                modal.SubmitButton.interactable = false;
-                (var address, var canRetry) = await wallet.LoginWithOtp(otp);
-                if (address != null)
+                    modal.OTPInputField.interactable = false;
+                    modal.SubmitButton.interactable = false;
+                    (var address, var canRetry) = await wallet.LoginWithOtp(otp);
+                    if (address != null)
+                    {
+                        modal.InAppWalletCanvas.gameObject.SetActive(false);
+                        tcs.SetResult(wallet);
+                    }
+                    else if (!canRetry)
+                    {
+                        modal.InAppWalletCanvas.gameObject.SetActive(false);
+                        tcs.SetException(new UnityException("Failed to verify OTP."));
+                    }
+                    else
+                    {
+                        modal.OTPInputField.text = string.Empty;
+                        modal.OTPInputField.interactable = true;
+                        modal.SubmitButton.interactable = true;
+                    }
+                }
+                catch (System.Exception e)
                 {
                     modal.InAppWalletCanvas.gameObject.SetActive(false);
-                    tcs.SetResult(wallet);
-                }
-                else if (!canRetry)
-                {
-                    modal.InAppWalletCanvas.gameObject.SetActive(false);
-                    tcs.SetException(new UnityException("Failed to verify OTP."));
-                }
-                else
-                {
-                    modal.OTPInputField.text = string.Empty;
-                    modal.OTPInputField.interactable = true;
-                    modal.SubmitButton.interactable = true;
+                    tcs.SetException(e);
                 }
             });
-
-            modal.InAppWalletCanvas.gameObject.SetActive(true);
 
             return tcs.Task;
         }
