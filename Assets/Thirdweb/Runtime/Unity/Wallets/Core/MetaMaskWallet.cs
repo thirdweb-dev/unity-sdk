@@ -171,42 +171,6 @@ namespace Thirdweb.Unity
             return SignTypedDataV4(safeJson);
         }
 
-        public virtual async Task<string> Authenticate(
-            string domain,
-            BigInteger chainId,
-            string authPayloadPath = "/auth/payload",
-            string authLoginPath = "/auth/login",
-            IThirdwebHttpClient httpClientOverride = null
-        )
-        {
-            await EnsureCorrectNetwork(chainId);
-
-            var payloadURL = domain + authPayloadPath;
-            var loginURL = domain + authLoginPath;
-
-            var payloadBodyRaw = new { address = await GetAddress(), chainId = chainId.ToString() };
-            var payloadBody = JsonConvert.SerializeObject(payloadBodyRaw);
-
-            var httpClient = httpClientOverride ?? _client.HttpClient;
-
-            var payloadContent = new StringContent(payloadBody, Encoding.UTF8, "application/json");
-            var payloadResponse = await httpClient.PostAsync(payloadURL, payloadContent);
-            _ = payloadResponse.EnsureSuccessStatusCode();
-            var payloadString = await payloadResponse.Content.ReadAsStringAsync();
-
-            var loginBodyRaw = JsonConvert.DeserializeObject<LoginPayload>(payloadString);
-            var payloadToSign = Utils.GenerateSIWE(loginBodyRaw.Payload);
-
-            loginBodyRaw.Signature = await PersonalSign(payloadToSign);
-            var loginBody = JsonConvert.SerializeObject(new { payload = loginBodyRaw });
-
-            var loginContent = new StringContent(loginBody, Encoding.UTF8, "application/json");
-            var loginResponse = await httpClient.PostAsync(loginURL, loginContent);
-            _ = loginResponse.EnsureSuccessStatusCode();
-            var responseString = await loginResponse.Content.ReadAsStringAsync();
-            return responseString;
-        }
-
         public Task<string> RecoverAddressFromEthSign(string message, string signature)
         {
             throw new NotImplementedException();
