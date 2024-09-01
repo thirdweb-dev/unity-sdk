@@ -57,12 +57,14 @@ namespace Thirdweb.Unity.Helpers
 
         public async Task<ThirdwebHttpResponseMessage> PostAsync(string requestUri, HttpContent content, CancellationToken cancellationToken = default)
         {
+            var contentBytes = await content.ReadAsByteArrayAsync().ConfigureAwait(false);
+
             return await SendRequestAsync(
                     () =>
                     {
                         var webRequest = new UnityWebRequest(requestUri, UnityWebRequest.kHttpVerbPOST)
                         {
-                            uploadHandler = new UploadHandlerRaw(content.ReadAsByteArrayAsync().Result) { contentType = content.Headers.ContentType.ToString() },
+                            uploadHandler = new UploadHandlerRaw(contentBytes) { contentType = content.Headers.ContentType.ToString() },
                             downloadHandler = new DownloadHandlerBuffer()
                         };
                         return webRequest;

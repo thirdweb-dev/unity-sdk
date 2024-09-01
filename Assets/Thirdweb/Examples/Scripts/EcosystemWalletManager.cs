@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -17,7 +18,7 @@ namespace Thirdweb.Unity.Examples
         public TMP_Text LogText;
 
         private ThirdwebClient _client;
-        private EcosystemWallet _ecosystemWallet;
+        private IThirdwebWallet _ecosystemWallet;
 
         private void Awake()
         {
@@ -96,15 +97,16 @@ namespace Thirdweb.Unity.Examples
             }
 
             string address;
-            if (await _ecosystemWallet.IsConnected())
+            if (!await _ecosystemWallet.IsConnected() && _ecosystemWallet is EcosystemWallet)
             {
-                address = await _ecosystemWallet.GetAddress();
-                Log($"Connected with address: {address}");
-                return;
+                _ = await (_ecosystemWallet as EcosystemWallet).SendOTP();
+                _ecosystemWallet = await EcosystemWalletModal.LoginWithOtp(_ecosystemWallet as EcosystemWallet);
             }
 
-            _ = await _ecosystemWallet.SendOTP();
-            _ecosystemWallet = await EcosystemWalletModal.LoginWithOtp(_ecosystemWallet);
+            if (_ecosystemWallet is not SmartWallet)
+            {
+                _ecosystemWallet = await SmartWallet.Create(_ecosystemWallet, 421614, gasless: true);
+            }
 
             address = await _ecosystemWallet.GetAddress();
             Log($"Connected with address: {address}");
@@ -132,10 +134,9 @@ namespace Thirdweb.Unity.Examples
             }
 
             var address = await _ecosystemWallet.GetAddress();
-            var nonce = await _ecosystemWallet.GetTransactionCount(chainId: 421614, blocktag: "pending");
-            var tx = new ThirdwebTransactionInput(chainId: 421614, from: address, to: address, nonce: nonce, gas: 100000, gasPrice: 200000000, value: 0, data: "0x");
-            var signature = await _ecosystemWallet.SignTransaction(tx);
-            Log($"Transaction Signed: {signature}");
+            var contract = await ThirdwebContract.Create(_client, "0xEBB8a39D865465F289fa349A67B3391d8f910da9", 421614);
+            var receipt = await contract.DropERC20_Claim(_ecosystemWallet, address, "1");
+            Log($"Hash: {receipt.TransactionHash}");
         }
 
         private void Log(string message)
