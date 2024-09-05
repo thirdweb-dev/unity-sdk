@@ -3,14 +3,9 @@
 [<img alt="Unity Documentation" src="https://img.shields.io/badge/Unity-Documentation-blue?logo=unity&style=for-the-badge" height="30">](https://portal.thirdweb.com/unity/v5)
 [<img alt=".NET Documentation" src="https://img.shields.io/badge/.NET-Documentation-purple?logo=dotnet&style=for-the-badge" height="30">](https://portal.thirdweb.com/dotnet)
 
-<div style="border-left: 4px solid #f0ad4e; padding: 10px; background-color: #fcf8e3;">
-  <strong>Note: Active Development</strong>
-  <p>This project is currently under active development. Features, APIs, and behavior may change frequently.</p>
-</div>
-
 # Technical Demo
 
-Experience our multichain game demo leveraging In-App and Smart Wallets for seamless gameplay, built in just three weeks - [Web3 Warriors](https://web3warriors.thirdweb.com/).
+Experience our multichain game demo leveraging In-App Wallets and Account Abstraction built in three weeks - [Web3 Warriors](https://web3warriors.thirdweb.com/).
 
 ![image](https://github.com/thirdweb-dev/unity-sdk/assets/43042585/171198b2-83e7-4c8a-951b-79126dd47abb)
 
