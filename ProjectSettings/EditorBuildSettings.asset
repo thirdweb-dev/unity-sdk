@@ -5,10 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/Thirdweb/Examples/Scenes/Scene_Playground.unity
     guid: 73a8efadf4c9a9b4cb1dd2dfdbe39c29
-  - enabled: 1
-    path: Assets/Thirdweb/Examples/Scenes/Scene_EcosystemWallet.unity
-    guid: 619330a535fe3d749bf09766a427be21
   m_configObjects: {}

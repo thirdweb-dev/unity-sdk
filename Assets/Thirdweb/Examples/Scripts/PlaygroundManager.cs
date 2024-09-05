@@ -53,7 +53,22 @@ namespace Thirdweb.Unity.Examples
 
         private async void Start()
         {
-            _chainDetails = await Utils.GetChainMetadata(client: ThirdwebManager.Instance.Client, chainId: ActiveChainId);
+            try
+            {
+                _chainDetails = await Utils.GetChainMetadata(client: ThirdwebManager.Instance.Client, chainId: ActiveChainId);
+            }
+            catch
+            {
+                _chainDetails = new ThirdwebChainData()
+                {
+                    NativeCurrency = new ThirdwebChainNativeCurrency()
+                    {
+                        Decimals = 18,
+                        Name = "ETH",
+                        Symbol = "ETH"
+                    }
+                };
+            }
         }
 
         private void InitializePanels()

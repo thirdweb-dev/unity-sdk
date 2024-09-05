@@ -55,7 +55,6 @@ namespace Thirdweb.Unity
         public string PhoneNumber;
         public AuthProvider AuthProvider;
         public string JwtOrPayload;
-        public string EncryptionKey;
         public string StorageDirectoryPath;
         public IThirdwebWallet SiweSigner;
 
@@ -66,7 +65,6 @@ namespace Thirdweb.Unity
             string phoneNumber = null,
             AuthProvider authprovider = AuthProvider.Default,
             string jwtOrPayload = null,
-            string encryptionKey = null,
             string storageDirectoryPath = null,
             IThirdwebWallet siweSigner = null
         )
@@ -77,7 +75,6 @@ namespace Thirdweb.Unity
             PhoneNumber = phoneNumber;
             AuthProvider = authprovider;
             JwtOrPayload = jwtOrPayload;
-            EncryptionKey = encryptionKey;
             StorageDirectoryPath = storageDirectoryPath ?? Path.Combine(Application.persistentDataPath, "Thirdweb", "EcosystemWallet");
             SiweSigner = siweSigner;
         }
@@ -154,7 +151,7 @@ namespace Thirdweb.Unity
         [field: SerializeField]
         private bool OptOutUsageAnalytics { get; set; } = false;
 
-        [field: SerializeField, Header("Wallet Settings")]
+        [field: SerializeField, Header("WalletConnect Settings")]
         private ulong[] SupportedChains { get; set; } = new ulong[] { 421614 };
 
         public ThirdwebClient Client { get; private set; }
@@ -305,9 +302,9 @@ namespace Thirdweb.Unity
                     {
                         throw new ArgumentException("EcosystemWalletOptions must be provided for EcosystemWallet provider.");
                     }
-                    if (string.IsNullOrEmpty(walletOptions.EcosystemWalletOptions.EcosystemId) || string.IsNullOrEmpty(walletOptions.EcosystemWalletOptions.EcosystemPartnerId))
+                    if (string.IsNullOrEmpty(walletOptions.EcosystemWalletOptions.EcosystemId))
                     {
-                        throw new ArgumentException("EcosystemId and EcosystemPartnerId must be provided for EcosystemWallet provider.");
+                        throw new ArgumentException("EcosystemId must be provided for EcosystemWallet provider.");
                     }
                     wallet = await EcosystemWallet.Create(
                         client: Client,
@@ -343,6 +340,14 @@ namespace Thirdweb.Unity
                 {
                     _ = await inAppWallet.LoginWithSiwe(walletOptions.ChainId);
                 }
+                else if (walletOptions.InAppWalletOptions.AuthProvider == AuthProvider.JWT)
+                {
+                    _ = await inAppWallet.LoginWithJWT(walletOptions.InAppWalletOptions.JwtOrPayload, walletOptions.InAppWalletOptions.EncryptionKey);
+                }
+                else if (walletOptions.InAppWalletOptions.AuthProvider == AuthProvider.AuthEndpoint)
+                {
+                    _ = await inAppWallet.LoginWithAuthEndpoint(walletOptions.InAppWalletOptions.JwtOrPayload, walletOptions.InAppWalletOptions.EncryptionKey);
+                }
                 else
                 {
                     _ = await inAppWallet.LoginWithOauth(
@@ -368,6 +373,14 @@ namespace Thirdweb.Unity
                 else if (walletOptions.EcosystemWalletOptions.AuthProvider == AuthProvider.Siwe)
                 {
                     _ = await ecosystemWallet.LoginWithSiwe(walletOptions.ChainId);
+                }
+                else if (walletOptions.EcosystemWalletOptions.AuthProvider == AuthProvider.JWT)
+                {
+                    _ = await ecosystemWallet.LoginWithJWT(walletOptions.EcosystemWalletOptions.JwtOrPayload);
+                }
+                else if (walletOptions.EcosystemWalletOptions.AuthProvider == AuthProvider.AuthEndpoint)
+                {
+                    _ = await ecosystemWallet.LoginWithAuthEndpoint(walletOptions.EcosystemWalletOptions.JwtOrPayload);
                 }
                 else
                 {
