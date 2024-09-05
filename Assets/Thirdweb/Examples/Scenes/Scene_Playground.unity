@@ -1710,7 +1710,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -275}
-  m_SizeDelta: {x: 1300, y: 100}
+  m_SizeDelta: {x: 1300, y: 120}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &198666613
 MonoBehaviour:
@@ -1763,7 +1763,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 10
+  m_fontSizeMin: 18
   m_fontSizeMax: 26
   m_fontStyle: 2
   m_HorizontalAlignment: 2
@@ -1775,7 +1775,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -4784,7 +4784,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -275}
-  m_SizeDelta: {x: 1300, y: 100}
+  m_SizeDelta: {x: 1300, y: 120}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &601487570
 MonoBehaviour:
@@ -4837,7 +4837,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 10
+  m_fontSizeMin: 18
   m_fontSizeMax: 26
   m_fontStyle: 2
   m_HorizontalAlignment: 2
@@ -4849,7 +4849,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -4918,7 +4918,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -275}
-  m_SizeDelta: {x: 1300, y: 100}
+  m_SizeDelta: {x: 1300, y: 120}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &603874974
 MonoBehaviour:
@@ -4971,7 +4971,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 10
+  m_fontSizeMin: 18
   m_fontSizeMax: 26
   m_fontStyle: 2
   m_HorizontalAlignment: 2
@@ -4983,7 +4983,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -7419,7 +7419,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -275}
-  m_SizeDelta: {x: 1300, y: 100}
+  m_SizeDelta: {x: 1300, y: 120}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &944447571
 MonoBehaviour:
@@ -7472,7 +7472,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 10
+  m_fontSizeMin: 18
   m_fontSizeMax: 26
   m_fontStyle: 2
   m_HorizontalAlignment: 2
@@ -7484,7 +7484,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -8409,7 +8409,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -275}
-  m_SizeDelta: {x: 1300, y: 100}
+  m_SizeDelta: {x: 1300, y: 120}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1032793237
 MonoBehaviour:
@@ -8462,7 +8462,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 10
+  m_fontSizeMin: 18
   m_fontSizeMax: 26
   m_fontStyle: 2
   m_HorizontalAlignment: 2
@@ -8474,7 +8474,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -9531,7 +9531,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -275}
-  m_SizeDelta: {x: 1300, y: 100}
+  m_SizeDelta: {x: 1300, y: 120}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1122116940
 MonoBehaviour:
@@ -9584,7 +9584,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 10
+  m_fontSizeMin: 18
   m_fontSizeMax: 26
   m_fontStyle: 2
   m_HorizontalAlignment: 2
@@ -9596,7 +9596,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -15468,7 +15468,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -275}
-  m_SizeDelta: {x: 1300, y: 100}
+  m_SizeDelta: {x: 1300, y: 120}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1854854119
 MonoBehaviour:
@@ -15521,7 +15521,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 10
+  m_fontSizeMin: 18
   m_fontSizeMax: 26
   m_fontStyle: 2
   m_HorizontalAlignment: 2
@@ -15533,7 +15533,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -16005,7 +16005,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -275}
-  m_SizeDelta: {x: 1300, y: 100}
+  m_SizeDelta: {x: 1300, y: 120}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1918711627
 MonoBehaviour:
@@ -16058,7 +16058,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 10
+  m_fontSizeMin: 18
   m_fontSizeMax: 26
   m_fontStyle: 2
   m_HorizontalAlignment: 2
@@ -16070,7 +16070,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -16985,7 +16985,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -275}
-  m_SizeDelta: {x: 1300, y: 100}
+  m_SizeDelta: {x: 1300, y: 120}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &2031826890
 MonoBehaviour:
@@ -17038,7 +17038,7 @@ MonoBehaviour:
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 10
+  m_fontSizeMin: 18
   m_fontSizeMax: 26
   m_fontStyle: 2
   m_HorizontalAlignment: 2
@@ -17050,7 +17050,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
