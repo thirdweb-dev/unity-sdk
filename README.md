@@ -16,6 +16,7 @@ Experience our multichain game demo leveraging In-App Wallets and Account Abstra
 | Wallet Provider                           | WebGL | Desktop | Mobile |
 | ----------------------------------------- | :---: | :-----: | :----: |
 | **In-App Wallet** (Email, Phone, Socials) |  ✔️   |   ✔️    |   ✔️   |
+| **Ecosystem Wallet** (IAW w/ partner permissions) |  ✔️   |   ✔️    |   ✔️   |
 | **Private Key Wallet** (Guest Mode)       |  ✔️   |   ✔️    |   ✔️   |
 | **Wallet Connect Wallet** (400+ Wallets)  |  ✔️   |   ✔️    |   ✔️   |
 | **MetaMask Wallet** (Browser Extension)   |  ✔️   |    —    |   —    |
