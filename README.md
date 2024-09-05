@@ -18,25 +18,27 @@ Experience our multichain game demo leveraging In-App and Smart Wallets for seam
 
 **Build games for WebGL, Desktop, and Mobile using 1000+ supported chains, with various login options!**
 
-|                Wallet Provider                | WebGL     | Desktop    | Mobile    |
-| --------------------------------------------- | :-------: | :-------:  | :-------: |
-| **In-App Wallet** (Email, Phone, Socials)     | ✔️        | ✔️        | ✔️        |
-| **Private Key Wallet** (Guest Mode)           | ✔️        | ✔️        | ✔️        |
-| **Wallet Connect Wallet** (400+ Wallets)      | ✔️        | ✔️        | ✔️        |
-| **MetaMask Wallet** (Browser Extension)       | ✔️        | —          | —         |
-| **Smart Wallet** (Account Abstraction)        | ✔️        | ✔️        | ✔️        |
+| Wallet Provider                           | WebGL | Desktop | Mobile |
+| ----------------------------------------- | :---: | :-----: | :----: |
+| **In-App Wallet** (Email, Phone, Socials) |  ✔️   |   ✔️    |   ✔️   |
+| **Private Key Wallet** (Guest Mode)       |  ✔️   |   ✔️    |   ✔️   |
+| **Wallet Connect Wallet** (400+ Wallets)  |  ✔️   |   ✔️    |   ✔️   |
+| **MetaMask Wallet** (Browser Extension)   |  ✔️   |    —    |   —    |
+| **Smart Wallet** (Account Abstraction)    |  ✔️   |   ✔️    |   ✔️   |
 
 <sub>✔️ Supported</sub> &nbsp; <sub>❌ Not Supported</sub> &nbsp; <sub>— Not Applicable</sub>
 
 # Why Upgrade to v5?
 
-Thirdweb's Unity SDK v5 leverages the robust [.NET SDK](https://portal.thirdweb.com/dotnet) for core functionality, providing a unified API and behavior across platforms. 
+Thirdweb's Unity SDK v5 leverages the robust [.NET SDK](https://portal.thirdweb.com/dotnet) for core functionality, providing a unified API and behavior across platforms.
 
 ## Key Improvements:
+
 - **Unified API:** Say goodbye to the WebGL Bridge. Now, enjoy a consistent experience across WebGL, Desktop, and Mobile platforms.
 - **Enhanced Composability:** Use our SDK anywhere without worrying about its state. APIs are chain agnostic, enabling seamless interaction with multiple chains.
 - **Native Experience:** The .NET core provides a native, predictable experience, making upgrades less daunting.
-- **Simplified `ThirdwebManager`:** 
+- **Ecosystem Wallets** The ultimate cross-platform wallet product, suitable for ecosystems wanting to grow out of their shell. Fast, shareable with third parties securely, non-custodial.
+- **Simplified `ThirdwebManager`:**
   - `ThirdwebManager.Instance.SDK.GetContract` is now `ThirdwebManager.Instance.GetContract`, returning `ThirdwebContract`.
   - `ThirdwebManager.Instance.SDK.Wallet.Connect` is now `ThirdwebManager.Instance.ConnectWallet`, returning `IThirdwebWallet`.
   - Handles multiple wallet connections and tracks the active wallet.
@@ -45,15 +47,17 @@ Thirdweb's Unity SDK v5 leverages the robust [.NET SDK](https://portal.thirdweb.
 - **Cross-Platform Consistency:** No behavioral differences between platforms. What you see in the editor is what you get in WebGL, Standalone, and Mobile runtime platforms.
 
 ## Note:
-To achieve full .NET core functionality for WebGL, we include a modified version of [WebGLThreadingPatcher](https://github.com/VolodymyrBS/WebGLThreadingPatcher), which makes async tasks blocking on the main thread. This is due to Unity's lack of support for C# multithreading in WebGL. This mainly affects InAppWallet initial creation (not session resuming).
+
+To achieve full .NET core functionality for WebGL, we include a modified version of [WebGLThreadingPatcher](https://github.com/VolodymyrBS/WebGLThreadingPatcher) and have adapted our .NET core to work around any potential issues running raw .NET libraries in WebGL, though all tasks will be executed on one thread. This is required due to Unity's lack of support for C# multithreading in WebGL.
 
 # Getting Started
 
 1. **Download:** Head over to the [releases](https://github.com/thirdweb-dev/unity-sdk/releases) page and download the latest `.unitypackage` file.
 2. **Explore:** Try out `Scene_Playground` to explore functionality and get onboarded.
-3. **Learn:** Explore the [.NET SDK Documentation](https://portal.thirdweb.com/dotnet) to find full API references.
+3. **Learn:** Explore the [Unity v5 SDK Docs](https://portal.thirdweb.com/unity/v5) and the [.NET SDK Docs](https://portal.thirdweb.com/dotnet) to find a full API reference.
 
 **Notes:**
+
 - Tested on Unity 2021.3+, 2022.3+, Unity 6 Preview. We recommend using 2022 LTS.
 - Newtonsoft DLL included; deselect if already installed to avoid conflicts.
 - If using .NET Framework and encountering `HttpUtility` errors, create `csc.rsp` with `-r:System.Web.dll` under `Assets`.
@@ -76,17 +80,19 @@ Example setup for testing In-App Wallet (Social Login) locally:
 
 ```javascript
 // YourWebGLOutputFolder/server.js
-const express = require('express');
+const express = require("express");
 const app = express();
 const port = 8000;
 
 app.use((req, res, next) => {
-  res.header('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  res.header("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   next();
 });
 
-app.use(express.static('.'));
-app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
+app.use(express.static("."));
+app.listen(port, () =>
+  console.log(`Server running on http://localhost:${port}`)
+);
 
 // run it with `node server.js`
 ```

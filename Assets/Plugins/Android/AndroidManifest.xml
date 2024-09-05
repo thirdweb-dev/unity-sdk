@@ -16,6 +16,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Set your bundle id here -->
+                <!-- Replace 'com.thirdweb.unitysdk' with your desired scheme -->
                 <data android:scheme="com.thirdweb.unitysdk" />
             </intent-filter>
 
