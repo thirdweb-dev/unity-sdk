@@ -203,12 +203,19 @@ namespace Thirdweb.Unity
         {
             if (WebGLMetaMask.Instance.GetActiveChainId() != chainId)
             {
-                await AddNetwork(chainId);
-                if (WebGLMetaMask.Instance.GetActiveChainId() == chainId)
+                try
                 {
-                    return;
+                    await SwitchNetwork(chainId);
                 }
-                await SwitchNetwork(chainId);
+                catch
+                {
+                    await AddNetwork(chainId);
+                    if (WebGLMetaMask.Instance.GetActiveChainId() == chainId)
+                    {
+                        return;
+                    }
+                    await SwitchNetwork(chainId);
+                }
             }
         }
 
