@@ -195,7 +195,6 @@ namespace Thirdweb.Unity
 
         public async Task<string> SendTransaction(ThirdwebTransactionInput transaction)
         {
-            Debug.Log("DEFAULT CHAIN ID: " + WalletConnect.Instance.SignClient.AddressProvider.DefaultChainId);
             var task = _walletConnectService.SendTransactionAsync(
                 new TransactionInput()
                 {
