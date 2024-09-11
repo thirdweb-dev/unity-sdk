@@ -294,7 +294,8 @@ namespace Thirdweb.Unity
                         email: walletOptions.InAppWalletOptions.Email,
                         phoneNumber: walletOptions.InAppWalletOptions.PhoneNumber,
                         authProvider: walletOptions.InAppWalletOptions.AuthProvider,
-                        storageDirectoryPath: walletOptions.InAppWalletOptions.StorageDirectoryPath
+                        storageDirectoryPath: walletOptions.InAppWalletOptions.StorageDirectoryPath,
+                        siweSigner: walletOptions.InAppWalletOptions.SiweSigner
                     );
                     break;
                 case WalletProvider.EcosystemWallet:
@@ -313,7 +314,8 @@ namespace Thirdweb.Unity
                         email: walletOptions.EcosystemWalletOptions.Email,
                         phoneNumber: walletOptions.EcosystemWalletOptions.PhoneNumber,
                         authProvider: walletOptions.EcosystemWalletOptions.AuthProvider,
-                        storageDirectoryPath: walletOptions.EcosystemWalletOptions.StorageDirectoryPath
+                        storageDirectoryPath: walletOptions.EcosystemWalletOptions.StorageDirectoryPath,
+                        siweSigner: walletOptions.EcosystemWalletOptions.SiweSigner
                     );
                     break;
                 case WalletProvider.WalletConnectWallet:
@@ -348,6 +350,10 @@ namespace Thirdweb.Unity
                 {
                     _ = await inAppWallet.LoginWithAuthEndpoint(walletOptions.InAppWalletOptions.JwtOrPayload, walletOptions.InAppWalletOptions.EncryptionKey);
                 }
+                else if (walletOptions.InAppWalletOptions.AuthProvider == AuthProvider.Guest)
+                {
+                    _ = await inAppWallet.LoginWithGuest();
+                }
                 else
                 {
                     _ = await inAppWallet.LoginWithOauth(
@@ -381,6 +387,10 @@ namespace Thirdweb.Unity
                 else if (walletOptions.EcosystemWalletOptions.AuthProvider == AuthProvider.AuthEndpoint)
                 {
                     _ = await ecosystemWallet.LoginWithAuthEndpoint(walletOptions.EcosystemWalletOptions.JwtOrPayload);
+                }
+                else if (walletOptions.EcosystemWalletOptions.AuthProvider == AuthProvider.Guest)
+                {
+                    _ = await ecosystemWallet.LoginWithGuest();
                 }
                 else
                 {
@@ -458,6 +468,21 @@ namespace Thirdweb.Unity
         }
 
         public async Task<List<LinkedAccount>> LinkAccount(InAppWallet mainWallet, InAppWallet walletToLink, string otp = null, BigInteger? chainId = null, string jwtOrPayload = null)
+        {
+            return await mainWallet.LinkAccount(
+                walletToLink: walletToLink,
+                otp: otp,
+                isMobile: Application.isMobilePlatform,
+                browserOpenAction: (url) => Application.OpenURL(url),
+                mobileRedirectScheme: BundleId + "://",
+                browser: new CrossPlatformUnityBrowser(),
+                chainId: chainId,
+                jwt: jwtOrPayload,
+                payload: jwtOrPayload
+            );
+        }
+
+        public async Task<List<LinkedAccount>> LinkAccount(EcosystemWallet mainWallet, EcosystemWallet walletToLink, string otp = null, BigInteger? chainId = null, string jwtOrPayload = null)
         {
             return await mainWallet.LinkAccount(
                 walletToLink: walletToLink,
