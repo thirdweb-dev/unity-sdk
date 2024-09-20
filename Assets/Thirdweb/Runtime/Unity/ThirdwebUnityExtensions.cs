@@ -1,6 +1,8 @@
 using System.Numerics;
 using System.Threading.Tasks;
 using UnityEngine;
+using ZXing;
+using ZXing.QrCode;
 
 namespace Thirdweb.Unity
 {
@@ -24,6 +26,37 @@ namespace Thirdweb.Unity
         public static async Task<SmartWallet> UpgradeToSmartWallet(this IThirdwebWallet personalWallet, BigInteger chainId, SmartWalletOptions smartWalletOptions)
         {
             return await ThirdwebManager.Instance.UpgradeToSmartWallet(personalWallet, chainId, smartWalletOptions);
+        }
+
+        public static Texture2D ToQRTexture(this string textForEncoding, Color? fgColor = null, Color? bgColor = null, int width = 512, int height = 512)
+        {
+            fgColor ??= Color.black;
+            bgColor ??= Color.white;
+
+            var qrCodeEncodingOptions = new QrCodeEncodingOptions
+            {
+                Height = height,
+                Width = width,
+                Margin = 4,
+                QrVersion = 11
+            };
+
+            var writer = new BarcodeWriter
+            {
+                Format = BarcodeFormat.QR_CODE,
+                Options = qrCodeEncodingOptions,
+                Renderer = new Color32Renderer { Foreground = fgColor.Value, Background = bgColor.Value }
+            };
+
+            var pixels = writer.Write(textForEncoding);
+
+            var texture = new Texture2D(width, height);
+            texture.SetPixels32(pixels);
+            texture.filterMode = FilterMode.Point;
+            texture.Apply();
+            texture.Compress(true);
+
+            return texture;
         }
     }
 }
