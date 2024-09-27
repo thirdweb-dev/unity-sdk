@@ -200,16 +200,11 @@ namespace Thirdweb.Unity
             Client = ThirdwebClient.Create(
                 clientId: ClientId,
                 bundleId: BundleId,
-                httpClient: Application.platform == RuntimePlatform.WebGLPlayer ? new Helpers.UnityThirdwebHttpClient() : new ThirdwebHttpClient(),
-                headers: new Dictionary<string, string>
-                {
-                    { "x-sdk-name", Application.platform == RuntimePlatform.WebGLPlayer ? "UnitySDK_WebGL" : "UnitySDK" },
-                    { "x-sdk-os", Application.platform.ToString() },
-                    { "x-sdk-platform", "unity" },
-                    { "x-sdk-version", THIRDWEB_UNITY_SDK_VERSION },
-                    { "x-client-id", ClientId },
-                    { "x-bundle-id", BundleId }
-                }
+                httpClient: new CrossPlatformUnityHttpClient(),
+                sdkName: Application.platform == RuntimePlatform.WebGLPlayer ? "UnitySDK_WebGL" : "UnitySDK",
+                sdkOs: Application.platform.ToString(),
+                sdkPlatform: "unity",
+                sdkVersion: THIRDWEB_UNITY_SDK_VERSION
             );
 
             ThirdwebDebug.Log("ThirdwebManager initialized.");
