@@ -9,12 +9,17 @@ namespace Thirdweb.Unity
     {
         IThirdwebBrowser _unityBrowser;
 
-        public CrossPlatformUnityBrowser()
+        public CrossPlatformUnityBrowser(string htmlOverride = null)
         {
+            if (string.IsNullOrEmpty(htmlOverride) || string.IsNullOrWhiteSpace(htmlOverride))
+            {
+                htmlOverride = null;
+            }
+
             var go = new GameObject("WebGLInAppWalletBrowser");
 
 #if UNITY_EDITOR
-            _unityBrowser = new InAppWalletBrowser();
+            _unityBrowser = new InAppWalletBrowser(htmlOverride);
 #elif UNITY_WEBGL
             _unityBrowser = go.AddComponent<WebGLInAppWalletBrowser>();
 #elif UNITY_ANDROID
@@ -22,7 +27,7 @@ namespace Thirdweb.Unity
 #elif UNITY_IOS
             _unityBrowser = new IOSBrowser();
 #else
-            _unityBrowser = new InAppWalletBrowser();
+            _unityBrowser = new InAppWalletBrowser(htmlOverride);
 #endif
         }
 
