@@ -137,34 +137,26 @@ namespace Thirdweb.Unity
     [HelpURL("http://portal.thirdweb.com/unity/v5/thirdwebmanager")]
     public class ThirdwebManager : MonoBehaviour
     {
-        [field: SerializeField, Header("Client Settings")]
-        [Tooltip("API key for your Thirdweb project. Get your API key from https://thirdweb.com/create-api-key")]
+        [field: SerializeField]
         private string ClientId { get; set; }
 
         [field: SerializeField]
-        [Tooltip("Bundle ID of your Unity project. Default is Application.identifier. If not set, it will be generated using Application.companyName and Application.productName.")]
         private string BundleId { get; set; }
 
         [field: SerializeField]
-        [Tooltip("Initialize ThirdwebManager on Awake. Default is true. Set to false if you want to initialize manually.")]
         private bool InitializeOnAwake { get; set; } = true;
 
         [field: SerializeField]
-        [Tooltip("Enable or disable debug logs. Default is true.")]
         private bool ShowDebugLogs { get; set; } = true;
 
         [field: SerializeField]
-        [Tooltip("Opt out of usage analytics. This will disable tracking of wallet connection events and affect your dashboard stats.")]
         private bool OptOutUsageAnalytics { get; set; } = false;
 
-        [field: SerializeField, Header("WalletConnect Settings")]
-        [Tooltip("Chain IDs supported by WalletConnect Wallet.")]
+        [field: SerializeField]
         private ulong[] SupportedChains { get; set; } = new ulong[] { 421614 };
 
-        [field: SerializeField, Header("Desktop OAuth Settings")]
-        [Tooltip("HTML content to be displayed when redirecting to the OAuth provider. Leave empty to use the default page.")]
-        [TextArea(3, 10)]
-        private string RedirectPageHtmlOverride;
+        [field: SerializeField]
+        private string RedirectPageHtmlOverride { get; set; } = null;
 
         public ThirdwebClient Client { get; private set; }
 
@@ -205,6 +197,11 @@ namespace Thirdweb.Unity
             {
                 ThirdwebDebug.LogError("ClientId and must be set in order to initialize ThirdwebManager. Get your API key from https://thirdweb.com/create-api-key");
                 return;
+            }
+
+            if (string.IsNullOrEmpty(BundleId))
+            {
+                BundleId = null;
             }
 
             BundleId ??= Application.identifier ?? $"com.{Application.companyName}.{Application.productName}";
