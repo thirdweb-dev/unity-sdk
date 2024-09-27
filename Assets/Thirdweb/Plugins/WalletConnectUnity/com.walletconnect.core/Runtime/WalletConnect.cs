@@ -69,7 +69,8 @@ namespace WalletConnectUnity.Core
                 }
 
                 var currentSyncContext = SynchronizationContext.Current;
-                if (currentSyncContext.GetType().FullName != "UnityEngine.UnitySynchronizationContext")
+                bool isSkipSyncCtxCheck = AppContext.TryGetSwitch("IsSkipWalletConnectSyncCtxCheck", out var isEnabled) && isEnabled;
+                if (!isSkipSyncCtxCheck && currentSyncContext.GetType().FullName != "UnityEngine.UnitySynchronizationContext")
                     throw new Exception(
                         $"[WalletConnectUnity] SynchronizationContext is not of type UnityEngine.UnitySynchronizationContext. Current type is <i>{currentSyncContext.GetType().FullName}</i>. Make sure to initialize WalletConnect from the main thread."
                     );
