@@ -471,22 +471,7 @@ namespace Thirdweb.Unity
             return wallet;
         }
 
-        public async Task<List<LinkedAccount>> LinkAccount(InAppWallet mainWallet, InAppWallet walletToLink, string otp = null, BigInteger? chainId = null, string jwtOrPayload = null)
-        {
-            return await mainWallet.LinkAccount(
-                walletToLink: walletToLink,
-                otp: otp,
-                isMobile: Application.isMobilePlatform,
-                browserOpenAction: (url) => Application.OpenURL(url),
-                mobileRedirectScheme: BundleId + "://",
-                browser: new CrossPlatformUnityBrowser(RedirectPageHtmlOverride),
-                chainId: chainId,
-                jwt: jwtOrPayload,
-                payload: jwtOrPayload
-            );
-        }
-
-        public async Task<List<LinkedAccount>> LinkAccount(EcosystemWallet mainWallet, EcosystemWallet walletToLink, string otp = null, BigInteger? chainId = null, string jwtOrPayload = null)
+        public async Task<List<LinkedAccount>> LinkAccount(IThirdwebWallet mainWallet, IThirdwebWallet walletToLink, string otp = null, BigInteger? chainId = null, string jwtOrPayload = null)
         {
             return await mainWallet.LinkAccount(
                 walletToLink: walletToLink,

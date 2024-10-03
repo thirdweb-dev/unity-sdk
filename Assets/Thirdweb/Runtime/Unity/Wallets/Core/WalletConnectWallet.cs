@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Nethereum.ABI.EIP712;
-using Newtonsoft.Json;
 using WalletConnectSharp.Sign.Models;
 using WalletConnectSharp.Sign.Models.Engine;
 using WalletConnectUnity.Core;
@@ -15,7 +13,6 @@ using WalletConnectUnity.Nethereum;
 using Nethereum.RPC.Eth.DTOs;
 using WalletConnectUnity.Core.Evm;
 using Nethereum.Hex.HexTypes;
-using UnityEngine;
 
 namespace Thirdweb.Unity
 {
@@ -288,6 +285,26 @@ namespace Thirdweb.Unity
             var activeSessionTopic = WalletConnect.Instance.ActiveSession.Topic;
             WalletConnect.Instance.Linker.OpenSessionRequestDeepLinkAfterMessageFromSession(activeSessionTopic);
 #endif
+        }
+
+        public Task<List<LinkedAccount>> LinkAccount(
+            IThirdwebWallet walletToLink,
+            string otp = null,
+            bool? isMobile = null,
+            Action<string> browserOpenAction = null,
+            string mobileRedirectScheme = "thirdweb://",
+            IThirdwebBrowser browser = null,
+            BigInteger? chainId = null,
+            string jwt = null,
+            string payload = null
+        )
+        {
+            throw new InvalidOperationException("LinkAccount is not supported by external wallets.");
+        }
+
+        public Task<List<LinkedAccount>> GetLinkedAccounts()
+        {
+            throw new InvalidOperationException("GetLinkedAccounts is not supported by external wallets.");
         }
     }
 }

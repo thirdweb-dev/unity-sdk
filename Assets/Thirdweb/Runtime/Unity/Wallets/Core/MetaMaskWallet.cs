@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
@@ -193,6 +192,26 @@ namespace Thirdweb.Unity
         {
             ThirdwebDebug.Log("Disconnecting has no effect on this wallet.");
             return Task.CompletedTask;
+        }
+
+        public Task<List<LinkedAccount>> LinkAccount(
+            IThirdwebWallet walletToLink,
+            string otp = null,
+            bool? isMobile = null,
+            Action<string> browserOpenAction = null,
+            string mobileRedirectScheme = "thirdweb://",
+            IThirdwebBrowser browser = null,
+            BigInteger? chainId = null,
+            string jwt = null,
+            string payload = null
+        )
+        {
+            throw new InvalidOperationException("LinkAccount is not supported by external wallets.");
+        }
+
+        public Task<List<LinkedAccount>> GetLinkedAccounts()
+        {
+            throw new InvalidOperationException("GetLinkedAccounts is not supported by external wallets.");
         }
 
         #endregion
