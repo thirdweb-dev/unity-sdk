@@ -72,16 +72,20 @@ namespace Thirdweb.Unity
             }
             else
             {
-                try
+                var currentChainId = WalletConnect.Instance.ActiveChainId;
+                if (currentChainId != $"eip155:{initialChainId}")
                 {
-                    var data = new WalletSwitchEthereumChain(new HexBigInteger(initialChainId).HexValue);
-                    await WalletConnect.Instance.RequestAsync<WalletSwitchEthereumChain, string>(data);
-                    await Task.Delay(5000); // wait for chain switch to take effect
-                    await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{initialChainId}");
-                }
-                catch (Exception e)
-                {
-                    ThirdwebDebug.LogWarning($"Failed to ensure wallet is on active chain: {e.Message}");
+                    try
+                    {
+                        var data = new WalletSwitchEthereumChain(new HexBigInteger(initialChainId).HexValue);
+                        await WalletConnect.Instance.RequestAsync<WalletSwitchEthereumChain, string>(data);
+                        await Task.Delay(5000); // wait for chain switch to take effect
+                        await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{initialChainId}");
+                    }
+                    catch (Exception e)
+                    {
+                        ThirdwebDebug.LogWarning($"Failed to ensure wallet is on active chain: {e.Message}");
+                    }
                 }
                 _walletConnectService = new WalletConnectServiceCore(WalletConnect.Instance.SignClient);
             }
@@ -91,6 +95,11 @@ namespace Thirdweb.Unity
 
         public async Task EnsureCorrectNetwork(BigInteger chainId)
         {
+            var currentChainId = WalletConnect.Instance.ActiveChainId;
+            if (currentChainId == $"eip155:{chainId}")
+            {
+                return;
+            }
             var chainInfo = await Utils.GetChainMetadata(_client, chainId);
             var wcChainInfo = new EthereumChain()
             {
